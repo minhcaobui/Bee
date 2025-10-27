@@ -25,7 +25,6 @@ public class SanPham {
     @Column(name = "ten", length = 200, nullable = false)
     private String ten;
 
-    @Lob
     @Column(name = "mo_ta")
     private String moTa;
 

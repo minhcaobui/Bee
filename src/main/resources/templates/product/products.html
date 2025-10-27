@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Products Admin (Vanilla JS + REST)</title>
+    <style>
+        :root{ --bg:#0b0c0f;--panel:#11131a;--muted:#1a1d27;--text:#e7e9ee;--sub:#9aa4b2;--primary:#5b9cff;--green:#3ddc97;--amber:#ffbb33;--red:#ff5b5b;--border:#232737; --blue:#69a7ff;}
+        *{box-sizing:border-box}
+        body{margin:0;background:linear-gradient(180deg,#0b0c0f,#0e1118 40%,#0b0c0f);color:var(--text);font:14px/1.4 system-ui,Segoe UI,Roboto,Helvetica,Arial}
+        .container{max-width:1100px;margin:24px auto;padding:0 16px}
+        .row{display:flex;gap:12px;align-items:center}
+        .between{justify-content:space-between}
+        /* Tabs */
+        .tabs{display:flex;gap:8px;background:var(--panel);border:1px solid var(--border);padding:6px;border-radius:999px}
+        .tab{padding:8px 14px;border-radius:999px;color:var(--sub);cursor:pointer;user-select:none}
+        .tab.active{background:var(--primary);color:#0b0c0f;font-weight:600}
+        /* Button, Input, Select */
+        .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:var(--muted);color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+        .btn.primary{background:var(--primary);border-color:transparent;color:#0b0c0f;font-weight:600}
+        .btn.icon{padding:6px 10px}
+        .btn.destructive{background:transparent;border-color:rgba(255,91,91,.25);color:#ff9f9f}
+        .btn[disabled]{opacity:.5;cursor:not-allowed}
+        .btn:hover:not([disabled]){filter:brightness(1.1)}
+        .input,.select,.textarea{width:100%;background:#0c0f16;border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:10px}
+        .textarea{min-height:90px;resize:vertical}
+        .input::placeholder{color:#657083}
+        /* Card / Table */
+        .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+        table{width:100%;border-collapse:separate;border-spacing:0}
+        thead th{background:linear-gradient(180deg,#151926,#121521);text-align:left;padding:12px;border-bottom:1px solid var(--border);color:#c7cfdb;font-weight:600}
+        tbody td{padding:12px;border-bottom:1px solid var(--border)}
+        tbody tr:hover{background:rgba(255,255,255,.02)}
+        .muted{color:var(--sub)}
+        .badge{display:inline-block;padding:4px 8px;border-radius:999px;border:1px solid;}
+        .badge.green{border-color:rgba(61,220,151,.3);color:#7bf0c5}
+        .badge.amber{border-color:rgba(255,187,51,.3);color:#ffd792}
+        /* Drawer */
+        .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:.2s}
+        .overlay.show{opacity:1;pointer-events:auto}
+        .drawer{position:fixed;top:0;right:-520px;width:460px;max-width:95vw;height:100%;background:#0f121a;border-left:1px solid var(--border);box-shadow:-10px 0 30px rgba(0,0,0,.3);transition:.25s}
+        .drawer.show{right:0}
+        .drawer header{padding:20px;border-bottom:1px solid var(--border)}
+        .drawer main{padding:20px;display:grid;gap:14px}
+        .drawer footer{padding:20px;border-top:1px solid var(--border)}
+        .label{display:block;margin-bottom:6px;color:#c7cfdb}
+        .label .req{color:#ff8080;margin-left:4px}
+        .switch{appearance:none;width:42px;height:26px;background:#333;border-radius:999px;position:relative;outline:none;cursor:pointer;border:1px solid #444}
+        .switch:checked{background:rgba(61,220,151,.2);border-color:#2a7c62}
+        .switch:before{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#bbb;transition:.2s}
+        .switch:checked:before{left:19px;background:#3ddc97}
+        /* Pagination */
+        .pagination{display:flex;align-items:center;gap:8px}
+        .pager{border:1px solid var(--border);background:var(--muted);padding:6px 10px;border-radius:8px;cursor:pointer}
+        .pager[disabled]{opacity:.5;cursor:not-allowed}
+        .kpi{padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:#0c0f16}
+        .spin{display:inline-block;width:16px;height:16px;border-radius:50%;border:2px solid #9aa4b2;border-top-color:transparent;animation:spin 1s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        /* Toasts */
+        #toastHost{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:9999}
+        .toast{min-width:260px;max-width:380px;background:#0f121a;border:1px solid var(--border);border-left-width:4px;border-radius:12px;padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,.35);opacity:0;transform:translateY(8px);transition:.2s}
+        .toast.show{opacity:1;transform:translateY(0)}
+        .toast.success{border-left-color:var(--green)}
+        .toast.error{border-left-color:var(--red)}
+        .toast.info{border-left-color:var(--blue)}
+        .toast .title{font-weight:600;margin-bottom:2px}
+        .toast .msg{color:var(--sub)}
+        /* Confirm dialog */
+        #confirmOverlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:9998}
+        #confirmBox{width:min(92vw,460px);background:#0f121a;border:1px solid var(--border);border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+        #confirmBox header{padding:16px 18px;border-bottom:1px solid var(--border);font-weight:700}
+        #confirmBox main{padding:16px 18px;color:#c7cfdb}
+        #confirmBox footer{padding:14px 18px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+        /* Hint card */
+        .hint{padding:18px;border:1px dashed #2a3142;border-radius:14px;background:#0e121a}
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="row between" style="margin-bottom:12px">
+        <div id="tabs" class="tabs">
+            <button class="tab" data-tab="products">Sản phẩm</button>
+            <button class="tab" data-tab="variants">Biến thể</button>
+            <button class="tab" data-tab="images">Ảnh</button>
+        </div>
+        <div class="row" id="rightActions">
+            <button class="btn primary" id="btnAdd">➕ Thêm</button>
+        </div>
+    </div>
+
+    <!-- Filters/Search (only for products tab) -->
+    <div class="row" id="filtersBar" style="margin-bottom:12px">
+        <div style="position:relative;flex:1">
+            <input id="search" class="input" placeholder="Search…" />
+            <span style="position:absolute;right:10px;top:50%;translate:0 -50%;color:#657083">⌕</span>
+        </div>
+        <select id="fDanhMuc" class="select" style="min-width:180px"><option value="">— Danh mục —</option></select>
+        <select id="fHang" class="select" style="min-width:160px"><option value="">— Hãng —</option></select>
+        <select id="fChatLieu" class="select" style="min-width:160px"><option value="">— Chất liệu —</option></select>
+    </div>
+
+    <!-- Header for sub-tabs (shows selected product) -->
+    <div id="subHeader" class="row between" style="display:none;margin-bottom:12px">
+        <div id="selProduct" class="muted">SP: —</div>
+        <div class="row" style="gap:8px">
+            <button class="btn" id="btnBack">← Về Sản phẩm</button>
+            <button class="btn" id="btnGoVariants">Biến thể</button>
+            <button class="btn" id="btnGoImages">Ảnh</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <table>
+            <thead id="thead"></thead>
+            <tbody id="tbody"></tbody>
+        </table>
+    </div>
+
+    <div class="row between" style="margin-top:12px">
+        <div class="muted" id="info">Hiển thị 0 / 0 bản ghi</div>
+        <div class="pagination">
+            <button class="pager" id="prev">◀ Trước</button>
+            <span class="kpi" id="pageKpi">1 / 1</span>
+            <button class="pager" id="next">Sau ▶</button>
+        </div>
+    </div>
+</div>
+
+<!-- Drawer -->
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer">
+    <header>
+        <h3 id="drawerTitle" style="margin:0">Thêm mới</h3>
+        <p class="muted" id="drawerSub" style="margin:6px 0 0">Điền thông tin rồi bấm Lưu.</p>
+    </header>
+    <main id="drawerBody">
+        <!-- dynamic form -->
+    </main>
+    <footer>
+        <div class="row" style="gap:10px">
+            <button class="btn" id="btnClose">Đóng</button>
+            <button class="btn primary" id="btnSave">Lưu</button>
+        </div>
+    </footer>
+</aside>
+
+<!-- Toast host -->
+<div id="toastHost"></div>
+
+<!-- Confirm dialog -->
+<div id="confirmOverlay">
+    <div id="confirmBox">
+        <header>Xác nhận</header>
+        <main id="confirmMsg">Bạn có chắc không?</main>
+        <footer>
+            <button class="btn" id="confirmCancel">Huỷ</button>
+            <button class="btn primary" id="confirmOk">Đồng ý</button>
+        </footer>
+    </div>
+</div>
+
+<script>
+    /* ================= API CONFIG ================= */
+    const API = {
+        // Catalog (dùng sẵn từ meta)
+        danh_muc: '/api/danh-muc',
+        hang: '/api/hang',
+        chat_lieu: '/api/chat-lieu',
+        kich_thuoc: '/api/kich-thuoc',
+        mau_sac: '/api/mau-sac',
+
+        // Products
+        san_pham: '/api/san-pham',
+
+        // Variants + Images
+        // Chọn 1 trong 2 dạng. Mặc định dùng NESTED. Nếu m dùng flat endpoints, bật FLAT = true.
+        NESTED: {
+            listVariants: (productId, page, size) => `/api/san-pham/${productId}/bien-the?page=${page}&size=${size}`,
+            createVariant: (productId) => `/api/san-pham/${productId}/bien-the`,
+            updateVariant: (variantId) => `/api/san-pham-bien-the/${variantId}`,
+            listImages: (productId) => `/api/san-pham/${productId}/images`,
+            createImage: (productId) => `/api/san-pham/${productId}/images`,
+            updateImage: (imageId) => `/api/hinh-anh-san-pham/${imageId}`,
+            deleteImage: (imageId) => `/api/hinh-anh-san-pham/${imageId}`,
+        },
+        FLAT: false,
+        FLAT_MAP: { // nếu FLAT=true thì sửa map này cho khớp
+            listVariants: (productId, page, size) => `/api/san-pham-bien-the?productId=${productId}&page=${page}&size=${size}`,
+            createVariant: (productId) => `/api/san-pham-bien-the?productId=${productId}`,
+            updateVariant: (variantId) => `/api/san-pham-bien-the/${variantId}`,
+            listImages: (productId) => `/api/hinh-anh-san-pham?productId=${productId}`,
+            createImage: (productId) => `/api/hinh-anh-san-pham?productId=${productId}`,
+            updateImage: (imageId) => `/api/hinh-anh-san-pham/${imageId}`,
+            deleteImage: (imageId) => `/api/hinh-anh-san-pham/${imageId}`,
+        }
+    };
+    function VARAPI(){ return API.FLAT ? API.FLAT_MAP : API.NESTED; }
+
+    /* ================= STATE ================= */
+    let tab = 'products';            // products | variants | images
+    let productId = null;            // cho variants/images
+    let page = 1, size = 5;          // phân trang chung
+    let rows = []; let totalElements = 0; let totalPages = 1;
+    let editingId = null;            // id đang edit (product/variant/image)
+    let catalogs = { dm: [], hang: [], cl: [], sz: [], color: [] };
+    let selectedProductCache = null; // cache sp đã chọn để show ở subHeader
+    let q = ''; let fDm='', fHang='', fCl='';
+
+    /* ================= HELPERS ================= */
+    const $ = (s) => document.querySelector(s);
+    function showToast(message, type = 'info', title){
+        const host = $('#toastHost');
+        const box = document.createElement('div');
+        box.className = `toast ${type}`;
+        box.innerHTML = `<div class="title">${title || (type==='success'?'Thành công': type==='error'?'Lỗi':'Thông báo')}</div><div class="msg">${message}</div>`;
+        host.appendChild(box);
+        requestAnimationFrame(()=> box.classList.add('show'));
+        const timer = setTimeout(close, 2600);
+        function close(){ box.classList.remove('show'); setTimeout(()=> box.remove(), 200); clearTimeout(timer); }
+        box.addEventListener('click', close);
+    }
+    const toast = (m,t='info',title)=>showToast(m,t,title);
+
+    function uiConfirm(message){
+        return new Promise((resolve)=>{
+            $('#confirmMsg').textContent = message;
+            const ov = $('#confirmOverlay');
+            ov.style.display = 'flex';
+            const ok = ()=>{ cleanup(); resolve(true); };
+            const cancel = ()=>{ cleanup(); resolve(false); };
+            function onKey(e){ if(e.key==='Escape'){ cancel(); } }
+            function cleanup(){
+                ov.style.display = 'none';
+                $('#confirmOk').removeEventListener('click', ok);
+                $('#confirmCancel').removeEventListener('click', cancel);
+                document.removeEventListener('keydown', onKey);
+            }
+            $('#confirmOk').addEventListener('click', ok);
+            $('#confirmCancel').addEventListener('click', cancel);
+            document.addEventListener('keydown', onKey);
+        });
+    }
+
+    async function request(url, opts={}){
+        const res = await fetch(url, { headers: { 'Content-Type':'application/json', 'Accept':'application/json' }, ...opts });
+        if(!res.ok){ const text = await res.text(); throw new Error(text || res.statusText); }
+        if(res.status === 204) return null;
+        const ct = res.headers.get('content-type') || '';
+        return ct.includes('application/json') ? res.json() : res.text();
+    }
+
+    function setHash(nextTab, id){
+        const h = `#tab=${nextTab}${id?`&id=${id}`:''}`;
+        if(location.hash !== h) location.hash = h; else onRoute();
+    }
+    function parseHash(){
+        const p = new URLSearchParams(location.hash.replace(/^#/, ''));
+        return { tab: p.get('tab') || 'products', id: p.get('id') };
+    }
+
+    /* ================= INIT CATALOGS ================= */
+    async function loadCatalogsOnce(){
+        if(catalogs.dm.length) return;
+        try{
+            const [dm, h, cl, sz, color] = await Promise.all([
+                request(`${API.danh_muc}?page=0&size=100`),
+                request(`${API.hang}?page=0&size=100`),
+                request(`${API.chat_lieu}?page=0&size=100`),
+                request(`${API.kich_thuoc}?page=0&size=200`),
+                request(`${API.mau_sac}?page=0&size=200`)
+            ]);
+            catalogs.dm   = dm?.content || dm || [];
+            catalogs.hang = h?.content || h || [];
+            catalogs.cl   = cl?.content || cl || [];
+            catalogs.sz   = sz?.content || sz || [];
+            catalogs.color= color?.content || color || [];
+            // fill filters
+            fillSelect($('#fDanhMuc'), catalogs.dm, '— Danh mục —');
+            fillSelect($('#fHang'), catalogs.hang, '— Hãng —');
+            fillSelect($('#fChatLieu'), catalogs.cl, '— Chất liệu —');
+        }catch(e){ toast('Tải catalog thất bại', 'error'); }
+    }
+    function fillSelect(sel, list, placeholder){
+        const val = sel.value;
+        sel.innerHTML = `<option value="">${placeholder}</option>` + list.map(x=>`<option value="${x.id}">${x.ten}</option>`).join('');
+        sel.value = val;
+    }
+    function findById(arr, id){ return arr.find(x=>String(x.id)===String(id)); }
+
+    /* ================= RENDER CORE ================= */
+    function setLoading(on){
+        const tdCount = $('#thead th')?.length || 5;
+        $('#tbody').innerHTML = on
+            ? `<tr><td colspan="${tdCount}" style="text-align:center;padding:24px"><span class="spin"></span> Đang tải…</td></tr>`
+            : '';
+    }
+    function activeTabs(){
+        document.querySelectorAll('.tabs .tab').forEach(b=>{
+            b.classList.toggle('active', b.dataset.tab === tab);
+        });
+    }
+
+    function updateAddButton(){
+        const btn = $('#btnAdd');
+        if(tab === 'products'){
+            btn.textContent = '➕ Thêm sản phẩm';
+            btn.disabled = false;
+        } else if(tab === 'variants'){
+            btn.textContent = '➕ Thêm biến thể';
+            btn.disabled = !productId;
+        } else if(tab === 'images'){
+            btn.textContent = '➕ Thêm ảnh';
+            btn.disabled = !productId;
+        }
+    }
+
+    function updatePager(){
+        $('#info').textContent = `Hiển thị ${rows.length} / ${totalElements} bản ghi`;
+        $('#pageKpi').textContent = `${page} / ${totalPages}`;
+        $('#prev').disabled = page<=1; $('#next').disabled = page>=totalPages;
+    }
+    function setSubHeader(){
+        const show = (tab!=='products');
+        $('#subHeader').style.display = show ? '' : 'none';
+        if(!show) return;
+        const p = selectedProductCache;
+        $('#selProduct').textContent = p ? `SP: [${p.ma||'—'}] ${p.ten||'—'}` : 'SP: —';
+    }
+
+    /* ================= PRODUCTS TAB ================= */
+    function renderProductsHeader(){
+        $('#filtersBar').style.display = '';
+        $('#rightActions').style.display = '';
+
+        $('#thead').innerHTML = `
+    <tr>
+      <th style="width:140px">Mã</th>
+      <th style="min-width:260px">Tên</th>
+      <th>Danh mục</th>
+      <th>Hãng</th>
+      <th>Chất liệu</th>
+      <th style="width:120px">Trạng thái</th>
+      <th style="width:260px;text-align:right;padding-right:16px">Thao tác</th>
+    </tr>
+  `;
+    }
+    async function apiListProducts(){
+        const params = new URLSearchParams();
+        params.set('page', page-1); params.set('size', size);
+        if(q) params.set('q', q);
+        if(fDm) params.set('idDanhMuc', fDm);
+        if(fHang) params.set('idHang', fHang);
+        if(fCl) params.set('idChatLieu', fCl);
+        return request(`${API.san_pham}?${params.toString()}`);
+    }
+    async function renderProducts(){
+        renderProductsHeader();
+        setLoading(true);
+        try{
+            await loadCatalogsOnce();
+            const data = await apiListProducts();
+            const content = Array.isArray(data?.content) ? data.content : (Array.isArray(data)?data:[]);
+            rows = content;
+            totalElements = data?.totalElements ?? rows.length;
+            totalPages = data?.totalPages ?? Math.max(1, Math.ceil(totalElements/size));
+
+            const tbody = $('#tbody'); tbody.innerHTML='';
+            if(!rows.length){
+                tbody.innerHTML = `<tr><td colspan="7" class="muted" style="text-align:center;padding:28px 12px">Không có dữ liệu.</td></tr>`;
+            } else {
+                rows.forEach(row=>{
+                    const dm = row.danhMuc?.ten || findById(catalogs.dm, row.idDanhMuc)?.ten || '—';
+                    const hang = row.hang?.ten || findById(catalogs.hang, row.idHang)?.ten || '—';
+                    const cl = row.chatLieu?.ten || findById(catalogs.cl, row.idChatLieu)?.ten || '—';
+                    const on = !!row.trangThai;
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+          <td>${row.ma||'—'}</td>
+          <td>${row.ten||'—'}</td>
+          <td>${dm}</td>
+          <td>${hang}</td>
+          <td>${cl}</td>
+          <td style="text-align:center"><span class="badge ${on?'green':'amber'}">${on?'Hiển thị':'Ẩn'}</span></td>
+          <td style="text-align:right;padding-right:16px">
+            <button class="btn icon" data-act="variants">Biến thể</button>
+            <button class="btn icon" data-act="images">Ảnh</button>
+            <button class="btn icon" data-act="edit">Sửa</button>
+            <button class="btn icon" data-act="toggle">${on?'Ẩn':'Hiện'}</button>
+          </td>
+        `;
+                    tr.querySelector('[data-act="variants"]').onclick = ()=>{ selectedProductCache = row; setHash('variants', row.id); };
+                    tr.querySelector('[data-act="images"]').onclick   = ()=>{ selectedProductCache = row; setHash('images', row.id); };
+                    tr.querySelector('[data-act="edit"]').onclick     = ()=> openDrawerProduct('edit', row);
+                    tr.querySelector('[data-act="toggle"]').onclick   = ()=> toggleProductStatus(row);
+                    $('#tbody').appendChild(tr);
+                });
+            }
+        }catch(e){ rows=[]; totalElements=0; totalPages=1; toast(e.message,'error','Lỗi'); }
+        updatePager();
+    }
+    function openDrawerProduct(mode, row){
+        editingId = mode==='edit' ? row.id : null;
+        $('#drawerTitle').textContent = (mode==='edit'?'Cập nhật':'Thêm mới') + ' — Sản phẩm';
+        $('#drawerSub').textContent = 'Điền thông tin rồi bấm Lưu.';
+        const dmOpts = catalogs.dm.map(x=>`<option value="${x.id}">${x.ten}</option>`).join('');
+        const hOpts  = catalogs.hang.map(x=>`<option value="${x.id}">${x.ten}</option>`).join('');
+        const clOpts = catalogs.cl.map(x=>`<option value="${x.id}">${x.ten}</option>`).join('');
+
+        $('#drawerBody').innerHTML = `
+    <div>
+      <label class="label" for="pMa">Mã</label>
+      <input id="pMa" class="input" placeholder="Để trống nếu muốn sinh tự động" value="${row?.ma||''}">
+    </div>
+    <div>
+      <label class="label" for="pTen">Tên<span class="req">*</span></label>
+      <input id="pTen" class="input" placeholder="Nhập tên sản phẩm" value="${row?.ten||''}">
+    </div>
+    <div>
+      <label class="label" for="pDanhMuc">Danh mục<span class="req">*</span></label>
+      <select id="pDanhMuc" class="select"><option value="">— Chọn —</option>${dmOpts}</select>
+    </div>
+    <div class="row" style="gap:12px">
+      <div style="flex:1">
+        <label class="label" for="pHang">Hãng<span class="req">*</span></label>
+        <select id="pHang" class="select"><option value="">— Chọn —</option>${hOpts}</select>
+      </div>
+      <div style="flex:1">
+        <label class="label" for="pChatLieu">Chất liệu<span class="req">*</span></label>
+        <select id="pChatLieu" class="select"><option value="">— Chọn —</option>${clOpts}</select>
+      </div>
+    </div>
+    <div>
+      <label class="label" for="pMoTa">Mô tả</label>
+      <textarea id="pMoTa" class="textarea" placeholder="Mô tả (tuỳ chọn)">${row?.moTa||''}</textarea>
+    </div>
+    <div>
+      <label class="label" for="pThumb">Ảnh đại diện (URL)</label>
+      <input id="pThumb" class="input" placeholder="https://..." value="${row?.hinhAnhDaiDien||''}">
+    </div>
+    <div class="row between" style="border:1px solid var(--border);border-radius:12px;padding:10px 12px">
+      <div>
+        <div class="label" style="margin:0">Trạng thái</div>
+        <div class="muted">Bật để hiển thị; tắt để ẩn.</div>
+      </div>
+      <input type="checkbox" id="pTrangThai" class="switch" ${ (row?.trangThai ?? true) ? 'checked':''}>
+    </div>
+  `;
+        // set selected
+        if(row){
+            $('#pDanhMuc').value = row.idDanhMuc || row.danhMuc?.id || '';
+            $('#pHang').value    = row.idHang || row.hang?.id || '';
+            $('#pChatLieu').value= row.idChatLieu || row.chatLieu?.id || '';
+        }
+        openDrawer();
+    }
+    async function saveProduct(){
+        const body = {
+            ma: ($('#pMa')?.value||'').trim() || undefined,
+            ten: ($('#pTen')?.value||'').trim(),
+            idDanhMuc: $('#pDanhMuc')?.value || null,
+            idHang: $('#pHang')?.value || null,
+            idChatLieu: $('#pChatLieu')?.value || null,
+            moTa: ($('#pMoTa')?.value||'').trim() || null,
+            hinhAnhDaiDien: ($('#pThumb')?.value||'').trim() || null,
+            trangThai: $('#pTrangThai')?.checked ?? true
+        };
+        if(!body.ten || !body.idDanhMuc || !body.idHang || !body.idChatLieu){
+            toast('Thiếu trường bắt buộc (Tên/Danh mục/Hãng/Chất liệu).','error'); return;
+        }
+        const verb = editingId? 'Cập nhật':'Thêm mới';
+        if(!await uiConfirm(`${verb} sản phẩm "${body.ten}"?`)) return;
+        try{
+            if(editingId){
+                await request(`${API.san_pham}/${editingId}`, { method:'PUT', body: JSON.stringify(body) });
+                toast('Đã cập nhật','success');
+            }else{
+                await request(API.san_pham, { method:'POST', body: JSON.stringify(body) });
+                toast('Đã tạo sản phẩm','success'); page = 1;
+            }
+            closeDrawer(); await renderProducts();
+        }catch(e){ toast(e.message,'error','Lỗi'); }
+    }
+    async function toggleProductStatus(row){
+        const body = {
+            ma: row.ma, ten: row.ten,
+            idDanhMuc: row.idDanhMuc || row.danhMuc?.id,
+            idHang: row.idHang || row.hang?.id,
+            idChatLieu: row.idChatLieu || row.chatLieu?.id,
+            moTa: row.moTa || null,
+            hinhAnhDaiDien: row.hinhAnhDaiDien || null,
+            trangThai: !row.trangThai
+        };
+        if(!await uiConfirm(`${row.trangThai ? 'Ẩn' : 'Hiển thị'} "${row.ten}"?`)) return;
+        try{ await request(`${API.san_pham}/${row.id}`, { method:'PUT', body: JSON.stringify(body) }); toast('Đã cập nhật trạng thái','success'); await renderProducts(); }catch(e){ toast(e.message,'error','Lỗi'); }
+    }
+
+    /* ================= VARIANTS TAB ================= */
+    function renderVariantsHeader(){
+        $('#filtersBar').style.display = 'none';
+        $('#rightActions').style.display = '';
+        $('#thead').innerHTML = `
+    <tr>
+      <th style="min-width:160px">SKU</th>
+      <th>Màu</th>
+      <th>Size</th>
+      <th style="width:120px">Giá</th>
+      <th style="width:120px">Số lượng</th>
+      <th style="width:120px">Trạng thái</th>
+      <th style="width:200px;text-align:right;padding-right:16px">Thao tác</th>
+    </tr>
+  `;
+    }
+    async function apiListVariants(pid){
+        return request(VARAPI().listVariants(pid, page-1, size));
+    }
+    async function renderVariants(pid){
+        setSubHeader();
+        renderVariantsHeader();
+        setLoading(true);
+        try{
+            await loadCatalogsOnce();
+            const data = await apiListVariants(pid);
+            const content = Array.isArray(data?.content) ? data.content : (Array.isArray(data)?data:[]);
+            rows = content;
+            totalElements = data?.totalElements ?? rows.length;
+            totalPages = data?.totalPages ?? Math.max(1, Math.ceil(totalElements/size));
+
+            const tbody = $('#tbody'); tbody.innerHTML='';
+            if(!rows.length){
+                tbody.innerHTML = `<tr><td colspan="7" class="muted" style="text-align:center;padding:28px 12px">Chưa có biến thể.</td></tr>`;
+            } else {
+                rows.forEach(row=>{
+                    const mau = row.mauSac?.ten || findById(catalogs.color, row.idMauSac)?.ten || '—';
+                    const sizeName = row.kichThuoc?.ten || findById(catalogs.sz, row.idKichThuoc)?.ten || '—';
+                    const on = !!row.trangThai;
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+          <td>${row.sku||'—'}</td>
+          <td>${mau}</td>
+          <td>${sizeName}</td>
+          <td>${formatMoney(row.gia)}</td>
+          <td>${row.soLuong ?? 0}</td>
+          <td style="text-align:center"><span class="badge ${on?'green':'amber'}">${on?'Hiển thị':'Ẩn'}</span></td>
+          <td style="text-align:right;padding-right:16px">
+            <button class="btn icon" data-act="edit">Sửa</button>
+            <button class="btn icon" data-act="toggle">${on?'Ẩn':'Hiện'}</button>
+          </td>
+        `;
+                    tr.querySelector('[data-act="edit"]').onclick = ()=> openDrawerVariant('edit', row);
+                    tr.querySelector('[data-act="toggle"]').onclick = ()=> toggleVariantStatus(row);
+                    tbody.appendChild(tr);
+                });
+            }
+        }catch(e){ rows=[]; totalElements=0; totalPages=1; toast(e.message,'error','Lỗi'); }
+        updatePager();
+    }
+    function openDrawerVariant(mode, row){
+        editingId = mode==='edit' ? row.id : null;
+        $('#drawerTitle').textContent = (mode==='edit'?'Cập nhật':'Thêm mới') + ' — Biến thể';
+        $('#drawerSub').textContent = selectedProductCache ? `SP: [${selectedProductCache.ma||'—'}] ${selectedProductCache.ten||'—'}` : '';
+        const szOpts = catalogs.sz.map(x=>`<option value="${x.id}">${x.ten}</option>`).join('');
+        const colorOpts = catalogs.color.map(x=>`<option value="${x.id}">${x.ten}</option>`).join('');
+        $('#drawerBody').innerHTML = `
+    <div>
+      <label class="label" for="vSku">SKU<span class="req">*</span></label>
+      <input id="vSku" class="input" placeholder="SKU" value="${row?.sku||''}">
+    </div>
+    <div class="row" style="gap:12px">
+      <div style="flex:1">
+        <label class="label" for="vColor">Màu<span class="req">*</span></label>
+        <select id="vColor" class="select"><option value="">— Chọn —</option>${colorOpts}</select>
+      </div>
+      <div style="flex:1">
+        <label class="label" for="vSize">Size<span class="req">*</span></label>
+        <select id="vSize" class="select"><option value="">— Chọn —</option>${szOpts}</select>
+      </div>
+    </div>
+    <div class="row" style="gap:12px">
+      <div style="flex:1">
+        <label class="label" for="vGia">Giá<span class="req">*</span></label>
+        <input id="vGia" class="input" type="number" min="0" step="1000" value="${row?.gia ?? ''}" placeholder="0">
+      </div>
+      <div style="flex:1">
+        <label class="label" for="vSoLuong">Số lượng<span class="req">*</span></label>
+        <input id="vSoLuong" class="input" type="number" min="0" step="1" value="${row?.soLuong ?? 0}">
+      </div>
+    </div>
+    <div class="row between" style="border:1px solid var(--border);border-radius:12px;padding:10px 12px">
+      <div>
+        <div class="label" style="margin:0">Trạng thái</div>
+        <div class="muted">Bật để hiển thị; tắt để ẩn.</div>
+      </div>
+      <input type="checkbox" id="vTrangThai" class="switch" ${ (row?.trangThai ?? true) ? 'checked':''}>
+    </div>
+  `;
+        if(row){
+            $('#vColor').value = row.idMauSac || row.mauSac?.id || '';
+            $('#vSize').value  = row.idKichThuoc || row.kichThuoc?.id || '';
+        }
+        openDrawer();
+    }
+    async function saveVariant(){
+        const body = {
+            sku: ($('#vSku')?.value||'').trim(),
+            idMauSac: $('#vColor')?.value || null,
+            idKichThuoc: $('#vSize')?.value || null,
+            gia: Number($('#vGia')?.value || 0),
+            soLuong: Number($('#vSoLuong')?.value || 0),
+            trangThai: $('#vTrangThai')?.checked ?? true
+        };
+        if(!body.sku || !body.idMauSac || !body.idKichThuoc){ toast('Thiếu trường bắt buộc (SKU/Màu/Size).','error'); return; }
+        const verb = editingId? 'Cập nhật':'Thêm mới';
+        if(!await uiConfirm(`${verb} biến thể SKU "${body.sku}"?`)) return;
+        try{
+            if(editingId){
+                await request(VARAPI().updateVariant(editingId), { method:'PUT', body: JSON.stringify(body) });
+                toast('Đã cập nhật','success');
+            }else{
+                await request(VARAPI().createVariant(productId), { method:'POST', body: JSON.stringify(body) });
+                toast('Đã tạo biến thể','success'); page = 1;
+            }
+            closeDrawer(); await renderVariants(productId);
+        }catch(e){ toast(e.message,'error','Lỗi'); }
+    }
+    async function toggleVariantStatus(row){
+        const body = {
+            sku: row.sku,
+            idMauSac: row.idMauSac || row.mauSac?.id,
+            idKichThuoc: row.idKichThuoc || row.kichThuoc?.id,
+            gia: row.gia, soLuong: row.soLuong, trangThai: !row.trangThai
+        };
+        if(!await uiConfirm(`${row.trangThai ? 'Ẩn' : 'Hiển thị'} SKU "${row.sku}"?`)) return;
+        try{ await request(VARAPI().updateVariant(row.id), { method:'PUT', body: JSON.stringify(body) }); toast('Đã cập nhật trạng thái','success'); await renderVariants(productId); }catch(e){ toast(e.message,'error','Lỗi'); }
+    }
+
+    /* ================= IMAGES TAB ================= */
+    function renderImagesHeader(){
+        $('#filtersBar').style.display = 'none';
+        $('#rightActions').style.display = '';
+        $('#thead').innerHTML = `
+    <tr>
+      <th style="min-width:260px">URL</th>
+      <th style="width:100px">Thứ tự</th>
+      <th style="width:140px">Xem</th>
+      <th style="width:200px;text-align:right;padding-right:16px">Thao tác</th>
+    </tr>
+  `;
+    }
+    async function apiListImages(pid){ return request(VARAPI().listImages(pid)); }
+    async function renderImages(pid){
+        setSubHeader();
+        renderImagesHeader();
+        setLoading(true);
+        try{
+            const data = await apiListImages(pid);
+            rows = Array.isArray(data?.content) ? data.content : (Array.isArray(data)?data:[]);
+            totalElements = rows.length; totalPages = 1;
+
+            const tbody = $('#tbody'); tbody.innerHTML='';
+            if(!rows.length){
+                tbody.innerHTML = `<tr><td colspan="4" class="muted" style="text-align:center;padding:28px 12px">Chưa có ảnh.</td></tr>`;
+            } else {
+                rows.sort((a,b)=>(a.thuTu??0)-(b.thuTu??0)).forEach(row=>{
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+          <td>${row.url}</td>
+          <td><input class="input" type="number" min="0" step="1" value="${row.thuTu ?? 0}" style="max-width:100px" data-order></td>
+          <td><a class="btn icon" href="${row.url}" target="_blank">Mở</a></td>
+          <td style="text-align:right;padding-right:16px">
+            <button class="btn icon" data-act="save">Lưu</button>
+            <button class="btn icon destructive" data-act="del">Xoá</button>
+          </td>
+        `;
+                    tr.querySelector('[data-act="save"]').onclick = async ()=>{
+                        const newOrder = Number(tr.querySelector('[data-order"]').value||0);
+                        try{ await request(VARAPI().updateImage(row.id), { method:'PUT', body: JSON.stringify({ url: row.url, thuTu: newOrder }) }); toast('Đã cập nhật','success'); }catch(e){ toast(e.message,'error','Lỗi'); }
+                    };
+                    tr.querySelector('[data-act="del"]').onclick = async ()=>{
+                        if(!await uiConfirm('Xoá ảnh này?')) return;
+                        try{ await request(VARAPI().deleteImage(row.id), { method:'DELETE' }); toast('Đã xoá','success'); await renderImages(productId); }catch(e){ toast(e.message,'error','Lỗi'); }
+                    };
+                    tbody.appendChild(tr);
+                });
+            }
+        }catch(e){ rows=[]; totalElements=0; totalPages=1; toast(e.message,'error','Lỗi'); }
+        updatePager();
+    }
+    function openDrawerImage(){
+        editingId = null;
+        $('#drawerTitle').textContent = 'Thêm ảnh — URL';
+        $('#drawerSub').textContent = selectedProductCache ? `SP: [${selectedProductCache.ma||'—'}] ${selectedProductCache.ten||'—'}` : '';
+        $('#drawerBody').innerHTML = `
+    <div>
+      <label class="label" for="imgUrl">URL<span class="req">*</span></label>
+      <input id="imgUrl" class="input" placeholder="https://example.com/image.jpg">
+    </div>
+    <div>
+      <label class="label" for="imgOrder">Thứ tự</label>
+      <input id="imgOrder" class="input" type="number" min="0" step="1" value="0">
+    </div>
+  `;
+        openDrawer();
+    }
+    async function saveImage(){
+        const url = ($('#imgUrl')?.value||'').trim();
+        const thuTu = Number($('#imgOrder')?.value||0);
+        if(!url){ toast('URL là bắt buộc','error'); return; }
+        if(!await uiConfirm('Thêm ảnh này?')) return;
+        try{
+            await request(VARAPI().createImage(productId), { method:'POST', body: JSON.stringify({ url, thuTu }) });
+            toast('Đã thêm ảnh','success'); closeDrawer(); await renderImages(productId);
+        }catch(e){ toast(e.message,'error','Lỗi'); }
+    }
+
+    /* ================= DRAWER CORE ================= */
+    function openDrawer(){ $('#overlay').classList.add('show'); $('#drawer').classList.add('show'); }
+    function closeDrawer(){ $('#overlay').classList.remove('show'); $('#drawer').classList.remove('show'); editingId = null; }
+
+    /* ================= MONEY ================= */
+    function formatMoney(n){ if(n==null) return '—'; try{ return Number(n).toLocaleString('vi-VN'); }catch{ return String(n); } }
+
+    /* ================= ROUTER ================= */
+    async function onRoute(){
+        const h = parseHash();
+        tab = h.tab; productId = h.id ? parseInt(h.id,10) : null;
+        activeTabs();
+        updateAddButton();
+
+        // show/hide action button meaning
+        $('#btnAdd').onclick = ()=> {
+            if(tab==='products') openDrawerProduct('create');
+            else if(tab==='variants'){ if(!productId){ toast('Chọn 1 sản phẩm trước đã','error'); return; } openDrawerVariant('create'); }
+            else if(tab==='images'){ if(!productId){ toast('Chọn 1 sản phẩm trước đã','error'); return; } openDrawerImage(); }
+        };
+
+        // Sub header buttons
+        $('#btnBack').onclick = ()=> setHash('products', null);
+        $('#btnGoVariants').onclick = ()=> { if(!productId){ toast('Chưa chọn sản phẩm','error'); return; } setHash('variants', productId); };
+        $('#btnGoImages').onclick = ()=> { if(!productId){ toast('Chưa chọn sản phẩm','error'); return; } setHash('images', productId); };
+
+        // sub header text (ensure we have product in cache)
+        if(productId && !selectedProductCache){
+            try{ selectedProductCache = await request(`${API.san_pham}/${productId}`); }catch{ /* ignore */ }
+        }
+        setSubHeader();
+
+        // Render per tab
+        if(tab==='products'){
+            $('#subHeader').style.display = 'none';
+            await loadCatalogsOnce();
+            await renderProducts();
+        } else if(tab==='variants'){
+            if(!productId){ renderPickHint(); return; }
+            await loadCatalogsOnce();
+            await renderVariants(productId);
+        } else if(tab==='images'){
+            if(!productId){ renderPickHint(); return; }
+            await renderImages(productId);
+        }
+    }
+    function renderPickHint(){
+        $('#filtersBar').style.display = 'none';
+        $('#rightActions').style.display = '';
+        updateAddButton(); // Sẽ disable nút vì productId = null
+        $('#thead').innerHTML = '';
+        $('#tbody').innerHTML = `<tr><td>
+    <div class="hint">
+      <div class="label" style="margin:0 0 6px">Chưa chọn sản phẩm</div>
+      <div class="muted">Hãy vào tab <b>Sản phẩm</b>, bấm nút <i>Biến thể</i> hoặc <i>Ảnh</i> ở dòng sản phẩm cần quản lý.</div>
+    </div>
+  </td></tr>`;
+        $('#info').textContent = '—';
+        $('#pageKpi').textContent = '—';
+        $('#prev').disabled = true; $('#next').disabled = true;
+    }
+
+    /* ================= WIRE-UP ================= */
+    $('#overlay').onclick = closeDrawer;
+    $('#btnClose').onclick = closeDrawer;
+    $('#btnSave').onclick = async ()=>{
+        if(tab==='products') await saveProduct();
+        else if(tab==='variants') await saveVariant();
+        else if(tab==='images') await saveImage();
+    };
+    document.querySelectorAll('.tabs .tab').forEach(b=>{
+        b.onclick = ()=>{
+            const next = b.dataset.tab;
+            setHash(next, (next==='products') ? null : productId);
+        };
+    });
+
+    let debounce;
+    $('#search').addEventListener('input', (e)=>{ q = e.target.value || ''; page = 1; clearTimeout(debounce); debounce = setTimeout(()=>{ if(tab==='products') renderProducts(); }, 300); });
+    $('#fDanhMuc').onchange = ()=>{ fDm = $('#fDanhMuc').value; page=1; if(tab==='products') renderProducts(); };
+    $('#fHang').onchange    = ()=>{ fHang = $('#fHang').value;   page=1; if(tab==='products') renderProducts(); };
+    $('#fChatLieu').onchange= ()=>{ fCl = $('#fChatLieu').value; page=1; if(tab==='products') renderProducts(); };
+    $('#prev').onclick = ()=>{ if(page>1){ page--; if(tab==='products') renderProducts(); else if(tab==='variants') renderVariants(productId); } };
+    $('#next').onclick = ()=>{ if(page<totalPages){ page++; if(tab==='products') renderProducts(); else if(tab==='variants') renderVariants(productId); } };
+
+    // boot
+    window.addEventListener('hashchange', onRoute);
+    window.addEventListener('load', async ()=>{
+        await loadCatalogsOnce();
+        const {tab:t,id} = parseHash();
+        if(!t) setHash('products', null); else onRoute();
+    });
+</script>
+</body>
+</html>

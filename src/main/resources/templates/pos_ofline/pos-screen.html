@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>POS Screen - Offline Sale</title>
+    <style>
+        /* ================= CSS VARIABLES & UTILS ================= */
+        :root {
+            --bg: #0b0c0f;
+            --panel: #11131a;
+            --muted: #1a1d27;
+            --text: #e7e9ee;
+            --sub: #9aa4b2;
+            --primary: #5b9cff;
+            --green: #3ddc97;
+            --amber: #ffbb33;
+            --red: #ff5b5b;
+            --border: #232737;
+            --blue: #69a7ff;
+        }
+
+        /* RESET */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font: 14px/1.4 system-ui, Segoe UI, Roboto, Helvetica, Arial;
+            overflow: hidden; /* Khóa scroll cho màn hình POS */
+        }
+
+        /* LAYOUT & UTILS */
+        .row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .between {
+            justify-content: space-between;
+        }
+
+        .muted {
+            color: var(--sub);
+        }
+
+        .spin {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid #9aa4b2;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* CARD */
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        /* BUTTON, INPUT, SELECT */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: 1px solid var(--border);
+            background: var(--muted);
+            color: var(--text);
+            padding: 8px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+
+        .btn.primary {
+            background: var(--primary);
+            border-color: transparent;
+            color: #0b0c0f;
+            font-weight: 600;
+        }
+
+        .btn.destructive {
+            background: transparent;
+            border-color: rgba(255, 91, 91, .25);
+            color: #ff9f9f;
+        }
+
+        .btn[disabled] {
+            opacity: .5;
+            cursor: not-allowed;
+        }
+
+        .btn:hover:not([disabled]) {
+            filter: brightness(1.1);
+        }
+
+        .input, .select {
+            width: 100%;
+            background: #0c0f16;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 12px;
+            border-radius: 10px;
+        }
+
+        /* POS LAYOUT */
+        #pos-screen-wrapper {
+            display: grid;
+            grid-template-columns: 5fr 3fr 2fr; /* 50% : 30% : 20% */
+            gap: 12px;
+            height: 100vh;
+            padding: 12px;
+        }
+
+        .pos-section {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 16px; /* Thêm padding chung cho sections */
+        }
+
+        .pos-section header {
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--muted);
+            margin-bottom: 12px;
+        }
+
+        .scrollable-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .sticky-footer {
+            padding-top: 12px;
+            border-top: 1px solid var(--muted);
+        }
+
+        /* PRODUCT LIST */
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: 0.1s;
+        }
+
+        .product-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* CART */
+        .cart-item-row {
+            padding: 10px 0;
+            border-bottom: 1px dashed var(--muted);
+        }
+
+        .price-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+        }
+
+        .price-line strong {
+            font-size: 1.4rem;
+        }
+
+        /* TOASTS (Cần cho JS) */
+        #toastHost{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:9999}
+        .toast{min-width:260px;max-width:380px;background:#0f121a;border:1px solid var(--border);border-left-width:4px;border-radius:12px;padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,.35);opacity:0;transform:translateY(8px);transition:.2s}
+        .toast.show{opacity:1;transform:translateY(0)}
+        .toast.success{border-left-color:var(--green)}
+        .toast.error{border-left-color:var(--red)}
+        .toast.info{border-left-color:var(--blue)}
+        .toast .title{font-weight:600;margin-bottom:2px}
+        .toast .msg{color:var(--sub)}
+
+        /* CONFIRM DIALOG (Cần cho JS) */
+        #confirmOverlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:9998}
+        #confirmBox{width:min(92vw,420px);background:#0f121a;border:1px solid var(--border);border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+        #confirmBox header{padding:16px 18px;border-bottom:1px solid var(--border);font-weight:700}
+        #confirmBox main{padding:16px 18px;color:#c7cfdb}
+        #confirmBox footer{padding:14px 18px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+
+    </style>
+</head>
+<body>
+<div id="pos-screen-wrapper">
+    <section id="product-area" class="card pos-section">
+        <header>
+            <h3 style="margin:0;">BÁN HÀNG TẠI QUẦY</h3>
+        </header>
+        <div class="row" style="margin-bottom: 12px;">
+            <div style="position: relative; flex: 1;">
+                <input id="posSearch" class="input" placeholder="Quét mã SKU hoặc tìm Tên sản phẩm..." autofocus />
+            </div>
+        </div>
+
+        <div class="scrollable-content" id="productList">
+            <div id="productHint" class="muted" style="text-align:center; padding:20px;">
+                Nhập ít nhất 3 ký tự để tìm kiếm, hoặc quét mã.
+            </div>
+        </div>
+    </section>
+
+    <section id="cart-area" class="card pos-section">
+        <header>
+            <h3 style="margin:0;">GIỎ HÀNG <span id="cartCount">(0)</span></h3>
+        </header>
+        <div class="scrollable-content" id="cartItems">
+            <div id="emptyCart" class="muted" style="text-align:center; padding:20px; display:block;">
+                Giỏ hàng trống.
+            </div>
+        </div>
+        <div class="sticky-footer">
+            <div class="row" style="margin-bottom: 8px;">
+                <input id="customerTel" class="input" placeholder="SĐT khách hàng (Thành viên)" />
+                <button class="btn primary" id="btnApplyCustomer" style="min-width: 80px;">Áp dụng</button>
+            </div>
+            <div id="memberInfo" class="muted" style="padding-bottom: 10px;">Khách lẻ / NV: Tên NV A</div>
+        </div>
+    </section>
+
+    <section id="checkout-area" class="card pos-section" style="padding: 16px;">
+        <h3 style="margin:0; padding-bottom: 10px; border-bottom: 1px solid var(--muted);">TỔNG KẾT</h3>
+
+        <div id="paymentSummary" class="scrollable-content" style="padding-right:0;">
+            <div class="price-line muted">
+                <span>Tạm tính:</span> <span id="subTotal">0</span>
+            </div>
+            <div class="price-line muted">
+                <span>Giảm giá:</span> <span id="discount">0</span>
+            </div>
+            <div class="row" style="margin: 12px 0;">
+                <input id="voucherCode" class="input" placeholder="Mã giảm giá" />
+                <button class="btn" id="btnApplyVoucher" style="min-width: 80px;">Áp</button>
+            </div>
+        </div>
+
+        <div class="sticky-footer">
+            <div class="price-line" style="border-bottom: 1px solid var(--muted); margin-bottom: 12px;">
+                <strong style="font-size: 1.4rem;">THÀNH TIỀN:</strong> <strong id="grandTotal" style="font-size: 1.4rem; color: var(--green);">0</strong>
+            </div>
+
+            <select id="paymentMethod" class="select" style="margin-bottom: 10px;">
+                <option value="CASH">Tiền mặt</option>
+                <option value="CARD">Quẹt thẻ</option>
+                <option value="QR">Chuyển khoản QR</option>
+            </select>
+
+            <button id="btnCompleteSale" class="btn primary" style="width: 100%; padding: 14px 12px; font-size: 1.1rem;">
+                HOÀN TẤT GIAO DỊCH
+            </button>
+            <button id="btnCancelSale" class="btn destructive" style="width: 100%; margin-top: 8px;">
+                HỦY ĐƠN HÀNG
+            </button>
+        </div>
+    </section>
+</div>
+
+<div id="toastHost"></div>
+<div id="confirmOverlay">
+    <div id="confirmBox">
+        <header>Xác nhận</header>
+        <main id="confirmMsg">Bạn có chắc không?</main>
+        <footer>
+            <button class="btn" id="confirmCancel">Huỷ</button>
+            <button class="btn primary" id="confirmOk">Đồng ý</button>
+        </footer>
+    </div>
+</div>
+<script src="js/pos.js"></script>
+</body>
+</html>
