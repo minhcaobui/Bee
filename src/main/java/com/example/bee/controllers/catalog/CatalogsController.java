@@ -5,10 +5,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/meta")
-public class MetaController {
+@RequestMapping("/catalogs")
+public class CatalogsController {
     @GetMapping
-    public String index() {
-        return "catalog/meta";
+    public String catalogs() {
+        return "admin/catalog/catalogs";
     }
 }

@@ -12,5 +12,6 @@ public interface ChatLieuRepository extends JpaRepository<ChatLieu, Integer> {
     boolean existsByMaIgnoreCaseAndIdNot(String ma, Integer id);
 
     Optional<ChatLieu> findByMa(String ma);
+
 }
 

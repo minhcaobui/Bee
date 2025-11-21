@@ -5,27 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Dashboard | Hệ thống Quản trị Bee</title>
     <style>
-        /* [COPY/PASTE TOÀN BỘ CSS VARIABLES VÀ UTILS TỪ FILE POS VÀO ĐÂY] */
+        /* ================= CSS VARIABLES & UTILS (Sử dụng lại) ================= */
         :root{ --bg:#0b0c0f;--panel:#11131a;--muted:#1a1d27;--text:#e7e9ee;--sub:#9aa4b2;--primary:#5b9cff;--red:#ff5b5b;--border:#232737; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: var(--bg); color: var(--text); font: 14px/1.4 system-ui, Roboto, Arial; }
+        .row { display: flex; gap: 12px; align-items: center; }
+        .muted { color: var(--sub); }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--border); background: var(--muted); color: var(--text); padding: 8px 12px; border-radius: 10px; cursor: pointer; transition: 0.1s; }
+        .btn.destructive { background: transparent; border-color: rgba(255, 91, 91, .25); color: #ff9f9f; }
+        .card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
 
-        /* KHUNG CHÍNH: Flexbox ngang */
+        /* ================= LAYOUT 3 PHẦN ================= */
         #app-wrapper {
             display: flex;
             min-height: 100vh;
         }
 
-        /* SIDEBAR (Cột 1: Cố định) */
+        /* 1. SIDEBAR (240px cố định) */
         #main-sidebar {
-            width: 240px; /* Chiều rộng cố định */
-            background: #181c26; /* Màu nền Sidebar */
+            width: 240px;
+            background: #181c26;
             border-right: 1px solid var(--border);
             padding: 16px 0;
+            flex-shrink: 0;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            flex-shrink: 0; /* Không bị co lại */
         }
         .sidebar-item {
             padding: 10px 20px;
@@ -36,19 +40,19 @@
             display: block;
         }
         .sidebar-item:hover, .sidebar-item.active {
-            background: rgba(91, 156, 255, 0.1); /* Màu xanh nhạt */
+            background: rgba(91, 156, 255, 0.1);
             color: var(--text);
             border-right: 3px solid var(--primary);
         }
 
-        /* KHU VỰC NỘI DUNG CHÍNH (Cột 2: Phần còn lại) */
+        /* 2. KHU VỰC CHÍNH */
         #main-container {
-            flex-grow: 1; /* Chiếm hết phần còn lại */
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
         }
 
-        /* HEADER (Thanh trên cùng) */
+        /* 3. HEADER (Thanh trên cùng) */
         #top-header {
             background: var(--panel);
             padding: 12px 20px;
@@ -58,11 +62,11 @@
             align-items: center;
         }
 
-        /* NỘI DUNG CHÍNH (Content Area) */
+        /* 4. CONTENT AREA */
         #content-area {
             flex-grow: 1;
             padding: 24px;
-            /* Nội dung của từng màn hình sẽ nằm ở đây */
+            overflow-y: auto; /* Cho phép cuộn riêng phần nội dung */
         }
     </style>
 </head>
@@ -72,9 +76,11 @@
     <aside id="main-sidebar">
         <h3 style="padding: 0 20px 10px; color: var(--primary);">BEE ADMIN</h3>
         <a href="#dashboard" class="sidebar-item active">🏠 Dashboard</a>
-        <a href="#catalog" class="sidebar-item">📦 Sản phẩm & Kho</a>
-        <a href="#pos" class="sidebar-item">🛒 **BÁN HÀNG POS**</a>
-        <a href="#orders" class="sidebar-item">🧾 Đơn hàng Online</a>
+        <a href="#catalogs" class="sidebar-item">🛠️ Danh mục</a>
+        <a href="#products" class="sidebar-item">📦 Sản phẩm</a>
+        <a href="#pos" class="sidebar-item">🛒 Bán hàng POS</a>
+        <a href="#orders" class="sidebar-item">🧾 Đơn hàng</a>
+        <a href="#promo" class="sidebar-item">🎁 Giảm giá</a>
         <a href="#reports" class="sidebar-item">📈 Báo cáo</a>
         <a href="#users" class="sidebar-item">👤 Tài khoản</a>
     </aside>
@@ -83,67 +89,20 @@
         <header id="top-header">
             <h2 id="pageTitle" style="margin:0; font-size:1.4rem;">Dashboard</h2>
             <div class="row">
-                <button class="btn" style="color:var(--red);">🔔</button>
-                <div class="muted">Ngô Việt Hoàng (Admin)</div>
+                <div class="muted">Hoàng (Admin)</div>
                 <button class="btn destructive">Đăng xuất</button>
             </div>
         </header>
 
         <main id="content-area">
             <div class="card" style="padding:30px; text-align:center;">
-                Nội dung của trang hiện tại (Dashboard, Catalog, Orders...)
+                <h3 style="margin-bottom:10px;">Chào mừng Hoàng!</h3>
+                <div>Bấm vào Sidebar để tải module.</div>
             </div>
         </main>
-
     </div>
 </div>
 
-<script>
-    // JS Logic cơ bản cho Sidebar/Routing (Dùng Hashchange như mày đã làm)
-    const $ = (s) => document.querySelector(s);
-
-    function updateLayout(hash) {
-        // Cập nhật tiêu đề
-        const titleMap = {
-            'dashboard': 'Dashboard', 'catalog': 'Quản lý Sản phẩm',
-            'pos': 'Bán hàng POS (Trang riêng)', 'orders': 'Quản lý Đơn hàng',
-            'reports': 'Báo cáo Hệ thống', 'users': 'Quản lý Tài khoản'
-        };
-        const currentTab = hash.replace('#', '').split('&')[0];
-        $('#pageTitle').textContent = titleMap[currentTab] || 'Quản trị Hệ thống';
-
-        // Cập nhật active link
-        document.querySelectorAll('.sidebar-item').forEach(item => {
-            item.classList.remove('active');
-            if (item.getAttribute('href') === '#' + currentTab) {
-                item.classList.add('active');
-            }
-        });
-
-        // Logic nhúng nội dung: Khi click vào #catalog, mày phải load code của catalog-manager.html vào #content-area
-        const contentArea = $('#content-area');
-        contentArea.innerHTML = `<div class="card" style="padding:30px; text-align:center;">Đang tải nội dung cho: ${currentTab}...</div>`;
-
-        // Ví dụ: Nếu click vào #pos, mày chuyển hướng sang trang POS fullscreen (hoặc tab mới)
-        if (currentTab === 'pos') {
-            contentArea.innerHTML = `<div class="card" style="padding:30px; color:var(--red);">Màn hình POS là trang Fullscreen. Vui lòng mở trang pos-screen.html riêng để sử dụng.</div>`;
-        }
-
-        // THÊM LOGIC LOAD HTML NỘI DUNG CỦA MÀY VÀO ĐÂY (FETCH/AJAX)
-    }
-
-    // Xử lý sự kiện thay đổi hash (router)
-    window.addEventListener('hashchange', () => updateLayout(location.hash));
-
-    // Khởi tạo lần đầu
-    document.addEventListener('DOMContentLoaded', () => {
-        if (!location.hash) {
-            location.hash = '#dashboard';
-        } else {
-            updateLayout(location.hash);
-        }
-    });
-
-</script>
+<script src="/js/admin-router.js"></script>
 </body>
 </html>
