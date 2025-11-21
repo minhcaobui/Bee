@@ -1,7 +1,10 @@
 package com.example.bee.entities.catalog;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Table(
@@ -29,4 +32,8 @@ public class ChatLieu {
 
     @Column(name = "trang_thai", nullable = false)
     private Boolean trangThai = true;
+
+    @OneToMany(mappedBy = "chatLieu")
+    @JsonIgnore // <--- THÊM CÁI NÀY VÀO! QUAN TRỌNG VÃI LỒN!
+    private List<SanPham> sanPhams;
 }

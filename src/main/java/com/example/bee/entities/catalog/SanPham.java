@@ -1,8 +1,10 @@
 package com.example.bee.entities.catalog;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(
@@ -31,22 +33,16 @@ public class SanPham {
     @Column(name = "hinh_anh_dai_dien", length = 255)
     private String hinhAnhDaiDien;
 
-    // Many-to-one: sản phẩm thuộc 1 danh mục
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_danh_muc", nullable = false,
-            foreignKey = @ForeignKey(name = "fk_sp_dm"))
+    @ManyToOne(fetch = FetchType.EAGER) // <--- THÊM fetch = FetchType.EAGER
+    @JoinColumn(name = "id_danh_muc")
     private DanhMuc danhMuc;
 
-    // Many-to-one: sản phẩm thuộc 1 hãng
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_hang", nullable = false,
-            foreignKey = @ForeignKey(name = "fk_sp_hang"))
+    @ManyToOne(fetch = FetchType.EAGER) // <--- THÊM fetch = FetchType.EAGER
+    @JoinColumn(name = "id_hang")
     private Hang hang;
 
-    // Many-to-one: sản phẩm có 1 chất liệu
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_chat_lieu", nullable = false,
-            foreignKey = @ForeignKey(name = "fk_sp_cl"))
+    @ManyToOne(fetch = FetchType.EAGER) // <--- THÊM fetch = FetchType.EAGER
+    @JoinColumn(name = "id_chat_lieu")
     private ChatLieu chatLieu;
 
     @Column(name = "trang_thai", nullable = false)
@@ -54,4 +50,13 @@ public class SanPham {
 
     @Column(name = "ngay_tao", nullable = false)
     private LocalDateTime ngayTao = LocalDateTime.now();
+
+    @OneToMany(mappedBy = "sanPham")
+    @JsonIgnore // <--- PHẢI CÓ CÁI NÀY!
+    private List<SanPhamBienThe> bienThes; // Tên biến của mày
+
+    // CHẶN VÒNG LẶP SANG ẢNH (Images)
+    @OneToMany(mappedBy = "sanPham")
+    @JsonIgnore // <--- PHẢI CÓ CÁI NÀY NỮA!
+    private List<HinhAnhSanPham> hinhAnhs; // Tên biến của mày
 }
