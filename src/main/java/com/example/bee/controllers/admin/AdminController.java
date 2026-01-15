@@ -5,10 +5,20 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller // Dùng @Controller để trả về View (HTML)
-@RequestMapping("/admin")
+//@RequestMapping("/admin")
 public class AdminController {
-    @GetMapping
+    @GetMapping("/admin")
     public String showAdminLayout() {
         return "admin/admin-layout";
+    }
+
+    @GetMapping("/catalogs")
+    public String catalogs() {
+        return "admin/catalog/catalogs";
+    }
+
+    @GetMapping("/products")
+    public String products() {
+        return "admin/product/products";
     }
 }
