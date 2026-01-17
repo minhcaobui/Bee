@@ -103,7 +103,7 @@ CREATE TABLE san_pham(
   ma VARCHAR(50) UNIQUE NOT NULL,
   ten NVARCHAR(200) NOT NULL,
   mo_ta NVARCHAR(MAX) NULL,
-  hinh_anh_dai_dien NVARCHAR(255) NULL,
+  hinh_anh_dai_dien NVARCHAR(MAX) NULL,
   id_danh_muc INT NOT NULL,
   id_hang INT NOT NULL,
   id_chat_lieu INT NOT NULL,
@@ -118,7 +118,7 @@ IF OBJECT_ID('hinh_anh_san_pham','U') IS NULL
 CREATE TABLE hinh_anh_san_pham(
   id INT IDENTITY(1,1) PRIMARY KEY,
   id_san_pham INT NOT NULL,
-  url NVARCHAR(255) NOT NULL,
+  url NVARCHAR(MAX) NOT NULL,
   thu_tu INT NOT NULL DEFAULT 0,
   CONSTRAINT fk_has_sp FOREIGN KEY(id_san_pham) REFERENCES san_pham(id)
 );
@@ -127,7 +127,7 @@ IF OBJECT_ID('san_pham_bien_the','U') IS NULL
 CREATE TABLE san_pham_bien_the(
   id INT IDENTITY(1,1) PRIMARY KEY,
   id_san_pham INT NOT NULL,
-  sku VARCHAR(100) UNIQUE NOT NULL,
+  sku VARCHAR(100) UNIQUE NOT NULL, --SKU là viết tắt của Stock Keeping Unit (Đơn vị lưu kho).Hiểu đơn giản nhất trong bán hàng: SKU là mã định danh duy nhất cho từng phiên bản cụ thể của sản phẩm.
   gia DECIMAL(12,2) NOT NULL,
   so_luong INT NOT NULL DEFAULT 0,
   id_kich_thuoc INT NOT NULL,
@@ -139,14 +139,15 @@ CREATE TABLE san_pham_bien_the(
   CONSTRAINT uq_spbt UNIQUE(id_san_pham,id_kich_thuoc,id_mau_sac)
 );
 
--- Tùy chọn kho_hang chi tiết theo vị trí/kho
-IF OBJECT_ID('kho_hang','U') IS NULL
-CREATE TABLE kho_hang(
+IF OBJECT_ID('nha_cung_cap','U') IS NULL
+CREATE TABLE nha_cung_cap(
   id INT IDENTITY(1,1) PRIMARY KEY,
-  id_san_pham_bien_the INT NOT NULL,
-  vi_tri NVARCHAR(100) NULL,
-  so_luong_ton INT NOT NULL DEFAULT 0,
-  CONSTRAINT fk_kho_spbt FOREIGN KEY(id_san_pham_bien_the) REFERENCES san_pham_bien_the(id)
+  ma VARCHAR(50) UNIQUE NOT NULL,
+  ten NVARCHAR(150) NOT NULL,
+  so_dien_thoai VARCHAR(20),
+  email VARCHAR(100),
+  dia_chi NVARCHAR(255),
+  trang_thai BIT NOT NULL DEFAULT 1
 );
 
 -- === C. CART & WISHLIST & REVIEWS =======================================
@@ -401,9 +402,14 @@ IF OBJECT_ID('phieu_nhap','U') IS NULL
 CREATE TABLE phieu_nhap(
   id INT IDENTITY(1,1) PRIMARY KEY,
   ma VARCHAR(50) UNIQUE NOT NULL,
+  id_nha_cung_cap INT NOT NULL,
   id_nhan_vien INT NOT NULL,
-  ngay DATETIME2(0) NOT NULL DEFAULT SYSDATETIME(),
-  ghi_chu NVARCHAR(255) NULL,
+  ngay_tao DATETIME2(0) NOT NULL DEFAULT SYSDATETIME(),
+  ngay_nhap DATETIME2(0) NOT NULL DEFAULT SYSDATETIME(), -- Ngày hàng thực về kho
+  tong_tien DECIMAL(15,2) NOT NULL DEFAULT 0, -- Tổng tiền hàng phải trả NCC
+  ghi_chu NVARCHAR(MAX) NULL,
+  trang_thai INT NOT NULL DEFAULT 0, -- 0: Chờ duyệt, 1: Đã nhập kho, 2: Đã hủy
+  CONSTRAINT fk_pn_ncc FOREIGN KEY(id_nha_cung_cap) REFERENCES nha_cung_cap(id),
   CONSTRAINT fk_pn_nv FOREIGN KEY(id_nhan_vien) REFERENCES nhan_vien(id)
 );
 
@@ -413,7 +419,7 @@ CREATE TABLE phieu_nhap_chi_tiet(
   id_phieu_nhap INT NOT NULL,
   id_san_pham_bien_the INT NOT NULL,
   so_luong INT NOT NULL CHECK(so_luong>0),
-  don_gia DECIMAL(12,2) NOT NULL,
+  don_gia_nhap DECIMAL(15,2) NOT NULL CHECK (don_gia_nhap >= 0), -- Giá vốn (khác giá bán)
   CONSTRAINT fk_pnct_pn FOREIGN KEY(id_phieu_nhap) REFERENCES phieu_nhap(id),
   CONSTRAINT fk_pnct_spbt FOREIGN KEY(id_san_pham_bien_the) REFERENCES san_pham_bien_the(id)
 );
