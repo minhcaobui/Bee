@@ -1,5 +1,6 @@
 package com.example.bee.entities.catalog;
 
+import com.example.bee.entities.product.SanPham;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;

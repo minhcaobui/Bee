@@ -1,4 +1,4 @@
-package com.example.bee.entities.catalog;
+package com.example.bee.entities.product;
 
 import jakarta.persistence.*;
 import lombok.*;

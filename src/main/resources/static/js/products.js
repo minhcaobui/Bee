@@ -1,345 +1,410 @@
-{ // BẮT ĐẦU BLOCK SCOPE ĐỂ NGĂN XUNG ĐỘT GLOBAL
-
-    /* ================= API CONFIG ================= */
-    const API_PROD = {
+{
+    /* ================= API ================= */
+    const API = {
+        products: '/api/products',
         danh_muc: '/api/danh-muc',
         hang: '/api/hang',
-        chat_lieu: '/api/chat-lieu',
-        kich_thuoc: '/api/kich-thuoc',
-        mau_sac: '/api/mau-sac',
-
-        san_pham: '/api/san-pham', // CRUD Sản phẩm
-
-        // Các API con (Biến thể, Ảnh)
-        variant: (pid) => `/api/san-pham/${pid}/bien-the`,
-        variant_crud: '/api/san-pham-bien-the',
-        image: (pid) => `/api/san-pham/${pid}/images`,
-        image_crud: '/api/hinh-anh-san-pham'
+        chat_lieu: '/api/chat-lieu'
     };
 
+    let isLoading = false;
+
+
     /* ================= STATE ================= */
-    let prod_tab = 'products';
-    let prod_id = null;
-    let selectedProductData = null;
+    let activeTab = 'products';
+    let selectedProduct = null;
 
-    let prod_q = '';
-    let prod_page = 1;
-    const prod_size = 5;
+    let q = '';
+    let page = 1;
+    const size = 10;
 
-    let prod_rows = [];
-    let prod_totalElements = 0;
-    let prod_totalPages = 1;
-    let prod_editingId = null;
+    let rows = [];
+    let totalElements = 0;
+    let totalPages = 1;
+    let editingId = null;
 
-    let fDm='', fHang='', fCl='';
-    let catalogs = { dm: [], hang: [], cl: [], sz: [], color: [] };
+    /* ================= HELPERS ================= */
+    const _get = s => document.querySelector(s);
 
-    /* ================= HELPERS (Local) ================= */
-    const _get = (s) => document.querySelector(s); // Selector cục bộ
+    /* ================= API ================= */
+    async function apiList() {
+        const params = new URLSearchParams({page: page - 1, size});
 
-    function _fmtMoney(n){
-        if(n==null) return '—';
-        try{ return Number(n).toLocaleString('vi-VN'); }catch{ return String(n); }
-    }
-    function findById(arr, id){ return arr.find(x=>String(x.id)===String(id)); }
+        if (q) params.append('q', q);
+        if (_get('#fDanhMuc').value) params.append('idDanhMuc', _get('#fDanhMuc').value);
+        if (_get('#fHang').value) params.append('idHang', _get('#fHang').value);
+        if (_get('#fChatLieu').value) params.append('idChatLieu', _get('#fChatLieu').value);
 
-    // FIX DB INTEGRITY: Chuyển chuỗi rỗng ("" hoặc "0") thành NULL trước khi gửi lên Java DTO
-    const _valOrNull = (v) => (v === "" || v === "0") ? null : v;
-
-
-    /* ================= CORE: LOAD CATALOGS ================= */
-    async function loadCatalogsOnce(){
-        if(catalogs.dm.length) return;
-        try{
-            const [dm, h, cl, sz, color] = await Promise.all([
-                request(`${API_PROD.danh_muc}?page=0&size=100`),
-                request(`${API_PROD.hang}?page=0&size=100`),
-                request(`${API_PROD.chat_lieu}?page=0&size=100`),
-                request(`${API_PROD.kich_thuoc}?page=0&size=100`),
-                request(`${API_PROD.mau_sac}?page=0&size=100`)
-            ]);
-            catalogs.dm = dm.content || dm || [];
-            catalogs.hang = h.content || h || [];
-            catalogs.cl = cl.content || cl || [];
-            catalogs.sz = sz.content || sz || [];
-            catalogs.color = color.content || color || [];
-
-            // Fill Filters
-            fillSelect(_get('#fDanhMuc'), catalogs.dm, '— Danh mục —');
-            fillSelect(_get('#fHang'), catalogs.hang, '— Hãng —');
-            fillSelect(_get('#fChatLieu'), catalogs.cl, '— Chất liệu —');
-        }catch(e){ console.error(e); }
-    }
-
-    function fillSelect(sel, list, placeholder){
-        if(!sel) return;
-        const val = sel.value;
-        sel.innerHTML = `<option value="">${placeholder}</option>` + list.map(x=>`<option value="${x.id}">${x.ten}</option>`).join('');
-        sel.value = val;
-    }
-
-    /* ================= RENDER MAIN ================= */
-    async function loadAndRender(){
-        if(prod_tab === 'products') {
-            _get('#filtersBar').style.display = 'flex';
-            _get('#subHeader').style.display = 'none';
-            await renderProducts();
-        } else {
-            _get('#filtersBar').style.display = 'none';
-            _get('#subHeader').style.display = 'flex';
-
-            const spName = selectedProductData ? `SP: ${selectedProductData.ten} (${selectedProductData.ma})` : `SP #${prod_id}`;
-            _get('#selProduct').textContent = spName;
-
-            if(prod_tab === 'variants') await renderVariants();
-            else if(prod_tab === 'images') await renderImages();
+        const st = _get('#fTrangThaiFilter');
+        if (st && st.value !== '') {
+            params.append('trangThai', st.value === 'true');
         }
-        updatePager();
-        updateTabsState();
+
+        const data = await request(`${API.products}?${params}`);
+        let list = data.content || [];
+
+        rows = list;
+        totalElements = data.totalElements ?? list.length;
+        totalPages = data.totalPages ?? 1;
     }
 
-    function updateTabsState(){
-        document.querySelectorAll('.tab').forEach(b => {
-            b.classList.toggle('active', b.dataset.tab === prod_tab);
+    async function apiCreate(payload) {
+        return request(API.products, {method: 'POST', body: JSON.stringify(payload)});
+    }
+
+    async function apiUpdate(id, payload) {
+        return request(`${API.products}/${id}`, {method: 'PUT', body: JSON.stringify(payload)});
+    }
+
+    /* ================= LOAD OPTIONS ================= */
+    async function loadOptions(select, url) {
+        select.innerHTML = '<option value=""></option>';
+        const data = await request(`${url}?page=0&size=100`);
+        (data.content || data)
+            .filter(x => x.trangThai === true)
+            .forEach(x => {
+                const o = document.createElement('option');
+                o.value = x.id;
+                o.textContent = x.ten;
+                select.appendChild(o);
+            });
+    }
+
+    /* ================= TABLE ================= */
+    function renderTable() {
+        const thead = _get('#thead');
+        const tbody = _get('#tbody');
+
+        thead.innerHTML = `
+<tr>
+  <th>Mã</th>
+  <th>Tên</th>
+  <th>Mô tả</th>
+  <th>Danh mục</th>
+  <th>Hãng</th>
+  <th>Chất liệu</th>
+  <th style="text-align:center">Trạng thái</th>
+  <th style="text-align:right;padding-right:16px">Hành động</th>
+</tr>
+`;
+
+        // ✅ KHÔNG CÓ DATA
+        if (rows.length === 0) {
+            tbody.innerHTML = `
+<tr>
+  <td colspan="8" style="height:360px;text-align:center" class="muted">
+    Không có dữ liệu
+  </td>
+</tr>`;
+            updatePager();
+            return;
+        }
+
+        // ✅ RENDER 1 LẦN DUY NHẤT
+        const frag = document.createDocumentFragment();
+
+        rows.forEach(r => {
+            const tr = document.createElement('tr');
+            tr.style.cursor = 'pointer';
+
+            tr.innerHTML = `
+<td><div class="ellipsis">${r.ma}</div></td>
+<td><div class="ellipsis">${r.ten}</div></td>
+<td><div class="ellipsis">${r.moTa || '—'}</div></td>
+<td><div class="ellipsis">${r.danhMuc?.ten || '—'}</div></td>
+<td><div class="ellipsis">${r.hang?.ten || '—'}</div></td>
+<td><div class="ellipsis">${r.chatLieu?.ten || '—'}</div></td>
+<td style="text-align:center">
+  <span class="badge ${r.trangThai ? 'green' : 'amber'}">
+    ${r.trangThai ? 'Hiện' : 'Ẩn'}
+  </span>
+</td>
+<td style="text-align:right;padding-right:16px"></td>
+`;
+
+            // click row
+            tr.onclick = e => {
+                if (e.target.closest('button')) return;
+                const isActive = tr.classList.contains('active-row');
+                document.querySelectorAll('#tbody tr')
+                    .forEach(x => x.classList.remove('active-row'));
+                if (!isActive) tr.classList.add('active-row');
+            };
+
+            // actions
+            const act = tr.lastElementChild;
+            act.style.display = 'flex';
+            act.style.justifyContent = 'flex-end';
+            act.style.gap = '6px';
+
+            const bEdit = document.createElement('button');
+            bEdit.className = 'btn icon';
+            bEdit.innerHTML = '<i class="bi bi-pencil-fill"></i>';
+            bEdit.onclick = e => {
+                e.stopPropagation();
+                openDrawer('edit', r);
+            };
+
+            const bToggle = document.createElement('button');
+            bToggle.className = 'btn icon';
+            bToggle.innerHTML = '<i class="bi bi-arrow-repeat"></i>';
+            bToggle.onclick = e => {
+                e.stopPropagation();
+                toggleStatus(r);
+            };
+
+            const bVariant = document.createElement('button');
+            bVariant.className = 'btn icon';
+            bVariant.innerHTML = '<i class="bi bi-diagram-3-fill"></i>';
+            bVariant.onclick = e => {
+                e.stopPropagation();
+                goVariants(r);
+            };
+
+            act.append(bEdit, bToggle, bVariant);
+            frag.appendChild(tr);
         });
 
-        const btn = _get('#btnAdd');
-        if(prod_tab === 'products') {
-            btn.textContent = '➕ Thêm Sản phẩm';
-            btn.disabled = false;
-        } else if(prod_tab === 'variants') {
-            btn.textContent = '➕ Thêm Biến thể';
-            btn.disabled = !prod_id;
-        } else {
-            btn.textContent = '➕ Thêm Ảnh';
-            btn.disabled = !prod_id;
-        }
+        tbody.replaceChildren(frag);
+        updatePager();
     }
 
-    function setLoading(on){
+
+
+    function updatePager() {
+        _get('#info').textContent = `Hiện${rows.length} / ${totalElements}`;
+        _get('#pageKpi').textContent = `${page} / ${totalPages}`;
+        _get('#prev').disabled = page <= 1;
+        _get('#next').disabled = page >= totalPages;
+    }
+
+    /* ================= LOAD ================= */
+    function setLoading() {
         const tbody = _get('#tbody');
-        const cols = prod_tab === 'products' ? 8 : (prod_tab === 'variants' ? 7 : 4);
-        if(on && tbody) tbody.innerHTML = `<tr><td colspan="${cols}" style="text-align:center;padding:20px"><span class="spin"></span> Đang tải...</td></tr>`;
+        let html = '';
+
+        for (let i = 0; i < size; i++) {
+            html += `
+        <tr class="skeleton-row">
+            <td><div class="skeleton sm"></div></td>
+            <td><div class="skeleton lg"></div></td>
+            <td><div class="skeleton lg"></div></td>
+            <td><div class="skeleton md"></div></td>
+            <td><div class="skeleton md"></div></td>
+            <td><div class="skeleton md"></div></td>
+            <td style="text-align:center"><div class="skeleton sm"></div></td>
+            <td style="text-align:right"><div class="skeleton sm"></div></td>
+        </tr>
+        `;
+        }
+
+        tbody.innerHTML = html;
     }
 
-    function updatePager(){
-        _get('#info').textContent = `Hiển thị ${prod_rows.length} / ${prod_totalElements} bản ghi`;
-        _get('#pageKpi').textContent = `${prod_page} / ${prod_totalPages}`;
-        _get('#prev').disabled = prod_page<=1;
-        _get('#next').disabled = prod_page>=prod_totalPages;
+    async function loadAndRender() {
+        if (isLoading) return;
+        isLoading = true;
+
+        setFiltersDisabled(true);
+        setLoading();
+
+        await apiList();
+        renderTable();
+
+        setFiltersDisabled(false);
+        isLoading = false;
     }
 
-    /* ================= LOGIC: PRODUCTS ================= */
-    async function renderProducts(){
-        _get('#thead').innerHTML = `
-            <tr>
-                <th>Mã</th><th>Tên</th><th>Danh mục</th><th>Hãng</th><th>Chất liệu</th><th style="width:140px">Ngày tạo</th><th>Trạng thái</th><th style="text-align:right">Thao tác</th>
-            </tr>`;
-        setLoading(true);
-        try {
-            await loadCatalogsOnce();
-            const params = new URLSearchParams({
-                page: prod_page-1, size: prod_size,
-                q: prod_q, idDanhMuc: fDm, idHang: fHang, idChatLieu: fCl
-            });
 
-            const data = await request(`${API_PROD.san_pham}?${params}`);
-            if(data && data.content) {
-                prod_rows = data.content;
-                prod_totalElements = data.totalElements;
-                prod_totalPages = data.totalPages;
-            } else { prod_rows=[]; prod_totalElements=0; prod_totalPages=1; }
-
-            const tbody = _get('#tbody'); tbody.innerHTML = '';
-            if(!prod_rows.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px" class="muted">Không có dữ liệu</td></tr>'; return; }
-
-            prod_rows.forEach(row => {
-                const dm = findById(catalogs.dm, row.idDanhMuc)?.ten || '—';
-                const hang = findById(catalogs.hang, row.idHang)?.ten || '—';
-                const cl = findById(catalogs.cl, row.idChatLieu)?.ten || '—';
-                const on = !!row.trangThai;
-                const ngayTao = row.ngayTao ? row.ngayTao.slice(0, 10) : '—';
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${row.ma||'—'}</td>
-                    <td style="font-weight:500">${row.ten}</td>
-                    <td>${dm}</td>
-                    <td>${hang}</td>
-                    <td>${cl}</td>
-                    <td>${ngayTao}</td> 
-                    <td style="text-align:center"><span class="badge ${on?'green':'amber'}">${on?'Hiển thị':'Ẩn'}</span></td>
-                    <td style="text-align:right">
-                        <button class="btn icon" data-act="variants" title="Xem Biến thể">📦</button>
-                        <button class="btn icon" data-act="images" title="Xem Ảnh">🖼️</button>
-                        <button class="btn icon" data-act="edit">Sửa</button>
-                        <button class="btn icon" data-act="toggle">${on?'Ẩn':'Hiện'}</button>
-                    </td>
-                `;
-                // Events
-                tr.querySelector('[data-act="variants"]').onclick = () => { prod_id = row.id; selectedProductData = row; switchTab('variants'); };
-                tr.querySelector('[data-act="images"]').onclick = () => { prod_id = row.id; selectedProductData = row; switchTab('images'); };
-                tr.querySelector('[data-act="edit"]').onclick = () => openDrawerProduct('edit', row);
-                tr.querySelector('[data-act="toggle"]').onclick = () => toggleStatus(row, API_PROD.san_pham);
-                tbody.appendChild(tr);
-            });
-        } catch(e){ console.error(e); prod_rows=[]; toast('Lỗi tải sản phẩm', 'error'); }
-    }
-
-    /* ================= LOGIC: VARIANTS/IMAGES (KHÔNG ĐỔI) ================= */
-    async function renderVariants(){ /* ... */ }
-    async function renderImages(){ /* ... */ }
-
-    // ... (renderVariants và renderImages logic không đổi) ...
-
-
-    /* ================= DRAWER & SAVE LOGIC ================= */
-    function openDrawerProduct(mode, row){
-        prod_editingId = mode==='edit' ? row.id : null;
-        _get('#drawerTitle').textContent = (mode==='edit'?'Cập nhật':'Thêm mới') + ' Sản phẩm';
-
-        const dmOpts = catalogs.dm.map(x=>`<option value="${x.id}">${x.ten}</option>`).join('');
-        const hOpts = catalogs.hang.map(x=>`<option value="${x.id}">${x.ten}</option>`).join('');
-        const clOpts = catalogs.cl.map(x=>`<option value="${x.id}">${x.ten}</option>`).join('');
+    /* ================= DRAWER ================= */
+    function openDrawer(mode, row) {
+        editingId = mode === 'edit' ? row.id : null;
+        _get('#drawerTitle').textContent = mode === 'edit' ? 'Cập nhật sản phẩm' : 'Thêm sản phẩm';
 
         _get('#drawerBody').innerHTML = `
-            <div><label class="label">Mã</label><input id="fMa" class="input" value="${row?.ma||''}" placeholder="Tự sinh nếu trống"></div>
-            <div><label class="label">Tên <span class="req">*</span></label><input id="fTen" class="input" value="${row?.ten||''}"></div>
-            <div><label class="label">Danh mục <span class="req">*</span></label><select id="fDM" class="select"><option value="">-- Chọn --</option>${dmOpts}</select></div>
-            <div class="row">
-                <div style="flex:1"><label class="label">Hãng</label><select id="fH" class="select"><option value="">-- Chọn --</option>${hOpts}</select></div>
-                <div style="flex:1"><label class="label">Chất liệu</label><select id="fCL" class="select"><option value="">-- Chọn --</option>${clOpts}</select></div>
-            </div>
-            <div><label class="label">Mô tả</label><textarea id="fMoTa" class="textarea">${row?.moTa||''}</textarea></div>
-            <div class="row between" style="margin-top:10px;border:1px solid var(--border);padding:10px;border-radius:8px">
-                <div>Trạng thái</div><input type="checkbox" id="fTT" class="switch" ${ (row?.trangThai ?? true) ? 'checked':''}>
-            </div>
-        `;
-        if(row){
-            _get('#fDM').value = row.idDanhMuc; _get('#fH').value = row.idHang; _get('#fCL').value = row.idChatLieu;
+    <div><label class="label">Mã</label><input id="fMa" class="input"/></div>
+    <div><label class="label">Tên *</label><input id="fTen" class="input"/></div>
+    <div><label class="label">Danh mục *</label><select id="fDM" class="select"></select></div>
+    <div><label class="label">Hãng *</label><select id="fHang2" class="select"></select></div>
+    <div><label class="label">Chất liệu *</label><select id="fCL" class="select"></select></div>
+    <div><label class="label">Mô tả</label><textarea id="fMoTa" class="textarea"></textarea></div>
+    <div><label class="label">Trạng thái</label><input type="checkbox" id="fTrangThai" class="switch"/></div>
+  `;
+
+        loadOptions(_get('#fDM'), API.danh_muc);
+        loadOptions(_get('#fHang2'), API.hang);
+        loadOptions(_get('#fCL'), API.chat_lieu);
+
+        if (mode === 'edit') {
+            _get('#fMa').value = row.ma;
+            _get('#fMa').disabled = true;
+            _get('#fTen').value = row.ten;
+            _get('#fMoTa').value = row.moTa || '';
+            _get('#fTrangThai').checked = !!row.trangThai;
+            setTimeout(() => {
+                _get('#fDM').value = row.danhMuc?.id || '';
+                _get('#fHang2').value = row.hang?.id || '';
+                _get('#fCL').value = row.chatLieu?.id || '';
+            }, 200);
+        } else {
+            _get('#fTrangThai').checked = true;
         }
-        _openDrawer();
+
+        _get('#overlay').classList.add('show');
+        _get('#drawer').classList.add('show');
     }
 
-    function openDrawerVariant(mode, row){
-        // ... (openDrawerVariant logic không đổi) ...
+    function closeDrawer() {
+        editingId = null;
+        _get('#overlay').classList.remove('show');
+        _get('#drawer').classList.remove('show');
     }
 
-    function openDrawerImage(){
-        // ... (openDrawerImage logic không đổi) ...
-    }
+    /* ================= SAVE / ACTION ================= */
+    async function saveFromDrawer() {
+        const payload = {
+            ten: _get('#fTen').value.trim(),
+            moTa: _get('#fMoTa').value.trim() || null,
+            idDanhMuc: +_get('#fDM').value,
+            idHang: +_get('#fHang2').value,
+            idChatLieu: +_get('#fCL').value,
+            trangThai: _get('#fTrangThai').checked
+        };
 
+        const ma = _get('#fMa').value.trim();
+        if (!editingId && ma) payload.ma = ma;
 
-    async function save(){
-        const btn = _get('#btnSave');
-        if (!btn) return;
-        const drawerTab = _get('#drawer').dataset.tab;
+        const ok = await uiConfirm(editingId ? 'Cập nhật sản phẩm?' : 'Thêm sản phẩm mới?');
+        if (!ok) return;
 
-        // 1. KHÓA NÚT NGAY LẬP TỨC
-        btn.disabled = true;
-        btn.textContent = "Đang lưu...";
-
-        try {
-            if(drawerTab === 'products') {
-                // --- LOGIC LƯU SẢN PHẨM CHÍNH (FIX NOT NULL & VALIDATION) ---
-                const _valOrNull = (v) => (v === "" || v === "0") ? null : v; // Hàm fix rỗng thành null
-
-                const payload = {
-                    ma: _valOrNull(_get('#fMa').value.trim()),
-                    ten: _get('#fTen').value.trim(),
-
-                    // FIX NOT NULL FKs: GỬI NULL thay vì chuỗi rỗng
-                    idDanhMuc: _valOrNull(_get('#fDM').value),
-                    idHang: _valOrNull(_get('#fH').value),
-                    idChatLieu: _valOrNull(_get('#fCL').value),
-
-                    moTa: _get('#fMoTa').value,
-                    trangThai: _get('#fTT').checked
-                };
-
-                // VALIDATION FE
-                if(!payload.ten || !payload.idDanhMuc) throw new Error('Thiếu Tên hoặc Danh mục bắt buộc');
-
-                const url = prod_editingId ? `${API_PROD.san_pham}/${prod_editingId}` : API_PROD.san_pham;
-                const method = prod_editingId ? 'PUT' : 'POST';
-
-                await request(url, { method, body: JSON.stringify(payload) }); // <--- API CALL
-
-                prod_page = 1; // Reset page
-                prod_editingId = null; // Reset edit state
-
-            } else if(drawerTab === 'variants') {
-                // ... (Logic Save Variant sẽ nằm ở đây) ...
-                throw new Error("Logic Save Variant chưa hoàn thành."); // Tạm thời ném lỗi
-            } else if(drawerTab === 'images') {
-                // ... (Logic Save Image sẽ nằm ở đây) ...
-                throw new Error("Logic Save Image chưa hoàn thành."); // Tạm thời ném lỗi
-            }
-
-            // 3. THÀNH CÔNG: Toast, đóng Drawer, Reload
-            toast('Lưu thành công', 'success');
-            _closeDrawer();
-            loadAndRender();
-
-        } catch(e){
-            // 4. THẤT BẠI: (Bao gồm lỗi DB Rollback)
-            toast(e.message || 'Lỗi lưu dữ liệu', 'error');
-
-        } finally {
-            // 5. MỞ KHÓA NÚT DÙ THÀNH CÔNG HAY THẤT BẠI
-            btn.disabled = false;
-            btn.textContent = "Lưu";
-        }
-    }
-
-    async function toggleStatus(row, apiBase){
-        // ... (toggleStatus logic không đổi) ...
-        if(!await uiConfirm('Đổi trạng thái mục này?')) return;
-        try {
-            const body = { ...row, trangThai: !row.trangThai };
-            // Cần check lại logic update 1 phần nếu BE hỗ trợ PATCH, hoặc gửi full body
-            await request(`${apiBase}/${row.id}`, { method:'PUT', body: JSON.stringify(body) });
-            toast('Đã cập nhật', 'success');
-            loadAndRender();
-        } catch(e){ toast('Lỗi cập nhật', 'error'); }
-    }
-
-    function _openDrawer(){ _get('#overlay').classList.add('show'); _get('#drawer').classList.add('show'); }
-    function _closeDrawer(){ _get('#overlay').classList.remove('show'); _get('#drawer').classList.remove('show'); }
-
-    /* ================= NAVIGATION ================= */
-    function switchTab(tabName){
-        prod_tab = tabName;
-        prod_page = 1;
+        editingId ? await apiUpdate(editingId, payload) : await apiCreate(payload);
+        toast('Thành công', 'success');
+        closeDrawer();
+        page = 1;
         loadAndRender();
+    }
+
+    async function toggleStatus(row) {
+        const ok = await uiConfirm(
+            `${row.trangThai ? 'Ẩn' : 'Hiển thị'} "${row.ten}"?`
+        );
+        if (!ok) return;
+
+        await apiUpdate(row.id, {
+            ten: row.ten,
+            moTa: row.moTa,
+            idDanhMuc: row.danhMuc.id,
+            idHang: row.hang.id,
+            idChatLieu: row.chatLieu.id,
+            trangThai: !row.trangThai
+        });
+
+        toast('Đã cập nhật trạng thái', 'success');
+        loadAndRender();
+    }
+
+
+
+    /* ================= VARIANTS ================= */
+    function goVariants(product) {
+        selectedProduct = product;
+        activeTab = 'variants';
+
+        _get('#subHeader').style.display = '';
+        _get('#selProduct').textContent = `SP: ${product.ma} - ${product.ten}`;
+
+        document.querySelectorAll('.tab')
+            .forEach(t => t.classList.toggle('active', t.dataset.tab === 'variants'));
+
+        _get('#thead').innerHTML = '';
+        _get('#tbody').innerHTML = `
+    <tr>
+      <td colspan="8" style="height:360px;text-align:center">
+        Biến thể của <b>${product.ten}</b>
+      </td>
+    </tr>`;
     }
 
     /* ================= INIT ================= */
-    window.initProductModule = function() {
-        // Wire Events
-        _get('#btnAdd').onclick = () => {
-            if(prod_tab === 'products') openDrawerProduct('create');
-            else if(prod_tab === 'variants') openDrawerVariant('create');
-            else openDrawerImage();
+    function init() {
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.onclick = () => {
+                const key = tab.dataset.tab;
+                if ((key === 'variants' || key === 'images') && !selectedProduct) {
+                    toast('Vui lòng chọn sản phẩm trước', 'info');
+                    return;
+                }
+                activeTab = key;
+                document.querySelectorAll('.tab')
+                    .forEach(t => t.classList.toggle('active', t.dataset.tab === activeTab));
+                if (key === 'products') {
+                    selectedProduct = null;
+                    _get('#subHeader').style.display = 'none';
+                    loadAndRender();
+                }
+                if (key === 'variants') goVariants(selectedProduct);
+            };
+        });
+
+        _get('#search').style.flex = '3';
+
+        ['#fDanhMuc', '#fHang', '#fChatLieu', '#fTrangThaiFilter']
+            .forEach(s => {
+                if (_get(s)) _get(s).style.flex = '1';
+            });
+
+        _get('#btnAdd').onclick = () => openDrawer('create');
+        _get('#btnSave').onclick = saveFromDrawer;
+        _get('#btnClose').onclick = closeDrawer;
+        _get('#overlay').onclick = closeDrawer;
+        _get('#prev').onclick = () => {
+            if (page > 1) {
+                page--;
+                loadAndRender();
+            }
         };
-        _get('#btnSave').onclick = save;
-        _get('#btnClose').onclick = _closeDrawer;
-        _get('#overlay').onclick = _closeDrawer;
-
-        // Filter Events
-        _get('#search').oninput = (e) => {
-            prod_q = e.target.value; prod_page=1;
-            if(prod_tab==='products') setTimeout(loadAndRender, 500); // Debounce thô
+        _get('#next').onclick = () => {
+            if (page < totalPages) {
+                page++;
+                loadAndRender();
+            }
         };
-        _get('#fDanhMuc').onchange = ()=>{ fDm = _get('#fDanhMuc').value; prod_page=1; loadAndRender(); };
-        _get('#fHang').onchange = ()=>{ fHang = _get('#fHang').value; prod_page=1; loadAndRender(); };
-        _get('#fChatLieu').onchange = ()=>{ fCl = _get('#fChatLieu').value; prod_page=1; loadAndRender(); };
 
-        _get('#prev').onclick = ()=>{ if(prod_page>1){ prod_page--; loadAndRender(); } };
-        _get('#next').onclick = ()=>{ if(prod_page<prod_totalPages){ prod_page++; loadAndRender(); } };
+        loadOptions(_get('#fDanhMuc'), API.danh_muc);
+        loadOptions(_get('#fHang'), API.hang);
+        loadOptions(_get('#fChatLieu'), API.chat_lieu);
 
-        // Tab Click & Back Button
-        _get('#btnBack').onclick = () => switchTab('products');
         loadAndRender();
-    };
+    }
+
+    init();
+    let debounce;
+    _get('#search').addEventListener('input', e => {
+        q = e.target.value.trim();
+        if (q.length === 1) return; // ❌ chặn
+        page = 1;
+        clearTimeout(debounce);
+        debounce = setTimeout(loadAndRender, 400);
+    });
+    ['#fDanhMuc', '#fHang', '#fChatLieu', '#fTrangThaiFilter']
+        .forEach(s => {
+            const el = _get(s);
+            if (el) {
+                el.addEventListener('change', () => {
+                    page = 1;
+                    loadAndRender();
+                });
+            }
+        });
+
+    function setFiltersDisabled(disabled) {
+        ['#search','#fDanhMuc','#fHang','#fChatLieu','#fTrangThaiFilter']
+            .forEach(s => {
+                const el = _get(s);
+                if (el) el.disabled = disabled;
+            });
+    }
+    setFiltersDisabled(true);
+// load
+    setFiltersDisabled(false);
 }

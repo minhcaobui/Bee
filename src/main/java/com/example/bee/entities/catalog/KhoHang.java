@@ -1,5 +1,6 @@
 package com.example.bee.entities.catalog;
 
+import com.example.bee.entities.product.SanPhamBienThe;
 import jakarta.persistence.*;
 import lombok.*;
 

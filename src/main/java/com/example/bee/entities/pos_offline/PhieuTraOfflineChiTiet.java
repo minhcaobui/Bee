@@ -1,6 +1,6 @@
 package com.example.bee.entities.pos_offline;
 
-import com.example.bee.entities.catalog.SanPhamBienThe;
+import com.example.bee.entities.product.SanPhamBienThe;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
