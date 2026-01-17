@@ -1,7 +1,7 @@
 package com.example.bee.entities.wishlist;
 
 import com.example.bee.entities.account.TaiKhoan;
-import com.example.bee.entities.catalog.SanPham;
+import com.example.bee.entities.product.SanPham;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;

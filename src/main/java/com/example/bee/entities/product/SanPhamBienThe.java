@@ -1,5 +1,7 @@
-package com.example.bee.entities.catalog;
+package com.example.bee.entities.product;
 
+import com.example.bee.entities.catalog.KichThuoc;
+import com.example.bee.entities.catalog.MauSac;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;

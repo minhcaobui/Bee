@@ -1,6 +1,6 @@
 package com.example.bee.entities.exchanges;
 
-import com.example.bee.entities.catalog.SanPhamBienThe;
+import com.example.bee.entities.product.SanPhamBienThe;
 import com.example.bee.entities.order.DonHangChiTiet;
 import jakarta.persistence.*;
 import lombok.*;
