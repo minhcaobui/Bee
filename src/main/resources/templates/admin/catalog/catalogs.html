@@ -1,175 +1,626 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Catalog Manager (Vanilla JS + API)</title>
-    <style>
-        :root{ --bg:#0b0c0f;--panel:#11131a;--muted:#1a1d27;--text:#e7e9ee;--sub:#9aa4b2;--primary:#5b9cff;--green:#3ddc97;--amber:#ffbb33;--red:#ff5b5b;--border:#232737; --blue:#69a7ff; }
-        *{box-sizing:border-box}
-        body{margin:0;background:linear-gradient(180deg,#0b0c0f,#0e1118 40%,#0b0c0f);color:var(--text);font:14px/1.4 system-ui,Segoe UI,Roboto,Helvetica,Arial}
-        .container{max-width:1100px;margin:24px auto;padding:0 16px}
-        .row{display:flex;gap:12px;align-items:center}
-        .between{justify-content:space-between}
+<!--<!DOCTYPE html>-->
+<!--<html lang="vi">-->
+<!--<head>-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attributes • Admin</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<style>
+    /* --- 1. CẤU HÌNH CHUNG --- */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* Tabs */
-        .tabs{display:flex;gap:8px;background:var(--panel);border:1px solid var(--border);padding:6px;border-radius:999px}
-        .tab{padding:8px 14px;border-radius:999px;color:var(--sub);cursor:pointer;user-select:none}
-        .tab.active{background:var(--primary);color:#0b0c0f;font-weight:600}
+    :root {
+        --black: #000000;
+        --white: #ffffff;
+        --gray-100: #f4f4f5;
+        --gray-200: #e4e4e7;
+        --gray-300: #d4d4d8;
+        --gray-500: #71717a;
+        --font-size: 12.5px; /* Giữ font nhỏ gọn */
+    }
 
-        /* Button, Input */
-        .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:var(--muted);color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
-        .btn.primary{background:var(--primary);border-color:transparent;color:#0b0c0f;font-weight:600}
-        .btn.icon{padding:6px 10px}
-        .btn.destructive{background:transparent;border-color:rgba(255,91,91,.25);color:#ff9f9f}
-        .btn[disabled]{opacity:.5;cursor:not-allowed}
-        .btn:hover:not([disabled]){filter:brightness(1.1)}
-        .input{width:100%;background:#0c0f16;border:1px solid var(--border);color:#0eec; color: var(--text);padding:10px 12px;border-radius:10px}
-        .input::placeholder{color:#657083}
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        background: var(--white);
+        color: var(--black);
+        font-size: var(--font-size);
+        line-height: 1.4;
+    }
 
-        /* Card / Table */
-        .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;overflow:hidden}
-        table{width:100%;border-collapse:separate;border-spacing:0}
-        thead th{background:linear-gradient(180deg,#151926,#121521);text-align:left;padding:12px;border-bottom:1px solid var(--border);color:#c7cfdb;font-weight:600}
-        tbody td{padding:12px;border-bottom:1px solid var(--border)}
-        tbody tr:hover{background:rgba(255,255,255,.02)}
-        .muted{color:var(--sub)}
-        .badge{display:inline-block;padding:4px 8px;border-radius:999px;border:1px solid;}
-        .badge.green{border-color:rgba(61,220,151,.3);color:#7bf0c5}
-        .badge.amber{border-color:rgba(255,187,51,.3);color:#ffd792}
+    /* --- 2. CONTAINER FULL WIDTH (Giữ nguyên ý ông) --- */
+    .container {
+        max-width: 100%;    /* Tràn viền */
+        padding: 20px 30px; /* Lề vừa phải */
+    }
 
-        /* Drawer */
-        .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:.2s}
-        .overlay.show{opacity:1;pointer-events:auto}
-        .drawer{position:fixed;top:0;right:-480px;width:420px;max-width:95vw;height:100%;background:#0f121a;border-left:1px solid var(--border);box-shadow:-10px 0 30px rgba(0,0,0,.3);transition:.25s}
-        .drawer.show{right:0}
-        .drawer header{padding:20px;border-bottom:1px solid var(--border)}
-        .drawer main{padding:20px;display:grid;gap:14px}
-        .drawer footer{padding:20px;border-top:1px solid var(--border)}
-        .label{display:block;margin-bottom:6px;color:#c7cfdb}
-        .label .req{color:#ff8080; margin-left:4px}
-        .switch{appearance:none;width:42px;height:26px;background:#333;border-radius:999px;position:relative;outline:none;cursor:pointer;border:1px solid #444}
-        .switch:checked{background:rgba(61,220,151,.2);border-color:#2a7c62}
-        .switch:before{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#bbb;transition:.2s}
-        .switch:checked:before{left:19px;background:#3ddc97}
+    /* --- 3. HEADER & TABS & BUTTON --- */
+    .page-header { margin-bottom: 20px; display: none; }
 
-        /* Pagination */
-        .pagination{display:flex;align-items:center;gap:8px}
-        .pager{border:1px solid var(--border);background:var(--muted);padding:6px 10px;border-radius:8px;cursor:pointer}
-        .pager[disabled]{opacity:.5;cursor:not-allowed}
-        .kpi{padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:#0c0f16}
-        .spin{display:inline-block;width:16px;height:16px;border-radius:50%;border:2px solid #9aa4b2;border-top-color:transparent;animation:spin 1s linear infinite}
-        @keyframes spin{to{transform:rotate(360deg)}}
+    /* Gom chung Tabs và Nút vào 1 hàng */
+    .actions-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        border-bottom: 1px solid var(--gray-200);
+        margin-bottom: 20px;
+        padding-bottom: 0;
+    }
 
-        /* Toasts */
-        #toastHost{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:9999}
-        .toast{min-width:260px;max-width:380px;background:#0f121a;border:1px solid var(--border);border-left-width:4px;border-radius:12px;padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,.35);opacity:0;transform:translateY(8px);transition:.2s}
-        .toast.show{opacity:1;transform:translateY(0)}
-        .toast.success{border-left-color:var(--green)}
-        .toast.error{border-left-color:var(--red)}
-        .toast.info{border-left-color:var(--blue)}
-        .toast .title{font-weight:600;margin-bottom:2px}
-        .toast .msg{color:var(--sub)}
+    .tabs {
+        display: flex; gap: 30px;
+        margin-bottom: 0; border: none;
+    }
 
-        /* Confirm dialog */
-        #confirmOverlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:9998}
-        #confirmBox{width:min(92vw,420px);background:#0f121a;border:1px solid var(--border);border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.5)}
-        #confirmBox header{padding:16px 18px;border-bottom:1px solid var(--border);font-weight:700}
-        #confirmBox main{padding:16px 18px;color:#c7cfdb}
-        #confirmBox footer{padding:14px 18px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
-    </style>
-</head>
+    .tab {
+        font-size: 12.5px; font-weight: 700; color: #888;
+        padding: 0 0 12px 0; cursor: pointer; text-transform: uppercase;
+        border: none; background: none;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        transition: 0.2s;
+    }
+    .tab:hover { color: #000; }
+    .tab.active { color: #000; border-bottom-color: #000; }
+
+    .btn {
+        font-size: 11px; font-weight: 800; text-transform: uppercase;
+        height: 30px; padding: 0 14px;
+        background: #000; color: #fff; border: 1px solid #000;
+        cursor: pointer; transition: 0.2s;
+        display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+        margin-bottom: 8px; border-radius: 2px;
+    }
+    .btn:hover { background: #333; }
+
+    /* --- 4. SEARCH --- */
+    .search-section { margin-bottom: 15px; }
+    .search-wrapper { display: flex; gap: 15px; }
+
+    .search-input, .filter-select {
+        padding: 8px 12px; font-size: 12.5px;
+        border: 1px solid var(--gray-300); outline: none;
+        background: #fff; height: 34px; border-radius: 2px;
+    }
+    .search-input { width: 300px; }
+    .filter-select { width: 150px; }
+    .search-input:focus, .filter-select:focus { border-color: #000; }
+
+    /* --- 5. BẢNG DỮ LIỆU (FIX LỖI MẤT GÓC Ở ĐÂY) --- */
+    .table-wrapper {
+        border: 1px solid var(--gray-200);
+        width: 100%;
+        overflow-x: auto; /* QUAN TRỌNG: Tự động cuộn ngang nếu bảng quá to */
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        /* Min-width để đảm bảo các cột không bị bóp méo quá đà */
+        min-width: 1000px;
+    }
+
+    thead th {
+        text-align: left; padding: 10px 15px;
+        font-size: 11px; font-weight: 800; text-transform: uppercase;
+        color: #666; background: #fafafa;
+        border-bottom: 1px solid var(--gray-200);
+        white-space: nowrap; /* Giữ tiêu đề thẳng hàng */
+    }
+
+    tbody td {
+        padding: 8px 15px;
+        border-bottom: 1px solid var(--gray-200);
+        vertical-align: middle;
+        font-size: 12.5px;
+        /* Nếu mô tả dài quá thì cho xuống dòng tự nhiên */
+        word-wrap: break-word;
+    }
+    tbody tr:hover { background: var(--gray-100); }
+
+    /* Status & Icon */
+    .status {
+        display: inline-flex; align-items: center; gap: 5px;
+        font-size: 11px; font-weight: 700; text-transform: uppercase;
+        padding: 2px 8px; border-radius: 4px; background: #f4f4f5; color: #666;
+        white-space: nowrap; /* Không cho status xuống dòng */
+    }
+    .status:not(.inactive) { background: #ecfdf5; color: #059669; }
+    .status-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+    .btn-icon {
+        width: 26px; height: 26px;
+        display: inline-flex; align-items: center; justify-content: center;
+        border: 1px solid var(--gray-200); background: #fff; cursor: pointer;
+    }
+    .btn-icon:hover { border-color: #000; background: #000; color: #fff; }
+
+    /* --- 6. PHÂN TRANG & DRAWER (Giữ nguyên) --- */
+    .pagination-wrapper { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; }
+    .pagination-info { font-size: 11px; font-weight: 600; color: #888; }
+    .page-number {
+        min-width: 26px; height: 26px; font-size: 12px; font-weight: 700;
+        background: transparent; border: 1px solid transparent; cursor: pointer;
+    }
+    .page-number.active { background: #000; color: #fff; }
+
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
+    .overlay.show { display: block; }
+    .drawer {
+        position: fixed; top: 0; right: -450px; width: 450px; height: 100vh;
+        background: #fff; border-left: 1px solid var(--gray-200); z-index: 1000;
+        transition: 0.3s; display: flex; flex-direction: column;
+        box-shadow: -5px 0 20px rgba(0,0,0,0.1);
+    }
+    .drawer.show { right: 0; }
+    .drawer-header { padding: 15px 20px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center;}
+    .drawer-title { font-size: 14px; font-weight: 800; text-transform: uppercase; margin: 0; }
+    .drawer-body { flex: 1; padding: 20px; overflow-y: auto; }
+    .drawer-footer { padding: 15px 20px; border-top: 1px solid var(--gray-200); display: flex; gap: 10px; }
+
+    .form-group { margin-bottom: 15px; }
+    .form-label { font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; display: block; }
+    .form-input, .form-textarea { width: 100%; padding: 8px; font-size: 12.5px; border: 1px solid var(--gray-300); outline: none; }
+    .form-input:focus { border-color: #000; }
+    .form-textarea { min-height: 80px; resize: vertical; }
+
+    .switch-wrapper { display: flex; align-items: center; gap: 10px; }
+    .switch { width: 36px; height: 20px; position: relative; appearance: none; background: #ddd; outline: none; cursor: pointer; transition: 0.2s; }
+    .switch::before { content:''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #fff; transition: 0.2s; }
+    .switch:checked { background: #000; }
+    .switch:checked::before { left: 18px; }
+
+    .toast-container { position: fixed; bottom: 30px; right: 30px; z-index: 9999; }
+    .empty-state { text-align: center; padding: 40px; color: #888; font-size: 12px; }
+</style>
 <body>
 <div class="container">
-    <div class="row between" style="margin-bottom:12px">
-        <div id="tabs" class="tabs"></div>
-        <button class="btn primary" id="btnAdd">➕ Thêm</button>
+<!--    <header class="page-header">-->
+<!--        <h1 class="page-title" id="mainTitle">Categories</h1>-->
+<!--        <p class="page-subtitle">Manage product attributes</p>-->
+<!--        <div class="header-line"></div>-->
+<!--    </header>-->
+
+    <div class="actions-bar">
+        <nav class="tabs" id="tabs">
+            <button class="tab active" data-tab="danh-muc" data-has-desc="true">Categories</button>
+            <button class="tab" data-tab="hang" data-has-desc="true">Brands</button>
+            <button class="tab" data-tab="chat-lieu" data-has-desc="true">Materials</button>
+            <button class="tab" data-tab="mau-sac" data-has-desc="false">Colors</button>
+            <button class="tab" data-tab="kich-thuoc" data-has-desc="false">Sizes</button>
+        </nav>
+        <button class="btn" id="btnAdd"><i class="bi bi-plus-lg"></i> ADD NEW</button>
     </div>
 
-    <div class="row" style="margin-bottom:12px">
-        <div style="position:relative;flex:1">
-            <input id="search" class="input" placeholder="Search…" />
-            <span style="position:absolute;right:10px;top:50%;translate:0 -50%;color:#657083">⌕</span>
+    <section class="search-section">
+        <div style="display: flex; gap: 16px;">
+            <div class="search-wrapper" style="flex: 1;">
+                <input type="text" class="search-input" id="search" placeholder="Search by code or name...">
+            </div>
+            <select class="filter-select" id="fTrangThaiFilter" style="width: 200px;">
+                <option value="">All Status</option>
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+            </select>
         </div>
-    </div>
+    </section>
 
-    <div class="card">
+    <div class="table-wrapper">
         <table>
-            <thead>
-            <tr>
-                <th style="width:160px">Mã</th>
-                <th>Tên</th>
-                <th id="thMoTa" class="hidden-mobile">Mô tả</th>
-                <th id="thTrangThai" style="width:140px">Trạng thái</th>
-                <th style="width:200px;text-align:right;padding-right:16px">Thao tác</th>
-            </tr>
-            </thead>
+            <thead id="thead"></thead>
             <tbody id="tbody"></tbody>
         </table>
     </div>
 
-    <div class="row between" style="margin-top:12px">
-        <div class="muted" id="info">Hiển thị 0 / 0 bản ghi</div>
+    <div class="pagination-wrapper">
+        <div class="pagination-info" id="info">Showing 0 items</div>
         <div class="pagination">
-            <button class="pager" id="prev">◀ Trước</button>
-            <span class="kpi" id="pageKpi">1 / 1</span>
-            <button class="pager" id="next">Sau ▶</button>
+            <button class="page-number" id="prev">←</button>
+            <span id="pageNumbers"></span>
+            <button class="page-number" id="next">→</button>
         </div>
     </div>
 </div>
+
+<!-- Overlay -->
+<div class="overlay" id="overlay"></div>
 
 <!-- Drawer -->
-<div class="overlay" id="overlay"></div>
 <aside class="drawer" id="drawer">
-    <header>
-        <h3 id="drawerTitle" style="margin:0">Thêm mới</h3>
-        <p class="muted" style="margin:6px 0 0">Điền thông tin rồi bấm Lưu.</p>
-    </header>
-    <main>
-        <div>
-            <label class="label" id="labelMa" for="fMa">Mã<span class="req" id="reqMa" style="display:none">*</span></label>
-            <input id="fMa" class="input" placeholder="Để trống nếu muốn sinh tự động (tuỳ API)" />
+    <div class="drawer-header">
+        <h3 class="drawer-title" id="drawerTitle">Add Attribute</h3>
+        <p class="drawer-subtitle">Fill in the details below</p>
+    </div>
+    <div class="drawer-body">
+        <div class="form-group">
+            <label class="form-label">Code</label>
+            <input id="fMa" class="form-input" placeholder="Auto-generated if empty">
         </div>
-        <div>
-            <label class="label" id="labelTen" for="fTen">Tên<span class="req">*</span></label>
-            <input id="fTen" class="input" placeholder="Nhập tên" />
+        <div class="form-group">
+            <label class="form-label">Name <span style="color:var(--black)">*</span></label>
+            <input id="fTen" class="form-input" placeholder="Enter name...">
         </div>
-        <div id="moTaRow">
-            <label class="label" for="fMoTa">Mô tả</label>
-            <input id="fMoTa" class="input" placeholder="Mô tả (tuỳ chọn)" />
+        <div class="form-group" id="groupMoTa">
+            <label class="form-label">Description</label>
+            <textarea id="fMoTa" class="form-textarea" placeholder="Enter description..."></textarea>
         </div>
-        <div id="statusRow" class="row between" style="border:1px solid var(--border);border-radius:12px;padding:10px 12px">
-            <div>
-                <div class="label" style="margin:0">Trạng thái</div>
-                <div class="muted">Bật để hiển thị; tắt để ẩn.</div>
+        <div class="form-group">
+            <label class="form-label">Status</label>
+            <div class="switch-wrapper">
+                <input type="checkbox" id="fTrangThai" class="switch" checked>
+                <span class="switch-label" id="switchLabel">Active</span>
             </div>
-            <input type="checkbox" id="fTrangThai" class="switch" />
         </div>
-    </main>
-    <footer>
-        <div class="row" style="gap:10px">
-            <button class="btn" id="btnClose">Đóng</button>
-            <button class="btn primary" id="btnSave">Lưu</button>
+        <div id="groupTimeline" style="display: none;">
+            <div class="form-group">
+                <label class="form-label">Ngày tạo</label>
+                <input id="fNgayTao" class="form-input" disabled>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Ngày sửa</label>
+                <input id="fNgaySua" class="form-input" disabled>
+            </div>
         </div>
-    </footer>
+    </div>
+    <div class="drawer-footer">
+        <button class="btn btn-secondary" id="btnClose" style="flex: 1;">Cancel</button>
+        <button class="btn" id="btnSave" style="flex: 1;">Save</button>
+    </div>
 </aside>
 
-<!-- Toast host -->
-<div id="toastHost"></div>
+<!-- Toast Container -->
+<div class="toast-container" id="toastHost"></div>
 
-<!-- Confirm dialog -->
-<div id="confirmOverlay">
-    <div id="confirmBox">
-        <header>Xác nhận</header>
-        <main id="confirmMsg">Bạn có chắc không?</main>
-        <footer>
-            <button class="btn" id="confirmCancel">Huỷ</button>
-            <button class="btn primary" id="confirmOk">Đồng ý</button>
-        </footer>
-    </div>
-</div>
+<script>
+    /* ================= 1. OBJECT CONTROLLER ================= */
+    const CatalogApp = {
+        state: {
+            activeTab: 'danh-muc',
+            hasDesc: true,
+            page: 0,
+            size: 10,
+            totalPages: 0,
+            q: '',
+            trangThai: '',
+            editingId: null
+        },
 
+        // --- HÀM KHỞI TẠO ---
+        init: function() {
+            console.log("🚀 CatalogApp: Khởi động...");
 
-<script src="/js/catalogs.js"></script>
-</body>
-</html>
+            // Reset dữ liệu về mặc định
+            this.state.activeTab = 'danh-muc';
+            this.state.hasDesc = true;
+            this.state.page = 0;
+            this.state.q = '';
+
+            // Reset UI Tab
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            const firstTab = document.querySelector('.tab[data-tab="danh-muc"]');
+            if(firstTab) firstTab.classList.add('active');
+
+            // Cập nhật tiêu đề an toàn
+            this.updateTitle(firstTab ? firstTab.textContent : 'DANH MỤC');
+
+            // --- QUAN TRỌNG: Chờ 100ms để HTML kịp hiện ra rồi mới gán sự kiện ---
+            setTimeout(() => {
+                this.bindEvents();
+            }, 100);
+
+            // Tải dữ liệu
+            this.loadData();
+        },
+
+        updateTitle: function(text) {
+            const t1 = document.getElementById('mainTitle');
+            const t2 = document.getElementById('pageTitle');
+            if(t1) t1.textContent = text;
+            else if(t2) t2.textContent = text;
+        },
+
+        // 3. HÀM GÁN SỰ KIỆN
+        bindEvents: function() {
+            const self = this;
+
+            // 1. Tab Click
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.onclick = function() {
+                    if (self.state.activeTab === this.dataset.tab) return;
+
+                    // Reset UI Tab cũ
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    self.updateTitle(this.textContent);
+
+                    // Reset State
+                    self.state.activeTab = this.dataset.tab;
+                    self.state.hasDesc = (this.dataset.hasDesc === 'true');
+                    self.state.page = 0;
+                    self.state.q = '';
+                    self.state.trangThai = ''; // Reset filter khi đổi tab
+
+                    // Reset input
+                    const searchInput = document.getElementById('search');
+                    if(searchInput) searchInput.value = '';
+                    const filterInput = document.getElementById('fTrangThaiFilter');
+                    if(filterInput) filterInput.value = ''; // Reset ô chọn về "Tất cả"
+
+                    // Load lại
+                    const tbody = document.getElementById('tbody');
+                    if(tbody) tbody.innerHTML = '<tr><td colspan="10" class="empty-state">⏳ Đang chuyển dữ liệu...</td></tr>';
+                    self.loadData();
+                };
+            });
+
+            // 2. Nút Thêm Mới
+            const btnAdd = document.getElementById('btnAdd');
+            if (btnAdd) btnAdd.onclick = () => self.openDrawer('create');
+
+            // 3. Nút Lưu
+            const btnSave = document.getElementById('btnSave');
+            if (btnSave) btnSave.onclick = () => self.saveItem();
+
+            // 4. Nút Đóng
+            const btnClose = document.getElementById('btnClose');
+            if(btnClose) btnClose.onclick = () => self.closeDrawer();
+            const overlay = document.getElementById('overlay');
+            if(overlay) overlay.onclick = () => self.closeDrawer();
+
+            // 5. Phân trang
+            const prev = document.getElementById('prev');
+            if(prev) prev.onclick = () => { if(self.state.page > 0) { self.state.page--; self.loadData(); }};
+            const next = document.getElementById('next');
+            if(next) next.onclick = () => { if(self.state.page < self.state.totalPages - 1) { self.state.page++; self.loadData(); }};
+
+            // 6. Tìm kiếm
+            const searchInput = document.getElementById('search');
+            if(searchInput) {
+                let timeout;
+                searchInput.oninput = function(e) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => {
+                        self.state.q = e.target.value.trim();
+                        self.state.page = 0;
+                        self.loadData();
+                    }, 500);
+                }
+            }
+
+            // ============================================================
+            // 7. LỌC TRẠNG THÁI (LÚC NÃY THIẾU CÁI NÀY)
+            // ============================================================
+            const filterSelect = document.getElementById('fTrangThaiFilter');
+            if(filterSelect) {
+                console.log("✅ Đã bắt được bộ lọc Trạng thái");
+                filterSelect.onchange = function(e) {
+                    console.log("🔍 Lọc trạng thái:", e.target.value);
+                    self.state.trangThai = e.target.value; // Gán giá trị (true/false/rỗng)
+                    self.state.page = 0; // Về trang 1
+                    self.loadData();     // Gọi API tải lại
+                }
+            } else {
+                console.error("❌ Không tìm thấy ID 'fTrangThaiFilter'");
+            }
+        },
+
+        // --- API LOAD DATA ---
+        loadData: async function() {
+            this.renderHeader();
+            const { activeTab, page, size, q, trangThai } = this.state;
+            const url = `/api/${activeTab}?page=${page}&size=${size}&q=${q}&trangThai=${trangThai}`;
+
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                this.renderTable(data.content || []);
+                this.renderPagination(data);
+            } catch (err) {
+                console.error(err);
+                if(window.toast) window.toast("Lỗi tải dữ liệu", "error");
+            }
+        },
+
+        // 5. VẼ HEADER (Logic: hasDesc = true thì hiện Mô tả + Ngày, ngược lại ẩn hết)
+        renderHeader: function() {
+            const thead = document.getElementById('thead');
+
+            // Nếu là nhóm Danh mục/Hãng/Chất liệu thì hiện thêm 3 cột này
+            const extraCols = this.state.hasDesc
+                ? `<th>MÔ TẢ</th>
+                   <th>NGÀY TẠO</th>
+                   <th>NGÀY SỬA</th>`
+                : ''; // Nhóm Màu sắc/Kích thước thì chuỗi rỗng (không hiện gì)
+
+            thead.innerHTML = `
+                <tr>
+                    <th style="width:80px">MÃ</th>
+                    <th>TÊN</th>
+                    ${extraCols} <th style="text-align:center">TRẠNG THÁI</th>
+                    <th style="text-align:right">THAO TÁC</th>
+                </tr>
+            `;
+        },
+
+        // 6. VẼ BODY BẢNG
+        renderTable: function(list) {
+            const tbody = document.getElementById('tbody');
+
+            // Tính số cột để merge khi bảng trống
+            // Cơ bản: Mã + Tên + Trạng thái + Thao tác = 4 cột
+            // Nếu có thêm (Mô tả + Ngày tạo + Ngày sửa) => 4 + 3 = 7 cột
+            const colSpan = this.state.hasDesc ? 7 : 4;
+
+            if(list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${colSpan}" class="empty-state" style="text-align:center; padding:30px;">Không có dữ liệu</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map(item => {
+                // Xử lý các cột phụ (Mô tả, Ngày tạo, Ngày sửa)
+                let extraCells = '';
+
+                if (this.state.hasDesc) {
+                    const moTa = item.moTa || '—';
+                    const ngayTao = item.ngayTao ? new Date(item.ngayTao).toLocaleDateString('vi-VN') : '—';
+                    const ngaySua = item.ngaySua ? new Date(item.ngaySua).toLocaleDateString('vi-VN') : '—';
+
+                    extraCells = `
+                        <td style="color:#666; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${moTa}</td>
+                        <td style="font-size:12px; color:#888">${ngayTao}</td>
+                        <td style="font-size:12px; color:#888">${ngaySua}</td>
+                    `;
+                }
+
+                // Trạng thái
+                const statusHtml = item.trangThai
+                    ? `<span class="status"><span class="status-dot"></span>Active</span>`
+                    : `<span class="status inactive"><span class="status-dot"></span>Inactive</span>`;
+
+                return `
+                <tr>
+                    <td style="font-weight:700">${item.ma || '—'}</td>
+                    <td style="font-weight:600">${item.ten || '—'}</td>
+                    ${extraCells} <td style="text-align:center">${statusHtml}</td>
+                    <td style="text-align:right">
+                        <button class="btn-icon" onclick="CatalogApp.openEdit(${item.id})">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                    </td>
+                </tr>`;
+            }).join('');
+        },
+
+        renderPagination: function(data) {
+            this.state.totalPages = data.totalPages;
+            const info = document.getElementById('info');
+            if(info) info.textContent = `${data.numberOfElements}/${data.totalElements} bản ghi`;
+
+            const prev = document.getElementById('prev');
+            if(prev) prev.disabled = data.first;
+
+            const next = document.getElementById('next');
+            if(next) next.disabled = data.last;
+
+            // Render số trang
+            const pageNumbers = document.getElementById('pageNumbers');
+            if(pageNumbers) {
+                pageNumbers.innerHTML = '';
+                const current = this.state.page;
+                for(let i = 0; i < data.totalPages; i++) {
+                    if(i === 0 || i === data.totalPages - 1 || (i >= current - 1 && i <= current + 1)) {
+                        const btn = document.createElement('button');
+                        btn.className = `page-number ${i === current ? 'active' : ''}`;
+                        btn.textContent = i + 1;
+                        btn.onclick = () => { this.state.page = i; this.loadData(); };
+                        pageNumbers.appendChild(btn);
+                    }
+                }
+            }
+        },
+
+        // --- DRAWER ACTIONS ---
+        openDrawer: function(mode, item) {
+            console.log("Mở Drawer:", mode);
+            this.state.editingId = item ? item.id : null;
+
+            const titleEl = document.getElementById('drawerTitle');
+            if(titleEl) titleEl.textContent = item ? 'CẬP NHẬT' : 'THÊM MỚI';
+
+            const fMa = document.getElementById('fMa');
+            const fTen = document.getElementById('fTen');
+            const fMoTa = document.getElementById('fMoTa');
+            const fTrangThai = document.getElementById('fTrangThai');
+
+            // Reset Form
+            if (item) {
+                if(fMa) { fMa.value = item.ma || ''; fMa.disabled = true; }
+                if(fTen) fTen.value = item.ten || '';
+                if(fTrangThai) fTrangThai.checked = item.trangThai;
+                if(this.state.hasDesc && fMoTa) fMoTa.value = item.moTa || '';
+            } else {
+                if(fMa) { fMa.value = ''; fMa.disabled = false; }
+                if(fTen) fTen.value = '';
+                if(fTrangThai) fTrangThai.checked = true;
+                if(this.state.hasDesc && fMoTa) fMoTa.value = '';
+            }
+
+            // Hiện Drawer
+            const groupMoTa = document.getElementById('groupMoTa');
+            if(groupMoTa) groupMoTa.style.display = this.state.hasDesc ? 'block' : 'none';
+
+            document.getElementById('overlay').classList.add('show');
+            document.getElementById('drawer').classList.add('show');
+        },
+
+        closeDrawer: function() {
+            document.getElementById('overlay').classList.remove('show');
+            document.getElementById('drawer').classList.remove('show');
+        },
+
+        openEdit: async function(id) {
+            console.log("Edit ID:", id);
+            try {
+                const res = await fetch(`/api/${this.state.activeTab}/${id}`);
+                const item = await res.json();
+                this.openDrawer('edit', item);
+            } catch(e) {
+                console.error(e);
+                if(window.toast) window.toast('Lỗi: ' + e.message, 'error');
+            }
+        },
+
+        saveItem: async function() {
+            const fTen = document.getElementById('fTen');
+            const ten = fTen ? fTen.value.trim() : '';
+
+            if(!ten) {
+                if(window.toast) window.toast('Tên không được để trống', 'error');
+                return;
+            }
+
+            const payload = {
+                ten: ten,
+                trangThai: document.getElementById('fTrangThai').checked
+            };
+
+            const fMa = document.getElementById('fMa');
+            if(fMa && fMa.value.trim()) payload.ma = fMa.value.trim();
+
+            if(this.state.hasDesc) {
+                const fMoTa = document.getElementById('fMoTa');
+                if(fMoTa) payload.moTa = fMoTa.value.trim();
+            }
+
+            const id = this.state.editingId;
+            const url = id ? `/api/${this.state.activeTab}/${id}` : `/api/${this.state.activeTab}`;
+            const method = id ? 'PUT' : 'POST';
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+
+                if(!res.ok) throw new Error("Lỗi lưu dữ liệu");
+
+                if(window.toast) window.toast('Thành công!', 'success');
+                this.closeDrawer();
+                this.loadData();
+            } catch(e) {
+                if(window.toast) window.toast(e.message, 'error');
+            }
+        }
+    };
+
+    /* ================= 2. KẾT NỐI TOÀN CỤC (FIX LỖI ONCLICK) ================= */
+    // Gán CatalogApp vào window để nút Edit trong HTML có thể gọi được
+    window.CatalogApp = CatalogApp;
+
+    // Router gọi hàm này
+    window.initCatalogs = function() {
+        CatalogApp.init();
+    };
+</script>
+<!--</body>-->
+<!--</html>-->
