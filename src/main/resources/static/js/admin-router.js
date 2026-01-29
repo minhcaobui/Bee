@@ -1,177 +1,181 @@
 /* =======================================================
- * File: admin-router.js (CORE: Global Helpers & Router Logic)
- * Chú ý: File này định nghĩa các hàm Global: $, toast, request, uiConfirm.
+ * File: admin-router.js
+ * Chức năng: Điều hướng, Tải module và Kích hoạt Script
  * =======================================================
  */
 
-// 1. GLOBAL HELPERS (Được sử dụng bởi tất cả module con)
+// 1. GLOBAL HELPERS (Giữ nguyên để file con dùng)
 const $ = (s) => document.querySelector(s);
+const $$ = (s) => document.querySelectorAll(s);
 
-// Toast
-function showToast(message, type = 'info', title){
-    const host = $('#toastHost');
-    if (!host) { console.error('Toast host element not found!'); return; }
-    const box = document.createElement('div');
-    box.className = `toast ${type}`;
-    box.innerHTML = `<div class="title">${title || (type==='success'?'Thành công': type==='error'?'Lỗi':'Thông báo')}</div><div class="msg">${message}</div>`;
-    host.appendChild(box);
-    requestAnimationFrame(()=> box.classList.add('show'));
-    const timer = setTimeout(close, 2600);
-    function close(){ box.classList.remove('show'); setTimeout(()=> box.remove(), 200); clearTimeout(timer); }
-    box.addEventListener('click', close);
+// Toast xịn (Kết nối với giao diện mới)
+function showToast(message, type = 'success') {
+    const host = document.getElementById('toastHost');
+    if (!host) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+
+    // SỬA ĐOẠN NÀY: Bỏ div class="title" đi, chỉ để lại msg
+    // Thêm icon cho sinh động nếu thích
+    const icon = type === 'success' ? '<i class="bi bi-check-circle-fill"></i>' : '<i class="bi bi-exclamation-triangle-fill"></i>';
+
+    toast.innerHTML = `
+        <div class="msg" style="display:flex; align-items:center; gap:10px; font-weight:700;">
+            ${icon} <span>${message}</span>
+        </div>
+    `;
+
+    host.appendChild(toast);
+
+    requestAnimationFrame(() => toast.classList.add('show'));
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
-const toast = (m,t='info',title)=>showToast(m,t,title);
-
-// Confirm (Giả định HTML Confirm Dialog đã có trong admin-layout.html)
-function uiConfirm(message){
-    return new Promise((resolve)=>{
-        const ov = $('#confirmOverlay');
-        if (!ov) { resolve(window.confirm(message)); return; } // Fallback
-
-        $('#confirmMsg').textContent = message;
-        ov.style.display = 'flex';
-        const ok = ()=>{ cleanup(); resolve(true); };
-        const cancel = ()=>{ cleanup(); resolve(false); };
-        function cleanup(){
-            ov.style.display = 'none';
-            // Dùng removeEventListener để tránh lỗi
-            document.removeEventListener('keydown', onKey);
-        }
-        $('#confirmOk').onclick = ok;
-        $('#confirmCancel').onclick = cancel;
-        function onKey(e){ if(e.key==='Escape'){ cancel(); } }
-        document.addEventListener('keydown', onKey);
-    });
-}
-
-// Fetch Request
-async function request(url, opts={}){
-    const res = await fetch(url, { headers: { 'Content-Type':'application/json', 'Accept':'application/json' }, ...opts });
-    if(!res.ok){ const text = await res.text(); throw new Error(text || res.statusText); }
-    if(res.status === 204) return null;
-    const ct = res.headers.get('content-type') || '';
-    return ct.includes('application/json') ? res.json() : res.text();
-}
-
-// Router Helpers
-function parseHash(){
-    const p = new URLSearchParams(location.hash.replace(/^#/, ''));
-    // Giả định các tab con (như variants) sẽ dùng #tab=products&id=1
-    return { tab: p.get('tab') || null, id: p.get('id') };
-}
-
-function setHash(nextModule, id){
-    const h = `#${nextModule}${id?`&id=${id}`:''}`;
-    if(location.hash !== h) location.hash = h; else updateLayout(h);
-}
+// Gán vào window để file con gọi được
+window.toast = showToast;
 
 
-// === CORE ROUTER LOGIC (Load Content) ===
+// 2. LOGIC ROUTER (QUAN TRỌNG NHẤT)
+async function loadModule(moduleName) {
+    const contentArea = document.getElementById('content-area');
+    const pageTitle = document.getElementById('pageTitle');
 
-/**
- * Hàm tải nội dung HTML của module và chèn vào khu vực chính.
- */
-/* ================= SỬA LẠI HÀM LOAD ĐỂ CHỜ SCRIPT TẢI XONG ================= */
-async function loadModuleContent(moduleName) {
-    const contentArea = $('#content-area');
-    contentArea.innerHTML = '<div style="text-align:center; padding:50px;"><div class="spin"></div> Đang tải nội dung...</div>';
+    // 1. Hiện loading
+    contentArea.innerHTML = `
+        <div style="text-align:center; padding:50px;">
+            <div style="font-size:20px; font-weight:700;">ĐANG TẢI DỮ LIỆU...</div>
+        </div>`;
 
-    if (moduleName === 'pos') {
-        contentArea.innerHTML = '<div class="card" style="padding:30px; color:var(--red);">Màn hình POS là trang Fullscreen.</div>';
-        return;
-    }
+    // 2. Map tên module -> Đường dẫn file HTML
+    // LƯU Ý: Nếu file mày nằm trong thư mục con thì sửa lại đường dẫn ở đây
+    let url = '';
+    let title = '';
 
-    // MAP MODULE NAME -> FILE URL
-    let url = "";
     switch(moduleName) {
-        case 'dashboard': url = `/dashboard`; break;
-        case 'catalogs':  url = `/catalogs`;  break;
-        case 'products':  url = `/products`;  break;
-        case 'orders':    url = `/orders`;    break;
-        case 'promo':     url = `/promo`;     break;
-        case 'reports':   url = `/reports`;   break;
-        case 'users':     url = `/users`;     break;
-        default:          url = `/${moduleName}`; break;
+        case 'dashboard':
+            url = '/dashboard.html';
+            title = 'DASHBOARD';
+            break;
+        case 'catalogs':
+            url = '/catalogs';
+            title = 'QUẢN LÝ THUỘC TÍNH';
+            break;
+        case 'products':
+            url = '/products.html';
+            title = 'QUẢN LÝ SẢN PHẨM';
+            break;
+        case 'orders':
+            url = '/orders.html';
+            title = 'QUẢN LÝ ĐƠN HÀNG';
+            break;
+        case 'users':
+            url = '/users.html';
+            title = 'QUẢN LÝ TÀI KHOẢN';
+            break;
+        default:
+            contentArea.innerHTML = `<div style="padding:40px; text-align:center;">MODULE KHÔNG TỒN TẠI</div>`;
+            return;
     }
+
+    // Cập nhật tiêu đề trang
+    if(pageTitle) pageTitle.textContent = title;
 
     try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`Lỗi tải module ${url}`);
+        // 3. Tải file HTML
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`Không tìm thấy file ${url} (Lỗi ${res.status})`);
 
-        const htmlText = await response.text();
-        contentArea.innerHTML = htmlText; // 1. Nhúng HTML vào trước
+        const html = await res.text();
 
-        // 2. TÌM VÀ CHẠY LẠI SCRIPT
-        const scripts = contentArea.querySelectorAll('script');
+        // 4. Nhúng HTML vào trang
+        contentArea.innerHTML = html;
 
-        scripts.forEach(oldScript => {
-            const newScript = document.createElement('script');
+        // 5. CHẠY SCRIPT CỦA MODULE (Đoạn này fix lỗi "không bấm được")
+        executeScripts(contentArea, moduleName);
 
-            // Copy attributes (src, type, etc)
-            Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-
-            // Nếu là script nội tuyến (inline)
-            if (oldScript.innerHTML) {
-                newScript.innerHTML = oldScript.innerHTML;
-                document.body.appendChild(newScript); // Chạy ngay
+        // Cập nhật Sidebar Active
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.classList.remove('active');
+            if(item.getAttribute('href') === '#' + moduleName) {
+                item.classList.add('active');
             }
-            // Nếu là script ngoại tuyến (src="...") -> QUAN TRỌNG
-            else if (oldScript.src) {
-                newScript.src = oldScript.src;
-
-                // --- FIX LỖI: CHỜ TẢI XONG MỚI GỌI INIT ---
-                newScript.onload = () => {
-                    // Map tên module sang hàm Init tương ứng
-                    if (moduleName === 'catalogs' && window.initCatalogModule) {
-                        window.initCatalogModule();
-                    } else if (moduleName === 'products' && window.initProductModule) {
-                        window.initProductModule();
-                    }
-                };
-
-                document.body.appendChild(newScript);
-            }
-
-            oldScript.remove(); // Xóa script cũ
         });
 
-    } catch (error) {
-        contentArea.innerHTML = `<div style="padding:30px; color:var(--red);">Lỗi: ${error.message}</div>`;
+    } catch (err) {
+        console.error(err);
+        contentArea.innerHTML = `
+            <div style="padding:40px; text-align:center; color:red;">
+                <h3>LỖI TẢI TRANG</h3>
+                <p>${err.message}</p>
+                <p>Kiểm tra lại xem file HTML có đúng vị trí không.</p>
+            </div>`;
     }
 }
 
-// === ROUTER EXECUTION ===
+// Hàm xử lý Script tách riêng cho gọn
+function executeScripts(container, moduleName) {
+    const scripts = container.querySelectorAll('script');
+    console.log(`🔍 Tìm thấy ${scripts.length} thẻ script trong module ${moduleName}`);
 
-function updateLayout(hash) {
-    // Nếu hash là #products&id=1, thì currentModule = products
-    const currentModule = hash.replace('#', '').split('&')[0];
-
-    const moduleNameMap = { 'dashboard': 'Dashboard', 'catalogs': 'Quản lý Danh mục', 'products': 'Quản lý Sản phẩm', 'orders': 'Quản lý Đơn hàng', 'promo': 'Quản lý Giảm giá', 'reports': 'Báo cáo', 'users': 'Quản lý Tài khoản' };
-    $('#pageTitle').textContent = moduleNameMap[currentModule] || 'Quản trị Hệ thống';
-
-    document.querySelectorAll('.sidebar-item').forEach(item => {
-        item.classList.remove('active');
-        // Chỉ so sánh phần module chính (#catalogs)
-        if (item.getAttribute('href') === '#' + currentModule) {
-            item.classList.add('active');
+    Array.from(scripts).forEach(oldScript => {
+        // 1. Nếu là script có src (ví dụ thư viện ngoài)
+        if (oldScript.src) {
+            const newScript = document.createElement('script');
+            Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+            document.body.appendChild(newScript);
         }
+        // 2. Nếu là script nội tuyến (code logic của module)
+        else {
+            try {
+                // Dùng eval để chạy ngay lập tức code trong thẻ script
+                // Đây là cách "bàn tay sắt" để ép code chạy
+                eval(oldScript.innerHTML);
+                console.log("✅ Đã chạy script nội tuyến thành công");
+            } catch (e) {
+                console.error("❌ Lỗi cú pháp trong script của module:", e);
+                // Hiển thị lỗi lên màn hình cho dễ sửa
+                window.toast(`Lỗi Script: ${e.message}`, 'error');
+            }
+        }
+        oldScript.remove(); // Dọn dẹp
     });
 
-    // Nếu đang ở tab con (như #products&tab=variants) thì vẫn tải module cha
-    if (currentModule) {
-        loadModuleContent(currentModule);
-    }
+    // 3. GỌI HÀM INIT (Quan trọng nhất)
+    setTimeout(() => {
+        console.log(`🚀 Đang kích hoạt init cho: ${moduleName}`);
+
+        if (moduleName === 'catalogs') {
+            if (typeof window.initCatalogs === 'function') {
+                try {
+                    window.initCatalogs();
+                } catch (err) {
+                    console.error("❌ Lỗi khi chạy initCatalogs:", err);
+                }
+            } else {
+                console.warn("⚠️ Không tìm thấy hàm window.initCatalogs");
+            }
+        }
+        else if (moduleName === 'products' && typeof window.initProducts === 'function') {
+            window.initProducts();
+        }
+    }, 100);
 }
 
-// Khởi tạo
-window.addEventListener('hashchange', () => updateLayout(location.hash));
+// 3. KHỞI TẠO ROUTER
+function initRouter() {
+    const hash = window.location.hash.slice(1) || 'dashboard'; // Mặc định vào dashboard
+    loadModule(hash);
+}
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Lần tải đầu tiên
-    const hash = location.hash;
-    if (!hash || hash === '#') {
-        updateLayout('#dashboard');
-    } else {
-        updateLayout(hash);
-    }
+// Lắng nghe sự kiện đổi URL (#)
+window.addEventListener('hashchange', () => {
+    const hash = window.location.hash.slice(1);
+    loadModule(hash);
 });
+
+// Chạy lần đầu khi mở web
+document.addEventListener('DOMContentLoaded', initRouter);

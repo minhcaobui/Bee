@@ -4,112 +4,89 @@ import com.example.bee.entities.catalog.ChatLieu;
 import com.example.bee.repositories.catalog.ChatLieuRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
-import java.util.UUID;
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
 
 @RestController
-@RequestMapping("api/chat-lieu")
+@RequestMapping("/api/chat-lieu")
 @RequiredArgsConstructor
 public class ChatLieuApi {
-
     private final ChatLieuRepository repo;
+    private static final String MA_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private static final SecureRandom RAND = new SecureRandom();
 
-    // ===== GET: danh sách phân trang (mặc định 5) =====
+    private String generateMa() {
+        String ma;
+        do {
+            StringBuilder sb = new StringBuilder(6);
+            for (int i = 0; i < 6; i++) sb.append(MA_CHARS.charAt(RAND.nextInt(MA_CHARS.length())));
+            ma = sb.toString();
+        } while (repo.existsByMaIgnoreCase(ma));
+        return ma;
+    }
+
+    // --- PHÂN TRANG CHẤT LIỆU ---
     @GetMapping
-    public Page<ChatLieu> list(@RequestParam(defaultValue = "0") int page,
-                               @RequestParam(defaultValue = "5") int size) {
-        size = Math.max(1, Math.min(size, 100));
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
-        return repo.findAll(pageable);
+    public Page<ChatLieu> list(@RequestParam(required = false) String q,
+                               @RequestParam(required = false) Boolean trangThai,
+                               @RequestParam(defaultValue = "0") int page,
+                               @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        return repo.search(q, trangThai, pageable);
     }
 
-    @GetMapping("{id}")
-    public ChatLieu get(@PathVariable Integer id) {
-        return repo.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy chất liệu"));
+    @GetMapping("/{id}")
+    public ChatLieu getById(@PathVariable Integer id) {
+        return repo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
-    @GetMapping("{ma}")
-    public ChatLieu get(@PathVariable String ma) {
-        return repo.findByMa(ma)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy chất liệu"));
-    }
-
-    // ===== POST: tạo mới (tự sinh mã nếu trống) =====
     @PostMapping
-    public ResponseEntity<ChatLieu> create(
-            @RequestBody ChatLieu body,
-            UriComponentsBuilder uriBuilder) {
+    public ResponseEntity<ChatLieu> create(@Valid @RequestBody ChatLieu body) {
+        String ten = body.getTen() != null ? body.getTen().trim() : "";
+        String ma = (body.getMa() == null || body.getMa().trim().isEmpty()) ? generateMa() : body.getMa().trim().toUpperCase();
 
-        body.setId(null);
+        if (ma.length() > 20 || !ma.matches("^[A-Z0-9]*$")) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã max 20, không tiếng Việt!");
+        if (ten.isEmpty() || ten.length() > 100) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên max 100 chữ!");
+        if (repo.existsByTenIgnoreCase(ten)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Chất liệu này có rồi!");
 
-        if (isBlank(body.getMa())) {
-            body.setMa(nextAutoCode());
-        } else {
-            body.setMa(body.getMa().trim());
-        }
-
-        if (repo.existsByMaIgnoreCase(body.getMa())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã chất liệu đã tồn tại");
-        }
-
-        body.setTen(safeTrim(body.getTen()));
-        if (body.getMoTa() == null) body.setMoTa("Không có mô tả!");
-        if (body.getTrangThai() == null) body.setTrangThai(true);
-
-        try {
-            ChatLieu saved = repo.save(body);
-            URI location = uriBuilder.path("/api/chat-lieu/{id}")
-                    .buildAndExpand(saved.getId()).toUri();
-            return ResponseEntity.created(location).body(saved);
-        } catch (DataIntegrityViolationException e) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã chất liệu bị trùng, vui lòng thử lại", e);
-        }
+        ChatLieu entity = new ChatLieu();
+        entity.setMa(ma);
+        entity.setTen(ten);
+        entity.setMoTa(body.getMoTa());
+        entity.setTrangThai(body.getTrangThai() != null ? body.getTrangThai() : true);
+        entity.setNgayTao(LocalDateTime.now());
+        return ResponseEntity.ok(repo.save(entity));
     }
 
-    // ===== PUT: cập nhật =====
-    @PutMapping("{id}")
-    public ChatLieu update(@PathVariable Integer id,
-                           @Valid @RequestBody ChatLieu body) {
+    @PutMapping("/{id}")
+    public ChatLieu update(@PathVariable Integer id, @Valid @RequestBody ChatLieu body) {
+        ChatLieu entity = repo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        String newTen = body.getTen() != null ? body.getTen().trim() : "";
 
-        ChatLieu e = repo.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy chất liệu"));
+        if (newTen.isEmpty() || newTen.length() > 100) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên max 100 chữ!");
+        if (!entity.getTen().equalsIgnoreCase(newTen) && repo.existsByTenIgnoreCase(newTen)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Trùng tên chất liệu!");
 
-        String newMa = isBlank(body.getMa()) ? e.getMa() : body.getMa().trim();
-        if (repo.existsByMaIgnoreCaseAndIdNot(newMa, id)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã chất liệu đã tồn tại");
-        }
-
-        e.setMa(newMa);
-        e.setTen(safeTrimOrDefault(body.getTen(), e.getTen()));
-        e.setMoTa(body.getMoTa());
-        if (body.getTrangThai() != null) e.setTrangThai(body.getTrangThai());
-
-        return repo.save(e);
-    }
-
-    // ===== Helpers =====
-    private static boolean isBlank(String s) {
-        return s == null || s.trim().isEmpty();
-    }
-    private static String safeTrim(String s) {
-        return s == null ? null : s.trim();
-    }
-    private static String safeTrimOrDefault(String s, String def) {
-        return s == null ? def : s.trim();
-    }
-
-    // Sinh mã ngắn, xác suất trùng rất thấp (8 ký tự hex)
-    private String nextAutoCode() {
-        return "M_" + UUID.randomUUID().toString().replace("-", "")
-                .substring(0, 8).toUpperCase();
+        entity.setTen(newTen);
+        entity.setMoTa(body.getMoTa());
+        entity.setTrangThai(body.getTrangThai() != null ? body.getTrangThai() : entity.getTrangThai());
+        entity.setNgaySua(LocalDateTime.now());
+        return repo.save(entity);
     }
 }

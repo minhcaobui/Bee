@@ -4,7 +4,6 @@ import com.example.bee.entities.catalog.DanhMuc;
 import com.example.bee.repositories.catalog.DanhMucRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,104 +14,91 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
-import java.util.UUID;
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
 
 @RestController
-@RequestMapping("api/danh-muc")
+@RequestMapping("/api/danh-muc")
 @RequiredArgsConstructor
 public class DanhMucApi {
+    private final DanhMucRepository danhMucRepository;
+    private static final String MA_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private static final SecureRandom RAND = new SecureRandom();
 
-    private final DanhMucRepository repo;
+    private String generateMa() {
+        String ma;
+        do {
+            StringBuilder sb = new StringBuilder(6);
+            for (int i = 0; i < 6; i++) sb.append(MA_CHARS.charAt(RAND.nextInt(MA_CHARS.length())));
+            ma = sb.toString();
+        } while (danhMucRepository.existsByMaIgnoreCase(ma));
+        return ma;
+    }
 
-    // ===== GET: danh sách phân trang (mặc định 5) =====
     @GetMapping
-    public Page<DanhMuc> list(@RequestParam(defaultValue = "0") int page,
-                              @RequestParam(defaultValue = "5") int size) {
-        size = Math.max(1, Math.min(size, 100));
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
-        return repo.findAll(pageable);
+    public Page<DanhMuc> list(@RequestParam(required = false) String q, @RequestParam(required = false) Boolean trangThai, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        return danhMucRepository.search(q, trangThai, pageable);
     }
 
-    @GetMapping("{id}")
-    public DanhMuc get(@PathVariable Integer id) {
-        return repo.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy danh mục"));
+    @GetMapping("/{id}")
+    public DanhMuc getById(@PathVariable Integer id) {
+        return danhMucRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy danh mục"));
     }
 
-    @GetMapping("{ma}")
-    public DanhMuc get(@PathVariable String ma) {
-        return repo.findByMa(ma)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy danh mục"));
-    }
-
-    // ===== POST: tạo mới (tự sinh mã nếu trống) =====
     @PostMapping
-    public ResponseEntity<DanhMuc> create(
-            @RequestBody DanhMuc body,
-            UriComponentsBuilder uriBuilder) {
+    public ResponseEntity<?> create(@Valid @RequestBody DanhMuc body) {
+        String ten = body.getTen() != null ? body.getTen().trim() : "";
+        String ma = (body.getMa() == null || body.getMa().trim().isEmpty())
+                ? generateMa()
+                : body.getMa().trim().toUpperCase();
 
-        body.setId(null);
+        // 1. Check độ dài & Tiếng Việt cho MÃ
+        if (ma.length() > 20) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã tối đa 20 ký tự thôi cu!");
+        if (!ma.matches("^[A-Z0-9]*$")) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã đéo được có tiếng Việt hoặc khoảng trắng!");
 
-        if (isBlank(body.getMa())) {
-            body.setMa(nextAutoCode());
-        } else {
-            body.setMa(body.getMa().trim());
+        // 2. Check độ dài cho TÊN
+        if (ten.isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên đéo được để trống!");
+        if (ten.length() > 100) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên dài quá (max 100), bớt văn vở lại!");
+
+        // 3. Check trùng TÊN & MÃ
+        if (danhMucRepository.existsByTenIgnoreCase(ten)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên này có thằng dùng rồi!");
+        if (danhMucRepository.existsByMaIgnoreCase(ma)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã này bị trùng rồi!");
+
+        // 4. Save
+        DanhMuc entity = new DanhMuc();
+        entity.setMa(ma);
+        entity.setTen(ten);
+        if (body.getMoTa() != null) entity.setMoTa(body.getMoTa().trim()); // Chỉ dành cho DM, Hãng, Chất liệu
+        entity.setTrangThai(body.getTrangThai() != null ? body.getTrangThai() : true);
+        entity.setNgayTao(LocalDateTime.now());
+
+        return ResponseEntity.ok(danhMucRepository.save(entity));
+    }
+
+    @PutMapping("/{id}")
+    public DanhMuc update(@PathVariable Integer id, @Valid @RequestBody DanhMuc body) {
+        DanhMuc entity = danhMucRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        String newTen = body.getTen() != null ? body.getTen().trim() : "";
+
+        // 1. Check độ dài TÊN
+        if (newTen.isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên không được để trống!");
+        if (newTen.length() > 100) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên tối đa 100 ký tự thôi!");
+
+        // 2. Check trùng TÊN (Trừ chính nó)
+        if (!entity.getTen().equalsIgnoreCase(newTen) && danhMucRepository.existsByTenIgnoreCase(newTen)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên này đã tồn tại ở bản ghi khác!");
         }
 
-        if (repo.existsByMaIgnoreCase(body.getMa())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã danh mục đã tồn tại");
-        }
+        // 3. Update thông tin
+        entity.setTen(newTen);
+        if (body.getMoTa() != null) entity.setMoTa(body.getMoTa().trim());
+        entity.setTrangThai(body.getTrangThai() != null ? body.getTrangThai() : entity.getTrangThai());
 
-        body.setTen(safeTrim(body.getTen()));
-        if (body.getMoTa() == null) body.setMoTa("Không có mô tả!");
-        if (body.getTrangThai() == null) body.setTrangThai(true);
+        // 4. Set ngày sửa để bảng "Cân bằng" nhảy giờ
+        entity.setNgaySua(LocalDateTime.now());
 
-        try {
-            DanhMuc saved = repo.save(body);
-            URI location = uriBuilder.path("/api/danh-muc/{id}")
-                    .buildAndExpand(saved.getId()).toUri();
-            return ResponseEntity.created(location).body(saved);
-        } catch (DataIntegrityViolationException e) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã danh mục bị trùng, vui lòng thử lại", e);
-        }
-    }
-
-    // ===== PUT: cập nhật =====
-    @PutMapping("{id}")
-    public DanhMuc update(@PathVariable Integer id,
-                           @Valid @RequestBody DanhMuc body) {
-
-        DanhMuc e = repo.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy danh mục"));
-
-        String newMa = isBlank(body.getMa()) ? e.getMa() : body.getMa().trim();
-        if (repo.existsByMaIgnoreCaseAndIdNot(newMa, id)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã danh mục đã tồn tại");
-        }
-
-        e.setMa(newMa);
-        e.setTen(safeTrimOrDefault(body.getTen(), e.getTen()));
-        e.setMoTa(body.getMoTa());
-        if (body.getTrangThai() != null) e.setTrangThai(body.getTrangThai());
-
-        return repo.save(e);
-    }
-
-    // ===== Helpers =====
-    private static boolean isBlank(String s) {
-        return s == null || s.trim().isEmpty();
-    }
-    private static String safeTrim(String s) {
-        return s == null ? null : s.trim();
-    }
-    private static String safeTrimOrDefault(String s, String def) {
-        return s == null ? def : s.trim();
-    }
-
-    // Sinh mã ngắn, xác suất trùng rất thấp (8 ký tự hex)
-    private String nextAutoCode() {
-        return "C_" + UUID.randomUUID().toString().replace("-", "")
-                .substring(0, 8).toUpperCase();
+        return danhMucRepository.save(entity);
     }
 }

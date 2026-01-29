@@ -3,106 +3,316 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Dashboard | Hệ thống Quản trị Bee</title>
+    <title>DASHBOARD | BEE ADMIN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
     <style>
-        /* ================= CSS VARIABLES & UTILS (Sử dụng lại) ================= */
-        :root{ --bg:#0b0c0f;--panel:#11131a;--muted:#1a1d27;--text:#e7e9ee;--sub:#9aa4b2;--primary:#5b9cff;--red:#ff5b5b;--border:#232737; }
+        /* ================= VARIABLES ================= */
+        :root {
+            --bg: #ffffff;
+            --panel: #ffffff;
+            --panel-hover: #f4f4f5;
+            --border: #e4e4e7;
+            --border-strong: #000000;
+            --text: #09090b;
+            --sub: #71717a;
+            --primary: #000000;
+            --red: #dc2626;
+            --green: #16a34a;
+            --header-height: 60px;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: var(--bg); color: var(--text); font: 14px/1.4 system-ui, Roboto, Arial; }
-        .row { display: flex; gap: 12px; align-items: center; }
-        .muted { color: var(--sub); }
-        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--border); background: var(--muted); color: var(--text); padding: 8px 12px; border-radius: 10px; cursor: pointer; transition: 0.1s; }
-        .btn.destructive { background: transparent; border-color: rgba(255, 91, 91, .25); color: #ff9f9f; }
-        .card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
 
-        /* ================= LAYOUT 3 PHẦN ================= */
-        #app-wrapper {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* 1. SIDEBAR (240px cố định) */
-        #main-sidebar {
-            width: 240px;
-            background: #181c26;
-            border-right: 1px solid var(--border);
-            padding: 16px 0;
-            flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
-        }
-        .sidebar-item {
-            padding: 10px 20px;
-            color: var(--sub);
-            cursor: pointer;
-            text-decoration: none;
-            transition: 0.1s;
-            display: block;
-        }
-        .sidebar-item:hover, .sidebar-item.active {
-            background: rgba(91, 156, 255, 0.1);
+        body {
+            background: var(--bg);
             color: var(--text);
-            border-right: 3px solid var(--primary);
+            font-family: 'Inter', system-ui, sans-serif;
+            font-size: 12.5px;
+            line-height: 1.5;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* 2. KHU VỰC CHÍNH */
-        #main-container {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d4d4d8; }
+        ::-webkit-scrollbar-thumb:hover { background: #000; }
 
-        /* 3. HEADER (Thanh trên cùng) */
-        #top-header {
+        /* ================= LAYOUT ================= */
+        #app-wrapper { display: flex; height: 100vh; overflow: hidden; }
+
+        /* 1. SIDEBAR */
+        #main-sidebar {
+            width: 230px;
             background: var(--panel);
-            padding: 12px 20px;
-            border-bottom: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; flex-shrink: 0;
+        }
+
+        .brand {
+            height: var(--header-height); /* Chiều cao cố định */
+            padding: 0 20px; /* Bỏ padding top/bottom đi, dùng flex để căn giữa */
+            font-size: 16px; font-weight: 900;
+            color: var(--text);
+            display: flex; align-items: center; gap: 10px; /* Căn giữa theo chiều dọc */
+            border-bottom: 1px solid var(--border-strong); /* Dùng border đậm cho nét */
+            letter-spacing: -0.5px;
+        }
+
+        .sidebar-menu { flex: 1; padding: 10px; overflow-y: auto; }
+        .sidebar-label { padding: 12px 10px 4px; font-size: 10px; color: #a1a1aa; font-weight: 700; }
+
+        .sidebar-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 10px;
+            color: var(--sub);
+            text-decoration: none;
+            border-radius: 4px;
+            margin-bottom: 2px;
+            transition: 0.1s;
+        }
+        .sidebar-item:hover { background: var(--panel-hover); color: var(--text); }
+        .sidebar-item.active { background: #000; color: #fff; }
+        .sidebar-item i { font-size: 14px; }
+
+        /* 2. MAIN CONTAINER */
+        #main-container { flex: 1; display: flex; flex-direction: column; position: relative; }
+
+        /* 3. HEADER */
+        #top-header {
+            height: var(--header-height);
+            background: var(--panel);
+            border-bottom: 1px solid var(--border-strong);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 30px;
+        }
+
+        /* ĐỒNG HỒ REALTIME (Thay cho Search) */
+        .header-clock {
+            background: var(--panel-hover);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 6px 12px;
+            min-width: 200px; text-align: center;
+            font-size: 12px; font-weight: 700;
+            border-radius: 2px;
+            font-variant-numeric: tabular-nums; /* Số không bị nhảy khi thay đổi */
+            display: flex; align-items: center; gap: 8px;
+        }
+        .header-clock i { color: var(--sub); }
+
+        .header-right { display: flex; align-items: center; gap: 10px; }
+        .icon-btn {
+            width: 30px; height: 30px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--sub); cursor: pointer; border-radius: 4px;
+            transition: 0.1s; background: transparent; border: none;
+        }
+        .icon-btn:hover { background: var(--panel-hover); color: var(--text); }
+
+        .user-profile {
+            display: flex; align-items: center; gap: 8px;
+            padding-left: 12px; border-left: 1px solid var(--border);
+            cursor: pointer;
+        }
+        .avatar { width: 26px; height: 26px; border-radius: 4px; object-fit: cover; background: #eee; border: 1px solid var(--border); }
+        .user-name { font-weight: 700; font-size: 12px; }
+
+        /* 4. CONTENT AREA */
+        #content-area { flex: 1; padding: 20px; overflow-y: auto; background: var(--bg); }
+
+        /* 5. FOOTER */
+        #main-footer {
+            height: 60px; /* Tăng chiều cao lên cho bằng nút Đăng xuất */
+            border-top: 1px solid var(--border);
+            background: var(--panel);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 0 30px;
+            font-size: 11px;
+            color: var(--sub);
         }
 
-        /* 4. CONTENT AREA */
-        #content-area {
-            flex-grow: 1;
-            padding: 24px;
-            overflow-y: auto; /* Cho phép cuộn riêng phần nội dung */
+        .footer-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 2px;
         }
+
+        .footer-center {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .footer-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .footer-item i { font-size: 10px; color: #000; } /* Icon nhỏ màu đen */
+
+        /* ================= UTILS ================= */
+        .card { background: var(--panel); border: 1px solid var(--border); border-radius: 0; box-shadow: none; }
+
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 8px 16px; font-size: 12px; font-weight: 700; text-transform: uppercase;
+            cursor: pointer; transition: 0.1s;
+            border: 1px solid var(--border-strong);
+            background: #fff; color: #000;
+            border-radius: 2px;
+        }
+        .btn:hover { background: #000; color: #fff; }
+        .btn.primary { background: #000; color: #fff; }
+        .btn.destructive { border-color: var(--red); color: var(--red); background: #fff; }
+        .btn.destructive:hover { background: var(--red); color: #fff; }
+
+        /* Toast & Overlay */
+        .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+        .toast {
+            background: #fff; border: 1px solid #000; color: #000;
+            padding: 10px 14px; min-width: 240px;
+            box-shadow: 3px 3px 0px #000;
+            opacity: 0; transform: translateX(20px); transition: 0.2s;
+            display: flex; flex-direction: column; gap: 2px;
+            font-size: 12px;
+        }
+        .toast.show { opacity: 1; transform: translateX(0); }
+        .toast.success { border-left: 3px solid var(--green); }
+        .toast.error { border-left: 3px solid var(--red); }
+
+        .overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 9999; backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
 <div id="app-wrapper">
     <aside id="main-sidebar">
-        <h3 style="padding: 0 20px 10px; color: var(--primary);">BEE ADMIN</h3>
-        <a href="#dashboard" class="sidebar-item active">🏠 Dashboard</a>
-        <a href="#catalogs" class="sidebar-item">🛠️ Danh mục</a>
-        <a href="#products" class="sidebar-item">📦 Sản phẩm</a>
-        <a href="#pos" class="sidebar-item">🛒 Bán hàng POS</a>
-        <a href="#orders" class="sidebar-item">🧾 Đơn hàng</a>
-        <a href="#promo" class="sidebar-item">🎁 Giảm giá</a>
-        <a href="#reports" class="sidebar-item">📈 Báo cáo</a>
-        <a href="#users" class="sidebar-item">👤 Tài khoản</a>
+        <div class="brand">
+            <i class="bi bi-ui-checks-grid"></i> BEE ADMIN
+        </div>
+
+        <div class="sidebar-menu">
+            <div class="sidebar-label">TỔNG QUAN</div>
+            <a href="#dashboard" class="sidebar-item active"><i class="bi bi-grid-fill"></i> DASHBOARD</a>
+            <a href="#pos" class="sidebar-item"><i class="bi bi-cart-fill"></i> BÁN HÀNG</a>
+
+            <div class="sidebar-label">QUẢN LÝ</div>
+            <a href="#catalogs" class="sidebar-item"><i class="bi bi-collection-fill"></i> THUỘC TÍNH</a>
+            <a href="#products" class="sidebar-item"><i class="bi bi-box-seam-fill"></i> SẢN PHẨM</a>
+            <a href="#orders" class="sidebar-item"><i class="bi bi-receipt-cutoff"></i> ĐƠN HÀNG</a>
+
+            <div class="sidebar-label">HỆ THỐNG</div>
+            <a href="#users" class="sidebar-item"><i class="bi bi-person-fill"></i> TÀI KHOẢN</a>
+        </div>
+
+        <div style="padding: 12px; border-top: 1px solid var(--border);">
+            <button class="btn destructive" style="width: 100%;">
+                <i class="bi bi-power"></i> ĐĂNG XUẤT
+            </button>
+        </div>
     </aside>
 
     <div id="main-container">
         <header id="top-header">
-            <h2 id="pageTitle" style="margin:0; font-size:1.4rem;">Dashboard</h2>
-            <div class="row">
-                <div class="muted">Hoàng (Admin)</div>
-                <button class="btn destructive">Đăng xuất</button>
+            <h2 id="pageTitle" style="font-size:14px; font-weight:700;">DASHBOARD</h2>
+
+            <div class="header-right">
+                <div class="header-clock">
+                    <i class="bi bi-clock"></i> <span id="realtimeClock">00:00:00 - ...</span>
+                </div>
+
+                <button class="icon-btn"><i class="bi bi-bell-fill"></i></button>
+
+                <div class="user-profile">
+                    <div class="user-info" style="text-align:right; line-height:1.1;">
+                        <div class="user-name">VIỆT HOÀNG</div>
+                        <div style="font-size:10px; color:#666;">ADMIN</div>
+                    </div>
+                    <img src="https://ui-avatars.com/api/?name=Viet+Hoang&background=000&color=fff&size=28" class="avatar" alt="User">
+                </div>
             </div>
         </header>
 
         <main id="content-area">
-            <div class="card" style="padding:30px; text-align:center;">
-                <h3 style="margin-bottom:10px;">Chào mừng Hoàng!</h3>
-                <div>Bấm vào Sidebar để tải module.</div>
+            <div class="card" style="padding:40px; text-align:center; max-width: 400px; margin: 60px auto; border: 1px solid #000; box-shadow: 4px 4px 0px #000;">
+                <h3 style="margin-bottom:10px; font-size: 16px;">XIN CHÀO HOÀNG!</h3>
+                <p style="color:var(--sub); font-size:12px;">HỆ THỐNG ĐÃ SẴN SÀNG.</p>
             </div>
         </main>
+
+        <footer id="main-footer">
+            <div class="footer-left">
+                <div style="font-weight: 800; color: var(--text);">© 2026 BEE STORE</div>
+                <div>All rights reserved.</div>
+            </div>
+
+            <div class="footer-center">
+                <div class="footer-item">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    <span>Số 1, Trịnh Văn Bô, Hà Nội</span>
+                </div>
+                <div class="footer-item">
+                    <i class="bi bi-telephone-fill"></i>
+                    <span>036.1818.9999</span>
+                </div>
+                <div class="footer-item">
+                    <i class="bi bi-envelope-fill"></i>
+                    <span>contact@bee.store</span>
+                </div>
+            </div>
+
+            <div style="font-weight: 700;">V1.0</div>
+        </footer>
+    </div>
+</div>
+
+<div id="toastHost" class="toast-container"></div>
+
+<div id="confirmOverlay" class="overlay">
+    <div class="card" style="padding:24px; width:300px; background:#fff; border:1px solid #000; box-shadow: 4px 4px 0px #000;">
+        <h4 style="margin-bottom:12px; font-size:14px;">XÁC NHẬN</h4>
+        <div id="confirmMsg" style="margin-bottom:20px; color:#444;">BẠN CÓ CHẮC KHÔNG?</div>
+        <div style="display:flex; justify-content:flex-end; gap:8px;">
+            <button id="confirmCancel" class="btn">Hủy</button>
+            <button id="confirmOk" class="btn primary">Đồng ý</button>
+        </div>
     </div>
 </div>
 
 <script src="/js/admin-router.js"></script>
+
+<script>
+    function startClock() {
+        const el = document.getElementById('realtimeClock');
+        if(!el) return;
+
+        function update() {
+            const now = new Date();
+            // Lấy giờ:phút:giây
+            const time = now.toLocaleTimeString('vi-VN', { hour12: false });
+            // Lấy ngày/tháng/năm
+            const date = now.toLocaleDateString('vi-VN');
+
+            el.textContent = `${time} - ${date}`;
+        }
+
+        update(); // Chạy ngay lập tức
+        setInterval(update, 1000); // Cập nhật mỗi giây
+    }
+
+    // Chạy khi web tải xong
+    document.addEventListener('DOMContentLoaded', startClock);
+</script>
+
 </body>
 </html>

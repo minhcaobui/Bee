@@ -1,18 +1,17 @@
 package com.example.bee.entities.catalog;
 
-import com.example.bee.entities.product.SanPham;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(
-        name = "danh_muc",
-        uniqueConstraints = @UniqueConstraint(name = "uk_danh_muc_ma", columnNames = "ma")
-)
-@Data
+@Table(name = "danh_muc")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -22,19 +21,23 @@ public class DanhMuc {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "ma", length = 50, nullable = false, unique = true)
+    @Size(max = 20, message = "Mã tối đa 20 ký tự")
+    @Pattern(regexp = "^[a-zA-Z0-9]*$", message = "Mã không được chứa tiếng Việt hoặc ký tự đặc biệt")
     private String ma;
 
-    @Column(name = "ten", length = 150, nullable = false)
+    @NotBlank(message = "Tên không được để trống")
+    @Size(max = 100, message = "Tên tối đa 100 ký tự")
     private String ten;
 
-    @Column(name = "mo_ta", length = 255)
+    @Column(name = "mo_ta", columnDefinition = "NVARCHAR(MAX)")
     private String moTa;
+
+    @Column(name = "ngay_tao", nullable = false, updatable = false)
+    private LocalDateTime ngayTao = LocalDateTime.now();
+
+    @Column(name = "ngay_sua")  // ✅ FIX
+    private LocalDateTime ngaySua;
 
     @Column(name = "trang_thai", nullable = false)
     private Boolean trangThai = true;
-
-    @OneToMany(mappedBy = "danhMuc")
-    @JsonIgnore // <--- THÊM CÁI NÀY VÀO! QUAN TRỌNG VÃI LỒN!
-    private List<SanPham> sanPhams;
 }

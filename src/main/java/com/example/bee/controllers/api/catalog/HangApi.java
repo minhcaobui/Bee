@@ -1,11 +1,9 @@
 package com.example.bee.controllers.api.catalog;
 
-import com.example.bee.entities.catalog.DanhMuc;
 import com.example.bee.entities.catalog.Hang;
 import com.example.bee.repositories.catalog.HangRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,104 +14,73 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
-import java.util.UUID;
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
 
 @RestController
-@RequestMapping("api/hang")
+@RequestMapping("/api/hang")
 @RequiredArgsConstructor
 public class HangApi {
-
     private final HangRepository repo;
+    private static final String MA_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private static final SecureRandom RAND = new SecureRandom();
 
-    // ===== GET: danh sách phân trang (mặc định 5) =====
+    private String generateMa() {
+        String ma;
+        do {
+            StringBuilder sb = new StringBuilder(6);
+            for (int i = 0; i < 6; i++) sb.append(MA_CHARS.charAt(RAND.nextInt(MA_CHARS.length())));
+            ma = sb.toString();
+        } while (repo.existsByMaIgnoreCase(ma));
+        return ma;
+    }
+
+    // --- TRẢ LẠI PHÂN TRANG CHO MÀY ĐÂY ---
     @GetMapping
-    public Page<Hang> list(@RequestParam(defaultValue = "0") int page,
-                           @RequestParam(defaultValue = "5") int size) {
-        size = Math.max(1, Math.min(size, 100));
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
-        return repo.findAll(pageable);
+    public Page<Hang> list(@RequestParam(required = false) String q,
+                           @RequestParam(required = false) Boolean trangThai,
+                           @RequestParam(defaultValue = "0") int page,
+                           @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        return repo.search(q, trangThai, pageable);
     }
 
-    @GetMapping("{id}")
-    public Hang get(@PathVariable Integer id) {
-        return repo.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy hãng"));
+    @GetMapping("/{id}")
+    public Hang getById(@PathVariable Integer id) {
+        return repo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
-    @GetMapping("{ma}")
-    public Hang get(@PathVariable String ma) {
-        return repo.findByMa(ma)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy hãng"));
-    }
-
-    // ===== POST: tạo mới (tự sinh mã nếu trống) =====
     @PostMapping
-    public ResponseEntity<Hang> create(
-            @RequestBody Hang body,
-            UriComponentsBuilder uriBuilder) {
+    public ResponseEntity<Hang> create(@Valid @RequestBody Hang body) {
+        String ten = body.getTen() != null ? body.getTen().trim() : "";
+        String ma = (body.getMa() == null || body.getMa().trim().isEmpty()) ? generateMa() : body.getMa().trim().toUpperCase();
 
-        body.setId(null);
+        if (ma.length() > 20 || !ma.matches("^[A-Z0-9]*$")) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã max 20, không tiếng Việt!");
+        if (ten.isEmpty() || ten.length() > 100) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên max 100 chữ!");
+        if (repo.existsByTenIgnoreCase(ten)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên hãng này có rồi!");
+        if (repo.existsByMaIgnoreCase(ma)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã này bị trùng!");
 
-        if (isBlank(body.getMa())) {
-            body.setMa(nextAutoCode());
-        } else {
-            body.setMa(body.getMa().trim());
-        }
-
-        if (repo.existsByMaIgnoreCase(body.getMa())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã hãng đã tồn tại");
-        }
-
-        body.setTen(safeTrim(body.getTen()));
-        if (body.getMoTa() == null) body.setMoTa("Không có mô tả!");
-        if (body.getTrangThai() == null) body.setTrangThai(true);
-
-        try {
-            Hang saved = repo.save(body);
-            URI location = uriBuilder.path("/api/hang/{id}")
-                    .buildAndExpand(saved.getId()).toUri();
-            return ResponseEntity.created(location).body(saved);
-        } catch (DataIntegrityViolationException e) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã hãng bị trùng, vui lòng thử lại", e);
-        }
+        Hang entity = new Hang();
+        entity.setMa(ma);
+        entity.setTen(ten);
+        entity.setMoTa(body.getMoTa());
+        entity.setTrangThai(body.getTrangThai() != null ? body.getTrangThai() : true);
+        entity.setNgayTao(LocalDateTime.now());
+        return ResponseEntity.ok(repo.save(entity));
     }
 
-    // ===== PUT: cập nhật =====
-    @PutMapping("{id}")
-    public Hang update(@PathVariable Integer id,
-                          @Valid @RequestBody DanhMuc body) {
+    @PutMapping("/{id}")
+    public Hang update(@PathVariable Integer id, @Valid @RequestBody Hang body) {
+        Hang entity = repo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        String newTen = body.getTen() != null ? body.getTen().trim() : "";
 
-        Hang e = repo.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy hãng"));
+        if (newTen.isEmpty() || newTen.length() > 100) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên max 100 chữ!");
+        if (!entity.getTen().equalsIgnoreCase(newTen) && repo.existsByTenIgnoreCase(newTen)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên hãng trùng rồi!");
 
-        String newMa = isBlank(body.getMa()) ? e.getMa() : body.getMa().trim();
-        if (repo.existsByMaIgnoreCaseAndIdNot(newMa, id)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã hãng đã tồn tại");
-        }
-
-        e.setMa(newMa);
-        e.setTen(safeTrimOrDefault(body.getTen(), e.getTen()));
-        e.setMoTa(body.getMoTa());
-        if (body.getTrangThai() != null) e.setTrangThai(body.getTrangThai());
-
-        return repo.save(e);
-    }
-
-    // ===== Helpers =====
-    private static boolean isBlank(String s) {
-        return s == null || s.trim().isEmpty();
-    }
-    private static String safeTrim(String s) {
-        return s == null ? null : s.trim();
-    }
-    private static String safeTrimOrDefault(String s, String def) {
-        return s == null ? def : s.trim();
-    }
-
-    // Sinh mã ngắn, xác suất trùng rất thấp (8 ký tự hex)
-    private String nextAutoCode() {
-        return "B_" + UUID.randomUUID().toString().replace("-", "")
-                .substring(0, 8).toUpperCase();
+        entity.setTen(newTen);
+        entity.setMoTa(body.getMoTa());
+        entity.setTrangThai(body.getTrangThai() != null ? body.getTrangThai() : entity.getTrangThai());
+        entity.setNgaySua(LocalDateTime.now());
+        return repo.save(entity);
     }
 }

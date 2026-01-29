@@ -17,8 +17,8 @@ public class AdminController {
         return "admin/catalog/catalogs";
     }
 
-    @GetMapping("/products")
-    public String products() {
-        return "admin/product/products";
-    }
+//    @GetMapping("/products")
+//    public String products() {
+//        return "admin/product/products";
+//    }
 }
