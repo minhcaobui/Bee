@@ -10,39 +10,29 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.Random;
 
 @RestController
 @RequestMapping("/api/chat-lieu")
 @RequiredArgsConstructor
 public class ChatLieuApi {
     private final ChatLieuRepository repo;
-    private static final String MA_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    private static final SecureRandom RAND = new SecureRandom();
 
+    // --- 1. SỬA LẠI LOGIC GEN MÃ (CL_ + SỐ) ---
     private String generateMa() {
         String ma;
+        Random random = new Random();
         do {
-            StringBuilder sb = new StringBuilder(6);
-            for (int i = 0; i < 6; i++) sb.append(MA_CHARS.charAt(RAND.nextInt(MA_CHARS.length())));
-            ma = sb.toString();
+            int randomNum = 1000 + random.nextInt(9000);
+            ma = "CL" + randomNum; // Ví dụ: CL_123456
         } while (repo.existsByMaIgnoreCase(ma));
         return ma;
     }
 
-    // --- PHÂN TRANG CHẤT LIỆU ---
     @GetMapping
     public Page<ChatLieu> list(@RequestParam(required = false) String q,
                                @RequestParam(required = false) Boolean trangThai,
@@ -60,11 +50,20 @@ public class ChatLieuApi {
     @PostMapping
     public ResponseEntity<ChatLieu> create(@Valid @RequestBody ChatLieu body) {
         String ten = body.getTen() != null ? body.getTen().trim() : "";
-        String ma = (body.getMa() == null || body.getMa().trim().isEmpty()) ? generateMa() : body.getMa().trim().toUpperCase();
+        String ma = (body.getMa() == null || body.getMa().trim().isEmpty())
+                ? generateMa()
+                : body.getMa().trim().toUpperCase();
 
-        if (ma.length() > 20 || !ma.matches("^[A-Z0-9]*$")) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã max 20, không tiếng Việt!");
+        // --- 2. SỬA REGEX CHO PHÉP DẤU _ ---
+        if (ma.length() > 20 || !ma.matches("^[A-Z0-9_]*$")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã max 20, không dấu tiếng Việt, cho phép '_'");
+        }
+
         if (ten.isEmpty() || ten.length() > 100) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên max 100 chữ!");
-        if (repo.existsByTenIgnoreCase(ten)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Chất liệu này có rồi!");
+
+        // --- 3. CHECK TRÙNG CẢ MÃ VÀ TÊN ---
+        if (repo.existsByTenIgnoreCase(ten)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên chất liệu này có rồi!");
+        if (repo.existsByMaIgnoreCase(ma)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã chất liệu này bị trùng!");
 
         ChatLieu entity = new ChatLieu();
         entity.setMa(ma);
@@ -81,12 +80,16 @@ public class ChatLieuApi {
         String newTen = body.getTen() != null ? body.getTen().trim() : "";
 
         if (newTen.isEmpty() || newTen.length() > 100) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên max 100 chữ!");
-        if (!entity.getTen().equalsIgnoreCase(newTen) && repo.existsByTenIgnoreCase(newTen)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Trùng tên chất liệu!");
+
+        if (!entity.getTen().equalsIgnoreCase(newTen) && repo.existsByTenIgnoreCase(newTen)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Trùng tên chất liệu!");
+        }
 
         entity.setTen(newTen);
         entity.setMoTa(body.getMoTa());
         entity.setTrangThai(body.getTrangThai() != null ? body.getTrangThai() : entity.getTrangThai());
         entity.setNgaySua(LocalDateTime.now());
+        entity.setNguoiSua(1);
         return repo.save(entity);
     }
 }

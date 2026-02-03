@@ -38,6 +38,9 @@ public class Hang {
     @Column(name = "ngay_sua")  // ✅ FIX
     private LocalDateTime ngaySua;
 
+    @Column(name = "nguoi_sua")
+    private Integer nguoiSua;
+
     @Column(name = "trang_thai", nullable = false)
     private Boolean trangThai = true;
 }

@@ -1,6 +1,6 @@
 package com.example.bee.entities.cart;
 
-import com.example.bee.entities.product.SanPhamBienThe;
+import com.example.bee.entities.product.SanPhamChiTiet;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -38,7 +38,7 @@ public class GioHangChiTiet {
             nullable = false,
             foreignKey = @ForeignKey(name = "fk_ghct_spbt")
     )
-    private SanPhamBienThe sanPhamBienThe;
+    private SanPhamChiTiet sanPhamChiTiet;
 
     @Column(name = "so_luong", nullable = false)
     private Integer soLuong;

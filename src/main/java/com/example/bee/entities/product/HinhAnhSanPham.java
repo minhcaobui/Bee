@@ -5,7 +5,8 @@ import lombok.*;
 
 @Entity
 @Table(name = "hinh_anh_san_pham")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -13,20 +14,15 @@ public class HinhAnhSanPham {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Integer id;
 
-    // Quan hệ N-1: nhiều hình ảnh thuộc 1 sản phẩm
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(
-            name = "id_san_pham",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "fk_has_sp")
-    )
-    private SanPham sanPham;
-
-    @Column(name = "url", length = 255, nullable = false)
+    // Cái URL ảnh đại diện hay ảnh phụ gì thì nó nằm ở đây hết
+    @Column(name = "url", columnDefinition = "VARCHAR(MAX)")
     private String url;
 
-    @Column(name = "thu_tu", nullable = false)
-    private Integer thuTu = 0;
+    // Nối về bảng cha SanPham
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_san_pham", referencedColumnName = "id")
+    private SanPham sanPham;
 }

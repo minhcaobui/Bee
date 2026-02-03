@@ -35,6 +35,7 @@ function showToast(message, type = 'success') {
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
+
 // Gán vào window để file con gọi được
 window.toast = showToast;
 
@@ -55,7 +56,7 @@ async function loadModule(moduleName) {
     let url = '';
     let title = '';
 
-    switch(moduleName) {
+    switch (moduleName) {
         case 'dashboard':
             url = '/dashboard.html';
             title = 'DASHBOARD';
@@ -67,6 +68,11 @@ async function loadModule(moduleName) {
         case 'products':
             url = '/products.html';
             title = 'QUẢN LÝ SẢN PHẨM';
+            break;
+
+        case 'promotions':
+            url = '/promotions';
+            title = 'QUẢN LÝ KHUYẾN MÃI';
             break;
         case 'orders':
             url = '/orders.html';
@@ -82,7 +88,7 @@ async function loadModule(moduleName) {
     }
 
     // Cập nhật tiêu đề trang
-    if(pageTitle) pageTitle.textContent = title;
+    if (pageTitle) pageTitle.textContent = title;
 
     try {
         // 3. Tải file HTML
@@ -100,7 +106,7 @@ async function loadModule(moduleName) {
         // Cập nhật Sidebar Active
         document.querySelectorAll('.sidebar-item').forEach(item => {
             item.classList.remove('active');
-            if(item.getAttribute('href') === '#' + moduleName) {
+            if (item.getAttribute('href') === '#' + moduleName) {
                 item.classList.add('active');
             }
         });
@@ -158,9 +164,14 @@ function executeScripts(container, moduleName) {
             } else {
                 console.warn("⚠️ Không tìm thấy hàm window.initCatalogs");
             }
-        }
-        else if (moduleName === 'products' && typeof window.initProducts === 'function') {
+        } else if (moduleName === 'products' && typeof window.initProducts === 'function') {
             window.initProducts();
+        } else if (moduleName === 'promotions') {
+            if (typeof window.PromotionApp !== 'undefined') {
+                window.PromotionApp.init(); // Gọi hàm init của file promotions.html
+            } else {
+                console.warn("⚠️ Chưa tìm thấy PromotionApp");
+            }
         }
     }, 100);
 }

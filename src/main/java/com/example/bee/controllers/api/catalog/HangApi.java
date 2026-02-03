@@ -12,30 +12,26 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.Random;
 
 @RestController
 @RequestMapping("/api/hang")
 @RequiredArgsConstructor
 public class HangApi {
     private final HangRepository repo;
-    private static final String MA_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    private static final SecureRandom RAND = new SecureRandom();
 
     private String generateMa() {
         String ma;
+        Random random = new Random();
         do {
-            StringBuilder sb = new StringBuilder(6);
-            for (int i = 0; i < 6; i++) sb.append(MA_CHARS.charAt(RAND.nextInt(MA_CHARS.length())));
-            ma = sb.toString();
+            int randomNum = 1000 + random.nextInt(9000);
+            ma = "HANG" + randomNum;
         } while (repo.existsByMaIgnoreCase(ma));
         return ma;
     }
 
-    // --- TRẢ LẠI PHÂN TRANG CHO MÀY ĐÂY ---
     @GetMapping
     public Page<Hang> list(@RequestParam(required = false) String q,
                            @RequestParam(required = false) Boolean trangThai,
@@ -53,9 +49,15 @@ public class HangApi {
     @PostMapping
     public ResponseEntity<Hang> create(@Valid @RequestBody Hang body) {
         String ten = body.getTen() != null ? body.getTen().trim() : "";
+        // Nếu không truyền mã thì tự sinh
         String ma = (body.getMa() == null || body.getMa().trim().isEmpty()) ? generateMa() : body.getMa().trim().toUpperCase();
 
-        if (ma.length() > 20 || !ma.matches("^[A-Z0-9]*$")) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã max 20, không tiếng Việt!");
+        // --- 2. SỬA VALIDATE ĐỂ CHẤP NHẬN DẤU GẠCH DƯỚI (_) ---
+        // Regex cũ: "^[A-Z0-9]*$" (chỉ chữ số) -> Thêm dấu _ vào thành "^[A-Z0-9_]*$"
+        if (ma.length() > 20 || !ma.matches("^[A-Z0-9_]*$")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã max 20, không dấu tiếng Việt, cho phép dấu gạch dưới!");
+        }
+
         if (ten.isEmpty() || ten.length() > 100) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên max 100 chữ!");
         if (repo.existsByTenIgnoreCase(ten)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên hãng này có rồi!");
         if (repo.existsByMaIgnoreCase(ma)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã này bị trùng!");
@@ -81,6 +83,7 @@ public class HangApi {
         entity.setMoTa(body.getMoTa());
         entity.setTrangThai(body.getTrangThai() != null ? body.getTrangThai() : entity.getTrangThai());
         entity.setNgaySua(LocalDateTime.now());
+        entity.setNguoiSua(1);
         return repo.save(entity);
     }
 }

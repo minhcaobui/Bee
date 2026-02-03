@@ -1,6 +1,6 @@
 package com.example.bee.entities.exchanges;
 
-import com.example.bee.entities.product.SanPhamBienThe;
+import com.example.bee.entities.product.SanPhamChiTiet;
 import com.example.bee.entities.order.DonHangChiTiet;
 import jakarta.persistence.*;
 import lombok.*;
@@ -50,7 +50,7 @@ public class YeuCauDoiTraChiTiet {
             name = "id_bien_the_doi_moi",
             foreignKey = @ForeignKey(name = "fk_ycdtct_bt")
     )
-    private SanPhamBienThe bienTheDoiMoi;
+    private SanPhamChiTiet bienTheDoiMoi;
 
     // Chênh lệch giá: + khách bù thêm, - hoàn lại khách
     @Column(name = "chenh_lech", precision = 12, scale = 2)

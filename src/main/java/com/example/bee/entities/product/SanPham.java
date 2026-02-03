@@ -3,63 +3,52 @@ package com.example.bee.entities.product;
 import com.example.bee.entities.catalog.ChatLieu;
 import com.example.bee.entities.catalog.DanhMuc;
 import com.example.bee.entities.catalog.Hang;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
-import java.util.List;
 
-@Entity
-@Table(
-        name = "san_pham",
-        uniqueConstraints = @UniqueConstraint(name = "uk_san_pham_ma", columnNames = "ma")
-)
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Entity
+@Table(name = "san_pham")
 public class SanPham {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "ma", length = 50, nullable = false, unique = true)
+    @Column(length = 50, nullable = false, unique = true)
     private String ma;
 
-    @Column(name = "ten", length = 200, nullable = false)
+    @Column(length = 100, nullable = false)
     private String ten;
 
-    @Column(name = "mo_ta")
+    @Column(name = "mo_ta", columnDefinition = "NVARCHAR(MAX)")
     private String moTa;
 
-    @Column(name = "hinh_anh_dai_dien", length = 255)
-    private String hinhAnhDaiDien;
-
-    @ManyToOne(fetch = FetchType.EAGER) // <--- THÊM fetch = FetchType.EAGER
-    @JoinColumn(name = "id_danh_muc")
-    private DanhMuc danhMuc;
-
-    @ManyToOne(fetch = FetchType.EAGER) // <--- THÊM fetch = FetchType.EAGER
-    @JoinColumn(name = "id_hang")
-    private Hang hang;
-
-    @ManyToOne(fetch = FetchType.EAGER) // <--- THÊM fetch = FetchType.EAGER
-    @JoinColumn(name = "id_chat_lieu")
-    private ChatLieu chatLieu;
-
-    @Column(name = "trang_thai", nullable = false)
-    private Boolean trangThai = true;
-
-    @Column(name = "ngay_tao", nullable = false)
+    @Column(name = "ngay_tao")
     private LocalDateTime ngayTao = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "sanPham")
-    @JsonIgnore // <--- PHẢI CÓ CÁI NÀY!
-    private List<SanPhamBienThe> bienThes; // Tên biến của mày
+    @Column(name = "ngay_sua")
+    private LocalDateTime ngaySua;
 
-    // CHẶN VÒNG LẶP SANG ẢNH (Images)
-    @OneToMany(mappedBy = "sanPham")
-    @JsonIgnore // <--- PHẢI CÓ CÁI NÀY NỮA!
-    private List<HinhAnhSanPham> hinhAnhs; // Tên biến của mày
+    @Column(name = "nguoi_sua")
+    private Integer nguoiSua;
+
+    @Column(name = "trang_thai")
+    private Boolean trangThai = true;
+
+    // --- KHÓA NGOẠI ---
+    @ManyToOne
+    @JoinColumn(name = "id_hang", nullable = false)
+    private Hang hang;
+
+    @ManyToOne
+    @JoinColumn(name = "id_chat_lieu", nullable = false)
+    private ChatLieu chatLieu;
+
+    @ManyToOne
+    @JoinColumn(name = "id_danh_muc", nullable = false)
+    private DanhMuc danhMuc;
 }
