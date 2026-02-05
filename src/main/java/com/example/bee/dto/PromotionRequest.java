@@ -1,32 +1,24 @@
 package com.example.bee.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 public class PromotionRequest {
+    private Integer id;
     private String ma;
     private String ten;
-    private String loai; // "PERCENT" hoặc "AMOUNT"
+    private String loai; // PERCENT / AMOUNT
     private BigDecimal giaTri;
-    @NotNull(message = "Số lượng không được để trống")
-    @Min(value = 1, message = "Số lượng phải lớn hơn 0")
-    private Integer soLuong;
-
-    @NotNull(message = "Hình thức không được để trống")
-    private Boolean hinhThuc; // true = Theo sản phẩm, false = Theo hóa đơn
     private LocalDateTime ngayBatDau;
     private LocalDateTime ngayKetThuc;
-    private Boolean trangThai;
+    private Boolean choPhepCongDon = false;
+    private Boolean trangThai = true;
 
-    private List<Integer> idSanPhams; // Danh sách ID sản phẩm (nếu hinhThuc = true)
-
-    private BigDecimal giamToiDa;
-
-    private BigDecimal dieuKienToiThieu;
+    private List<Integer> idSanPhams;
 }

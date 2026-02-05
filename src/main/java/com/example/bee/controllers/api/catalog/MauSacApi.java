@@ -2,8 +2,10 @@ package com.example.bee.controllers.api.catalog;
 
 import com.example.bee.entities.catalog.MauSac;
 import com.example.bee.repositories.catalog.MauSacRepository;
+import com.example.bee.repositories.promotion.KhuyenMaiRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +18,11 @@ import java.util.Random;
 @RequestMapping("/api/mau-sac")
 @RequiredArgsConstructor
 public class MauSacApi {
-    private final MauSacRepository repo;
+    @Autowired
+    private MauSacRepository mauSacRepository;
+
+    @Autowired
+    private KhuyenMaiRepository khuyenMaiRepo;
 
     // --- GEN MÃ MÀU (MS_ + 6 số) ---
     private String generateMa() {
@@ -25,7 +31,7 @@ public class MauSacApi {
         do {
             int randomNum = 1000 + random.nextInt(9000);
             ma = "MS" + randomNum;
-        } while (repo.existsByMaIgnoreCase(ma));
+        } while (mauSacRepository.existsByMaIgnoreCase(ma));
         return ma;
     }
 
@@ -35,12 +41,12 @@ public class MauSacApi {
                              @RequestParam(defaultValue = "0") int page,
                              @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-        return repo.search(q, trangThai, pageable);
+        return mauSacRepository.search(q, trangThai, pageable);
     }
 
     @GetMapping("/{id}")
     public MauSac getDetail(@PathVariable Integer id) {
-        return repo.findById(id)
+        return mauSacRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy dữ liệu!"));
     }
 
@@ -57,8 +63,8 @@ public class MauSacApi {
 
         if (ten.isEmpty() || ten.length() > 100) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên màu max 100!");
 
-        if (repo.existsByTenIgnoreCase(ten)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Màu này có rồi!");
-        if (repo.existsByMaIgnoreCase(ma)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã màu bị trùng!");
+        if (mauSacRepository.existsByTenIgnoreCase(ten)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Màu này có rồi!");
+        if (mauSacRepository.existsByMaIgnoreCase(ma)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã màu bị trùng!");
 
         MauSac entity = new MauSac();
         entity.setMa(ma);
@@ -66,17 +72,17 @@ public class MauSacApi {
         // Đã xóa ngày tạo, ngày sửa
         entity.setTrangThai(body.getTrangThai() != null ? body.getTrangThai() : true);
 
-        return ResponseEntity.ok(repo.save(entity));
+        return ResponseEntity.ok(mauSacRepository.save(entity));
     }
 
     @PutMapping("/{id}")
     public MauSac update(@PathVariable Integer id, @Valid @RequestBody MauSac body) {
-        MauSac entity = repo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        MauSac entity = mauSacRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         String newTen = body.getTen() != null ? body.getTen().trim() : "";
 
         if (newTen.isEmpty() || newTen.length() > 100) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên màu max 100!");
 
-        if (!entity.getTen().equalsIgnoreCase(newTen) && repo.existsByTenIgnoreCase(newTen)) {
+        if (!entity.getTen().equalsIgnoreCase(newTen) && mauSacRepository.existsByTenIgnoreCase(newTen)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Trùng tên màu!");
         }
 
@@ -84,6 +90,18 @@ public class MauSacApi {
         entity.setTrangThai(body.getTrangThai() != null ? body.getTrangThai() : entity.getTrangThai());
         // Đã xóa ngày sửa, người sửa
 
-        return repo.save(entity);
+        return mauSacRepository.save(entity);
+    }
+
+    @PatchMapping("/{id}/trang-thai")
+    public ResponseEntity<?> toggleStatus(@PathVariable Integer id) {
+        MauSac mauSac = mauSacRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        // Cứ thế mà đổi thôi, không sợ bố con thằng nào cả :))
+        mauSac.setTrangThai(!mauSac.getTrangThai());
+
+        mauSacRepository.save(mauSac);
+        return ResponseEntity.ok().build();
     }
 }

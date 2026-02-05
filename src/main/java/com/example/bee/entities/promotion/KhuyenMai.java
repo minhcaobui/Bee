@@ -1,49 +1,36 @@
 package com.example.bee.entities.promotion;
 
+import com.example.bee.entities.product.SanPham;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
+
+@Entity
+@Table(name = "khuyen_mai")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "khuyen_mai")
 public class KhuyenMai {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(length = 50, nullable = false, unique = true)
+    @Column(length = 10, nullable = false)
     private String ma;
 
-    @Column(length = 150, nullable = false)
+    @Column(name = "ten", nullable = false, length = 150)
     private String ten;
 
-    @Column(length = 20, nullable = false)
+    @Column(name = "loai", nullable = false, length = 20)
     private String loai; // PERCENT hoặc AMOUNT
 
     @Column(name = "gia_tri", nullable = false)
     private BigDecimal giaTri;
-
-    // --- CÁC CỘT MỚI THÊM ---
-    @Column(name = "giam_toi_da")
-    private BigDecimal giamToiDa; // Dùng cho loại PERCENT
-
-    @Column(name = "dieu_kien_toi_thieu")
-    private BigDecimal dieuKienToiThieu = BigDecimal.ZERO;
-
-    @Column(name = "da_su_dung")
-    private Integer daSuDung = 0;
-    // ------------------------
-
-    @Column(name = "so_luong", nullable = false)
-    private Integer soLuong;
-
-    @Column(name = "hinh_thuc", nullable = false)
-    private Boolean hinhThuc; // false: Hóa đơn, true: Sản phẩm
 
     @Column(name = "ngay_bat_dau", nullable = false)
     private LocalDateTime ngayBatDau;
@@ -54,6 +41,15 @@ public class KhuyenMai {
     @Column(name = "cho_phep_cong_don")
     private Boolean choPhepCongDon = false;
 
-    @Column(name = "trang_thai")
+    @Column(name = "trang_thai", nullable = false)
     private Boolean trangThai = true;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "khuyen_mai_san_pham",
+            joinColumns = @JoinColumn(name = "id_khuyen_mai"),
+            inverseJoinColumns = @JoinColumn(name = "id_san_pham")
+    )
+    @JsonIgnore
+    private List<SanPham> sanPhams;
 }

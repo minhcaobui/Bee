@@ -2,8 +2,10 @@ package com.example.bee.controllers.api.catalog;
 
 import com.example.bee.entities.catalog.DanhMuc;
 import com.example.bee.repositories.catalog.DanhMucRepository;
+import com.example.bee.repositories.promotion.KhuyenMaiRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +19,11 @@ import java.util.Random;
 @RequestMapping("/api/danh-muc")
 @RequiredArgsConstructor
 public class DanhMucApi {
+
+    @Autowired
     private final DanhMucRepository danhMucRepository;
+    @Autowired
+    private final KhuyenMaiRepository khuyenMaiRepository;
 
     // Đã xóa 2 dòng static final thừa thãi đi rồi nhé
 
@@ -99,7 +105,30 @@ public class DanhMucApi {
         entity.setTrangThai(body.getTrangThai() != null ? body.getTrangThai() : entity.getTrangThai());
 
         entity.setNgaySua(LocalDateTime.now());
-        entity.setNguoiSua(1); // Sau này nhớ sửa thành ID user đang login
         return danhMucRepository.save(entity);
+    }
+
+    @PatchMapping("/{id}/trang-thai")
+    public ResponseEntity<?> toggleStatus(@PathVariable Integer id) {
+        DanhMuc danhMuc = danhMucRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        // LOGIC CHẶN MỚI THÊM:
+        // Chỉ chặn khi đang định TẮT (từ true -> false)
+        if (danhMuc.getTrangThai()) {
+            long conflictCount = khuyenMaiRepository.countByDanhMuc(id);
+
+            if (conflictCount > 0) {
+                // Trả về lỗi Bad Request để Frontend hiện Toast đỏ
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Không thể tắt danh mục này! Có " + conflictCount + " chương trình Khuyến Mãi đang chạy liên quan đến sản phẩm thuộc danh mục.");
+            }
+        }
+
+        // Nếu không trùng thì cho tắt bình thường
+        danhMuc.setTrangThai(!danhMuc.getTrangThai());
+        danhMucRepository.save(danhMuc);
+
+        return ResponseEntity.ok().build();
     }
 }

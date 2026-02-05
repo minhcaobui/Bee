@@ -33,8 +33,8 @@ public class SanPham {
     @Column(name = "ngay_sua")
     private LocalDateTime ngaySua;
 
-    @Column(name = "nguoi_sua")
-    private Integer nguoiSua;
+//    @Column(name = "nguoi_sua")
+//    private Integer nguoiSua;
 
     @Column(name = "trang_thai")
     private Boolean trangThai = true;

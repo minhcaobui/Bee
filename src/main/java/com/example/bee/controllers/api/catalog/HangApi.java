@@ -2,8 +2,10 @@ package com.example.bee.controllers.api.catalog;
 
 import com.example.bee.entities.catalog.Hang;
 import com.example.bee.repositories.catalog.HangRepository;
+import com.example.bee.repositories.promotion.KhuyenMaiRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +22,12 @@ import java.util.Random;
 @RequestMapping("/api/hang")
 @RequiredArgsConstructor
 public class HangApi {
-    private final HangRepository repo;
+
+    @Autowired
+    private final HangRepository hangRepository;
+    @Autowired
+    private final KhuyenMaiRepository khuyenMaiRepository;
+
 
     private String generateMa() {
         String ma;
@@ -28,7 +35,7 @@ public class HangApi {
         do {
             int randomNum = 1000 + random.nextInt(9000);
             ma = "HANG" + randomNum;
-        } while (repo.existsByMaIgnoreCase(ma));
+        } while (hangRepository.existsByMaIgnoreCase(ma));
         return ma;
     }
 
@@ -38,12 +45,12 @@ public class HangApi {
                            @RequestParam(defaultValue = "0") int page,
                            @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-        return repo.search(q, trangThai, pageable);
+        return hangRepository.search(q, trangThai, pageable);
     }
 
     @GetMapping("/{id}")
     public Hang getById(@PathVariable Integer id) {
-        return repo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return hangRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     @PostMapping
@@ -59,8 +66,8 @@ public class HangApi {
         }
 
         if (ten.isEmpty() || ten.length() > 100) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên max 100 chữ!");
-        if (repo.existsByTenIgnoreCase(ten)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên hãng này có rồi!");
-        if (repo.existsByMaIgnoreCase(ma)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã này bị trùng!");
+        if (hangRepository.existsByTenIgnoreCase(ten)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên hãng này có rồi!");
+        if (hangRepository.existsByMaIgnoreCase(ma)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã này bị trùng!");
 
         Hang entity = new Hang();
         entity.setMa(ma);
@@ -68,22 +75,40 @@ public class HangApi {
         entity.setMoTa(body.getMoTa());
         entity.setTrangThai(body.getTrangThai() != null ? body.getTrangThai() : true);
         entity.setNgayTao(LocalDateTime.now());
-        return ResponseEntity.ok(repo.save(entity));
+        return ResponseEntity.ok(hangRepository.save(entity));
     }
 
     @PutMapping("/{id}")
     public Hang update(@PathVariable Integer id, @Valid @RequestBody Hang body) {
-        Hang entity = repo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Hang entity = hangRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         String newTen = body.getTen() != null ? body.getTen().trim() : "";
 
         if (newTen.isEmpty() || newTen.length() > 100) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên max 100 chữ!");
-        if (!entity.getTen().equalsIgnoreCase(newTen) && repo.existsByTenIgnoreCase(newTen)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên hãng trùng rồi!");
+        if (!entity.getTen().equalsIgnoreCase(newTen) && hangRepository.existsByTenIgnoreCase(newTen)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên hãng trùng rồi!");
 
         entity.setTen(newTen);
         entity.setMoTa(body.getMoTa());
         entity.setTrangThai(body.getTrangThai() != null ? body.getTrangThai() : entity.getTrangThai());
         entity.setNgaySua(LocalDateTime.now());
-        entity.setNguoiSua(1);
-        return repo.save(entity);
+        return hangRepository.save(entity);
+    }
+
+    @PatchMapping("/{id}/trang-thai")
+    public ResponseEntity<?> toggleStatus(@PathVariable Integer id) {
+        Hang hang = hangRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        // Nếu đang định TẮT -> Check xem có dính Sale không
+        if (hang.getTrangThai()) {
+            long count = khuyenMaiRepository.countByHang(id); // <--- Gọi hàm check Hãng
+            if (count > 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Không thể tắt Hãng này! Đang có " + count + " chương trình Sale chạy.");
+            }
+        }
+
+        hang.setTrangThai(!hang.getTrangThai());
+        hangRepository.save(hang);
+        return ResponseEntity.ok().build();
     }
 }

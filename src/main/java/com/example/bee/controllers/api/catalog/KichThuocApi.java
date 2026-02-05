@@ -2,8 +2,10 @@ package com.example.bee.controllers.api.catalog;
 
 import com.example.bee.entities.catalog.KichThuoc;
 import com.example.bee.repositories.catalog.KichThuocRepository;
+import com.example.bee.repositories.promotion.KhuyenMaiRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +18,11 @@ import java.util.Random;
 @RequestMapping("/api/kich-thuoc")
 @RequiredArgsConstructor
 public class KichThuocApi {
-    private final KichThuocRepository repo;
+    @Autowired
+    private KichThuocRepository kichThuocRepository;
+
+    @Autowired
+    private KhuyenMaiRepository khuyenMaiRepo;
 
     // --- GEN MÃ SIZE (KT_ + 6 số) ---
     private String generateMa() {
@@ -25,7 +31,7 @@ public class KichThuocApi {
         do {
             int randomNum = 1000 + random.nextInt(9000);
             ma = "KT" + randomNum;
-        } while (repo.existsByMaIgnoreCase(ma));
+        } while (kichThuocRepository.existsByMaIgnoreCase(ma));
         return ma;
     }
 
@@ -35,12 +41,12 @@ public class KichThuocApi {
                                 @RequestParam(defaultValue = "0") int page,
                                 @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-        return repo.search(q, trangThai, pageable);
+        return kichThuocRepository.search(q, trangThai, pageable);
     }
 
     @GetMapping("/{id}")
     public KichThuoc getDetail(@PathVariable Integer id) {
-        return repo.findById(id)
+        return kichThuocRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy dữ liệu!"));
     }
 
@@ -57,8 +63,8 @@ public class KichThuocApi {
 
         if (ten.isEmpty() || ten.length() > 100) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên size max 100!");
 
-        if (repo.existsByTenIgnoreCase(ten)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Size này có rồi!");
-        if (repo.existsByMaIgnoreCase(ma)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã size bị trùng!");
+        if (kichThuocRepository.existsByTenIgnoreCase(ten)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Size này có rồi!");
+        if (kichThuocRepository.existsByMaIgnoreCase(ma)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã size bị trùng!");
 
         KichThuoc entity = new KichThuoc();
         entity.setMa(ma);
@@ -66,17 +72,17 @@ public class KichThuocApi {
         // Đã xóa ngày tạo, ngày sửa
         entity.setTrangThai(body.getTrangThai() != null ? body.getTrangThai() : true);
 
-        return ResponseEntity.ok(repo.save(entity));
+        return ResponseEntity.ok(kichThuocRepository.save(entity));
     }
 
     @PutMapping("/{id}")
     public KichThuoc update(@PathVariable Integer id, @Valid @RequestBody KichThuoc body) {
-        KichThuoc entity = repo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        KichThuoc entity = kichThuocRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         String newTen = body.getTen() != null ? body.getTen().trim() : "";
 
         if (newTen.isEmpty() || newTen.length() > 100) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên size max 100!");
 
-        if (!entity.getTen().equalsIgnoreCase(newTen) && repo.existsByTenIgnoreCase(newTen)) {
+        if (!entity.getTen().equalsIgnoreCase(newTen) && kichThuocRepository.existsByTenIgnoreCase(newTen)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Trùng tên size!");
         }
 
@@ -84,6 +90,18 @@ public class KichThuocApi {
         entity.setTrangThai(body.getTrangThai() != null ? body.getTrangThai() : entity.getTrangThai());
         // Đã xóa ngày sửa, người sửa
 
-        return repo.save(entity);
+        return kichThuocRepository.save(entity);
+    }
+
+    @PatchMapping("/{id}/trang-thai")
+    public ResponseEntity<?> toggleStatus(@PathVariable Integer id) {
+        KichThuoc kichThuoc = kichThuocRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        // Thoải mái tắt bật
+        kichThuoc.setTrangThai(!kichThuoc.getTrangThai());
+
+        kichThuocRepository.save(kichThuoc);
+        return ResponseEntity.ok().build();
     }
 }

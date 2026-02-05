@@ -1,7 +1,9 @@
+<!DOCTYPE html>
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attributes Admin</title>
+    <title>Quản Lý Thuộc Tính</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <style>
         /* --- CẤU HÌNH CHUNG --- */
@@ -33,14 +35,11 @@
         thead th { text-align: left; padding: 10px 15px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #666; background: #fafafa; border-bottom: 1px solid var(--gray-200); white-space: nowrap; }
         tbody td { padding: 8px 15px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; font-size: 12.5px; word-wrap: break-word; }
         tbody tr:hover { background: var(--gray-100); }
-        .status { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; background: #f4f4f5; color: #666; white-space: nowrap; }
-        .status:not(.inactive) { background: #ecfdf5; color: #059669; }
-        .status-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
 
         /* ICON BUTTONS */
         .btn-icon { width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--gray-200); background: #fff; cursor: pointer; border-radius: 2px; transition: 0.2s; margin-left: 4px; }
         .btn-icon:hover { border-color: #000; background: #000; color: #fff; }
-        .btn-icon.view:hover { background: #2563eb; border-color: #2563eb; } /* Màu xanh cho nút Xem */
+        .btn-icon.view:hover { background: #2563eb; border-color: #2563eb; }
 
         /* --- PAGINATION --- */
         .pagination-wrapper { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; }
@@ -63,14 +62,76 @@
         .form-input:disabled, .form-textarea:disabled { background: #f9f9f9; color: #555; }
         .form-input:focus { border-color: #000; }
         .form-textarea { min-height: 80px; resize: vertical; }
+
+        /* Switch trong Form (Lớn) */
         .switch-wrapper { display: flex; align-items: center; gap: 10px; }
         .switch { width: 36px; height: 20px; position: relative; appearance: none; background: #ddd; outline: none; cursor: pointer; transition: 0.2s; }
         .switch::before { content:''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #fff; transition: 0.2s; }
         .switch:checked { background: #000; }
         .switch:checked::before { left: 18px; }
-        .toast-container { position: fixed; bottom: 30px; right: 30px; z-index: 9999; }
+
+        /* Switch nhỏ dùng trong bảng */
+        .switch-sm { position: relative; display: inline-block; width: 30px; height: 16px; }
+        .switch-sm input { opacity: 0; width: 0; height: 0; }
+        .slider-sm { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 16px; }
+        .slider-sm:before { position: absolute; content: ""; height: 12px; width: 12px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider-sm { background-color: #000; }
+        input:checked + .slider-sm:before { transform: translateX(14px); }
+        .switch-sm.loading { opacity: 0.5; pointer-events: none; }
+
+        /* --- TOAST NOTIFICATION (STYLE GIỐNG KHUYẾN MÃI) --- */
+        .toast-container {
+            position: fixed;
+            top: 20px; /* Đưa lên TRÊN thay vì ở dưới */
+            right: 20px;
+            z-index: 10002;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            min-width: 280px;
+            padding: 14px 22px;
+            border-radius: 6px;
+            background: #fff;
+            color: #000;
+            /* Bóng đổ xịn hơn */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 5px solid #000;
+            /* Hiệu ứng trượt vào mượt mà (Cubic Bezier) */
+            animation: toastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+            transition: all 0.5s ease;
+        }
+
+        .toast.success { border-left-color: #10b981; }
+        .toast.error { border-left-color: #ef4444; }
+        .toast.warning { border-left-color: #f59e0b; }
+
+        /* Hiệu ứng khi ẩn đi (Co lại) */
+        .toast.hiding {
+            transform: translateX(130%);
+            opacity: 0;
+            margin-top: -60px; /* Giúp các thông báo bên dưới trượt lên */
+        }
+
+        @keyframes toastSlideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
         .empty-state { text-align: center; padding: 40px; color: #888; font-size: 12px; }
+
+        /* Ô tìm kiếm có icon */
+        .search-box { position: relative; width: 100%; }
+        .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 14px; pointer-events: none; }
+        .search-input { width: 100%; padding: 8px 12px 8px 36px !important; font-size: 12.5px; border: 1px solid var(--gray-300); outline: none; background: #fff; height: 34px; border-radius: 2px; }
+        .search-input:focus { border-color: #000; }
     </style>
+</head>
 <body>
 <div class="container">
     <div class="actions-bar">
@@ -87,7 +148,14 @@
     <section class="search-section">
         <div style="display: flex; gap: 16px;">
             <div class="search-wrapper" style="flex: 1;">
-                <input type="text" class="search-input" id="search" placeholder="🔍 Tìm tên hoặc mã...">
+                <div style="flex: 2; min-width: 200px;">
+                    <div class="search-box">
+                        <i class="bi bi-search"></i>
+                        <input type="text" class="search-input" id="search"
+                               placeholder="Tìm tên hoặc mã..."
+                               oninput="window.CatalogApp.handleSearch(this.value)">
+                    </div>
+                </div>
             </div>
             <select class="filter-select" id="fTrangThaiFilter" style="width: 200px;">
                 <option value="">Tất cả</option>
@@ -149,11 +217,6 @@
         <div id="groupFullDetail" style="display: none; border-top: 1px solid #eee; padding-top: 20px; margin-top: 20px;">
             <h5 style="font-weight:700; margin-bottom:10px; font-size:13px; color:#555;">2. Thông tin hệ thống</h5>
 
-            <div class="form-group">
-                <label class="form-label">Người chỉnh sửa cuối</label>
-                <input id="fNguoiSua" class="form-input" disabled style="background: #f9fafb; color: #666;">
-            </div>
-
             <div style="display: flex; gap: 15px;">
                 <div class="form-group" style="flex: 1;">
                     <label class="form-label">Ngày tạo</label>
@@ -175,6 +238,27 @@
 <div class="toast-container" id="toastHost"></div>
 
 <script>
+    // --- 1. HÀM TOAST THÔNG BÁO ---
+    window.toast = function(message, type = 'success') {
+        const container = document.getElementById('toastHost');
+        if (!container) return;
+        const el = document.createElement('div');
+        el.className = `toast ${type}`;
+
+        let icon;
+        if (type === 'success') icon = '<i class="bi bi-check-circle-fill" style="color:#10b981; font-size:18px;"></i>';
+        else if (type === 'error') icon = '<i class="bi bi-x-circle-fill" style="color:#ef4444; font-size:18px;"></i>';
+        else icon = '<i class="bi bi-exclamation-circle-fill" style="color:#f59e0b; font-size:18px;"></i>';
+
+        el.innerHTML = `${icon} <span style="font-weight:600; font-size:13px;">${message}</span>`;
+        container.appendChild(el);
+        setTimeout(() => {
+            el.classList.add('hiding');
+            el.addEventListener('transitionend', () => el.remove());
+        }, 3000);
+    };
+
+    // --- 2. ỨNG DỤNG CATALOG ---
     const CatalogApp = {
         state: { activeTab: 'danh-muc', hasDesc: true, page: 0, size: 10, totalPages: 0, q: '', trangThai: '', editingId: null },
 
@@ -182,6 +266,7 @@
 
         bindEvents: function() {
             const self = this;
+            // Xử lý chuyển tab
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.onclick = function() {
                     if (self.state.activeTab === this.dataset.tab) return;
@@ -195,21 +280,42 @@
                     self.loadData();
                 };
             });
+
             document.getElementById('btnAdd').onclick = () => self.openDrawer('create');
             document.getElementById('btnSave').onclick = () => self.saveItem();
             document.getElementById('btnClose').onclick = () => self.closeDrawer();
             document.getElementById('overlay').onclick = () => self.closeDrawer();
+
+            // Phân trang
             document.getElementById('prev').onclick = () => { if(self.state.page > 0) { self.state.page--; self.loadData(); }};
             document.getElementById('next').onclick = () => { if(self.state.page < self.state.totalPages - 1) { self.state.page++; self.loadData(); }};
 
-            let timeout;
-            document.getElementById('search').oninput = (e) => {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => { self.state.q = e.target.value.trim(); self.state.page = 0; self.loadData(); }, 500);
-            };
+            // Filter trạng thái
             document.getElementById('fTrangThaiFilter').onchange = (e) => {
                 self.state.trangThai = e.target.value; self.state.page = 0; self.loadData();
             };
+        },
+
+        // Helper: Lấy tên tiếng Việt của Tab (để thông báo cho chuyên nghiệp)
+        getTabName: function() {
+            const map = {
+                'danh-muc': 'danh mục',
+                'hang': 'thương hiệu',
+                'chat-lieu': 'chất liệu',
+                'mau-sac': 'màu sắc',
+                'kich-thuoc': 'kích thước'
+            };
+            return map[this.state.activeTab] || 'dữ liệu';
+        },
+
+        // Helper cho Search input gọi (Fix delay)
+        handleSearch: function(val) {
+            clearTimeout(this.timeout);
+            this.timeout = setTimeout(() => {
+                this.state.q = val.trim();
+                this.state.page = 0;
+                this.loadData();
+            }, 500);
         },
 
         loadData: async function() {
@@ -224,7 +330,6 @@
             } catch (err) { console.error(err); }
         },
 
-        // 1. HEADER: Chỉ hiện Mã, Tên, Mô tả, Ngày tạo (Bỏ Người sửa, Ngày sửa)
         renderHeader: function() {
             const extraCols = this.state.hasDesc ? `<th>MÔ TẢ</th><th>NGÀY TẠO</th>` : '';
             document.getElementById('thead').innerHTML = `
@@ -237,7 +342,6 @@
                 </tr>`;
         },
 
-        // 2. BODY: Thêm nút Xem (Mắt)
         renderTable: function(list) {
             const tbody = document.getElementById('tbody');
             const colSpan = this.state.hasDesc ? 7 : 5;
@@ -252,19 +356,59 @@
                     extraCells = `<td style="color:#666; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${moTa}</td>
                                   <td style="font-size:12px; color:#888">${ngayTao}</td>`;
                 }
-                const statusHtml = item.trangThai ? `<span class="status"><span class="status-dot"></span>ĐANG HOẠT ĐỘNG</span>` : `<span class="status inactive"><span class="status-dot"></span>NGƯNG HOẠT ĐỘNG</span>`;
+
+                // Nút gạt Quick Toggle
+                const toggleHtml = `
+                    <label class="switch-sm">
+                        <input type="checkbox"
+                               ${item.trangThai ? 'checked' : ''}
+                               onchange="window.CatalogApp.quickToggle(${item.id}, this)">
+                        <span class="slider-sm"></span>
+                    </label>
+                `;
 
                 return `<tr>
-                    <td style="font-weight:700; text-align:center;">${stt}</td>
-                    <td style="font-weight:700">${item.ma || '—'}</td>
+                    <td style="text-align:center;">${stt}</td>
+                    <td>${item.ma || '—'}</td>
                     <td style="font-weight:600">${item.ten || '—'}</td>
-                    ${extraCells} <td style="text-align:center">${statusHtml}</td>
+                    ${extraCells}
+                    <td style="text-align:center;">${toggleHtml}</td>
                     <td style="text-align:right">
                         <button class="btn-icon view" onclick="CatalogApp.openDetail(${item.id})"><i class="bi bi-eye"></i></button>
                         <button class="btn-icon" onclick="CatalogApp.openEdit(${item.id})"><i class="bi bi-pencil"></i></button>
                     </td>
                 </tr>`;
             }).join('');
+        },
+
+        // --- HÀM GỌI API ĐỔI TRẠNG THÁI NHANH ---
+        quickToggle: async function(id, el) {
+            const originalState = !el.checked;
+            const parent = el.closest('.switch-sm');
+            parent.classList.add('loading');
+
+            const name = this.getTabName(); // Lấy tên tiếng Việt (danh mục, thương hiệu...)
+
+            try {
+                const res = await fetch(`/api/${this.state.activeTab}/${id}/trang-thai`, { method: 'PATCH' });
+
+                if (res.ok) {
+                    if (el.checked) {
+                        window.toast(`Đã kích hoạt hiển thị ${name}.`, 'success');
+                    } else {
+                        window.toast(`Đã ngưng hoạt động ${name} này.`, 'warning');
+                    }
+                } else {
+                    const err = await res.json();
+                    window.toast(err.message || "Có lỗi xảy ra, vui lòng thử lại.", 'error');
+                    el.checked = originalState;
+                }
+            } catch (e) {
+                window.toast("Mất kết nối server!", 'error');
+                el.checked = originalState;
+            } finally {
+                parent.classList.remove('loading');
+            }
         },
 
         renderPagination: function(data) {
@@ -285,32 +429,20 @@
             }
         },
 
-        // --- HÀM XỬ LÝ DRAWER (QUAN TRỌNG) ---
-        // mode: 'create' | 'edit' | 'view'
+        // --- DRAWER ---
         openDrawer: function(mode, item) {
             this.state.editingId = item ? item.id : null;
             const titleEl = document.getElementById('drawerTitle');
             const btnSave = document.getElementById('btnSave');
-
-            // Các input
             const fMa = document.getElementById('fMa');
             const fTen = document.getElementById('fTen');
             const fMoTa = document.getElementById('fMoTa');
             const fTrangThai = document.getElementById('fTrangThai');
-
-            // Các input chi tiết (chỉ hiện khi View)
-            const fNgayTao = document.getElementById('fNgayTao');
-            const fNgaySua = document.getElementById('fNgaySua');
-            const fNguoiSua = document.getElementById('fNguoiSua');
             const groupFullDetail = document.getElementById('groupFullDetail');
 
-            // 1. Xử lý hiển thị theo MODE
             if (mode === 'create') {
                 titleEl.textContent = 'THÊM MỚI';
-                btnSave.style.display = 'block'; // Hiện nút Lưu
-                groupFullDetail.style.display = 'none'; // Ẩn chi tiết thừa
-
-                // Reset form
+                btnSave.style.display = 'block'; groupFullDetail.style.display = 'none';
                 fMa.value = ''; fMa.disabled = false;
                 fTen.value = ''; fTen.disabled = false;
                 fMoTa.value = ''; fMoTa.disabled = false;
@@ -318,41 +450,29 @@
 
             } else if (mode === 'edit') {
                 titleEl.textContent = 'CẬP NHẬT';
-                btnSave.style.display = 'block'; // Hiện nút Lưu
-                groupFullDetail.style.display = 'none'; // Ẩn chi tiết thừa (như yêu cầu)
-
-                // Fill data
-                fMa.value = item.ma || ''; fMa.disabled = true; // Cấm sửa mã
+                btnSave.style.display = 'block'; groupFullDetail.style.display = 'none';
+                fMa.value = item.ma || ''; fMa.disabled = true;
                 fTen.value = item.ten || ''; fTen.disabled = false;
                 fMoTa.value = item.moTa || ''; fMoTa.disabled = false;
                 fTrangThai.checked = item.trangThai; fTrangThai.disabled = false;
 
             } else if (mode === 'view') {
                 titleEl.textContent = 'CHI TIẾT';
-                btnSave.style.display = 'none'; // Ẩn nút Lưu (Chỉ xem)
-
-                // Hiện vùng chi tiết nếu là tab có description
+                btnSave.style.display = 'none';
                 groupFullDetail.style.display = (this.state.hasDesc) ? 'block' : 'none';
-
-                // Fill data & Disable tất cả
                 fMa.value = item.ma || ''; fMa.disabled = true;
                 fTen.value = item.ten || ''; fTen.disabled = true;
                 fMoTa.value = item.moTa || ''; fMoTa.disabled = true;
                 fTrangThai.checked = item.trangThai; fTrangThai.disabled = true;
-
-                // Fill thông tin chi tiết
                 if(this.state.hasDesc) {
-                    fNgayTao.value = item.ngayTao ? new Date(item.ngayTao).toLocaleString('vi-VN') : '';
-                    fNgaySua.value = item.ngaySua ? new Date(item.ngaySua).toLocaleString('vi-VN') : '';
-                    fNguoiSua.value = (item.nguoiSua === 1) ? 'Admin' : (item.nguoiSua ? 'User '+item.nguoiSua : '—');
+                    document.getElementById('fNgayTao').value = item.ngayTao ? new Date(item.ngayTao).toLocaleString('vi-VN') : '';
+                    document.getElementById('fNgaySua').value = item.ngaySua ? new Date(item.ngaySua).toLocaleString('vi-VN') : '';
                 }
             }
 
-            // Hiện/Ẩn Group Mô tả chung
             if(document.getElementById('groupMoTa')) {
                 document.getElementById('groupMoTa').style.display = this.state.hasDesc ? 'block' : 'none';
             }
-
             document.getElementById('overlay').classList.add('show');
             document.getElementById('drawer').classList.add('show');
         },
@@ -362,7 +482,6 @@
             document.getElementById('drawer').classList.remove('show');
         },
 
-        // API lấy chi tiết để Sửa
         openEdit: async function(id) {
             try {
                 const res = await fetch(`/api/${this.state.activeTab}/${id}`);
@@ -371,7 +490,6 @@
             } catch(e) { console.error(e); }
         },
 
-        // API lấy chi tiết để Xem
         openDetail: async function(id) {
             try {
                 const res = await fetch(`/api/${this.state.activeTab}/${id}`);
@@ -382,22 +500,37 @@
 
         saveItem: async function() {
             const ten = document.getElementById('fTen').value.trim();
-            if(!ten) { if(window.toast) window.toast('Tên không được để trống', 'error'); return; }
+            if(!ten) { window.toast('Tên không được để trống', 'error'); return; }
+
             const payload = { ten: ten, trangThai: document.getElementById('fTrangThai').checked };
-            const fMa = document.getElementById('fMa'); if(fMa && fMa.value.trim()) payload.ma = fMa.value.trim();
+            const fMa = document.getElementById('fMa');
+            if(fMa && fMa.value.trim()) payload.ma = fMa.value.trim();
             if(this.state.hasDesc) payload.moTa = document.getElementById('fMoTa').value.trim();
+
             const id = this.state.editingId;
             const url = id ? `/api/${this.state.activeTab}/${id}` : `/api/${this.state.activeTab}`;
+            const name = this.getTabName(); // Lấy tên tiếng Việt
+
             try {
                 const res = await fetch(url, { method: id ? 'PUT' : 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
-                if(!res.ok) throw new Error("Lỗi");
-                if(window.toast) window.toast('Thành công!', 'success');
+
+                if(!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.message || "Có lỗi xảy ra, vui lòng thử lại.");
+                }
+
+                // Thông báo chuyên nghiệp hơn
+                if(id) window.toast(`Cập nhật thông tin ${name} thành công!`, 'success');
+                else window.toast(`Thêm mới ${name} vào hệ thống thành công!`, 'success');
+
                 this.closeDrawer(); this.loadData();
-            } catch(e) { if(window.toast) window.toast(e.message, 'error'); }
+            } catch(e) { window.toast(e.message, 'error'); }
         }
     };
+
     window.CatalogApp = CatalogApp;
     window.initCatalogs = function() { CatalogApp.init(); };
     CatalogApp.init();
 </script>
 </body>
+</html>
