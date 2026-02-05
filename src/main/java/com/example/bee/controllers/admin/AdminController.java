@@ -17,6 +17,10 @@ public class AdminController {
         return "admin/catalog/catalogs";
     }
 
+    @GetMapping("/customers")
+    public String customer(){
+        return "admin/customer/customers";
+    }
 //    @GetMapping("/products")
 //    public String products() {
 //        return "admin/product/products";

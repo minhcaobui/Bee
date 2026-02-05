@@ -68,6 +68,10 @@ async function loadModule(moduleName) {
             url = '/products.html';
             title = 'QUẢN LÝ SẢN PHẨM';
             break;
+        case 'customers':
+            url = '/customers';
+            title = 'QUẢN LÝ KHÁCH HÀNG';
+            break;
         case 'orders':
             url = '/orders.html';
             title = 'QUẢN LÝ ĐƠN HÀNG';
