@@ -17,10 +17,9 @@
             --border-strong: #000000;
             --text: #09090b;
             --sub: #71717a;
-            --primary: #000000;
-            --red: #dc2626;
-            --green: #16a34a;
             --header-height: 60px;
+            --sidebar-width: 240px;
+            --sidebar-width-collapsed: 64px;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -48,40 +47,98 @@
 
         /* 1. SIDEBAR */
         #main-sidebar {
-            width: 230px;
+            width: var(--sidebar-width);
             background: var(--panel);
             border-right: 1px solid var(--border);
             display: flex; flex-direction: column; flex-shrink: 0;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Hiệu ứng mượt */
+            overflow: hidden; /* Để ẩn chữ khi thu nhỏ */
+            z-index: 20;
         }
+
+        /* Khi thu nhỏ Sidebar */
+        #main-sidebar.collapsed { width: var(--sidebar-width-collapsed); }
 
         .brand {
-            height: var(--header-height); /* Chiều cao cố định */
-            padding: 0 20px; /* Bỏ padding top/bottom đi, dùng flex để căn giữa */
+            height: var(--header-height);
+            padding: 0 20px;
             font-size: 16px; font-weight: 900;
             color: var(--text);
-            display: flex; align-items: center; gap: 10px; /* Căn giữa theo chiều dọc */
-            border-bottom: 1px solid var(--border-strong); /* Dùng border đậm cho nét */
-            letter-spacing: -0.5px;
+            display: flex; align-items: center; gap: 12px;
+            border-bottom: 1px solid var(--border-strong);
+            white-space: nowrap; /* Không xuống dòng */
+        }
+        .brand i { font-size: 20px; min-width: 24px; } /* Cố định kích thước icon */
+
+        .sidebar-menu { flex: 1; padding: 10px; overflow-y: auto; overflow-x: hidden; }
+
+        /* Label nhỏ (Tổng quan, Quản lý...) */
+        .sidebar-label {
+            padding: 12px 10px 4px; font-size: 10px; color: #a1a1aa; font-weight: 700;
+            white-space: nowrap; transition: 0.2s; opacity: 1;
         }
 
-        .sidebar-menu { flex: 1; padding: 10px; overflow-y: auto; }
-        .sidebar-label { padding: 12px 10px 4px; font-size: 10px; color: #a1a1aa; font-weight: 700; }
-
         .sidebar-item {
-            display: flex; align-items: center; gap: 10px;
-            padding: 8px 10px;
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px;
             color: var(--sub);
             text-decoration: none;
             border-radius: 4px;
             margin-bottom: 2px;
             transition: 0.1s;
+            white-space: nowrap;
         }
         .sidebar-item:hover { background: var(--panel-hover); color: var(--text); }
         .sidebar-item.active { background: #000; color: #fff; }
-        .sidebar-item i { font-size: 14px; }
+        .sidebar-item i { font-size: 18px; min-width: 24px; text-align: center; } /* Căn giữa icon */
+        .sidebar-item span { transition: 0.2s; opacity: 1; }
+
+        /* --- USER PANEL DƯỚI ĐÁY --- */
+        .sidebar-user-panel {
+            background: var(--panel);
+            color: var(--text);
+            padding: 16px;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px;
+            border-top: 1px solid var(--border);
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+        .sidebar-user-panel:hover { background: var(--panel-hover); }
+
+        .user-mini-info { flex: 1; display: flex; flex-direction: column; justify-content: center; overflow: hidden; transition: 0.3s; }
+        .user-mini-name { font-size: 12px; font-weight: 800; }
+        .user-mini-role { font-size: 10px; color: var(--sub); font-weight: 600; }
+
+        .user-mini-avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            border: 1px solid var(--border); background: #eee;
+            object-fit: cover; min-width: 32px;
+        }
+
+        .logout-icon-btn {
+            color: var(--sub); background: transparent; border: none; font-size: 18px; cursor: pointer;
+            transition: 0.2s; min-width: 20px;
+        }
+        .logout-icon-btn:hover { color: var(--red); }
+
+        /* --- STYLE KHI THU NHỎ (COLLAPSED) --- */
+        #main-sidebar.collapsed .brand span,
+        #main-sidebar.collapsed .sidebar-label,
+        #main-sidebar.collapsed .sidebar-item span,
+        #main-sidebar.collapsed .user-mini-info,
+        #main-sidebar.collapsed .logout-icon-btn {
+            opacity: 0; pointer-events: none; display: none; /* Ẩn hết chữ */
+        }
+
+        #main-sidebar.collapsed .sidebar-user-panel { padding: 16px 14px; justify-content: center; }
+        #main-sidebar.collapsed .brand { padding: 0 20px; justify-content: center; }
+        #main-sidebar.collapsed .brand i { margin: 0; }
+
 
         /* 2. MAIN CONTAINER */
-        #main-container { flex: 1; display: flex; flex-direction: column; position: relative; }
+        #main-container { flex: 1; display: flex; flex-direction: column; position: relative; min-width: 0; }
 
         /* 3. HEADER */
         #top-header {
@@ -89,169 +146,70 @@
             background: var(--panel);
             border-bottom: 1px solid var(--border-strong);
             display: flex; justify-content: space-between; align-items: center;
-            padding: 0 30px;
+            padding: 0 20px;
         }
 
-        /* ĐỒNG HỒ REALTIME (Thay cho Search) */
+        .header-left { display: flex; align-items: center; gap: 15px; }
+
+        /* Nút 3 gạch */
+        .toggle-btn {
+            width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            border: none; background: transparent; cursor: pointer;
+            font-size: 20px; color: var(--text); border-radius: 4px;
+            transition: 0.1s;
+        }
+        .toggle-btn:hover { background: var(--panel-hover); }
+
         .header-clock {
             background: var(--panel-hover);
             border: 1px solid var(--border);
             color: var(--text);
             padding: 6px 12px;
-            min-width: 200px; text-align: center;
+            min-width: 180px; text-align: center;
             font-size: 12px; font-weight: 700;
             border-radius: 2px;
-            font-variant-numeric: tabular-nums; /* Số không bị nhảy khi thay đổi */
+            font-variant-numeric: tabular-nums;
             display: flex; align-items: center; gap: 8px;
         }
-        .header-clock i { color: var(--sub); }
 
         .header-right { display: flex; align-items: center; gap: 10px; }
+
         .icon-btn {
-            width: 30px; height: 30px;
+            width: 36px; height: 36px;
             display: flex; align-items: center; justify-content: center;
             color: var(--sub); cursor: pointer; border-radius: 4px;
-            transition: 0.1s; background: transparent; border: none;
+            transition: 0.1s; background: transparent; border: none; font-size: 16px;
         }
         .icon-btn:hover { background: var(--panel-hover); color: var(--text); }
 
-        .user-profile {
-            display: flex; align-items: center; gap: 8px;
-            padding-left: 12px; border-left: 1px solid var(--border);
-            cursor: pointer;
-        }
-        .avatar { width: 26px; height: 26px; border-radius: 4px; object-fit: cover; background: #eee; border: 1px solid var(--border); }
-        .user-name { font-weight: 700; font-size: 12px; }
-
         /* 4. CONTENT AREA */
-        #content-area { flex: 1; padding: 20px; overflow-y: auto; background: var(--bg); }
+        #content-area { flex: 1; padding: 20px; overflow-y: auto; background: var(--bg); position: relative; }
 
-        /* 5. FOOTER */
-        #main-footer {
-            height: 60px; /* Tăng chiều cao lên cho bằng nút Đăng xuất */
-            border-top: 1px solid var(--border);
-            background: var(--panel);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 30px;
-            font-size: 11px;
-            color: var(--sub);
+        /* DROPDOWN MENU */
+        .header-action-container { position: relative; }
+        .dropdown-menu {
+            position: absolute; top: 120%; right: 0;
+            width: 280px; background: #fff; border: 1px solid #000;
+            box-shadow: 4px 4px 0px #000; display: none;
+            flex-direction: column; z-index: 9999;
         }
-
-        .footer-left {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            gap: 2px;
-        }
-
-        .footer-center {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .footer-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .footer-item i { font-size: 10px; color: #000; } /* Icon nhỏ màu đen */
-
-        /* ================= UTILS ================= */
-        .card { background: var(--panel); border: 1px solid var(--border); border-radius: 0; box-shadow: none; }
-
-        .btn {
-            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-            padding: 8px 16px; font-size: 12px; font-weight: 700; text-transform: uppercase;
-            cursor: pointer; transition: 0.1s;
-            border: 1px solid var(--border-strong);
-            background: #fff; color: #000;
-            border-radius: 2px;
-        }
-        .btn:hover { background: #000; color: #fff; }
-        .btn.primary { background: #000; color: #fff; }
-        .btn.destructive { border-color: var(--red); color: var(--red); background: #fff; }
-        .btn.destructive:hover { background: var(--red); color: #fff; }
+        .dropdown-menu.show { display: flex; animation: fadeIn 0.1s ease-out; }
+        .dropdown-header { padding: 12px 16px; border-bottom: 1px solid #eee; font-size: 11px; color: #888; font-weight: 700; }
+        .dropdown-content { max-height: 300px; overflow-y: auto; }
+        .empty-notif { padding: 30px 20px; text-align: center; color: var(--sub); display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Toast & Overlay */
         .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
-        .toast {
-            background: #fff; border: 1px solid #000; color: #000;
-            padding: 10px 14px; min-width: 240px;
-            box-shadow: 3px 3px 0px #000;
-            opacity: 0; transform: translateX(20px); transition: 0.2s;
-            display: flex; flex-direction: column; gap: 2px;
-            font-size: 12px;
-        }
+        .toast { background: #fff; border: 1px solid #000; padding: 10px 14px; min-width: 240px; box-shadow: 3px 3px 0px #000; opacity: 0; transform: translateX(20px); transition: 0.2s; display: flex; flex-direction: column; gap: 2px; font-size: 12px; }
         .toast.show { opacity: 1; transform: translateX(0); }
-        .toast.success { border-left: 3px solid var(--green); }
-        .toast.error { border-left: 3px solid var(--red); }
+        .toast.success { border-left: 3px solid #16a34a; }
 
         .overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 9999; backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; }
-
-        .footer-right {
-            display: flex;
-            align-items: center;
-            gap: 15px; /* Khoảng cách giữa Version và Nút */
-        }
-
-        /* --- DROPDOWN MENU (MỚI) --- */
-        .header-action-container {
-            position: relative; /* Để cái menu con bám theo thằng này */
-        }
-
-        .dropdown-menu {
-            position: absolute;
-            top: 110%; /* Cách bên trên 1 chút */
-            right: 0;
-            width: 280px;
-            background: #fff;
-            border: 1px solid #000;
-            box-shadow: 4px 4px 0px #000; /* Style khối đặc trưng */
-            display: none; /* Mặc định ẩn */
-            flex-direction: column;
-            z-index: 9999;
-        }
-
-        .dropdown-menu.show {
-            display: flex;
-            animation: fadeIn 0.1s ease-out;
-        }
-
-        .dropdown-header {
-            padding: 12px 16px;
-            border-bottom: 1px solid #eee;
-            font-size: 11px; color: #888; font-weight: 700;
-        }
-
-        .dropdown-content {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        /* Style cho từng dòng trong menu */
-        .menu-item {
-            padding: 10px 16px;
-            display: flex; align-items: center; gap: 10px;
-            text-decoration: none; color: var(--text);
-            font-size: 12px; transition: 0.1s;
-        }
-        .menu-item:hover { background: var(--panel-hover); }
-        .menu-item i { font-size: 14px; color: #555; }
-
-        /* Style riêng cho thông báo trống */
-        .empty-notif {
-            padding: 30px 20px;
-            text-align: center;
-            color: var(--sub);
-            display: flex; flex-direction: column; align-items: center; gap: 10px;
-        }
-        .empty-notif i { font-size: 24px; color: #ccc; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 16px; font-size: 12px; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: 0.1s; border: 1px solid var(--border-strong); background: #fff; color: #000; border-radius: 2px; }
+        .btn:hover { background: #000; color: #fff; }
+        .btn.primary { background: #000; color: #fff; }
     </style>
 </head>
 <body>
@@ -259,39 +217,58 @@
 <div id="app-wrapper">
     <aside id="main-sidebar">
         <div class="brand">
-            <i class="bi bi-ui-checks-grid"></i> BEE ADMIN
+            <i class="bi bi-ui-checks-grid"></i>
+            <span>BEE ADMIN</span>
         </div>
 
         <div class="sidebar-menu">
             <div class="sidebar-label">TỔNG QUAN</div>
-            <a href="#dashboard" class="sidebar-item active"><i class="bi bi-grid-fill"></i> DASHBOARD</a>
-            <a href="#pos" class="sidebar-item"><i class="bi bi-cart-fill"></i> BÁN HÀNG</a>
+            <a href="#dashboards" class="sidebar-item active"><i class="bi bi-grid-fill"></i> <span>DASHBOARD</span></a>
+            <a href="#pos" class="sidebar-item"><i class="bi bi-cart-fill"></i> <span>BÁN HÀNG</span></a>
 
             <div class="sidebar-label">QUẢN LÝ</div>
-            <a href="#catalogs" class="sidebar-item"><i class="bi bi-collection-fill"></i> THUỘC TÍNH</a>
-            <a href="#products" class="sidebar-item"><i class="bi bi-box-seam-fill"></i> SẢN PHẨM</a>
-            <a href="#promotions" class="sidebar-item"><i class="bi bi-box-seam-fill"></i> KHUYẾN MÃI</a>
-            <a href="#orders" class="sidebar-item"><i class="bi bi-receipt-cutoff"></i> ĐƠN HÀNG</a>
+            <a href="#catalogs" class="sidebar-item"><i class="bi bi-collection-fill"></i> <span>THUỘC TÍNH</span></a>
+            <a href="#products" class="sidebar-item"><i class="bi bi-box-seam-fill"></i> <span>SẢN PHẨM</span></a>
+            <a href="#promotions" class="sidebar-item"><i class="bi bi-tags-fill"></i> <span>KHUYẾN MÃI</span></a>
+            <a href="#orders" class="sidebar-item"><i class="bi bi-receipt-cutoff"></i> <span>ĐƠN HÀNG</span></a>
 
             <div class="sidebar-label">HỆ THỐNG</div>
-            <a href="#users" class="sidebar-item"><i class="bi bi-person-fill"></i> TÀI KHOẢN</a>
+            <a href="#users" class="sidebar-item"><i class="bi bi-person-fill"></i> <span>TÀI KHOẢN</span></a>
         </div>
 
+        <div class="sidebar-user-panel" onclick="alert('Trang cá nhân')">
+            <img src="https://ui-avatars.com/api/?name=Viet+Hoang&background=000&color=fff&size=64" class="user-mini-avatar" alt="User">
+
+            <div class="user-mini-info">
+                <div class="user-mini-name">VIỆT HOÀNG</div>
+                <div class="user-mini-role">System Admin</div>
+            </div>
+
+            <button class="logout-icon-btn" title="Đăng xuất" onclick="event.stopPropagation(); confirmLogout()">
+                <i class="bi bi-box-arrow-right"></i>
+            </button>
+        </div>
     </aside>
 
     <div id="main-container">
         <header id="top-header">
-            <h2 id="pageTitle" style="font-size:14px; font-weight:700;">DASHBOARD</h2>
+            <div class="header-left">
+                <button class="toggle-btn" onclick="toggleSidebar()">
+                    <i class="bi bi-list"></i>
+                </button>
+                <h2 id="pageTitle" style="font-size:14px; font-weight:800;">DASHBOARD</h2>
+            </div>
 
             <div class="header-right">
                 <div class="header-clock">
-                    <i class="bi bi-clock"></i> <span id="realtimeClock">00:00:00 - ...</span>
+                    <i class="bi bi-clock"></i> <span id="realtimeClock">00:00:00</span>
                 </div>
 
                 <div class="header-action-container">
-                    <button class="icon-btn" onclick="toggleDropdown('notif-dropdown')">
+                    <button class="icon-btn" onclick="handleNotifClick()">
                         <i class="bi bi-bell-fill"></i>
-                        <span style="position:absolute; top:6px; right:8px; width:8px; height:8px; background:red; border-radius:50%; border:1px solid #fff;"></span>
+
+                        <span id="notif-badge" style="position:absolute; top:8px; right:8px; width:8px; height:8px; background:red; border-radius:50%; border:2px solid #fff;"></span>
                     </button>
 
                     <div id="notif-dropdown" class="dropdown-menu">
@@ -304,27 +281,6 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="header-action-container">
-                    <div class="user-profile" onclick="toggleDropdown('user-dropdown')">
-                        <div class="user-info" style="text-align:right; line-height:1.1;">
-                            <div class="user-name">VIỆT HOÀNG</div>
-                            <div style="font-size:10px; color:#666;">ADMIN</div>
-                        </div>
-                        <img src="https://ui-avatars.com/api/?name=Viet+Hoang&background=000&color=fff&size=28" class="avatar" alt="User">
-                    </div>
-
-                    <div id="user-dropdown" class="dropdown-menu" style="width: 200px;">
-                        <div class="dropdown-header">TÀI KHOẢN</div>
-                        <div class="dropdown-content">
-                            <a href="#" class="menu-item"><i class="bi bi-person-gear"></i> Thông tin cá nhân</a>
-                            <a href="#" class="menu-item"><i class="bi bi-shield-lock"></i> Đổi mật khẩu</a>
-                            <a href="#" class="menu-item"><i class="bi bi-gear"></i> Cài đặt hệ thống</a>
-                            <div style="border-top: 1px solid #eee; margin: 4px 0;"></div>
-                            <a href="#" class="menu-item" style="color: var(--red);"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a>
-                        </div>
-                    </div>
-                </div>
             </div>
         </header>
 
@@ -332,50 +288,19 @@
             <div class="card" style="padding:40px; text-align:center; max-width: 400px; margin: 60px auto; border: 1px solid #000; box-shadow: 4px 4px 0px #000;">
                 <h3 style="margin-bottom:10px; font-size: 16px;">XIN CHÀO HOÀNG!</h3>
                 <p style="color:var(--sub); font-size:12px;">HỆ THỐNG ĐÃ SẴN SÀNG.</p>
+                <p style="margin-top:20px; font-size:11px; color:#888;">© 2026 BEE STORE - V1.0</p>
             </div>
         </main>
-
-        <footer id="main-footer">
-            <div class="footer-left">
-                <div style="font-weight: 800; color: var(--text);">© 2026 BEE STORE</div>
-                <div>All rights reserved.</div>
-            </div>
-
-            <div class="footer-center">
-                <div class="footer-item">
-                    <i class="bi bi-geo-alt-fill"></i>
-                    <span>Số 1, Trịnh Văn Bô, Hà Nội</span>
-                </div>
-                <div class="footer-item">
-                    <i class="bi bi-telephone-fill"></i>
-                    <span>036.1818.9999</span>
-                </div>
-                <div class="footer-item">
-                    <i class="bi bi-envelope-fill"></i>
-                    <span>contact@bee.store</span>
-                </div>
-            </div>
-
-            <div class="footer-right">
-                <div style="font-weight: 700;">V1.0</div>
-
-                <button class="btn destructive" style="height: 30px; padding: 0 12px; font-size: 11px;">
-                    <i class="bi bi-power"></i> ĐĂNG XUẤT
-                </button>
-            </div>
-        </footer>
     </div>
 </div>
 
-<div id="toastHost" class="toast-container"></div>
-
 <div id="confirmOverlay" class="overlay">
     <div class="card" style="padding:24px; width:300px; background:#fff; border:1px solid #000; box-shadow: 4px 4px 0px #000;">
-        <h4 style="margin-bottom:12px; font-size:14px;">XÁC NHẬN</h4>
-        <div id="confirmMsg" style="margin-bottom:20px; color:#444;">BẠN CÓ CHẮC KHÔNG?</div>
+        <h4 style="margin-bottom:12px; font-size:14px;">ĐĂNG XUẤT?</h4>
+        <div id="confirmMsg" style="margin-bottom:20px; color:#444;">Bạn có chắc muốn thoát phiên làm việc không?</div>
         <div style="display:flex; justify-content:flex-end; gap:8px;">
-            <button id="confirmCancel" class="btn">Hủy</button>
-            <button id="confirmOk" class="btn primary">Đồng ý</button>
+            <button onclick="document.getElementById('confirmOverlay').style.display='none'" class="btn">Hủy</button>
+            <button onclick="location.reload()" class="btn primary">Đồng ý</button>
         </div>
     </div>
 </div>
@@ -383,52 +308,65 @@
 <script src="/js/admin-router.js"></script>
 
 <script>
+    // --- SIDEBAR TOGGLE ---
+    function toggleSidebar() {
+        document.getElementById('main-sidebar').classList.toggle('collapsed');
+    }
+
+    // --- ĐỒNG HỒ ---
     function startClock() {
         const el = document.getElementById('realtimeClock');
         if(!el) return;
-
         function update() {
             const now = new Date();
-            // Lấy giờ:phút:giây
-            const time = now.toLocaleTimeString('vi-VN', { hour12: false });
-            // Lấy ngày/tháng/năm
-            const date = now.toLocaleDateString('vi-VN');
-
-            el.textContent = `${time} - ${date}`;
+            el.textContent = `${now.toLocaleTimeString('vi-VN', { hour12: false })} - ${now.toLocaleDateString('vi-VN')}`;
         }
-
-        update(); // Chạy ngay lập tức
-        setInterval(update, 1000); // Cập nhật mỗi giây
+        update(); setInterval(update, 1000);
     }
 
-    // Chạy khi web tải xong
-    document.addEventListener('DOMContentLoaded', startClock);
-    // --- XỬ LÝ DROPDOWN HEADER ---
+    // --- DROPDOWN ---
     function toggleDropdown(id) {
-        // 1. Lấy menu cần bật
         const target = document.getElementById(id);
-        const isCurrentlyOpen = target.classList.contains('show');
+        const isOpen = target.classList.contains('show');
+        document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+        if (!isOpen) target.classList.add('show');
+    }
 
-        // 2. Tắt HẾT tất cả các dropdown đang mở khác (để tránh bị chồng nhau)
-        document.querySelectorAll('.dropdown-menu').forEach(menu => {
-            menu.classList.remove('show');
-        });
+    // --- XỬ LÝ CHẤM ĐỎ THÔNG BÁO ---
 
-        // 3. Nếu nó chưa mở thì bật lên, còn đang mở rồi thì thôi (bước 2 đã tắt nó rồi)
-        if (!isCurrentlyOpen) {
-            target.classList.add('show');
+    // Giả lập trạng thái: Ban đầu có thông báo mới (true)
+    let hasUnread = true;
+
+    function handleNotifClick() {
+        // 1. Mở/Đóng dropdown (Gọi lại logic cũ)
+        toggleDropdown('notif-dropdown');
+
+        // 2. Xử lý chấm đỏ
+        if (hasUnread) {
+            // Đánh dấu là đã đọc
+            hasUnread = false;
+
+            // Ẩn chấm đỏ đi
+            const badge = document.getElementById('notif-badge');
+            if (badge) badge.style.display = 'none';
         }
     }
 
-    // Sự kiện: Bấm ra ngoài thì tắt dropdown
-    window.addEventListener('click', function(e) {
-        // Nếu click KHÔNG nằm trong .header-action-container thì tắt hết
-        if (!e.target.closest('.header-action-container')) {
-            document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                menu.classList.remove('show');
-            });
-        }
+    // (Tùy chọn) Hàm này để sau này bạn gọi khi có thông báo mới từ Server đẩy về
+    function receiveNewNotification() {
+        hasUnread = true;
+        const badge = document.getElementById('notif-badge');
+        if (badge) badge.style.display = 'block';
+        // Có thể thêm logic hiện Toast báo "Có tin mới" ở đây
+    }
+
+    window.addEventListener('click', e => {
+        if (!e.target.closest('.header-action-container'))
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
     });
+
+    function confirmLogout() { document.getElementById('confirmOverlay').style.display = 'flex'; }
+    document.addEventListener('DOMContentLoaded', startClock);
 </script>
 
 </body>

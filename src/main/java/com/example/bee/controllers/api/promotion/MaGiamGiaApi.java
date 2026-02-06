@@ -98,14 +98,30 @@ public class MaGiamGiaApi {
         return ResponseEntity.ok(voucherRepo.save(entity));
     }
 
-    // --- 5. ĐỔI TRẠNG THÁI NHANH ---
+    // --- 5. ĐỔI TRẠNG THÁI NHANH (SỬA LẠI ĐỂ CHECK SỐ LƯỢNG) ---
     @PatchMapping("/{id}/trang-thai")
     @Transactional
     public ResponseEntity<?> quickToggle(@PathVariable Integer id) {
         MaGiamGia entity = voucherRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        entity.setTrangThai(!entity.getTrangThai());
+        boolean newStatus = !entity.getTrangThai();
+
+        // NẾU ĐANG ĐỊNH BẬT (ON)
+        if (newStatus) {
+            // 1. Check Hết hạn
+            if (entity.getNgayKetThuc().isBefore(LocalDateTime.now())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Voucher đã hết hạn, không thể kích hoạt!");
+            }
+
+            // 2. CHECK SỐ LƯỢNG (Mới thêm)
+            if (entity.getLuotSuDung() >= entity.getSoLuong()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Voucher này đã hết lượt sử dụng (" + entity.getLuotSuDung() + "/" + entity.getSoLuong() + "). Vui lòng tăng số lượng trước khi bật!");
+            }
+        }
+
+        entity.setTrangThai(newStatus);
         voucherRepo.save(entity);
 
         return ResponseEntity.ok().build();
@@ -188,30 +204,43 @@ public class MaGiamGiaApi {
                 .findFirst()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Mã không tồn tại!"));
 
-        // 2. Check Trạng thái & Thời gian
+        // --- CHECK TRƯỚC (QUAN TRỌNG) ---
+        // Phải check xem nó có hợp lệ không đã rồi mới dám trừ
+
+        // 2. Check Trạng thái
         if (!voucher.getTrangThai()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Voucher này đang bị khóa!");
         }
-        if (voucher.getNgayBatDau().isAfter(LocalDateTime.now())) {
+
+        // 3. Check Thời gian
+        LocalDateTime now = LocalDateTime.now();
+        if (voucher.getNgayBatDau().isAfter(now)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Voucher chưa đến giờ dùng!");
         }
-        if (voucher.getNgayKetThuc().isBefore(LocalDateTime.now())) {
+        if (voucher.getNgayKetThuc().isBefore(now)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Voucher đã hết hạn!");
         }
 
-        // 3. Check Số lượng
+        // 4. Check Số lượng (Phải check TRƯỚC khi cộng)
         if (voucher.getLuotSuDung() >= voucher.getSoLuong()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Voucher đã hết lượt sử dụng!");
         }
 
-        // 4. Check Điều kiện đơn hàng (Min Spend)
+        // 5. Check Điều kiện đơn hàng
         if (orderValue.compareTo(voucher.getDieuKien()) < 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Đơn hàng chưa đủ điều kiện! Cần tối thiểu " + voucher.getDieuKien() + "đ");
         }
 
-        // 5. NẾU THỎA MÃN TẤT CẢ -> TĂNG LƯỢT DÙNG LÊN 1
-        voucher.setLuotSuDung(voucher.getLuotSuDung() + 1);
+        // --- SAU KHI QUA HẾT CÁC CỬA ẢI THÌ MỚI TRỪ ---
+        int luotDungMoi = voucher.getLuotSuDung() + 1;
+        voucher.setLuotSuDung(luotDungMoi);
+
+        // Logic tự động tắt nếu full (như bạn muốn)
+        if (luotDungMoi >= voucher.getSoLuong()) {
+            voucher.setTrangThai(false);
+        }
+
         voucherRepo.save(voucher);
 
         return ResponseEntity.ok("Áp dụng thành công! (Đã trừ 1 lượt dùng)");

@@ -61,6 +61,11 @@ async function loadModule(moduleName) {
             url = '/dashboard.html';
             title = 'DASHBOARD';
             break;
+
+        case 'pos':
+            url = '/pos';
+            title = 'BÁN HÀNG';
+            break;
         case 'catalogs':
             url = '/catalogs';
             title = 'QUẢN LÝ THUỘC TÍNH';
@@ -83,7 +88,7 @@ async function loadModule(moduleName) {
             title = 'QUẢN LÝ TÀI KHOẢN';
             break;
         default:
-            contentArea.innerHTML = `<div style="padding:40px; text-align:center;">MODULE KHÔNG TỒN TẠI</div>`;
+            contentArea.innerHTML = `<div style="padding:40px; text-align:center;">Module không tồn tại</div>`;
             return;
     }
 
@@ -140,9 +145,9 @@ function executeScripts(container, moduleName) {
                 // Dùng eval để chạy ngay lập tức code trong thẻ script
                 // Đây là cách "bàn tay sắt" để ép code chạy
                 eval(oldScript.innerHTML);
-                console.log("✅ Đã chạy script nội tuyến thành công");
+                console.log("Đã chạy script nội tuyến thành công");
             } catch (e) {
-                console.error("❌ Lỗi cú pháp trong script của module:", e);
+                console.error("Lỗi cú pháp trong script của module:", e);
                 // Hiển thị lỗi lên màn hình cho dễ sửa
                 window.toast(`Lỗi Script: ${e.message}`, 'error');
             }
@@ -152,17 +157,17 @@ function executeScripts(container, moduleName) {
 
     // 3. GỌI HÀM INIT (Quan trọng nhất)
     setTimeout(() => {
-        console.log(`🚀 Đang kích hoạt init cho: ${moduleName}`);
+        console.log(`Đang kích hoạt init cho: ${moduleName}`);
 
         if (moduleName === 'catalogs') {
             if (typeof window.initCatalogs === 'function') {
                 try {
                     window.initCatalogs();
                 } catch (err) {
-                    console.error("❌ Lỗi khi chạy initCatalogs:", err);
+                    console.error(" Lỗi khi chạy initCatalogs:", err);
                 }
             } else {
-                console.warn("⚠️ Không tìm thấy hàm window.initCatalogs");
+                console.warn("Không tìm thấy hàm window.initCatalogs");
             }
         } else if (moduleName === 'products' && typeof window.initProducts === 'function') {
             window.initProducts();
@@ -170,7 +175,13 @@ function executeScripts(container, moduleName) {
             if (typeof window.PromotionApp !== 'undefined') {
                 window.PromotionApp.init(); // Gọi hàm init của file promotions.html
             } else {
-                console.warn("⚠️ Chưa tìm thấy PromotionApp");
+                console.warn("Chưa tìm thấy PromotionApp");
+            }
+        } else if (moduleName === 'pos') {
+            if (typeof window.PosApp !== 'undefined') {
+                window.PosApp.init();
+            } else {
+                console.warn("Chưa tìm thấy PosApp");
             }
         }
     }, 100);

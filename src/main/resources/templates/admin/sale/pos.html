@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS | Bee Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        /* ==========================================================================
+           1. CORE SYSTEM STYLE
+           ========================================================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        :root {
+            --gray-100: #f4f4f5;
+            --gray-200: #e4e4e7;
+            --gray-300: #d4d4d8;
+            --text: #09090b;
+            --border-radius: 2px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #fff;
+            color: var(--text);
+            font-size: 12.5px;
+            line-height: 1.4;
+            overflow: hidden;
+        }
+
+        /* BUTTONS */
+        .btn {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            height: 30px;
+            padding: 0 14px;
+            background: #000;
+            color: #fff;
+            border: 1px solid #000;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            border-radius: var(--border-radius);
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            background: #333;
+        }
+
+        .btn-secondary {
+            background: #fff;
+            color: #000;
+            border: 1px solid var(--gray-300);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-100);
+            border-color: #000;
+        }
+
+        .btn-danger {
+            background: #fff;
+            color: #dc2626;
+            border: 1px solid #dc2626;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            color: #fff;
+        }
+
+        .btn.w-100 {
+            width: 100%;
+        }
+
+        /* ICON BUTTON STANDARD */
+        .btn-icon {
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--gray-200);
+            background: #fff;
+            cursor: pointer;
+            border-radius: var(--border-radius);
+            transition: 0.2s;
+            color: #71717a;
+        }
+
+        .btn-icon:hover {
+            border-color: #000;
+            background: #000;
+            color: #fff;
+        }
+
+        /* INPUTS */
+        input[type="text"], .filter-select {
+            width: 100%;
+            padding: 0 12px;
+            height: 34px;
+            font-size: 12.5px;
+            font-family: 'Inter', sans-serif;
+            border: 1px solid var(--gray-300);
+            background: #fff;
+            border-radius: var(--border-radius);
+            transition: 0.2s;
+        }
+
+        input[type="text"]:focus, .filter-select:focus {
+            border-color: #000;
+        }
+
+        .text-end {
+            text-align: right;
+        }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 20px;
+            border-bottom: 1px solid var(--gray-200);
+            margin-bottom: 0;
+        }
+
+        .tab {
+            font-size: 12px;
+            font-weight: 700;
+            color: #888;
+            padding: 12px 0;
+            cursor: pointer;
+            text-transform: uppercase;
+            border: none;
+            background: none;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: 0.2s;
+        }
+
+        .tab:hover {
+            color: #000;
+        }
+
+        .tab.active {
+            color: #000;
+            border-bottom-color: #000;
+        }
+
+        /* TABLE */
+        .table-wrapper {
+            border: 1px solid var(--gray-200);
+            background: #fff;
+            overflow-y: auto;
+            flex: 1;
+            position: relative;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            text-align: left;
+            padding: 10px 15px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #666;
+            background: #fafafa;
+            border-bottom: 1px solid var(--gray-200);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+        }
+
+        tbody td {
+            padding: 8px 15px;
+            border-bottom: 1px solid var(--gray-200);
+            vertical-align: middle;
+            font-size: 12.5px;
+            font-weight: 500;
+        }
+
+        tbody tr:hover {
+            background: var(--gray-100);
+            cursor: pointer;
+        }
+
+        /* ==========================================================================
+           2. POS LAYOUT (45% - 55%)
+           ========================================================================== */
+        .pos-wrapper {
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+        }
+
+        .pos-layout {
+            display: flex;
+            flex: 1;
+            width: 100%;
+            background: #fff;
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+        }
+
+        /* PANEL TRÁI: 45% */
+        .panel-left {
+            width: 45%;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--gray-200);
+            background: #fff;
+            z-index: 2;
+        }
+
+        /* PANEL PHẢI: 55% */
+        .panel-right {
+            width: 55%;
+            display: flex;
+            flex-direction: column;
+            background: #fafafa;
+            padding: 20px;
+        }
+
+        .panel-header {
+            height: 50px;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--gray-200);
+            padding: 0 15px;
+            background: #fff;
+        }
+
+        .customer-card {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+        }
+
+        .payment-footer {
+            background: #fff;
+            border-top: 2px solid #000;
+            padding: 15px;
+            flex-shrink: 0;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 12.5px;
+            color: #555;
+        }
+
+        .summary-row.main {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed var(--gray-300);
+            color: #000;
+        }
+
+        .total-money {
+            font-size: 20px;
+            font-weight: 700;
+            color: #000;
+        }
+
+        .btn-pay-big {
+            width: 100%;
+            height: 46px;
+            margin-top: 15px;
+            font-size: 14px;
+            background: #000;
+            border: none;
+            font-weight: 700;
+        }
+
+        .btn-pay-big:hover {
+            background: #222;
+            transform: translateY(-1px);
+        }
+
+        .search-bar-wrapper {
+            background: #fff;
+            border: 1px solid var(--gray-200);
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: var(--border-radius);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* ==========================================================================
+           3. MODAL CUSTOM
+           ========================================================================== */
+        .modal {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(2px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .modal-dialog {
+            background: #fff;
+            width: 400px;
+            max-width: 90%;
+            border: 1px solid var(--gray-300);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .modal-dialog.modal-sm {
+            width: 320px;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .modal-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #888;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+        }
+
+        .btn-close:before {
+            content: "\F62A";
+            font-family: "bootstrap-icons";
+        }
+
+        .btn-close:hover {
+            color: #000;
+            background: #f4f4f5;
+            border-radius: 4px;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background: #fafafa;
+        }
+
+        .app-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .app-btn {
+            height: 50px;
+            border: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.1s;
+            background: #fff;
+            border-radius: 2px;
+        }
+
+        .app-btn:hover {
+            border-color: #000;
+        }
+
+        .app-btn.selected {
+            border-color: #000;
+            background: #000;
+            color: #fff;
+        }
+
+        /* ==========================================================================
+           4. TOAST NOTIFICATION
+           ========================================================================== */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast-msg {
+            min-width: 300px;
+            background: #fff;
+            padding: 15px 20px;
+            border-left: 4px solid #000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideInRight 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border-radius: 2px;
+        }
+
+        .toast-msg.warning {
+            border-left-color: #f59e0b;
+        }
+
+        .toast-msg.success {
+            border-left-color: #10b981;
+        }
+
+        .toast-msg.error {
+            border-left-color: #ef4444;
+        }
+
+        .toast-msg i {
+            font-size: 18px;
+        }
+
+        .toast-msg.warning i {
+            color: #f59e0b;
+        }
+
+        .toast-msg.success i {
+            color: #10b981;
+        }
+
+        .toast-msg.error i {
+            color: #ef4444;
+        }
+
+        .toast-msg span {
+            font-weight: 700;
+            font-size: 13px;
+            color: #333;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #d4d4d8;
+            border-radius: 2px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #000;
+        }
+
+        /* --- Bắt đầu đoạn code bố m cho --- */
+
+        /* Container bao quanh cả 2 khung để nó cao bằng nhau */
+        .container-flex {
+            display: flex;
+            gap: 20px;
+            align-items: stretch; /* Dòng này làm 2 khung cao bằng nhau */
+        }
+
+        /* Style cho từng khung (Thêm mới & Tìm kiếm) */
+        .box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            flex: 1; /* Chia đôi màn hình 50-50 */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .box h3 {
+            margin-top: 0;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        /* --- PHẦN TÌM KIẾM --- */
+        .search-wrapper {
+            position: relative; /* Quan trọng để căn icon */
+            margin-bottom: 15px;
+        }
+
+        /* Cái ô nhập liệu */
+        .search-wrapper input {
+            width: 100%;
+            padding: 10px 10px 10px 40px; /* Padding trái 40px để chừa chỗ cho icon */
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        /* Cái icon kính lúp */
+        .search-wrapper i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+        }
+
+        /* Khu vực list khách hàng - Cố định height */
+        .customer-list {
+            flex-grow: 1;
+            border: 1px solid #eee;
+            height: 120px; /* Chỉnh số này nếu muốn cao hơn hoặc thấp hơn */
+            overflow-y: auto; /* Tự hiện thanh cuộn nếu danh sách dài */
+        }
+
+        .customer-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #transfer-section[style*="display: block"] {
+            display: flex !important;
+        }
+
+        /* Khi JS bật hiển thị (style="display: block"), ta ép nó thành Flex */
+        #transfer-section[style*="display: block"],
+        #transfer-section[style*="display:block"] {
+            display: flex !important;
+            gap: 15px;
+            align-items: stretch;
+        }
+
+        /* Hiệu ứng bấm nút (Active) giả lập */
+        .app-btn {
+            border: 1px solid #ccc;
+            background: #fff;
+            opacity: 0.7;
+        }
+
+        .app-btn.selected {
+            border: 2px solid #0d6efd !important; /* Viền xanh khi chọn */
+            background: #f0f8ff !important;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="pos-wrapper">
+    <div class="pos-layout">
+
+        <aside class="panel-left">
+            <div class="panel-header" style="padding: 0;">
+                <div style="flex:1; overflow-x: auto; padding: 0 10px;" id="invoiceTabsContainerWrapper">
+                    <nav class="tabs" id="invoiceTabsContainer" style="border:none; width: max-content;">
+                    </nav>
+                </div>
+                <div style="display: flex; gap: 5px; padding-right: 10px; border-left: 1px solid var(--gray-200); height: 100%; align-items: center; padding-left: 10px;">
+                    <button class="btn-icon" title="Thêm hóa đơn mới" onclick="PosApp.createInvoice()"><i
+                            class="bi bi-plus-lg"></i></button>
+                    <button class="btn-icon" title="Xóa hóa đơn" onclick="PosApp.promptDelete()"><i
+                            class="bi bi-trash"></i></button>
+                </div>
+            </div>
+
+            <div class="customer-card">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="width:36px; height:36px; background:#f4f4f5; border-radius:50%; display:flex; align-items:center; justify-content:center; border: 1px solid var(--gray-200);">
+                        <i class="bi bi-person-fill" style="color:#666; font-size: 16px;"></i>
+                    </div>
+                    <div>
+                        <div style="font-weight: 700; font-size: 12px;" id="customerName">KHÁCH VÃNG LAI</div>
+                        <div style="font-size: 11px; color: #888; font-weight: 500;" id="customerPhone">Khách lẻ</div>
+                    </div>
+                </div>
+                <button class="btn-icon" onclick="PosApp.openModal('customerModal')"><i class="bi bi-pencil-square"></i>
+                </button>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                    <tr>
+                        <th style="padding-left: 20px;">Sản phẩm</th>
+                        <th style="text-align: center; width: 60px;">SL</th>
+                        <th style="text-align: right; padding-right: 20px;">Thành tiền</th>
+                        <th style="width: 30px;"></th>
+                    </tr>
+                    </thead>
+                    <tbody id="cartBody"></tbody>
+                </table>
+                <div id="emptyCart" style="text-align: center; padding: 60px 20px; color: #999;">
+                    <i class="bi bi-basket"
+                       style="font-size: 32px; margin-bottom: 10px; display: block; opacity: 0.5;"></i>
+                    <span style="font-size: 12px;">Chưa có sản phẩm nào</span>
+                </div>
+            </div>
+
+            <div class="payment-footer">
+                <div style="display: flex; gap: 0; margin-bottom: 15px;">
+                    <input type="text" placeholder="Nhập mã giảm giá..."
+                           style="border-radius: 2px 0 0 2px; border-right: none; height: 34px;">
+                    <button class="btn-icon"
+                            style="border-radius: 0 2px 2px 0; width: 34px; height: 34px; border-left: none;">
+                        <i class="bi bi-tag-fill"></i>
+                    </button>
+                </div>
+
+                <div class="summary-row">
+                    <span>TẠM TÍNH</span>
+                    <span style="font-weight:700" id="lblSubTotal">0 ₫</span>
+                </div>
+                <div class="summary-row">
+                    <span>KHUYẾN MÃI</span>
+                    <span style="font-weight:700; color: #10b981;">-0 ₫</span>
+                </div>
+                <div class="summary-row">
+                    <span>VOUCHER</span>
+                    <span style="font-weight:700; color: #10b981;">-0 ₫</span>
+                </div>
+                <div class="summary-row main">
+                    <span style="font-weight:700; font-size: 14px;">TỔNG TIỀN</span>
+                    <span class="total-money" id="lblTotal">0 ₫</span>
+                </div>
+
+                <button class="btn btn-pay-big" onclick="PosApp.openModal('payModal')">
+                    <i class="bi bi-credit-card-2-front-fill" style="margin-right: 6px;"></i> THANH TOÁN (F9)
+                </button>
+            </div>
+        </aside>
+
+        <main class="panel-right">
+            <div class="search-bar-wrapper">
+                <div style="position: relative; flex: 1;">
+                    <i class="bi bi-search"
+                       style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #999;"></i>
+                    <input type="text" placeholder="Tìm kiếm sản phẩm (Tên, Mã, SKU)..."
+                           style="padding-left: 36px; border: 1px solid var(--gray-200); box-shadow: none;"
+                           onkeyup="PosApp.filterProduct(this.value)">
+                </div>
+                <select class="filter-select" style="width: 130px;">
+                    <option>Tất cả Màu Sắc</option>
+                </select>
+                <select class="filter-select" style="width: 130px;">
+                    <option>Tất cả Kích Thước</option>
+                </select>
+            </div>
+
+            <div class="table-wrapper" style="border-radius: 2px; border: 1px solid var(--gray-200);">
+                <table>
+                    <thead>
+                    <tr>
+                        <th style="width: 60px; text-align: center;">Ảnh</th>
+                        <th>Tên sản phẩm / Thuộc tính</th>
+                        <th style="text-align: right;">Giá bán</th>
+                        <th style="text-align: center; width: 60px;">Tồn</th>
+                        <th style="width: 40px;"></th>
+                    </tr>
+                    </thead>
+                    <tbody id="productBody"></tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</div>
+
+<div id="toast-container"></div>
+
+<div id="customerModal" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <span class="modal-title">Khách hàng</span>
+            <button class="btn-close" onclick="PosApp.closeModal('customerModal')"></button>
+        </div>
+        <div class="modal-body">
+            <nav class="tabs" style="margin-bottom: 15px;">
+                <button class="tab active" onclick="PosApp.switchCustTab('search')" id="tabSearchBtn">Tìm kiếm</button>
+                <button class="tab" onclick="PosApp.switchCustTab('create')" id="tabCreateBtn">Thêm mới</button>
+            </nav>
+
+            <div style="height: 210px; position: relative;">
+
+                <div id="paneSearch" style="display: flex; flex-direction: column; height: 100%;">
+
+                    <div style="position: relative; margin-bottom: 10px; flex-shrink: 0;">
+                        <i class="bi bi-search"
+                           style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #666;"></i>
+                        <input type="text" class="form-control" placeholder="Nhập tên hoặc SĐT..."
+                               style="width: 100%; padding: 8px 10px 8px 35px; box-sizing: border-box;">
+                    </div>
+
+                    <div style="border: 1px solid var(--gray-200); border-radius: 2px; flex-grow: 1; overflow-y: auto;">
+
+                        <div style="padding: 10px 15px; border-bottom: 1px solid #eee; cursor: pointer;"
+                             onclick="PosApp.selectCustomer('Nguyễn Văn A', '0988.777.666')">
+                            <div style="font-weight: 700; font-size: 13px;">Nguyễn Văn A</div>
+                            <div style="font-size: 11px; color: #666;">0988.777.666</div>
+                        </div>
+
+                        <div style="padding: 10px 15px; border-bottom: 1px solid #eee; cursor: pointer;"
+                             onclick="PosApp.selectCustomer('Trần Thị B', '0912.345.678')">
+                            <div style="font-weight: 700; font-size: 13px;">Trần Thị B</div>
+                            <div style="font-size: 11px; color: #666;">0912.345.678</div>
+                        </div>
+                        <div style="padding: 10px 15px; border-bottom: 1px solid #eee; cursor: pointer;"
+                             onclick="PosApp.selectCustomer('Lê Văn C', '0999.888.777')">
+                            <div style="font-weight: 700; font-size: 13px;">Lê Văn C</div>
+                            <div style="font-size: 11px; color: #666;">0999.888.777</div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div id="paneCreate" style="display: none; height: 100%;">
+                    <div style="margin-bottom: 12px;">
+                        <label style="font-weight: 700; font-size: 11px; margin-bottom: 4px; display: block;">Tên khách
+                            hàng</label>
+                        <input type="text" id="newCustName" placeholder="Nhập tên khách..."
+                               style="width: 100%; box-sizing: border-box; padding: 8px;">
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-weight: 700; font-size: 11px; margin-bottom: 4px; display: block;">Số điện
+                            thoại</label>
+                        <input type="text" id="newCustPhone" placeholder="Nhập số điện thoại..."
+                               style="width: 100%; box-sizing: border-box; padding: 8px;">
+                    </div>
+                    <button class="btn w-100" onclick="PosApp.createNewCustomer()">Lưu & Chọn</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="payModal" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <span class="modal-title">Xác nhận thanh toán</span>
+            <button class="btn-close" onclick="PosApp.closeModal('payModal')"></button>
+        </div>
+        <div class="modal-body" style="padding: 25px;">
+
+            <style>
+                /* Style nút chọn (Ngân hàng/Momo) */
+                .payment-option {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    height: 100%;
+                    border: 1px solid #e4e4e7;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    background: #fff;
+                    transition: all 0.2s;
+                    position: relative;
+                    min-width: 0;
+                }
+
+                .payment-option:hover {
+                    border-color: #000;
+                    background: #fafafa;
+                }
+
+                /* Khi được chọn */
+                .payment-option.selected {
+                    border: 2px solid #000 !important;
+                    background: #fff !important;
+                }
+
+                .payment-option.selected::after {
+                    content: "\F26B";
+                    font-family: "bootstrap-icons";
+                    position: absolute;
+                    top: 8px;
+                    right: 8px;
+                    color: #10b981;
+                    font-size: 16px;
+                }
+
+                /* Style ô nhập tiền (Floating Label xịn xò) */
+                .money-input-wrapper {
+                    position: relative;
+                    height: 50px;
+                    width: 100%;
+                }
+
+                .money-input {
+                    width: 100%;
+                    height: 100%;
+                    border: 1px solid #000;
+                    border-radius: 6px;
+                    font-size: 20px;
+                    font-weight: 800;
+                    text-align: right;
+                    padding: 18px 45px 0 12px;
+                    outline: none;
+                }
+
+                .money-label {
+                    position: absolute;
+                    top: 8px;
+                    left: 12px;
+                    font-size: 10px;
+                    font-weight: 700;
+                    color: #666;
+                    text-transform: uppercase;
+                    pointer-events: none; /* Để bấm xuyên qua label vào input */
+                }
+
+                .money-unit {
+                    position: absolute;
+                    right: 12px;
+                    bottom: 12px;
+                    font-size: 12px;
+                    font-weight: 700;
+                    color: #999;
+                }
+            </style>
+
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="font-size: 12px; color: #666; font-weight: 600; text-transform: uppercase;">Tổng tiền</div>
+                <div id="modalTotal" style="font-size: 32px; font-weight: 800; color: #000; line-height: 1.2;">0 ₫</div>
+            </div>
+
+            <nav class="tabs" style="display: flex; border-bottom: 1px solid #e4e4e7; margin-bottom: 25px; gap: 0;">
+                <button class="tab active"
+                        style="flex:1; padding-bottom: 10px; border: none; background: none; border-bottom: 2px solid #000; font-weight: 700;"
+                        onclick="PosApp.switchPaymentMethod('cash', this)">Tiền mặt
+                </button>
+                <button class="tab"
+                        style="flex:1; padding-bottom: 10px; border: none; background: none; border-bottom: 2px solid transparent; color: #999; font-weight: 600;"
+                        onclick="PosApp.switchPaymentMethod('transfer', this)">Chuyển khoản
+                </button>
+            </nav>
+
+            <div style="height: 110px; position: relative;">
+
+                <div id="cash-section"
+                     style="height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+
+                    <div class="money-input-wrapper">
+                        <span class="money-label">TIỀN KHÁCH ĐƯA</span>
+                        <input type="text" class="money-input" id="inpKhachDua" oninput="PosApp.calcChange()"
+                               placeholder="0">
+                        <span class="money-unit">VNĐ</span>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 5px;">
+                        <span style="font-weight: 600; color: #555; font-size: 13px;">TIỀN THỪA:</span>
+                        <span id="lblTienThua" style="font-weight: 800; font-size: 18px; color: #000;">0 ₫</span>
+                    </div>
+                </div>
+
+                <div id="transfer-section" style="display: none; height: 100%;">
+                    <div style="display: flex; gap: 15px; height: 100%; width: 100%;">
+
+                        <div class="payment-option selected" onclick="PosApp.selectApp(this)">
+                            <i class="bi bi-bank" style="font-size: 28px; color: #0d6efd; margin-bottom: 5px;"></i>
+                            <span style="font-size: 13px; font-weight: 700;">NGÂN HÀNG</span>
+                        </div>
+
+                        <div class="payment-option" onclick="PosApp.selectApp(this)">
+                            <i class="bi bi-wallet2" style="font-size: 28px; color: #a50064; margin-bottom: 5px;"></i>
+                            <span style="font-size: 13px; font-weight: 700;">VÍ MOMO</span>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="PosApp.closeModal('payModal')">Đóng</button>
+        <button class="btn" style="min-width: 120px;" onclick="PosApp.finishOrder()">HOÀN TẤT</button>
+    </div>
+</div>
+
+<div id="confirmModal" class="modal">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-body" style="text-align: center; padding: 30px 20px;">
+            <i class="bi bi-exclamation-circle"
+               style="font-size: 40px; color: #f59e0b; margin-bottom: 15px; display: block;"></i>
+            <h5 style="font-weight: 800; font-size: 16px; margin-bottom: 8px;">XÁC NHẬN XÓA?</h5>
+            <p style="font-size: 13px; color: #666; margin-bottom: 25px;">Bạn có chắc chắn muốn xóa hóa đơn này
+                không?</p>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-secondary w-100" onclick="PosApp.closeModal('confirmModal')">HỦY</button>
+                <button class="btn btn-danger w-100" onclick="PosApp.forceDelete()">XÓA NGAY</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // --- HÀM TOAST CHUYÊN NGHIỆP ---
+    function toast(msg, type = 'success') {
+        const icons = {
+            success: 'bi-check-circle-fill',
+            warning: 'bi-exclamation-triangle-fill',
+            error: 'bi-x-circle-fill'
+        };
+        const el = document.createElement('div');
+        el.className = `toast-msg ${type}`;
+        el.innerHTML = `<i class="bi ${icons[type]}"></i> <span>${msg}</span>`;
+
+        document.getElementById('toast-container').appendChild(el);
+
+        setTimeout(() => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateX(100%)';
+            setTimeout(() => el.remove(), 300);
+        }, 3000);
+    }
+
+    const PosApp = {
+        products: [
+            {
+                id: 1,
+                name: "ÁO THUN BASIC",
+                price: 150000,
+                stock: 50,
+                img: "https://placehold.co/40/000/fff?text=T",
+                attr: "ĐEN - L"
+            },
+            {
+                id: 2,
+                name: "ÁO POLO SIGNATURE",
+                price: 250000,
+                stock: 30,
+                img: "https://placehold.co/40/000/fff?text=P",
+                attr: "TRẮNG - M"
+            },
+            {
+                id: 3,
+                name: "QUẦN JEANS SLIMFIT",
+                price: 350000,
+                stock: 20,
+                img: "https://placehold.co/40/000/fff?text=J",
+                attr: "XANH - 32"
+            },
+            {
+                id: 4,
+                name: "SƠ MI OXFORD BLUE",
+                price: 280000,
+                stock: 15,
+                img: "https://placehold.co/40/000/fff?text=S",
+                attr: "XANH - XL"
+            },
+            {
+                id: 5,
+                name: "ÁO KHOÁC BOMBER",
+                price: 450000,
+                stock: 10,
+                img: "https://placehold.co/40/000/fff?text=B",
+                attr: "RÊU - XXL"
+            },
+            {
+                id: 6,
+                name: "T-SHIRT GRAPHIC",
+                price: 180000,
+                stock: 45,
+                img: "https://placehold.co/40/000/fff?text=G",
+                attr: "HỒNG - S"
+            },
+            {
+                id: 7,
+                name: "QUẦN SHORT KAKI",
+                price: 220000,
+                stock: 25,
+                img: "https://placehold.co/40/000/fff?text=K",
+                attr: "BE - 30"
+            },
+        ],
+        invoices: [{id: 1, name: 'Hóa đơn 1', cart: [], customer: 'KHÁCH VÃNG LAI', phone: ''}],
+        activeInvoiceId: 1,
+
+        init: function () {
+            this.renderProducts(this.products);
+            this.renderTabs();
+            this.renderCart();
+        },
+        createInvoice: function () {
+            if (this.invoices.length >= 5) {
+                toast("Chỉ được tạo tối đa 5 hóa đơn chờ!", "warning");
+                return;
+            }
+            const newId = Date.now();
+            const nextNum = this.invoices.length + 1;
+            this.invoices.push({
+                id: newId,
+                name: `Hóa đơn ${nextNum}`,
+                cart: [],
+                customer: 'KHÁCH VÃNG LAI',
+                phone: ''
+            });
+            this.switchTab(newId);
+            toast("Đã tạo hóa đơn mới", "success");
+        },
+
+        // --- LOGIC XÓA (MODAL CONFIRM) ---
+        promptDelete: function () {
+            if (this.invoices.length <= 1) {
+                toast("Không thể xóa hóa đơn cuối cùng!", "warning");
+                return;
+            }
+            this.openModal('confirmModal');
+        },
+        forceDelete: function () {
+            this.invoices = this.invoices.filter(inv => inv.id !== this.activeInvoiceId);
+            if (this.invoices.length === 0) {
+                const newId = Date.now();
+                this.invoices.push({id: newId, name: 'Hóa đơn 1', cart: [], customer: 'KHÁCH VÃNG LAI', phone: ''});
+                this.activeInvoiceId = newId;
+            } else {
+                this.activeInvoiceId = this.invoices[0].id;
+            }
+            this.renderTabs();
+            this.renderCart();
+            this.closeModal('confirmModal');
+            toast("Đã hủy hóa đơn thành công!", "success");
+        },
+
+        switchTab: function (id) {
+            this.activeInvoiceId = id;
+            this.renderTabs();
+            this.renderCart();
+        },
+        renderTabs: function () {
+            const container = document.getElementById('invoiceTabsContainer');
+            container.innerHTML = this.invoices.map(inv => `
+                <button class="tab ${inv.id === this.activeInvoiceId ? 'active' : ''}"
+                        style="padding: 0 15px; border-bottom: 2px solid ${inv.id === this.activeInvoiceId ? '#000' : 'transparent'}"
+                        onclick="PosApp.switchTab(${inv.id})">
+                    ${inv.name}
+                </button>
+            `).join('');
+            const cur = this.getCurrentInvoice();
+            document.getElementById('customerName').innerText = cur.customer;
+            document.getElementById('customerPhone').innerText = cur.phone || 'Khách lẻ';
+        },
+        getCurrentInvoice: function () {
+            return this.invoices.find(inv => inv.id === this.activeInvoiceId);
+        },
+        renderProducts: function (list) {
+            document.getElementById('productBody').innerHTML = list.map(p => `
+                <tr onclick="PosApp.addToCart(${p.id})" style="cursor: pointer;">
+                    <td style="text-align:center; padding: 5px;">
+                        <img src="${p.img}" style="width: 36px; height: 36px; border-radius: 2px; border: 1px solid #eee;">
+                    </td>
+                    <td>
+                        <div style="font-weight:700; color: #000;">${p.name}</div>
+                        <div style="font-size:11px; color:#666;">${p.attr}</div>
+                    </td>
+                    <td style="text-align:right; font-weight:700;">${new Intl.NumberFormat('vi-VN').format(p.price)}</td>
+                    <td style="text-align:center;">${p.stock}</td>
+                    <td style="text-align:center;">
+                        <button class="btn-icon" style="width: 24px; height: 24px;">
+                            <i class="bi bi-plus-lg" style="font-size:12px;"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        },
+        addToCart: function (id) {
+            const invoice = this.getCurrentInvoice();
+            const product = this.products.find(p => p.id === id);
+            const item = invoice.cart.find(i => i.id === id);
+            if (item) item.qty++; else invoice.cart.push({...product, qty: 1});
+            this.renderCart();
+        },
+        renderCart: function () {
+            const invoice = this.getCurrentInvoice();
+            const tbody = document.getElementById('cartBody');
+            if (invoice.cart.length === 0) {
+                tbody.innerHTML = '';
+                document.getElementById('emptyCart').style.display = 'block';
+                this.updateTotal(0);
+                return;
+            }
+            document.getElementById('emptyCart').style.display = 'none';
+            tbody.innerHTML = invoice.cart.map(item => `
+                <tr>
+                    <td style="padding-left: 20px;">
+                        <div style="font-weight:700; font-size: 12px;">${item.name}</div>
+                        <div style="font-size:10px; color:#666;">${item.attr}</div>
+                    </td>
+                    <td style="text-align:center;">
+                        <div style="display:flex; justify-content:center; align-items:center; gap:5px;">
+                            <button class="btn-icon" style="width:20px; height:20px; font-size:10px;" onclick="PosApp.changeQty(${item.id}, -1)">-</button>
+                            <span style="font-weight:700; min-width: 15px;">${item.qty}</span>
+                            <button class="btn-icon" style="width:20px; height:20px; font-size:10px;" onclick="PosApp.changeQty(${item.id}, 1)">+</button>
+                        </div>
+                    </td>
+                    <td style="text-align:right; padding-right: 20px; font-weight:700;">
+                        ${new Intl.NumberFormat('vi-VN').format(item.price * item.qty)}
+                    </td>
+                    <td style="text-align:center;">
+                        <i class="bi bi-x" style="cursor:pointer; font-size:18px; color: #999;" onclick="PosApp.changeQty(${item.id}, -999)"></i>
+                    </td>
+                </tr>
+            `).join('');
+            this.updateTotal(invoice.cart.reduce((sum, i) => sum + (i.price * i.qty), 0));
+        },
+        changeQty: function (id, delta) {
+            const invoice = this.getCurrentInvoice();
+            const item = invoice.cart.find(i => i.id === id);
+            if (item) {
+                item.qty += delta;
+                if (item.qty <= 0) invoice.cart = invoice.cart.filter(i => i.id !== id);
+                this.renderCart();
+            }
+        },
+        updateTotal: function (total) {
+            const money = new Intl.NumberFormat('vi-VN').format(total) + ' ₫';
+            document.getElementById('lblSubTotal').innerText = money;
+            document.getElementById('lblTotal').innerText = money;
+            document.getElementById('modalTotal').innerText = money;
+        },
+        filterProduct: function (key) {
+            const lower = key.toLowerCase();
+            this.renderProducts(this.products.filter(p => p.name.toLowerCase().includes(lower)));
+        },
+
+        // --- MODAL LOGIC ---
+        openModal: function (id) {
+            if (id === 'payModal' && this.getCurrentInvoice().cart.length === 0) {
+                toast("Giỏ hàng đang trống!", "error");
+                return;
+            }
+            document.getElementById(id).classList.add('show');
+            if (id === 'payModal') this.switchPaymentMethod('cash', document.querySelectorAll('#payModal .tab')[0]);
+        },
+        closeModal: function (id) {
+            document.getElementById(id).classList.remove('show');
+        },
+
+        switchCustTab: function (tabName) {
+            document.getElementById('tabSearchBtn').classList.remove('active');
+            document.getElementById('tabCreateBtn').classList.remove('active');
+            document.getElementById('paneSearch').style.display = tabName === 'search' ? 'block' : 'none';
+            document.getElementById('paneCreate').style.display = tabName === 'create' ? 'block' : 'none';
+            if (tabName === 'search') document.getElementById('tabSearchBtn').classList.add('active');
+            else document.getElementById('tabCreateBtn').classList.add('active');
+        },
+        selectCustomer: function (name, phone) {
+            const inv = this.getCurrentInvoice();
+            inv.customer = name;
+            inv.phone = phone;
+            this.renderTabs();
+            this.closeModal('customerModal');
+            toast(`Đã chọn khách: ${name}`, "success");
+        },
+        createNewCustomer: function () {
+            const name = document.getElementById('newCustName').value;
+            const phone = document.getElementById('newCustPhone').value;
+            if (!name || !phone) {
+                toast("Vui lòng nhập đủ thông tin!", "warning");
+                return;
+            }
+            this.selectCustomer(name, phone);
+        },
+
+        switchPaymentMethod: function (type, el) {
+            // 1. Xử lý giao diện Tab (Chỉ cần add/remove class active là có gạch chân)
+            const container = el.parentElement;
+            container.querySelectorAll('.tab').forEach(t => {
+                t.classList.remove('active');
+            });
+            el.classList.add('active');
+
+            // 2. Xử lý hiển thị nội dung
+            document.getElementById('cash-section').style.display = type === 'cash' ? 'flex' : 'none'; // Nhớ là flex nhé
+            // Cái này dùng logic CSS đè style display:block hôm qua tao chỉ
+            const transferSection = document.getElementById('transfer-section');
+            transferSection.style.display = type === 'cash' ? 'none' : 'block';
+        },
+        selectApp: function (el) {
+            // Tìm tất cả các thằng có class .payment-option và bỏ chọn hết
+            document.querySelectorAll('.payment-option').forEach(b => b.classList.remove('selected'));
+            // Chọn thằng vừa bấm
+            el.classList.add('selected');
+        },
+        calcChange: function () {
+            const total = parseInt(document.getElementById('lblTotal').innerText.replace(/\D/g, '')) || 0;
+            const cust = parseInt(document.getElementById('inpKhachDua').value.replace(/\D/g, '')) || 0;
+            document.getElementById('lblTienThua').innerText = new Intl.NumberFormat('vi-VN').format(Math.max(0, cust - total)) + ' ₫';
+        },
+        finishOrder: function () {
+            toast("Thanh toán thành công!", "success");
+            this.closeModal('payModal');
+            // Logic reset hóa đơn...
+        }
+    };
+    window.PosApp = PosApp;
+    window.onload = function () {
+        PosApp.init();
+    }
+</script>
+</body>
+</html>

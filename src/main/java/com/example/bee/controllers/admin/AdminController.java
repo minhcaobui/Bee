@@ -22,8 +22,9 @@ public class AdminController {
         return "admin/promotion/promotions";
     }
 
-//    @GetMapping("/products")
-//    public String products() {
-//        return "admin/product/products";
-//    }
+    @GetMapping("/pos")
+    public String pos() {
+        return "admin/sale/pos";
+    }
+
 }
