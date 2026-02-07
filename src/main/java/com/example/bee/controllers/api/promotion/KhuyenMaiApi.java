@@ -4,7 +4,6 @@ import com.example.bee.dto.PromotionRequest;
 import com.example.bee.entities.product.SanPham;
 import com.example.bee.entities.promotion.KhuyenMai;
 import com.example.bee.entities.promotion.KhuyenMaiSanPham;
-import com.example.bee.repositories.product.SanPhamRepository;
 import com.example.bee.repositories.promotion.KhuyenMaiRepository;
 import com.example.bee.repositories.promotion.KhuyenMaiSanPhamRepository;
 import jakarta.transaction.Transactional;
