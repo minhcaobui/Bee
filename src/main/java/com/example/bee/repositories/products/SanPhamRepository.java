@@ -7,16 +7,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
-
-    boolean existsByTenIgnoreCaseAndDanhMucIdAndHangIdAndChatLieuId(
-            String ten, Integer idDanhMuc, Integer idHang, Integer idChatLieu
-    );
-
-    boolean existsByTenIgnoreCaseAndDanhMucIdAndHangIdAndChatLieuIdAndIdNot(
-            String ten, Integer idDanhMuc, Integer idHang, Integer idChatLieu, Integer id
-    );
 
     boolean existsByMaIgnoreCase(String ma);
 
@@ -32,4 +26,8 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
             "AND (:idChatLieu IS NULL OR s.chatLieu.id = :idChatLieu)")
     Page<SanPham> search(String q, Boolean trangThai, Integer idDanhMuc,
                          Integer idHang, Integer idChatLieu, Pageable pageable);
+
+    @Query("SELECT s FROM SanPham s " +
+            "WHERE s.trangThai = true ")
+    List<SanPham> getAllActiveProducts();
 }

@@ -20,4 +20,14 @@ public class AdminController {
     public String products() {
         return "admin/product/products";
     }
+
+    @GetMapping("/pos")
+    public String pos() {
+        return "admin/sale/pos";
+    }
+
+    @GetMapping("/promotions")
+    public String promotions() {
+        return "admin/promotion/promotions";
+    }
 }

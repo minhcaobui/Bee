@@ -1,0 +1,1012 @@
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Khuyến Mãi & Voucher</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <style>
+        /* --- CSS CHUNG --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --black: #000; --white: #fff; --gray-100: #f4f4f5; --gray-200: #e4e4e7; --gray-300: #d4d4d8; --font-size: 12.5px; }
+        body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--black); font-size: var(--font-size); line-height: 1.4; }
+        .container { max-width: 100%; padding: 20px 30px; }
+
+        /* Tabs */
+        .actions-bar { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--gray-200); margin-bottom: 20px; padding-bottom: 0; }
+        .tabs { display: flex; gap: 30px; margin-bottom: 0; border: none; }
+        .tab { font-size: 12.5px; font-weight: 700; color: #888; padding: 0 0 12px 0; cursor: pointer; text-transform: uppercase; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
+        .tab:hover { color: #000; }
+        .tab.active { color: #000; border-bottom-color: #000; }
+
+        /* Buttons & Inputs */
+        .btn { font-size: 11px; font-weight: 800; text-transform: uppercase; height: 30px; padding: 0 14px; background: #000; color: #fff; border: 1px solid #000; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; border-radius: 2px; }
+        .btn:hover { background: #333; }
+        .btn-secondary { background: #fff; color: #000; border: 1px solid #ccc; }
+        .btn-secondary:hover { background: #f4f4f5; }
+
+        /* Search */
+        .search-section { margin-bottom: 15px; }
+        .search-wrapper { display: flex; gap: 10px; flex-wrap: wrap; }
+        .search-box { position: relative; width: 100%; }
+        .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 14px; pointer-events: none; }
+        .search-input { width: 300px; padding: 8px 12px 8px 36px !important; font-size: 12.5px; border: 1px solid var(--gray-300); outline: none; background: #fff; height: 34px; border-radius: 2px; }
+        .filter-select { padding: 8px 12px; font-size: 12.5px; border: 1px solid var(--gray-300); outline: none; background: #fff; height: 34px; border-radius: 2px; }
+        .search-input:focus, .filter-select:focus { border-color: #000; }
+
+        /* Table */
+        .table-wrapper { border: 1px solid var(--gray-200); width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+        thead th { text-align: left; padding: 10px 15px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #666; background: #fafafa; border-bottom: 1px solid var(--gray-200); white-space: nowrap; }
+        tbody td { padding: 8px 15px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; font-size: 12.5px; word-wrap: break-word; }
+        tbody tr:hover { background: var(--gray-100); }
+        .status { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; background: #f4f4f5; color: #666; white-space: nowrap; }
+        .status:not(.inactive) { background: #ecfdf5; color: #059669; }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+        .btn-icon { width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--gray-200); background: #fff; cursor: pointer; border-radius: 2px; margin-left: 4px; }
+        .btn-icon:hover { border-color: #000; background: #000; color: #fff; }
+
+        /* Pagination */
+        .pagination-wrapper { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; }
+        .pagination-info { font-size: 11px; font-weight: 600; color: #888; }
+        .page-number { min-width: 26px; height: 26px; font-size: 12px; font-weight: 700; background: transparent; border: 1px solid transparent; cursor: pointer; }
+        .page-number.active { background: #000; color: #fff; }
+
+        /* Drawer */
+        .overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 999; display: none; }
+        .overlay.show { display: block; }
+        .drawer { position: fixed; top: 0; right: -600px; width: 600px; height: 100vh; background: #fff; border-left: 1px solid var(--gray-200); z-index: 1000; transition: 0.3s; display: flex; flex-direction: column; box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1); }
+        .drawer.show { right: 0; }
+        .drawer-header { padding: 15px 20px; border-bottom: 1px solid var(--gray-200); }
+        .drawer-title { font-size: 14px; font-weight: 800; text-transform: uppercase; margin: 0; }
+        .drawer-body { flex: 1; padding: 20px; overflow-y: auto; }
+        .drawer-footer { padding: 15px 20px; border-top: 1px solid var(--gray-200); display: flex; gap: 10px; }
+
+        /* Form & Switch */
+        .form-group { margin-bottom: 15px; }
+        .form-label { font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        .form-input { width: 100%; padding: 8px; font-size: 12.5px; border: 1px solid var(--gray-300); outline: none; }
+        .form-input:focus { border-color: #000; }
+        .form-input:disabled { background: #f5f5f5; color: #888; cursor: not-allowed; border-color: #eee; }
+        .switch-wrapper { display: flex; align-items: center; gap: 10px; }
+        .switch { width: 36px; height: 20px; position: relative; appearance: none; background: #ddd; outline: none; cursor: pointer; transition: 0.2s; }
+        .switch::before { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #fff; transition: 0.2s; }
+        .switch:checked { background: #000; }
+        .switch:checked::before { left: 18px; }
+
+        /* Quick Switch (Table) */
+        .switch-sm { position: relative; display: inline-block; width: 30px; height: 16px; }
+        .switch-sm input { opacity: 0; width: 0; height: 0; }
+        .slider-sm { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 16px; }
+        .slider-sm:before { position: absolute; content: ""; height: 12px; width: 12px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider-sm { background-color: #000; }
+        input:checked + .slider-sm:before { transform: translateX(14px); }
+        .switch-sm.loading { opacity: 0.5; pointer-events: none; }
+
+        /* Toast Xịn (Góc trên phải) */
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 10002; display: flex; flex-direction: column; gap: 10px; }
+        .toast { min-width: 280px; padding: 14px 22px; border-radius: 6px; background: #fff; color: #000; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); display: flex; align-items: center; gap: 12px; border-left: 5px solid #000; animation: toastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; transition: all 0.5s ease; }
+        .toast.success { border-left-color: #10b981; }
+        .toast.error { border-left-color: #ef4444; }
+        .toast.warning { border-left-color: #f59e0b; }
+        .toast.hiding { transform: translateX(130%); opacity: 0; margin-top: -60px; }
+        @keyframes toastSlideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* Product Select Box */
+        .product-select-box { border: 1px solid #eee; border-radius: 4px; height: 250px; overflow-y: auto; }
+        .product-table { width: 100%; border-collapse: collapse; }
+        .product-table th { position: sticky; top: 0; background: #f9f9f9; padding: 8px; text-align: left; font-size: 11px; font-weight: 700; border-bottom: 1px solid #eee; }
+        .product-table td { padding: 8px; border-bottom: 1px solid #eee; font-size: 12px; }
+        .empty-state { text-align: center; padding: 40px; color: #888; font-size: 12px; }
+
+        /* --- PROGRESS BAR & HOVER EFFECT (BẢN FIX OCD) --- */
+        .qty-wrapper {
+            display: flex;
+            flex-direction: column; /* Xếp dọc: Chữ trên, Bar dưới */
+            align-items: center;    /* Căn giữa ngang */
+            justify-content: center;/* Căn giữa dọc */
+            cursor: help;
+            min-width: 140px;       /* Đảm bảo ô đủ rộng, không bị co */
+            padding: 5px 0;         /* Khoảng đệm trên dưới cho thoáng */
+        }
+
+        /* Khung chứa chữ (Cao cố định để không bị nhảy dòng khi hover) */
+        .qty-text-group {
+            position: relative;
+            width: 100%;
+            height: 18px; /* Chiều cao cố định cho dòng chữ */
+            margin-bottom: 6px; /* Cách thanh bar ra 6px cho thoáng */
+        }
+
+        /* Định dạng chung cho 2 dòng chữ */
+        .qty-default, .qty-hover-text {
+            position: absolute; /* Chồng lên nhau tại đúng 1 vị trí */
+            width: 100%;
+            text-align: center; /* Căn giữa chữ */
+            left: 0;
+            top: 0;
+            font-size: 11.5px;
+            font-weight: 700;
+            white-space: nowrap; /* Cấm xuống dòng */
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); /* Hiệu ứng mượt */
+        }
+
+        /* --- TRẠNG THÁI BÌNH THƯỜNG --- */
+        .qty-default {
+            opacity: 1;
+            transform: translateY(0);
+            color: #374151; /* Màu chữ xám đậm cho dễ đọc */
+        }
+        .qty-hover-text {
+            opacity: 0;
+            transform: translateY(5px); /* Nằm thấp xuống 1 chút chờ trồi lên */
+        }
+
+        /* --- KHI HOVER VÀO --- */
+        .qty-wrapper:hover .qty-default {
+            opacity: 0;
+            transform: translateY(-5px); /* Bay lên trên */
+        }
+        .qty-wrapper:hover .qty-hover-text {
+            opacity: 1;
+            transform: translateY(0); /* Trồi lên vị trí chính giữa */
+        }
+
+        /* --- THANH BAR --- */
+        .progress-track {
+            width: 90%; /* Không full 100% để hở 2 bên cho đẹp */
+            height: 6px;
+            background-color: #e5e7eb; /* Màu nền xám nhạt */
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.6s ease; /* Bar chạy mượt hơn */
+        }
+
+        /* Màu sắc */
+        .bg-safe { background-color: #10b981; }
+        .bg-warning { background-color: #f59e0b; }
+        .bg-danger { background-color: #ef4444; }
+
+        .text-safe { color: #059669; }
+        .text-warning { color: #d97706; }
+        .text-danger { color: #dc2626; }
+
+        /* Quick Switch (Table) - Style Vuông */
+        .switch-sm { position: relative; display: inline-block; width: 30px; height: 16px; }
+        .switch-sm input { opacity: 0; width: 0; height: 0; }
+
+        /* Bỏ border-radius: 16px đi để nó vuông */
+        .slider-sm {
+            position: absolute; cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 0; /* Vuông chằn chặn */
+        }
+
+        /* Bỏ border-radius: 50% đi để cục trượt cũng vuông */
+        .slider-sm:before {
+            position: absolute; content: "";
+            height: 12px; width: 12px;
+            left: 2px; bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 0; /* Vuông chằn chặn */
+        }
+
+        /* Màu khi bật (Checked) */
+        input:checked + .slider-sm { background-color: #000; }
+        input:checked + .slider-sm:before { transform: translateX(14px); }
+
+        .switch-sm.loading { opacity: 0.5; pointer-events: none; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="actions-bar">
+        <nav class="tabs">
+            <button class="tab active" data-tab="voucher" onclick="window.PromotionApp.switchTab('voucher')" id="tabVoucher">
+                <i class="bi bi-ticket-perforated-fill"></i> MÃ GIẢM GIÁ (Voucher)
+            </button>
+
+            <button class="tab" data-tab="sale" onclick="window.PromotionApp.switchTab('sale')" id="tabSale">
+                <i class="bi bi-tags-fill"></i> ĐỢT KHUYẾN MÃI (Sale)
+            </button>
+        </nav>
+        <button class="btn" id="btnAdd" onclick="window.PromotionApp.openDrawer('create')">
+            <i class="bi bi-plus-lg"></i> THÊM MỚI
+        </button>
+    </div>
+
+    <section class="search-section">
+        <div class="search-wrapper">
+            <div style="flex: 2; min-width: 200px;">
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" class="search-input" id="search"
+                           placeholder="Tìm tên hoặc mã..."
+                           oninput="window.PromotionApp.handleSearch(this.value)">
+                </div>
+            </div>
+            <select class="filter-select" id="fTrangThaiFilter" onchange="window.PromotionApp.handleStatus(this.value)">
+                <option value="">-- Trạng thái --</option>
+                <option value="true">Đang hoạt động</option>
+                <option value="false">Ngưng hoạt động</option>
+            </select>
+            <button class="btn btn-secondary" onclick="window.PromotionApp.resetFilters()">
+                <i class="bi bi-arrow-counterclockwise"></i>
+            </button>
+        </div>
+    </section>
+
+    <div class="table-wrapper">
+        <table>
+            <thead id="thead">
+            </thead>
+            <tbody id="tbody"></tbody>
+        </table>
+    </div>
+
+    <div class="pagination-wrapper">
+        <div class="pagination-info" id="info">Đang tải...</div>
+        <div class="pagination">
+            <button class="page-number" id="prev">←</button>
+            <button class="page-number" id="next">→</button>
+        </div>
+    </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="window.PromotionApp.closeDrawer()"></div>
+
+<aside class="drawer" id="drawer">
+    <div class="drawer-header"><h3 class="drawer-title" id="drawerTitle">THÊM MỚI</h3></div>
+    <div class="drawer-body">
+        <h5 style="font-weight:700; margin-bottom:10px; font-size:13px; color:#555;">1. Thông tin chung</h5>
+
+        <div class="form-group">
+            <label class="form-label" id="lblMa">Mã chương trình <span style="font-weight:400; color:#888;">(Tự sinh nếu trống)</span></label>
+            <input id="kmMa" class="form-input" maxlength="20" placeholder="VD: SALE50..." oninput="this.value = this.value.toUpperCase().replace(/\s/g, '')">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Tên hiển thị <span style="color:red">*</span></label>
+            <input id="kmTen" class="form-input" placeholder="Nhập tên...">
+        </div>
+
+        <div style="display: flex; gap: 15px;">
+            <div class="form-group" style="flex: 1;">
+                <label class="form-label">Loại giảm</label>
+                <select id="kmLoai" class="form-input" onchange="window.PromotionApp.handleTypeChange()">
+                    <option value="PERCENT">Phần trăm (%)</option>
+                    <option value="AMOUNT">Tiền mặt (VND)</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label class="form-label">Giá trị giảm <span style="color:red">*</span></label>
+                <input id="kmGiaTri" class="form-input" placeholder="VD: 10" oninput="window.PromotionApp.formatMoneyInput(this)">
+            </div>
+        </div>
+
+        <div id="voucherFields" style="display: none;">
+            <div class="form-group" id="groupMaxGiam" style="display: none;">
+                <label class="form-label">Giảm tối đa (VND) <span style="color:red">*</span></label>
+                <input id="vGiaTriToiDa" class="form-input" placeholder="VD: 100,000" oninput="window.PromotionApp.formatMoneyInput(this)">
+            </div>
+
+            <div style="display: flex; gap: 15px;">
+                <div class="form-group" style="flex: 1;">
+                    <label class="form-label">Đơn tối thiểu <span style="color:red">*</span></label>
+                    <input id="vDieuKien" class="form-input" placeholder="VD: 200,000" oninput="window.PromotionApp.formatMoneyInput(this)">
+                </div>
+                <div class="form-group" style="flex: 1; text-align: center">
+                    <label class="form-label">Số lượng <span style="color:red">*</span></label>
+                    <input id="vSoLuong" type="number" class="form-input" placeholder="VD: 100">
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 15px; margin-top: 5px;">
+            <div class="form-group" style="flex: 1;">
+                <label class="form-label">Ngày bắt đầu <span style="color:red">*</span></label>
+                <input id="kmNgayBatDau" type="datetime-local" class="form-input">
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label class="form-label">Ngày kết thúc <span style="color:red">*</span></label>
+                <input id="kmNgayKetThuc" type="datetime-local" class="form-input">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="switch-wrapper">
+                <input type="checkbox" id="kmCongDon" class="switch" onchange="window.PromotionApp.handleCongDonChange(this)">
+                <span class="switch-label">Cho phép cộng dồn</span>
+            </div>
+            <div id="congDonWarning" style="display:none; margin-top:5px; font-size:11px; color:#d97706; background:#fffbeb; padding:5px; border-radius:4px; border:1px solid #fcd34d;">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                Lưu ý: Nếu tắt cộng dồn, các sản phẩm đang tham gia khuyến mãi khác có thể bị báo lỗi trùng lặp.
+            </div>
+
+            <div class="switch-wrapper" style="margin-top: 10px;">
+                <input type="checkbox" id="kmTrangThai" class="switch" checked>
+                <span class="switch-label">Kích hoạt</span>
+            </div>
+        </div>
+
+        <div id="saleFields">
+            <h5 style="font-weight:700; margin: 20px 0 10px 0; font-size:13px; color:#555;">2. Chọn sản phẩm áp dụng</h5>
+            <div class="form-group">
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                    <input type="text" id="productSearchDrawer" class="form-input" placeholder="Tìm sản phẩm..." style="width: 60%;" oninput="window.PromotionApp.filterProducts(this.value)">
+                    <span style="color:blue; font-size:11px; line-height: 34px;" id="selectedCount">(Đã chọn: 0)</span>
+                </div>
+                <div class="product-select-box">
+                    <table class="product-table">
+                        <thead>
+                        <tr>
+                            <th style="width:40px; text-align: center;"><input type="checkbox" id="checkAll"></th>
+                            <th>MÃ SP</th>
+                            <th>TÊN SẢN PHẨM</th>
+                        </tr>
+                        </thead>
+                        <tbody id="productTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="drawer-footer">
+        <button class="btn btn-secondary" id="btnClose" onclick="window.PromotionApp.closeDrawer()" style="flex: 1;">Thoát</button>
+        <button class="btn" id="btnSave" onclick="window.PromotionApp.saveItem()" style="flex: 1;">Lưu</button>
+    </div>
+</aside>
+
+<div class="toast-container" id="toastHost"></div>
+
+<script>
+    // --- TOAST ---
+    window.toast = function(message, type = 'success') {
+        const container = document.getElementById('toastHost');
+        if (!container) return;
+        const el = document.createElement('div');
+        el.className = `toast ${type}`;
+
+        const prefix = type === 'success' ? 'THÀNH CÔNG: ' : (type === 'error' ? 'LỖI: ' : 'THÔNG BÁO: ');
+
+        // Thêm thẻ span làm nút đóng (dấu x)
+        el.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+            <div>
+                <span style="font-weight:700; font-size:12px;">${prefix}</span>
+                <span style="font-weight:500; font-size:12px;">${message}</span>
+            </div>
+            <i class="bi bi-x-lg" style="cursor: pointer; margin-left: 10px; font-size: 14px;" onclick="this.parentElement.parentElement.remove()"></i>
+        </div>
+    `;
+
+        container.appendChild(el);
+
+        // Tự động xóa sau 4 giây nếu không bấm đóng
+        setTimeout(() => {
+            if (el.parentNode) {
+                el.classList.add('hiding');
+                el.addEventListener('transitionend', () => el.remove());
+            }
+        }, 3500);
+    };
+
+    window.PromotionApp = {
+        state: {
+            activeTab: 'sale', // Mặc định là Sale
+            page: 0, size: 10, totalPages: 0, q: '', trangThai: '',
+            editingId: null, products: [], selectedProductIds: []
+        },
+
+        init: function () {
+            this.bindEvents();
+            this.loadProducts(); // Load sẵn sản phẩm
+            this.switchTab('voucher'); // Khởi động ở tab voucher
+        },
+
+        bindEvents: function () {
+            // Các nút bấm
+            document.getElementById('btnAdd').onclick = () => this.openDrawer('create');
+            document.getElementById('btnSave').onclick = () => this.saveItem();
+            document.getElementById('btnClose').onclick = () => this.closeDrawer();
+            document.getElementById('overlay').onclick = () => this.closeDrawer();
+
+            // Checkbox All
+            document.getElementById('checkAll').onclick = (e) => {
+                if (document.getElementById('checkAll').disabled) return;
+                document.querySelectorAll('.product-check').forEach(chk => {
+                    chk.checked = e.target.checked;
+                    this.toggleProductSelection(parseInt(chk.value), e.target.checked);
+                });
+            };
+
+            // Phân trang
+            document.getElementById('prev').onclick = () => { if (this.state.page > 0) { this.state.page--; this.loadData(); } };
+            document.getElementById('next').onclick = () => { if (this.state.page < this.state.totalPages - 1) { this.state.page++; this.loadData(); } };
+        },
+
+        // --- XỬ LÝ TAB (MỚI) ---
+        switchTab: function(tab) {
+            this.state.activeTab = tab;
+            this.state.page = 0;
+            this.state.q = '';
+            this.state.trangThai = '';
+
+            // UI Tab
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            if(tab === 'sale') document.getElementById('tabSale').classList.add('active');
+            else document.getElementById('tabVoucher').classList.add('active');
+
+            // Reset Search & Load Data
+            document.getElementById('search').value = '';
+            document.getElementById('fTrangThaiFilter').value = '';
+            this.renderHeader();
+            this.loadData();
+        },
+
+        renderHeader: function() {
+            const thead = document.getElementById('thead');
+            if(this.state.activeTab === 'sale') {
+                thead.innerHTML = `<tr>
+                    <th style="width:50px; text-align:center;">STT</th>
+                    <th>MÃ</th>
+                    <th>TÊN CHƯƠNG TRÌNH</th>
+                    <th>LOẠI GIẢM</th>
+                    <th>GIÁ TRỊ</th>
+                    <th>THỜI GIAN ÁP DỤNG</th>
+                    <th style="text-align:center">TRẠNG THÁI</th>
+                    <th style="text-align:right">THAO TÁC</th>
+                </tr>`;
+            } else {
+                thead.innerHTML = `<tr>
+                    <th style="width:50px; text-align:center;">STT</th>
+                    <th>MÃ VOUCHER</th>
+                    <th>TÊN VOUCHER</th>
+                    <th>LOẠI</th>
+                    <th>GIÁ TRỊ</th>
+                    <th>ĐIỀU KIỆN</th>
+                    <th>SỐ LƯỢNG</th>
+                    <th style="text-align:center">TRẠNG THÁI</th>
+                    <th style="text-align:right">THAO TÁC</th>
+                </tr>`;
+            }
+        },
+
+        // --- LOAD DATA (ĐA NĂNG) ---
+        loadData: async function () {
+            const { activeTab, page, size, q, trangThai } = this.state;
+            const endpoint = activeTab === 'sale' ? '/api/khuyen-mai' : '/api/vouchers';
+            const url = `${endpoint}?page=${page}&size=${size}&q=${q}&trangThai=${trangThai}`;
+
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if(activeTab === 'sale') this.renderSaleTable(data.content || []);
+                else this.renderVoucherTable(data.content || []);
+
+                this.renderPagination(data);
+            } catch (e) {
+                console.error(e);
+                window.toast("Hệ thống gặp sự cố khi tải danh sách dữ liệu. Vui lòng làm mới trang hoặc thử lại sau.", "error");
+            }
+        },
+
+        renderSaleTable: function (list) {
+            const tbody = document.getElementById('tbody');
+            if (list.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Chưa có khuyến mãi nào</td></tr>'; return; }
+            tbody.innerHTML = list.map((item, index) => {
+                const fm = new Intl.NumberFormat('vi-VN');
+                const val = item.loai === 'PERCENT' ? item.giaTri + '%' : fm.format(item.giaTri) + ' đ';
+                const toggleHtml = `<label class="switch-sm"><input type="checkbox" ${item.trangThai ? 'checked' : ''} onchange="window.PromotionApp.quickToggle(${item.id}, this)"><span class="slider-sm"></span></label>`;
+
+                return `<tr>
+                    <td style="text-align:center;">${(this.state.page * this.state.size) + index + 1}</td>
+                    <td style="font-weight:700;">${item.ma}</td>
+                    <td>${item.ten}</td>
+                    <td>${item.loai === 'PERCENT' ? 'Phần trăm' : 'Tiền mặt'}</td>
+                    <td style="font-weight:700; color:#d63384;">${val}</td>
+                    <td style="font-size:11px;">${item.ngayBatDau.replace('T',' ')}<br>${item.ngayKetThuc.replace('T',' ')}</td>
+                    <td style="text-align:center;">${toggleHtml}</td>
+                    <td style="text-align:right; white-space: nowrap;">
+                    <button class="btn-icon" title="Chi tiết" onclick="window.PromotionApp.openView(${item.id})"><i class="bi bi-eye"></i></button>
+                        <button class="btn-icon" title="Sửa" onclick="window.PromotionApp.openEdit(${item.id})"><i class="bi bi-pencil"></i></button>
+                    </td>
+                </tr>`;
+            }).join('');
+        },
+
+        renderVoucherTable: function (list) {
+            const tbody = document.getElementById('tbody');
+            if (list.length === 0) { tbody.innerHTML = '<tr><td colspan="9" class="empty-state">Chưa có voucher nào</td></tr>'; return; }
+
+            tbody.innerHTML = list.map((item, index) => {
+                const fm = new Intl.NumberFormat('vi-VN');
+                const val = item.loaiGiamGia === 'PERCENTAGE' ? item.giaTriGiamGia + '%' : fm.format(item.giaTriGiamGia) + ' đ';
+                const cond = fm.format(item.dieuKien);
+                const toggleHtml = `<label class="switch-sm"><input type="checkbox" ${item.trangThai ? 'checked' : ''} onchange="window.PromotionApp.quickToggle(${item.id}, this)"><span class="slider-sm"></span></label>`;
+
+                // --- LOGIC TÍNH TOÁN & FORMAT SỐ ---
+                const total = item.soLuong;
+                const used = item.luotSuDung;
+                const remain = total - used;
+                const percentRemain = total > 0 ? (remain / total) * 100 : 0;
+
+                // Hàm format số nhỏ gọn (VD: 1.000)
+                const fmt = (n) => n.toLocaleString('vi-VN');
+
+                // Xác định màu sắc (Giữ nguyên)
+                let colorClass = 'bg-safe';
+                let textClass = 'text-safe';
+
+                if (remain === 0) { colorClass = 'bg-danger'; textClass = 'text-danger'; }
+                else if (percentRemain < 30) { colorClass = 'bg-danger'; textClass = 'text-danger'; }
+                else if (percentRemain < 70) { colorClass = 'bg-warning'; textClass = 'text-warning'; }
+
+                // --- HTML MỚI (Đã thêm format số fmt(...)) ---
+                const qtyHtml = `
+                    <div class="qty-wrapper" title="Rê chuột để xem số lượng còn lại">
+                        <div class="qty-text-group">
+                            <span class="qty-default">${fmt(used)} / ${fmt(total)}</span>
+                            <span class="qty-hover-text ${textClass}">Còn: ${fmt(remain)}</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill ${colorClass}" style="width: ${percentRemain}%"></div>
+                        </div>
+                    </div>
+                `;
+
+                return `<tr>
+                    <td style="text-align:center;">${(this.state.page * this.state.size) + index + 1}</td>
+                    <td style="font-weight:700;">${item.maCode}</td>
+                    <td>${item.ten}</td>
+                    <td>${item.loaiGiamGia === 'PERCENTAGE' ? 'Phần trăm' : 'Tiền mặt'}</td>
+                    <td style="font-weight:700; color:#d63384;">${val}</td>
+                    <td style="font-size:12px;">Min: ${cond} đ</td>
+
+                    <td style="padding: 0;">${qtyHtml}</td>
+
+                    <td style="text-align:center;">${toggleHtml}</td>
+                    <td style="text-align:right; white-space: nowrap;">
+
+                        <button class="btn-icon" title="Chi tiết" onclick="window.PromotionApp.openView(${item.id})"><i class="bi bi-eye"></i></button>
+                        <button class="btn-icon" title="Sửa" onclick="window.PromotionApp.openEdit(${item.id})"><i class="bi bi-pencil"></i></button>
+                    </td>
+                </tr>`;
+            }).join('');
+        },
+
+        /*<button class="btn-icon" title="Test thử" style="color:#d97706; border-color:#d97706"
+                                onclick="window.PromotionApp.testVoucher('${item.maCode}')">
+                            <i class="bi bi-lightning-charge-fill"></i>
+                        </button>*/
+
+        // --- HÀM TEST GIẢ LẬP ---
+        // testVoucher: async function(code) {
+        //     // Hỏi người dùng nhập tiền đơn hàng
+        //     const input = prompt(`Nhập tổng tiền đơn hàng giả định để test mã [${code}]:`, "200000");
+        //
+        //     if (input === null) return; // Bấm hủy
+        //
+        //     const amount = parseFloat(input);
+        //     if (isNaN(amount)) { window.toast("\"Giá trị đơn hàng giả định không hợp lệ. Vui lòng nhập số tiền định dạng số.\"", "error"); return; }
+        //
+        //     try {
+        //         // Gọi API use-test vừa viết
+        //         const res = await fetch(`/api/vouchers/use-test?code=${code}&orderValue=${amount}`, {
+        //             method: 'POST'
+        //         });
+        //
+        //         if (res.ok) {
+        //             window.toast("Xác thực mã giảm giá thành công. Hệ thống đã ghi nhận lượt sử dụng giả định", "success");
+        //             this.loadData(); // Load lại bảng để thấy thanh nộ giảm đi
+        //         } else {
+        //             const txt = await res.text(); // Lấy thông báo lỗi từ backend
+        //             // Vì backend trả về json error mặc định của Spring nên có thể phải parse
+        //             try {
+        //                 const err = JSON.parse(txt);
+        //                 window.toast(" " + (err.message || "Không thỏa mãn điều kiện!"), "error");
+        //             } catch (e) {
+        //                 window.toast(" " + txt, "error");
+        //             }
+        //         }
+        //     } catch (e) {
+        //         window.toast("Không thể kết nối với dịch vụ kiểm thử mã. Vui lòng kiểm tra lại đường truyền.", "error");
+        //     }
+        // },
+
+        // --- HÀM HELPER ĐỂ BẤM VÀO SỐ LƯỢNG ---
+        toggleQtyDisplay: function(el, used, total, remain) {
+            const span = el.querySelector('.qty-text');
+            const currentMode = span.getAttribute('data-mode');
+
+            if (currentMode === 'used') {
+                // Chuyển sang hiện số còn lại
+                span.innerText = `Còn lại: ${remain}`;
+                span.style.color = remain === 0 ? 'red' : 'blue';
+                span.setAttribute('data-mode', 'remain');
+            } else {
+                // Quay về hiện Used/Total
+                span.innerText = `${used} / ${total}`;
+                span.style.color = 'black';
+                span.setAttribute('data-mode', 'used');
+            }
+        },
+
+        // --- DRAWER & FORM (LOGIC GỘP) ---
+        // --- HÀM MỞ THÊM MỚI ---
+        openDrawer: function (mode) {
+            this.state.editingId = null;
+            this.state.selectedProductIds = [];
+            this.setFormState(false);
+
+            const isSale = this.state.activeTab === 'sale';
+            document.getElementById('drawerTitle').innerText = isSale ? "THÊM KHUYẾN MÃI" : "THÊM VOUCHER";
+
+            // Reset trạng thái ẩn/hiện của 2 khối trường
+            document.getElementById('saleFields').style.display = isSale ? 'block' : 'none';
+            document.getElementById('voucherFields').style.display = isSale ? 'none' : 'block';
+
+            // Hiện lại các controls (đề phòng trước đó mở 'Xem chi tiết' bị ẩn đi)
+            document.getElementById('productSearchDrawer').style.display = isSale ? 'block' : 'none';
+            document.getElementById('checkAll').style.display = isSale ? 'inline-block' : 'none';
+
+            // Reset toàn bộ input về rỗng
+            ['kmMa','kmTen','kmGiaTri','vGiaTriToiDa','vDieuKien','vSoLuong','kmNgayBatDau','kmNgayKetThuc'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.value = '';
+            });
+
+            if (isSale) {
+                this.renderProductSelectionTable(this.state.products);
+                document.getElementById('selectedCount').innerText = '(Đã chọn: 0)';
+            }
+
+            document.getElementById('drawer').classList.add('show');
+            document.getElementById('overlay').classList.add('show');
+        },
+
+        // --- HÀM MỞ SỬA ---
+        openEdit: async function (id) {
+            window.toast("Đang lấy thông tin...", "warning");
+            this.state.editingId = id;
+            this.setFormState(false);
+
+            try {
+                const isSale = this.state.activeTab === 'sale';
+                const endpoint = isSale ? `/api/khuyen-mai/${id}` : `/api/vouchers/${id}`;
+                const res = await fetch(endpoint);
+                const data = await res.json();
+                const item = isSale ? (data.data || data) : data;
+
+                // 1. Gán dữ liệu cơ bản
+                document.getElementById('kmMa').value = isSale ? item.ma : item.maCode;
+                document.getElementById('kmTen').value = item.ten;
+                document.getElementById('kmLoai').value = isSale ? item.loai : (item.loaiGiamGia === 'PERCENTAGE' ? 'PERCENT' : 'AMOUNT');
+                document.getElementById('kmGiaTri').value = isSale ? item.giaTri : item.giaTriGiamGia;
+
+                const formatTime = (t) => t ? t.substring(0, 16) : '';
+                document.getElementById('kmNgayBatDau').value = formatTime(item.ngayBatDau);
+                document.getElementById('kmNgayKetThuc').value = formatTime(item.ngayKetThuc);
+                document.getElementById('kmCongDon').checked = item.choPhepCongDon;
+                document.getElementById('kmTrangThai').checked = item.trangThai;
+
+                // 2. XỬ LÝ HIỂN THỊ THEO TAB (QUAN TRỌNG NHẤT)
+                if (isSale) {
+                    // Hiện phần sản phẩm cho SALE
+                    document.getElementById('saleFields').style.display = 'block';
+                    document.getElementById('voucherFields').style.display = 'none';
+
+                    // Logic sản phẩm
+                    document.getElementById('productSearchDrawer').style.display = 'block';
+                    document.getElementById('checkAll').style.display = 'inline-block';
+                    this.state.selectedProductIds = data.productIds || [];
+                    document.getElementById('selectedCount').innerText = `(Đã chọn: ${this.state.selectedProductIds.length})`;
+                    this.renderProductSelectionTable(this.state.products);
+                } else {
+                    // ẨN TOÀN BỘ phần sản phẩm cho VOUCHER
+                    document.getElementById('saleFields').style.display = 'none';
+                    document.getElementById('voucherFields').style.display = 'block';
+
+                    // Gán các trường riêng của Voucher
+                    document.getElementById('vDieuKien').value = item.dieuKien;
+                    document.getElementById('vSoLuong').value = item.soLuong;
+                    if (item.loaiGiamGia === 'PERCENTAGE') {
+                        document.getElementById('vGiaTriToiDa').value = item.giaTriGiamGiaToiDa;
+                        document.getElementById('groupMaxGiam').style.display = 'block';
+                    } else {
+                        document.getElementById('groupMaxGiam').style.display = 'none';
+                    }
+
+                    // Khóa field Voucher nếu đã có lượt dùng (Logic mày mới thêm ở Backend)
+                    const isUsed = item.luotSuDung > 0;
+                    if (isUsed) {
+                        document.getElementById('kmLoai').disabled = true;
+                        document.getElementById('kmGiaTri').disabled = true;
+                        document.getElementById('kmLoai').title = "Mã đã phát sinh lượt dùng, không thể sửa định mức.";
+                    }
+                }
+
+                // Khóa field thông minh chung
+                const now = new Date();
+                const startDate = new Date(item.ngayBatDau);
+                if (startDate <= now) {
+                    document.getElementById('kmNgayBatDau').disabled = true;
+                }
+                document.getElementById('kmMa').disabled = true;
+
+                document.getElementById('drawer').classList.add('show');
+                document.getElementById('overlay').classList.add('show');
+            } catch(e) {
+                window.toast("Truy xuất thông tin thất bại.", "error");
+            }
+        },
+
+        saveItem: async function () {
+            const isSale = this.state.activeTab === 'sale';
+            const btnSave = document.getElementById('btnSave');
+            const originalText = btnSave.innerHTML;
+
+            const cleanMoney = (id, defaultValue = null) => {
+                const val = document.getElementById(id).value;
+                if (!val || val.trim() === '') return defaultValue;
+                return parseFloat(val.replace(/,/g, ''));
+            };
+
+            const ten = document.getElementById('kmTen').value.trim();
+            const ngayBatDau = document.getElementById('kmNgayBatDau').value;
+            const ngayKetThuc = document.getElementById('kmNgayKetThuc').value;
+            const loaiRaw = document.getElementById('kmLoai').value;
+            const giaTriRaw = cleanMoney('kmGiaTri', null);
+
+            // Validation cơ bản
+            if (!ten) { window.toast('Vui lòng nhập tên chương trình.', 'warning'); return; }
+            if (!ngayBatDau || !ngayKetThuc) { window.toast('Thông tin thời gian áp dụng không được để trống.', 'warning'); return; }
+            if (new Date(ngayKetThuc) <= new Date(ngayBatDau)) { window.toast('Thời gian kết thúc phải sau thời gian bắt đầu.', 'warning'); return; }
+            if (giaTriRaw === null) { window.toast('Vui lòng nhập định mức chiết khấu hợp lệ.', 'warning'); return; }
+
+            let payload = {
+                ten: ten,
+                ngayBatDau: ngayBatDau,
+                ngayKetThuc: ngayKetThuc,
+                choPhepCongDon: document.getElementById('kmCongDon').checked,
+                trangThai: document.getElementById('kmTrangThai').checked
+            };
+
+            if (isSale) {
+                payload.ma = document.getElementById('kmMa').value.trim();
+                payload.loai = loaiRaw;
+                payload.giaTri = giaTriRaw;
+                payload.idSanPhams = this.state.selectedProductIds;
+
+                // CHẶN LƯU KHI TRỐNG SẢN PHẨM (Đảm bảo dữ liệu không bị rỗng từ đầu)
+                if (payload.idSanPhams.length === 0) {
+                    window.toast('Vui lòng lựa chọn ít nhất một sản phẩm để áp dụng chiến dịch.', 'warning');
+                    return;
+                }
+            } else {
+                payload.maCode = document.getElementById('kmMa').value.trim();
+                payload.loaiGiamGia = loaiRaw === 'PERCENT' ? 'PERCENTAGE' : 'FIXED';
+                payload.giaTriGiamGia = giaTriRaw;
+                payload.giaTriGiamGiaToiDa = (loaiRaw === 'PERCENT') ? cleanMoney('vGiaTriToiDa', null) : null;
+                payload.dieuKien = cleanMoney('vDieuKien', 0);
+                payload.soLuong = parseInt(document.getElementById('vSoLuong').value) || 0;
+            }
+
+            const endpoint = isSale ? '/api/khuyen-mai' : '/api/vouchers';
+            const url = this.state.editingId ? `${endpoint}/${this.state.editingId}` : endpoint;
+
+            try {
+                btnSave.disabled = true;
+                btnSave.innerHTML = '<span class="spinner-border spinner-border-sm"></span> ĐANG XỬ LÝ...';
+                window.toast("Hệ thống đang thực hiện ghi dữ liệu, vui lòng đợi...", "warning");
+
+                const res = await fetch(url, {
+                    method: this.state.editingId ? 'PUT' : 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    window.toast(this.state.editingId ? "Cập nhật dữ liệu thành công." : "Thiết lập chương trình mới thành công.", "success");
+                    this.closeDrawer();
+                    this.loadData();
+                } else {
+                    let errorMsg = "Yêu cầu không thể hoàn tất.";
+                    try {
+                        const err = await res.json();
+                        errorMsg = err.message || err.error || errorMsg;
+                    } catch (e) {
+                        const text = await res.text();
+                        if (text) errorMsg = text;
+                    }
+                    window.toast(errorMsg, 'error');
+                }
+            } catch (e) {
+                window.toast("Sự cố kết nối máy chủ. Vui lòng thử lại sau.", 'error');
+            } finally {
+                btnSave.disabled = false;
+                btnSave.innerHTML = originalText;
+            }
+        },
+
+        setFormState: function(disabled) {
+            // Khóa/Mở tất cả ô nhập liệu
+            document.querySelectorAll('#drawer input, #drawer select').forEach(el => el.disabled = disabled);
+            // Ẩn/Hiện nút Lưu
+            document.getElementById('btnSave').style.display = disabled ? 'none' : 'block';
+            // Khóa checkbox sản phẩm
+            document.getElementById('checkAll').disabled = disabled;
+            document.querySelectorAll('.product-check').forEach(chk => chk.disabled = disabled);
+        },
+
+        // --- HÀM XEM CHI TIẾT ---
+        openView: async function(id) {
+            // 1. Gọi hàm sửa để đổ dữ liệu vào form và lấy selectedProductIds
+            await this.openEdit(id);
+
+            // 2. Khóa form
+            this.setFormState(true);
+
+            // 3. Đổi tiêu đề
+            const isSale = this.state.activeTab === 'sale';
+            document.getElementById('drawerTitle').innerText = isSale ? "CHI TIẾT KHUYẾN MÃI" : "CHI TIẾT VOUCHER";
+
+            // --- LOGIC MỚI: CHỈ HIỆN SẢN PHẨM ĐƯỢC CHỌN ---
+            if (isSale) {
+                // Lọc ra các sản phẩm trùng khớp ID
+                const selectedOnly = this.state.products.filter(p => this.state.selectedProductIds.includes(p.id));
+                this.renderProductSelectionTable(selectedOnly);
+
+                // Ẩn ô tìm kiếm và checkbox CheckAll cho đỡ rối mắt
+                document.getElementById('productSearchDrawer').style.display = 'none';
+                document.getElementById('checkAll').style.display = 'none';
+                // Cập nhật lại số lượng
+                document.getElementById('selectedCount').innerText = `(Sản phẩm áp dụng: ${selectedOnly.length})`;
+            }
+            // ---------------------------------------------
+        },
+
+        quickToggle: async function(id, el) {
+            const originalState = !el.checked;
+            const isSale = this.state.activeTab === 'sale';
+            const actionText = originalState ? "kích hoạt" : "ngừng áp dụng";
+
+            // Toast confirm
+            this.toastConfirm(
+                `Hệ thống ghi nhận yêu cầu ${actionText} chương trình này. Bạn có chắc chắn muốn thực hiện?`,
+                async () => {
+                    const endpoint = isSale ? `/api/khuyen-mai/${id}/trang-thai` : `/api/vouchers/${id}/trang-thai`;
+                    const parent = el.closest('.switch-sm');
+
+                    try {
+                        parent.classList.add('loading');
+                        const res = await fetch(endpoint, { method: 'PATCH' });
+
+                        // Đọc body phản hồi bất kể thành công hay thất bại
+                        let data = {};
+                        try {
+                            data = await res.json();
+                        } catch (e) {
+                            // Nếu không phải JSON (ví dụ lỗi server 500 html), bỏ qua
+                        }
+
+                        if (res.ok) {
+                            // Thành công
+                            const type = data.message && data.message.includes('⚠️') ? 'warning' : 'success';
+                            window.toast(data.message || "Cập nhật trạng thái thành công.", type);
+                            this.loadData();
+                        } else {
+                            // --- KHẮC PHỤC Ở ĐÂY ---
+                            // Ưu tiên lấy message từ Backend trả về (data.message)
+                            // Nếu không có, mới dùng câu mặc định.
+                            const errorMsg = data.message || "Không thể cập nhật trạng thái (Lỗi không xác định).";
+                            window.toast(errorMsg, 'error');
+
+                            el.checked = originalState; // Trả lại trạng thái cũ
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        window.toast("Sự cố kết nối máy chủ.", "error");
+                        el.checked = originalState;
+                    } finally {
+                        parent.classList.remove('loading');
+                    }
+                },
+                () => {
+                    el.checked = originalState;
+                }
+            );
+        },
+
+        toastConfirm: function(message, onConfirm, onCancel) {
+            const container = document.getElementById('toastHost');
+            if (!container) return;
+
+            const el = document.createElement('div');
+            el.className = `toast warning`; // Dùng màu warning cho trang trọng
+            el.style.flexDirection = 'column';
+            el.style.alignItems = 'flex-start';
+            el.style.gap = '10px';
+
+            el.innerHTML = `
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <i class="bi bi-exclamation-circle-fill" style="color:#f59e0b; font-size:18px;"></i>
+                    <span style="font-weight:600; font-size:13px;">${message}</span>
+                </div>
+                <div style="display: flex; gap: 8px; width: 100%; justify-content: flex-end;">
+                    <button class="btn btn-secondary" id="toastCancel" style="height: 24px; font-size: 10px; padding: 0 10px;">HỦY</button>
+                    <button class="btn" id="toastOk" style="height: 24px; font-size: 10px; padding: 0 10px;">XÁC NHẬN</button>
+                </div>
+            `;
+
+            container.appendChild(el);
+
+            // Xử lý sự kiện bấm nút
+            el.querySelector('#toastOk').onclick = () => { el.remove(); onConfirm(); };
+            el.querySelector('#toastCancel').onclick = () => { el.remove(); onCancel(); };
+        },
+
+        // --- Helpers ---
+        handleTypeChange: function() {
+            const type = document.getElementById('kmLoai').value;
+            const input = document.getElementById('kmGiaTri');
+            input.value = '';
+            input.placeholder = type === 'PERCENT' ? "Ví dụ: 10" : "Ví dụ: 10,000";
+
+            // Hiện ô Giảm tối đa nếu là Voucher và chọn %
+            const isVoucher = this.state.activeTab === 'voucher';
+            document.getElementById('groupMaxGiam').style.display = (isVoucher && type === 'PERCENT') ? 'block' : 'none';
+        },
+        handleCongDonChange: function(el) {
+            document.getElementById('congDonWarning').style.display = el.checked ? 'none' : 'block';
+        },
+        formatMoneyInput: function(el) {
+            // 1. Chỉ giữ lại số (0-9), xóa tất cả ký tự khác
+            let val = el.value.replace(/[^0-9]/g, '');
+
+            // 2. Xóa số 0 ở đầu (nếu có) để tránh kiểu "0123" (trừ khi nó là số 0 duy nhất)
+            if (val.length > 1 && val.startsWith('0')) {
+                val = val.substring(1);
+            }
+
+            // 3. Format dấu phẩy
+            el.value = val ? parseInt(val).toLocaleString('en-US') : '';
+        },
+        handleSearch: function(val) {
+            clearTimeout(this.timeout);
+            this.timeout = setTimeout(() => { this.state.q = val.trim(); this.state.page = 0; this.loadData(); }, 500);
+        },
+        handleStatus: function(val) { this.state.trangThai = val; this.state.page = 0; this.loadData(); },
+        resetFilters: function() { this.state.q=''; this.state.trangThai=''; document.getElementById('search').value=''; document.getElementById('fTrangThaiFilter').value=''; this.loadData(); },
+        closeDrawer: function () { document.getElementById('drawer').classList.remove('show'); document.getElementById('overlay').classList.remove('show'); },
+        renderPagination: function(data) { document.getElementById('info').innerText = `Trang ${data.number + 1} / ${data.totalPages}`; },
+
+        // Sale Logic
+        loadProducts: async function () { try { const res = await fetch('/api/khuyen-mai/san-pham'); this.state.products = await res.json(); } catch(e){} },
+        filterProducts: function(key) {
+            const low = key.toLowerCase();
+            this.renderProductSelectionTable(this.state.products.filter(p => p.ma.toLowerCase().includes(low) || p.ten.toLowerCase().includes(low)));
+        },
+        renderProductSelectionTable: function (data) {
+            document.getElementById('productTableBody').innerHTML = data.map(p => `<tr>
+                <td style="text-align:center;"><input type="checkbox" class="product-check" value="${p.id}" ${this.state.selectedProductIds.includes(p.id)?'checked':''} onchange="window.PromotionApp.toggleProductSelection(${p.id}, this.checked)"></td>
+                <td style="font-weight:700;">${p.ma}</td><td>${p.ten}</td>
+            </tr>`).join('');
+        },
+        toggleProductSelection: function (id, checked) {
+            if(checked) { if (!this.state.selectedProductIds.includes(id)) this.state.selectedProductIds.push(id); }
+            else { this.state.selectedProductIds = this.state.selectedProductIds.filter(x => x !== id); }
+            document.getElementById('selectedCount').innerText = `(Đã chọn: ${this.state.selectedProductIds.length})`;
+        }
+    };
+
+    window.PromotionApp.init();
+</script>
+</body>
