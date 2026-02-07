@@ -65,7 +65,7 @@ async function loadModule(moduleName) {
             title = 'QUẢN LÝ THUỘC TÍNH';
             break;
         case 'products':
-            url = '/products.html';
+            url = '/products';
             title = 'QUẢN LÝ SẢN PHẨM';
             break;
         case 'orders':

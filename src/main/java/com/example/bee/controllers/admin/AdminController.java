@@ -4,8 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-@Controller // Dùng @Controller để trả về View (HTML)
-//@RequestMapping("/admin")
+@Controller
 public class AdminController {
     @GetMapping("/admin")
     public String showAdminLayout() {
@@ -17,8 +16,8 @@ public class AdminController {
         return "admin/catalog/catalogs";
     }
 
-//    @GetMapping("/products")
-//    public String products() {
-//        return "admin/product/products";
-//    }
+    @GetMapping("/products")
+    public String products() {
+        return "admin/product/products";
+    }
 }
