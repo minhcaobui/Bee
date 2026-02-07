@@ -64,6 +64,9 @@ async function loadModule(moduleName) {
             url = '/catalogs';
             title = 'QUẢN LÝ THUỘC TÍNH';
             break;
+        case 'staff':
+            url = '/staff'; title = 'QUẢN LÝ NHÂN VIÊN';
+            break;
         case 'products':
             url = '/products.html';
             title = 'QUẢN LÝ SẢN PHẨM';
@@ -163,6 +166,7 @@ function executeScripts(container, moduleName) {
             window.initProducts();
         }
     }, 100);
+
 }
 
 // 3. KHỞI TẠO ROUTER
