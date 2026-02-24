@@ -30,4 +30,14 @@ public class AdminController {
     public String promotions() {
         return "admin/promotion/promotions";
     }
+
+    @GetMapping("/dashboards")
+    public String dashboards() {
+        return "admin/dashboard/dashboards";
+    }
+
+    @GetMapping("/customers")
+    public String customers() {
+        return "admin/customer/customers";
+    }
 }

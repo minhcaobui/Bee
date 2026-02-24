@@ -28,7 +28,7 @@ public class SanPhamChiTiet {
     @Column(name = "so_luong", nullable = false)
     private Integer soLuong = 0;
 
-    @Column(name = "hinh_anh", columnDefinition = "VARCHAR(MAX)")
+    @Column(name = "hinh_anh", length = 2048)
     private String hinhAnh;
 
     @Column(name = "trang_thai", nullable = false)

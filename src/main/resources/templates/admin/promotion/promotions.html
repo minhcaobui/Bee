@@ -26,12 +26,15 @@
 
         /* Search */
         .search-section { margin-bottom: 15px; }
-        .search-wrapper { display: flex; gap: 10px; flex-wrap: wrap; }
+        .search-wrapper { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; } /* Thêm align-items: center vào đây */
         .search-box { position: relative; width: 100%; }
         .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 14px; pointer-events: none; }
         .search-input { width: 300px; padding: 8px 12px 8px 36px !important; font-size: 12.5px; border: 1px solid var(--gray-300); outline: none; background: #fff; height: 34px; border-radius: 2px; }
         .filter-select { padding: 8px 12px; font-size: 12.5px; border: 1px solid var(--gray-300); outline: none; background: #fff; height: 34px; border-radius: 2px; }
         .search-input:focus, .filter-select:focus { border-color: #000; }
+
+        /* Thêm cục này để nắn cái nút Làm mới thành hình vuông 34x34 */
+        .btn-reset { height: 34px !important; width: 34px !important; padding: 0 !important; justify-content: center; font-size: 15px; }
 
         /* Table */
         .table-wrapper { border: 1px solid var(--gray-200); width: 100%; overflow-x: auto; }
@@ -45,11 +48,14 @@
         .btn-icon { width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--gray-200); background: #fff; cursor: pointer; border-radius: 2px; margin-left: 4px; }
         .btn-icon:hover { border-color: #000; background: #000; color: #fff; }
 
-        /* Pagination */
+        /* Pagination Đồng Bộ */
         .pagination-wrapper { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; }
-        .pagination-info { font-size: 11px; font-weight: 600; color: #888; }
-        .page-number { min-width: 26px; height: 26px; font-size: 12px; font-weight: 700; background: transparent; border: 1px solid transparent; cursor: pointer; }
+        .pagination-info { font-size: 11px; font-weight: 800; color: #888; text-transform: uppercase; }
+        .pagination { display: flex; gap: 5px; }
+        .page-number { min-width: 26px; height: 26px; font-size: 12px; font-weight: 700; background: transparent; border: 1px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 2px; transition: 0.2s; }
+        .page-number:hover:not(:disabled) { background: #eee; }
         .page-number.active { background: #000; color: #fff; }
+        .page-number:disabled { opacity: 0.4; cursor: not-allowed; }
 
         /* Drawer */
         .overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 999; display: none; }
@@ -236,7 +242,7 @@
                 <option value="true">Đang hoạt động</option>
                 <option value="false">Ngưng hoạt động</option>
             </select>
-            <button class="btn btn-secondary" onclick="window.PromotionApp.resetFilters()">
+            <button class="btn btn-secondary btn-reset" onclick="window.PromotionApp.resetFilters()" title="Làm mới">
                 <i class="bi bi-arrow-counterclockwise"></i>
             </button>
         </div>

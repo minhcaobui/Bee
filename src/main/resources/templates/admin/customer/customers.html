@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Khách Hàng</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <style>
+        /* --- CSS CHUNG TỪ PROMOTION --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --black: #000; --white: #fff; --gray-100: #f4f4f5; --gray-200: #e4e4e7; --gray-300: #d4d4d8; --font-size: 12.5px; }
+        body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--black); font-size: var(--font-size); line-height: 1.4; }
+        .container { max-width: 100%; padding: 20px 30px; }
+
+        /* Actions Bar & Tabs giả lập */
+        .actions-bar { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--gray-200); margin-bottom: 20px; padding-bottom: 0; }
+        .tabs { display: flex; gap: 30px; margin-bottom: 0; border: none; }
+        .tab { font-size: 12.5px; font-weight: 700; color: #888; padding: 0 0 12px 0; cursor: default; text-transform: uppercase; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; display: flex; align-items: center; gap: 6px; }
+        .tab.active { color: #000; border-bottom-color: #000; }
+
+        /* Buttons & Inputs */
+        .btn { font-size: 11px; font-weight: 800; text-transform: uppercase; height: 30px; padding: 0 14px; background: #000; color: #fff; border: 1px solid #000; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; border-radius: 2px; transition: 0.2s; }
+        .btn:hover { background: #333; }
+        .btn-secondary { background: #fff; color: #000; border: 1px solid #ccc; }
+        .btn-secondary:hover { background: #f4f4f5; }
+        .btn-danger { background: #fff; color: #dc2626; border: 1px solid #dc2626; }
+        .btn-danger:hover { background: #dc2626; color: #fff; }
+
+        /* Search Section */
+        .search-section { margin-bottom: 15px; }
+        /* Sửa lại dòng search-wrapper hiện tại thành thế này (thêm align-items: center) */
+        .search-wrapper { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+        /* Thêm class này dành riêng cho nút Làm mới để nó thành hình vuông 34x34 */
+        .btn-reset { height: 34px !important; width: 34px !important; padding: 0 !important; justify-content: center; font-size: 15px; }
+        .search-box { position: relative; width: 100%; }
+        .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 14px; pointer-events: none; }
+        .search-input { width: 300px; padding: 8px 12px 8px 36px !important; font-size: 12.5px; border: 1px solid var(--gray-300); outline: none; background: #fff; height: 34px; border-radius: 2px; }
+        .filter-select { padding: 8px 12px; font-size: 12.5px; border: 1px solid var(--gray-300); outline: none; background: #fff; height: 34px; border-radius: 2px; min-width: 150px; }
+        .search-input:focus, .filter-select:focus { border-color: #000; }
+
+        /* Table */
+        .table-wrapper { border: 1px solid var(--gray-200); width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+        thead th { text-align: left; padding: 10px 15px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #666; background: #fafafa; border-bottom: 1px solid var(--gray-200); white-space: nowrap; }
+        tbody td { padding: 8px 15px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; font-size: 12.5px; word-wrap: break-word; }
+        tbody tr:hover { background: var(--gray-100); }
+        .btn-icon { width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--gray-200); background: #fff; cursor: pointer; border-radius: 2px; margin-left: 4px; }
+        .btn-icon:hover { border-color: #000; background: #000; color: #fff; }
+
+        /* Pagination Đồng Bộ */
+        .pagination-wrapper { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; }
+        .pagination-info { font-size: 11px; font-weight: 800; color: #888; text-transform: uppercase; }
+        .pagination { display: flex; gap: 5px; }
+        .page-number { min-width: 26px; height: 26px; font-size: 12px; font-weight: 700; background: transparent; border: 1px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 2px; transition: 0.2s; }
+        .page-number:hover:not(:disabled) { background: #eee; }
+        .page-number.active { background: #000; color: #fff; }
+        .page-number:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* Drawer */
+        .overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 999; display: none; }
+        .overlay.show { display: block; }
+        .drawer { position: fixed; top: 0; right: -600px; width: 600px; height: 100vh; background: #fff; border-left: 1px solid var(--gray-200); z-index: 1000; transition: 0.3s; display: flex; flex-direction: column; box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1); }
+        .drawer.show { right: 0; }
+        .drawer-header { padding: 15px 20px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; }
+        .drawer-title { font-size: 14px; font-weight: 800; text-transform: uppercase; margin: 0; }
+        .drawer-body { flex: 1; padding: 20px; overflow-y: auto; }
+        .drawer-footer { padding: 15px 20px; border-top: 1px solid var(--gray-200); display: flex; gap: 10px; }
+
+        /* Form Elements */
+        .form-group { margin-bottom: 15px; }
+        .form-label { font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; display: block; color: #555; }
+        .form-input { width: 100%; padding: 8px; font-size: 12.5px; border: 1px solid var(--gray-300); outline: none; border-radius: 2px; }
+        .form-input:focus { border-color: #000; }
+        .form-input:disabled { background: #f5f5f5; color: #888; cursor: not-allowed; border-color: #eee; }
+
+        /* Switch Vuông */
+        .switch-wrapper { display: flex; align-items: center; gap: 10px; }
+        .switch-square { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch-square input { opacity: 0; width: 0; height: 0; }
+        .slider-square { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 0; }
+        .slider-square:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 0; }
+        input:checked + .slider-square { background-color: #000; }
+        input:checked + .slider-square:before { transform: translateX(20px); }
+        input:disabled + .slider-square { opacity: 0.6; cursor: not-allowed; }
+
+        /* Quick Switch (Table) */
+        .switch-sm { position: relative; display: inline-block; width: 30px; height: 16px; }
+        .switch-sm input { opacity: 0; width: 0; height: 0; }
+        .slider-sm { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 0; }
+        .slider-sm:before { position: absolute; content: ""; height: 12px; width: 12px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 0; }
+        input:checked + .slider-sm { background-color: #000; }
+        input:checked + .slider-sm:before { transform: translateX(14px); }
+        .switch-sm.loading { opacity: 0.5; pointer-events: none; }
+
+        /* Toast Xịn */
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 10002; display: flex; flex-direction: column; gap: 10px; }
+        .toast { min-width: 280px; padding: 14px 22px; border-radius: 6px; background: #fff; color: #000; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); display: flex; align-items: center; gap: 12px; border-left: 5px solid #000; animation: toastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; transition: all 0.5s ease; }
+        .toast.success { border-left-color: #10b981; }
+        .toast.error { border-left-color: #ef4444; }
+        .toast.warning { border-left-color: #f59e0b; }
+        .toast.hiding { transform: translateX(130%); opacity: 0; margin-top: -60px; }
+        @keyframes toastSlideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* --- CUSTOM RIÊNG KHÁCH HÀNG --- */
+        .avatar-cell { display: flex; align-items: center; gap: 12px; }
+        .avatar-img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid #eee; background: #f9f9f9; }
+
+        .upload-area { width: 100px; height: 100px; border-radius: 50%; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; margin: 0 auto 10px; transition: 0.2s; background: #fafafa; }
+        .upload-area:hover { border-color: #000; background: #fff; }
+        .upload-area img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .upload-area i { font-size: 24px; color: #ccc; }
+        .upload-area.disabled { cursor: not-allowed; border-color: #eee; background: #f9f9f9; pointer-events: none; }
+
+        .drawer-tabs { display: flex; border-bottom: 1px solid #eee; margin-bottom: 20px; gap: 20px; }
+        .drawer-tab { padding-bottom: 10px; font-size: 12px; font-weight: 700; text-transform: uppercase; color: #888; cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; }
+        .drawer-tab.active { color: #000; border-bottom-color: #000; }
+        .drawer-tab:hover { color: #000; }
+
+        .addr-card { border: 1px solid #eee; padding: 12px; border-radius: 2px; margin-bottom: 10px; background: #fafafa; position: relative; transition: 0.2s; }
+        .addr-card:hover { border-color: #ccc; }
+        .addr-card.default { border: 1px solid #000; background: #fff; }
+        .addr-tag { font-size: 9px; font-weight: 800; background: #000; color: #fff; padding: 2px 6px; border-radius: 2px; text-transform: uppercase; margin-left: 5px; }
+        .addr-actions { position: absolute; top: 10px; right: 10px; display: flex; gap: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="actions-bar">
+        <nav class="tabs">
+            <div class="tab active">
+                <i class="bi bi-people-fill"></i> QUẢN LÝ KHÁCH HÀNG
+            </div>
+        </nav>
+        <button class="btn" id="btnAdd" onclick="window.CustomerApp.openDrawer('create')">
+            <i class="bi bi-plus-lg"></i> THÊM MỚI
+        </button>
+    </div>
+
+    <section class="search-section">
+        <div class="search-wrapper">
+            <div style="flex: 2; min-width: 200px;">
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" class="search-input" id="search"
+                           placeholder="Tìm tên, SĐT, Mã khách hàng..."
+                           oninput="window.CustomerApp.handleSearch(this.value)">
+                </div>
+            </div>
+            <select class="filter-select" id="fStatus" onchange="window.CustomerApp.handleFilter(this.value)">
+                <option value="">-- Trạng thái --</option>
+                <option value="true">Đang hoạt động</option>
+                <option value="false">Ngưng hoạt động</option>
+            </select>
+            <button class="btn btn-secondary btn-reset" onclick="window.CustomerApp.resetFilters()" title="Làm mới">
+                <i class="bi bi-arrow-counterclockwise"></i>
+            </button>
+        </div>
+    </section>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+            <tr>
+                <th style="width: 50px; text-align: center;">STT</th>
+                <th>MÃ KHÁCH HÀNG</th>
+                <th>TÊN KHÁCH HÀNG</th>
+                <th>LIÊN HỆ</th>
+                <th>GIỚI TÍNH</th>
+                <th style="text-align: center;">TRẠNG THÁI</th>
+                <th style="text-align: right;">THAO TÁC</th>
+            </tr>
+            </thead>
+            <tbody id="tbody">
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination-wrapper">
+        <div class="pagination-info" id="pagiInfo">Đang tải...</div>
+        <div class="pagination">
+            <button class="page-number" id="prevBtn">←</button>
+            <button class="page-number" id="nextBtn">→</button>
+        </div>
+    </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="window.CustomerApp.closeDrawer()"></div>
+
+<aside class="drawer" id="drawer">
+    <div class="drawer-header">
+        <h3 class="drawer-title" id="drawerTitle">THÊM MỚI KHÁCH HÀNG</h3>
+        <button class="btn-icon" onclick="window.CustomerApp.closeDrawer()" style="border:none;"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <div class="drawer-body">
+
+        <div class="drawer-tabs" id="drawerTabs" style="display: none;">
+            <div class="drawer-tab active" onclick="window.CustomerApp.switchDrawerTab('info')" id="tabTitleInfo">THÔNG TIN CHUNG</div>
+            <div class="drawer-tab" onclick="window.CustomerApp.switchDrawerTab('address')" id="tabTitleAddr">SỔ ĐỊA CHỈ</div>
+        </div>
+
+        <div id="tabContentInfo">
+            <div id="avatarUploadGroup">
+                <div class="upload-area" id="uploadArea" onclick="if(!window.CustomerApp.state.isViewMode) document.getElementById('inpFile').click()">
+                    <input type="file" id="inpFile" hidden accept="image/*" onchange="window.CustomerApp.previewImage(this)">
+                    <img id="imgPreview" alt="Avatar">
+                    <i class="bi bi-camera" id="iconUpload"></i>
+                </div>
+                <div id="uploadHint" style="text-align: center; font-size: 11px; color: #888; margin-bottom: 20px;">Nhấn để tải ảnh đại diện</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Họ và Tên <span style="color:red" class="required-star">*</span></label>
+                <input id="inpName" class="form-input" placeholder="Nhập họ tên...">
+            </div>
+
+            <div style="display: flex; gap: 15px;">
+                <div class="form-group" style="flex: 1;">
+                    <label class="form-label">Số điện thoại <span style="color:red" class="required-star">*</span></label>
+                    <input id="inpPhone" class="form-input" placeholder="09xxxxxxxx">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label class="form-label">Email</label>
+                    <input id="inpEmail" class="form-input" placeholder="email@example.com">
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 15px;">
+                <div class="form-group" style="flex: 1;">
+                    <label class="form-label">Ngày sinh</label>
+                    <input id="inpDob" type="date" class="form-input">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label class="form-label">Giới tính</label>
+                    <select id="inpGender" class="form-input">
+                        <option value="true">Nam</option>
+                        <option value="false">Nữ</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="switch-wrapper">
+                    <label class="switch-square">
+                        <input type="checkbox" id="inpStatus" checked>
+                        <span class="slider-square"></span>
+                    </label>
+                    <span style="font-size: 12px; font-weight: 600;">Kích hoạt tài khoản</span>
+                </div>
+            </div>
+
+            <div id="defaultAddressGroup" style="border-top: 1px dashed #ccc; margin-top: 20px; padding-top: 15px;">
+                <h5 style="font-size: 12px; font-weight: 800; margin-bottom: 10px; color: #555; text-transform: uppercase;">Địa chỉ (Có thể bỏ qua nếu mua tại quầy)</h5>
+
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <select id="inpCity" class="form-input" onchange="window.CustomerApp.Address.loadDistricts(this.value, 'inpDist', 'inpWard')">
+                        <option value="">-- Chọn Tỉnh / TP --</option>
+                    </select>
+                    <select id="inpDist" class="form-input" onchange="window.CustomerApp.Address.loadWards(this.value, 'inpWard')" disabled>
+                        <option value="">-- Chọn Quận / Huyện --</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <select id="inpWard" class="form-input" disabled>
+                        <option value="">-- Chọn Phường / Xã --</option>
+                    </select>
+                    <input id="inpDetail" class="form-input" style="flex: 2;" placeholder="Số nhà, đường...">
+                </div>
+            </div>
+        </div>
+
+        <div id="tabContentAddr" style="display: none;">
+            <div id="subAddressForm" style="display: none; background: #f9f9f9; padding: 15px; border: 1px solid #ccc; margin-bottom: 15px; border-radius: 2px;">
+                <div style="font-weight: 700; font-size: 11px; margin-bottom: 10px; text-transform: uppercase;">Thêm địa chỉ mới</div>
+                <div class="form-group">
+                    <select id="subCity" class="form-input" onchange="window.CustomerApp.Address.loadDistricts(this.value, 'subDist', 'subWard')">
+                        <option value="">-- Chọn Tỉnh / TP --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <select id="subDist" class="form-input" onchange="window.CustomerApp.Address.loadWards(this.value, 'subWard')" disabled>
+                        <option value="">-- Chọn Quận / Huyện --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <select id="subWard" class="form-input" disabled>
+                        <option value="">-- Chọn Phường / Xã --</option>
+                    </select>
+                </div>
+                <div class="form-group"><input id="subDetail" class="form-input" placeholder="Chi tiết (Số nhà, đường...)"></div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn" onclick="window.CustomerApp.saveSubAddress()">Lưu</button>
+                    <button class="btn btn-secondary" onclick="document.getElementById('subAddressForm').style.display='none'">Hủy</button>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h5 style="font-size: 12px; font-weight: 700; color:#888;">DANH SÁCH ĐỊA CHỈ</h5>
+                <button class="btn btn-secondary" id="btnShowAddAddress" onclick="window.CustomerApp.showAddAddressForm()">
+                    <i class="bi bi-plus-lg"></i> Thêm mới
+                </button>
+            </div>
+
+            <div id="addressListContainer">
+            </div>
+        </div>
+
+    </div>
+
+    <div class="drawer-footer">
+        <button class="btn btn-secondary" style="flex: 1;" onclick="window.CustomerApp.closeDrawer()">Thoát</button>
+        <button class="btn" style="flex: 1;" id="btnSave" onclick="window.CustomerApp.saveCustomer()">Lưu thông tin</button>
+    </div>
+</aside>
+
+<div class="toast-container" id="toastHost"></div>
+
+<script>
+    // --- TOAST XỊN ---
+    window.toast = function(message, type = 'success') {
+        const container = document.getElementById('toastHost');
+        if (!container) return;
+        const el = document.createElement('div');
+        el.className = `toast ${type}`;
+        const prefix = type === 'success' ? 'THÀNH CÔNG: ' : (type === 'error' ? 'LỖI: ' : 'THÔNG BÁO: ');
+
+        el.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+                <div>
+                    <span style="font-weight:700; font-size:12px;">${prefix}</span>
+                    <span style="font-weight:500; font-size:12px;">${message}</span>
+                </div>
+                <i class="bi bi-x-lg" style="cursor: pointer; margin-left: 10px; font-size: 14px;" onclick="this.parentElement.parentElement.remove()"></i>
+            </div>
+        `;
+        container.appendChild(el);
+        setTimeout(() => {
+            if(el.parentNode) {
+                el.classList.add('hiding');
+                el.addEventListener('transitionend', () => el.remove());
+            }
+        }, 3500);
+    }
+
+    // --- MAIN APP ---
+    window.CustomerApp = {
+        state: { page: 0, size: 10, totalPages: 0, q: '', status: '', editingId: null, isViewMode: false },
+
+        // Tích hợp API Tỉnh / Huyện / Xã
+        Address: {
+            async loadProvinces(selectId) {
+                try {
+                    const res = await fetch('https://esgoo.net/api-tinhthanh/1/0.htm');
+                    const data = await res.json();
+                    if(data.error === 0) {
+                        const html = '<option value="">-- Chọn Tỉnh / TP --</option>' +
+                            data.data.map(p => `<option value="${p.id}" data-name="${p.full_name}">${p.full_name}</option>`).join('');
+                        document.getElementById(selectId).innerHTML = html;
+                    }
+                } catch(e) { console.error('Lỗi load Tỉnh', e); }
+            },
+            async loadDistricts(provId, distSelectId, wardSelectId) {
+                const distSelect = document.getElementById(distSelectId);
+                const wardSelect = document.getElementById(wardSelectId);
+                wardSelect.innerHTML = '<option value="">-- Chọn Phường / Xã --</option>';
+                wardSelect.disabled = true;
+
+                if(!provId) {
+                    distSelect.innerHTML = '<option value="">-- Chọn Quận / Huyện --</option>';
+                    distSelect.disabled = true;
+                    return;
+                }
+                try {
+                    const res = await fetch(`https://esgoo.net/api-tinhthanh/2/${provId}.htm`);
+                    const data = await res.json();
+                    if(data.error === 0) {
+                        distSelect.innerHTML = '<option value="">-- Chọn Quận / Huyện --</option>' +
+                            data.data.map(d => `<option value="${d.id}" data-name="${d.full_name}">${d.full_name}</option>`).join('');
+                        distSelect.disabled = false;
+                    }
+                } catch(e) { console.error('Lỗi load Huyện', e); }
+            },
+            async loadWards(distId, wardSelectId) {
+                const wardSelect = document.getElementById(wardSelectId);
+                if(!distId) {
+                    wardSelect.innerHTML = '<option value="">-- Chọn Phường / Xã --</option>';
+                    wardSelect.disabled = true;
+                    return;
+                }
+                try {
+                    const res = await fetch(`https://esgoo.net/api-tinhthanh/3/${distId}.htm`);
+                    const data = await res.json();
+                    if(data.error === 0) {
+                        wardSelect.innerHTML = '<option value="">-- Chọn Phường / Xã --</option>' +
+                            data.data.map(w => `<option value="${w.id}" data-name="${w.full_name}">${w.full_name}</option>`).join('');
+                        wardSelect.disabled = false;
+                    }
+                } catch(e) { console.error('Lỗi load Xã', e); }
+            },
+            getText(selectId) {
+                const sel = document.getElementById(selectId);
+                if(sel.selectedIndex <= 0) return '';
+                return sel.options[sel.selectedIndex].getAttribute('data-name');
+            },
+            reset(provId, distId, wardId) {
+                document.getElementById(provId).selectedIndex = 0;
+                document.getElementById(distId).innerHTML = '<option value="">-- Chọn Quận / Huyện --</option>'; document.getElementById(distId).disabled = true;
+                document.getElementById(wardId).innerHTML = '<option value="">-- Chọn Phường / Xã --</option>'; document.getElementById(wardId).disabled = true;
+            }
+        },
+
+        init() {
+            this.loadData();
+            this.Address.loadProvinces('inpCity');
+            this.Address.loadProvinces('subCity');
+
+            document.getElementById('prevBtn').onclick = () => { if(this.state.page > 0) { this.state.page--; this.loadData(); }};
+            document.getElementById('nextBtn').onclick = () => { if(this.state.page < this.state.totalPages-1) { this.state.page++; this.loadData(); }};
+        },
+
+        // --- TẢI DANH SÁCH ---
+        async loadData() {
+            document.getElementById('pagiInfo').innerText = 'Đang tải...';
+            try {
+                const url = `/api/khach-hang?page=${this.state.page}&size=${this.state.size}&q=${this.state.q}&trangThai=${this.state.status}`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                this.state.totalPages = data.totalPages;
+                this.renderTable(data.content);
+                document.getElementById('pagiInfo').innerText = `Trang ${data.number + 1} / ${data.totalPages}`;
+
+                // Nút phân trang
+                const btnPrev = document.getElementById('prevBtn');
+                const btnNext = document.getElementById('nextBtn');
+
+                if (this.state.page === 0) {
+                    btnPrev.style.opacity = '0.3'; btnPrev.style.cursor = 'not-allowed';
+                } else {
+                    btnPrev.style.opacity = '1'; btnPrev.style.cursor = 'pointer';
+                }
+
+                if (this.state.page >= this.state.totalPages - 1 || this.state.totalPages === 0) {
+                    btnNext.style.opacity = '0.3'; btnNext.style.cursor = 'not-allowed';
+                } else {
+                    btnNext.style.opacity = '1'; btnNext.style.cursor = 'pointer';
+                }
+            } catch (e) {
+                console.error(e);
+                window.toast('Hệ thống gặp sự cố khi tải danh sách. Vui lòng thử lại sau.', 'error');
+            }
+        },
+
+        renderTable(list) {
+            const tbody = document.getElementById('tbody');
+            if(!list || list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="empty-state">Không tìm thấy dữ liệu</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map((item, index) => {
+                const stt = (this.state.page * this.state.size) + index + 1;
+                const gender = item.gioiTinh ? item.gioiTinh : '---';
+                const toggleHtml = `<label class="switch-sm"><input type="checkbox" ${item.trangThai ? 'checked' : ''} onchange="window.CustomerApp.quickToggle(${item.id}, this)"><span class="slider-sm"></span></label>`;
+
+                // Đã dọn dẹp biến avatarUrl đi cho nhẹ nợ
+                return `
+                    <tr>
+                        <td style="text-align:center;">${stt}</td>
+                        <td style="font-weight:700;">${item.ma}</td>
+                        <td>
+                            <span style="font-weight: 700; color: #000; font-size: 13px;">${item.hoTen}</span>
+                        </td>
+                        <td>
+                            <div style="font-weight:700;">${item.soDienThoai || '---'}</div>
+                            <div style="font-size:11px; color:#666;">${item.email || ''}</div>
+                        </td>
+                        <td>${gender}</td>
+                        <td style="text-align:center;">${toggleHtml}</td>
+                        <td style="text-align:right; white-space: nowrap;">
+                            <button class="btn-icon" title="Xem chi tiết" onclick="window.CustomerApp.openEdit(${item.id}, true)"><i class="bi bi-eye"></i></button>
+                            <button class="btn-icon" title="Sửa" onclick="window.CustomerApp.openEdit(${item.id}, false)"><i class="bi bi-pencil"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        },
+
+        // --- DRAWER ACTIONS ---
+        setFormState(isDisabled) {
+            this.state.isViewMode = isDisabled;
+            // Vô hiệu hóa input
+            document.querySelectorAll('#drawer input, #drawer select').forEach(el => {
+                if(el.id !== 'inpFile') el.disabled = isDisabled;
+            });
+            // Ẩn/hiện nút Lưu
+            document.getElementById('btnSave').style.display = isDisabled ? 'none' : 'block';
+
+            // Xử lý Giao diện Avatar
+            const uploadArea = document.getElementById('uploadArea');
+            if(isDisabled) {
+                uploadArea.classList.add('disabled');
+                document.getElementById('uploadHint').style.display = 'none';
+                document.querySelectorAll('.required-star').forEach(s => s.style.display = 'none');
+            } else {
+                uploadArea.classList.remove('disabled');
+                document.getElementById('uploadHint').style.display = 'block';
+                document.querySelectorAll('.required-star').forEach(s => s.style.display = 'inline');
+            }
+        },
+
+        openDrawer(mode) {
+            this.state.editingId = null;
+            this.setFormState(false);
+
+            document.getElementById('drawerTitle').innerText = 'THÊM MỚI KHÁCH HÀNG';
+            this.resetForm();
+
+            document.getElementById('drawerTabs').style.display = 'none';
+            document.getElementById('tabContentInfo').style.display = 'block';
+            document.getElementById('tabContentAddr').style.display = 'none';
+            document.getElementById('defaultAddressGroup').style.display = 'block';
+
+            // Ẩn upload avatar khi tạo mới
+            document.getElementById('avatarUploadGroup').style.display = 'none';
+
+            document.getElementById('drawer').classList.add('show');
+            document.getElementById('overlay').classList.add('show');
+        },
+
+        async openEdit(id, isViewMode = false) {
+            this.state.editingId = id;
+            this.setFormState(isViewMode);
+
+            document.getElementById('drawerTitle').innerText = isViewMode ? 'CHI TIẾT KHÁCH HÀNG' : 'CẬP NHẬT THÔNG TIN';
+            document.getElementById('drawerTabs').style.display = 'flex';
+            document.getElementById('defaultAddressGroup').style.display = 'none';
+
+            // Ẩn hiện nút thêm địa chỉ dựa vào mode
+            document.getElementById('btnShowAddAddress').style.display = isViewMode ? 'none' : 'inline-flex';
+            document.getElementById('subAddressForm').style.display = 'none';
+
+            // Mở lại tab Info mặc định
+            this.switchDrawerTab('info');
+            document.getElementById('avatarUploadGroup').style.display = 'block';
+
+            try {
+                const res = await fetch(`/api/khach-hang/${id}`);
+                const data = await res.json();
+
+                document.getElementById('inpName').value = data.hoTen;
+                document.getElementById('inpPhone').value = data.soDienThoai;
+                document.getElementById('inpEmail').value = data.email;
+
+                // Fix Ngày sinh Spring Boot
+                let dob = data.ngaySinh;
+                if (Array.isArray(dob)) {
+                    dob = `${dob[0]}-${String(dob[1]).padStart(2, '0')}-${String(dob[2]).padStart(2, '0')}`;
+                }
+                document.getElementById('inpDob').value = dob || '';
+
+                document.getElementById('inpGender').value = (data.gioiTinh === 'Nam' || data.gioiTinh === true) ? 'true' : 'false';
+                document.getElementById('inpStatus').checked = data.trangThai;
+
+                // Avatar
+                const img = document.getElementById('imgPreview');
+                const icon = document.getElementById('iconUpload');
+                if(data.hinhAnh) {
+                    img.src = data.hinhAnh;
+                    img.style.display = 'block';
+                    icon.style.display = 'none';
+                } else {
+                    img.style.display = 'none';
+                    icon.style.display = 'block';
+                }
+
+                document.getElementById('drawer').classList.add('show');
+                document.getElementById('overlay').classList.add('show');
+            } catch(e) {
+                window.toast('Không thể truy xuất thông tin khách hàng.', 'error');
+            }
+        },
+
+        switchDrawerTab(tabName) {
+            document.querySelectorAll('.drawer-tab').forEach(t => t.classList.remove('active'));
+
+            if(tabName === 'info') {
+                document.getElementById('tabTitleInfo').classList.add('active');
+                document.getElementById('tabContentInfo').style.display = 'block';
+                document.getElementById('tabContentAddr').style.display = 'none';
+                // Hiện nút lưu nếu không phải view mode
+                document.getElementById('btnSave').style.display = this.state.isViewMode ? 'none' : 'block';
+            } else {
+                document.getElementById('tabTitleAddr').classList.add('active');
+                document.getElementById('tabContentInfo').style.display = 'none';
+                document.getElementById('tabContentAddr').style.display = 'block';
+                document.getElementById('btnSave').style.display = 'none';
+                this.loadAddressList();
+            }
+        },
+
+        // --- LƯU THÔNG TIN ---
+        // ✅ THAY HÀM saveCustomer — upload ảnh lên Cloudinary trước
+        async saveCustomer() {
+            const btn = document.getElementById('btnSave');
+            btn.innerHTML = 'Đang xử lý...'; btn.disabled = true;
+
+            const payload = {
+                hoTen: document.getElementById('inpName').value.trim(),
+                soDienThoai: document.getElementById('inpPhone').value.trim(),
+                email: document.getElementById('inpEmail').value.trim(),
+                ngaySinh: document.getElementById('inpDob').value,
+                gioiTinh: document.getElementById('inpGender').value === 'true',
+                trangThai: document.getElementById('inpStatus').checked
+            };
+
+            // ✅ Upload ảnh lên Cloudinary trước nếu có file mới
+            const fileInput = document.getElementById('inpFile');
+            if (fileInput.files[0]) {
+                try {
+                    const formData = new FormData();
+                    formData.append('file', fileInput.files[0]);
+                    const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData });
+                    const uploadData = await uploadRes.json();
+                    if (uploadRes.ok && uploadData.url) {
+                        payload.hinhAnh = uploadData.url; // ✅ Gắn URL vào payload
+                    } else {
+                        window.toast('Upload ảnh thất bại.', 'error');
+                        btn.innerHTML = 'Lưu thông tin'; btn.disabled = false;
+                        return;
+                    }
+                } catch(e) {
+                    window.toast('Lỗi kết nối khi upload ảnh.', 'error');
+                    btn.innerHTML = 'Lưu thông tin'; btn.disabled = false;
+                    return;
+                }
+            }
+
+            if (!this.state.editingId) {
+                payload.tinhThanhPho = window.CustomerApp.Address.getText('inpCity') || 'Chưa cập nhật';
+                payload.quanHuyen = window.CustomerApp.Address.getText('inpDist') || 'Chưa cập nhật';
+                payload.phuongXa = window.CustomerApp.Address.getText('inpWard') || 'Chưa cập nhật';
+                payload.diaChiChiTiet = document.getElementById('inpDetail').value.trim() || 'Mua tại cửa hàng';
+            }
+
+            if (!payload.hoTen || !payload.soDienThoai) {
+                window.toast('Vui lòng nhập đầy đủ Tên và Số điện thoại.', 'warning');
+                btn.innerHTML = 'Lưu thông tin'; btn.disabled = false;
+                return;
+            }
+
+            try {
+                // ✅ Gửi JSON thay vì FormData — nhẹ hơn nhiều
+                const method = this.state.editingId ? 'PUT' : 'POST';
+                const url = this.state.editingId ? `/api/khach-hang/${this.state.editingId}` : '/api/khach-hang';
+
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    window.toast(this.state.editingId ? 'Cập nhật thành công.' : 'Tạo mới thành công.', 'success');
+                    this.closeDrawer();
+                    this.loadData();
+                } else {
+                    let errorMsg = 'Yêu cầu không thể hoàn tất.';
+                    try {
+                        const err = await res.json();
+                        // Moi bằng được message ra, nếu Spring giấu message thì moi chữ error (VD: "Bad Request")
+                        errorMsg = err.message || err.error || errorMsg;
+                    } catch (errJson) {
+                        // Đề phòng backend ném ra chữ (text) thay vì JSON
+                        const text = await res.text();
+                        if (text) errorMsg = text;
+                    }
+                    window.toast(errorMsg, 'error');
+                }
+            } catch(e) {
+                window.toast('Mất kết nối với máy chủ.', 'error');
+            } finally {
+                btn.innerHTML = 'Lưu thông tin'; btn.disabled = false;
+            }
+        },
+
+        // --- TOAST CONFIRM (ĐỒNG BỘ PROMOTION) ---
+        toastConfirm(message, onConfirm, onCancel) {
+            const container = document.getElementById('toastHost');
+            if (!container) return;
+
+            const el = document.createElement('div');
+            el.className = `toast warning`;
+            el.style.flexDirection = 'column';
+            el.style.alignItems = 'flex-start';
+            el.style.gap = '10px';
+
+            el.innerHTML = `
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <i class="bi bi-exclamation-circle-fill" style="color:#f59e0b; font-size:18px;"></i>
+                    <span style="font-weight:600; font-size:13px;">${message}</span>
+                </div>
+                <div style="display: flex; gap: 8px; width: 100%; justify-content: flex-end;">
+                    <button class="btn btn-secondary" id="toastCancel" style="height: 24px; font-size: 10px; padding: 0 10px;">HỦY</button>
+                    <button class="btn" id="toastOk" style="height: 24px; font-size: 10px; padding: 0 10px;">XÁC NHẬN</button>
+                </div>
+            `;
+            container.appendChild(el);
+
+            el.querySelector('#toastOk').onclick = () => { el.remove(); onConfirm(); };
+            el.querySelector('#toastCancel').onclick = () => { el.remove(); onCancel(); };
+        },
+
+        // --- ĐỔI TRẠNG THÁI NHANH ---
+        async quickToggle(id, el) {
+            const originalState = !el.checked;
+            const actionText = originalState ? "kích hoạt" : "đình chỉ";
+
+            this.toastConfirm(
+                `Bạn có chắc chắn muốn ${actionText} tài khoản khách hàng này không?`,
+                async () => {
+                    const parent = el.closest('.switch-sm');
+                    try {
+                        parent.classList.add('loading');
+                        const res = await fetch(`/api/khach-hang/${id}/trang-thai`, { method: 'PATCH' });
+                        if(res.ok) {
+                            window.toast('Cập nhật trạng thái thành công.', 'success');
+                        } else {
+                            window.toast('Hệ thống từ chối yêu cầu thay đổi.', 'error');
+                            el.checked = originalState;
+                        }
+                    } catch(e) {
+                        window.toast('Sự cố đường truyền.', 'error');
+                        el.checked = originalState;
+                    } finally {
+                        parent.classList.remove('loading');
+                    }
+                },
+                () => { el.checked = originalState; }
+            );
+        },
+
+        // --- QUẢN LÝ SỔ ĐỊA CHỈ ---
+        async loadAddressList() {
+            const container = document.getElementById('addressListContainer');
+            container.innerHTML = '<div style="text-align:center; padding:20px;">Đang xử lý dữ liệu...</div>';
+
+            try {
+                const res = await fetch(`/api/khach-hang/${this.state.editingId}/dia-chi`);
+                const list = await res.json();
+
+                if(list.length === 0) {
+                    container.innerHTML = '<div style="text-align:center; color:#888; padding:20px;">Khách hàng chưa cung cấp địa chỉ</div>';
+                    return;
+                }
+
+                container.innerHTML = list.map(addr => {
+                    // Logic ẩn thao tác nếu đang xem chi tiết (isViewMode = true)
+                    const showActions = !this.state.isViewMode;
+                    const defaultBtn = (!addr.laMacDinh && showActions) ? `<button class="btn btn-secondary" style="height:22px; font-size:9px; padding:0 8px;" onclick="window.CustomerApp.setDefaultAddress(${addr.id})">Đặt mặc định</button>` : '';
+                    const deleteBtn = showActions ? `<button class="btn btn-danger" style="height:22px; font-size:9px; padding:0 8px;" onclick="window.CustomerApp.deleteAddress(${addr.id})">Xóa</button>` : '';
+
+                    return `
+                    <div class="addr-card ${addr.laMacDinh ? 'default' : ''}">
+                        <div style="font-weight:700; font-size:13px; margin-bottom:4px;">
+                            ${addr.hoTenNhan || ''} | ${addr.sdtNhan || ''}
+                            ${addr.laMacDinh ? '<span class="addr-tag">Mặc định</span>' : ''}
+                        </div>
+                        <div style="font-size:12px; color:#555;">
+                            ${addr.diaChiChiTiet}, ${addr.phuongXa}, ${addr.quanHuyen}, ${addr.tinhThanhPho}
+                        </div>
+                        <div class="addr-actions">
+                            ${defaultBtn}
+                            ${deleteBtn}
+                        </div>
+                    </div>
+                `}).join('');
+            } catch(e) {
+                container.innerHTML = '<div style="text-align:center; color:red; padding:20px;">Lỗi truy xuất sổ địa chỉ</div>';
+            }
+        },
+
+        showAddAddressForm() {
+            document.getElementById('subAddressForm').style.display = 'block';
+            document.getElementById('subCity').focus();
+        },
+
+        async saveSubAddress() {
+            const payload = {
+                tinhThanhPho: window.CustomerApp.Address.getText('subCity'),
+                quanHuyen: window.CustomerApp.Address.getText('subDist'),
+                phuongXa: window.CustomerApp.Address.getText('subWard'),
+                diaChiChiTiet: document.getElementById('subDetail').value.trim()
+            };
+
+            if(!payload.tinhThanhPho || !payload.diaChiChiTiet) {
+                window.toast('Vui lòng cung cấp khu vực và chi tiết số nhà.', 'warning');
+                return;
+            }
+            try {
+                const res = await fetch(`/api/khach-hang/${this.state.editingId}/dia-chi`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+
+                if(res.ok) {
+                    window.toast('Bổ sung địa chỉ thành công.', 'success');
+                    document.getElementById('subAddressForm').style.display = 'none';
+                    document.querySelectorAll('#subAddressForm input').forEach(i => i.value='');
+                    this.Address.reset('subCity', 'subDist', 'subWard');
+                    this.loadAddressList();
+                } else {
+                    window.toast('Lỗi phát sinh khi lưu địa chỉ.', 'error');
+                }
+            } catch(e) {
+                window.toast('Không thể kết nối với máy chủ.', 'error');
+            }
+        },
+
+        async setDefaultAddress(addrId) {
+            this.toastConfirm("Xác nhận thiết lập địa chỉ này làm mặc định cho các đơn hàng?", async () => {
+                try {
+                    const res = await fetch(`/api/khach-hang/dia-chi/${addrId}/mac-dinh`, { method: 'PUT' });
+                    if(res.ok) {
+                        window.toast('Cập nhật địa chỉ mặc định thành công.', 'success');
+                        this.loadAddressList();
+                    } else {
+                        window.toast('Không thể thay đổi thiết lập mặc định.', 'error');
+                    }
+                } catch(e) { window.toast('Sự cố kết nối mạng.', 'error'); }
+            }, () => {});
+        },
+
+        async deleteAddress(addrId) {
+            this.toastConfirm("Bạn có chắc chắn muốn xóa vĩnh viễn địa chỉ này khỏi hệ thống?", async () => {
+                try {
+                    const res = await fetch(`/api/khach-hang/dia-chi/${addrId}`, { method: 'DELETE' });
+                    if(res.ok) {
+                        window.toast('Xóa địa chỉ thành công.', 'success');
+                        this.loadAddressList();
+                    } else {
+                        const err = await res.json();
+                        window.toast(err.message || 'Hệ thống từ chối xóa địa chỉ này.', 'error');
+                    }
+                } catch(e) { window.toast('Sự cố kết nối mạng.', 'error'); }
+            }, () => {});
+        },
+
+        // --- UTILS ---
+        closeDrawer() {
+            document.getElementById('drawer').classList.remove('show');
+            document.getElementById('overlay').classList.remove('show');
+        },
+        resetForm() {
+            document.querySelectorAll('input').forEach(i => { if(i.type !== 'checkbox') i.value = ''; });
+            document.getElementById('imgPreview').src = '';
+            document.getElementById('imgPreview').style.display = 'none';
+            document.getElementById('iconUpload').style.display = 'block';
+            document.getElementById('inpStatus').checked = true;
+            document.getElementById('inpFile').value = '';
+            document.getElementById('subAddressForm').style.display = 'none';
+
+            this.Address.reset('inpCity', 'inpDist', 'inpWard');
+            this.Address.reset('subCity', 'subDist', 'subWard');
+        },
+        previewImage(input) {
+            if (input.files && input.files[0]) {
+                const blobUrl = URL.createObjectURL(input.files[0]);
+                document.getElementById('imgPreview').src = blobUrl;
+                document.getElementById('imgPreview').style.display = 'block';
+                document.getElementById('iconUpload').style.display = 'none';
+            }
+        },
+        handleSearch(val) {
+            clearTimeout(this.timeout);
+            this.timeout = setTimeout(() => { this.state.q = val; this.state.page = 0; this.loadData(); }, 500);
+        },
+        handleFilter(val) { this.state.status = val; this.state.page = 0; this.loadData(); },
+        resetFilters() {
+            clearTimeout(this.timeout); // <--- Thêm đúng dòng này vào
+            document.getElementById('search').value = '';
+            document.getElementById('fStatus').value = '';
+            this.state.q = ''; this.state.status = '';
+            this.loadData();
+        }
+    };
+
+    window.CustomerApp.init();
+</script>
+
+</body>
+</html>

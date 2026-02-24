@@ -1,142 +1,178 @@
+<!DOCTYPE html>
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Sản Phẩm • Bee Admin</title>
+    <title>Quản Lý Sản Phẩm</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
     <style>
-        /* --- 1. CẤU HÌNH CHUNG --- */
+        /* --- 1. CSS CHUNG ĐỒNG BỘ TỪ KHÁCH HÀNG --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root { --black: #000; --white: #fff; --gray-100: #f4f4f5; --gray-200: #e4e4e7; --gray-300: #d4d4d8; --success-color: #10b981; --font-size: 12.5px; }
         body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--black); font-size: var(--font-size); line-height: 1.4; }
         .container { max-width: 100%; padding: 20px 30px; }
 
-        /* Actions Bar */
-        .actions-bar { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--gray-200); margin-bottom: 20px; padding-bottom: 10px; }
-        .tabs { display: flex; gap: 30px; }
-        .tab { font-size: 12.5px; font-weight: 700; color: #888; padding: 0 0 5px 0; cursor: pointer; text-transform: uppercase; border: none; background: none; border-bottom: 2px solid transparent; transition: 0.2s; }
+        /* Actions Bar & Tabs giả lập */
+        .actions-bar { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--gray-200); margin-bottom: 20px; padding-bottom: 0; }
+        .tabs { display: flex; gap: 30px; margin-bottom: 0; border: none; }
+        .tab { font-size: 12.5px; font-weight: 700; color: #888; padding: 0 0 12px 0; cursor: default; text-transform: uppercase; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; display: flex; align-items: center; gap: 6px; }
         .tab.active { color: #000; border-bottom-color: #000; }
 
-        .btn { font-size: 11px; font-weight: 800; text-transform: uppercase; height: 32px; padding: 0 16px; background: #000; color: #fff; border: 1px solid #000; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; border-radius: 2px; }
+        /* Buttons */
+        .btn { font-size: 11px; font-weight: 800; text-transform: uppercase; height: 30px; padding: 0 14px; background: #000; color: #fff; border: 1px solid #000; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; border-radius: 2px; transition: 0.2s; }
         .btn:hover { background: #333; }
-        .btn-secondary { background: #fff; color: #000; border: 1px solid var(--gray-300); }
+        .btn-secondary { background: #fff; color: #000; border: 1px solid #ccc; }
+        .btn-secondary:hover { background: #f4f4f5; }
+        .btn-danger { background: #fff; color: #dc2626; border: 1px solid #dc2626; }
+        .btn-danger:hover { background: #dc2626; color: #fff; }
 
-        /* Search */
-        .search-section { margin-bottom: 20px; }
-        .search-wrapper { display: flex; gap: 12px; }
-        .search-box { position: relative; flex: 1; }
-        .search-box i { position: absolute; left: 12px; top:50%; transform: translateY(-50%); color: #9ca3af; }
-        .search-input { width: 100%; padding: 8px 12px 8px 36px; font-size: 12.5px; border: 1px solid var(--gray-300); outline: none; height: 36px; border-radius: 2px; }
-        .filter-select { padding: 0 12px; border: 1px solid var(--gray-300); border-radius: 2px; height: 36px; background: #fff; min-width: 150px; }
+        /* Search Section */
+        .search-section { margin-bottom: 15px; }
+        .search-wrapper { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .btn-reset { height: 34px !important; width: 34px !important; padding: 0 !important; justify-content: center; font-size: 15px; }
+        .search-box { position: relative; width: 100%; }
+        .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 14px; pointer-events: none; }
+        .search-input { width: 300px; padding: 8px 12px 8px 36px !important; font-size: 12.5px; border: 1px solid var(--gray-300); outline: none; background: #fff; height: 34px; border-radius: 2px; }
+        .filter-select { padding: 8px 12px; font-size: 12.5px; border: 1px solid var(--gray-300); outline: none; background: #fff; height: 34px; border-radius: 2px; min-width: 150px; }
+        .search-input:focus, .filter-select:focus { border-color: #000; }
 
         /* Table */
-        .table-wrapper { border: 1px solid var(--gray-200); border-radius: 4px; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; }
-        thead th { text-align: left; padding: 12px 15px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #666; background: #fafafa; border-bottom: 1px solid var(--gray-200); }
-        tbody td { padding: 12px 15px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; }
+        .table-wrapper { border: 1px solid var(--gray-200); width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+        thead th { text-align: left; padding: 10px 15px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #666; background: #fafafa; border-bottom: 1px solid var(--gray-200); white-space: nowrap; }
+        tbody td { padding: 8px 15px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; font-size: 12.5px; word-wrap: break-word; }
         tbody tr:hover { background: var(--gray-100); }
-
-        .product-img { width: 42px; height: 42px; object-fit: cover; border-radius: 4px; border: 1px solid var(--gray-200); }
-        .variant-img-sm { width: 32px; height: 32px; object-fit: cover; border-radius: 2px; border: 1px solid #eee; }
-        .btn-icon { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--gray-200); background: #fff; cursor: pointer; border-radius: 2px; transition: 0.2s; }
+        .btn-icon { width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--gray-200); background: #fff; cursor: pointer; border-radius: 2px; margin-left: 4px; }
         .btn-icon:hover { border-color: #000; background: #000; color: #fff; }
 
-        /* Switch */
-        .switch-sm { position: relative; display: inline-block; width: 32px; height: 18px; }
-        .switch-sm input { opacity: 0; width: 0; height: 0; }
-        .slider-sm { position: absolute; cursor: pointer; inset: 0; background-color: #ccc; transition: .3s; border-radius: 20px; }
-        .slider-sm:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%; }
-        input:checked + .slider-sm { background-color: var(--success-color); }
-        input:checked + .slider-sm:before { transform: translateX(14px); }
+        /* Pagination */
+        .pagination-wrapper { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; }
+        .pagination-info { font-size: 11px; font-weight: 600; color: #888; }
+        .pagination { display: flex; gap: 5px; }
+        .page-number { min-width: 26px; height: 26px; font-size: 12px; font-weight: 700; background: transparent; border: 1px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .page-number:hover:not(:disabled) { background: #eee; }
+        .page-number.active { background: #000; color: #fff; border-radius: 2px; }
+        .page-number:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        .switch { width: 36px; height: 20px; position: relative; appearance: none; background: #ddd; outline: none; cursor: pointer; border-radius: 10px; }
-        .switch:checked { background: var(--success-color); }
-        .switch::before { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #fff; transition: 0.2s; border-radius: 50%; }
-        .switch:checked::before { left: 18px; }
-
-        /* Drawer & Layout */
+        /* Drawer Framework Chẩn */
         .overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 999; display: none; }
         .overlay.show { display: block; }
-        .drawer { position: fixed; top: 0; right: -850px; width: 550px; height: 100vh; background: #fff; z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -5px 0 20px rgba(0,0,0,0.1); }
+        .drawer { position: fixed; top: 0; right: -100%; height: 100vh; background: #fff; border-left: 1px solid var(--gray-200); z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1); }
         .drawer.show { right: 0; }
+        .drawer-header { padding: 15px 20px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; }
+        .drawer-title { font-size: 14px; font-weight: 800; text-transform: uppercase; margin: 0; }
+        .drawer-body { flex: 1; padding: 20px; overflow-y: auto; }
+        .drawer-footer { padding: 15px 20px; border-top: 1px solid var(--gray-200); display: flex; gap: 10px; background: #fff;}
 
-        .drawer-header { padding: 15px 25px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; }
-        .drawer-title { font-size: 13.5px; font-weight: 800; text-transform: uppercase; }
-        .drawer-body { flex: 1; padding: 25px; overflow-y: auto; }
-        .form-group { margin-bottom: 20px; }
-        .form-label { font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; display: block; color: #555; }
-        .form-input, .form-select, .form-textarea { width: 100%; padding: 10px 12px; font-size: 13px; border: 1px solid var(--gray-300); outline: none; border-radius: 2px; background: #fff; }
-        .form-textarea { min-height: 100px; resize: vertical; }
+        /* Form Elements */
+        .form-group { margin-bottom: 15px; }
+        .form-label { font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; display: block; color: #555; }
+        .form-input, .form-select, .form-textarea { width: 100%; padding: 8px; font-size: 12.5px; border: 1px solid var(--gray-300); outline: none; border-radius: 2px; background: #fff; }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #000; }
+        .form-input:disabled { background: #f5f5f5; color: #888; cursor: not-allowed; border-color: #eee; }
+        .form-textarea { min-height: 80px; resize: vertical; }
 
-        .drawer-footer { padding: 15px 25px; border-top: 1px solid var(--gray-200); display: flex; gap: 12px; background: #fff; }
+        /* Switch Vuông (Form) & Tròn (Table) */
+        .switch-wrapper { display: flex; align-items: center; gap: 10px; }
+        .switch-square { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch-square input { opacity: 0; width: 0; height: 0; }
+        .slider-square { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 0; }
+        .slider-square:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 0; }
+        input:checked + .slider-square { background-color: #000; }
+        input:checked + .slider-square:before { transform: translateX(20px); }
 
-        /* Custom Sizes */
+        .switch-sm { position: relative; display: inline-block; width: 30px; height: 16px; }
+        .switch-sm input { opacity: 0; width: 0; height: 0; }
+        .slider-sm { position: absolute; cursor: pointer; inset: 0; background-color: #ccc; transition: .3s; border-radius: 0; }
+        .slider-sm:before { position: absolute; content: ""; height: 12px; width: 12px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 0; }
+        input:checked + .slider-sm { background-color: #000; }
+        input:checked + .slider-sm:before { transform: translateX(14px); }
+        .switch-sm.loading { opacity: 0.5; pointer-events: none; }
+
+        /* Toast Xịn */
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 10002; display: flex; flex-direction: column; gap: 10px; }
+        .toast { min-width: 280px; padding: 14px 22px; border-radius: 6px; background: #fff; color: #000; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); display: flex; align-items: center; gap: 12px; border-left: 5px solid #000; animation: toastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; transition: all 0.5s ease; }
+        .toast.success { border-left-color: var(--success-color); }
+        .toast.error { border-left-color: #ef4444; }
+        .toast.warning { border-left-color: #f59e0b; }
+        .toast.hiding { transform: translateX(130%); opacity: 0; margin-top: -60px; }
+        @keyframes toastSlideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* --- 2. CSS RIÊNG CHO SẢN PHẨM --- */
+        /* Cấu trúc nhiều Drawer */
+        #mainDrawer { width: 600px; }
         #variantDrawer { width: 850px; z-index: 1050; }
         #vFormDrawer { width: 450px; z-index: 1101; }
-        #stockDrawer { width: 320px; z-index: 1201; }
+        #stockDrawer { width: 350px; z-index: 1201; }
+        #vFormOverlay { z-index: 1100; }
+        #stockOverlay { z-index: 1200; }
 
-        #vFormOverlay, #stockOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; }
-        #vFormOverlay { z-index: 1100; } #stockOverlay { z-index: 1200; }
-        #vFormOverlay.show, #stockOverlay.show { display: block; }
+        /* Cột Ảnh + Tên gộp chung */
+        .product-cell { display: flex; align-items: center; gap: 12px; }
+        .product-img { width: 36px; height: 36px; border-radius: 4px; object-fit: cover; border: 1px solid #eee; background: #f9f9f9; }
+        .variant-img-sm { width: 32px; height: 32px; object-fit: cover; border-radius: 2px; border: 1px solid #eee; }
 
-        /* Carousel */
-        .carousel-container { position: relative; width: 100%; height: 240px; background: #f8fafc; border: 1px solid var(--gray-200); border-radius: 6px; overflow: hidden; margin-bottom: 20px; }
-        .carousel-wrapper { display: flex; transition: transform 0.4s ease-in-out; height: 100%; }
-        .carousel-item { min-width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #fff; }
-        .carousel-item img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.2); color: #fff; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; }
-        .carousel-btn:hover { background: #000; }
-        .carousel-prev { left: 10px; } .carousel-next { right: 10px; }
-        .carousel-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
-        .dot { width: 8px; height: 8px; background: #cbd5e1; border-radius: 50%; cursor: pointer; }
-        .dot.active { background: #000; width: 18px; border-radius: 4px; }
-
-        /* --- INFO BOX --- */
-        .product-brief { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background: #fafafa; padding: 15px; border-radius: 6px; border: 1px solid #eee; margin-bottom: 20px; }
-        .brief-item label { display: block; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; }
-        .brief-item p { font-size: 12px; font-weight: 600; color: #1e293b; margin: 0; }
-        .brief-desc { grid-column: span 2; padding-top: 10px; border-top: 1px dashed #eee; }
-
-        /* Grid Preview cho Sửa sản phẩm */
+        /* Preview Ảnh */
         #imagePreviewContainer { display: grid; grid-template-columns: repeat(auto-fill, 65px); gap: 10px; margin-top: 12px; }
         .preview-item { position: relative; width: 65px; height: 65px; border: 1px solid var(--gray-200); border-radius: 4px; overflow: hidden; background: #fff; }
         .preview-item img { width: 100%; height: 100%; object-fit: cover; }
         .preview-item .remove-btn { position: absolute; top: 2px; right: 2px; background: #ef4444; color: #fff; border: none; width: 18px; height: 18px; cursor: pointer; font-size: 12px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        .preview-item .remove-btn:hover { background: #b91c1c; }
+        .preview-item .remove-btn:hover { background: #dc2626; }
 
-        /* Toast & Pagination */
-        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 10002; display: flex; flex-direction: column; gap: 10px; }
-        .toast { min-width: 280px; padding: 14px 22px; border-radius: 6px; background: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 12px; border-left: 5px solid #000; animation: toastSlideIn 0.4s forwards; }
-        .toast.success { border-left-color: var(--success-color); }
-        .toast.error { border-left-color: #ef4444; }
-        @keyframes toastSlideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        /* Carousel xem chi tiết */
+        .carousel-container { position: relative; width: 100%; height: 240px; background: #fafafa; border: 1px solid #eee; border-radius: 4px; overflow: hidden; margin-bottom: 20px; }
+        .carousel-wrapper { display: flex; transition: transform 0.4s ease-in-out; height: 100%; }
+        .carousel-item { min-width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #fff; }
+        .carousel-item img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.4); color: #fff; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; }
+        .carousel-prev { left: 10px; } .carousel-next { right: 10px; }
+        .carousel-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
+        .dot { width: 8px; height: 8px; background: #ccc; border-radius: 50%; cursor: pointer; }
+        .dot.active { background: #000; width: 16px; border-radius: 4px; }
 
-        .pagination-wrapper { display: flex; justify-content: space-between; align-items: center; padding-top: 20px; }
-        .pagination { display: flex; gap: 5px; }
-        .page-number { min-width: 32px; height: 32px; font-size: 12px; font-weight: 700; border: 1px solid var(--gray-200); background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 2px; }
-        .page-number.active { background: #000; color: #fff; border-color: #000; }
-        .page-number:disabled { opacity: 0.4; cursor: not-allowed; }
+        /* Info Brief */
+        .product-brief { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #fafafa; padding: 15px; border-radius: 4px; border: 1px solid #eee; margin-bottom: 20px; }
+        .brief-item label { display: block; font-size: 10px; font-weight: 800; color: #888; text-transform: uppercase; margin-bottom: 4px; }
+        .brief-item p { font-size: 12px; font-weight: 700; color: #000; margin: 0; }
+        .brief-desc { grid-column: span 2; padding-top: 10px; border-top: 1px dashed #eee; }
+
+        /* Chống kẹt màn hình mờ chặn chuột */
+        .overlay:not(.show) {
+            display: none !important;
+            pointer-events: none !important;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="actions-bar">
-        <nav class="tabs"><button class="tab active"><i class="bi bi-box-seam-fill"></i> QUẢN LÝ SẢN PHẨM</button></nav>
-        <button class="btn" id="btnAdd"><i class="bi bi-plus-lg"></i> THÊM MỚI</button>
+        <nav class="tabs">
+            <div class="tab active"><i class="bi bi-box-seam-fill"></i> QUẢN LÝ SẢN PHẨM</div>
+        </nav>
+        <button class="btn" id="btnAdd" onclick="ProductApp.openDrawer()">
+            <i class="bi bi-plus-lg"></i> THÊM MỚI
+        </button>
     </div>
 
     <section class="search-section">
         <div class="search-wrapper">
-            <div class="search-box">
-                <i class="bi bi-search"></i>
-                <input type="text" class="search-input" id="search" placeholder="Tìm tên hoặc mã sản phẩm...">
+            <div style="flex: 2; min-width: 200px;">
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" class="search-input" id="search" placeholder="Tìm tên hoặc mã sản phẩm...">
+                </div>
             </div>
             <select class="filter-select" id="fTrangThaiFilter">
                 <option value="">-- Trạng thái --</option>
                 <option value="true">Đang bán</option>
                 <option value="false">Ngừng bán</option>
             </select>
-            <button class="btn btn-secondary" onclick="ProductApp.resetFilters()"><i class="bi bi-arrow-counterclockwise"></i></button>
+            <button class="btn btn-secondary btn-reset" onclick="ProductApp.resetFilters()" title="Làm mới">
+                <i class="bi bi-arrow-counterclockwise"></i>
+            </button>
         </div>
     </section>
 
@@ -145,14 +181,13 @@
             <thead>
             <tr>
                 <th style="width:50px; text-align:center;">STT</th>
-                <th style="width:70px">Ảnh</th>
-                <th style="width:120px">MÃ</th>
-                <th>TÊN SẢN PHẨM</th>
-                <th style="width:130px">DANH MỤC</th>
-                <th style="width:110px">HÃNG</th>
+                <th>MÃ SP</th>
+                <th>SẢN PHẨM</th>
+                <th>DANH MỤC</th>
+                <th>HÃNG</th>
                 <th>CHẤT LIỆU</th>
-                <th style="text-align:center; width:110px">TRẠNG THÁI</th>
-                <th style="text-align:right; width:100px">THAO TÁC</th>
+                <th style="text-align:center;">TRẠNG THÁI</th>
+                <th style="text-align:right;">THAO TÁC</th>
             </tr>
             </thead>
             <tbody id="tbody"></tbody>
@@ -169,42 +204,70 @@
     </div>
 </div>
 
-<aside class="drawer" id="drawer">
-    <div class="drawer-header"><h3 class="drawer-title" id="drawerTitle">SẢN PHẨM</h3></div>
+<div class="overlay" id="overlay" onclick="ProductApp.handleOverlayClick()"></div>
+<aside class="drawer" id="mainDrawer">
+    <div class="drawer-header">
+        <h3 class="drawer-title" id="drawerTitle">THÊM MỚI SẢN PHẨM</h3>
+        <button class="btn-icon" onclick="ProductApp.closeDrawer()" style="border:none;"><i class="bi bi-x-lg"></i></button>
+    </div>
     <div class="drawer-body">
-        <div class="form-group"><label class="form-label">Tên sản phẩm *</label><input id="fTen" class="form-input"></div>
-        <div class="form-group"><label class="form-label">Mã sản phẩm</label><input id="fMa" class="form-input"></div>
-        <div style="display:flex; gap:15px">
-            <div class="form-group" style="flex:1"><label class="form-label">Danh mục</label><select id="fDanhMuc" class="form-select"></select></div>
-            <div class="form-group" style="flex:1"><label class="form-label">Hãng</label><select id="fHang" class="form-select"></select></div>
+        <div class="form-group">
+            <label class="form-label">Tên sản phẩm <span style="color:red">*</span></label>
+            <input id="fTen" class="form-input" placeholder="Nhập tên sản phẩm...">
         </div>
-        <div class="form-group"><label class="form-label">Chất liệu</label><select id="fChatLieu" class="form-select"></select></div>
-        <div class="form-group"><label class="form-label">Mô tả chi tiết</label><textarea id="fMoTa" class="form-textarea"></textarea></div>
+        <div class="form-group">
+            <label class="form-label">Mã sản phẩm</label>
+            <input id="fMa" class="form-input" placeholder="Tự động tạo nếu để trống...">
+        </div>
+        <div style="display:flex; gap:15px">
+            <div class="form-group" style="flex:1">
+                <label class="form-label">Danh mục</label>
+                <select id="fDanhMuc" class="form-select"></select>
+            </div>
+            <div class="form-group" style="flex:1">
+                <label class="form-label">Hãng</label>
+                <select id="fHang" class="form-select"></select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Chất liệu</label>
+            <select id="fChatLieu" class="form-select"></select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Mô tả chi tiết</label>
+            <textarea id="fMoTa" class="form-textarea" placeholder="Nhập mô tả..."></textarea>
+        </div>
         <div class="form-group">
             <label class="form-label">Hình ảnh sản phẩm</label>
             <input type="file" id="fFile" multiple accept="image/*" style="display:none">
             <button class="btn btn-secondary" onclick="document.getElementById('fFile').click()" type="button"><i class="bi bi-image"></i> CHỌN ẢNH</button>
             <div id="imagePreviewContainer"></div>
         </div>
-        <div class="form-group">
-            <div style="display:flex; align-items:center; gap:12px">
-                <input type="checkbox" id="fTrangThai" class="switch" checked>
-                <span class="form-label" style="margin:0">Đang kinh doanh</span>
+        <div class="form-group" style="margin-top: 20px;">
+            <div class="switch-wrapper">
+                <label class="switch-square">
+                    <input type="checkbox" id="fTrangThai" checked>
+                    <span class="slider-square"></span>
+                </label>
+                <span style="font-size: 12px; font-weight: 600;">Đang kinh doanh</span>
             </div>
         </div>
     </div>
     <div class="drawer-footer">
-        <button class="btn btn-secondary" id="btnClose" style="flex:1">HỦY</button>
-        <button class="btn" id="btnSave" style="flex:1">LƯU SẢN PHẨM</button>
+        <button class="btn btn-secondary" id="btnClose" style="flex:1" onclick="ProductApp.closeDrawer()">Hủy</button>
+        <button class="btn" id="btnSave" style="flex:1" onclick="ProductApp.saveProduct()">Lưu Thông Tin</button>
     </div>
 </aside>
 
 <aside class="drawer" id="variantDrawer">
     <div class="drawer-header">
-        <h3 class="drawer-title" style="margin-left: 5px;">CHI TIẾT: <span id="vTitle" style="color:#2563eb"></span></h3>
-        <button class="btn" style="margin-right: 5px;" onclick="ProductApp.openAddVariantForm()">+ THÊM SKU</button>
+        <h3 class="drawer-title">CHI TIẾT: <span id="vTitle" style="color:#555"></span></h3>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn" onclick="ProductApp.openAddVariantForm()">+ THÊM SKU</button>
+            <button class="btn-icon" onclick="ProductApp.closeVariantDrawer()" style="border:none;"><i class="bi bi-x-lg"></i></button>
+        </div>
     </div>
-    <div class="drawer-body" style="padding: 15px 25px;">
+    <div class="drawer-body">
         <div id="carouselWrapper" class="carousel-container">
             <div class="carousel-wrapper" id="carouselSlides"></div>
             <button class="carousel-btn carousel-prev" onclick="ProductApp.moveSlide(-1)"><i class="bi bi-chevron-left"></i></button>
@@ -216,13 +279,13 @@
             <div class="brief-item"><label>Mã sản phẩm</label><p id="bMa">-</p></div>
             <div class="brief-item"><label>Ngày tạo</label><p id="bNgayTao">-</p></div>
             <div class="brief-item"><label>Ngày sửa</label><p id="bNgaySua">-</p></div>
-            <div class="brief-desc"><label>Mô tả sản phẩm</label><p id="bMoTa" style="font-weight:400; color:#64748b; line-height:1.6; white-space: pre-line;">-</p></div>
+            <div class="brief-desc"><label>Mô tả sản phẩm</label><p id="bMoTa" style="font-weight:500; color:#555; white-space: pre-line;">-</p></div>
         </div>
 
-        <h5 style="font-weight:800; text-transform:uppercase; font-size:11px; margin-bottom:12px; color:#334155; display: flex; justify-content: space-between;">
-            Danh sách biến thể (SKU)
-            <span id="vPageInfo" style="color: #94a3b8; font-weight: 600;">Trang 1/1</span>
-        </h5>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h5 style="font-weight:800; text-transform:uppercase; font-size:12px; color:#000; margin:0;">DANH SÁCH BIẾN THỂ (SKU)</h5>
+            <span id="vPageInfo" style="color: #888; font-weight: 600; font-size: 11px;">Trang 1/1</span>
+        </div>
 
         <div class="table-wrapper">
             <table style="min-width: 600px;">
@@ -230,11 +293,11 @@
                 <tr>
                     <th style="width:50px">ẢNH</th>
                     <th style="width:130px">SKU</th>
-                    <th>MÀU</th>
-                    <th>SIZE</th>
+                    <th>MÀU SẮC</th>
+                    <th>KÍCH THƯỚC</th>
                     <th>GIÁ BÁN</th>
-                    <th style="text-align:center">SỐ LƯỢNG</th>
-                    <th style="text-align:center">T.THÁI</th>
+                    <th style="text-align:center">TỒN KHO</th>
+                    <th style="text-align:center">TRẠNG THÁI</th>
                     <th style="text-align:right">THAO TÁC</th>
                 </tr>
                 </thead>
@@ -243,65 +306,107 @@
         </div>
 
         <div style="display: flex; justify-content: center; gap: 10px; margin-top: 15px;">
-            <button class="btn btn-secondary" id="vPrevBtn" style="height: 28px; padding: 0 10px;" onclick="ProductApp.changeVariantPage(-1)">← Trước</button>
-            <button class="btn btn-secondary" id="vNextBtn" style="height: 28px; padding: 0 10px;" onclick="ProductApp.changeVariantPage(1)">Sau →</button>
+            <button class="page-number" id="vPrevBtn" onclick="ProductApp.changeVariantPage(-1)"><i class="bi bi-chevron-left"></i></button>
+            <button class="page-number" id="vNextBtn" onclick="ProductApp.changeVariantPage(1)"><i class="bi bi-chevron-right"></i></button>
         </div>
     </div>
     <div class="drawer-footer">
-        <button class="btn btn-secondary" style="width: 100%" onclick="ProductApp.closeVariantDrawer()">ĐÓNG DANH SÁCH</button>
+        <button class="btn btn-secondary" style="width: 100%" onclick="ProductApp.closeVariantDrawer()">ĐÓNG</button>
     </div>
 </aside>
 
 <div id="vFormOverlay" class="overlay" onclick="ProductApp.closeVariantForm()"></div>
 <aside class="drawer" id="vFormDrawer">
-    <div class="drawer-header"><h3 class="drawer-title" id="vFormTitle">Thêm Biến Thể</h3></div>
+    <div class="drawer-header">
+        <h3 class="drawer-title" id="vFormTitle">THÊM BIẾN THỂ</h3>
+        <button class="btn-icon" onclick="ProductApp.closeVariantForm()" style="border:none;"><i class="bi bi-x-lg"></i></button>
+    </div>
     <div class="drawer-body">
         <div style="display:flex; gap:15px">
-            <div class="form-group" style="flex:1"><label class="form-label">Màu sắc *</label><select id="vMauSac" class="form-select"></select></div>
-            <div class="form-group" style="flex:1"><label class="form-label">Kích thước *</label><select id="vKichThuoc" class="form-select"></select></div>
+            <div class="form-group" style="flex:1">
+                <label class="form-label">Màu sắc <span style="color:red">*</span></label>
+                <select id="vMauSac" class="form-select"></select>
+            </div>
+            <div class="form-group" style="flex:1">
+                <label class="form-label">Kích thước <span style="color:red">*</span></label>
+                <select id="vKichThuoc" class="form-select"></select>
+            </div>
         </div>
-        <div class="form-group"><label class="form-label">Giá bán (VND) *</label><input type="text" id="vGia" class="form-input" placeholder="0" oninput="ProductApp.formatCurrencyInput(this)"></div>
+        <div class="form-group">
+            <label class="form-label">Giá bán (VND) <span style="color:red">*</span></label>
+            <input type="text" id="vGia" class="form-input" placeholder="0" oninput="ProductApp.formatCurrencyInput(this)">
+        </div>
         <div class="form-group">
             <label class="form-label">Ảnh đại diện SKU</label>
             <input type="file" id="vFile" accept="image/*" style="display:none">
-            <button class="btn btn-secondary" onclick="document.getElementById('vFile').click()" type="button">CHỌN ẢNH</button>
-            <div id="vImagePreview" style="width:60px; height:60px; border:1px dashed #ccc; margin-top:10px; display:flex; align-items:center; justify-content:center"><img id="vImgDisplay" src="" style="width:100%; height:100%; object-fit:cover; display:none"><i id="vImgPlaceholder" class="bi bi-image"></i></div>
+            <button class="btn btn-secondary" onclick="document.getElementById('vFile').click()" type="button"><i class="bi bi-image"></i> CHỌN ẢNH</button>
+            <div id="vImagePreview" style="width:65px; height:65px; border:1px solid #ccc; border-radius: 4px; margin-top:10px; display:flex; align-items:center; justify-content:center; background: #fafafa; overflow:hidden;">
+                <img id="vImgDisplay" src="" style="width:100%; height:100%; object-fit:cover; display:none">
+                <i id="vImgPlaceholder" class="bi bi-image" style="color:#ccc; font-size:24px;"></i>
+            </div>
         </div>
     </div>
-    <div class="drawer-footer"><button class="btn" id="btnSaveVariant" style="flex:1">XÁC NHẬN LƯU</button></div>
+    <div class="drawer-footer">
+        <button class="btn btn-secondary" style="flex:1" onclick="ProductApp.closeVariantForm()">HỦY</button>
+        <button class="btn" id="btnSaveVariant" style="flex:1" onclick="ProductApp.saveVariant()">LƯU SKU</button>
+    </div>
 </aside>
 
 <div id="stockOverlay" class="overlay" onclick="ProductApp.closeStockForm()"></div>
 <aside class="drawer" id="stockDrawer">
-    <div class="drawer-header"><h3 class="drawer-title">NHẬP THÊM KHO</h3></div>
+    <div class="drawer-header">
+        <h3 class="drawer-title">NHẬP THÊM KHO</h3>
+        <button class="btn-icon" onclick="ProductApp.closeStockForm()" style="border:none;"><i class="bi bi-x-lg"></i></button>
+    </div>
     <div class="drawer-body">
-        <div style="background:#f8fafc; padding:15px; border-radius:4px; margin-bottom:20px; border:1px solid #e2e8f0;">
-            <div style="font-size:11px; color:#64748b; font-weight:700;">ĐANG CHỌN SKU:</div>
-            <div id="sSku" style="font-weight:800; font-size:14px; margin-top:4px;">-</div>
-            <div style="margin-top:10px; display:flex; justify-content:space-between;"><span style="color:#64748b;">Tồn kho cũ:</span><b id="sCurrentQty">0</b></div>
+        <div style="background:#fafafa; padding:15px; border-radius:4px; margin-bottom:20px; border:1px solid #eee;">
+            <div style="font-size:11px; color:#888; font-weight:700;">MÃ SKU ĐANG CHỌN:</div>
+            <div id="sSku" style="font-weight:800; font-size:14px; margin-top:4px; color:#000;">-</div>
+            <div style="margin-top:10px; display:flex; justify-content:space-between; align-items: center;">
+                <span style="color:#666; font-size: 12px;">Tồn kho hiện tại:</span>
+                <b id="sCurrentQty" style="font-size: 14px;">0</b>
+            </div>
         </div>
         <div class="form-group">
-            <label class="form-label">Số lượng thêm *</label>
-            <input type="number" id="sInputQty" class="form-input" placeholder="0" min="1">
-            <small style="margin-top:8px; display:block; color:#64748b;">Tổng sau nhập: <b id="sPreview" style="color:var(--success-color)">0</b></small>
+            <label class="form-label">Số lượng nhập thêm <span style="color:red">*</span></label>
+            <input type="number" id="sInputQty" class="form-input" placeholder="VD: 50" min="1">
+            <div style="margin-top:10px; font-size: 12px; color:#666;">
+                Dự kiến tổng sau nhập: <b id="sPreview" style="color:#000; font-size: 14px;">0</b>
+            </div>
         </div>
     </div>
-    <div class="drawer-footer"><button class="btn" style="flex:1" onclick="ProductApp.submitUpdateStock()">CẬP NHẬT KHO</button></div>
+    <div class="drawer-footer">
+        <button class="btn" style="width:100%" onclick="ProductApp.submitUpdateStock()">XÁC NHẬN CẬP NHẬT</button>
+    </div>
 </aside>
 
-<div class="overlay" id="overlay" onclick="ProductApp.handleOverlayClick()"></div>
 <div class="toast-container" id="toastHost"></div>
 
 <script>
-    /* --- TOAST SYSTEM --- */
-    window.toast = function(msg, type = 'success') {
-        const host = document.getElementById('toastHost');
+    /* --- TOAST SYSTEM (CHUẨN ĐỒNG BỘ) --- */
+    window.toast = function(message, type = 'success') {
+        const container = document.getElementById('toastHost');
+        if (!container) return;
         const el = document.createElement('div');
         el.className = `toast ${type}`;
-        let icon = type === 'success' ? '<i class="bi bi-check-circle-fill" style="color:var(--success-color)"></i>' : '<i class="bi bi-x-circle-fill" style="color:#ef4444"></i>';
-        el.innerHTML = `${icon} <span style="font-weight:600">${msg}</span>`;
-        host.appendChild(el);
-        setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(100%)'; setTimeout(() => el.remove(), 400); }, 3000);
+        const prefix = type === 'success' ? 'THÀNH CÔNG: ' : (type === 'error' ? 'LỖI: ' : 'THÔNG BÁO: ');
+
+        el.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+                <div>
+                    <span style="font-weight:700; font-size:12px;">${prefix}</span>
+                    <span style="font-weight:500; font-size:12px;">${message}</span>
+                </div>
+                <i class="bi bi-x-lg" style="cursor: pointer; margin-left: 10px; font-size: 14px;" onclick="this.parentElement.parentElement.remove()"></i>
+            </div>
+        `;
+        container.appendChild(el);
+        setTimeout(() => {
+            if(el.parentNode) {
+                el.classList.add('hiding');
+                el.addEventListener('transitionend', () => el.remove());
+            }
+        }, 3500);
     };
 
     const ProductApp = {
@@ -309,8 +414,10 @@
             page: 0, size: 10, totalPages: 0, q: '', trangThai: '', editingId: null,
             tempImages: [], currentProductId: null, vTempImage: null,
             activeVariantId: null, activeCurrentQty: 0,
-            currentSlide: 0, variantList: [], variantPage: 0, variantSize: 3,
-            editingVariantId: null
+            currentSlide: 0, variantList: [], variantPage: 0, variantSize: 5,
+            editingVariantId: null,
+            isLoading: false,
+            abortController: null,
         },
 
         init: async function() {
@@ -321,43 +428,82 @@
 
         bindEvents: function() {
             const self = this;
-            document.getElementById('btnAdd').onclick = () => self.openDrawer();
-            document.getElementById('btnClose').onclick = () => self.closeDrawer();
-            document.getElementById('btnSave').onclick = () => self.saveProduct();
-            document.getElementById('btnPrev').onclick = () => { if (self.state.page > 0) { self.state.page--; self.loadData(); } };
-            document.getElementById('btnNext').onclick = () => { if (self.state.page < self.state.totalPages - 1) { self.state.page++; self.loadData(); } };
-
             document.getElementById('search').oninput = (e) => {
                 clearTimeout(this.timeout);
                 this.timeout = setTimeout(() => { self.state.q = e.target.value.trim(); self.state.page = 0; self.loadData(); }, 500);
             };
             document.getElementById('fTrangThaiFilter').onchange = (e) => { self.state.trangThai = e.target.value; self.state.page = 0; self.loadData(); };
 
-            document.getElementById('fFile').onchange = (e) => {
-                Array.from(e.target.files).forEach(file => {
-                    const reader = new FileReader();
-                    reader.onload = (ev) => { self.state.tempImages.push(ev.target.result); self.renderPreview(); };
-                    reader.readAsDataURL(file);
-                });
+            document.getElementById('fFile').onchange = async (e) => {
+                const files = Array.from(e.target.files);
                 e.target.value = '';
-            };
 
-            document.getElementById('vFile').onchange = (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                        self.state.vTempImage = ev.target.result;
-                        document.getElementById('vImgDisplay').src = ev.target.result;
-                        document.getElementById('vImgDisplay').style.display = 'block';
-                        document.getElementById('vImgPlaceholder').style.display = 'none';
-                    };
-                    reader.readAsDataURL(file);
+                for (const file of files) {
+                    // Hiện preview tạm ngay lập tức
+                    const blobUrl = URL.createObjectURL(file);
+                    self.state.tempImages.push({ uploading: true, preview: blobUrl });
+                    self.renderPreview();
+
+                    try {
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                        const data = await res.json();
+
+                        if (res.ok && data.url) {
+                            // Thay blob bằng URL Cloudinary thật
+                            const idx = self.state.tempImages.findIndex(i => i.preview === blobUrl);
+                            if (idx !== -1) self.state.tempImages[idx] = data.url;
+                            URL.revokeObjectURL(blobUrl);
+                            window.toast('Tải ảnh lên thành công!', 'success');
+                        } else {
+                            window.toast('Upload ảnh thất bại: ' + (data.message || ''), 'error');
+                            self.state.tempImages = self.state.tempImages.filter(i => i.preview !== blobUrl);
+                        }
+                    } catch (err) {
+                        window.toast('Lỗi kết nối khi upload ảnh.', 'error');
+                        self.state.tempImages = self.state.tempImages.filter(i => i.preview !== blobUrl);
+                    }
+                    self.renderPreview();
                 }
             };
+
+                document.getElementById('vFile').onchange = async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    e.target.value = '';
+
+                    // Preview tạm
+                    const blobUrl = URL.createObjectURL(file);
+                    document.getElementById('vImgDisplay').src = blobUrl;
+                    document.getElementById('vImgDisplay').style.display = 'block';
+                    document.getElementById('vImgPlaceholder').style.display = 'none';
+
+                    try {
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                        const data = await res.json();
+
+                        if (res.ok && data.url) {
+                            self.state.vTempImage = data.url; // ✅ URL Cloudinary thật
+                            document.getElementById('vImgDisplay').src = data.url;
+                            URL.revokeObjectURL(blobUrl);
+                            window.toast('Tải ảnh SKU thành công!', 'success');
+                        } else {
+                            window.toast('Upload ảnh thất bại.', 'error');
+                            document.getElementById('vImgDisplay').style.display = 'none';
+                            document.getElementById('vImgPlaceholder').style.display = 'block';
+                            self.state.vTempImage = null;
+                        }
+                    } catch (err) {
+                        window.toast('Lỗi kết nối khi upload ảnh.', 'error');
+                    }
+                };
         },
 
         loadData: async function() {
+            document.getElementById('info').textContent = 'Đang tải...';
             try {
                 const res = await fetch(`/api/products?page=${this.state.page}&size=${this.state.size}&q=${this.state.q}&trangThai=${this.state.trangThai}`);
                 const data = await res.json();
@@ -367,43 +513,93 @@
         },
 
         renderTable: function(list) {
+            const tbody = document.getElementById('tbody');
+            if(!list || list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 40px; color:#888;">Không tìm thấy dữ liệu</td></tr>`;
+                return;
+            }
+
             const startSTT = this.state.page * this.state.size + 1;
-            document.getElementById('tbody').innerHTML = list.map((item, index) => `
+            tbody.innerHTML = list.map((item, index) => {
+                let rawImg = item.hinhAnhs?.[0]?.url || 'https://placehold.co/100x100?text=SP';
+                const img = getOptimizedImg(rawImg, 60, 60);
+                const toggleHtml = `<label class="switch-sm"><input type="checkbox" ${item.trangThai ? 'checked' : ''} onchange="ProductApp.quickToggle(${item.id}, this)"><span class="slider-sm"></span></label>`;
+
+                return `
                 <tr>
-                    <td align="center" style="color:#888">${startSTT + index}</td>
-                    <td><img src="${item.hinhAnhs?.[0]?.url || 'https://via.placeholder.com/50'}" class="product-img"></td>
-                    <td style="font-weight:700; color:#2563eb;">${item.ma}</td>
-                    <td style="font-weight:600">${item.ten}</td>
-                    <td>${item.danhMuc?.ten || '-'}</td>
-                    <td>${item.hang?.ten || '-'}</td>
-                    <td>${item.chatLieu?.ten || '-'}</td>
-                    <td align="center"><label class="switch-sm"><input type="checkbox" ${item.trangThai ? 'checked' : ''} onchange="ProductApp.quickToggle(${item.id}, this)"><span class="slider-sm"></span></label></td>
-                    <td align="right">
-                        <button class="btn-icon" onclick="ProductApp.viewVariants(${item.id}, '${item.ten}')" title="Xem chi tiết"><i class="bi bi-eye"></i></button>
+                    <td style="text-align:center;">${startSTT + index}</td>
+                    <td style="font-weight:700;">${item.ma}</td>
+                    <td>
+                        <div class="product-cell">
+                            <img src="${img}" class="product-img" loading="lazy" onerror="this.src='https://placehold.co/60x60?text=ERR'">
+                            <span style="font-weight: 700; color: #000; font-size: 13px;">${item.ten}</span>
+                        </div>
+                    </td>
+                    <td>${item.danhMuc?.ten || '---'}</td>
+                    <td>${item.hang?.ten || '---'}</td>
+                    <td>${item.chatLieu?.ten || '---'}</td>
+                    <td style="text-align:center;">${toggleHtml}</td>
+                    <td style="text-align:right; white-space: nowrap;">
+                        <button class="btn-icon" onclick="ProductApp.viewVariants(${item.id}, '${item.ten}')" title="Xem chi tiết & SKU"><i class="bi bi-eye"></i></button>
                         <button class="btn-icon" onclick="ProductApp.openEdit(${item.id})" title="Sửa sản phẩm"><i class="bi bi-pencil"></i></button>
                     </td>
-                </tr>`).join('');
+                </tr>`;
+            }).join('');
         },
 
         /* --- CHI TIẾT & BIẾN THỂ & SLIDE --- */
         viewVariants: async function(id, name) {
+            if (this.state.isLoading) return;
+            this.state.isLoading = true;
+
+            if (this.state.abortController) this.state.abortController.abort();
+            this.state.abortController = new AbortController();
+
             this.state.currentProductId = id;
             document.getElementById('vTitle').textContent = name;
-            const resp = await fetch(`/api/products/${id}`);
-            const item = await resp.json();
 
-            document.getElementById('bMa').textContent = item.ma;
-            const fmt = (d) => d ? new Date(d).toLocaleString('vi-VN') : 'N/A';
-            document.getElementById('bNgayTao').textContent = fmt(item.ngayTao);
-            document.getElementById('bNgaySua').textContent = fmt(item.ngaySua);
-            document.getElementById('bMoTa').textContent = item.moTa || 'Không có mô tả.';
+            try {
+                const resp = await fetch(`/api/products/${id}`, {
+                    signal: this.state.abortController.signal
+                });
+                const item = await resp.json();
 
-            this.renderCarousel(item.hinhAnhs);
-            this.state.variantPage = 0;
-            await this.loadVariants(id);
+                document.getElementById('bMa').textContent = item.ma;
 
-            document.getElementById('variantDrawer').classList.add('show');
-            document.getElementById('overlay').classList.add('show');
+                // --- FIX LỖI INVALID DATE BẰNG HÀM XỬ LÝ SIÊU CẤP ---
+                const fmt = (d) => {
+                    if (!d) return 'N/A'; // Nếu DB trả về null thì hiện N/A
+                    // Nếu Spring Boot trả về dạng mảng [Năm, Tháng, Ngày, Giờ, Phút...]
+                    if (Array.isArray(d)) {
+                        // Lưu ý: Tháng trong JS bắt đầu từ 0 (Tháng 1 = 0), nên phải d[1] - 1
+                        const dateObj = new Date(d[0], d[1] - 1, d[2], d[3] || 0, d[4] || 0, d[5] || 0);
+                        return dateObj.toLocaleString('vi-VN');
+                    }
+                    // Nếu là chuỗi ISO (như 2026-02-25T14:30:00) thì dùng như cũ
+                    return new Date(d).toLocaleString('vi-VN');
+                };
+
+                document.getElementById('bNgayTao').textContent = fmt(item.ngayTao);
+                document.getElementById('bNgaySua').textContent = fmt(item.ngaySua);
+                // --- KẾT THÚC ĐOẠN FIX ---
+
+                document.getElementById('bMoTa').textContent = item.moTa || 'Không có mô tả.';
+
+                this.renderCarousel(item.hinhAnhs);
+                this.state.variantPage = 0;
+                await this.loadVariants(id);
+
+                document.getElementById('variantDrawer').classList.add('show');
+                document.getElementById('overlay').classList.add('show');
+            } catch (e) {
+                if (e.name !== 'AbortError') {
+                    window.toast('Không thể tải chi tiết sản phẩm.', 'error');
+                }
+            } finally {
+                // SỬA Ở ĐÂY: Mở khóa để có thể bấm Sửa/Xem tiếp
+                this.state.isLoading = false;
+            }
+
         },
 
         renderCarousel: function(images) {
@@ -413,8 +609,15 @@
             if (!images || images.length === 0) { wrapper.style.display = 'none'; return; }
             wrapper.style.display = 'block';
             this.state.currentSlide = 0;
-            container.innerHTML = images.map(img => `<div class="carousel-item"><img src="${img.url}"></div>`).join('');
-            dots.innerHTML = images.map((_, i) => `<span class="dot" onclick="ProductApp.goToSlide(${i})"></span>`).join('');
+
+            container.innerHTML = images.map(img => `
+                <div class="carousel-item">
+                    <img src="${getOptimizedImg(img.url, 600, 600)}"
+                    loading="lazy"
+                    onerror="this.src='https://placehold.co/600x600?text=ERR'">
+                </div>
+`           ).join('');
+
             this.updateSlidePosition();
         },
         moveSlide: function(step) { const items = document.querySelectorAll('.carousel-item'); if(items.length===0) return; this.state.currentSlide = (this.state.currentSlide + step + items.length) % items.length; this.updateSlidePosition(); },
@@ -429,9 +632,11 @@
 
         /* --- BIẾN THỂ PHÂN TRANG SKU --- */
         loadVariants: async function(id) {
-            const res = await fetch(`/api/products/${id}/variants`);
-            this.state.variantList = await res.json();
-            this.renderVariantTable();
+            try {
+                const res = await fetch(`/api/products/${id}/variants`);
+                this.state.variantList = await res.json();
+                this.renderVariantTable();
+            } catch(e) { window.toast('Lỗi tải danh sách SKU', 'error'); }
         },
 
         renderVariantTable: function() {
@@ -439,18 +644,27 @@
             const start = variantPage * variantSize;
             const pageData = variantList.slice(start, start + variantSize);
             const totalVPages = Math.ceil(variantList.length / variantSize) || 1;
+
             document.getElementById('variantTableBody').innerHTML = pageData.map(v => `
                 <tr>
-                    <td><img src="${v.hinhAnh || 'https://via.placeholder.com/32'}" class="variant-img-sm"></td>
-                    <td><small style="color:#64748b">${v.sku}</small></td>
-                    <td>${v.mauSac?.ten || '-'}</td><td>${v.kichThuoc?.ten || '-'}</td>
-                    <td><b>${v.giaBan.toLocaleString()}đ</b></td><td align="center"><b>${v.soLuong}</b></td>
-                    <td align="center"><label class="switch-sm"><input type="checkbox" ${v.trangThai ? 'checked' : ''} onchange="ProductApp.quickToggleVariant(${v.id}, this)"><span class="slider-sm"></span></label></td>
-                    <td align="right">
+                    <td>
+                        <img src="${getOptimizedImg(v.hinhAnh || 'https://placehold.co/100x100?text=SKU', 50, 50)}"
+                            class="variant-img-sm"
+                            loading="lazy"
+                            onerror="this.src='https://placehold.co/50x50?text=ERR'">
+                    </td>
+                    <td><span style="color:#666; font-size: 11px; background: #f4f4f5; padding: 2px 6px; border-radius: 2px; font-weight:700;">${v.sku}</span></td>
+                    <td>${v.mauSac?.ten || '-'}</td>
+                    <td>${v.kichThuoc?.ten || '-'}</td>
+                    <td style="font-weight: 700;">${v.giaBan.toLocaleString('en-US')} đ</td>
+                    <td style="text-align:center; font-weight: 700;">${v.soLuong}</td>
+                    <td style="text-align:center;"><label class="switch-sm"><input type="checkbox" ${v.trangThai ? 'checked' : ''} onchange="ProductApp.quickToggleVariant(${v.id}, this)"><span class="slider-sm"></span></label></td>
+                    <td style="text-align:right;">
                         <button class="btn-icon" onclick="ProductApp.openStockForm(${v.id}, '${v.sku}', ${v.soLuong})" title="Nhập kho"><i class="bi bi-plus-lg"></i></button>
                         <button class="btn-icon" onclick="ProductApp.openEditVariant(${v.id})" title="Sửa SKU"><i class="bi bi-pencil"></i></button>
                     </td>
-                </tr>`).join('') || '<tr><td colspan="8" align="center">Chưa có biến thể</td></tr>';
+                </tr>`).join('') || '<tr><td colspan="8" style="text-align:center; padding:20px; color:#888;">Sản phẩm chưa có biến thể nào</td></tr>';
+
             document.getElementById('vPageInfo').textContent = `Trang ${variantPage + 1}/${totalVPages}`;
             document.getElementById('vPrevBtn').disabled = variantPage === 0;
             document.getElementById('vNextBtn').disabled = (variantPage + 1) >= totalVPages;
@@ -462,15 +676,114 @@
             try {
                 const res = await fetch(`/api/products/variants/${id}/trang-thai`, { method: 'PATCH' });
                 if(res.ok) {
-                    const d = await res.json();
-                    window.toast(d.message || "Đã đổi trạng thái SKU", "success");
+                    window.toast("Đã thay đổi trạng thái SKU", "success");
                 } else {
-                    window.toast("Lỗi đổi trạng thái SKU", "error");
+                    window.toast("Hệ thống từ chối thay đổi.", "error");
                     cb.checked = !cb.checked;
                 }
             } catch(e) {
                 cb.checked = !cb.checked;
-                window.toast("Mất kết nối server", "error");
+                window.toast("Mất kết nối server.", "error");
+            }
+        },
+
+        /* --- LOGIC THÊM/SỬA SKU --- */
+        openAddVariantForm: function() {
+            this.state.editingVariantId = null;
+            document.getElementById('vFormTitle').innerText = "THÊM MỚI BIẾN THỂ";
+            document.getElementById('vMauSac').value = '';
+            document.getElementById('vKichThuoc').value = '';
+            document.getElementById('vGia').value = '';
+            this.state.vTempImage = null;
+            document.getElementById('vImgDisplay').style.display='none';
+            document.getElementById('vImgPlaceholder').style.display='block';
+
+            document.getElementById('vFormDrawer').classList.add('show');
+            document.getElementById('vFormOverlay').classList.add('show');
+        },
+
+        openEditVariant: function(id) {
+            this.state.editingVariantId = id;
+            document.getElementById('vFormTitle').innerText = "CẬP NHẬT BIẾN THỂ";
+
+            const variant = this.state.variantList.find(v => v.id === id);
+            if(!variant) return;
+
+            document.getElementById('vMauSac').value = variant.mauSac?.id || '';
+            document.getElementById('vKichThuoc').value = variant.kichThuoc?.id || '';
+            document.getElementById('vGia').value = variant.giaBan ? variant.giaBan.toLocaleString('en-US') : '';
+
+            this.state.vTempImage = variant.hinhAnh || null;
+            if (variant.hinhAnh) {
+                document.getElementById('vImgDisplay').src = variant.hinhAnh;
+                document.getElementById('vImgDisplay').style.display = 'block';
+                document.getElementById('vImgPlaceholder').style.display = 'none';
+            } else {
+                document.getElementById('vImgDisplay').style.display = 'none';
+                document.getElementById('vImgPlaceholder').style.display = 'block';
+            }
+
+            document.getElementById('vFormDrawer').classList.add('show');
+            document.getElementById('vFormOverlay').classList.add('show');
+        },
+
+        formatCurrencyInput: function(el) {
+            let val = el.value.replace(/[^0-9]/g, '');
+            if (val.length > 1 && val.startsWith('0')) val = val.substring(1);
+            el.value = val ? parseInt(val).toLocaleString('en-US') : '';
+        },
+
+        saveVariant: async function() {
+            console.log('=== DEBUG saveVariant ===');
+            console.log('editingVariantId:', this.state.editingVariantId);
+            console.log('vTempImage:', this.state.vTempImage);  // ← NULL hay URL?
+
+            const mauSac = document.getElementById('vMauSac').value;
+            const kichThuoc = document.getElementById('vKichThuoc').value;
+            const giaStr = document.getElementById('vGia').value;
+            const giaBan = giaStr ? parseFloat(giaStr.replace(/,/g, '')) : null;
+
+            // 1. VALIDATE TRƯỚC
+            if (!mauSac || !kichThuoc || !giaBan) {
+                window.toast('Vui lòng cung cấp đủ Màu sắc, Kích thước và Giá bán.', 'warning');
+                return;
+            }
+
+            const btn = document.getElementById('btnSaveVariant');
+            btn.disabled = true;
+            btn.textContent = 'Đang lưu...';
+
+            const payload = {
+                idMauSac: parseInt(mauSac),
+                idKichThuoc: parseInt(kichThuoc),
+                giaBan: giaBan,
+                hinhAnh: this.state.vTempImage || null
+            };
+
+            const isEdit = !!this.state.editingVariantId;
+            const url = isEdit
+                ? `/api/products/variants/${this.state.editingVariantId}`
+                : `/api/products/${this.state.currentProductId}/variants`;
+
+            try {
+                const res = await fetch(url, {
+                    method: isEdit ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    window.toast(isEdit ? 'Cập nhật SKU thành công.' : 'Bổ sung SKU thành công.', 'success');
+                    this.closeVariantForm();
+                    this.loadVariants(this.state.currentProductId);
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    window.toast(err.message || 'Lỗi lưu thông tin biến thể.', 'error');
+                }
+            } catch (e) {
+                window.toast('Sự cố kết nối máy chủ.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'LƯU SKU';
             }
         },
 
@@ -482,30 +795,29 @@
             const input = document.getElementById('sInputQty');
             input.value = ''; document.getElementById('sPreview').textContent = currentQty;
             input.oninput = () => document.getElementById('sPreview').textContent = currentQty + (parseInt(input.value) || 0);
+
             document.getElementById('stockDrawer').classList.add('show');
             document.getElementById('stockOverlay').classList.add('show');
             setTimeout(() => input.focus(), 300);
         },
-        closeStockForm: function() { document.getElementById('stockDrawer').classList.remove('show'); document.getElementById('stockOverlay').classList.remove('show'); },
+
         submitUpdateStock: async function() {
             const add = parseInt(document.getElementById('sInputQty').value);
-            if(!add || add <= 0) { window.toast("Số lượng không hợp lệ", "error"); return; }
+            if(!add || add <= 0) { window.toast("Số lượng nhập không hợp lệ.", "warning"); return; }
             try {
                 const res = await fetch(`/api/products/variants/${this.state.activeVariantId}/update-stock`, { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ soLuong: this.state.activeCurrentQty + add }) });
                 if(res.ok) {
-                    window.toast(`Đã nhập thêm ${add} sản phẩm thành công!`, "success");
+                    window.toast(`Nhập thành công ${add} sản phẩm vào kho.`, "success");
                     this.closeStockForm();
                     this.loadVariants(this.state.currentProductId);
                     this.loadData();
                 } else {
-                    window.toast("Lỗi cập nhật kho", "error");
+                    window.toast("Hệ thống từ chối cập nhật kho.", "error");
                 }
-            } catch (e) {
-                window.toast("Mất kết nối server", "error");
-            }
+            } catch (e) { window.toast("Mất kết nối máy chủ.", "error"); }
         },
 
-        /* --- LOGIC QUẢN LÝ SẢN PHẨM --- */
+        /* --- LOGIC SẢN PHẨM CHÍNH --- */
         openDrawer: function(item = null) {
             this.state.editingId = item?.id || null;
             document.getElementById('drawerTitle').innerText = item ? 'CẬP NHẬT SẢN PHẨM' : 'THÊM MỚI SẢN PHẨM';
@@ -519,92 +831,106 @@
             document.getElementById('fTrangThai').checked = item ? item.trangThai : true;
             this.state.tempImages = item ? item.hinhAnhs.map(h => h.url) : [];
             this.renderPreview();
-            document.getElementById('drawer').classList.add('show');
+            document.getElementById('mainDrawer').classList.add('show');
             document.getElementById('overlay').classList.add('show');
         },
 
-        saveProduct: async function() {
-            const payload = { ten: document.getElementById('fTen').value, ma: document.getElementById('fMa').value, idDanhMuc: document.getElementById('fDanhMuc').value, idHang: document.getElementById('fHang').value, idChatLieu: document.getElementById('fChatLieu').value, moTa: document.getElementById('fMoTa').value, trangThai: document.getElementById('fTrangThai').checked, danhSachHinhAnh: this.state.tempImages };
-            const id = this.state.editingId;
-            const url = id ? `/api/products/${id}` : `/api/products`;
-            const method = id ? 'PUT' : 'POST';
-
-            try {
-                const res = await fetch(url, {
-                    method: method,
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(payload)
-                });
-                if(res.ok) {
-                    window.toast(id ? "Cập nhật sản phẩm thành công!" : "Thêm sản phẩm thành công!", "success");
-                    this.closeDrawer();
-                    this.loadData();
-                } else {
-                    window.toast("Lỗi xử lý sản phẩm", "error");
-                }
-            } catch(e) { window.toast("Mất kết nối máy chủ", "error"); }
-        },
-
-        renderPreview: function() {
-            document.getElementById('imagePreviewContainer').innerHTML = this.state.tempImages.map((s, i) => `
-                <div class="preview-item">
-                    <img src="${s}">
-                    <button class="remove-btn" onclick="ProductApp.removeImg(${i})">&times;</button>
-                </div>`).join('');
-        },
-        removeImg: function(i) {
-            this.state.tempImages.splice(i, 1);
-            this.renderPreview();
-            window.toast("Đã gỡ ảnh tạm", "success");
-        },
-
-        handleOverlayClick: function() {
-            if (document.getElementById('variantDrawer').classList.contains('show')) {
-                this.closeVariantDrawer();
-            } else {
-                this.closeDrawer();
-            }
-        },
-
-        resetFilters: function() { this.state.q=''; this.state.trangThai=''; document.getElementById('search').value=''; document.getElementById('fTrangThaiFilter').value=''; this.loadData(); window.toast("Đã xóa bộ lọc"); },
-        closeDrawer: () => { document.getElementById('drawer').classList.remove('show'); document.getElementById('overlay').classList.remove('show'); },
-        closeVariantDrawer: () => { document.getElementById('variantDrawer').classList.remove('show'); document.getElementById('overlay').classList.remove('show'); },
-        closeVariantForm: () => { document.getElementById('vFormDrawer').classList.remove('show'); document.getElementById('vFormOverlay').classList.remove('show'); },
-
-        loadSelectOptions: async function() {
-            const fill = async (url, id) => { try { const r = await fetch(url); const d = await r.json(); document.getElementById(id).innerHTML = '<option value="">-- Chọn --</option>' + (d.content || d).map(i => `<option value="${i.id}">${i.ten}</option>`).join(''); } catch(e){} };
-            await Promise.all([fill('/api/danh-muc', 'fDanhMuc'), fill('/api/hang', 'fHang'), fill('/api/chat-lieu', 'fChatLieu'), fill('/api/mau-sac', 'vMauSac'), fill('/api/kich-thuoc', 'vKichThuoc')]);
-        },
-
-        renderPagination: function(data) {
-            this.state.totalPages = data.totalPages;
-            document.getElementById('info').textContent = `Trang ${data.totalPages > 0 ? this.state.page + 1 : 0} / ${data.totalPages}`;
-            document.getElementById('btnPrev').disabled = (this.state.page === 0);
-            document.getElementById('btnNext').disabled = (this.state.page >= data.totalPages - 1);
-            let h = ''; for(let i=0; i<data.totalPages; i++) h += `<button class="page-number ${i===this.state.page?'active':''}" onclick="ProductApp.changePage(${i})">${i+1}</button>`;
-            document.getElementById('pageNumbers').innerHTML = h;
-        },
-        changePage: function(p) { this.state.page = p; this.loadData(); },
-
-        openAddVariantForm: async function() {
-            this.state.editingVariantId = null;
-            document.getElementById('vFormTitle').innerText = "Thêm Biến Thể";
-            document.getElementById('vGia').value = '';
-            this.state.vTempImage = null;
-            document.getElementById('vImgDisplay').style.display='none';
-            document.getElementById('vImgPlaceholder').style.display='block';
-            document.getElementById('vFormDrawer').classList.add('show');
-            document.getElementById('vFormOverlay').classList.add('show');
-            document.getElementById('btnSaveVariant').onclick = () => this.saveVariant();
-        },
-
         openEdit: async function(id) {
+            if (this.state.isLoading) return; // ✅ Chống double click
+            this.state.isLoading = true;
             try {
                 const r = await fetch(`/api/products/${id}`);
                 const item = await r.json();
                 this.openDrawer(item);
             } catch (e) {
-                window.toast("Không thể tải thông tin sản phẩm", "error");
+                window.toast("Không thể truy xuất dữ liệu sản phẩm.", "error");
+            } finally {
+                this.state.isLoading = false;
+            }
+        },
+
+        saveProduct: async function() {
+            const tenSp = document.getElementById('fTen').value.trim();
+            if (!tenSp) { window.toast("Vui lòng nhập tên sản phẩm.", "warning"); return; }
+
+            const btn = document.getElementById('btnSave');
+            btn.disabled = true;
+            btn.textContent = 'Đang lưu...';
+
+
+            // Ép kiểu chuẩn, tránh lỗi Bad Request từ Backend
+            const payload = {
+                ten: tenSp,
+                ma: document.getElementById('fMa').value.trim(),
+                idDanhMuc: parseInt(document.getElementById('fDanhMuc').value) || null,
+                idHang: parseInt(document.getElementById('fHang').value) || null,
+                idChatLieu: parseInt(document.getElementById('fChatLieu').value) || null,
+                moTa: document.getElementById('fMoTa').value.trim(),
+                trangThai: document.getElementById('fTrangThai').checked,
+                danhSachHinhAnh: this.state.tempImages
+            };
+
+            const id = this.state.editingId;
+            try {
+                const res = await fetch(id ? `/api/products/${id}` : `/api/products`, {
+                    method: id ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    window.toast(id ? "Cập nhật thành công." : "Tạo mới thành công.", "success");
+                    this.closeDrawer();
+                    this.loadData();
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    window.toast(err.message || "Yêu cầu không thể hoàn tất.", "error");
+                }
+            } catch (e) {
+                window.toast("Sự cố kết nối mạng.", "error");
+            } finally {
+                // ✅ Luôn restore nút
+                btn.disabled = false;
+                btn.textContent = 'Lưu Thông Tin';
+            }
+        },
+
+        renderPreview: function() {
+            document.getElementById('imagePreviewContainer').innerHTML = this.state.tempImages.map((item, i) => {
+                if (typeof item === 'object' && item.uploading) {
+                    return `
+                <div class="preview-item" style="display:flex;align-items:center;justify-content:center;">
+                    <img src="${item.preview}" style="width:100%;height:100%;object-fit:cover;opacity:0.4;">
+                    <div style="position:absolute;font-size:9px;font-weight:700;color:#555;">Đang tải...</div>
+                </div>`;
+                }
+                return `
+            <div class="preview-item">
+                <img src="${getOptimizedImg(item, 100, 100)}">
+                <button class="remove-btn" onclick="ProductApp.removeImg(${i})">&times;</button>
+            </div>`;
+            }).join('');
+        },
+        removeImg: async function(i) {
+            const imgUrl = this.state.tempImages[i];
+
+            // 1. Gỡ ảnh khỏi giao diện ngay lập tức cho người dùng đỡ phải đợi
+            this.state.tempImages.splice(i, 1);
+            this.renderPreview();
+
+            // 2. Nếu nó là link Cloudinary thật (chứ không phải Blob tải dở), thì gọi API bắn chết nó trên mây
+            if (typeof imgUrl === 'string' && imgUrl.includes('res.cloudinary.com')) {
+                try {
+                    // Gọi method DELETE kèm url cần xóa
+                    const res = await fetch(`/api/upload?url=${encodeURIComponent(imgUrl)}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (res.ok) {
+                        console.log("Đã dọn rác thành công trên Cloudinary!");
+                    }
+                } catch(e) {
+                    console.error('Lỗi khi dọn rác Cloudinary', e);
+                }
             }
         },
 
@@ -612,20 +938,91 @@
             try {
                 const res = await fetch(`/api/products/${id}/trang-thai`, { method: 'PATCH' });
                 if(res.ok) {
-                    const d = await res.json();
-                    window.toast(d.message || "Đã đổi trạng thái sản phẩm", "success");
+                    window.toast("Cập nhật trạng thái thành công.", "success");
                 } else {
-                    window.toast("Lỗi đổi trạng thái sản phẩm", "error");
+                    window.toast("Từ chối thay đổi trạng thái.", "error");
                     cb.checked = !cb.checked;
                 }
             } catch(e) {
                 cb.checked = !cb.checked;
-                window.toast("Mất kết nối server", "error");
+                window.toast("Sự cố đường truyền.", "error");
             }
         },
+
+        /* --- QUẢN LÝ ĐÓNG MỞ DRAWER --- */
+        handleOverlayClick: function() {
+            if (document.getElementById('variantDrawer').classList.contains('show')) {
+                this.closeVariantDrawer();
+            } else {
+                this.closeDrawer();
+            }
+        },
+        closeDrawer: () => {
+            document.getElementById('mainDrawer').classList.remove('show');
+            document.getElementById('overlay').classList.remove('show');
+            ProductApp.state.isLoading = false; // Mở khóa nút
+        },
+        closeVariantDrawer: () => {
+            document.getElementById('variantDrawer').classList.remove('show');
+            document.getElementById('overlay').classList.remove('show');
+            ProductApp.state.isLoading = false; // Mở khóa nút
+        },
+        closeVariantForm: () => {
+            document.getElementById('vFormDrawer').classList.remove('show');
+            document.getElementById('vFormOverlay').classList.remove('show');
+        },
+        closeStockForm: () => {
+            document.getElementById('stockDrawer').classList.remove('show');
+            document.getElementById('stockOverlay').classList.remove('show');
+        },
+
+        /* --- UTILS KHÁC --- */
+        resetFilters: function() {
+            clearTimeout(this.timeout);
+            this.state.q=''; this.state.trangThai='';
+            document.getElementById('search').value='';
+            document.getElementById('fTrangThaiFilter').value='';
+            this.loadData();
+        },
+
+        loadSelectOptions: async function() {
+            if (this.state.optionsLoaded) return;
+            const fill = async (url, id) => { try { const r = await fetch(url); const d = await r.json(); document.getElementById(id).innerHTML = '<option value="">-- Chọn --</option>' + (d.content || d).map(i => `<option value="${i.id}">${i.ten}</option>`).join(''); } catch(e){} };
+            await Promise.all([fill('/api/danh-muc', 'fDanhMuc'), fill('/api/hang', 'fHang'), fill('/api/chat-lieu', 'fChatLieu'), fill('/api/mau-sac', 'vMauSac'), fill('/api/kich-thuoc', 'vKichThuoc')]);
+            this.state.optionsLoaded = true;
+        },
+
+        renderPagination: function(data) {
+            this.state.totalPages = data.totalPages;
+            document.getElementById('info').textContent = `Trang ${data.totalPages > 0 ? this.state.page + 1 : 0} / ${data.totalPages}`;
+            let h = '';
+            for(let i=0; i<data.totalPages; i++) {
+                h += `<button class="page-number ${i===this.state.page?'active':''}" onclick="ProductApp.changePage(${i})">${i+1}</button>`;
+            }
+            document.getElementById('pageNumbers').innerHTML = h;
+        },
+        changePage: function(p) { this.state.page = p; this.loadData(); }
     };
 
+    function getOptimizedImg(url, width = null, height = null) {
+        if (!url || !url.includes('res.cloudinary.com')) return url;
+
+        // f_auto: tự chuyển sang định dạng nhẹ nhất (WebP/AVIF)
+        // q_auto: tự giảm chất lượng xuống mức tối ưu
+        let params = 'f_auto,q_auto';
+
+        if (width && height) {
+            // c_fill: cắt ảnh cho vừa khít khung, tránh méo ảnh
+            params += `,c_fill,w_${width},h_${height}`;
+        }
+
+        return url.replace('/image/upload/', `/image/upload/${params}/`);
+    }
+
     window.ProductApp = ProductApp;
-    window.initProducts = () => ProductApp.init();
+    window.initProducts = function() {
+        ProductApp.init();
+    };
 </script>
 </body>
+</html>
