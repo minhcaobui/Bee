@@ -6,7 +6,8 @@ import lombok.*;
 
 @Entity
 @Table(name = "hinh_anh_san_pham")
-@Data
+@Getter // CHỈ DÙNG GETTER & SETTER, BỎ @Data ĐI
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -15,12 +16,11 @@ public class HinhAnhSanPham {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    // Tìm đến đối tượng sanPham
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_san_pham")
-    @JsonBackReference // THÊM DÒNG NÀY
+    @JsonBackReference
     private SanPham sanPham;
 
-    @Column(nullable = false, columnDefinition = "NVARCHAR(MAX)") // Dùng MAX cho SQL Server
+    @Column(nullable = false, columnDefinition = "NVARCHAR(MAX)")
     private String url;
 }

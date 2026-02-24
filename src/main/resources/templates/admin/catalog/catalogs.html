@@ -40,10 +40,14 @@
         .btn-icon.view:hover { background: #2563eb; border-color: #2563eb; }
 
         /* --- PAGINATION --- */
+        /* Pagination Đồng Bộ */
         .pagination-wrapper { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; }
-        .pagination-info { font-size: 11px; font-weight: 600; color: #888; }
-        .page-number { min-width: 26px; height: 26px; font-size: 12px; font-weight: 700; background: transparent; border: 1px solid transparent; cursor: pointer; }
+        .pagination-info { font-size: 11px; font-weight: 800; color: #888; text-transform: uppercase; }
+        .pagination { display: flex; gap: 5px; }
+        .page-number { min-width: 26px; height: 26px; font-size: 12px; font-weight: 700; background: transparent; border: 1px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 2px; transition: 0.2s; }
+        .page-number:hover:not(:disabled) { background: #eee; }
         .page-number.active { background: #000; color: #fff; }
+        .page-number:disabled { opacity: 0.4; cursor: not-allowed; }
 
         /* --- DRAWER --- */
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; display: none; }

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -18,7 +19,7 @@ import java.util.List;
 )
 @Getter
 @Setter
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // Thêm dòng này
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -56,14 +57,23 @@ public class SanPham {
 
     private Boolean trangThai = true;
 
-    // Tìm đến list hinhAnhs
+    @org.hibernate.annotations.BatchSize(size = 20)
     @OneToMany(mappedBy = "sanPham", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference // THÊM DÒNG NÀY
+    @JsonManagedReference
     private List<HinhAnhSanPham> hinhAnhs = new ArrayList<>();
 
-    // Helper method để thêm hình ảnh đúng cách
     public void addHinhAnh(HinhAnhSanPham hinhAnh) {
         hinhAnhs.add(hinhAnh);
         hinhAnh.setSanPham(this);
+    }
+
+    @PrePersist
+    public void prePersist() {
+        if (this.ngayTao == null) this.ngayTao = new Date();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.ngaySua = new Date();
     }
 }

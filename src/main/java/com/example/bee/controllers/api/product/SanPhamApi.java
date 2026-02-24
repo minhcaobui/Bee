@@ -1,14 +1,18 @@
 package com.example.bee.controllers.api.product;
 
 import com.example.bee.dto.SanPhamRequest;
+import com.example.bee.dto.VariantRequest;
 import com.example.bee.entities.product.HinhAnhSanPham;
 import com.example.bee.entities.product.SanPham;
 import com.example.bee.entities.product.SanPhamChiTiet;
 import com.example.bee.repositories.catalog.ChatLieuRepository;
 import com.example.bee.repositories.catalog.DanhMucRepository;
 import com.example.bee.repositories.catalog.HangRepository;
+import com.example.bee.repositories.catalog.KichThuocRepository;
+import com.example.bee.repositories.catalog.MauSacRepository;
 import com.example.bee.repositories.products.SanPhamChiTietRepository;
 import com.example.bee.repositories.products.SanPhamRepository;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,6 +27,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -39,9 +44,11 @@ public class SanPhamApi {
     private final ChatLieuRepository chatLieuRepo;
     private final SanPhamChiTietRepository variantRepo;
 
-    private static final String MA_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    private static final int MA_LEN = 10;
-    private static final SecureRandom RAND = new SecureRandom();
+    // Khai báo thêm 2 thằng này để ánh xạ SKU
+    private final MauSacRepository mauSacRepo;
+    private final KichThuocRepository kichThuocRepo;
+
+
 
     @GetMapping
     public Page<SanPham> list(
@@ -57,6 +64,14 @@ public class SanPhamApi {
         return sanPhamrepo.search(q, trangThai, idDanhMuc, idHang, idChatLieu, pageable);
     }
 
+    private String generateMa() {
+        for (int i = 1; i <= 9999; i++) {
+            String ma = String.format("SP%04d", i); // SP0001 → SP9999
+            if (!sanPhamrepo.existsByMaIgnoreCase(ma)) return ma;
+        }
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Đã hết mã sản phẩm (SP0001-SP9999)");
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<SanPham> getOne(@PathVariable Integer id) {
         return sanPhamrepo.findById(id)
@@ -65,10 +80,10 @@ public class SanPhamApi {
     }
 
     @PostMapping
+    @Transactional
     public ResponseEntity<SanPham> create(@Valid @RequestBody SanPhamRequest body, UriComponentsBuilder uriBuilder) {
         SanPham sp = new SanPham();
 
-        // Xử lý mã
         if (isBlank(body.getMa())) {
             sp.setMa(generateMa());
         } else {
@@ -80,13 +95,13 @@ public class SanPhamApi {
         }
 
         mapCommonFields(sp, body);
-
         SanPham saved = sanPhamrepo.save(sp);
         URI location = uriBuilder.path("/api/products/{id}").buildAndExpand(saved.getId()).toUri();
         return ResponseEntity.created(location).body(saved);
     }
 
     @PutMapping("/{id}")
+    @Transactional
     public SanPham update(@PathVariable Integer id, @Valid @RequestBody SanPhamRequest body) {
         SanPham sp = sanPhamrepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy sản phẩm"));
@@ -100,125 +115,129 @@ public class SanPhamApi {
         sp.setMoTa(safeTrim(body.getMoTa()));
         sp.setTrangThai(body.getTrangThai() != null ? body.getTrangThai() : true);
 
-        if (sp.getId() != null) {
-            sp.setNgaySua(new Date());
+        if (sp.getId() == null) {
+            sp.setNgayTao(new Date()); // Nếu chưa có ID (Thêm mới) -> Gán ngày tạo
+        } else {
+            sp.setNgaySua(new Date()); // Nếu đã có ID (Cập nhật) -> Gán ngày sửa
         }
 
-        // Map quan hệ
-        sp.setDanhMuc(danhMucRepo.findById(body.getIdDanhMuc())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Danh mục không tồn tại")));
-        sp.setHang(hangRepo.findById(body.getIdHang())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Hãng không tồn tại")));
-        sp.setChatLieu(chatLieuRepo.findById(body.getIdChatLieu())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Chất liệu không tồn tại")));
+        sp.setDanhMuc(body.getIdDanhMuc() != null ? danhMucRepo.findById(body.getIdDanhMuc()).orElse(null) : null);
+        sp.setHang(body.getIdHang() != null ? hangRepo.findById(body.getIdHang()).orElse(null) : null);
+        sp.setChatLieu(body.getIdChatLieu() != null ? chatLieuRepo.findById(body.getIdChatLieu()).orElse(null) : null);
 
-        // Xử lý hình ảnh
+        // Fix lỗi lưu ảnh mồ côi
         if (body.getDanhSachHinhAnh() != null) {
-            sp.getHinhAnhs().clear();
+            if (sp.getHinhAnhs() == null) {
+                sp.setHinhAnhs(new ArrayList<>());
+            } else {
+                sp.getHinhAnhs().clear();
+            }
             for (String path : body.getDanhSachHinhAnh()) {
                 HinhAnhSanPham ha = new HinhAnhSanPham();
-
-                // SỬA DÒNG NÀY: dùng setUrl thay vì setTenHinhAnh
                 ha.setUrl(path);
-
-                sp.addHinhAnh(ha);
+                ha.setSanPham(sp); // BẮT BUỘC PHẢI CÓ DÒNG NÀY ĐỂ MAPPING DB
+                sp.getHinhAnhs().add(ha);
             }
         }
     }
 
-    private String generateMa() {
-        String ma;
-        do {
-            StringBuilder sb = new StringBuilder(MA_LEN);
-            for (int i = 0; i < MA_LEN; i++) sb.append(MA_CHARS.charAt(RAND.nextInt(MA_CHARS.length())));
-            ma = sb.toString();
-        } while (sanPhamrepo.existsByMaIgnoreCase(ma));
-        return ma;
-    }
 
     @PatchMapping("/{id}/trang-thai")
+    @Transactional
     public ResponseEntity<?> toggleTrangThai(@PathVariable Integer id) {
         return sanPhamrepo.findById(id).map(sp -> {
-            sp.setTrangThai(!sp.getTrangThai()); // Đảo ngược trạng thái hiện tại
+            sp.setTrangThai(!sp.getTrangThai());
             sanPhamrepo.save(sp);
             return ResponseEntity.ok(Collections.singletonMap("message",
                     "Đã " + (sp.getTrangThai() ? "mở bán" : "ngừng bán") + " sản phẩm!"));
-        }).orElse(ResponseEntity.notFound().build());
+        }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
+
+    // ==========================================================
+    // QUẢN LÝ BIẾN THỂ (SKU)
+    // ==========================================================
 
     @GetMapping("/{id}/variants")
     public List<SanPhamChiTiet> getVariants(@PathVariable Integer id) {
         return variantRepo.findBySanPhamId(id);
     }
 
-    @PostMapping("/variants")
-    public ResponseEntity<?> createVariant(@RequestBody SanPhamChiTiet variant) {
-        if (variantRepo.existsBySanPhamIdAndMauSacIdAndKichThuocId(
-                variant.getSanPham().getId(),
-                variant.getMauSac().getId(),
-                variant.getKichThuoc().getId())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Biến thể Màu + Size này đã tồn tại!");
+    // FIX 1: Map đúng đường dẫn JS gọi (gắn ID sản phẩm vào)
+    @PostMapping("/{productId}/variants")
+    @Transactional
+    public ResponseEntity<?> createVariant(@PathVariable Integer productId, @RequestBody VariantRequest req) {
+        SanPham sp = sanPhamrepo.findById(productId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy sản phẩm gốc"));
+
+        if (variantRepo.existsBySanPhamIdAndMauSacIdAndKichThuocId(productId, req.getIdMauSac(), req.getIdKichThuoc())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Collections.singletonMap("message", "Biến thể Màu + Size này đã tồn tại!"));
         }
+
+        SanPhamChiTiet variant = new SanPhamChiTiet();
+        variant.setSanPham(sp);
+        variant.setMauSac(mauSacRepo.findById(req.getIdMauSac()).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Màu sắc không hợp lệ")));
+        variant.setKichThuoc(kichThuocRepo.findById(req.getIdKichThuoc()).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kích thước không hợp lệ")));
+        variant.setGiaBan(req.getGiaBan());
+        variant.setHinhAnh(req.getHinhAnh());
+        variant.setSoLuong(0); // Mặc định kho = 0 khi mới tạo
+        variant.setTrangThai(true);
+
+        String skuCode;
+        do {
+            long nextId = (variantRepo.findMaxId() != null ? variantRepo.findMaxId() : 0L) + 1;
+            skuCode = String.format("SKU%05d", nextId); // SKU00001 → SKU99999
+        } while (variantRepo.existsBySku(skuCode));
+        variant.setSku(skuCode);
+
         return ResponseEntity.ok(variantRepo.save(variant));
     }
 
-    @PatchMapping("/variants/{id}/update-stock")
-    public ResponseEntity<?> updateStock(@PathVariable Integer id, @RequestBody Map<String, Integer> body) {
-        // 1. Tìm biến thể trong Database
+    @PutMapping("/variants/{id}")
+    @Transactional
+    public ResponseEntity<?> updateVariant(@PathVariable Integer id, @RequestBody VariantRequest req) {
         return variantRepo.findById(id).map(variant -> {
-            // 2. Lấy số lượng mới từ Request gửi lên
-            Integer newQty = body.get("soLuong");
 
-            // 3. Cập nhật và lưu
+            boolean isChangingAttr = !variant.getMauSac().getId().equals(req.getIdMauSac())
+                    || !variant.getKichThuoc().getId().equals(req.getIdKichThuoc());
+            if (isChangingAttr && variantRepo.existsBySanPhamIdAndMauSacIdAndKichThuocId(
+                    variant.getSanPham().getId(), req.getIdMauSac(), req.getIdKichThuoc())) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Biến thể Màu + Size này đã tồn tại!");
+            }
+
+            variant.setGiaBan(req.getGiaBan());
+            variant.setMauSac(mauSacRepo.findById(req.getIdMauSac()).orElse(variant.getMauSac()));
+            variant.setKichThuoc(kichThuocRepo.findById(req.getIdKichThuoc()).orElse(variant.getKichThuoc()));
+            if (req.getHinhAnh() != null) variant.setHinhAnh(req.getHinhAnh());
+
+            variantRepo.save(variant);
+            return ResponseEntity.ok(Collections.singletonMap("message", "Cập nhật biến thể thành công!"));
+
+        }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy biến thể"));
+    }
+
+    @PatchMapping("/variants/{id}/update-stock")
+    @Transactional
+    public ResponseEntity<?> updateStock(@PathVariable Integer id, @RequestBody Map<String, Integer> body) {
+        return variantRepo.findById(id).map(variant -> {
+            Integer newQty = body.get("soLuong");
             variant.setSoLuong(newQty);
             variantRepo.save(variant);
-
             return ResponseEntity.ok(Collections.singletonMap("message", "Cập nhật kho thành công!"));
-        }).orElse(ResponseEntity.notFound().build());
+        }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không thấy biến thể"));
     }
 
     @PatchMapping("/variants/{id}/trang-thai")
+    @Transactional
     public ResponseEntity<?> toggleVariantStatus(@PathVariable Integer id) {
         return variantRepo.findById(id).map(variant -> {
-            // 1. Đảo ngược trạng thái
             variant.setTrangThai(!variant.getTrangThai());
-
-            // 2. Lưu thay đổi
             variantRepo.save(variant);
-
-            // 3. Trả về thông báo đẹp cho Frontend
             String statusLabel = variant.getTrangThai() ? "đang kinh doanh" : "ngừng kinh doanh";
-            return ResponseEntity.ok(Collections.singletonMap("message",
-                    "Biến thể [" + variant.getSku() + "] hiện " + statusLabel));
-
-        }).orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Collections.singletonMap("message", "Không tìm thấy biến thể này!")));
-    }
-
-    @PutMapping("/variants/{id}")
-    public ResponseEntity<?> updateVariant(@PathVariable Integer id, @RequestBody SanPhamChiTiet variantRequest) {
-        return variantRepo.findById(id).map(variant -> {
-            // 1. Cập nhật các trường thông tin
-            variant.setGiaBan(variantRequest.getGiaBan());
-            variant.setMauSac(variantRequest.getMauSac());
-            variant.setKichThuoc(variantRequest.getKichThuoc());
-
-            // Cập nhật hình ảnh nếu có gửi lên
-            if (variantRequest.getHinhAnh() != null) {
-                variant.setHinhAnh(variantRequest.getHinhAnh());
-            }
-
-            // 2. Lưu vào database
-            variantRepo.save(variant);
-
-            // 3. Trả về thông báo thành công
-            return ResponseEntity.ok(Collections.singletonMap("message", "Cập nhật biến thể thành công!"));
-
-        }).orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Collections.singletonMap("message", "Không tìm thấy biến thể để cập nhật!")));
+            return ResponseEntity.ok(Collections.singletonMap("message", "Biến thể [" + variant.getSku() + "] hiện " + statusLabel));
+        }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không thấy biến thể"));
     }
 
     private boolean isBlank(String s) { return s == null || s.trim().isEmpty(); }
     private String safeTrim(String s) { return s == null ? null : s.trim(); }
 }
-

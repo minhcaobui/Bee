@@ -89,6 +89,11 @@ async function loadModule(moduleName) {
             title = 'QUẢN LÝ ĐƠN HÀNG';
             break;
 
+        case 'customers':
+            url = '/customers';
+            title = 'QUẢN LÝ KHÁCH HÀNG';
+            break;
+
         case 'users':
             url = '/users.html';
             title = 'QUẢN LÝ TÀI KHOẢN';
@@ -102,9 +107,6 @@ async function loadModule(moduleName) {
     if (pageTitle) pageTitle.textContent = title;
 
     try {
-        // Giả lập mạng chậm 1 tí để kịp nhìn thấy con mèo (500ms)
-        // Sau này chạy thật thì xóa dòng await này đi cũng được
-        await new Promise(r => setTimeout(r, 500));
 
         const res = await fetch(url);
         if (!res.ok) throw new Error(`Lỗi ${res.status}`);
@@ -163,14 +165,14 @@ function executeScripts(container, moduleName) {
         console.log(`🚀 Đang kích hoạt init cho module: ${moduleName}`);
 
         if (moduleName === 'catalogs') {
-            if (typeof window.initCatalogs === 'function') {
+            if (typeof window.initCatalogs !== 'undefined') {
                 window.initCatalogs();
             } else {
-                console.warn("⚠️ Không tìm thấy hàm window.initCatalogs");
+                console.warn("Chưa tìm thấy CatalogApp");
             }
         }
         else if (moduleName === 'products') {
-            if (typeof window.initProducts === 'function') {
+            if (typeof window.initProducts !== 'undefined') {
                 window.initProducts();
             } else {
                 console.warn("⚠️ Không tìm thấy hàm window.initProducts");
@@ -180,14 +182,21 @@ function executeScripts(container, moduleName) {
             if (typeof window.PromotionApp !== 'undefined') {
                 window.PromotionApp.init();
             } else {
-                console.warn("⚠️ Chưa tìm thấy PromotionApp");
+                console.warn("Chưa tìm thấy PromotionApp");
             }
         }
         else if (moduleName === 'pos') {
             if (typeof window.PosApp !== 'undefined') {
                 window.PosApp.init();
             } else {
-                console.warn("⚠️ Chưa tìm thấy PosApp");
+                console.warn("Chưa tìm thấy PosApp");
+            }
+        }
+        else if (moduleName === 'customers') {
+            if (typeof window.CustomerApp !== 'undefined') {
+                window.CustomerApp.init();
+            } else {
+                console.warn("Chưa tìm thấy CustomerApp");
             }
         }
     }, 100);
