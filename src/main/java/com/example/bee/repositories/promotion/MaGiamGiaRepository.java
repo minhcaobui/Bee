@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Repository
 public interface MaGiamGiaRepository extends JpaRepository<MaGiamGia, Integer> {
@@ -22,4 +23,6 @@ public interface MaGiamGiaRepository extends JpaRepository<MaGiamGia, Integer> {
                                   Pageable pageable);
 
     boolean existsByMaCodeIgnoreCase(String maCode);
+
+    Optional<MaGiamGia> findByMaCode(String code);
 }

@@ -605,18 +605,6 @@
             align-items: center;
         }
 
-        #transfer-section[style*="display: block"] {
-            display: flex !important;
-        }
-
-        /* Khi JS bật hiển thị (style="display: block"), ta ép nó thành Flex */
-        #transfer-section[style*="display: block"],
-        #transfer-section[style*="display:block"] {
-            display: flex !important;
-            gap: 15px;
-            align-items: stretch;
-        }
-
         /* Hiệu ứng bấm nút (Active) giả lập */
         .app-btn {
             border: 1px solid #ccc;
@@ -651,17 +639,48 @@
             </div>
 
             <div class="customer-card">
-                <div style="display:flex; align-items:center; gap:12px;">
-                    <div style="width:36px; height:36px; background:#f4f4f5; border-radius:50%; display:flex; align-items:center; justify-content:center; border: 1px solid var(--gray-200);">
-                        <i class="bi bi-person-fill" style="color:#666; font-size: 16px;"></i>
+                <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:0;">
+                    <!-- Avatar + nút swap -->
+                    <div style="position:relative; flex-shrink:0;">
+                        <div style="width:36px; height:36px; background:#f4f4f5; border-radius:50%; display:flex; align-items:center; justify-content:center; border:1px solid var(--gray-200);">
+                            <i class="bi bi-person-fill" style="color:#666; font-size:16px;"></i>
+                        </div>
+                        <button onclick="PosApp.toggleCustomerSearch()" title="Đổi khách hàng"
+                                style="position:absolute; bottom:-4px; right:-4px; width:16px; height:16px; background:#000; border:none; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;">
+                            <i class="bi bi-arrow-repeat" style="color:#fff; font-size:9px;"></i>
+                        </button>
                     </div>
-                    <div>
-                        <div style="font-weight: 700; font-size: 12px;" id="customerName">KHÁCH VÃNG LAI</div>
-                        <div style="font-size: 11px; color: #888; font-weight: 500;" id="customerPhone">Khách lẻ</div>
+
+                    <!-- Tên + SĐT -->
+                    <div style="min-width:0;">
+                        <div style="font-weight:700; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="customerName">KHÁCH VÃNG LAI</div>
+                        <div style="font-size:11px; color:#888; font-weight:500;" id="customerPhone">Khách lẻ</div>
                     </div>
                 </div>
-                <button class="btn-icon" onclick="PosApp.openModal('customerModal')"><i class="bi bi-pencil-square"></i>
-                </button>
+
+                <!-- Nút sửa + nút reset vãng lai -->
+                <div style="display:flex; gap:4px; flex-shrink:0;">
+                    <button class="btn-icon" title="Sửa thông tin" onclick="PosApp.openModal('customerModal')">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button class="btn-icon btn-danger" title="Về khách vãng lai" onclick="PosApp.resetCustomer()"
+                            style="color:#dc2626; border-color:#fca5a5;">
+                        <i class="bi bi-person-x"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dropdown tìm kiếm inline (ẩn mặc định) -->
+            <div id="inlineCustomerSearch" style="display:none; padding:10px 15px; border-bottom:1px solid var(--gray-200); background:#fafafa;">
+                <div style="position:relative; margin-bottom:8px;">
+                    <i class="bi bi-search" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#666; font-size:11px;"></i>
+                    <input type="text" placeholder="Nhập tên hoặc SĐT..."
+                           style="padding-left:30px; height:30px; font-size:12px; width:100%;"
+                           oninput="PosApp.inlineSearchCustomer(this.value)">
+                </div>
+                <div id="inlineSearchResults" style="max-height:120px; overflow-y:auto; border:1px solid var(--gray-200); border-radius:2px; background:#fff;">
+                    <div style="padding:8px 12px; color:#999; font-size:11px;">Nhập để tìm kiếm...</div>
+                </div>
             </div>
 
             <div class="table-wrapper">
@@ -687,7 +706,7 @@
                 <div style="display: flex; gap: 0; margin-bottom: 15px;">
                     <input type="text" placeholder="Nhập mã giảm giá..."
                            style="border-radius: 2px 0 0 2px; border-right: none; height: 34px;">
-                    <button class="btn-icon"
+                    <button class="btn-icon" onclick="PosApp.applyVoucher()"
                             style="border-radius: 0 2px 2px 0; width: 34px; height: 34px; border-left: none;">
                         <i class="bi bi-tag-fill"></i>
                     </button>
@@ -711,7 +730,7 @@
                 </div>
 
                 <button class="btn btn-pay-big" onclick="PosApp.openModal('payModal')">
-                    <i class="bi bi-credit-card-2-front-fill" style="margin-right: 6px;"></i> THANH TOÁN (F9)
+                    <i class="bi bi-credit-card-2-front-fill" style="margin-right: 6px;"></i> THANH TOÁN [F9]
                 </button>
             </div>
         </aside>
@@ -723,7 +742,7 @@
                        style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #999;"></i>
                     <input type="text" placeholder="Tìm kiếm sản phẩm (Tên, Mã, SKU)..."
                            style="padding-left: 36px; border: 1px solid var(--gray-200); box-shadow: none;"
-                           onkeyup="PosApp.filterProduct(this.value)">
+                           onkeyup="PosApp.loadProducts(this.value)">
                 </div>
                 <select class="filter-select" style="width: 130px;">
                     <option>Tất cả Màu Sắc</option>
@@ -754,213 +773,203 @@
 <div id="toast-container"></div>
 
 <div id="customerModal" class="modal">
-    <div class="modal-dialog">
+    <div class="modal-dialog" style="width:340px;">
         <div class="modal-header">
             <span class="modal-title">Khách hàng</span>
             <button class="btn-close" onclick="PosApp.closeModal('customerModal')"></button>
         </div>
-        <div class="modal-body">
-            <nav class="tabs" style="margin-bottom: 15px;">
+        <div class="modal-body" style="padding:15px;">
+            <nav class="tabs" style="margin-bottom:12px;">
                 <button class="tab active" onclick="PosApp.switchCustTab('search')" id="tabSearchBtn">Tìm kiếm</button>
                 <button class="tab" onclick="PosApp.switchCustTab('create')" id="tabCreateBtn">Thêm mới</button>
             </nav>
 
-            <div style="height: 210px; position: relative;">
-
-                <div id="paneSearch" style="display: flex; flex-direction: column; height: 100%;">
-
-                    <div style="position: relative; margin-bottom: 10px; flex-shrink: 0;">
-                        <i class="bi bi-search"
-                           style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #666;"></i>
-                        <input type="text" class="form-control" placeholder="Nhập tên hoặc SĐT..."
-                               style="width: 100%; padding: 8px 10px 8px 35px; box-sizing: border-box;">
-                    </div>
-
-                    <div style="border: 1px solid var(--gray-200); border-radius: 2px; flex-grow: 1; overflow-y: auto;">
-
-                        <div style="padding: 10px 15px; border-bottom: 1px solid #eee; cursor: pointer;"
-                             onclick="PosApp.selectCustomer('Nguyễn Văn A', '0988.777.666')">
-                            <div style="font-weight: 700; font-size: 13px;">Nguyễn Văn A</div>
-                            <div style="font-size: 11px; color: #666;">0988.777.666</div>
-                        </div>
-
-                        <div style="padding: 10px 15px; border-bottom: 1px solid #eee; cursor: pointer;"
-                             onclick="PosApp.selectCustomer('Trần Thị B', '0912.345.678')">
-                            <div style="font-weight: 700; font-size: 13px;">Trần Thị B</div>
-                            <div style="font-size: 11px; color: #666;">0912.345.678</div>
-                        </div>
-                        <div style="padding: 10px 15px; border-bottom: 1px solid #eee; cursor: pointer;"
-                             onclick="PosApp.selectCustomer('Lê Văn C', '0999.888.777')">
-                            <div style="font-weight: 700; font-size: 13px;">Lê Văn C</div>
-                            <div style="font-size: 11px; color: #666;">0999.888.777</div>
-                        </div>
-
+            <!-- PANE TÌM KIẾM -->
+            <div id="paneSearch" style="display:flex; flex-direction:column; height:200px;">
+                <div style="position:relative; margin-bottom:8px; flex-shrink:0;">
+                    <i class="bi bi-search" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#666;"></i>
+                    <input type="text" placeholder="Nhập tên hoặc SĐT..."
+                           style="padding-left:32px; height:32px; font-size:12px; width:100%;"
+                           oninput="PosApp.searchCustomer(this.value)">
+                </div>
+                <div id="customerSearchResults"
+                     style="flex:1; border:1px solid var(--gray-200); border-radius:2px; overflow-y:auto;">
+                    <div style="padding:12px; color:#999; font-size:11px; text-align:left;">
+                        Nhập tên hoặc SĐT để tìm kiếm...
                     </div>
                 </div>
+            </div>
 
-                <div id="paneCreate" style="display: none; height: 100%;">
-                    <div style="margin-bottom: 12px;">
-                        <label style="font-weight: 700; font-size: 11px; margin-bottom: 4px; display: block;">Tên khách
-                            hàng</label>
-                        <input type="text" id="newCustName" placeholder="Nhập tên khách..."
-                               style="width: 100%; box-sizing: border-box; padding: 8px;">
-                    </div>
-                    <div style="margin-bottom: 20px;">
-                        <label style="font-weight: 700; font-size: 11px; margin-bottom: 4px; display: block;">Số điện
-                            thoại</label>
-                        <input type="text" id="newCustPhone" placeholder="Nhập số điện thoại..."
-                               style="width: 100%; box-sizing: border-box; padding: 8px;">
-                    </div>
-                    <button class="btn w-100" onclick="PosApp.createNewCustomer()">Lưu & Chọn</button>
-                </div>
+            <!-- PANE THÊM MỚI — Floating label style -->
+            <div id="paneCreate" style="display:none; padding-top:8px;">
+
+                <fieldset style="border:1px solid var(--gray-300); border-radius:0; padding:8px 12px 10px; margin-bottom:12px; position:relative;">
+                    <legend style="font-size:10px; font-weight:700; color:#666; text-transform:uppercase; letter-spacing:0.5px; padding:0 6px;">
+                        Tên khách hàng
+                    </legend>
+                    <input type="text" id="newCustName" placeholder="Nguyễn Văn A..."
+                           style="width:100%; border:none; padding:0; height:26px; font-size:13px; background:transparent;">
+                </fieldset>
+
+                <fieldset style="border:1px solid var(--gray-300); border-radius:0; padding:8px 12px 10px; margin-bottom:16px; position:relative;">
+                    <legend style="font-size:10px; font-weight:700; color:#666; text-transform:uppercase; letter-spacing:0.5px; padding:0 6px;">
+                        Số điện thoại
+                    </legend>
+                    <input type="text" id="newCustPhone" placeholder="0912 345 678..."
+                           style="width:100%; border:none; padding:0; height:26px; font-size:13px; background:transparent;">
+                </fieldset>
+
+                <button class="btn w-100" onclick="PosApp.createNewCustomer()" style="border-radius:0 !important;">
+                    <i class="bi bi-person-plus-fill"></i> LƯU & CHỌN
+                </button>
             </div>
         </div>
     </div>
 </div>
 
 <div id="payModal" class="modal">
-    <div class="modal-dialog">
-        <div class="modal-header">
-            <span class="modal-title">Xác nhận thanh toán</span>
+    <div class="modal-dialog" style="border-radius: 0;">
+        <div class="modal-header" style="border-radius: 0;">
+            <span class="modal-title" style="font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Xác nhận thanh toán</span>
             <button class="btn-close" onclick="PosApp.closeModal('payModal')"></button>
         </div>
-        <div class="modal-body" style="padding: 25px;">
 
+        <div class="modal-body" style="padding: 20px;">
             <style>
-                /* Style nút chọn (Ngân hàng/Momo) */
+                /* Đồng bộ style Fieldset giống bên thêm khách hàng */
+                .pos-fieldset {
+                    border: 1px solid #ccc;
+                    border-radius: 0; /* Vuông chằn chặn */
+                    padding: 8px 12px 10px;
+                    margin-bottom: 16px;
+                    position: relative;
+                }
+
+                .pos-legend {
+                    font-size: 10px;
+                    font-weight: 700;
+                    color: #666;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    padding: 0 6px;
+                    width: auto;
+                    float: none;
+                    margin-bottom: 0;
+                    border: none;
+                }
+
+                .pos-input-money {
+                    width: 100%;
+                    border: none;
+                    padding: 0;
+                    height: 32px;
+                    font-size: 22px; /* Cho tiền to ra nhìn mới sướng */
+                    font-weight: 800;
+                    background: transparent;
+                    text-align: right;
+                    outline: none;
+                }
+
+                /* Tab vuông */
+                .payment-tabs {
+                    display: flex;
+                    margin-bottom: 20px;
+                    border: 1px solid #ccc;
+                }
+
+                .payment-tab {
+                    flex: 1;
+                    padding: 12px;
+                    border: none;
+                    background: #f4f4f5;
+                    font-size: 12px;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+
+                .payment-tab.active {
+                    background: #000;
+                    color: #fff;
+                }
+
+                /* Option Ngân hàng/Momo vuông */
                 .payment-option {
                     flex: 1;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
                     justify-content: center;
-                    height: 100%;
-                    border: 1px solid #e4e4e7;
-                    border-radius: 8px;
+                    height: 90px;
+                    border: 1px solid #ccc;
+                    border-radius: 0;
                     cursor: pointer;
                     background: #fff;
-                    transition: all 0.2s;
                     position: relative;
-                    min-width: 0;
                 }
 
-                .payment-option:hover {
-                    border-color: #000;
-                    background: #fafafa;
-                }
-
-                /* Khi được chọn */
                 .payment-option.selected {
                     border: 2px solid #000 !important;
-                    background: #fff !important;
+                    background: #f8f9fa;
                 }
 
                 .payment-option.selected::after {
                     content: "\F26B";
                     font-family: "bootstrap-icons";
                     position: absolute;
-                    top: 8px;
-                    right: 8px;
+                    top: 5px;
+                    right: 5px;
                     color: #10b981;
-                    font-size: 16px;
-                }
-
-                /* Style ô nhập tiền (Floating Label xịn xò) */
-                .money-input-wrapper {
-                    position: relative;
-                    height: 50px;
-                    width: 100%;
-                }
-
-                .money-input {
-                    width: 100%;
-                    height: 100%;
-                    border: 1px solid #000;
-                    border-radius: 6px;
-                    font-size: 20px;
-                    font-weight: 800;
-                    text-align: right;
-                    padding: 18px 45px 0 12px;
-                    outline: none;
-                }
-
-                .money-label {
-                    position: absolute;
-                    top: 8px;
-                    left: 12px;
-                    font-size: 10px;
-                    font-weight: 700;
-                    color: #666;
-                    text-transform: uppercase;
-                    pointer-events: none; /* Để bấm xuyên qua label vào input */
-                }
-
-                .money-unit {
-                    position: absolute;
-                    right: 12px;
-                    bottom: 12px;
-                    font-size: 12px;
-                    font-weight: 700;
-                    color: #999;
                 }
             </style>
-
-            <div style="text-align: center; margin-bottom: 20px;">
-                <div style="font-size: 12px; color: #666; font-weight: 600; text-transform: uppercase;">Tổng tiền</div>
-                <div id="modalTotal" style="font-size: 32px; font-weight: 800; color: #000; line-height: 1.2;">0 ₫</div>
+            <div style="text-align: center; margin-bottom: 20px; background: #f8f9fa; padding: 15px; border: 1px dashed #ccc;">
+                <div style="font-size: 11px; color: #666; font-weight: 700; text-transform: uppercase;">Tổng thanh toán</div>
+                <div id="modalTotal" style="font-size: 36px; font-weight: 900; color: #000;">0 ₫</div>
             </div>
 
-            <nav class="tabs" style="display: flex; border-bottom: 1px solid #e4e4e7; margin-bottom: 25px; gap: 0;">
-                <button class="tab active"
-                        style="flex:1; padding-bottom: 10px; border: none; background: none; border-bottom: 2px solid #000; font-weight: 700;"
-                        onclick="PosApp.switchPaymentMethod('cash', this)">Tiền mặt
-                </button>
-                <button class="tab"
-                        style="flex:1; padding-bottom: 10px; border: none; background: none; border-bottom: 2px solid transparent; color: #999; font-weight: 600;"
-                        onclick="PosApp.switchPaymentMethod('transfer', this)">Chuyển khoản
-                </button>
-            </nav>
+            <div class="payment-tabs">
+                <button class="payment-tab active" onclick="PosApp.switchPaymentMethod('cash', this)">Tiền mặt</button>
+                <button class="payment-tab" onclick="PosApp.switchPaymentMethod('transfer', this)">Chuyển khoản</button>
+            </div>
 
-            <div style="height: 110px; position: relative;">
+            <div style="min-height: 100px;">
+                <div id="cash-section" style="display: block;">
+                    <fieldset class="pos-fieldset">
+                        <legend class="pos-legend">Tiền khách đưa</legend>
+                        <div style="display: flex; align-items: center;">
+                            <input type="text" class="pos-input-money" id="inpKhachDua" oninput="PosApp.calcChange()" placeholder="0">
+                            <span style="font-weight: 700; margin-left: 8px; font-size: 12px; color: #999;">VNĐ</span>
+                        </div>
+                    </fieldset>
 
-                <div id="cash-section"
-                     style="height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
-
-                    <div class="money-input-wrapper">
-                        <span class="money-label">TIỀN KHÁCH ĐƯA</span>
-                        <input type="text" class="money-input" id="inpKhachDua" oninput="PosApp.calcChange()"
-                               placeholder="0">
-                        <span class="money-unit">VNĐ</span>
-                    </div>
-
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 5px;">
-                        <span style="font-weight: 600; color: #555; font-size: 13px;">TIỀN THỪA:</span>
-                        <span id="lblTienThua" style="font-weight: 800; font-size: 18px; color: #000;">0 ₫</span>
-                    </div>
+                    <fieldset class="pos-fieldset" style="background: #fffef0; border-color: #eab308;">
+                        <legend class="pos-legend" style="color: #854d0e;">Tiền thừa trả khách</legend>
+                        <div id="lblTienThua" style="text-align: right; font-size: 20px; font-weight: 800; color: #000;">0 ₫</div>
+                    </fieldset>
                 </div>
 
-                <div id="transfer-section" style="display: none; height: 100%;">
-                    <div style="display: flex; gap: 15px; height: 100%; width: 100%;">
-
+                <div id="transfer-section" style="display: none;">
+                    <div style="display: flex; gap: 15px; width: 100%;">
                         <div class="payment-option selected" onclick="PosApp.selectApp(this)">
-                            <i class="bi bi-bank" style="font-size: 28px; color: #0d6efd; margin-bottom: 5px;"></i>
-                            <span style="font-size: 13px; font-weight: 700;">NGÂN HÀNG</span>
+                            <i class="bi bi-bank" style="font-size: 28px; color: #000; margin-bottom: 8px;"></i>
+                            <span style="font-size: 12px; font-weight: 700;">NGÂN HÀNG</span>
                         </div>
-
                         <div class="payment-option" onclick="PosApp.selectApp(this)">
-                            <i class="bi bi-wallet2" style="font-size: 28px; color: #a50064; margin-bottom: 5px;"></i>
-                            <span style="font-size: 13px; font-weight: 700;">VÍ MOMO</span>
+                            <i class="bi bi-wallet2" style="font-size: 28px; color: #000; margin-bottom: 8px;"></i>
+                            <span style="font-size: 12px; font-weight: 700;">VÍ MOMO</span>
                         </div>
-
                     </div>
                 </div>
-
             </div>
         </div>
-    </div>
-    <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="PosApp.closeModal('payModal')">Đóng</button>
-        <button class="btn" style="min-width: 120px;" onclick="PosApp.finishOrder()">HOÀN TẤT</button>
+
+        <div class="modal-footer" style="padding: 15px 20px;">
+            <button class="btn btn-secondary" style="border-radius: 0; font-weight: 700; text-transform: uppercase; font-size: 12px;" onclick="PosApp.closeModal('payModal')">Hủy</button>
+            <button class="btn btn-primary" style="border-radius: 0; min-width: 150px; font-weight: 800; text-transform: uppercase; font-size: 13px; background: #000; border: none;" onclick="PosApp.finishOrder()">
+                Xác nhận thanh toán
+            </button>
+        </div>
     </div>
 </div>
 
@@ -1003,288 +1012,524 @@
     }
 
     const PosApp = {
-        products: [
-            {
-                id: 1,
-                name: "ÁO THUN BASIC",
-                price: 150000,
-                stock: 50,
-                img: "https://placehold.co/40/000/fff?text=T",
-                attr: "ĐEN - L"
-            },
-            {
-                id: 2,
-                name: "ÁO POLO SIGNATURE",
-                price: 250000,
-                stock: 30,
-                img: "https://placehold.co/40/000/fff?text=P",
-                attr: "TRẮNG - M"
-            },
-            {
-                id: 3,
-                name: "QUẦN JEANS SLIMFIT",
-                price: 350000,
-                stock: 20,
-                img: "https://placehold.co/40/000/fff?text=J",
-                attr: "XANH - 32"
-            },
-            {
-                id: 4,
-                name: "SƠ MI OXFORD BLUE",
-                price: 280000,
-                stock: 15,
-                img: "https://placehold.co/40/000/fff?text=S",
-                attr: "XANH - XL"
-            },
-            {
-                id: 5,
-                name: "ÁO KHOÁC BOMBER",
-                price: 450000,
-                stock: 10,
-                img: "https://placehold.co/40/000/fff?text=B",
-                attr: "RÊU - XXL"
-            },
-            {
-                id: 6,
-                name: "T-SHIRT GRAPHIC",
-                price: 180000,
-                stock: 45,
-                img: "https://placehold.co/40/000/fff?text=G",
-                attr: "HỒNG - S"
-            },
-            {
-                id: 7,
-                name: "QUẦN SHORT KAKI",
-                price: 220000,
-                stock: 25,
-                img: "https://placehold.co/40/000/fff?text=K",
-                attr: "BE - 30"
-            },
-        ],
-        invoices: [{id: 1, name: 'Hóa đơn 1', cart: [], customer: 'KHÁCH VÃNG LAI', phone: ''}],
-        activeInvoiceId: 1,
+        products: [],
+        invoices: [],
+        activeInvoiceId: null,
+        isCreating: false,
 
-        init: function () {
-            this.renderProducts(this.products);
+        // --- 0. KHỞI TẠO (CÓ LƯU TRỮ) ---
+        init: async function () {
+            this.loadState(); // Nạp lại đơn hàng từ ổ cứng (localStorage)
+            await this.loadAttributes();
+            await this.loadProducts("");
             this.renderTabs();
             this.renderCart();
         },
-        createInvoice: function () {
+
+        saveState: function() {
+            localStorage.setItem('bee_pos_invoices', JSON.stringify(this.invoices));
+            localStorage.setItem('bee_pos_active_id', this.activeInvoiceId);
+        },
+
+        loadState: function() {
+            const savedInvoices = localStorage.getItem('bee_pos_invoices');
+            const savedActiveId = localStorage.getItem('bee_pos_active_id');
+
+            if (savedInvoices) {
+                this.invoices = JSON.parse(savedInvoices);
+
+                // Ép hết id về Number để tránh string/number mismatch
+                this.invoices = this.invoices.map(inv => ({ ...inv, id: Number(inv.id) }));
+
+                let activeId = parseInt(savedActiveId);
+                if (isNaN(activeId)) activeId = null;
+
+                // Nếu activeId không tồn tại trong danh sách thì lấy cái đầu tiên
+                if (activeId && !this.invoices.some(inv => inv.id === activeId)) {
+                    activeId = this.invoices.length > 0 ? this.invoices[0].id : null;
+                }
+                this.activeInvoiceId = activeId;
+            }
+        },
+
+        // --- 1. THUỘC TÍNH & SẢN PHẨM ---
+        loadAttributes: async function() {
+            try {
+                const res = await fetch('/api/pos/attributes');
+                const data = await res.json();
+                const colorSel = document.querySelectorAll('.filter-select')[0];
+                const sizeSel = document.querySelectorAll('.filter-select')[1];
+
+                colorSel.innerHTML = '<option value="">TẤT CẢ MÀU SẮC</option>' +
+                    data.colors.map(c => `<option value="${c.id}">${c.ten.toUpperCase()}</option>`).join('');
+                sizeSel.innerHTML = '<option value="">TẤT CẢ KÍCH THƯỚC</option>' +
+                    data.sizes.map(s => `<option value="${s.id}">${s.ten.toUpperCase()}</option>`).join('');
+
+                // FIX: Tìm đúng ô input dựa trên placeholder để lọc onload
+                const searchInp = document.querySelector('input[placeholder*="Tìm kiếm sản phẩm"]');
+                colorSel.onchange = () => this.loadProducts(searchInp.value);
+                sizeSel.onchange = () => this.loadProducts(searchInp.value);
+            } catch (e) { console.error("Lỗi load thuộc tính:", e); }
+        },
+
+        loadProducts: async function (q) {
+            const colorId = document.querySelectorAll('.filter-select')[0].value;
+            const sizeId = document.querySelectorAll('.filter-select')[1].value;
+            const res = await fetch(`/api/pos/products/search?q=${q}&color=${colorId}&size=${sizeId}`);
+            this.products = await res.json();
+            this.renderProducts(this.products);
+        },
+
+        renderProducts: function (list) {
+            const available = list.filter(p => p.soLuong > 0);
+            document.getElementById('productBody').innerHTML = available.map(p => {
+                const hasPromo = p.giaSauKhuyenMai && p.giaSauKhuyenMai < p.giaBan;
+                const displayPrice = hasPromo
+                    ? `<span style="text-decoration:line-through; color:#999; font-size:10px;">${new Intl.NumberFormat('vi-VN').format(p.giaBan)}</span>
+                       <span style="color:#dc2626; margin-left:5px;">${new Intl.NumberFormat('vi-VN').format(p.giaSauKhuyenMai)} ₫</span>`
+                    : `<span>${new Intl.NumberFormat('vi-VN').format(p.giaBan)} ₫</span>`;
+
+                return `
+                <tr onclick="PosApp.addToCart(${p.id})" style="cursor: pointer;">
+                    <td style="text-align:center; padding: 5px;">
+                        <img src="${p.hinhAnh || 'https://placehold.co/40'}" style="width: 36px; height: 36px; border-radius: 2px; border: 1px solid #eee;">
+                    </td>
+                    <td>
+                        <div style="font-weight:700;">${p.sanPham.ten}</div>
+                        <div style="font-size:11px; color:#666;">${p.sku} | ${p.mauSac.ten} - ${p.kichThuoc.ten}</div>
+                    </td>
+                    <td style="text-align:right; font-weight:700;">${displayPrice}</td>
+                    <td style="text-align:center;">${p.soLuong}</td>
+                    <td style="text-align:center;"><button class="btn-icon"><i class="bi bi-plus"></i></button></td>
+                </tr>`;
+            }).join('');
+        },
+
+        // --- 2. QUẢN LÝ HÓA ĐƠN ---
+        createInvoice: async function () {
+            if (this.isCreating) return;
+            this.isCreating = true;
+
             if (this.invoices.length >= 5) {
-                toast("Chỉ được tạo tối đa 5 hóa đơn chờ!", "warning");
+                toast("TỐI ĐA 5 ĐƠN CHỜ", "warning");
+                this.isCreating = false;
                 return;
             }
-            const newId = Date.now();
-            const nextNum = this.invoices.length + 1;
+
+            const res = await fetch('/api/pos/invoices', { method: 'POST' });
+            const newHd = await res.json();
+
+            const newId = Number(newHd.id);   // ← ÉP NUMBER Ở ĐÂY
+
+            const orderNum = this.invoices.length + 1;
             this.invoices.push({
                 id: newId,
-                name: `Hóa đơn ${nextNum}`,
+                name: `HÓA ĐƠN ${orderNum}`,
+                maHD: newHd.ma,
                 cart: [],
                 customer: 'KHÁCH VÃNG LAI',
-                phone: ''
+                customerId: null,
+                voucher: null
             });
-            this.switchTab(newId);
-            toast("Đã tạo hóa đơn mới", "success");
-        },
 
-        // --- LOGIC XÓA (MODAL CONFIRM) ---
-        promptDelete: function () {
-            if (this.invoices.length <= 1) {
-                toast("Không thể xóa hóa đơn cuối cùng!", "warning");
-                return;
-            }
-            this.openModal('confirmModal');
-        },
-        forceDelete: function () {
-            this.invoices = this.invoices.filter(inv => inv.id !== this.activeInvoiceId);
-            if (this.invoices.length === 0) {
-                const newId = Date.now();
-                this.invoices.push({id: newId, name: 'Hóa đơn 1', cart: [], customer: 'KHÁCH VÃNG LAI', phone: ''});
-                this.activeInvoiceId = newId;
-            } else {
-                this.activeInvoiceId = this.invoices[0].id;
-            }
+            this.activeInvoiceId = newId;   // ← ÉP NUMBER Ở ĐÂY
+            this.saveState();
             this.renderTabs();
             this.renderCart();
-            this.closeModal('confirmModal');
-            toast("Đã hủy hóa đơn thành công!", "success");
+            toast(`ĐÃ TẠO ${newHd.ma}`, "success");
+
+            this.isCreating = false;
         },
 
         switchTab: function (id) {
-            this.activeInvoiceId = id;
+            this.activeInvoiceId = Number(id);   // ← THÊM Number() ở đây
+            this.saveState();
             this.renderTabs();
             this.renderCart();
+            document.querySelector('input[placeholder*="giảm giá"]').value = '';
         },
-        renderTabs: function () {
-            const container = document.getElementById('invoiceTabsContainer');
-            container.innerHTML = this.invoices.map(inv => `
-                <button class="tab ${inv.id === this.activeInvoiceId ? 'active' : ''}"
-                        style="padding: 0 15px; border-bottom: 2px solid ${inv.id === this.activeInvoiceId ? '#000' : 'transparent'}"
-                        onclick="PosApp.switchTab(${inv.id})">
-                    ${inv.name}
-                </button>
-            `).join('');
-            const cur = this.getCurrentInvoice();
-            document.getElementById('customerName').innerText = cur.customer;
-            document.getElementById('customerPhone').innerText = cur.phone || 'Khách lẻ';
-        },
-        getCurrentInvoice: function () {
-            return this.invoices.find(inv => inv.id === this.activeInvoiceId);
-        },
-        renderProducts: function (list) {
-            document.getElementById('productBody').innerHTML = list.map(p => `
-                <tr onclick="PosApp.addToCart(${p.id})" style="cursor: pointer;">
-                    <td style="text-align:center; padding: 5px;">
-                        <img src="${p.img}" style="width: 36px; height: 36px; border-radius: 2px; border: 1px solid #eee;">
-                    </td>
-                    <td>
-                        <div style="font-weight:700; color: #000;">${p.name}</div>
-                        <div style="font-size:11px; color:#666;">${p.attr}</div>
-                    </td>
-                    <td style="text-align:right; font-weight:700;">${new Intl.NumberFormat('vi-VN').format(p.price)}</td>
-                    <td style="text-align:center;">${p.stock}</td>
-                    <td style="text-align:center;">
-                        <button class="btn-icon" style="width: 24px; height: 24px;">
-                            <i class="bi bi-plus-lg" style="font-size:12px;"></i>
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        },
-        addToCart: function (id) {
-            const invoice = this.getCurrentInvoice();
-            const product = this.products.find(p => p.id === id);
-            const item = invoice.cart.find(i => i.id === id);
-            if (item) item.qty++; else invoice.cart.push({...product, qty: 1});
-            this.renderCart();
-        },
-        renderCart: function () {
-            const invoice = this.getCurrentInvoice();
-            const tbody = document.getElementById('cartBody');
-            if (invoice.cart.length === 0) {
-                tbody.innerHTML = '';
-                document.getElementById('emptyCart').style.display = 'block';
-                this.updateTotal(0);
+
+        promptDelete: function () {
+            if (!this.getCurrentInvoice()) {
+                toast("CHƯA CHỌN ĐƠN HOẶC HÓA ĐƠN ĐÃ BỊ XÓA", "warning");
                 return;
             }
-            document.getElementById('emptyCart').style.display = 'none';
-            tbody.innerHTML = invoice.cart.map(item => `
-                <tr>
-                    <td style="padding-left: 20px;">
-                        <div style="font-weight:700; font-size: 12px;">${item.name}</div>
-                        <div style="font-size:10px; color:#666;">${item.attr}</div>
-                    </td>
-                    <td style="text-align:center;">
-                        <div style="display:flex; justify-content:center; align-items:center; gap:5px;">
-                            <button class="btn-icon" style="width:20px; height:20px; font-size:10px;" onclick="PosApp.changeQty(${item.id}, -1)">-</button>
-                            <span style="font-weight:700; min-width: 15px;">${item.qty}</span>
-                            <button class="btn-icon" style="width:20px; height:20px; font-size:10px;" onclick="PosApp.changeQty(${item.id}, 1)">+</button>
-                        </div>
-                    </td>
-                    <td style="text-align:right; padding-right: 20px; font-weight:700;">
-                        ${new Intl.NumberFormat('vi-VN').format(item.price * item.qty)}
-                    </td>
-                    <td style="text-align:center;">
-                        <i class="bi bi-x" style="cursor:pointer; font-size:18px; color: #999;" onclick="PosApp.changeQty(${item.id}, -999)"></i>
-                    </td>
-                </tr>
-            `).join('');
-            this.updateTotal(invoice.cart.reduce((sum, i) => sum + (i.price * i.qty), 0));
+            document.getElementById('confirmModal').classList.add('show');
         },
+
+        forceDelete: async function () {
+            const res = await fetch(`/api/pos/invoices/${this.activeInvoiceId}`, { method: 'DELETE' });
+            if (res.ok) {
+                this.invoices = this.invoices.filter(inv => inv.id !== this.activeInvoiceId);
+                this.invoices.forEach((inv, idx) => inv.name = `HÓA ĐƠN ${idx + 1}`);
+                this.activeInvoiceId = this.invoices.length > 0 ? this.invoices[0].id : null;
+                this.saveState();
+                this.renderTabs();
+                this.renderCart();
+                this.closeModal('confirmModal');
+                toast("ĐÃ HỦY ĐƠN HÀNG", "success");
+            }
+        },
+
+        // --- 3. GIỎ HÀNG & VOUCHER ---
+        addToCart: function (id) {
+            const inv = this.getCurrentInvoice();
+            if (!inv) { toast("VUI LÒNG TẠO HÓA ĐƠN TRƯỚC", "warning"); return; }
+            const product = this.products.find(p => p.id === id);
+            const item = inv.cart.find(i => i.id === id);
+
+            if (item) {
+                if (item.qty >= product.soLuong) { toast("VƯỢT QUÁ TỒN KHO", "warning"); return; }
+                item.qty++;
+            } else {
+                const price = (product.giaSauKhuyenMai && product.giaSauKhuyenMai < product.giaBan) ? product.giaSauKhuyenMai : product.giaBan;
+                inv.cart.push({ id: product.id, name: product.sanPham.ten, price: price, attr: `${product.mauSac.ten} - ${product.kichThuoc.ten}`, qty: 1 });
+            }
+            this.saveState();
+            this.renderCart();
+        },
+
+        applyVoucher: async function() {
+            const code = document.querySelector('input[placeholder*="giảm giá"]').value.trim();
+            const inv = this.getCurrentInvoice();
+            if (!inv || inv.cart.length === 0) { toast("GIỎ HÀNG TRỐNG", "warning"); return; }
+            if (!code) { toast("NHẬP MÃ VOUCHER", "warning"); return; }
+
+            const subTotal = inv.cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+            try {
+                const res = await fetch(`/api/pos/vouchers/apply?code=${code}&currentTotal=${subTotal}`);
+                if (res.ok) {
+                    inv.voucher = await res.json();
+                    this.saveState();
+                    this.renderCart();
+                    toast("ÁP DỤNG THÀNH CÔNG", "success");
+                } else {
+                    toast(await res.text(), "error");
+                }
+            } catch (e) { toast("LỖI HỆ THỐNG", "error"); }
+        },
+
+        updateTotal: function (subTotal) {
+            const inv = this.getCurrentInvoice();
+            let discount = 0;
+            if (inv && inv.voucher) {
+                const v = inv.voucher;
+                discount = v.loaiGiamGia === 'PERCENTAGE' ? (subTotal * v.giaTriGiamGia) / 100 : v.giaTriGiamGia;
+                if (v.giaTriGiamGiaToiDa && discount > v.giaTriGiamGiaToiDa) discount = v.giaTriGiamGiaToiDa;
+            }
+            const total = Math.max(0, subTotal - discount);
+            document.getElementById('lblSubTotal').innerText = new Intl.NumberFormat('vi-VN').format(subTotal) + ' ₫';
+            const discountSpans = document.querySelectorAll('.summary-row span[style*="10b981"]');
+            discountSpans[1].innerText = '-' + new Intl.NumberFormat('vi-VN').format(discount) + ' ₫';
+            document.getElementById('lblTotal').innerText = new Intl.NumberFormat('vi-VN').format(total) + ' ₫';
+            document.getElementById('modalTotal').innerText = new Intl.NumberFormat('vi-VN').format(total) + ' ₫';
+        },
+
         changeQty: function (id, delta) {
-            const invoice = this.getCurrentInvoice();
-            const item = invoice.cart.find(i => i.id === id);
+            const inv = this.getCurrentInvoice();
+            const item = inv.cart.find(i => i.id === id);
             if (item) {
                 item.qty += delta;
-                if (item.qty <= 0) invoice.cart = invoice.cart.filter(i => i.id !== id);
+                if (item.qty <= 0) inv.cart = inv.cart.filter(i => i.id !== id);
+                this.saveState();
                 this.renderCart();
             }
         },
-        updateTotal: function (total) {
-            const money = new Intl.NumberFormat('vi-VN').format(total) + ' ₫';
-            document.getElementById('lblSubTotal').innerText = money;
-            document.getElementById('lblTotal').innerText = money;
-            document.getElementById('modalTotal').innerText = money;
-        },
-        filterProduct: function (key) {
-            const lower = key.toLowerCase();
-            this.renderProducts(this.products.filter(p => p.name.toLowerCase().includes(lower)));
-        },
 
-        // --- MODAL LOGIC ---
-        openModal: function (id) {
-            if (id === 'payModal' && this.getCurrentInvoice().cart.length === 0) {
-                toast("Giỏ hàng đang trống!", "error");
+        // --- 4. TÌM KIẾM ---
+        filterProduct: function (key) { this.loadProducts(key); },
+
+        searchCustomer: async function(val) {
+            const resultBox = document.getElementById('customerSearchResults');
+            if (val.length < 2) {
+                resultBox.innerHTML = '<div style="color:#999;font-size:12px;padding:15px;text-align:center;">Nhập tên hoặc SĐT để tìm kiếm...</div>';
                 return;
             }
-            document.getElementById(id).classList.add('show');
-            if (id === 'payModal') this.switchPaymentMethod('cash', document.querySelectorAll('#payModal .tab')[0]);
-        },
-        closeModal: function (id) {
-            document.getElementById(id).classList.remove('show');
+            const res = await fetch(`/api/pos/customers/search?q=${val}`);
+            const data = await res.json();
+            if (data.length === 0) {
+                resultBox.innerHTML = '<div style="color:#999;font-size:12px;padding:15px;text-align:center;">Không tìm thấy khách hàng</div>';
+                return;
+            }
+            resultBox.innerHTML = data.map(c => `
+        <div style="padding:10px 15px;border-bottom:1px solid #eee;cursor:pointer;"
+             onclick="PosApp.selectCustomer('${c.hoTen}', '${c.soDienThoai}', ${c.id})">
+            <div style="font-weight:700;">${c.hoTen.toUpperCase()}</div>
+            <div style="font-size:11px;color:#666;">${c.soDienThoai}</div>
+        </div>`).join('');
         },
 
-        switchCustTab: function (tabName) {
-            document.getElementById('tabSearchBtn').classList.remove('active');
-            document.getElementById('tabCreateBtn').classList.remove('active');
-            document.getElementById('paneSearch').style.display = tabName === 'search' ? 'block' : 'none';
-            document.getElementById('paneCreate').style.display = tabName === 'create' ? 'block' : 'none';
-            if (tabName === 'search') document.getElementById('tabSearchBtn').classList.add('active');
-            else document.getElementById('tabCreateBtn').classList.add('active');
-        },
-        selectCustomer: function (name, phone) {
+        selectCustomer: function (name, phone, id) {
             const inv = this.getCurrentInvoice();
-            inv.customer = name;
-            inv.phone = phone;
+            inv.customer = name; inv.phone = phone; inv.customerId = id;
+            this.saveState();
             this.renderTabs();
             this.closeModal('customerModal');
-            toast(`Đã chọn khách: ${name}`, "success");
         },
-        createNewCustomer: function () {
-            const name = document.getElementById('newCustName').value;
-            const phone = document.getElementById('newCustPhone').value;
-            if (!name || !phone) {
-                toast("Vui lòng nhập đủ thông tin!", "warning");
+
+        // --- 5. THANH TOÁN ---
+        finishOrder: async function () {
+            const inv = this.getCurrentInvoice();
+            const total = parseInt(document.getElementById('lblTotal').innerText.replace(/\D/g, '')) || 0;
+
+            const isCash = document.getElementById('cash-section').style.display !== 'none';
+            let finalMethod = '';
+
+            if (isCash) {
+                const khachDua = parseInt(document.getElementById('inpKhachDua').value.replace(/\D/g, '')) || 0;
+                if (khachDua < total) {
+                    // Thông báo nhẹ nhàng, không gắt gỏng
+                    toast("Số tiền khách đưa chưa đủ. Vui lòng kiểm tra lại!", "warning");
+                    return;
+                }
+                finalMethod = 'TIỀN MẶT';
+            } else {
+                const selectedOption = document.querySelector('#transfer-section .payment-option.selected span');
+                finalMethod = selectedOption ? selectedOption.innerText : 'CHUYỂN KHOẢN';
+            }
+
+            const payload = {
+                invoiceId: inv.id,
+                customerId: inv.customerId,
+                total: total,
+                // loaiThanhToan: finalMethod,
+                method: finalMethod,
+                cart: inv.cart,
+                voucherId: inv.voucher ? inv.voucher.id : null
+            };
+
+            try {
+                const res = await fetch('/api/pos/finish', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    toast("Thanh toán thành công!", "success");
+                    this.invoices = this.invoices.filter(i => i.id !== this.activeInvoiceId);
+                    this.invoices.forEach((i, idx) => i.name = `HÓA ĐƠN ${idx + 1}`);
+                    this.activeInvoiceId = this.invoices.length > 0 ? this.invoices[0].id : null;
+                    this.saveState();
+                    await this.loadProducts("");
+                    this.renderTabs();
+                    this.renderCart();
+                    this.closeModal('payModal');
+                } else {
+                    toast("Thanh toán thất bại. Vui lòng thử lại sau.", "error");
+                }
+            } catch (e) {
+                toast("Lỗi kết nối đến máy chủ. Vui lòng kiểm tra mạng!", "error");
+            }
+        },
+
+        openPayModal: function () {
+            const inv = this.getCurrentInvoice();
+
+            if (!inv) {
+                toast("Vui lòng chọn hoặc tạo hóa đơn trước khi thanh toán.", "warning");
                 return;
             }
-            this.selectCustomer(name, phone);
+
+            if (!inv.cart || inv.cart.length === 0) {
+                toast("Giỏ hàng đang trống. Vui lòng thêm sản phẩm.", "warning");
+                return;
+            }
+
+            document.getElementById('inpKhachDua').value = '';
+            document.getElementById('lblTienThua').innerText = '0 ₫';
+
+            const tabs = document.querySelectorAll('.payment-tab');
+            if(tabs.length > 0) this.switchPaymentMethod('cash', tabs[0]);
+
+            const subTotal = inv.cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+            let discount = 0;
+            if (inv.voucher) {
+                const v = inv.voucher;
+                discount = v.loaiGiamGia === 'PERCENTAGE' ? (subTotal * v.giaTriGiamGia) / 100 : v.giaTriGiamGia;
+                if (v.giaTriGiamGiaToiDa && discount > v.giaTriGiamGiaToiDa) discount = v.giaTriGiamGiaToiDa;
+            }
+            const total = Math.max(0, subTotal - discount);
+            document.getElementById('modalTotal').innerText = new Intl.NumberFormat('vi-VN').format(total) + ' ₫';
+
+            this.openModal('payModal');
         },
 
+        // --- UTILS ---
+        getCurrentInvoice: function () { return this.invoices.find(inv => inv.id === this.activeInvoiceId); },
+        renderTabs: function () {
+            const container = document.getElementById('invoiceTabsContainer');
+            if (this.invoices.length === 0) {
+                container.innerHTML = '<span style="color:#999; font-size:11px; padding:10px;">CHƯA CÓ HÓA ĐƠN</span>';
+                return;
+            }
+            container.innerHTML = this.invoices.map(inv => `
+                <button class="tab ${inv.id === this.activeInvoiceId ? 'active' : ''}" onclick="PosApp.switchTab(${inv.id})">
+                    ${inv.name}
+                </button>`).join('');
+            const cur = this.getCurrentInvoice();
+            document.getElementById('customerName').innerText = cur ? cur.customer : 'KHÁCH VÃNG LAI';
+            document.getElementById('customerPhone').innerText = cur ? (cur.phone || 'Khách lẻ') : 'Khách lẻ';
+        },
+        renderCart: function () {
+            const inv = this.getCurrentInvoice();
+            const tbody = document.getElementById('cartBody');
+            if (!inv || inv.cart.length === 0) {
+                tbody.innerHTML = ''; document.getElementById('emptyCart').style.display = 'block';
+                this.updateTotal(0); return;
+            }
+            document.getElementById('emptyCart').style.display = 'none';
+            tbody.innerHTML = inv.cart.map(i => `
+                <tr>
+                    <td style="padding-left: 20px;"><b>${i.name}</b><br><small>${i.attr}</small></td>
+                    <td style="text-align:center;">
+                        <div style="display:flex; justify-content:center; align-items:center; gap:5px;">
+                            <button class="btn-icon" style="width:20px; height:20px;" onclick="PosApp.changeQty(${i.id}, -1)">-</button>
+                            <span>${i.qty}</span>
+                            <button class="btn-icon" style="width:20px; height:20px;" onclick="PosApp.changeQty(${i.id}, 1)">+</button>
+                        </div>
+                    </td>
+                    <td style="text-align:right; padding-right: 20px;">${new Intl.NumberFormat('vi-VN').format(i.price * i.qty)}</td>
+                    <td><i class="bi bi-trash" style="cursor:pointer; color:#ef4444;" onclick="PosApp.changeQty(${i.id}, -999)"></i></td>
+                </tr>`).join('');
+            this.updateTotal(inv.cart.reduce((sum, i) => sum + (i.price * i.qty), 0));
+        },
+        openModal: function (id) { document.getElementById(id).classList.add('show'); },
+        closeModal: function (id) { document.getElementById(id).classList.remove('show'); },
         switchPaymentMethod: function (type, el) {
-            // 1. Xử lý giao diện Tab (Chỉ cần add/remove class active là có gạch chân)
-            const container = el.parentElement;
-            container.querySelectorAll('.tab').forEach(t => {
-                t.classList.remove('active');
-            });
+            // Sửa '.tab' thành '.payment-tab' để nó xóa đúng class
+            el.parentElement.querySelectorAll('.payment-tab').forEach(t => t.classList.remove('active'));
             el.classList.add('active');
 
-            // 2. Xử lý hiển thị nội dung
-            document.getElementById('cash-section').style.display = type === 'cash' ? 'flex' : 'none'; // Nhớ là flex nhé
-            // Cái này dùng logic CSS đè style display:block hôm qua tao chỉ
-            const transferSection = document.getElementById('transfer-section');
-            transferSection.style.display = type === 'cash' ? 'none' : 'block';
-        },
-        selectApp: function (el) {
-            // Tìm tất cả các thằng có class .payment-option và bỏ chọn hết
-            document.querySelectorAll('.payment-option').forEach(b => b.classList.remove('selected'));
-            // Chọn thằng vừa bấm
-            el.classList.add('selected');
+            // ĐỔI 'flex' THÀNH 'block' ĐỂ HAI Ô NHẬP TIỀN NẰM DỌC
+            document.getElementById('cash-section').style.display = type === 'cash' ? 'block' : 'none';
+            document.getElementById('transfer-section').style.display = type === 'cash' ? 'none' : 'block';
         },
         calcChange: function () {
+            const inputEl = document.getElementById('inpKhachDua');
+
+            // 1. Lọc lấy phần số thô (xóa hết dấu chấm, phẩy, chữ cái nếu có)
+            let rawValue = inputEl.value.replace(/\D/g, '');
+
+            // 2. Tự động format lại ô input lúc mày đang gõ
+            if (rawValue !== '') {
+                inputEl.value = new Intl.NumberFormat('vi-VN').format(parseInt(rawValue));
+            } else {
+                inputEl.value = '';
+            }
+
+            // 3. Tính toán tiền thừa
             const total = parseInt(document.getElementById('lblTotal').innerText.replace(/\D/g, '')) || 0;
-            const cust = parseInt(document.getElementById('inpKhachDua').value.replace(/\D/g, '')) || 0;
+            const cust = parseInt(rawValue) || 0; // Lấy cái số thô ở trên ra tính cho chuẩn
+
             document.getElementById('lblTienThua').innerText = new Intl.NumberFormat('vi-VN').format(Math.max(0, cust - total)) + ' ₫';
         },
-        finishOrder: function () {
-            toast("Thanh toán thành công!", "success");
-            this.closeModal('payModal');
-            // Logic reset hóa đơn...
-        }
+
+        switchCustTab: function(tab) {
+            document.getElementById('paneSearch').style.display = tab === 'search' ? 'flex' : 'none';
+            document.getElementById('paneCreate').style.display  = tab === 'create' ? 'block' : 'none';
+            document.getElementById('tabSearchBtn').classList.toggle('active', tab === 'search');
+            document.getElementById('tabCreateBtn').classList.toggle('active', tab === 'create');
+        },
+
+        createNewCustomer: async function() {
+            const name  = document.getElementById('newCustName').value.trim();
+            const phone = document.getElementById('newCustPhone').value.trim();
+            if (!name || !phone) { toast("VUI LÒNG NHẬP ĐỦ THÔNG TIN", "warning"); return; }
+
+            // CHECK TRÙNG SĐT trước khi tạo
+            try {
+                const checkRes = await fetch(`/api/pos/customers/search?q=${phone}`);
+                const existing = await checkRes.json();
+                const duplicate = existing.find(c => c.soDienThoai === phone);
+                if (duplicate) {
+                    toast(`SĐT ĐÃ TỒN TẠI: ${duplicate.hoTen}`, "warning");
+                    return;
+                }
+            } catch (e) { toast("LỖI KIỂM TRA SĐT", "error"); return; }
+
+            const res = await fetch('/api/pos/customers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ hoTen: name, soDienThoai: phone })
+            });
+            if (res.ok) {
+                const kh = await res.json();
+                this.selectCustomer(kh.hoTen, kh.soDienThoai, kh.id);
+                toast("ĐÃ THÊM KHÁCH HÀNG", "success");
+            } else {
+                toast("LỖI KHI THÊM KHÁCH", "error");
+            }
+        },
+
+        selectApp: function(el) {
+            // Bỏ chọn tất cả, chọn cái được click
+            el.closest('div').querySelectorAll('.payment-option')
+                .forEach(btn => btn.classList.remove('selected'));
+            el.classList.add('selected');
+        },
+
+        // Nút swap trên avatar — toggle inline search
+        toggleCustomerSearch: function() {
+            const box = document.getElementById('inlineCustomerSearch');
+            const isHidden = box.style.display === 'none';
+            box.style.display = isHidden ? 'block' : 'none';
+            if (isHidden) {
+                box.querySelector('input').focus();
+                document.getElementById('inlineSearchResults').innerHTML =
+                    '<div style="padding:8px 12px; color:#999; font-size:11px;">Nhập để tìm kiếm...</div>';
+            }
+        },
+
+// Tìm kiếm trong inline dropdown
+        inlineSearchCustomer: async function(val) {
+            const box = document.getElementById('inlineSearchResults');
+            if (val.length < 2) {
+                box.innerHTML = '<div style="padding:8px 12px; color:#999; font-size:11px;">Nhập để tìm kiếm...</div>';
+                return;
+            }
+            const res = await fetch(`/api/pos/customers/search?q=${val}`);
+            const data = await res.json();
+            if (data.length === 0) {
+                box.innerHTML = '<div style="padding:8px 12px; color:#999; font-size:11px;">Không tìm thấy</div>';
+                return;
+            }
+            box.innerHTML = data.map(c => `
+        <div style="padding:8px 12px; border-bottom:1px solid #eee; cursor:pointer;"
+             onmouseover="this.style.background='#f4f4f5'" onmouseout="this.style.background=''"
+             onclick="PosApp.selectCustomerInline('${c.hoTen}', '${c.soDienThoai}', ${c.id})">
+            <div style="font-weight:700; font-size:12px;">${c.hoTen.toUpperCase()}</div>
+            <div style="font-size:11px; color:#666;">${c.soDienThoai}</div>
+        </div>`).join('');
+        },
+
+// Chọn từ inline search
+        selectCustomerInline: function(name, phone, id) {
+            const inv = this.getCurrentInvoice();
+            if (!inv) { toast("VUI LÒNG TẠO HÓA ĐƠN TRƯỚC", "warning"); return; }
+            inv.customer = name; inv.phone = phone; inv.customerId = id;
+            this.saveState();
+            this.renderTabs();
+            document.getElementById('inlineCustomerSearch').style.display = 'none';
+            toast(`ĐÃ CHỌN: ${name}`, "success");
+        },
+
+// Reset về khách vãng lai
+        resetCustomer: function() {
+            const inv = this.getCurrentInvoice();
+            if (!inv) return;
+            inv.customer = 'KHÁCH VÃNG LAI';
+            inv.phone = '';
+            inv.customerId = null;
+            this.saveState();
+            this.renderTabs();
+            document.getElementById('inlineCustomerSearch').style.display = 'none';
+            toast("ĐÃ CHUYỂN VỀ KHÁCH VÃNG LAI", "success");
+        },
     };
+
     window.PosApp = PosApp;
-    window.onload = function () {
-        PosApp.init();
-    }
+    window.onload = () => PosApp.init();
+
 </script>
 </body>
 </html>

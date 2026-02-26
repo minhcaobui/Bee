@@ -566,16 +566,23 @@
 
                 document.getElementById('bMa').textContent = item.ma;
 
-                // --- FIX LỖI INVALID DATE BẰNG HÀM XỬ LÝ SIÊU CẤP ---
+                // --- HÀM FIX DATE SIÊU CẤP ---
                 const fmt = (d) => {
-                    if (!d) return 'N/A'; // Nếu DB trả về null thì hiện N/A
-                    // Nếu Spring Boot trả về dạng mảng [Năm, Tháng, Ngày, Giờ, Phút...]
+                    if (!d) return '---';
+
+                    // Nếu d là chuỗi (do đã dùng @JsonFormat ở Backend)
+                    if (typeof d === 'string') {
+                        // Thay '-' bằng '/' để trình duyệt nào cũng đọc được (đặc biệt là Safari)
+                        const dateObj = new Date(d.replace(/-/g, '/'));
+                        return isNaN(dateObj.getTime()) ? d : dateObj.toLocaleString('vi-VN');
+                    }
+
+                    // Đề phòng trường hợp nó vẫn trả về mảng số
                     if (Array.isArray(d)) {
-                        // Lưu ý: Tháng trong JS bắt đầu từ 0 (Tháng 1 = 0), nên phải d[1] - 1
                         const dateObj = new Date(d[0], d[1] - 1, d[2], d[3] || 0, d[4] || 0, d[5] || 0);
                         return dateObj.toLocaleString('vi-VN');
                     }
-                    // Nếu là chuỗi ISO (như 2026-02-25T14:30:00) thì dùng như cũ
+
                     return new Date(d).toLocaleString('vi-VN');
                 };
 
