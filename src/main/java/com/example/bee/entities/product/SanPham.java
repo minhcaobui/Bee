@@ -3,6 +3,7 @@ package com.example.bee.entities.product;
 import com.example.bee.entities.catalog.ChatLieu;
 import com.example.bee.entities.catalog.DanhMuc;
 import com.example.bee.entities.catalog.Hang;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -37,10 +38,14 @@ public class SanPham {
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String moTa;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "ngay_tao", updatable = false)
-    private Date ngayTao = new Date();
+    private Date ngayTao;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "ngay_sua")
     private Date ngaySua;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -69,11 +74,11 @@ public class SanPham {
 
     @PrePersist
     public void prePersist() {
-        if (this.ngayTao == null) this.ngayTao = new Date();
+        this.ngayTao = new Date(); // Khi lưu lần đầu thì gán ngày tạo
     }
 
     @PreUpdate
     public void preUpdate() {
-        this.ngaySua = new Date();
+        this.ngaySua = new Date(); // Khi cập nhật thì gán ngày sửa
     }
 }

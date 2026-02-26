@@ -7,6 +7,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Optional;
+
 @Repository
 public interface KhachHangRepository extends JpaRepository<KhachHang, Integer> {
     boolean existsByMaIgnoreCase(String ma);
@@ -21,4 +24,8 @@ public interface KhachHangRepository extends JpaRepository<KhachHang, Integer> {
             "(:q IS NULL OR k.hoTen LIKE %:q% OR k.soDienThoai LIKE %:q% OR k.email LIKE %:q% OR k.ma LIKE %:q%) " +
             "AND (:trangThai IS NULL OR k.trangThai = :trangThai)")
     Page<KhachHang> search(String q, Boolean trangThai, Pageable pageable);
+
+    Optional<KhachHang> findBySoDienThoai(String sdt);
+
+    List<KhachHang> findBySoDienThoaiContainingOrHoTenContaining(String q, String q1);
 }
