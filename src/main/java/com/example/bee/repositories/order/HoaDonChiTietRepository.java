@@ -2,13 +2,22 @@ package com.example.bee.repositories.order;
 
 import com.example.bee.entities.order.HoaDonChiTiet;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
 public interface HoaDonChiTietRepository extends JpaRepository<HoaDonChiTiet, Integer> {
-    List<HoaDonChiTiet> findByHoaDonId(Integer hoaDonId);
+
+    @Query("SELECT ct FROM HoaDonChiTiet ct " +
+            "JOIN FETCH ct.sanPhamChiTiet spct " +
+            "JOIN FETCH spct.sanPham " +
+            "JOIN FETCH spct.mauSac " +
+            "JOIN FETCH spct.kichThuoc " +
+            "WHERE ct.hoaDon.id = :idHoaDon")
+    List<HoaDonChiTiet> findByHoaDonId(Integer idHoaDon);
 
     void deleteByHoaDonId(Integer id);
+
 }

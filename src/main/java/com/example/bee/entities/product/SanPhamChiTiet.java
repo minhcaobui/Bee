@@ -47,4 +47,7 @@ public class SanPhamChiTiet {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_kich_thuoc", nullable = false)
     private KichThuoc kichThuoc;
+
+    @jakarta.persistence.Transient
+    private BigDecimal giaSauKhuyenMai;
 }

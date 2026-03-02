@@ -69,24 +69,24 @@ async function loadModule(moduleName) {
             title = 'BÁN HÀNG TẠI QUẦY';
             break;
 
+        case 'orders':
+            url = '/orders';
+            title = 'QUẢN LÝ HÓA ĐƠN';
+            break;
+
         case 'catalogs':
             url = '/catalogs';
             title = 'QUẢN LÝ THUỘC TÍNH';
             break;
 
         case 'products':
-            url = '/products'; // Code cũ bạn để có .html
+            url = '/products';
             title = 'QUẢN LÝ SẢN PHẨM';
             break;
 
         case 'promotions':
             url = '/promotions';
             title = 'QUẢN LÝ KHUYẾN MÃI';
-            break;
-
-        case 'orders':
-            url = '/orders.html';
-            title = 'QUẢN LÝ ĐƠN HÀNG';
             break;
 
         case 'customers':
@@ -100,7 +100,7 @@ async function loadModule(moduleName) {
             break;
 
         default:
-            window.hideLoading(); // Tắt mèo nếu không tìm thấy module
+            window.hideLoading();
             return;
     }
 
@@ -171,11 +171,18 @@ function executeScripts(container, moduleName) {
                 console.warn("Chưa tìm thấy CatalogApp");
             }
         }
+        if (moduleName === 'orders') {
+            if (typeof window.OrderApp !== 'undefined') {
+                window.OrderApp.init();
+            } else {
+                console.warn("Chưa tìm thấy OrderApp");
+            }
+        }
         else if (moduleName === 'products') {
             if (typeof window.initProducts !== 'undefined') {
                 window.initProducts();
             } else {
-                console.warn("⚠️ Không tìm thấy hàm window.initProducts");
+                console.warn("Chưa tìm thấy ProductApp");
             }
         }
         else if (moduleName === 'promotions') {

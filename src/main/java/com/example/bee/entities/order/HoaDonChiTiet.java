@@ -4,6 +4,8 @@ import com.example.bee.entities.product.SanPhamChiTiet;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "hoa_don_chi_tiet")
 @Getter @Setter
@@ -13,7 +15,7 @@ public class HoaDonChiTiet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private Double giaTien;
+    private BigDecimal giaTien;
 
     @Column(nullable = false)
     private Integer soLuong;
