@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>BEE ADMIN - QUẢN LÝ HÓA ĐƠN</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --black: #000; --white: #fff; --gray-100: #f4f4f5; --gray-200: #e4e4e7; --gray-300: #d4d4d8; --font-size: 12.5px; }
+        body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--black); font-size: var(--font-size); line-height: 1.4; }
+        .container { max-width: 100%; padding: 20px 30px; }
+
+        .actions-bar { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--gray-200); margin-bottom: 20px; padding-bottom: 0; }
+        .tabs { display: flex; gap: 30px; margin-bottom: 0; border: none; }
+        .tab { font-size: 12.5px; font-weight: 700; color: #888; padding: 0 0 12px 0; cursor: pointer; text-transform: uppercase; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
+        .tab.active { color: #000; border-bottom-color: #000; }
+
+        .btn { font-size: 11px; font-weight: 800; text-transform: uppercase; height: 34px !important; padding: 0 16px !important; background: #000; color: #fff; border: 1px solid #000; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 2px; line-height: 1; }
+        .btn-secondary { background: #fff; color: #000; border: 1px solid #ccc; }
+        .btn-icon { width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--gray-200); background: #fff; cursor: pointer; border-radius: 2px; margin-left: 4px; }
+
+        .table-wrapper { border: 1px solid var(--gray-200); width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        thead th { text-align: left; padding: 10px 15px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #666; background: #fafafa; border-bottom: 1px solid var(--gray-200); }
+        tbody td { padding: 8px 15px; border-bottom: 1px solid var(--gray-200); font-size: 12.5px; }
+
+        .badge-type { font-size: 10px; padding: 2px 6px; border-radius: 2px; font-weight: 800; text-transform: uppercase; }
+        .type-pos { background: #e0f2fe; color: #0369a1; }
+        .type-online { background: #fef3c7; color: #92400e; }
+
+        /* DRAWER */
+        .drawer { position: fixed; top: 0; right: -900px; width: 900px; height: 100vh; background: #f4f4f5; border-left: 1px solid var(--gray-200); z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -5px 0 20px rgba(0,0,0,0.1); }
+        .drawer.show { right: 0; }
+        .drawer-header { padding: 15px 20px; background: #fff; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; }
+        .drawer-title { font-size: 14px; font-weight: 800; text-transform: uppercase; margin: 0; }
+        .drawer-body { flex: 1; padding: 20px; overflow-y: auto; }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
+        .overlay.show { display: block; }
+
+        .detail-card { border: 1px solid var(--gray-200); border-radius: 4px; margin-bottom: 15px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .detail-card-header { background: #f8f9fa; padding: 10px 15px; font-size: 12px; font-weight: 800; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; gap: 8px; color: #333; }
+        .detail-card-body { padding: 15px; }
+
+        .timeline-horizontal { display: flex; justify-content: space-between; position: relative; padding: 20px 0 10px 0; }
+        .timeline-horizontal::before { content: ''; position: absolute; top: 35px; left: 10%; right: 10%; height: 2px; background: #007bff; z-index: 1; transition: 0.3s; }
+        .th-step { position: relative; z-index: 2; text-align: center; flex: 1; }
+        .th-icon { width: 32px; height: 32px; background: #007bff; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 16px; border: 4px solid #cce5ff; transition: 0.3s; }
+        .th-step.pending .th-icon { background: #fff; color: #adb5bd; border-color: #e9ecef; }
+        .th-label { font-size: 11px; font-weight: 700; color: #007bff; }
+        .th-step.pending .th-label { color: #888; font-weight: 500; }
+        .th-time { font-size: 10px; color: #888; margin-top: 4px; }
+
+        /* SEARCH SECTION */
+        .search-section { background: #f8f9fa; padding: 18px 20px; border: 1px solid var(--gray-200); border-radius: 4px; margin-bottom: 20px; }
+
+        /* FILTER ROWS */
+        .filter-row-1 { display: grid; gap: 16px; align-items: end; }
+        .filter-row-2 { display: grid; gap: 16px; align-items: end; margin-top: 14px; }
+
+        /* Online: 1 hàng — tìm kiếm rộng, trạng thái, ngày, nút */
+        .filter-row-1.online-mode  { grid-template-columns: 2.5fr 1fr 1.5fr auto; }
+
+        /* Lịch sử hàng 1: 4 ô lọc */
+        .filter-row-1.history-mode { grid-template-columns: 2.5fr 1fr 1fr 1fr; }
+        /* Lịch sử hàng 2: tìm NV + ngày + nút */
+        .filter-row-2.history-mode { grid-template-columns: 1.5fr 2fr auto; }
+
+        .filter-group { display: flex; flex-direction: column; gap: 5px; }
+        .filter-label { font-size: 10px; font-weight: 800; color: #666; text-transform: uppercase; letter-spacing: 0.04em; }
+
+        input[type="text"], input[type="date"], select {
+            height: 34px; padding: 0 10px; border: 1px solid var(--gray-300); border-radius: 2px;
+            font-family: inherit; font-size: 12px; outline: none; width: 100%; background: #fff;
+        }
+        input:focus, select:focus { border-color: #000; }
+
+        /* DATE RANGE */
+        .date-range-wrapper { display: flex; align-items: center; gap: 8px; }
+        .date-sep { font-size: 11px; color: #bbb; flex-shrink: 0; display: none; }
+        .date-to-wrap { display: none; flex: 1; }
+        .date-to-wrap.visible { display: flex; }
+
+        /* NV SEARCH DROPDOWN */
+        .nv-search-wrap { position: relative; }
+        .nv-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid var(--gray-300); border-top: none; border-radius: 0 0 2px 2px; z-index: 100; max-height: 160px; overflow-y: auto; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .nv-dropdown.open { display: block; }
+        .nv-item { padding: 8px 12px; cursor: pointer; font-size: 12px; border-bottom: 1px solid #f0f0f0; }
+        .nv-item:hover { background: #f4f4f5; }
+        .nv-item.selected { font-weight: 700; }
+        .nv-clear { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #999; font-size: 12px; display: none; }
+        .nv-clear.show { display: block; }
+
+        .btn-group-filter { display: flex; gap: 8px; }
+
+        .highlight-order { background-color: #f1f5f9 !important; outline: 1.5px solid #000 !important; animation: subtleBlink 1.2s infinite ease-in-out; }
+        @keyframes subtleBlink { 0%, 100% { background-color: #f1f5f9; } 50% { background-color: #ffffff; } }
+
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="actions-bar">
+        <nav class="tabs">
+            <button class="tab active" onclick="OrderApp.switchTab('don-hang')" id="tabDonHang">
+                <i class="bi bi-box-seam-fill"></i> ĐƠN HÀNG ONLINE
+            </button>
+            <button class="tab" onclick="OrderApp.switchTab('lich-su')" id="tabLichSu">
+                <i class="bi bi-clock-history"></i> LỊCH SỬ HÓA ĐƠN
+            </button>
+        </nav>
+    </div>
+
+    <!-- BỘ LỌC ĐỘNG — renderFilterSection() ghi vào đây -->
+    <section class="search-section" id="filterSection"></section>
+
+    <div class="table-wrapper">
+        <table>
+            <thead></thead>
+            <tbody id="tbody"></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="OrderApp.closeDrawer()"></div>
+<aside class="drawer" id="drawer">
+    <div class="drawer-header">
+        <h3 class="drawer-title">CHI TIẾT ĐƠN HÀNG: <span id="viewMaHD" style="color:#007bff;"></span></h3>
+        <button class="btn-icon" onclick="OrderApp.closeDrawer()" style="border:none;"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="drawer-body" id="drawerBody">
+
+        <div class="detail-card">
+            <div class="detail-card-header"><i class="bi bi-person-fill"></i> Thông tin người dùng</div>
+            <div class="detail-card-body" style="display:flex; justify-content:space-around; font-size:13px; font-weight:700; color:#333;">
+                <div>Khách hàng: <span id="viewKhachHang" style="font-weight:500;"></span></div>
+                <div>Nhân viên phụ trách: <span id="viewNhanVien" style="font-weight:500;"></span></div>
+            </div>
+        </div>
+
+        <div class="detail-card">
+            <div class="detail-card-header"><i class="bi bi-box-seam"></i> Danh sách sản phẩm</div>
+            <div class="detail-card-body">
+                <div id="viewProductList" style="border:1px solid #eee; border-radius:4px; margin-bottom:15px; overflow-x:auto;"></div>
+                <div id="viewSummaryBox" style="font-size:12px; line-height:2.2; max-width:320px; float:right;"></div>
+                <div style="clear:both;"></div>
+            </div>
+        </div>
+
+        <div class="detail-card" id="cardTimeline">
+            <div class="detail-card-header"><i class="bi bi-list-nested"></i> Trạng thái đơn hàng</div>
+            <div class="detail-card-body">
+                <div class="timeline-horizontal" id="timeline"></div>
+            </div>
+        </div>
+
+        <div class="detail-card">
+            <div class="detail-card-header"><i class="bi bi-info-circle"></i> Thông tin đơn hàng</div>
+            <div class="detail-card-body" style="display:grid; grid-template-columns:1fr 1fr; gap:20px; font-size:13px; line-height:1.8;">
+                <div>
+                    <div><span style="color:#666;">Ngày tạo:</span> <span id="viewNgayTao" style="font-weight:600;"></span></div>
+                    <div><span style="color:#666;">Trạng thái hệ thống:</span> <strong id="viewTrangThaiText"></strong></div>
+                </div>
+                <div>
+                    <div><span style="color:#666;">Địa chỉ nhận:</span> <span id="viewDiaChi" style="font-weight:600;"></span></div>
+                    <div><span style="color:#666;">Loại hóa đơn:</span> <span id="viewLoaiDon" style="font-weight:600;"></span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-card" id="cardActions">
+            <div class="detail-card-header"><i class="bi bi-pencil-square"></i> Cập nhật trạng thái</div>
+            <div class="detail-card-body" id="drawerFooter" style="display:flex; gap:10px;"></div>
+        </div>
+
+    </div>
+</aside>
+
+<script>
+    const formatVNTime = (dateStr) => {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateStr;
+        const pad = n => n < 10 ? '0' + n : n;
+        return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
+
+    const OrderApp = {
+        state: {
+            activeTab: 'don-hang',
+            q: '', statusId: '', loai: '', pttt: '',
+            nhanVienId: '', dateFrom: '', dateTo: ''
+        },
+
+        _nvList: [],
+        _nvSelectedId: null,
+        _statusList: [],
+
+        // =============================================
+        // RENDER BỘ LỌC ĐỘNG THEO TAB
+        // =============================================
+        renderFilterSection: function() {
+            const section = document.getElementById('filterSection');
+            const isHistory = this.state.activeTab === 'lich-su';
+
+            // Phần date range dùng chung — tái sử dụng HTML
+            const dateRangeHtml = `
+                <div class="filter-group">
+                    <label class="filter-label">Khoảng ngày tạo</label>
+                    <div class="date-range-wrapper">
+                        <input type="date" id="dateFrom" style="flex:1;" onchange="OrderApp.handleDateFromChange()">
+                        <span class="date-sep" id="dateSep">→</span>
+                        <div class="date-to-wrap" id="dateToWrap">
+                            <input type="date" id="dateTo" style="width:100%;" onchange="OrderApp.handleFilterChange()">
+                        </div>
+                    </div>
+                </div>`;
+
+            const resetBtnHtml = `
+                <div class="btn-group-filter">
+                    <button class="btn btn-secondary" onclick="OrderApp.resetFilters()">
+                        <i class="bi bi-arrow-counterclockwise"></i> LÀM MỚI
+                    </button>
+                </div>`;
+
+            if (!isHistory) {
+                // ---- TAB ĐƠN HÀNG ONLINE: 1 hàng ----
+                section.innerHTML = `
+                    <div class="filter-row-1 online-mode">
+                        <div class="filter-group">
+                            <label class="filter-label">Tìm kiếm</label>
+                            <div style="position:relative;">
+                                <i class="bi bi-search" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#999; font-size:12px;"></i>
+                                <input type="text" id="search" placeholder="Mã đơn, tên KH, SĐT, email..."
+                                    style="padding-left:32px;" oninput="OrderApp.handleSearch(this.value)">
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Trạng thái</label>
+                            <select id="filterStatus" onchange="OrderApp.handleFilterChange()">
+                                <option value="">Tất cả</option>
+                            </select>
+                        </div>
+                        ${dateRangeHtml}
+                        ${resetBtnHtml}
+                    </div>`;
+            } else {
+                // ---- TAB LỊCH SỬ HÓA ĐƠN: 2 hàng ----
+                section.innerHTML = `
+                    <div class="filter-row-1 history-mode">
+                        <div class="filter-group">
+                            <label class="filter-label">Tìm kiếm</label>
+                            <div style="position:relative;">
+                                <i class="bi bi-search" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#999; font-size:12px;"></i>
+                                <input type="text" id="search" placeholder="Mã đơn, tên KH, SĐT, email..."
+                                    style="padding-left:32px;" oninput="OrderApp.handleSearch(this.value)">
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Trạng thái</label>
+                            <select id="filterStatus" onchange="OrderApp.handleFilterChange()">
+                                <option value="">Tất cả</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Loại hóa đơn</label>
+                            <select id="filterLoai" onchange="OrderApp.handleFilterChange()">
+                                <option value="">Tất cả</option>
+                                <option value="1">Online</option>
+                                <option value="0">Tại quầy</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Phương thức TT</label>
+                            <select id="filterPTTT" onchange="OrderApp.handleFilterChange()">
+                                <option value="">Tất cả</option>
+                                <option value="tien_mat">Tiền mặt</option>
+                                <option value="chuyen_khoan">Chuyển khoản</option>
+                                <option value="momo">MoMo</option>
+                                <option value="vnpay">VNPay</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="filter-row-2 history-mode">
+                        <div class="filter-group">
+                            <label class="filter-label">Tìm nhân viên</label>
+                            <div class="nv-search-wrap">
+                                <input type="text" id="searchNhanVien" placeholder="Nhập tên nhân viên..." autocomplete="off"
+                                    oninput="OrderApp.handleNhanVienSearch(this.value)"
+                                    onfocus="OrderApp.showNhanVienDropdown()"
+                                    onblur="setTimeout(()=>OrderApp.hideNhanVienDropdown(), 200)">
+                                <i class="bi bi-x nv-clear" id="nvClear" onclick="OrderApp.clearNhanVien()"></i>
+                                <div class="nv-dropdown" id="nvDropdown"></div>
+                            </div>
+                        </div>
+                        ${dateRangeHtml}
+                        ${resetBtnHtml}
+                    </div>`;
+            }
+
+            // Đổ options trạng thái vào select vừa render
+            this.populateStatusSelect();
+
+            // Khôi phục giá trị state lên form
+            this.restoreFilterValues();
+        },
+
+        populateStatusSelect: function() {
+            const sel = document.getElementById('filterStatus');
+            if (!sel || !this._statusList.length) return;
+            sel.innerHTML = '<option value="">Tất cả</option>' +
+                this._statusList.map(s => `<option value="${s.id}">${s.ten}</option>`).join('');
+            sel.value = this.state.statusId;
+        },
+
+        restoreFilterValues: function() {
+            const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+            setVal('search',     this.state.q);
+            setVal('filterLoai', this.state.loai);
+            setVal('filterPTTT', this.state.pttt);
+            setVal('dateFrom',   this.state.dateFrom);
+            setVal('dateTo',     this.state.dateTo);
+
+            if (this.state.dateFrom) {
+                const sep  = document.getElementById('dateSep');
+                const wrap = document.getElementById('dateToWrap');
+                if (sep)  sep.style.display = 'block';
+                if (wrap) wrap.classList.add('visible');
+            }
+
+            if (this.state.activeTab === 'lich-su' && this._nvSelectedId) {
+                const found = this._nvList.find(n => n.id === this._nvSelectedId);
+                if (found) {
+                    const inp = document.getElementById('searchNhanVien');
+                    const clr = document.getElementById('nvClear');
+                    if (inp) inp.value = found.hoTen;
+                    if (clr) clr.classList.add('show');
+                }
+            }
+        },
+
+        // =============================================
+        // INIT
+        // =============================================
+        init: async function() {
+            await this.loadFilterOptions();
+            this.renderFilterSection();
+            this.renderHeader();
+            this.loadData();
+        },
+
+        loadFilterOptions: async function() {
+            try {
+                const [resStatus, resNv] = await Promise.all([
+                    fetch('/api/trang-thai-hoa-don'),
+                    fetch('/api/nhan-vien/active')
+                ]);
+                if (resStatus.ok) this._statusList = await resStatus.json();
+                if (resNv.ok)     this._nvList     = await resNv.json();
+            } catch (e) {
+                console.error("Lỗi load bộ lọc:", e);
+            }
+        },
+
+        // =============================================
+        // FILTER HANDLERS
+        // =============================================
+        handleFilterChange: function() {
+            this.state.statusId = document.getElementById('filterStatus')?.value || '';
+            this.state.loai     = document.getElementById('filterLoai')?.value   || '';
+            this.state.pttt     = document.getElementById('filterPTTT')?.value   || '';
+            this.state.dateFrom = document.getElementById('dateFrom')?.value     || '';
+            this.state.dateTo   = document.getElementById('dateTo')?.value       || '';
+            this.loadData();
+        },
+
+        handleSearch: function(val) {
+            clearTimeout(this.searchTimeout);
+            this.searchTimeout = setTimeout(() => {
+                this.state.q = val.trim();
+                this.loadData();
+            }, 400);
+        },
+
+        handleDateFromChange: function() {
+            const val  = document.getElementById('dateFrom').value;
+            const sep  = document.getElementById('dateSep');
+            const wrap = document.getElementById('dateToWrap');
+            if (val) {
+                sep.style.display = 'block';
+                wrap.classList.add('visible');
+            } else {
+                sep.style.display = 'none';
+                wrap.classList.remove('visible');
+                document.getElementById('dateTo').value = '';
+            }
+            this.handleFilterChange();
+        },
+
+        // resetFilters: function() {
+        //     this.state = {
+        //         activeTab: this.state.activeTab,
+        //         q: '', statusId: '', loai: '', pttt: '',
+        //         nhanVienId: '', dateFrom: '', dateTo: ''
+        //     };
+        //     this._nvSelectedId = null;
+        //     this.renderFilterSection();
+        //     this.loadData();
+        //     if (typeof toast === 'function') toast("Đã làm mới bộ lọc", "success");
+        // },
+
+        // =============================================
+        // NHÂN VIÊN SEARCH
+        // =============================================
+        handleNhanVienSearch: function(val) {
+            clearTimeout(this._nvTimeout);
+            this._nvTimeout = setTimeout(() => this.renderNvDropdown(val.trim()), 200);
+            if (!val.trim()) {
+                this._nvSelectedId    = null;
+                this.state.nhanVienId = '';
+                document.getElementById('nvClear')?.classList.remove('show');
+            }
+        },
+
+        renderNvDropdown: function(q) {
+            const dd = document.getElementById('nvDropdown');
+            if (!dd) return;
+            const filtered = q
+                ? this._nvList.filter(n => n.hoTen.toLowerCase().includes(q.toLowerCase()))
+                : this._nvList;
+            dd.innerHTML = filtered.length
+                ? filtered.map(n =>
+                    `<div class="nv-item ${this._nvSelectedId == n.id ? 'selected' : ''}"
+                        onmousedown="OrderApp.selectNhanVien(${n.id}, '${n.hoTen.replace(/'/g,"\\'")}')">
+                        <i class="bi bi-person" style="margin-right:6px; color:#666;"></i>${n.hoTen}
+                    </div>`).join('')
+                : `<div class="nv-item" style="color:#aaa; cursor:default;">Không tìm thấy</div>`;
+            dd.classList.add('open');
+        },
+
+        showNhanVienDropdown: function() {
+            this.renderNvDropdown(document.getElementById('searchNhanVien')?.value.trim() || '');
+        },
+
+        hideNhanVienDropdown: function() {
+            document.getElementById('nvDropdown')?.classList.remove('open');
+        },
+
+        selectNhanVien: function(id, name) {
+            this._nvSelectedId    = id;
+            this.state.nhanVienId = id;
+            const inp = document.getElementById('searchNhanVien');
+            const clr = document.getElementById('nvClear');
+            const dd  = document.getElementById('nvDropdown');
+            if (inp) inp.value = name;
+            if (clr) clr.classList.add('show');
+            if (dd)  dd.classList.remove('open');
+            this.loadData();
+        },
+
+        clearNhanVien: function() {
+            this._nvSelectedId    = null;
+            this.state.nhanVienId = '';
+            const inp = document.getElementById('searchNhanVien');
+            const clr = document.getElementById('nvClear');
+            if (inp) inp.value = '';
+            if (clr) clr.classList.remove('show');
+            this.loadData();
+        },
+
+        // =============================================
+        // SWITCH TAB
+        // =============================================
+        switchTab: function(tab) {
+            this.state.activeTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tab === 'don-hang' ? 'tabDonHang' : 'tabLichSu').classList.add('active');
+
+            // Reset toàn bộ filter khi đổi tab
+            this.state.q = ''; this.state.statusId = ''; this.state.loai = '';
+            this.state.pttt = ''; this.state.nhanVienId = ''; this.state.dateFrom = ''; this.state.dateTo = '';
+            this._nvSelectedId = null;
+
+            this.renderFilterSection();
+            this.renderHeader();
+            this.loadData();
+        },
+
+        // =============================================
+        // TABLE
+        // =============================================
+        renderHeader: function() {
+            const thead = document.querySelector('thead');
+            if (this.state.activeTab === 'don-hang') {
+                thead.innerHTML = `<tr>
+                    <th style="width:50px; text-align:center;">STT</th>
+                    <th>MÃ HÓA ĐƠN</th>
+                    <th>KHÁCH HÀNG</th>
+                    <th>TỔNG TIỀN</th>
+                    <th>LOẠI</th>
+                    <th>NGÀY TẠO</th>
+                    <th style="text-align:center">TRẠNG THÁI</th>
+                    <th style="text-align:right">THAO TÁC</th>
+                </tr>`;
+            } else {
+                thead.innerHTML = `<tr>
+                    <th style="width:50px; text-align:center;">STT</th>
+                    <th>MÃ ĐƠN</th>
+                    <th>KHÁCH HÀNG</th>
+                    <th>NHÂN VIÊN</th>
+                    <th>TỔNG TIỀN</th>
+                    <th>PHƯƠNG THỨC TT</th>
+                    <th>LOẠI HÓA ĐƠN</th>
+                    <th>NGÀY TẠO</th>
+                    <th style="text-align:center">TRẠNG THÁI</th>
+                    <th style="text-align:right">THAO TÁC</th>
+                </tr>`;
+            }
+        },
+
+        loadData: async function() {
+            try {
+                if (!document.querySelector('thead').innerHTML.trim()) this.renderHeader();
+                const endpoint = this.state.activeTab === 'don-hang'
+                    ? '/api/hoa-don/don-hang'
+                    : '/api/hoa-don/lich-su';
+
+                const params = new URLSearchParams({
+                    q:                   this.state.q,
+                    statusId:            this.state.statusId,
+                    nhanVienId:          this.state.nhanVienId,
+                    loaiHoaDon:          this.state.loai,
+                    phuongThucThanhToan: this.state.pttt,
+                    startDate:           this.state.dateFrom,
+                    endDate:             this.state.dateTo
+                });
+
+                const res = await fetch(`${endpoint}?${params.toString()}`);
+                if (!res.ok) throw new Error("Lỗi fetch data");
+                const data = await res.json();
+                this.renderTable(data);
+            } catch (error) {
+                console.error(error);
+            }
+        },
+
+        renderTable: function(list) {
+            const tbody     = document.getElementById('tbody');
+            const isHistory = this.state.activeTab === 'lich-su';
+            const cols      = isHistory ? 10 : 8;
+            const highlightId = sessionStorage.getItem('highlightOrderId');
+
+            if (!list || list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${cols}" style="text-align:center; padding:30px; color:#888;">Không có dữ liệu</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map((hd, idx) => {
+                const tenKhach    = hd.khachHang ? hd.khachHang.hoTen : 'Khách vãng lai';
+                const tenNhanVien = hd.nhanVien  ? hd.nhanVien.hoTen  : '<span style="color:#aaa; font-style:italic;">Hệ thống</span>';
+                const hinhThucTT  = hd.phuongThucThanhToan || (hd.loaiHoaDon === 0 ? 'Tiền mặt' : 'Chuyển khoản');
+                const ngayTaoVN   = formatVNTime(hd.ngayTao);
+                const trangThaiTen = hd.trangThaiHoaDon ? hd.trangThaiHoaDon.ten : 'N/A';
+                const isHighlight  = highlightId && Number(highlightId) === Number(hd.id);
+
+                let trContent = `
+                    <td style="text-align:center;">${idx + 1}</td>
+                    <td style="font-weight:800;">${hd.ma}</td>
+                    <td>${tenKhach}</td>`;
+
+                if (isHistory) trContent += `<td style="font-weight:600;">${tenNhanVien}</td>`;
+
+                trContent += `<td style="font-weight:700; color:#d63384;">${(hd.giaTong || 0).toLocaleString('vi-VN')} đ</td>`;
+
+                if (isHistory) trContent += `<td><span class="badge-type" style="background:#e0e7ff; color:#3730a3;">${hinhThucTT}</span></td>`;
+
+                trContent += `
+                    <td><span class="badge-type ${hd.loaiHoaDon === 0 ? 'type-pos' : 'type-online'}">${hd.loaiHoaDon === 0 ? 'TẠI QUẦY' : 'ONLINE'}</span></td>
+                    <td style="font-size:11px;">${ngayTaoVN}</td>
+                    <td style="text-align:center; font-weight:700; font-size:11px;">${trangThaiTen}</td>
+                    <td style="text-align:right;">
+                        <button class="btn-icon" title="Xem chi tiết" onclick="OrderApp.openDetail(${hd.id})"><i class="bi bi-eye"></i></button>
+                    </td>`;
+
+                return `<tr class="${isHighlight ? 'highlight-order' : ''}" data-id="${hd.id}">${trContent}</tr>`;
+            }).join('');
+
+            if (highlightId) {
+                const targetRow = document.querySelector('.highlight-order');
+                if (targetRow) {
+                    targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    const removeHighlight = () => {
+                        targetRow.classList.remove('highlight-order');
+                        sessionStorage.removeItem('highlightOrderId');
+                        window.removeEventListener('click', removeHighlight);
+                    };
+                    setTimeout(() => window.addEventListener('click', removeHighlight), 500);
+                }
+            }
+        },
+
+        // =============================================
+        // DRAWER DETAIL
+        // =============================================
+        openDetail: async function(id) {
+            if (window.showLoading) window.showLoading();
+            try {
+                const res = await fetch(`/api/hoa-don/${id}`);
+                if (!res.ok) throw new Error("Lỗi fetch chi tiết");
+                const hd = await res.json();
+
+                document.getElementById('viewMaHD').innerText        = hd.ma;
+                document.getElementById('viewKhachHang').innerText   = hd.tenKhachHang || 'Khách vãng lai';
+                document.getElementById('viewNhanVien').innerHTML     = hd.tenNhanVien  || 'Hệ thống';
+                document.getElementById('viewNgayTao').innerText      = hd.ngayTao || '';
+                document.getElementById('viewTrangThaiText').innerText = (hd.trangThaiTen || '').toUpperCase();
+                document.getElementById('viewDiaChi').innerText       = hd.diaChiGiaoHang || 'Nhận hàng tại cửa hàng';
+                document.getElementById('viewLoaiDon').innerText      = hd.loaiHoaDon === 0 ? 'Hóa đơn Tại quầy' : 'Đơn hàng Online';
+
+                const listSP = hd.chiTiets || [];
+                let productHtml = listSP.length
+                    ? listSP.map(item => {
+                        const giaGoc = Number(item.donGia) || 0;
+                        const giaBan = Number(item.giaBan) || 0;
+                        let priceDisplay = `<span style="color:#dc2626; font-weight:700;">${giaBan.toLocaleString('vi-VN')} VND</span>`;
+                        if (giaGoc > giaBan) priceDisplay += ` <span style="text-decoration:line-through; color:#999; font-size:11px; margin-left:8px;">-${giaGoc.toLocaleString('vi-VN')} VND</span>`;
+                        return `
+                        <div style="display:flex; align-items:flex-start; padding:12px 0; border-bottom:1px dashed #eee;">
+                            <img src="${item.hinhAnh || 'https://placehold.co/60x60'}" onerror="this.src='https://placehold.co/60x60'"
+                                style="width:60px; height:60px; object-fit:cover; border-radius:4px; margin-right:12px; border:1px solid #f0f0f0;">
+                            <div style="flex:1; line-height:1.6;">
+                                <div style="font-weight:700; color:#111; font-size:13px;">${item.tenSanPham}</div>
+                                <div style="color:#666; font-size:12px;">${item.sku || 'N/A'} | ${item.thuocTinh} <span style="font-weight:700; color:#000;">x${item.soLuong}</span></div>
+                                <div style="font-size:12.5px;">Đơn giá: ${priceDisplay}</div>
+                            </div>
+                        </div>`;
+                    }).join('')
+                    : `<div style="text-align:center; padding:20px; color:#999; border:1px dashed #ccc;">Không có dữ liệu sản phẩm</div>`;
+
+                const pList = document.getElementById('viewProductList');
+                pList.innerHTML = productHtml;
+                pList.style.border  = 'none';
+                pList.style.padding = '0';
+
+                const sBox = document.getElementById('viewSummaryBox');
+                sBox.innerHTML = `
+                    <div style="width:100%; font-size:13px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                            <span>Tiền hàng:</span> <strong style="color:#000;">${Number(hd.tienHang).toLocaleString('vi-VN')} VND</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                            <span>Phí vận chuyển:</span> <strong style="color:#000;">${Number(hd.phiVanChuyen).toLocaleString('vi-VN')} VND</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                            <span>Voucher:</span> <strong style="color:#10b981;">-${Number(hd.tienGiamVoucher).toLocaleString('vi-VN')} VND</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:14px; margin-top:10px; border-top:2px solid #333; padding-top:10px;">
+                            <span style="font-weight:700;">TỔNG THANH TOÁN:</span>
+                            <strong style="color:#007bff; font-size:15px;">${Number(hd.tongTien).toLocaleString('vi-VN')} VND</strong>
+                        </div>
+                    </div>`;
+                sBox.style.float = 'none';
+
+                const isPos = hd.loaiHoaDon === 0;
+                document.getElementById('cardTimeline').style.display = isPos ? 'none' : 'block';
+                document.getElementById('cardActions').style.display  = isPos ? 'none' : 'block';
+                if (!isPos) {
+                    this.renderTimeline(hd.trangThaiMa);
+                    this.renderActions(hd);
+                }
+
+                document.getElementById('drawer').classList.add('show');
+                document.getElementById('overlay').classList.add('show');
+            } catch (err) {
+                console.error("Lỗi:", err);
+                if (typeof toast === 'function') toast("Lỗi tải chi tiết đơn hàng", "error");
+            } finally {
+                if (window.hideLoading) window.hideLoading();
+            }
+        },
+
+        renderTimeline: function(currentMa) {
+            const steps = [
+                { ma: 'CHO_XAC_NHAN', icon: 'bi-wallet2',     label: 'Chờ xác nhận' },
+                { ma: 'CHO_GIAO',     icon: 'bi-box-seam',    label: 'Đang chuẩn bị' },
+                { ma: 'DANG_GIAO',    icon: 'bi-truck',        label: 'Đang giao hàng' },
+                { ma: 'HOAN_THANH',   icon: 'bi-check-circle', label: 'Hoàn thành' }
+            ];
+            let html = '';
+            if (currentMa === 'DA_HUY') {
+                html = steps.map(s => `
+                    <div class="th-step pending">
+                        <div class="th-icon"><i class="${s.icon}"></i></div>
+                        <div class="th-label">${s.label}</div>
+                    </div>`).join('');
+                html += `
+                    <div class="th-step">
+                        <div class="th-icon" style="background:#dc3545; border-color:#f8d7da;"><i class="bi bi-x-lg"></i></div>
+                        <div class="th-label" style="color:#dc3545;">ĐÃ HỦY</div>
+                    </div>`;
+            } else {
+                let isPassed = true;
+                html = steps.map(s => {
+                    let cls = '', timeStr = '';
+                    if (s.ma === currentMa) { cls = '';        timeStr = 'Đang xử lý'; isPassed = false; }
+                    else if (isPassed)      { cls = '';        timeStr = 'Đã hoàn tất'; }
+                    else                    { cls = 'pending'; timeStr = ''; }
+                    return `
+                        <div class="th-step ${cls}">
+                            <div class="th-icon"><i class="${s.icon}"></i></div>
+                            <div class="th-label">${s.label}</div>
+                            <div class="th-time">${timeStr}</div>
+                        </div>`;
+                }).join('');
+            }
+            document.getElementById('timeline').innerHTML = html;
+        },
+
+        renderActions: function(hd) {
+            const footer    = document.getElementById('drawerFooter');
+            footer.innerHTML = '';
+            const currentMa  = hd.trangThaiMa;
+            if (currentMa === 'DA_HUY' || currentMa === 'HOAN_THANH') {
+                footer.innerHTML = `<div style="width:100%; text-align:center; font-weight:700; color:#888; padding:10px 0;">Đơn hàng đã đóng, không thể thao tác thêm.</div>`;
+                return;
+            }
+            const btnNext = document.createElement('button');
+            btnNext.className = 'btn';
+            btnNext.style.cssText = 'flex:2; background:#000; color:#fff; height:36px !important;';
+            btnNext.innerHTML = 'XÁC NHẬN BƯỚC TIẾP THEO <i class="bi bi-arrow-right"></i>';
+            btnNext.onclick = () => this.nextStatus(hd.id);
+
+            const btnHuy = document.createElement('button');
+            btnHuy.className = 'btn btn-secondary';
+            btnHuy.style.cssText = 'flex:1; color:#dc3545; border-color:#dc3545; height:36px !important;';
+            btnHuy.innerHTML = '<i class="bi bi-x-lg"></i> HỦY ĐƠN';
+            btnHuy.onclick = () => this.huyDon(hd.id);
+
+            footer.appendChild(btnHuy);
+            footer.appendChild(btnNext);
+        },
+
+        nextStatus: async function(id) {
+            if (!confirm("Xác nhận chuyển đơn hàng sang bước tiếp theo?")) return;
+            try {
+                if (window.showLoading) window.showLoading();
+                const res = await fetch(`/api/hoa-don/${id}/next-status`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ghiChu: "Admin chuyển trạng thái" })
+                });
+                if (!res.ok) throw new Error("Chuyển trạng thái thất bại");
+                if (typeof toast === 'function') toast("Chuyển trạng thái thành công!", "success");
+                this.loadData();
+                this.openDetail(id);
+            } catch (err) {
+                if (typeof toast === 'function') toast(err.message, "error");
+            } finally {
+                if (window.hideLoading) window.hideLoading();
+            }
+        },
+
+        huyDon: async function(id) {
+            const reason = prompt("Nhập lý do hủy đơn hàng:");
+            if (reason === null) return;
+            try {
+                if (window.showLoading) window.showLoading();
+                const res = await fetch(`/api/hoa-don/${id}/huy`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ghiChu: reason || "Admin hủy đơn" })
+                });
+                if (!res.ok) throw new Error("Hủy đơn thất bại");
+                if (typeof toast === 'function') toast("Đã hủy đơn hàng!", "success");
+                this.closeDrawer();
+                this.loadData();
+            } catch (err) {
+                if (typeof toast === 'function') toast(err.message, "error");
+            } finally {
+                if (window.hideLoading) window.hideLoading();
+            }
+        },
+
+        closeDrawer: function() {
+            document.getElementById('drawer').classList.remove('show');
+            document.getElementById('overlay').classList.remove('show');
+        }
+    };
+
+    window.OrderApp = OrderApp;
+    window.initOrders = function() { OrderApp.init(); };
+</script>
+</body>
+</html>

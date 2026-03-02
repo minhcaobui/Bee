@@ -6,6 +6,8 @@ import com.example.bee.entities.promotion.MaGiamGia; // Check lại package ma g
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
@@ -20,10 +22,10 @@ public class HoaDon {
     @Column(unique = true, length = 50)
     private String ma;
 
-    private Double giaTamThoi;
-    private Double phiVanChuyen;
-    private Double giaTriKhuyenMai;
-    private Double giaTong;
+    private BigDecimal giaTamThoi;
+    private BigDecimal phiVanChuyen;
+    private BigDecimal giaTriKhuyenMai;
+    private BigDecimal giaTong;
 
     @Column(name = "ten_nguoi_nhan")
     private String tenNguoiNhan;
@@ -67,7 +69,10 @@ public class HoaDon {
     public void prePersist() {
         this.ngayTao = new Date();
         if (this.loaiHoaDon == null) this.loaiHoaDon = 0;
-        if (this.phiVanChuyen == null) this.phiVanChuyen = 0.0;
-        if (this.giaTriKhuyenMai == null) this.giaTriKhuyenMai = 0.0;
+        if (this.phiVanChuyen == null) this.phiVanChuyen = BigDecimal.ZERO;
+        if (this.giaTriKhuyenMai == null) this.giaTriKhuyenMai = BigDecimal.ZERO;
+
+        if (this.giaTamThoi == null) this.giaTamThoi = BigDecimal.ZERO;
+        if (this.giaTong == null) this.giaTong = BigDecimal.ZERO;
     }
 }

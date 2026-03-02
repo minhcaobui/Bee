@@ -1182,8 +1182,18 @@
                 if (item.qty >= product.soLuong) { toast("VƯỢT QUÁ TỒN KHO", "warning"); return; }
                 item.qty++;
             } else {
+                // Lấy cả giá gốc và giá sau KM
+                const originalPrice = product.giaBan;
                 const price = (product.giaSauKhuyenMai && product.giaSauKhuyenMai < product.giaBan) ? product.giaSauKhuyenMai : product.giaBan;
-                inv.cart.push({ id: product.id, name: product.sanPham.ten, price: price, attr: `${product.mauSac.ten} - ${product.kichThuoc.ten}`, qty: 1 });
+
+                inv.cart.push({
+                    id: product.id,
+                    name: product.sanPham.ten,
+                    originalPrice: originalPrice, // <-- THÊM DÒNG NÀY ĐỂ LƯU GIÁ GỐC
+                    price: price,
+                    attr: `${product.mauSac.ten} - ${product.kichThuoc.ten}`,
+                    qty: 1
+                });
             }
             this.saveState();
             this.renderCart();
@@ -1195,13 +1205,17 @@
             if (!inv || inv.cart.length === 0) { toast("GIỎ HÀNG TRỐNG", "warning"); return; }
             if (!code) { toast("NHẬP MÃ VOUCHER", "warning"); return; }
 
-            const subTotal = inv.cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+            // Tính tiền sau sale để check xem có đủ điều kiện Min Order của Voucher không
+            const subTotal = inv.cart.reduce((sum, i) => sum + ((i.originalPrice || i.price) * i.qty), 0);
+            const saleDiscount = inv.cart.reduce((sum, i) => sum + (((i.originalPrice || i.price) - i.price) * i.qty), 0);
+            const totalAfterSale = subTotal - saleDiscount;
+
             try {
-                const res = await fetch(`/api/pos/vouchers/apply?code=${code}&currentTotal=${subTotal}`);
+                const res = await fetch(`/api/pos/vouchers/apply?code=${code}&currentTotal=${totalAfterSale}`);
                 if (res.ok) {
                     inv.voucher = await res.json();
                     this.saveState();
-                    this.renderCart();
+                    this.renderCart(); // Thằng này gọi updateTotal() nên sẽ update lại số liệu
                     toast("ÁP DỤNG THÀNH CÔNG", "success");
                 } else {
                     toast(await res.text(), "error");
@@ -1209,20 +1223,62 @@
             } catch (e) { toast("LỖI HỆ THỐNG", "error"); }
         },
 
-        updateTotal: function (subTotal) {
+        updateTotal: function () {
             const inv = this.getCurrentInvoice();
-            let discount = 0;
-            if (inv && inv.voucher) {
+            if (!inv) return;
+
+            // 1. Tính Tạm tính (Giá gốc) và Khuyến mãi (Sale SP)
+            let subTotal = 0;     // Tổng giá gốc
+            let saleDiscount = 0; // Tổng tiền giảm do Sale
+
+            inv.cart.forEach(i => {
+                // Ép kiểu tường minh thành Number trước khi tính
+                const giaGoc = Number(i.originalPrice) || Number(i.price);
+                const giaBan = Number(i.price);
+
+                subTotal += (giaGoc * i.qty);
+                saleDiscount += ((giaGoc - giaBan) * i.qty);
+            });
+
+            // 2. LÀM TRÒN SAU KHI CỘNG DỒN:
+            subTotal = Math.round(subTotal);
+            saleDiscount = Math.round(saleDiscount);
+
+            // Tiền sau khi trừ Sale (Dùng để xét điều kiện áp Voucher)
+            let totalAfterSale = subTotal - saleDiscount;
+
+            // 3. Tính Voucher
+            let calcVoucher = 0;
+            if (inv.voucher) {
                 const v = inv.voucher;
-                discount = v.loaiGiamGia === 'PERCENTAGE' ? (subTotal * v.giaTriGiamGia) / 100 : v.giaTriGiamGia;
-                if (v.giaTriGiamGiaToiDa && discount > v.giaTriGiamGiaToiDa) discount = v.giaTriGiamGiaToiDa;
+                const giaTriVoucher = Number(v.giaTriGiamGia);
+
+                calcVoucher = v.loaiGiamGia === 'PERCENTAGE'
+                    ? (totalAfterSale * giaTriVoucher) / 100
+                    : giaTriVoucher;
+
+                if (v.giaTriGiamGiaToiDa) {
+                    const maxGiang = Number(v.giaTriGiamGiaToiDa);
+                    if (calcVoucher > maxGiang) {
+                        calcVoucher = maxGiang;
+                    }
+                }
             }
-            const total = Math.max(0, subTotal - discount);
+            let voucherDiscount = Math.round(calcVoucher);
+            const total = Math.round(Math.max(0, totalAfterSale - voucherDiscount));
+
+            // 5. Đẩy lên UI
             document.getElementById('lblSubTotal').innerText = new Intl.NumberFormat('vi-VN').format(subTotal) + ' ₫';
+
+            // Lấy 2 cái thẻ span màu xanh lá để điền Khuyến mãi và Voucher
             const discountSpans = document.querySelectorAll('.summary-row span[style*="10b981"]');
-            discountSpans[1].innerText = '-' + new Intl.NumberFormat('vi-VN').format(discount) + ' ₫';
+            discountSpans[0].innerText = '-' + new Intl.NumberFormat('vi-VN').format(saleDiscount) + ' ₫';
+            discountSpans[1].innerText = '-' + new Intl.NumberFormat('vi-VN').format(voucherDiscount) + ' ₫';
+
             document.getElementById('lblTotal').innerText = new Intl.NumberFormat('vi-VN').format(total) + ' ₫';
-            document.getElementById('modalTotal').innerText = new Intl.NumberFormat('vi-VN').format(total) + ' ₫';
+
+            const modalTotalEl = document.getElementById('modalTotal');
+            if(modalTotalEl) modalTotalEl.innerText = new Intl.NumberFormat('vi-VN').format(total) + ' ₫';
         },
 
         changeQty: function (id, delta) {
@@ -1261,7 +1317,18 @@
 
         selectCustomer: function (name, phone, id) {
             const inv = this.getCurrentInvoice();
-            inv.customer = name; inv.phone = phone; inv.customerId = id;
+
+            // 1. CHẶN LỖI: Bắt buộc phải có hóa đơn mới cho chọn khách
+            if (!inv) {
+                toast("VUI LÒNG TẠO HÓA ĐƠN TRƯỚC", "warning");
+                return;
+            }
+
+            // 2. Gán khách hàng vào hóa đơn
+            inv.customer = name;
+            inv.phone = phone;
+            inv.customerId = id;
+
             this.saveState();
             this.renderTabs();
             this.closeModal('customerModal');
@@ -1304,6 +1371,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
+
                 if (res.ok) {
                     toast("Thanh toán thành công!", "success");
                     this.invoices = this.invoices.filter(i => i.id !== this.activeInvoiceId);
@@ -1315,7 +1383,13 @@
                     this.renderCart();
                     this.closeModal('payModal');
                 } else {
-                    toast("Thanh toán thất bại. Vui lòng thử lại sau.", "error");
+                    // --- ĐOẠN NÀY ĐỂ ĐỌC LỖI TỪ BACKEND TRẢ VỀ ---
+                    let errorMsg = "Thanh toán thất bại. Vui lòng thử lại sau.";
+                    try {
+                        const errData = await res.json();
+                        errorMsg = errData.message || errorMsg;
+                    } catch (ex) {}
+                    toast(errorMsg, "error");
                 }
             } catch (e) {
                 toast("Lỗi kết nối đến máy chủ. Vui lòng kiểm tra mạng!", "error");
@@ -1388,10 +1462,10 @@
                             <button class="btn-icon" style="width:20px; height:20px;" onclick="PosApp.changeQty(${i.id}, 1)">+</button>
                         </div>
                     </td>
-                    <td style="text-align:right; padding-right: 20px;">${new Intl.NumberFormat('vi-VN').format(i.price * i.qty)}</td>
+                    <td style="text-align:right; padding-right: 20px;">${new Intl.NumberFormat('vi-VN').format(Number(i.price) * Number(i.qty))} ₫</td>
                     <td><i class="bi bi-trash" style="cursor:pointer; color:#ef4444;" onclick="PosApp.changeQty(${i.id}, -999)"></i></td>
                 </tr>`).join('');
-            this.updateTotal(inv.cart.reduce((sum, i) => sum + (i.price * i.qty), 0));
+            this.updateTotal(); // Giờ gọi hàm không cần truyền gì cả, nó tự tính
         },
         openModal: function (id) { document.getElementById(id).classList.add('show'); },
         closeModal: function (id) { document.getElementById(id).classList.remove('show'); },

@@ -4,6 +4,7 @@ import com.example.bee.entities.promotion.MaGiamGia;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -25,4 +26,10 @@ public interface MaGiamGiaRepository extends JpaRepository<MaGiamGia, Integer> {
     boolean existsByMaCodeIgnoreCase(String maCode);
 
     Optional<MaGiamGia> findByMaCode(String code);
+
+    @Modifying
+    @org.springframework.transaction.annotation.Transactional
+    @Query("UPDATE MaGiamGia v SET v.trangThai = false " +
+            "WHERE v.trangThai = true AND (v.ngayKetThuc < :now OR v.luotSuDung >= v.soLuong)")
+    void autoDeactivateExpiredVouchers(@org.springframework.data.repository.query.Param("now") LocalDateTime now);
 }

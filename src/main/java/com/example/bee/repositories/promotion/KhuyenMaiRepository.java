@@ -64,4 +64,11 @@ public interface KhuyenMaiRepository extends JpaRepository<KhuyenMai, Integer> {
     @Query("UPDATE KhuyenMai k SET k.trangThai = false " +
             "WHERE k.trangThai = true AND k.ngayKetThuc < :now")
     void autoDeactivateExpiredPromotions(@Param("now") LocalDateTime now);
+
+    @Query("SELECT km FROM KhuyenMai km JOIN KhuyenMaiSanPham kmsp ON km.id = kmsp.idKhuyenMai " +
+            "WHERE kmsp.idSanPham = :spId " +
+            "AND km.trangThai = true " +
+            "AND km.ngayBatDau <= CURRENT_TIMESTAMP " +
+            "AND km.ngayKetThuc >= CURRENT_TIMESTAMP")
+    List<KhuyenMai> findActiveKhuyenMaiBySanPhamId(@org.springframework.data.repository.query.Param("spId") Integer spId);
 }

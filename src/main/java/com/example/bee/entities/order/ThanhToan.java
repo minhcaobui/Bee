@@ -4,6 +4,8 @@ import com.example.bee.entities.user.NhanVien;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
@@ -20,7 +22,7 @@ public class ThanhToan {
     private HoaDon hoaDon;
 
     @Column(nullable = false)
-    private Double soTien;
+    private BigDecimal soTien;
 
     @Column(nullable = false, length = 50)
     private String phuongThuc; // TIEN_MAT, CHUYEN_KHOAN, VNPAY...

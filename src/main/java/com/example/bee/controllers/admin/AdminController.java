@@ -2,7 +2,6 @@ package com.example.bee.controllers.admin;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 public class AdminController {
@@ -26,6 +25,11 @@ public class AdminController {
         return "admin/sale/pos";
     }
 
+    @GetMapping("/orders")
+    public String orders() {
+        return "admin/order/orders";
+    }
+
     @GetMapping("/promotions")
     public String promotions() {
         return "admin/promotion/promotions";
@@ -40,4 +44,5 @@ public class AdminController {
     public String customers() {
         return "admin/customer/customers";
     }
+
 }

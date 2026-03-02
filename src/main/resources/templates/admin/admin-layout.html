@@ -554,6 +554,20 @@
                 opacity: 1;
             }
         }
+
+        /* Hiệu ứng nháy nhẹ cho hàng được chọn - Professional Style */
+        .highlight-order {
+            background-color: #f1f5f9 !important; /* Màu nền chính */
+            outline: 1.5px solid #000 !important; /* Viền đen cho đúng chất BEE */
+            animation: subtleBlink 1.2s infinite ease-in-out;
+            position: relative;
+            z-index: 5;
+        }
+
+        @keyframes subtleBlink {
+            0%, 100% { background-color: #f1f5f9; }
+            50% { background-color: #ffffff; } /* Nháy nhẹ về trắng */
+        }
     </style>
 </head>
 <body>
@@ -571,10 +585,10 @@
             <a href="#pos" class="sidebar-item"><i class="bi bi-cart-fill"></i> <span>BÁN HÀNG</span></a>
 
             <div class="sidebar-label">QUẢN LÝ</div>
+            <a href="#orders" class="sidebar-item"><i class="bi bi-collection-fill"></i> <span>HÓA ĐƠN</span></a>
             <a href="#catalogs" class="sidebar-item"><i class="bi bi-collection-fill"></i> <span>THUỘC TÍNH</span></a>
             <a href="#products" class="sidebar-item"><i class="bi bi-box-seam-fill"></i> <span>SẢN PHẨM</span></a>
             <a href="#promotions" class="sidebar-item"><i class="bi bi-tags-fill"></i> <span>KHUYẾN MÃI</span></a>
-            <a href="#orders" class="sidebar-item"><i class="bi bi-receipt-cutoff"></i> <span>ĐƠN HÀNG</span></a>
             <a href="#customers" class="sidebar-item"><i class="bi bi-receipt-cutoff"></i> <span>KHÁCH HÀNG</span></a>
 
             <div class="sidebar-label">HỆ THỐNG</div>
@@ -720,6 +734,46 @@
     }
 
     document.addEventListener('DOMContentLoaded', startClock);
+
+    function addOrderNotification(order) {
+        const container = document.querySelector('.dropdown-content');
+        const badge = document.getElementById('notif-badge');
+
+        // Hiện chấm đỏ
+        badge.style.display = 'block';
+
+        // Xóa cái "Không có thông báo" nếu đang có
+        if (container.querySelector('.empty-notif')) container.innerHTML = '';
+
+        const notifItem = document.createElement('div');
+        notifItem.style = "padding: 12px 16px; border-bottom: 1px solid #eee; cursor: pointer; transition: 0.2s;";
+        notifItem.onmouseover = () => notifItem.style.background = "#f9fafb";
+        notifItem.onmouseout = () => notifItem.style.background = "#fff";
+
+        // Khi bấm vào thông báo
+        notifItem.onclick = () => {
+            sessionStorage.setItem('highlightOrderId', order.id);
+
+           //Nếu đang ở sẵn trang thì phải bắt nó load lại data
+            if (window.location.hash === '#orders') {
+                if (window.OrderApp) {
+                    OrderApp.loadData(); // Gọi hàm load lại bảng ngay lập tức
+                }
+            } else {
+                window.location.hash = '#orders';
+            }
+
+            // Bấm xong thì đóng cái menu thông báo cho nó gọn
+            document.getElementById('notif-dropdown').classList.remove('show');
+        };
+        notifItem.innerHTML = `
+        <div style="font-weight: 800; font-size: 11px; color: #d97706;">🐝 KÈO THƠM MỚI!</div>
+        <div style="font-size: 12px; margin-top: 4px;">Đơn hàng <b>${order.ma}</b> vừa cập bến</div>
+        <div style="font-size: 10px; color: #888; margin-top: 2px;">Vừa xong - ${order.tenKhach}</div>
+    `;
+
+        container.prepend(notifItem);
+    }
 </script>
 
 </body>
