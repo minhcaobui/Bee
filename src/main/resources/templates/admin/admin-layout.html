@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -568,6 +568,9 @@
             0%, 100% { background-color: #f1f5f9; }
             50% { background-color: #ffffff; } /* Nháy nhẹ về trắng */
         }
+
+        #notif-dropdown {
+        }
     </style>
 </head>
 <body>
@@ -596,15 +599,24 @@
         </div>
 
         <div class="sidebar-user-panel" onclick="alert('Trang cá nhân')">
-            <img src="https://ui-avatars.com/api/?name=Viet+Hoang&background=000&color=fff&size=64"
+            <img th:src="${loggedInUser != null ? 'https://ui-avatars.com/api/?name=' + loggedInUser.hoTen + '&background=000&color=fff&size=64' : 'https://ui-avatars.com/api/?name=Admin&background=000&color=fff&size=64'}"
                  class="user-mini-avatar" alt="User">
+
             <div class="user-mini-info">
-                <div class="user-mini-name">VIỆT HOÀNG</div>
-                <div class="user-mini-role">System Admin</div>
+                <div class="user-mini-name" th:text="${loggedInUser != null ? loggedInUser.hoTen : 'Chưa đăng nhập'}">
+                    VIỆT HOÀNG
+                </div>
+
+                <div class="user-mini-role" sec:authentication="principal.authorities[0].authority">
+                    System Admin
+                </div>
             </div>
-            <button class="logout-icon-btn" title="Đăng xuất" onclick="event.stopPropagation(); confirmLogout()">
-                <i class="bi bi-box-arrow-right"></i>
-            </button>
+
+            <form th:action="@{/logout}" method="POST" style="display:inline;">
+                <button type="submit" class="logout-icon-btn" title="Đăng xuất" onclick="event.stopPropagation();">
+                    <i class="bi bi-box-arrow-right"></i>
+                </button>
+            </form>
         </div>
     </aside>
 

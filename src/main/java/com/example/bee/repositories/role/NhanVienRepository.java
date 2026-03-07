@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface NhanVienRepository extends JpaRepository<NhanVien, Integer> {
     Optional<NhanVien> findByMa(String ma);
+    Optional<NhanVien> findByTaiKhoan_TenDangNhap(String tenDangNhap);
 }

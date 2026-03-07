@@ -401,7 +401,7 @@
         // --- HÀM TOGGLE CÓ CONFIRM ---
         quickToggle: async function(id, el) {
             const originalState = !el.checked;
-            const actionText = originalState ? "kích hoạt" : "ngừng hoạt động";
+            const actionText = el.checked ? "kích hoạt" : "ngừng hoạt động";
             const name = this.getTabName();
 
             // Gọi Toast Confirm trước

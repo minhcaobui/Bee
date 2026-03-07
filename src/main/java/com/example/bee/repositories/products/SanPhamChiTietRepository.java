@@ -33,5 +33,11 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
             @Param("color") Integer color,
             @Param("size") Integer size
     );
+
+    // Kiểm tra xem có Sản phẩm chi tiết nào đang HOẠT ĐỘNG dùng Màu sắc này không?
+    boolean existsByMauSac_IdAndTrangThaiTrue(Integer mauSacId);
+
+    // Kiểm tra xem có Sản phẩm chi tiết nào đang HOẠT ĐỘNG dùng Kích thước này không?
+    boolean existsByKichThuoc_IdAndTrangThaiTrue(Integer kichThuocId);
 }
 

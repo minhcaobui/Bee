@@ -1,6 +1,7 @@
 package com.example.bee.controllers.api.product;
 
 import com.example.bee.dto.SanPhamRequest;
+import com.example.bee.dto.SanPhamResponse;
 import com.example.bee.dto.VariantRequest;
 import com.example.bee.entities.product.HinhAnhSanPham;
 import com.example.bee.entities.product.SanPham;
@@ -181,7 +182,7 @@ public class SanPhamApi {
         variant.setGiaBan(req.getGiaBan());
         variant.setHinhAnh(req.getHinhAnh());
         variant.setSoLuong(0); // Mặc định kho = 0 khi mới tạo
-        variant.setTrangThai(true);
+        variant.setTrangThai(false);
 
         String skuCode;
         do {
@@ -221,9 +222,23 @@ public class SanPhamApi {
     public ResponseEntity<?> updateStock(@PathVariable Integer id, @RequestBody Map<String, Integer> body) {
         return variantRepo.findById(id).map(variant -> {
             Integer newQty = body.get("soLuong");
+
+            // 1. Cập nhật số lượng mới
             variant.setSoLuong(newQty);
+
+            // 2. LOGIC TỰ ĐỘNG BẬT/TẮT TRẠNG THÁI
+            if (newQty > 0 && (variant.getTrangThai() == null || !variant.getTrangThai())) {
+                // Nếu có hàng (>0) mà trạng thái đang TẮT thì tự động BẬT
+                variant.setTrangThai(true);
+            } else if (newQty == 0 && (variant.getTrangThai() == null || variant.getTrangThai())) {
+                // Nếu hết hàng (==0) mà trạng thái đang BẬT thì tự động TẮT
+                variant.setTrangThai(false);
+            }
+
+            // 3. Lưu xuống Database
             variantRepo.save(variant);
-            return ResponseEntity.ok(Collections.singletonMap("message", "Cập nhật kho thành công!"));
+
+            return ResponseEntity.ok(Collections.singletonMap("message", "Cập nhật kho và trạng thái thành công!"));
         }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không thấy biến thể"));
     }
 
@@ -237,6 +252,7 @@ public class SanPhamApi {
             return ResponseEntity.ok(Collections.singletonMap("message", "Biến thể [" + variant.getSku() + "] hiện " + statusLabel));
         }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không thấy biến thể"));
     }
+
 
     private boolean isBlank(String s) { return s == null || s.trim().isEmpty(); }
     private String safeTrim(String s) { return s == null ? null : s.trim(); }

@@ -418,6 +418,7 @@
             editingVariantId: null,
             isLoading: false,
             abortController: null,
+            isUploadingVariantImg: false,
         },
 
         init: async function() {
@@ -468,38 +469,66 @@
                 }
             };
 
-                document.getElementById('vFile').onchange = async (e) => {
-                    const file = e.target.files[0];
-                    if (!file) return;
-                    e.target.value = '';
+            document.getElementById('vFile').onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                e.target.value = '';
 
-                    // Preview tạm
-                    const blobUrl = URL.createObjectURL(file);
-                    document.getElementById('vImgDisplay').src = blobUrl;
-                    document.getElementById('vImgDisplay').style.display = 'block';
-                    document.getElementById('vImgPlaceholder').style.display = 'none';
+                // --- XỬ LÝ GIAO DIỆN LÚC ĐANG TẢI ---
+                const blobUrl = URL.createObjectURL(file);
+                const imgDisplay = document.getElementById('vImgDisplay');
+                const placeholder = document.getElementById('vImgPlaceholder');
+                const previewContainer = document.getElementById('vImagePreview');
 
-                    try {
-                        const formData = new FormData();
-                        formData.append('file', file);
-                        const res = await fetch('/api/upload', { method: 'POST', body: formData });
-                        const data = await res.json();
+                // 1. Hiện ảnh Blob, làm mờ nó đi và ẩn icon placeholder
+                imgDisplay.src = blobUrl;
+                imgDisplay.style.display = 'block';
+                imgDisplay.style.opacity = '0.4';
+                placeholder.style.display = 'none';
 
-                        if (res.ok && data.url) {
-                            self.state.vTempImage = data.url; // ✅ URL Cloudinary thật
-                            document.getElementById('vImgDisplay').src = data.url;
-                            URL.revokeObjectURL(blobUrl);
-                            window.toast('Tải ảnh SKU thành công!', 'success');
-                        } else {
-                            window.toast('Upload ảnh thất bại.', 'error');
-                            document.getElementById('vImgDisplay').style.display = 'none';
-                            document.getElementById('vImgPlaceholder').style.display = 'block';
-                            self.state.vTempImage = null;
-                        }
-                    } catch (err) {
-                        window.toast('Lỗi kết nối khi upload ảnh.', 'error');
+                // 2. Tạo text "Đang tải..." đè lên trên
+                let loadingText = document.getElementById('vImgLoadingText');
+                if (!loadingText) {
+                    loadingText = document.createElement('div');
+                    loadingText.id = 'vImgLoadingText';
+                    loadingText.style.cssText = 'position:absolute; font-size:10px; font-weight:700; color:#555; z-index:2; pointer-events:none;';
+                    loadingText.innerText = 'Đang tải...';
+                    previewContainer.style.position = 'relative'; // Cần cái này để chữ nằm giữa khung
+                    previewContainer.appendChild(loadingText);
+                }
+                loadingText.style.display = 'block';
+
+                // --- BẮT ĐẦU GỌI API ---
+                self.state.isUploadingVariantImg = true; // <-- Bật cờ đang tải
+                try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                    const data = await res.json();
+
+                    if (res.ok && data.url) {
+                        self.state.vTempImage = data.url; // URL Cloudinary thật
+                        imgDisplay.src = data.url;
+                        window.toast('Tải ảnh SKU thành công!', 'success');
+                    } else {
+                        window.toast('Upload ảnh thất bại.', 'error');
+                        imgDisplay.style.display = 'none';
+                        placeholder.style.display = 'block';
+                        self.state.vTempImage = null;
                     }
-                };
+                } catch (err) {
+                    window.toast('Lỗi kết nối khi upload ảnh.', 'error');
+                    imgDisplay.style.display = 'none';
+                    placeholder.style.display = 'block';
+                    self.state.vTempImage = null;
+                } finally {
+                    // --- DỌN DẸP SAU KHI TẢI XONG ---
+                    self.state.isUploadingVariantImg = false;
+                    imgDisplay.style.opacity = '1'; // Trả lại độ sáng bình thường
+                    if (loadingText) loadingText.style.display = 'none'; // Ẩn chữ đi
+                    URL.revokeObjectURL(blobUrl); // Dọn rác bộ nhớ
+                }
+            };
         },
 
         loadData: async function() {
@@ -741,6 +770,10 @@
         },
 
         saveVariant: async function() {
+            if (this.state.isUploadingVariantImg) {
+                window.toast('Vui lòng chờ ảnh SKU tải lên hoàn tất!', 'warning');
+                return;
+            }
             console.log('=== DEBUG saveVariant ===');
             console.log('editingVariantId:', this.state.editingVariantId);
             console.log('vTempImage:', this.state.vTempImage);  // ← NULL hay URL?
@@ -857,6 +890,11 @@
         },
 
         saveProduct: async function() {
+            const isUploading = this.state.tempImages.some(img => typeof img === 'object' && img.uploading);
+            if (isUploading) {
+                window.toast("Vui lòng chờ ảnh sản phẩm tải lên hoàn tất trước khi lưu!", "warning");
+                return;
+            }
             const tenSp = document.getElementById('fTen').value.trim();
             if (!tenSp) { window.toast("Vui lòng nhập tên sản phẩm.", "warning"); return; }
 

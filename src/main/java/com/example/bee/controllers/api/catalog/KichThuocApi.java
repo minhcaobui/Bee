@@ -2,6 +2,8 @@ package com.example.bee.controllers.api.catalog;
 
 import com.example.bee.entities.catalog.KichThuoc;
 import com.example.bee.repositories.catalog.KichThuocRepository;
+import com.example.bee.repositories.products.SanPhamChiTietRepository;
+import com.example.bee.repositories.products.SanPhamRepository;
 import com.example.bee.repositories.promotion.KhuyenMaiRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Map;
 import java.util.Random;
 
 @RestController
@@ -34,6 +37,9 @@ public class KichThuocApi {
 
     @Autowired
     private KhuyenMaiRepository khuyenMaiRepo;
+
+    @Autowired
+    private final SanPhamChiTietRepository sanPhamChiTietRepository;
 
     // --- GEN MÃ SIZE (KT_ + 6 số) ---
     private String generateMa() {
@@ -109,9 +115,16 @@ public class KichThuocApi {
         KichThuoc kichThuoc = kichThuocRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        // Thoải mái tắt bật
-        kichThuoc.setTrangThai(!kichThuoc.getTrangThai());
+        if (kichThuoc.getTrangThai() != null && kichThuoc.getTrangThai() == true) {
+            boolean isUsed = sanPhamChiTietRepository.existsByKichThuoc_IdAndTrangThaiTrue(id);
+            if (isUsed) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "message", "Không thể tắt size này! Đang có sản phẩm chi tiết sử dụng kích thước này."
+                ));
+            }
+        }
 
+        kichThuoc.setTrangThai(!kichThuoc.getTrangThai());
         kichThuocRepository.save(kichThuoc);
         return ResponseEntity.ok().build();
     }

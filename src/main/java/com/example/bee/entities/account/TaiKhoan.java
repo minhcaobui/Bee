@@ -5,36 +5,28 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(
-        name = "tai_khoan",
-        uniqueConstraints = {
-                @UniqueConstraint(name = "uk_tai_khoan_ten_dang_nhap", columnNames = "ten_dang_nhap"),
-                @UniqueConstraint(name = "uk_tai_khoan_email", columnNames = "email")
-        }
-)
+@Table( name = "tai_khoan" )
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Getter
+@Setter
 public class TaiKhoan {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "ten_dang_nhap", length = 100, nullable = false, unique = true)
+    @Column(name = "ten_dang_nhap", unique = true)
     private String tenDangNhap;
 
-    @Column(name = "email", length = 150, nullable = false, unique = true)
-    private String email;
+    @Column(name = "mat_khau")
+    private String matKhau;
 
-    @Lob
-    @Column(name = "mat_khau", nullable = false)
-    private byte[] matKhau;
+    @Column(name = "trang_thai")
+    private Boolean trangThai;
 
-    @Column(name = "trang_thai", nullable = false)
-    private Boolean trangThai = true;
-
-    @Column(name = "ngay_tao", nullable = false)
-    private LocalDateTime ngayTao = LocalDateTime.now();
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_vai_tro")
+    private VaiTro vaiTro;
 }

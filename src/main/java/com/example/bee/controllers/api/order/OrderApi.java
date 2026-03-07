@@ -10,17 +10,19 @@ import com.example.bee.repositories.order.HoaDonChiTietRepository;
 import com.example.bee.repositories.order.HoaDonRepository;
 import com.example.bee.repositories.order.LichSuHoaDonRepository;
 import com.example.bee.repositories.order.TrangThaiHoaDonRepository;
+import com.example.bee.repositories.role.NhanVienRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/hoa-don")
@@ -31,6 +33,7 @@ public class OrderApi {
     private final TrangThaiHoaDonRepository ttRepo;
     private final LichSuHoaDonRepository lsRepo;
     private final HoaDonChiTietRepository hdctRepo;
+    private final NhanVienRepository nvRepo;
 
     @GetMapping("/don-hang")
     public List<HoaDon> getDonHangOnline() {
@@ -43,6 +46,7 @@ public class OrderApi {
         return hdRepo.findLichSuHoaDon();
     }
 
+    // Đã bỏ tham số Authentication ở đây để tránh lỗi không truyền được từ frontend
     @GetMapping("/{id}")
     public ResponseEntity<HoaDonResponse> getDetail(@PathVariable Integer id) {
         HoaDon hd = hdRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -79,11 +83,29 @@ public class OrderApi {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+        // 3. Logic lấy tên nhân viên đang đăng nhập bằng SecurityContextHolder
+        String tenNhanVienHienTai = "Hệ thống";
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.isAuthenticated() && !authentication.getPrincipal().equals("anonymousUser")) {
+            String username = authentication.getName(); // Lấy email/tên đăng nhập
+            System.out.println("====> [DEBUG] Lấy Detail - API được gọi bởi User: " + username);
+
+            // Chọc vào DB để lấy NhanVien
+            var nhanVienDangNhap = nvRepo.findByTaiKhoan_TenDangNhap(username).orElse(null);
+            if (nhanVienDangNhap != null) {
+                tenNhanVienHienTai = nhanVienDangNhap.getHoTen();
+            } else {
+                System.out.println("====> [DEBUG] Không tìm thấy thông tin nhân viên cho username này trong CSDL.");
+            }
+        }
+
         HoaDonResponse response = HoaDonResponse.builder()
                 .id(hd.getId())
                 .ma(hd.getMa())
                 .tenKhachHang(hd.getKhachHang() != null ? hd.getKhachHang().getHoTen() : "Khách vãng lai")
-                .tenNhanVien(hd.getNhanVien() != null ? hd.getNhanVien().getHoTen() : "Hệ thống")
+                // Gán tên nhân viên tạo đơn (nếu có) hoặc người đang thao tác
+                .tenNhanVien(hd.getNhanVien() != null ? hd.getNhanVien().getHoTen() : tenNhanVienHienTai)
                 .sdtNhan(hd.getSdtNhan())
                 .diaChiGiaoHang(hd.getDiaChiGiaoHang())
                 .phuongThucThanhToan(hd.getPhuongThucThanhToan())

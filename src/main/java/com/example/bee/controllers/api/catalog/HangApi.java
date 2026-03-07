@@ -2,6 +2,7 @@ package com.example.bee.controllers.api.catalog;
 
 import com.example.bee.entities.catalog.Hang;
 import com.example.bee.repositories.catalog.HangRepository;
+import com.example.bee.repositories.products.SanPhamRepository;
 import com.example.bee.repositories.promotion.KhuyenMaiRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Random;
 
 @RestController
@@ -35,7 +37,8 @@ public class HangApi {
     private final HangRepository hangRepository;
     @Autowired
     private final KhuyenMaiRepository khuyenMaiRepository;
-
+    @Autowired
+    private final SanPhamRepository sanPhamRepository;
 
     private String generateMa() {
         String ma;
@@ -105,6 +108,17 @@ public class HangApi {
     public ResponseEntity<?> toggleStatus(@PathVariable Integer id) {
         Hang hang = hangRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        // Nếu đang BẬT và chuẩn bị TẮT
+        if (hang.getTrangThai() != null && hang.getTrangThai() == true) {
+            boolean isUsed = sanPhamRepository.existsByHang_IdAndTrangThaiTrue(id);
+            if (isUsed) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "message", "Không thể ngừng hoạt động! Đang có sản phẩm thuộc hãng này đang được bày bán."
+                ));
+            }
+        }
+
         hang.setTrangThai(!hang.getTrangThai());
         hangRepository.save(hang);
         return ResponseEntity.ok().build();
