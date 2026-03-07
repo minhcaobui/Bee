@@ -3,6 +3,7 @@ package com.example.bee.controllers.api.catalog;
 import com.example.bee.entities.catalog.DanhMuc;
 import com.example.bee.repositories.catalog.DanhMucRepository;
 import com.example.bee.repositories.promotion.KhuyenMaiRepository;
+import com.example.bee.repositories.products.SanPhamRepository; // THÊM IMPORT NÀY
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.Map; // THÊM IMPORT NÀY
 import java.util.Random;
 
 @RestController
@@ -33,10 +35,13 @@ public class DanhMucApi {
 
     @Autowired
     private final DanhMucRepository danhMucRepository;
+
     @Autowired
     private final KhuyenMaiRepository khuyenMaiRepository;
 
-    // Đã xóa 2 dòng static final thừa thãi đi rồi nhé
+    // THÊM REPOSITORY CỦA SẢN PHẨM ĐỂ KIỂM TRA
+    @Autowired
+    private final SanPhamRepository sanPhamRepository;
 
     private String generateMa() {
         String ma;
@@ -119,11 +124,26 @@ public class DanhMucApi {
         return danhMucRepository.save(entity);
     }
 
+    // ĐÃ SỬA LẠI HÀM NÀY
     @PatchMapping("/{id}/trang-thai")
     public ResponseEntity<?> toggleStatus(@PathVariable Integer id) {
         DanhMuc danhMuc = danhMucRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        // Nếu không trùng thì cho tắt bình thường
+
+        // KIỂM TRA: Nếu trạng thái hiện tại đang là BẬT (true) và chuẩn bị TẮT
+        if (danhMuc.getTrangThai() != null && danhMuc.getTrangThai() == true) {
+            // Kiểm tra xem có sản phẩm nào thuộc danh mục này đang bán không
+            boolean isUsed = sanPhamRepository.existsByDanhMuc_IdAndTrangThaiTrue(id);
+
+            if (isUsed) {
+                // Nếu có, chặn lại và trả về lỗi 400
+                return ResponseEntity.badRequest().body(Map.of(
+                        "message", "Không thể ngừng hoạt động! Đang có sản phẩm thuộc danh mục này đang được bày bán."
+                ));
+            }
+        }
+
+        // Nếu qua được vòng kiểm tra (hoặc đang từ TẮT bật lên) thì cho đổi bình thường
         danhMuc.setTrangThai(!danhMuc.getTrangThai());
         danhMucRepository.save(danhMuc);
 

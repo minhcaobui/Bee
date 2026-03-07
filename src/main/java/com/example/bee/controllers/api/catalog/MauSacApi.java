@@ -2,6 +2,8 @@ package com.example.bee.controllers.api.catalog;
 
 import com.example.bee.entities.catalog.MauSac;
 import com.example.bee.repositories.catalog.MauSacRepository;
+import com.example.bee.repositories.products.SanPhamChiTietRepository;
+import com.example.bee.repositories.products.SanPhamRepository;
 import com.example.bee.repositories.promotion.KhuyenMaiRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Map;
 import java.util.Random;
 
 @RestController
@@ -34,6 +37,8 @@ public class MauSacApi {
 
     @Autowired
     private KhuyenMaiRepository khuyenMaiRepo;
+    @Autowired
+    private final SanPhamChiTietRepository sanPhamChiTietRepository;
 
     // --- GEN MÃ MÀU (MS_ + 6 số) ---
     private String generateMa() {
@@ -109,9 +114,17 @@ public class MauSacApi {
         MauSac mauSac = mauSacRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        // Cứ thế mà đổi thôi, không sợ bố con thằng nào cả :))
-        mauSac.setTrangThai(!mauSac.getTrangThai());
+        if (mauSac.getTrangThai() != null && mauSac.getTrangThai() == true) {
+            // Chú ý: Dùng sanPhamChiTietRepository vì màu sắc gắn ở bản ghi chi tiết
+            boolean isUsed = sanPhamChiTietRepository.existsByMauSac_IdAndTrangThaiTrue(id);
+            if (isUsed) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "message", "Không thể tắt màu này! Đang có sản phẩm chi tiết sử dụng màu sắc này."
+                ));
+            }
+        }
 
+        mauSac.setTrangThai(!mauSac.getTrangThai());
         mauSacRepository.save(mauSac);
         return ResponseEntity.ok().build();
     }

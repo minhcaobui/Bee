@@ -171,22 +171,24 @@
         <p>Vui lòng đăng nhập để tiếp tục</p>
     </div>
 
-    <form action="#" method="POST">
+    <div th:if="${param.error}" style="color: #ff4d4d; text-align: center; margin-bottom: 15px; font-size: 14px;">
+        Tên đăng nhập hoặc mật khẩu không chính xác!
+    </div>
+
+    <form th:action="@{/login}" method="POST">
         <div class="input-group">
             <i class="fas fa-user"></i>
-            <input type="text" placeholder="Email hoặc tên đăng nhập" required>
+            <input type="text" name="username" placeholder="Email hoặc tên đăng nhập" required>
         </div>
 
         <div class="input-group">
             <i class="fas fa-lock"></i>
-            <input type="password" id="password" placeholder="Mật khẩu" required>
+            <input type="password" id="password" name="password" placeholder="Mật khẩu" required>
             <i class="fas fa-eye toggle-password" id="togglePassword"></i>
         </div>
 
         <div class="options">
-            <label>
-                <input type="checkbox"> Ghi nhớ tôi
-            </label>
+            <label><input type="checkbox" name="remember-me"> Ghi nhớ tôi</label>
             <a href="#">Quên mật khẩu?</a>
         </div>
 

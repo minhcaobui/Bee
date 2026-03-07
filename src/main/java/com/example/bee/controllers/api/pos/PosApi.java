@@ -4,17 +4,21 @@ import com.example.bee.entities.order.*;
 import com.example.bee.entities.product.SanPhamChiTiet;
 import com.example.bee.entities.customer.KhachHang;
 import com.example.bee.entities.promotion.KhuyenMai;
-import com.example.bee.entities.promotion.MaGiamGia; // Check lại package này
+import com.example.bee.entities.promotion.MaGiamGia;
+import com.example.bee.entities.user.NhanVien;
 import com.example.bee.repositories.catalog.KichThuocRepository;
 import com.example.bee.repositories.catalog.MauSacRepository;
 import com.example.bee.repositories.products.SanPhamChiTietRepository;
 import com.example.bee.repositories.order.*;
 import com.example.bee.repositories.customer.KhachHangRepository;
 import com.example.bee.repositories.promotion.KhuyenMaiRepository;
-import com.example.bee.repositories.promotion.MaGiamGiaRepository; // Repository cho voucher
+import com.example.bee.repositories.promotion.MaGiamGiaRepository;
+import com.example.bee.repositories.role.NhanVienRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -36,9 +40,19 @@ public class PosApi {
     private final KichThuocRepository kichThuocRepo;
     private final MaGiamGiaRepository maGiamGiaRepo;
     private final KhuyenMaiRepository khuyenMaiRepo;
+    private final NhanVienRepository nvRepo;
 
-    // CHỈ ĐỂ DUY NHẤT 1 HÀM NÀY CHO ĐƯỜNG DẪN /products/search
-    // 2. Thay lại hàm này:
+    // Hàm hỗ trợ tái sử dụng để lấy NhanVien đang đăng nhập
+    private NhanVien getLoggedInNhanVien() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
+            String username = auth.getName();
+            return nvRepo.findByTaiKhoan_TenDangNhap(username).orElse(null);
+        }
+        return null;
+    }
+
+    // 1. TÌM KIẾM SẢN PHẨM
     @GetMapping("/products/search")
     public List<SanPhamChiTiet> searchProducts(
             @RequestParam(required = false, defaultValue = "") String q,
@@ -47,30 +61,23 @@ public class PosApi {
 
         List<SanPhamChiTiet> list = variantRepo.findAvailableProducts(q, color, size);
 
-        // Chạy vòng lặp để soi từng sản phẩm xem có Sale không
         for (SanPhamChiTiet spct : list) {
             java.math.BigDecimal giaGoc = spct.getGiaBan();
             java.math.BigDecimal giaSauKM = giaGoc;
 
-            // Lấy danh sách Sale đang chạy cho sản phẩm này
             List<KhuyenMai> activeSales = khuyenMaiRepo.findActiveKhuyenMaiBySanPhamId(spct.getSanPham().getId());
 
             if (activeSales != null && !activeSales.isEmpty()) {
-                KhuyenMai km = activeSales.get(0); // Lấy Sale đầu tiên
+                KhuyenMai km = activeSales.get(0);
                 if ("PERCENT".equals(km.getLoai())) {
-                    // Chia 100 và làm tròn HALF_UP
                     java.math.BigDecimal tyLe = km.getGiaTri().divide(new java.math.BigDecimal("100"), 2, java.math.RoundingMode.HALF_UP);
-                    // Nhân với giá gốc để ra số tiền được giảm
                     java.math.BigDecimal tienGiam = giaGoc.multiply(tyLe).setScale(0, java.math.RoundingMode.HALF_UP);
-
                     giaSauKM = giaGoc.subtract(tienGiam);
                 } else {
-                    // Khuyến mãi trừ tiền mặt thẳng tay
                     giaSauKM = giaGoc.subtract(km.getGiaTri());
                 }
             }
 
-            // Ép giá ảo vào, nếu giảm dưới 0đ (âm) thì set = 0đ cho an toàn
             if (giaSauKM.compareTo(java.math.BigDecimal.ZERO) < 0) {
                 giaSauKM = java.math.BigDecimal.ZERO;
             }
@@ -81,14 +88,13 @@ public class PosApi {
         return list;
     }
 
-
     // 2. LẤY DANH SÁCH HÓA ĐƠN CHỜ
     @GetMapping("/invoices/pending")
     public List<HoaDon> getPendingInvoices() {
         return hoaDonRepo.findByLoaiHoaDonAndTrangThaiHoaDonMa(0, "CHO_THANH_TOAN");
     }
 
-    // 3. TẠO MỚI HÓA ĐƠN CHỜ (Mã HD 8 ký tự: HD + 6 ký tự random)
+    // 3. TẠO MỚI HÓA ĐƠN CHỜ
     @PostMapping("/invoices")
     @Transactional
     public HoaDon createInvoice() {
@@ -100,40 +106,149 @@ public class PosApi {
         }
 
         TrangThaiHoaDon trangThai = trangThaiRepo.findByMa("CHO_THANH_TOAN");
+
+        NhanVien nvTaoDon = getLoggedInNhanVien();
+
         HoaDon hd = HoaDon.builder()
                 .ma(sb.toString())
-                .giaTamThoi(BigDecimal.ZERO) // Thay 0.0
-                .giaTong(BigDecimal.ZERO)    // Thay 0.0
+                .giaTamThoi(BigDecimal.ZERO)
+                .giaTong(BigDecimal.ZERO)
                 .loaiHoaDon(0)
                 .trangThaiHoaDon(trangThai)
+                .nhanVien(nvTaoDon)
                 .ngayTao(new Date())
                 .build();
-        return hoaDonRepo.save(hd);
+
+        HoaDon savedHd = hoaDonRepo.save(hd);
+
+        lichSuRepo.save(LichSuHoaDon.builder()
+                .hoaDon(savedHd)
+                .trangThaiHoaDon(trangThai)
+                .ghiChu("Tạo hóa đơn mới tại quầy")
+                .nhanVien(nvTaoDon)
+                .build());
+
+        return savedHd;
     }
 
-    // 4. CHỐT ĐƠN & THANH TOÁN (Logic trừ kho + Voucher + Lịch sử)
+    // ==========================================================
+    // CÁC HÀM MỚI: QUẢN LÝ GIỎ HÀNG VÀ TỒN KHO TRỰC TIẾP
+    // ==========================================================
+
+    // THÊM SẢN PHẨM VÀO HÓA ĐƠN (Trừ kho ngay lập tức)
+    @PostMapping("/invoices/{id}/add-product")
+    @Transactional
+    public ResponseEntity<?> addProductToInvoice(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
+        Integer spctId = (Integer) body.get("spctId");
+        Integer qty = (Integer) body.get("qty");
+
+        HoaDon hd = hoaDonRepo.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
+        SanPhamChiTiet spct = variantRepo.findById(spctId).orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
+
+        // Kiểm tra tồn kho
+        if (spct.getSoLuong() < qty) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Sản phẩm không đủ số lượng!"));
+        }
+
+        // 1. Trừ kho ngay lập tức
+        spct.setSoLuong(spct.getSoLuong() - qty);
+        if (spct.getSoLuong() == 0) spct.setTrangThai(false);
+        variantRepo.save(spct);
+
+        // 2. Cập nhật hoặc tạo mới HoaDonChiTiet
+        Optional<HoaDonChiTiet> existingDetail = hdctRepo.findByHoaDonIdAndSanPhamChiTietId(id, spctId);
+        if (existingDetail.isPresent()) {
+            HoaDonChiTiet detail = existingDetail.get();
+            detail.setSoLuong(detail.getSoLuong() + qty);
+            hdctRepo.save(detail);
+        } else {
+            hdctRepo.save(HoaDonChiTiet.builder()
+                    .hoaDon(hd)
+                    .sanPhamChiTiet(spct)
+                    .soLuong(qty)
+                    .giaTien(spct.getGiaSauKhuyenMai() != null ? spct.getGiaSauKhuyenMai() : spct.getGiaBan())
+                    .build());
+        }
+
+        // 3. Cập nhật lại tổng tiền tạm thời của hóa đơn
+        updateInvoiceTotal(hd);
+        return ResponseEntity.ok(Map.of("message", "Đã thêm vào hóa đơn và trừ kho"));
+    }
+
+    // CẬP NHẬT SỐ LƯỢNG TRONG GIỎ (Bù/Trừ kho)
+    @PatchMapping("/invoices/{id}/update-quantity")
+    @Transactional
+    public ResponseEntity<?> updateQuantity(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
+        Integer spctId = (Integer) body.get("spctId");
+        Integer newQty = (Integer) body.get("newQty");
+
+        HoaDonChiTiet detail = hdctRepo.findByHoaDonIdAndSanPhamChiTietId(id, spctId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm trong giỏ"));
+        SanPhamChiTiet spct = detail.getSanPhamChiTiet();
+
+        int diff = newQty - detail.getSoLuong(); // Số lượng chênh lệch
+
+        if (diff > 0) {
+            // Nếu tăng số lượng mua -> Trừ thêm kho
+            if (spct.getSoLuong() < diff) return ResponseEntity.badRequest().body(Map.of("message", "Không đủ hàng trong kho"));
+            spct.setSoLuong(spct.getSoLuong() - diff);
+        } else {
+            // Nếu giảm số lượng mua -> Hoàn lại kho
+            spct.setSoLuong(spct.getSoLuong() + Math.abs(diff));
+        }
+
+        if (spct.getSoLuong() == 0) spct.setTrangThai(false);
+        else spct.setTrangThai(true);
+
+        variantRepo.save(spct);
+        detail.setSoLuong(newQty);
+        hdctRepo.save(detail);
+        updateInvoiceTotal(detail.getHoaDon());
+
+        return ResponseEntity.ok(Map.of("message", "Đã cập nhật kho"));
+    }
+
+    // XÓA SẢN PHẨM KHỎI GIỎ (Hoàn kho toàn bộ)
+    @DeleteMapping("/invoices/{id}/remove-product/{spctId}")
+    @Transactional
+    public ResponseEntity<?> removeProduct(@PathVariable Integer id, @PathVariable Integer spctId) {
+        HoaDonChiTiet detail = hdctRepo.findByHoaDonIdAndSanPhamChiTietId(id, spctId)
+                .orElseThrow(() -> new RuntimeException("Không có sản phẩm này trong giỏ"));
+
+        // HOÀN LẠI KHO
+        SanPhamChiTiet spct = detail.getSanPhamChiTiet();
+        spct.setSoLuong(spct.getSoLuong() + detail.getSoLuong());
+        if (spct.getSoLuong() > 0) spct.setTrangThai(true);
+        variantRepo.save(spct);
+
+        hdctRepo.delete(detail);
+        updateInvoiceTotal(detail.getHoaDon());
+        return ResponseEntity.ok(Map.of("message", "Đã hoàn kho"));
+    }
+
+    // HÀM PHỤ TRỢ TÍNH TỔNG TIỀN
+    private void updateInvoiceTotal(HoaDon hd) {
+        List<HoaDonChiTiet> details = hdctRepo.findByHoaDonId(hd.getId());
+        BigDecimal total = details.stream()
+                .map(d -> d.getGiaTien().multiply(BigDecimal.valueOf(d.getSoLuong())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        hd.setGiaTamThoi(total);
+        hd.setGiaTong(total);
+        hoaDonRepo.save(hd);
+    }
+
+    // ==========================================================
+
+    // 4. CHỐT ĐƠN & THANH TOÁN (Đã sửa: Không trừ kho nữa)
     @PostMapping("/finish")
     @Transactional
     public ResponseEntity<?> finishOrder(@RequestBody Map<String, Object> payload) {
         try {
             Integer invoiceId = (Integer) payload.get("invoiceId");
             Integer customerId = (Integer) payload.get("customerId");
-
-            // Sửa tổng tiền thành BigDecimal
             BigDecimal total = new BigDecimal(payload.get("total").toString());
             String method = (String) payload.get("method");
-            List<Map<String, Object>> cart = (List<Map<String, Object>>) payload.get("cart");
             Integer voucherId = (Integer) payload.get("voucherId");
-
-            // Sửa giá tạm tính thành BigDecimal
-            BigDecimal giaTamTinh = BigDecimal.ZERO;
-            for (Map<String, Object> item : cart) {
-                Integer qty = (Integer) item.get("qty");
-                BigDecimal price = new BigDecimal(item.get("price").toString()); // Đổi sang BigDecimal
-
-                // giaTamTinh += (price * qty) chuyển thành:
-                giaTamTinh = giaTamTinh.add(price.multiply(BigDecimal.valueOf(qty)));
-            }
 
             HoaDon hd = hoaDonRepo.findById(invoiceId).orElseThrow(() -> new RuntimeException("Không tìm thấy HD!"));
             if (customerId != null) {
@@ -142,7 +257,6 @@ public class PosApi {
                 hd.setKhachHang(null);
             }
 
-            // Logic trừ Voucher em đã fix cho anh ở trên
             if (voucherId != null) {
                 MaGiamGia voucher = maGiamGiaRepo.findById(voucherId).orElse(null);
                 if (voucher != null) {
@@ -156,48 +270,34 @@ public class PosApi {
                 }
             }
 
-            hd.setGiaTamThoi(giaTamTinh);
+            NhanVien nvChotDon = getLoggedInNhanVien();
+            if (hd.getNhanVien() == null && nvChotDon != null) {
+                hd.setNhanVien(nvChotDon);
+            }
+
+            // ĐÃ XÓA VÒNG LẶP TRỪ KHO Ở ĐÂY VÌ KHO ĐÃ TRỪ TRONG QUÁ TRÌNH THÊM VÀO GIỎ RỒI!
+
             hd.setGiaTong(total);
             hd.setNgayThanhToan(new Date());
             hd.setPhuongThucThanhToan(method);
-            hd.setTrangThaiHoaDon(trangThaiRepo.findByMa("HOAN_THANH"));
+
+            TrangThaiHoaDon ttHoanThanh = trangThaiRepo.findByMa("HOAN_THANH");
+            hd.setTrangThaiHoaDon(ttHoanThanh);
             hoaDonRepo.save(hd);
-
-            for (Map<String, Object> item : cart) {
-                Integer spctId = (Integer) item.get("id");
-                Integer qty = (Integer) item.get("qty");
-
-                // SỬA: Chuyển đổi giá từ Map sang BigDecimal thông qua chuỗi để tránh sai số
-                BigDecimal price = new BigDecimal(item.get("price").toString());
-
-                // 1. Tìm sản phẩm chi tiết
-                SanPhamChiTiet spct = variantRepo.findById(spctId)
-                        .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm mã ID: " + spctId));
-
-                // 2. KIỂM TRA TỒN KHO TRƯỚC (Logic quan trọng)
-                if (spct.getSoLuong() < qty) {
-                    throw new RuntimeException("Sản phẩm " + spct.getSku() + " không đủ số lượng trong kho!");
-                }
-
-                // 3. Cập nhật số lượng sản phẩm chi tiết
-                spct.setSoLuong(spct.getSoLuong() - qty);
-                variantRepo.save(spct);
-
-                // 4. Lưu chi tiết hóa đơn với kiểu BigDecimal
-                hdctRepo.save(HoaDonChiTiet.builder()
-                        .hoaDon(hd)
-                        .sanPhamChiTiet(spct)
-                        .soLuong(qty)
-                        .giaTien(price) // Giờ nó đã là chuẩn BigDecimal
-                        .build());
-            }
 
             thanhToanRepo.save(ThanhToan.builder()
                     .hoaDon(hd)
                     .soTien(total)
                     .phuongThuc(method)
+                    .nhanVien(nvChotDon)
                     .build());
-            lichSuRepo.save(LichSuHoaDon.builder().hoaDon(hd).trangThaiHoaDon(hd.getTrangThaiHoaDon()).ghiChu("Thanh toán tại quầy").build());
+
+            lichSuRepo.save(LichSuHoaDon.builder()
+                    .hoaDon(hd)
+                    .trangThaiHoaDon(ttHoanThanh)
+                    .ghiChu("Thanh toán tại quầy")
+                    .nhanVien(nvChotDon)
+                    .build());
 
             return ResponseEntity.ok(Map.of("message", "Thành công!", "ma", hd.getMa()));
         } catch (Exception e) {
@@ -219,7 +319,6 @@ public class PosApi {
             return ResponseEntity.badRequest().body("MÃ GIẢM GIÁ ĐÃ HẾT HẠN HOẶC HẾT LƯỢT SỬ DỤNG");
         }
 
-        // Sửa điều kiện so sánh
         if (currentTotal.compareTo(v.getDieuKien()) < 0) {
             return ResponseEntity.badRequest().body("Chưa đủ điều kiện (Tối thiểu " + v.getDieuKien() + ")");
         }
@@ -240,30 +339,24 @@ public class PosApi {
         return khachHangRepo.save(kh);
     }
 
-    // 7. XÓA (HỦY) HÓA ĐƠN - XÓA MỀM & HOÀN KHO/VOUCHER
+    // 7. XÓA (HỦY) HÓA ĐƠN VÀ HOÀN KHO TOÀN BỘ
     @DeleteMapping("/invoices/{id}")
     @Transactional
     public ResponseEntity<?> deleteInvoice(@PathVariable Integer id) {
         HoaDon hd = hoaDonRepo.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
 
-        // 1. CẬP NHẬT TRẠNG THÁI THÀNH "ĐÃ HỦY"
-        // Lưu ý: Tùy database của anh quy định mã Hủy là gì (DA_HUY, HUY_DON, v.v.), anh thay cho khớp nhé!
         TrangThaiHoaDon trangThaiHuy = trangThaiRepo.findByMa("DA_HUY");
         if (trangThaiHuy == null) {
-            trangThaiHuy = trangThaiRepo.findByMa("HUY_DON"); // Dự phòng nếu mã của anh là HUY_DON
+            trangThaiHuy = trangThaiRepo.findByMa("HUY_DON");
         }
         hd.setTrangThaiHoaDon(trangThaiHuy);
 
-        // 2. LOGIC HOÀN VOUCHER (Nếu đơn đã gắn voucher)
         if (hd.getMaGiamGia() != null) {
             MaGiamGia voucher = hd.getMaGiamGia();
             int luotMoi = voucher.getLuotSuDung() - 1;
 
-            // Đảm bảo không bị âm lượt dùng
             if (luotMoi >= 0) {
                 voucher.setLuotSuDung(luotMoi);
-
-                // Bật lại voucher nếu trước đó bị tắt (do hết lượt) và vẫn còn hạn
                 if (!voucher.getTrangThai() && voucher.getNgayKetThuc().isAfter(LocalDateTime.now())) {
                     voucher.setTrangThai(true);
                 }
@@ -271,18 +364,29 @@ public class PosApi {
             }
         }
 
-        // 3. LOGIC HOÀN LẠI TỒN KHO (Nếu đơn đã có chi tiết sản phẩm)
         List<HoaDonChiTiet> listHdct = hdctRepo.findByHoaDonId(id);
         if (!listHdct.isEmpty()) {
             for (HoaDonChiTiet hdct : listHdct) {
                 SanPhamChiTiet spct = hdct.getSanPhamChiTiet();
-                // Cộng trả lại số lượng
                 spct.setSoLuong(spct.getSoLuong() + hdct.getSoLuong());
+
+                // TỰ ĐỘNG BẬT LẠI TRẠNG THÁI KHI HOÀN KHO
+                if (spct.getSoLuong() > 0 && (spct.getTrangThai() == null || spct.getTrangThai() == false)) {
+                    spct.setTrangThai(true);
+                }
+
                 variantRepo.save(spct);
             }
         }
 
-        // 4. LƯU LẠI HÓA ĐƠN VỚI TRẠNG THÁI MỚI (Bỏ đi 2 lệnh deleteById cũ)
+        NhanVien nvHuy = getLoggedInNhanVien();
+        lichSuRepo.save(LichSuHoaDon.builder()
+                .hoaDon(hd)
+                .trangThaiHoaDon(trangThaiHuy)
+                .ghiChu("Hủy hóa đơn chờ tại quầy")
+                .nhanVien(nvHuy)
+                .build());
+
         hoaDonRepo.save(hd);
 
         return ResponseEntity.ok(Map.of("message", "Đã hủy hóa đơn thành công"));
@@ -296,6 +400,4 @@ public class PosApi {
                 "sizes", kichThuocRepo.findAll()
         );
     }
-
-
 }

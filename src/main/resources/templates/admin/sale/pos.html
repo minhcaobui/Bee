@@ -1017,13 +1017,17 @@
         activeInvoiceId: null,
         isCreating: false,
 
-        // --- 0. KHỞI TẠO (CÓ LƯU TRỮ) ---
+        // --- 0. KHỞI TẠO ---
         init: async function () {
-            this.loadState(); // Nạp lại đơn hàng từ ổ cứng (localStorage)
+            this.loadState();
             await this.loadAttributes();
             await this.loadProducts("");
+
+            // QUAN TRỌNG: Nạp lại giỏ hàng từ Server thay vì chỉ lấy từ LocalStorage
+            if (this.activeInvoiceId) {
+                await this.syncCartWithServer(this.activeInvoiceId);
+            }
             this.renderTabs();
-            this.renderCart();
         },
 
         saveState: function() {
@@ -1037,14 +1041,11 @@
 
             if (savedInvoices) {
                 this.invoices = JSON.parse(savedInvoices);
-
-                // Ép hết id về Number để tránh string/number mismatch
                 this.invoices = this.invoices.map(inv => ({ ...inv, id: Number(inv.id) }));
 
                 let activeId = parseInt(savedActiveId);
                 if (isNaN(activeId)) activeId = null;
 
-                // Nếu activeId không tồn tại trong danh sách thì lấy cái đầu tiên
                 if (activeId && !this.invoices.some(inv => inv.id === activeId)) {
                     activeId = this.invoices.length > 0 ? this.invoices[0].id : null;
                 }
@@ -1065,7 +1066,6 @@
                 sizeSel.innerHTML = '<option value="">TẤT CẢ KÍCH THƯỚC</option>' +
                     data.sizes.map(s => `<option value="${s.id}">${s.ten.toUpperCase()}</option>`).join('');
 
-                // FIX: Tìm đúng ô input dựa trên placeholder để lọc onload
                 const searchInp = document.querySelector('input[placeholder*="Tìm kiếm sản phẩm"]');
                 colorSel.onchange = () => this.loadProducts(searchInp.value);
                 sizeSel.onchange = () => this.loadProducts(searchInp.value);
@@ -1118,8 +1118,7 @@
 
             const res = await fetch('/api/pos/invoices', { method: 'POST' });
             const newHd = await res.json();
-
-            const newId = Number(newHd.id);   // ← ÉP NUMBER Ở ĐÂY
+            const newId = Number(newHd.id);
 
             const orderNum = this.invoices.length + 1;
             this.invoices.push({
@@ -1132,28 +1131,25 @@
                 voucher: null
             });
 
-            this.activeInvoiceId = newId;   // ← ÉP NUMBER Ở ĐÂY
+            this.activeInvoiceId = newId;
             this.saveState();
             this.renderTabs();
             this.renderCart();
             toast(`ĐÃ TẠO ${newHd.ma}`, "success");
-
             this.isCreating = false;
         },
 
-        switchTab: function (id) {
-            this.activeInvoiceId = Number(id);   // ← THÊM Number() ở đây
+        switchTab: async function (id) {
+            this.activeInvoiceId = Number(id);
             this.saveState();
             this.renderTabs();
-            this.renderCart();
+            // ĐỒNG BỘ LẠI KHI CHUYỂN TAB
+            await this.syncCartWithServer(this.activeInvoiceId);
             document.querySelector('input[placeholder*="giảm giá"]').value = '';
         },
 
         promptDelete: function () {
-            if (!this.getCurrentInvoice()) {
-                toast("CHƯA CHỌN ĐƠN HOẶC HÓA ĐƠN ĐÃ BỊ XÓA", "warning");
-                return;
-            }
+            if (!this.getCurrentInvoice()) { toast("CHƯA CHỌN ĐƠN HOẶC HÓA ĐƠN ĐÃ BỊ XÓA", "warning"); return; }
             document.getElementById('confirmModal').classList.add('show');
         },
 
@@ -1164,39 +1160,127 @@
                 this.invoices.forEach((inv, idx) => inv.name = `HÓA ĐƠN ${idx + 1}`);
                 this.activeInvoiceId = this.invoices.length > 0 ? this.invoices[0].id : null;
                 this.saveState();
+
+                // ĐỒNG BỘ LẠI SAU KHI XÓA
+                if(this.activeInvoiceId) await this.syncCartWithServer(this.activeInvoiceId);
+                await this.loadProducts(document.querySelector('input[placeholder*="Tìm kiếm sản phẩm"]').value);
+
                 this.renderTabs();
                 this.renderCart();
                 this.closeModal('confirmModal');
-                toast("ĐÃ HỦY ĐƠN HÀNG", "success");
+                toast("ĐÃ HỦY ĐƠN HÀNG VÀ HOÀN KHO", "success");
             }
         },
 
-        // --- 3. GIỎ HÀNG & VOUCHER ---
-        addToCart: function (id) {
-            const inv = this.getCurrentInvoice();
-            if (!inv) { toast("VUI LÒNG TẠO HÓA ĐƠN TRƯỚC", "warning"); return; }
-            const product = this.products.find(p => p.id === id);
-            const item = inv.cart.find(i => i.id === id);
+        // --- 3. GIỎ HÀNG (TRỪ KHO TRỰC TIẾP) ---
 
-            if (item) {
-                if (item.qty >= product.soLuong) { toast("VƯỢT QUÁ TỒN KHO", "warning"); return; }
-                item.qty++;
-            } else {
-                // Lấy cả giá gốc và giá sau KM
-                const originalPrice = product.giaBan;
-                const price = (product.giaSauKhuyenMai && product.giaSauKhuyenMai < product.giaBan) ? product.giaSauKhuyenMai : product.giaBan;
+        // HÀM MỚI: Đồng bộ giỏ hàng từ Server
+        syncCartWithServer: async function(invoiceId) {
+            try {
+                const res = await fetch('/api/pos/invoices/pending');
+                const pendingInvoices = await res.json();
 
-                inv.cart.push({
-                    id: product.id,
-                    name: product.sanPham.ten,
-                    originalPrice: originalPrice, // <-- THÊM DÒNG NÀY ĐỂ LƯU GIÁ GỐC
-                    price: price,
-                    attr: `${product.mauSac.ten} - ${product.kichThuoc.ten}`,
-                    qty: 1
+                // Cập nhật lại toàn bộ invoices từ server
+                pendingInvoices.forEach(serverInv => {
+                    let localInv = this.invoices.find(i => i.id === serverInv.id);
+                    if (localInv && serverInv.hoaDonChiTiets) {
+                        localInv.cart = serverInv.hoaDonChiTiets.map(ct => ({
+                            id: ct.sanPhamChiTiet.id,
+                            name: ct.sanPhamChiTiet.sanPham.ten,
+                            price: ct.giaTien,
+                            originalPrice: ct.sanPhamChiTiet.giaBan,
+                            attr: `${ct.sanPhamChiTiet.mauSac.ten} - ${ct.sanPhamChiTiet.kichThuoc.ten}`,
+                            qty: ct.soLuong
+                        }));
+                    }
                 });
-            }
-            this.saveState();
-            this.renderCart();
+                this.saveState();
+                this.renderCart();
+            } catch (e) { console.error("Lỗi đồng bộ giỏ hàng", e); }
+        },
+
+        // ĐÃ SỬA: Gọi API Trừ kho
+        addToCart: async function (spctId) {
+            if (!this.activeInvoiceId) { toast("VUI LÒNG TẠO HÓA ĐƠN TRƯỚC", "warning"); return; }
+
+            try {
+                const res = await fetch(`/api/pos/invoices/${this.activeInvoiceId}/add-product`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ spctId: spctId, qty: 1 })
+                });
+
+                if (res.ok) {
+                    toast("Đã thêm vào giỏ hàng");
+
+                    // --- CẬP NHẬT GIAO DIỆN NGAY LẬP TỨC TẠI ĐÂY ---
+                    const inv = this.getCurrentInvoice();
+                    const product = this.products.find(p => p.id === spctId);
+                    const item = inv.cart.find(i => i.id === spctId);
+
+                    if (item) {
+                        item.qty += 1;
+                    } else {
+                        const price = (product.giaSauKhuyenMai && product.giaSauKhuyenMai < product.giaBan) ? product.giaSauKhuyenMai : product.giaBan;
+                        inv.cart.push({
+                            id: product.id,
+                            name: product.sanPham.ten,
+                            originalPrice: product.giaBan,
+                            price: price,
+                            attr: `${product.mauSac.ten} - ${product.kichThuoc.ten}`,
+                            qty: 1
+                        });
+                    }
+                    this.saveState();
+                    this.renderCart();
+
+                    // Load lại kho ở bảng bên phải
+                    await this.loadProducts(document.querySelector('input[placeholder*="Tìm kiếm sản phẩm"]').value);
+                } else {
+                    const err = await res.json();
+                    toast(err.message || "Không đủ hàng trong kho!", "warning");
+                }
+            } catch (e) { toast("Lỗi kết nối máy chủ", "error"); }
+        },
+
+        // ĐÃ SỬA: Gọi API Đổi số lượng / Hoàn kho
+        changeQty: async function (spctId, delta) {
+            const inv = this.getCurrentInvoice();
+            const item = inv.cart.find(i => i.id === spctId);
+            if (!item) return;
+
+            const newQty = item.qty + delta;
+
+            try {
+                if (newQty <= 0 || delta === -999) {
+                    // API Xóa hoàn kho
+                    const res = await fetch(`/api/pos/invoices/${inv.id}/remove-product/${spctId}`, { method: 'DELETE' });
+                    if (res.ok) {
+                        toast("Đã xóa khỏi giỏ và hoàn kho");
+                        // Cập nhật giao diện: Loại bỏ sản phẩm khỏi mảng
+                        inv.cart = inv.cart.filter(i => i.id !== spctId);
+                    }
+                } else {
+                    // API Cập nhật kho
+                    const res = await fetch(`/api/pos/invoices/${inv.id}/update-quantity`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ spctId: spctId, newQty: newQty })
+                    });
+                    if (!res.ok) {
+                        const err = await res.json();
+                        toast(err.message || "Kho không đủ hàng", "warning");
+                        return;
+                    }
+                    // Cập nhật giao diện: Tăng/giảm số lượng
+                    item.qty = newQty;
+                }
+
+                this.saveState();
+                this.renderCart();
+                // Load lại kho ở bảng bên phải
+                await this.loadProducts(document.querySelector('input[placeholder*="Tìm kiếm sản phẩm"]').value);
+            } catch (e) { toast("Lỗi hệ thống", "error"); }
         },
 
         applyVoucher: async function() {
@@ -1205,7 +1289,6 @@
             if (!inv || inv.cart.length === 0) { toast("GIỎ HÀNG TRỐNG", "warning"); return; }
             if (!code) { toast("NHẬP MÃ VOUCHER", "warning"); return; }
 
-            // Tính tiền sau sale để check xem có đủ điều kiện Min Order của Voucher không
             const subTotal = inv.cart.reduce((sum, i) => sum + ((i.originalPrice || i.price) * i.qty), 0);
             const saleDiscount = inv.cart.reduce((sum, i) => sum + (((i.originalPrice || i.price) - i.price) * i.qty), 0);
             const totalAfterSale = subTotal - saleDiscount;
@@ -1215,7 +1298,7 @@
                 if (res.ok) {
                     inv.voucher = await res.json();
                     this.saveState();
-                    this.renderCart(); // Thằng này gọi updateTotal() nên sẽ update lại số liệu
+                    this.renderCart();
                     toast("ÁP DỤNG THÀNH CÔNG", "success");
                 } else {
                     toast(await res.text(), "error");
@@ -1227,69 +1310,41 @@
             const inv = this.getCurrentInvoice();
             if (!inv) return;
 
-            // 1. Tính Tạm tính (Giá gốc) và Khuyến mãi (Sale SP)
-            let subTotal = 0;     // Tổng giá gốc
-            let saleDiscount = 0; // Tổng tiền giảm do Sale
+            let subTotal = 0;
+            let saleDiscount = 0;
 
             inv.cart.forEach(i => {
-                // Ép kiểu tường minh thành Number trước khi tính
                 const giaGoc = Number(i.originalPrice) || Number(i.price);
                 const giaBan = Number(i.price);
-
                 subTotal += (giaGoc * i.qty);
                 saleDiscount += ((giaGoc - giaBan) * i.qty);
             });
 
-            // 2. LÀM TRÒN SAU KHI CỘNG DỒN:
             subTotal = Math.round(subTotal);
             saleDiscount = Math.round(saleDiscount);
-
-            // Tiền sau khi trừ Sale (Dùng để xét điều kiện áp Voucher)
             let totalAfterSale = subTotal - saleDiscount;
 
-            // 3. Tính Voucher
             let calcVoucher = 0;
             if (inv.voucher) {
                 const v = inv.voucher;
                 const giaTriVoucher = Number(v.giaTriGiamGia);
-
-                calcVoucher = v.loaiGiamGia === 'PERCENTAGE'
-                    ? (totalAfterSale * giaTriVoucher) / 100
-                    : giaTriVoucher;
-
-                if (v.giaTriGiamGiaToiDa) {
-                    const maxGiang = Number(v.giaTriGiamGiaToiDa);
-                    if (calcVoucher > maxGiang) {
-                        calcVoucher = maxGiang;
-                    }
-                }
+                calcVoucher = v.loaiGiamGia === 'PERCENTAGE' ? (totalAfterSale * giaTriVoucher) / 100 : giaTriVoucher;
+                if (v.giaTriGiamGiaToiDa && calcVoucher > Number(v.giaTriGiamGiaToiDa)) calcVoucher = Number(v.giaTriGiamGiaToiDa);
             }
+
             let voucherDiscount = Math.round(calcVoucher);
             const total = Math.round(Math.max(0, totalAfterSale - voucherDiscount));
 
-            // 5. Đẩy lên UI
             document.getElementById('lblSubTotal').innerText = new Intl.NumberFormat('vi-VN').format(subTotal) + ' ₫';
-
-            // Lấy 2 cái thẻ span màu xanh lá để điền Khuyến mãi và Voucher
             const discountSpans = document.querySelectorAll('.summary-row span[style*="10b981"]');
-            discountSpans[0].innerText = '-' + new Intl.NumberFormat('vi-VN').format(saleDiscount) + ' ₫';
-            discountSpans[1].innerText = '-' + new Intl.NumberFormat('vi-VN').format(voucherDiscount) + ' ₫';
-
+            if(discountSpans.length >= 2) {
+                discountSpans[0].innerText = '-' + new Intl.NumberFormat('vi-VN').format(saleDiscount) + ' ₫';
+                discountSpans[1].innerText = '-' + new Intl.NumberFormat('vi-VN').format(voucherDiscount) + ' ₫';
+            }
             document.getElementById('lblTotal').innerText = new Intl.NumberFormat('vi-VN').format(total) + ' ₫';
 
             const modalTotalEl = document.getElementById('modalTotal');
             if(modalTotalEl) modalTotalEl.innerText = new Intl.NumberFormat('vi-VN').format(total) + ' ₫';
-        },
-
-        changeQty: function (id, delta) {
-            const inv = this.getCurrentInvoice();
-            const item = inv.cart.find(i => i.id === id);
-            if (item) {
-                item.qty += delta;
-                if (item.qty <= 0) inv.cart = inv.cart.filter(i => i.id !== id);
-                this.saveState();
-                this.renderCart();
-            }
         },
 
         // --- 4. TÌM KIẾM ---
@@ -1308,27 +1363,19 @@
                 return;
             }
             resultBox.innerHTML = data.map(c => `
-        <div style="padding:10px 15px;border-bottom:1px solid #eee;cursor:pointer;"
-             onclick="PosApp.selectCustomer('${c.hoTen}', '${c.soDienThoai}', ${c.id})">
-            <div style="font-weight:700;">${c.hoTen.toUpperCase()}</div>
-            <div style="font-size:11px;color:#666;">${c.soDienThoai}</div>
-        </div>`).join('');
+                <div style="padding:10px 15px;border-bottom:1px solid #eee;cursor:pointer;"
+                     onclick="PosApp.selectCustomer('${c.hoTen}', '${c.soDienThoai}', ${c.id})">
+                    <div style="font-weight:700;">${c.hoTen.toUpperCase()}</div>
+                    <div style="font-size:11px;color:#666;">${c.soDienThoai}</div>
+                </div>`).join('');
         },
 
         selectCustomer: function (name, phone, id) {
             const inv = this.getCurrentInvoice();
-
-            // 1. CHẶN LỖI: Bắt buộc phải có hóa đơn mới cho chọn khách
-            if (!inv) {
-                toast("VUI LÒNG TẠO HÓA ĐƠN TRƯỚC", "warning");
-                return;
-            }
-
-            // 2. Gán khách hàng vào hóa đơn
+            if (!inv) { toast("VUI LÒNG TẠO HÓA ĐƠN TRƯỚC", "warning"); return; }
             inv.customer = name;
             inv.phone = phone;
             inv.customerId = id;
-
             this.saveState();
             this.renderTabs();
             this.closeModal('customerModal');
@@ -1338,17 +1385,12 @@
         finishOrder: async function () {
             const inv = this.getCurrentInvoice();
             const total = parseInt(document.getElementById('lblTotal').innerText.replace(/\D/g, '')) || 0;
-
             const isCash = document.getElementById('cash-section').style.display !== 'none';
             let finalMethod = '';
 
             if (isCash) {
                 const khachDua = parseInt(document.getElementById('inpKhachDua').value.replace(/\D/g, '')) || 0;
-                if (khachDua < total) {
-                    // Thông báo nhẹ nhàng, không gắt gỏng
-                    toast("Số tiền khách đưa chưa đủ. Vui lòng kiểm tra lại!", "warning");
-                    return;
-                }
+                if (khachDua < total) { toast("Số tiền khách đưa chưa đủ!", "warning"); return; }
                 finalMethod = 'TIỀN MẶT';
             } else {
                 const selectedOption = document.querySelector('#transfer-section .payment-option.selected span');
@@ -1359,9 +1401,7 @@
                 invoiceId: inv.id,
                 customerId: inv.customerId,
                 total: total,
-                // loaiThanhToan: finalMethod,
                 method: finalMethod,
-                cart: inv.cart,
                 voucherId: inv.voucher ? inv.voucher.id : null
             };
 
@@ -1380,56 +1420,35 @@
                     this.saveState();
                     await this.loadProducts("");
                     this.renderTabs();
-                    this.renderCart();
+
+                    if (this.activeInvoiceId) await this.syncCartWithServer(this.activeInvoiceId);
+                    else this.renderCart();
+
                     this.closeModal('payModal');
                 } else {
-                    // --- ĐOẠN NÀY ĐỂ ĐỌC LỖI TỪ BACKEND TRẢ VỀ ---
-                    let errorMsg = "Thanh toán thất bại. Vui lòng thử lại sau.";
-                    try {
-                        const errData = await res.json();
-                        errorMsg = errData.message || errorMsg;
-                    } catch (ex) {}
+                    let errorMsg = "Thanh toán thất bại.";
+                    try { const errData = await res.json(); errorMsg = errData.message || errorMsg; } catch (ex) {}
                     toast(errorMsg, "error");
                 }
-            } catch (e) {
-                toast("Lỗi kết nối đến máy chủ. Vui lòng kiểm tra mạng!", "error");
-            }
+            } catch (e) { toast("Lỗi kết nối đến máy chủ!", "error"); }
         },
 
         openPayModal: function () {
             const inv = this.getCurrentInvoice();
-
-            if (!inv) {
-                toast("Vui lòng chọn hoặc tạo hóa đơn trước khi thanh toán.", "warning");
-                return;
-            }
-
-            if (!inv.cart || inv.cart.length === 0) {
-                toast("Giỏ hàng đang trống. Vui lòng thêm sản phẩm.", "warning");
-                return;
-            }
+            if (!inv) { toast("Vui lòng chọn hoặc tạo hóa đơn trước", "warning"); return; }
+            if (!inv.cart || inv.cart.length === 0) { toast("Giỏ hàng đang trống", "warning"); return; }
 
             document.getElementById('inpKhachDua').value = '';
             document.getElementById('lblTienThua').innerText = '0 ₫';
 
             const tabs = document.querySelectorAll('.payment-tab');
             if(tabs.length > 0) this.switchPaymentMethod('cash', tabs[0]);
-
-            const subTotal = inv.cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
-            let discount = 0;
-            if (inv.voucher) {
-                const v = inv.voucher;
-                discount = v.loaiGiamGia === 'PERCENTAGE' ? (subTotal * v.giaTriGiamGia) / 100 : v.giaTriGiamGia;
-                if (v.giaTriGiamGiaToiDa && discount > v.giaTriGiamGiaToiDa) discount = v.giaTriGiamGiaToiDa;
-            }
-            const total = Math.max(0, subTotal - discount);
-            document.getElementById('modalTotal').innerText = new Intl.NumberFormat('vi-VN').format(total) + ' ₫';
-
             this.openModal('payModal');
         },
 
         // --- UTILS ---
         getCurrentInvoice: function () { return this.invoices.find(inv => inv.id === this.activeInvoiceId); },
+
         renderTabs: function () {
             const container = document.getElementById('invoiceTabsContainer');
             if (this.invoices.length === 0) {
@@ -1444,12 +1463,15 @@
             document.getElementById('customerName').innerText = cur ? cur.customer : 'KHÁCH VÃNG LAI';
             document.getElementById('customerPhone').innerText = cur ? (cur.phone || 'Khách lẻ') : 'Khách lẻ';
         },
+
         renderCart: function () {
             const inv = this.getCurrentInvoice();
             const tbody = document.getElementById('cartBody');
-            if (!inv || inv.cart.length === 0) {
-                tbody.innerHTML = ''; document.getElementById('emptyCart').style.display = 'block';
-                this.updateTotal(0); return;
+            if (!inv || !inv.cart || inv.cart.length === 0) {
+                tbody.innerHTML = '';
+                document.getElementById('emptyCart').style.display = 'block';
+                this.updateTotal(0);
+                return;
             }
             document.getElementById('emptyCart').style.display = 'none';
             tbody.innerHTML = inv.cart.map(i => `
@@ -1465,36 +1487,27 @@
                     <td style="text-align:right; padding-right: 20px;">${new Intl.NumberFormat('vi-VN').format(Number(i.price) * Number(i.qty))} ₫</td>
                     <td><i class="bi bi-trash" style="cursor:pointer; color:#ef4444;" onclick="PosApp.changeQty(${i.id}, -999)"></i></td>
                 </tr>`).join('');
-            this.updateTotal(); // Giờ gọi hàm không cần truyền gì cả, nó tự tính
+            this.updateTotal();
         },
+
         openModal: function (id) { document.getElementById(id).classList.add('show'); },
         closeModal: function (id) { document.getElementById(id).classList.remove('show'); },
+
         switchPaymentMethod: function (type, el) {
-            // Sửa '.tab' thành '.payment-tab' để nó xóa đúng class
             el.parentElement.querySelectorAll('.payment-tab').forEach(t => t.classList.remove('active'));
             el.classList.add('active');
-
-            // ĐỔI 'flex' THÀNH 'block' ĐỂ HAI Ô NHẬP TIỀN NẰM DỌC
             document.getElementById('cash-section').style.display = type === 'cash' ? 'block' : 'none';
             document.getElementById('transfer-section').style.display = type === 'cash' ? 'none' : 'block';
         },
+
         calcChange: function () {
             const inputEl = document.getElementById('inpKhachDua');
-
-            // 1. Lọc lấy phần số thô (xóa hết dấu chấm, phẩy, chữ cái nếu có)
             let rawValue = inputEl.value.replace(/\D/g, '');
+            if (rawValue !== '') inputEl.value = new Intl.NumberFormat('vi-VN').format(parseInt(rawValue));
+            else inputEl.value = '';
 
-            // 2. Tự động format lại ô input lúc mày đang gõ
-            if (rawValue !== '') {
-                inputEl.value = new Intl.NumberFormat('vi-VN').format(parseInt(rawValue));
-            } else {
-                inputEl.value = '';
-            }
-
-            // 3. Tính toán tiền thừa
             const total = parseInt(document.getElementById('lblTotal').innerText.replace(/\D/g, '')) || 0;
-            const cust = parseInt(rawValue) || 0; // Lấy cái số thô ở trên ra tính cho chuẩn
-
+            const cust = parseInt(rawValue) || 0;
             document.getElementById('lblTienThua').innerText = new Intl.NumberFormat('vi-VN').format(Math.max(0, cust - total)) + ' ₫';
         },
 
@@ -1510,15 +1523,11 @@
             const phone = document.getElementById('newCustPhone').value.trim();
             if (!name || !phone) { toast("VUI LÒNG NHẬP ĐỦ THÔNG TIN", "warning"); return; }
 
-            // CHECK TRÙNG SĐT trước khi tạo
             try {
                 const checkRes = await fetch(`/api/pos/customers/search?q=${phone}`);
                 const existing = await checkRes.json();
                 const duplicate = existing.find(c => c.soDienThoai === phone);
-                if (duplicate) {
-                    toast(`SĐT ĐÃ TỒN TẠI: ${duplicate.hoTen}`, "warning");
-                    return;
-                }
+                if (duplicate) { toast(`SĐT ĐÃ TỒN TẠI`, "warning"); return; }
             } catch (e) { toast("LỖI KIỂM TRA SĐT", "error"); return; }
 
             const res = await fetch('/api/pos/customers', {
@@ -1530,56 +1539,42 @@
                 const kh = await res.json();
                 this.selectCustomer(kh.hoTen, kh.soDienThoai, kh.id);
                 toast("ĐÃ THÊM KHÁCH HÀNG", "success");
-            } else {
-                toast("LỖI KHI THÊM KHÁCH", "error");
-            }
+            } else { toast("LỖI KHI THÊM KHÁCH", "error"); }
         },
 
         selectApp: function(el) {
-            // Bỏ chọn tất cả, chọn cái được click
-            el.closest('div').querySelectorAll('.payment-option')
-                .forEach(btn => btn.classList.remove('selected'));
+            el.closest('div').querySelectorAll('.payment-option').forEach(btn => btn.classList.remove('selected'));
             el.classList.add('selected');
         },
 
-        // Nút swap trên avatar — toggle inline search
         toggleCustomerSearch: function() {
             const box = document.getElementById('inlineCustomerSearch');
             const isHidden = box.style.display === 'none';
             box.style.display = isHidden ? 'block' : 'none';
             if (isHidden) {
                 box.querySelector('input').focus();
-                document.getElementById('inlineSearchResults').innerHTML =
-                    '<div style="padding:8px 12px; color:#999; font-size:11px;">Nhập để tìm kiếm...</div>';
+                document.getElementById('inlineSearchResults').innerHTML = '<div style="padding:8px 12px; color:#999; font-size:11px;">Nhập để tìm kiếm...</div>';
             }
         },
 
-// Tìm kiếm trong inline dropdown
         inlineSearchCustomer: async function(val) {
             const box = document.getElementById('inlineSearchResults');
-            if (val.length < 2) {
-                box.innerHTML = '<div style="padding:8px 12px; color:#999; font-size:11px;">Nhập để tìm kiếm...</div>';
-                return;
-            }
+            if (val.length < 2) { box.innerHTML = '<div style="padding:8px 12px; color:#999; font-size:11px;">Nhập để tìm kiếm...</div>'; return; }
             const res = await fetch(`/api/pos/customers/search?q=${val}`);
             const data = await res.json();
-            if (data.length === 0) {
-                box.innerHTML = '<div style="padding:8px 12px; color:#999; font-size:11px;">Không tìm thấy</div>';
-                return;
-            }
+            if (data.length === 0) { box.innerHTML = '<div style="padding:8px 12px; color:#999; font-size:11px;">Không tìm thấy</div>'; return; }
             box.innerHTML = data.map(c => `
-        <div style="padding:8px 12px; border-bottom:1px solid #eee; cursor:pointer;"
-             onmouseover="this.style.background='#f4f4f5'" onmouseout="this.style.background=''"
-             onclick="PosApp.selectCustomerInline('${c.hoTen}', '${c.soDienThoai}', ${c.id})">
-            <div style="font-weight:700; font-size:12px;">${c.hoTen.toUpperCase()}</div>
-            <div style="font-size:11px; color:#666;">${c.soDienThoai}</div>
-        </div>`).join('');
+                <div style="padding:8px 12px; border-bottom:1px solid #eee; cursor:pointer;"
+                     onmouseover="this.style.background='#f4f4f5'" onmouseout="this.style.background=''"
+                     onclick="PosApp.selectCustomerInline('${c.hoTen}', '${c.soDienThoai}', ${c.id})">
+                    <div style="font-weight:700; font-size:12px;">${c.hoTen.toUpperCase()}</div>
+                    <div style="font-size:11px; color:#666;">${c.soDienThoai}</div>
+                </div>`).join('');
         },
 
-// Chọn từ inline search
         selectCustomerInline: function(name, phone, id) {
             const inv = this.getCurrentInvoice();
-            if (!inv) { toast("VUI LÒNG TẠO HÓA ĐƠN TRƯỚC", "warning"); return; }
+            if (!inv) { toast("VUI LÒNG TẠO HÓA ĐƠN", "warning"); return; }
             inv.customer = name; inv.phone = phone; inv.customerId = id;
             this.saveState();
             this.renderTabs();
@@ -1587,15 +1582,11 @@
             toast(`ĐÃ CHỌN: ${name}`, "success");
         },
 
-// Reset về khách vãng lai
         resetCustomer: function() {
             const inv = this.getCurrentInvoice();
             if (!inv) return;
-            inv.customer = 'KHÁCH VÃNG LAI';
-            inv.phone = '';
-            inv.customerId = null;
-            this.saveState();
-            this.renderTabs();
+            inv.customer = 'KHÁCH VÃNG LAI'; inv.phone = ''; inv.customerId = null;
+            this.saveState(); this.renderTabs();
             document.getElementById('inlineCustomerSearch').style.display = 'none';
             toast("ĐÃ CHUYỂN VỀ KHÁCH VÃNG LAI", "success");
         },

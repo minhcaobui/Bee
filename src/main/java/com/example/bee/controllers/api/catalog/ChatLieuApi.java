@@ -2,6 +2,8 @@ package com.example.bee.controllers.api.catalog;
 
 import com.example.bee.entities.catalog.ChatLieu;
 import com.example.bee.repositories.catalog.ChatLieuRepository;
+import com.example.bee.repositories.products.SanPhamChiTietRepository;
+import com.example.bee.repositories.products.SanPhamRepository;
 import com.example.bee.repositories.promotion.KhuyenMaiRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Random;
 
 @RestController
@@ -35,6 +38,9 @@ public class ChatLieuApi {
     private final ChatLieuRepository chatLieuRepository;
     @Autowired
     private final KhuyenMaiRepository khuyenMaiRepository;
+
+    @Autowired
+    private final SanPhamRepository sanPhamRepository;
 
 
     // --- 1. SỬA LẠI LOGIC GEN MÃ (CL_ + SỐ) ---
@@ -110,7 +116,21 @@ public class ChatLieuApi {
     public ResponseEntity<?> toggleStatus(@PathVariable Integer id) {
         ChatLieu chatLieu = chatLieuRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        // Nếu không trùng thì cho tắt bình thường
+
+        // KIỂM TRA: Nếu trạng thái hiện tại đang là BẬT (true) và chuẩn bị TẮT
+        if (chatLieu.getTrangThai() != null && chatLieu.getTrangThai() == true) {
+            // Kiểm tra xem có sản phẩm nào đang dùng chất liệu này và đang hoạt động không
+            boolean isUsed = sanPhamRepository.existsByChatLieu_IdAndTrangThaiTrue(id);
+
+            if (isUsed) {
+                // Nếu có, chặn lại và trả về lỗi 400
+                return ResponseEntity.badRequest().body(Map.of(
+                        "message", "Không thể ngừng hoạt động! Đang có sản phẩm sử dụng chất liệu này đang được bày bán."
+                ));
+            }
+        }
+
+        // Nếu không vướng sản phẩm nào (hoặc đang từ TẮT bật lên) thì cho đổi bình thường
         chatLieu.setTrangThai(!chatLieu.getTrangThai());
         chatLieuRepository.save(chatLieu);
 

@@ -81,4 +81,5 @@ public class SanPham {
     public void preUpdate() {
         this.ngaySua = new Date(); // Khi cập nhật thì gán ngày sửa
     }
+
 }

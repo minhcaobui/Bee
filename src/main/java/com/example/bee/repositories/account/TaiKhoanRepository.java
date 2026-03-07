@@ -7,8 +7,6 @@ import java.util.Optional;
 
 @Repository
 public interface TaiKhoanRepository extends JpaRepository<TaiKhoan, Integer> {
-    // Tìm kiếm theo username hoặc email
-    Optional<TaiKhoan> findByTenDangNhapOrEmail(String tenDangNhap, String email);
-
-    boolean existsByTenDangNhap(String tenDangNhap);
+    // Tìm tài khoản đang hoạt động (trang_thai = true)
+    Optional<TaiKhoan> findByTenDangNhapAndTrangThaiTrue(String tenDangNhap);
 }

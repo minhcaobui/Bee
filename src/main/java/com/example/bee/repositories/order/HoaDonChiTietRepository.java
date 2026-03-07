@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface HoaDonChiTietRepository extends JpaRepository<HoaDonChiTiet, Integer> {
@@ -19,5 +20,9 @@ public interface HoaDonChiTietRepository extends JpaRepository<HoaDonChiTiet, In
     List<HoaDonChiTiet> findByHoaDonId(Integer idHoaDon);
 
     void deleteByHoaDonId(Integer id);
+
+    // THÊM DÒNG NÀY ĐỂ HẾT LỖI:
+    // Tìm chính xác 1 dòng dựa trên ID hóa đơn và ID sản phẩm chi tiết
+    Optional<HoaDonChiTiet> findByHoaDonIdAndSanPhamChiTietId(Integer hoaDonId, Integer sanPhamChiTietId);
 
 }
