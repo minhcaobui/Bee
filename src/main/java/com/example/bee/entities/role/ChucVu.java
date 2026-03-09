@@ -15,9 +15,9 @@ public class ChucVu {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(unique = true, nullable = false, length = 50)
+    @Column(name = "ma", unique = true, nullable = false, length = 50)
     private String ma;
 
-    @Column(nullable = false, length = 150)
+    @Column(name = "ten", nullable = false, length = 150)
     private String ten;
 }

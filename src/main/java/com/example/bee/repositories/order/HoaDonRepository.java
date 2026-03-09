@@ -14,6 +14,8 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
     // Tab 1: ĐƠN HÀNG (Online đang xử lý)
     // Lấy đơn Online và có mã trạng thái nằm trong list (CHO_XAC_NHAN, CHO_GIAO, DANG_GIAO)
     List<HoaDon> findByLoaiHoaDonAndTrangThaiHoaDonMaInOrderByNgayTaoDesc(Integer loai, List<String> mas);
+    HoaDon findByMa(String ma);
+
 
     // Tab 2: HÓA ĐƠN (Lịch sử)
     // Lấy tất cả tại quầy (loai=0) HOẶC Online đã xong/hủy

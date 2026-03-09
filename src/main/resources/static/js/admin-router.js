@@ -94,6 +94,11 @@ async function loadModule(moduleName) {
             title = 'QUẢN LÝ KHÁCH HÀNG';
             break;
 
+        case 'staff':
+            url = '/staff';
+            title = 'QUẢN LÝ NHÂN VIÊN';
+            break;
+
         case 'users':
             url = '/users.html';
             title = 'QUẢN LÝ TÀI KHOẢN';
