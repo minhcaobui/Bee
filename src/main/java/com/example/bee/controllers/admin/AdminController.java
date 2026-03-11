@@ -13,6 +13,7 @@ import java.util.List;
 public class AdminController {
     @Autowired
     private NVRepository nvRepo;
+
     @GetMapping("/admin")
     public String showAdminLayout() {
         return "admin/admin-layout";

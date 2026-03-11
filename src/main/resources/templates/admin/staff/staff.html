@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
     <style>
-        /* --- KẾ THỪA CSS CHUẨN TỪ MODULE KHÁCH HÀNG --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root { --black: #000; --white: #fff; --gray-100: #f4f4f5; --gray-200: #e4e4e7; --gray-300: #d4d4d8; --font-size: 12.5px; }
         body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--black); font-size: var(--font-size); line-height: 1.4; }
@@ -30,7 +29,7 @@
         thead th { padding: 12px 15px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #222; background: #fafafa; border-bottom: 1px solid var(--gray-200); }
         tbody td { padding: 12px 15px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; }
 
-        /* SWITCH TOGGLE VUÔNG (Drawer) */
+        /* SWITCH TOGGLE */
         .switch-square { position: relative; display: inline-block; width: 40px; height: 20px; }
         .switch-square input { opacity: 0; width: 0; height: 0; }
         .slider-square { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; }
@@ -38,7 +37,6 @@
         input:checked + .slider-square { background-color: #000; }
         input:checked + .slider-square:before { transform: translateX(20px); }
 
-        /* SWITCH TRONG BẢNG (Toggle nhanh) */
         .switch-sm { position: relative; display: inline-block; width: 30px; height: 16px; }
         .switch-sm input { opacity: 0; width: 0; height: 0; }
         .slider-sm { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; }
@@ -67,7 +65,6 @@
         .drawer-tab { padding-bottom: 10px; font-size: 12px; font-weight: 700; text-transform: uppercase; color: #888; cursor: pointer; border-bottom: 2px solid transparent; }
         .drawer-tab.active { color: #000; border-bottom-color: #000; }
 
-        /* TOAST XỊN */
         .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
         .toast { min-width: 280px; padding: 14px 22px; border-radius: 4px; background: #fff; color: #000; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 12px; border-left: 5px solid #000; animation: toastIn 0.3s forwards; }
         .toast.success { border-left-color: #10b981; }
@@ -76,6 +73,14 @@
 
         .btn-icon { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--gray-200); background: #fff; cursor: pointer; border-radius: 2px; margin-left: 6px; }
         .btn-icon:hover { border-color: #000; background: #000; color: #fff; }
+
+        /* MODAL OTP XỊN XÒ */
+        .modal-otp-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+        .modal-otp-box { background: #fff; width: 420px; padding: 30px; border-radius: 6px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: scaleIn 0.2s ease-out; }
+        .modal-otp-box h4 { font-weight: 800; margin-bottom: 10px; text-transform: uppercase; }
+        .modal-otp-box p { font-size: 13px; color: #666; margin-bottom: 25px; }
+        .modal-otp-box input { width: 100%; text-align: center; letter-spacing: 10px; font-size: 24px; font-weight: bold; margin-bottom: 20px; height: 50px; }
+        @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
@@ -126,7 +131,7 @@
     </div>
 
     <div class="drawer-body">
-        <div class="drawer-tabs" id="drawerTabs" style="display: none;">
+        <div class="drawer-tabs" id="drawerTabs">
             <div class="drawer-tab active" onclick="window.StaffApp.switchTab('info')" id="tabInfo">THÔNG TIN HỒ SƠ</div>
             <div class="drawer-tab" onclick="window.StaffApp.switchTab('address')" id="tabAddr">ĐỊA CHỈ TẠM TRÚ</div>
         </div>
@@ -145,16 +150,16 @@
 
             <div style="display: flex; gap: 15px;">
                 <div class="form-group" style="flex: 1;"><label class="label-bee">Số điện thoại *</label><input type="tel" id="nvSdt" class="input-bee" placeholder="09xxxxxxxx"></div>
-                <div class="form-group" style="flex: 1;"><label class="label-bee">Email *</label><input type="email" id="nvEmail" class="input-bee" placeholder="email@gmail.com"></div>
+                <div class="form-group" style="flex: 1;"><label class="label-bee">Email *</label><input type="email" id="nvEmail" class="input-bee" placeholder="Ví dụ: hoten@gmail.com"></div>
             </div>
 
-            <div id="passwordBlock" style="display: flex; gap: 15px;">
-                <div class="form-group" style="flex: 1;"><label class="label-bee">Mật khẩu *</label><input type="password" id="nvPass" class="input-bee" placeholder="••••••••"></div>
-                <div class="form-group" style="flex: 1;"><label class="label-bee">Xác nhận *</label><input type="password" id="nvConfirmPass" class="input-bee" placeholder="••••••••"></div>
+            <div id="passwordBlock" style="display: none; gap: 15px; background: #fdfdfd; border: 1px dashed #ccc; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
+                <div class="form-group" style="flex: 1; margin:0;"><label class="label-bee">Đổi mật khẩu (Bỏ trống nếu không đổi)</label><input type="password" id="nvPass" class="input-bee" placeholder="Mật khẩu mới..."></div>
+                <div class="form-group" style="flex: 1; margin:0;"><label class="label-bee">Xác nhận mật khẩu</label><input type="password" id="nvConfirmPass" class="input-bee" placeholder="Nhập lại mật khẩu mới..."></div>
             </div>
 
             <div style="display: flex; gap: 15px;">
-                <div class="form-group" style="flex: 1;"><label class="label-bee">Ngày sinh</label><input type="date" id="nvNgaySinh" class="input-bee"></div>
+                <div class="form-group" style="flex: 1;"><label class="label-bee">Ngày sinh *</label><input type="date" id="nvNgaySinh" class="input-bee"></div>
                 <div class="form-group" style="flex: 1;">
                     <label class="label-bee">Giới tính</label>
                     <select id="nvGender" class="input-bee"><option value="Nam">Nam</option><option value="Nữ">Nữ</option></select>
@@ -170,48 +175,59 @@
                     <span style="font-size: 12px; font-weight: 700;" id="statusLabel">ĐANG LÀM VIỆC</span>
                 </div>
             </div>
-
-            <div id="editAddrGroup" style="border-top: 1px dashed #ccc; padding-top: 15px; margin-top: 20px;">
-                <label class="label-bee">Địa chỉ liên hệ</label>
-                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                    <select id="inpCity" class="input-bee" onchange="window.StaffApp.Address.loadDistricts(this.value, 'inpDist', 'inpWard')"></select>
-                    <select id="inpDist" class="input-bee" onchange="window.StaffApp.Address.loadWards(this.value, 'inpWard')" disabled></select>
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <select id="inpWard" class="input-bee" disabled></select>
-                    <input id="inpDetail" class="input-bee" style="flex: 2;" placeholder="Số nhà, đường...">
-                </div>
-            </div>
         </div>
 
         <div id="contentAddr" style="display: none;">
-            <div style="padding: 20px; background: #fafafa; border: 1px solid #eee; font-size: 13px; border-radius: 2px;">
-                <i class="bi bi-geo-alt-fill" style="color: #ef4444;"></i> <span id="txtFullAddr" style="font-weight: 600;">Chưa cập nhật</span>
+            <div id="addressViewer" style="padding: 15px 20px; background: #fafafa; border: 1px solid #eee; font-size: 13px; border-radius: 2px; display: flex; justify-content: space-between; align-items: center;">
+                <div><i class="bi bi-geo-alt-fill" style="color: #ef4444; margin-right: 5px;"></i> <span id="txtFullAddr" style="font-weight: 600;">Chưa cập nhật</span></div>
+                <button id="btnEditAddr" class="btn-bee btn-secondary" style="height: 26px; padding: 0 10px;" onclick="window.StaffApp.enableEditAddress()"><i class="bi bi-pencil"></i> SỬA</button>
+            </div>
+
+            <div id="editAddrGroup" style="padding-top: 15px;">
+                <label class="label-bee">Thiết lập địa chỉ liên hệ *</label>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <select id="inpCity" class="input-bee" style="flex: 1;" onchange="window.StaffApp.Address.loadDistricts(this.value, 'inpDist', 'inpWard')"></select>
+                    <select id="inpDist" class="input-bee" style="flex: 1;" onchange="window.StaffApp.Address.loadWards(this.value, 'inpWard')" disabled></select>
+                    <select id="inpWard" class="input-bee" style="flex: 1;" disabled></select>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="drawer-footer" id="drawerFooter">
         <button class="btn-bee btn-secondary" style="flex: 1;" onclick="window.StaffApp.closeDrawer()">HỦY BỎ</button>
-        <button class="btn-bee" style="flex: 1;" id="btnSave" onclick="window.StaffApp.saveStaff()">LƯU HỒ SƠ</button>
+        <button class="btn-bee" style="flex: 1;" id="btnSave" onclick="window.StaffApp.processSave()">LƯU HỒ SƠ</button>
     </div>
 </aside>
+
+<div class="modal-otp-overlay" id="otpModal">
+    <div class="modal-otp-box">
+        <h4>XÁC THỰC EMAIL</h4>
+        <p id="otpMessage">Hệ thống đang gửi mã xác thực đến Email...</p>
+        <div id="otpInputGroup" style="display: none;">
+            <input type="text" id="inpOtpCode" class="input-bee" placeholder="------" maxlength="6">
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-bee btn-secondary" style="flex: 1;" onclick="document.getElementById('otpModal').style.display='none'">HỦY BỎ</button>
+                <button class="btn-bee" style="flex: 1;" onclick="window.StaffApp.verifyOtpAndSave()">XÁC NHẬN MÃ</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="toast-container" id="toastHost"></div>
 
 <script>
-    // --- TOAST XỊN ---
     window.toast = function(msg, type = 'success') {
         const h = document.getElementById('toastHost');
         const e = document.createElement('div');
         e.className = `toast ${type}`;
         e.innerHTML = `<div><span style="font-weight:800;">${type === 'success' ? 'THÀNH CÔNG: ' : 'LỖI: '}</span>${msg}</div>`;
         h.appendChild(e);
-        setTimeout(() => e.remove(), 3500);
+        setTimeout(() => e.remove(), 4500);
     };
 
     window.StaffApp = {
-        state: { q: '', status: '', editingId: null, isViewMode: false },
+        state: { q: '', status: '', editingId: null, isViewMode: false, originalEmail: '', tempFormData: null },
 
         Address: {
             async loadProvinces(sid) {
@@ -239,8 +255,14 @@
             getText(id) { const s = document.getElementById(id); return s.selectedIndex > 0 ? s.options[s.selectedIndex].getAttribute('data-name') : ''; },
             reset(cid, did, wid) {
                 document.getElementById(cid).selectedIndex = 0;
-                document.getElementById(did).innerHTML = '<option value="">-- Quận/Huyện --</option>';
-                document.getElementById(wid).innerHTML = '<option value="">-- Xã/Phường --</option>';
+                document.getElementById(did).innerHTML = '<option value="">-- Quận/Huyện --</option>'; document.getElementById(did).disabled = true;
+                document.getElementById(wid).innerHTML = '<option value="">-- Xã/Phường --</option>'; document.getElementById(wid).disabled = true;
+            },
+            findOptionByText(selectEl, text) {
+                for(let i=0; i<selectEl.options.length; i++) {
+                    if(selectEl.options[i].getAttribute('data-name') === text) return selectEl.options[i].value;
+                }
+                return null;
             }
         },
 
@@ -248,7 +270,6 @@
             this.loadData();
             this.Address.loadProvinces('inpCity');
 
-            // Đồng bộ label cho switch trong drawer
             document.getElementById('nvTrangThaiSwitch').onchange = function() {
                 document.getElementById('statusLabel').innerText = this.checked ? "ĐANG LÀM VIỆC" : "NGHỈ VIỆC";
             };
@@ -289,13 +310,23 @@
         },
 
         openDrawer(mode) {
-            this.state.editingId = null; this.state.isViewMode = false;
+            this.state.editingId = null; this.state.isViewMode = false; this.state.originalEmail = '';
+
             document.getElementById('drawerTitle').innerText = 'TẠO HỒ SƠ NHÂN VIÊN';
-            document.getElementById('drawerTabs').style.display = 'none';
-            document.getElementById('avatarGroup').style.display = 'none'; // ✅ KHÔNG HIỆN ẢNH KHI THÊM
-            document.getElementById('passwordBlock').style.display = 'flex';
+
+            document.getElementById('drawerTabs').style.display = 'flex';
+
+            document.getElementById('avatarGroup').style.display = 'none';
+            document.getElementById('passwordBlock').style.display = 'none';
+
+            document.getElementById('addressViewer').style.display = 'none';
             document.getElementById('editAddrGroup').style.display = 'block';
-            document.getElementById('contentAddr').style.display = 'none';
+
+            document.getElementById('nvTrangThaiSwitch').checked = true;
+            document.getElementById('nvTrangThaiSwitch').disabled = true;
+            document.getElementById('statusLabel').innerText = "ĐANG LÀM VIỆC";
+
+            this.switchTab('info');
             this.resetForm();
             this.toggleInputs(false);
             document.getElementById('staffDrawer').classList.add('show');
@@ -304,18 +335,20 @@
 
         async openEdit(id, isView) {
             this.state.editingId = id; this.state.isViewMode = isView;
+
             document.getElementById('drawerTitle').innerText = isView ? 'CHI TIẾT NHÂN VIÊN' : 'CẬP NHẬT HỒ SƠ';
             document.getElementById('drawerTabs').style.display = 'flex';
-            document.getElementById('avatarGroup').style.display = 'block'; // ✅ HIỆN ẢNH KHI SỬA/XEM
-            document.getElementById('passwordBlock').style.display = 'none';
+            document.getElementById('avatarGroup').style.display = 'block';
 
-            // Logic địa chỉ: View thì chỉ hiện text nối liền, Edit thì hiện ô chọn
-            document.getElementById('editAddrGroup').style.display = isView ? 'none' : 'block';
-            document.getElementById('contentAddr').style.display = isView ? 'block' : 'none';
+            document.getElementById('passwordBlock').style.display = isView ? 'none' : 'flex';
+
+            document.getElementById('nvTrangThaiSwitch').disabled = isView;
 
             this.switchTab('info');
             const res = await fetch(`/api/admin/nhan-vien/detail/${id}`);
             const d = await res.json();
+
+            this.state.originalEmail = d.email;
 
             document.getElementById('nvId').value = d.id;
             document.getElementById('nvHoTen').value = d.hoTen;
@@ -325,12 +358,49 @@
             document.getElementById('nvGender').value = d.gioiTinh;
             document.getElementById('nvTrangThaiSwitch').checked = d.trangThai;
             document.getElementById('statusLabel').innerText = d.trangThai ? "ĐANG LÀM VIỆC" : "NGHỈ VIỆC";
-            document.getElementById('txtFullAddr').innerText = d.diaChi || 'Chưa cập nhật';
             document.getElementById('imgPreview').src = d.hinhAnh || 'https://via.placeholder.com/80';
+
+            document.getElementById('txtFullAddr').innerText = d.diaChi || 'Chưa cập nhật';
+            document.getElementById('addressViewer').style.display = 'flex';
+            document.getElementById('btnEditAddr').style.display = isView ? 'none' : 'block';
+            document.getElementById('editAddrGroup').style.display = 'none';
 
             this.toggleInputs(isView);
             document.getElementById('staffDrawer').classList.add('show');
             document.getElementById('staffOverlay').classList.add('show');
+        },
+
+        async enableEditAddress() {
+            document.getElementById('addressViewer').style.display = 'none';
+            document.getElementById('editAddrGroup').style.display = 'block';
+
+            const fullAddr = document.getElementById('txtFullAddr').innerText;
+            if(!fullAddr || fullAddr === 'Chưa cập nhật') return;
+
+            let parts = fullAddr.split(',').map(s => s.trim());
+            if(parts.length >= 3) {
+                let pWard = parts[parts.length - 3];
+                let pDist = parts[parts.length - 2];
+                let pProv = parts[parts.length - 1];
+
+                let cSelect = document.getElementById('inpCity');
+                let cId = this.Address.findOptionByText(cSelect, pProv);
+                if(cId) {
+                    cSelect.value = cId;
+                    await this.Address.loadDistricts(cId, 'inpDist', 'inpWard');
+
+                    let dSelect = document.getElementById('inpDist');
+                    let dId = this.Address.findOptionByText(dSelect, pDist);
+                    if(dId) {
+                        dSelect.value = dId;
+                        await this.Address.loadWards(dId, 'inpWard');
+
+                        let wSelect = document.getElementById('inpWard');
+                        let wId = this.Address.findOptionByText(wSelect, pWard);
+                        if(wId) wSelect.value = wId;
+                    }
+                }
+            }
         },
 
         switchTab(t) {
@@ -346,42 +416,41 @@
             }
         },
 
-        async saveStaff() {
-            // 1. LẤY DỮ LIỆU TỪ CÁC Ô NHẬP
+        async processSave() {
             const name = document.getElementById('nvHoTen').value.trim();
             const phone = document.getElementById('nvSdt').value.trim();
             const email = document.getElementById('nvEmail').value.trim();
             const dob = document.getElementById('nvNgaySinh').value;
             const isNew = !this.state.editingId;
 
-            // 2. VALIDATE TRỐNG (CHECK TRỐNG)
             if (!name || !phone || !email || !dob) {
-                window.toast("Vui lòng điền đầy đủ các trường có dấu (*)", "error");
+                this.switchTab('info');
+                window.toast("Vui lòng điền đầy đủ các trường thông tin có dấu (*)", "error");
                 return;
             }
 
-            // 3. VALIDATE TUỔI (PHẢI TRÊN 15 TUỔI)
             const birthDate = new Date(dob);
             const today = new Date();
             let age = today.getFullYear() - birthDate.getFullYear();
-            const m = today.getMonth() - birthDate.getMonth();
-            // Tính toán chính xác đến từng ngày
-            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) { age--; }
-
             if (age < 15) {
-                window.toast(`Nhân viên chưa đủ tuổi (Hiện tại: ${age} tuổi). Phải từ 15 tuổi trở lên!`, "error");
+                this.switchTab('info');
+                window.toast("Nhân viên phải từ 15 tuổi trở lên!", "error");
                 return;
             }
 
-            // 4. KIỂM TRA MẬT KHẨU (NẾU LÀ THÊM MỚI)
-            if (isNew) {
-                const pass = document.getElementById('nvPass').value;
-                const confirm = document.getElementById('nvConfirmPass').value;
-                if (!pass) { window.toast("Mật khẩu không được để trống!", "error"); return; }
-                if (pass !== confirm) { window.toast("Mật khẩu xác nhận không khớp!", "error"); return; }
+            const addrDiv = document.getElementById('editAddrGroup');
+            let city = this.Address.getText('inpCity');
+            let dist = this.Address.getText('inpDist');
+            let ward = this.Address.getText('inpWard');
+
+            if (addrDiv.style.display !== 'none') {
+                if (!city || !dist || !ward) {
+                    this.switchTab('address');
+                    window.toast("Vui lòng CHỌN ĐỦ Tỉnh/Thành, Quận/Huyện, Xã/Phường!", "error");
+                    return;
+                }
             }
 
-            // 5. CHUẨN BỊ FORM DATA GỬI LÊN JAVA
             const fd = new FormData();
             fd.append('hoTen', name);
             fd.append('soDienThoai', phone);
@@ -390,32 +459,111 @@
             fd.append('gioiTinh', document.getElementById('nvGender').value);
             fd.append('trangThai', document.getElementById('nvTrangThaiSwitch').checked);
 
-            // Gửi chuỗi địa chỉ nối liền nếu có chọn mới, không thì giữ cái text hiển thị
-            const city = this.Address.getText('inpCity');
-            if(city) {
-                fd.append('diaChi', `${document.getElementById('inpDetail').value}, ${this.Address.getText('inpWard')}, ${this.Address.getText('inpDist')}, ${city}`);
+            if(addrDiv.style.display !== 'none' && city && dist && ward) {
+                fd.append('diaChi', `${ward}, ${dist}, ${city}`);
             } else {
                 fd.append('diaChi', document.getElementById('txtFullAddr').innerText);
             }
 
             if(!isNew) {
                 fd.append('id', this.state.editingId);
+
+                // ===============================================
+                // TÍCH HỢP CLOUDINARY: GỌI API ĐỂ LẤY URL VỀ
+                // ===============================================
                 const file = document.getElementById('fileInput').files[0];
-                if(file) fd.append('fileAnh', file);
-            } else {
+                if(file) {
+                    try {
+                        const imgFormData = new FormData();
+                        imgFormData.append('file', file);
+                        const uploadRes = await fetch('/api/upload', { method: 'POST', body: imgFormData });
+                        const uploadData = await uploadRes.json();
+
+                        if (uploadRes.ok && uploadData.url) {
+                            fd.append('hinhAnh', uploadData.url); // Ném link URL vào FormData
+                        } else {
+                            window.toast('Upload ảnh thất bại.', 'error');
+                            return;
+                        }
+                    } catch(e) {
+                        window.toast('Lỗi kết nối khi upload ảnh.', 'error');
+                        return;
+                    }
+                }
+                // ===============================================
+
                 fd.append('password', document.getElementById('nvPass').value);
                 fd.append('confirmPassword', document.getElementById('nvConfirmPass').value);
             }
+            this.state.tempFormData = fd;
 
-            // 6. GỬI REQUEST
-            try {
-                const res = await fetch('/api/admin/nhan-vien/save', { method: 'POST', body: fd });
-                const msg = await res.text();
+            const idParam = isNew ? '' : `&id=${this.state.editingId}`;
+
+            const checkPhoneRes = await fetch(`/api/admin/nhan-vien/check-phone?phone=${phone}${idParam}`);
+            if (!checkPhoneRes.ok) {
+                this.switchTab('info');
+                window.toast(await checkPhoneRes.text(), "error");
+                return;
+            }
+
+            const isEmailChanged = (email !== this.state.originalEmail);
+
+            if (isNew || isEmailChanged) {
+                const checkEmailRes = await fetch(`/api/admin/nhan-vien/check-email?email=${email}${idParam}`);
+
+                if (!checkEmailRes.ok) {
+                    this.switchTab('info');
+                    window.toast(await checkEmailRes.text(), "error");
+                    return;
+                }
+
+                document.getElementById('otpModal').style.display = 'flex';
+                document.getElementById('otpInputGroup').style.display = 'none';
+                document.getElementById('otpMessage').innerText = `Hệ thống đang gửi Email xác thực đến ${email}...`;
+
+                const res = await fetch(`/api/admin/nhan-vien/send-otp?email=${email}`, { method: 'POST' });
                 if(res.ok) {
-                    window.toast(msg, "success");
-                    setTimeout(() => location.reload(), 1000);
+                    document.getElementById('otpMessage').innerHTML = `Mã xác nhận 6 số đã được gửi tới hòm thư:<br><b>${email}</b>`;
+                    document.getElementById('otpInputGroup').style.display = 'block';
+                    document.getElementById('inpOtpCode').value = '';
                 } else {
-                    window.toast(msg, "error"); // Hiện lỗi từ Java (Trùng SĐT, Email...)
+                    document.getElementById('otpModal').style.display = 'none';
+                    window.toast(await res.text(), "error");
+                }
+            } else {
+                this.executeFinalSave();
+            }
+        },
+
+        async verifyOtpAndSave() {
+            const email = document.getElementById('nvEmail').value.trim();
+            const otp = document.getElementById('inpOtpCode').value.trim();
+            if(otp.length < 6) { window.toast("Mã OTP phải gồm 6 chữ số!", "error"); return; }
+
+            const res = await fetch(`/api/admin/nhan-vien/verify-otp?email=${email}&otp=${otp}`, { method: 'POST' });
+            if(res.ok) {
+                document.getElementById('otpModal').style.display = 'none';
+                this.executeFinalSave();
+            } else {
+                window.toast(await res.text(), "error");
+            }
+        },
+
+        async executeFinalSave() {
+            try {
+                const isNew = !this.state.editingId;
+                const res = await fetch('/api/admin/nhan-vien/save', { method: 'POST', body: this.state.tempFormData });
+                const msg = await res.text();
+
+                if(res.ok) {
+                    if(isNew) {
+                        window.toast("THÀNH CÔNG! MẬT KHẨU CỦA TÀI KHOẢN MỚI LÀ: 12345678", "success");
+                    } else {
+                        window.toast("CẬP NHẬT HỒ SƠ THÀNH CÔNG!", "success");
+                    }
+                    setTimeout(() => location.reload(), 2500);
+                } else {
+                    window.toast(msg, "error");
                 }
             } catch(e) {
                 window.toast("Lỗi kết nối Server!", "error");
@@ -429,13 +577,14 @@
 
         closeDrawer() { document.getElementById('staffDrawer').classList.remove('show'); document.getElementById('staffOverlay').classList.remove('show'); },
         resetForm() {
-            document.querySelectorAll('#staffDrawer input').forEach(i => { if(i.type !== 'checkbox') i.value = ''; });
+            document.querySelectorAll('#staffDrawer input:not([type="checkbox"])').forEach(i => i.value = '');
             document.getElementById('imgPreview').src = 'https://via.placeholder.com/80';
             this.Address.reset('inpCity', 'inpDist', 'inpWard');
+            document.getElementById('nvPass').value = '';
+            document.getElementById('nvConfirmPass').value = '';
         },
         previewImg(i) { if(i.files[0]) document.getElementById('imgPreview').src = URL.createObjectURL(i.files[0]); },
-        handleSearch(v) { if(v !== undefined) this.state.q = v; this.state.status = document.getElementById('filterStatus').value; this.loadData(); },
-        resetFilters() { document.getElementById('liveSearch').value=''; document.getElementById('filterStatus').value=''; this.state.q=''; this.state.status=''; this.loadData(); }
+        handleSearch(v) { if(v !== undefined) this.state.q = v; this.state.status = document.getElementById('filterStatus').value; this.loadData(); }
     };
 
     window.StaffApp.init();

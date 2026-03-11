@@ -95,8 +95,7 @@ async function loadModule(moduleName) {
             break;
 
         case 'staff':
-            url = '/staff';
-            title = 'QUẢN LÝ NHÂN VIÊN';
+            url = '/staff'; title = 'QUẢN LÝ NHÂN VIÊN';
             break;
 
         case 'users':

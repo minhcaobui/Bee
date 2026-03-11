@@ -588,6 +588,10 @@
             this.saveState();
             this.renderTabs();
             await this.syncCartWithServer(); // Chỉ gọi lại trạng thái chứ không ghi đè giỏ hàng
+
+            // THÊM DÒNG NÀY: Cập nhật lại giao diện giỏ hàng của hóa đơn đang chọn
+            this.renderCart();
+
             document.querySelector('input[placeholder*="giảm giá"]').value = '';
         },
 
