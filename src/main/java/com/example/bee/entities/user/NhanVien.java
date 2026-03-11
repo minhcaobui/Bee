@@ -19,29 +19,30 @@ public class NhanVien {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(unique = true, nullable = false, length = 50)
+    @Column(name = "ma",unique = true, nullable = false, length = 50)
     private String ma;
 
     @Column(name = "ho_ten", nullable = false, length = 150)
     private String hoTen;
 
-    @Column(length = 50)
+    @Column(name = "gioi_tinh", length = 50)
     private String gioiTinh;
 
     @Temporal(TemporalType.DATE)
+    @Column(name = "ngay_sinh")
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "Asia/Ho_Chi_Minh")
     private Date ngaySinh;
 
-    @Column(columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "dia_chi", columnDefinition = "NVARCHAR(MAX)")
     private String diaChi;
 
-    @Column(length = 12)
+    @Column(name = "so_dien_thoai",length = 12)
     private String soDienThoai;
 
-    @Column(length = 150)
+    @Column(name = "email",length = 150)
     private String email;
 
-    @Column(columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "hinh_anh", columnDefinition = "NVARCHAR(MAX)")
     private String hinhAnh;
 
     @ManyToOne(fetch = FetchType.LAZY)
