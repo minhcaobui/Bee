@@ -1,0 +1,459 @@
+<section id="about-section">
+    <style>
+        #about-section {
+            min-height: 100vh;
+            background: var(--bg);
+        }
+
+        /* ── ABOUT HERO ── */
+        .about-hero {
+            height: 60vh; min-height: 480px;
+            display: flex; flex-direction: column;
+            justify-content: flex-end;
+            padding: 0 60px 72px;
+            position: relative;
+            overflow: hidden;
+            background: var(--text);
+        }
+        .about-hero-bg {
+            position: absolute; inset: 0;
+            background: linear-gradient(160deg, #2a2a2a 0%, #1A1A1A 60%, #0d1510 100%);
+        }
+        .about-hero-pattern {
+            position: absolute; inset: 0;
+            background-image: repeating-linear-gradient(
+                    0deg, transparent, transparent 60px,
+                    rgba(61,90,76,0.08) 60px, rgba(61,90,76,0.08) 61px
+            ),
+            repeating-linear-gradient(
+                    90deg, transparent, transparent 60px,
+                    rgba(61,90,76,0.08) 60px, rgba(61,90,76,0.08) 61px
+            );
+        }
+        .about-hero-year {
+            position: absolute; top: 40px; right: 60px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 120px; font-weight: 300;
+            color: rgba(255,255,255,0.04);
+            line-height: 1; letter-spacing: -0.05em;
+            user-select: none;
+        }
+        .about-hero-content { position: relative; z-index: 2; }
+        .about-hero-eyebrow {
+            font-size: 11px; letter-spacing: 0.25em;
+            color: var(--accent-light); text-transform: uppercase;
+            font-weight: 500; margin-bottom: 20px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .about-hero-eyebrow::before { content:''; width:20px; height:1px; background:var(--accent-light); }
+        .about-hero-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(44px, 7vw, 96px);
+            font-weight: 300; color: white;
+            line-height: 1.0; letter-spacing: -0.02em;
+        }
+        .about-hero-title em { font-style: italic; color: var(--accent-light); }
+
+        /* ── MANIFESTO ── */
+        .about-manifesto {
+            padding: 100px 60px;
+            display: grid; grid-template-columns: 1fr 2fr;
+            gap: 80px; align-items: start;
+            border-bottom: 1px solid rgba(0,0,0,0.07);
+        }
+        .about-manifesto-label {
+            font-size: 11px; letter-spacing: 0.22em;
+            color: var(--accent); text-transform: uppercase;
+            font-weight: 500; padding-top: 8px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .about-manifesto-label::before { content:''; width:20px; height:1px; background:var(--accent); }
+        .about-manifesto-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(24px, 3vw, 38px);
+            font-weight: 300; line-height: 1.5;
+            color: var(--text);
+        }
+        .about-manifesto-text em { font-style: italic; color: var(--accent); }
+
+        /* ── VALUES ── */
+        .about-values {
+            padding: 100px 60px;
+            border-bottom: 1px solid rgba(0,0,0,0.07);
+        }
+        .about-values-header {
+            display: flex; justify-content: space-between;
+            align-items: flex-end; margin-bottom: 72px;
+        }
+        .about-values-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(32px, 4vw, 52px);
+            font-weight: 300; line-height: 1.1;
+        }
+        .about-values-title em { font-style: italic; }
+        .about-values-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 2px; background: rgba(0,0,0,0.07);
+        }
+        .about-value-card {
+            background: var(--bg); padding: 48px 40px;
+            transition: background 0.3s ease;
+            position: relative; overflow: hidden;
+        }
+        .about-value-card:hover { background: var(--white); }
+        .about-value-card::before {
+            content: attr(data-num);
+            position: absolute; top: 24px; right: 32px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 80px; font-weight: 300;
+            color: rgba(61,90,76,0.07); line-height: 1;
+            pointer-events: none;
+        }
+        .about-value-icon {
+            width: 40px; height: 40px;
+            border: 1px solid rgba(61,90,76,0.3);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 28px;
+        }
+        .about-value-icon svg { width: 18px; height: 18px; stroke: var(--accent); fill: none; }
+        .about-value-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 26px; font-weight: 400;
+            margin-bottom: 16px; line-height: 1.1;
+        }
+        .about-value-desc {
+            font-size: 14px; color: var(--muted);
+            line-height: 1.8; font-weight: 300;
+        }
+
+        /* ── STORY TIMELINE ── */
+        .about-story {
+            padding: 100px 60px;
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 80px; align-items: start;
+            border-bottom: 1px solid rgba(0,0,0,0.07);
+        }
+        .about-story-img-wrap { position: relative; }
+        .about-story-img {
+            width: 100%; aspect-ratio: 3/4; overflow: hidden;
+        }
+        .about-story-img-bg {
+            width: 100%; height: 100%;
+            background: linear-gradient(160deg, #c5cfc7, #3D5A4C);
+        }
+        .about-story-img-caption {
+            position: absolute; bottom: -20px; right: -20px;
+            background: var(--accent);
+            color: white; padding: 24px 28px;
+            font-size: 13px; line-height: 1.6;
+            max-width: 220px;
+        }
+        .about-story-img-caption strong {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 22px; font-weight: 300;
+            display: block; margin-bottom: 4px;
+        }
+        .about-story-right { padding-top: 20px; }
+        .about-story-eyebrow {
+            font-size: 11px; letter-spacing: 0.22em;
+            color: var(--accent); text-transform: uppercase;
+            font-weight: 500; margin-bottom: 24px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .about-story-eyebrow::before { content:''; width:20px; height:1px; background:var(--accent); }
+        .about-story-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(28px, 3.5vw, 44px);
+            font-weight: 300; line-height: 1.1;
+            margin-bottom: 32px;
+        }
+        .about-story-title em { font-style: italic; }
+        .about-timeline { list-style: none; }
+        .about-timeline-item {
+            display: grid; grid-template-columns: 60px 1fr;
+            gap: 24px; padding-bottom: 36px;
+            position: relative;
+        }
+        .about-timeline-item:not(:last-child)::after {
+            content: '';
+            position: absolute; left: 22px; top: 28px;
+            width: 1px; bottom: 0;
+            background: rgba(0,0,0,0.1);
+        }
+        .about-timeline-year {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 18px; font-weight: 300;
+            color: var(--accent); padding-top: 2px;
+            flex-shrink: 0;
+        }
+        .about-timeline-content {}
+        .about-timeline-title {
+            font-size: 14px; font-weight: 500;
+            margin-bottom: 6px; letter-spacing: 0.02em;
+        }
+        .about-timeline-desc {
+            font-size: 13px; color: var(--muted);
+            line-height: 1.7; font-weight: 300;
+        }
+
+        /* ── TEAM ── */
+        .about-team {
+            padding: 100px 60px;
+            border-bottom: 1px solid rgba(0,0,0,0.07);
+        }
+        .about-team-header {
+            margin-bottom: 64px;
+        }
+        .about-team-eyebrow {
+            font-size: 11px; letter-spacing: 0.22em;
+            color: var(--accent); text-transform: uppercase;
+            font-weight: 500; margin-bottom: 16px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .about-team-eyebrow::before { content:''; width:20px; height:1px; background:var(--accent); }
+        .about-team-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(28px, 3.5vw, 44px);
+            font-weight: 300; line-height: 1.1;
+        }
+        .about-team-title em { font-style: italic; }
+        .about-team-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+        }
+        .about-team-card {}
+        .about-team-photo {
+            width: 100%; aspect-ratio: 3/4; overflow: hidden;
+            margin-bottom: 20px; position: relative;
+        }
+        .about-team-photo-bg {
+            width: 100%; height: 100%;
+            transition: transform 0.6s ease;
+        }
+        .about-team-card:hover .about-team-photo-bg { transform: scale(1.04); }
+        .about-team-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 22px; font-weight: 400;
+            margin-bottom: 4px;
+        }
+        .about-team-role {
+            font-size: 12px; color: var(--accent);
+            letter-spacing: 0.1em; text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .about-team-bio {
+            font-size: 13px; color: var(--muted);
+            line-height: 1.7; font-weight: 300;
+        }
+
+        /* ── CLOSING ── */
+        .about-closing {
+            padding: 100px 60px;
+            text-align: center;
+            background: var(--white);
+        }
+        .about-closing-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(32px, 5vw, 64px);
+            font-weight: 300; line-height: 1.15;
+            max-width: 720px; margin: 0 auto 40px;
+        }
+        .about-closing-title em { font-style: italic; color: var(--accent); }
+        .about-closing-cta {
+            display: inline-flex; align-items: center; gap: 14px;
+            background: var(--accent); color: white;
+            padding: 18px 48px;
+            font-size: 13px; letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-family: 'DM Sans', sans-serif; font-weight: 400;
+            border: none; cursor: pointer;
+            transition: background 0.3s ease;
+            position: relative; overflow: hidden;
+        }
+        .about-closing-cta:hover { background: var(--accent-light); }
+        .about-closing-cta svg { width: 16px; height: 16px; stroke: white; fill: none; }
+
+        /* responsive */
+        @media (max-width: 900px) {
+            .about-hero { padding: 0 24px 60px; }
+            .about-hero-year { font-size: 64px; top: 24px; right: 24px; }
+            .about-manifesto { grid-template-columns: 1fr; padding: 60px 24px; gap: 32px; }
+            .about-values { padding: 60px 24px; }
+            .about-values-grid { grid-template-columns: 1fr; }
+            .about-story { grid-template-columns: 1fr; padding: 60px 24px; }
+            .about-story-img-caption { position: static; margin-top: 16px; }
+            .about-team { padding: 60px 24px; }
+            .about-team-grid { grid-template-columns: 1fr; }
+            .about-closing { padding: 60px 24px; }
+        }
+    </style>
+
+    <!-- HERO -->
+    <div class="about-hero">
+        <div class="about-hero-bg"></div>
+        <div class="about-hero-pattern"></div>
+        <div class="about-hero-year">2019</div>
+        <div class="about-hero-content">
+            <div class="about-hero-eyebrow">Về chúng tôi</div>
+            <h1 class="about-hero-title">
+                Chúng tôi<br>
+                may áo để<br>
+                <em>thở thôi.</em>
+            </h1>
+        </div>
+    </div>
+
+    <!-- MANIFESTO -->
+    <div class="about-manifesto reveal">
+        <div class="about-manifesto-label">Tuyên ngôn</div>
+        <p class="about-manifesto-text">
+            Beemate tin rằng <em>trang phục tốt nhất là thứ bạn không cần nghĩ đến</em> — nó chỉ cần ở đó, đúng lúc, đúng người, đúng cảm giác. Không hơn, không kém.
+        </p>
+    </div>
+
+    <!-- VALUES -->
+    <div class="about-values">
+        <div class="about-values-header reveal">
+            <div>
+                <div style="font-size:11px;letter-spacing:0.22em;color:var(--accent);text-transform:uppercase;font-weight:500;margin-bottom:12px;display:flex;align-items:center;gap:10px"><span style="width:20px;height:1px;background:var(--accent);display:inline-block"></span>Giá trị cốt lõi</div>
+                <h2 class="about-values-title">Ba điều<br>Beemate không nhượng bộ</h2>
+            </div>
+        </div>
+        <div class="about-values-grid">
+            <div class="about-value-card reveal" data-num="01">
+                <div class="about-value-icon">
+                    <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <div class="about-value-name">Vải thật,<br>không pha tạp</div>
+                <p class="about-value-desc">Mọi chiếc áo Beemate đều dùng vải tự nhiên 100% — linen, cotton, bamboo. Không polyester, không pha trộn vì lợi nhuận.</p>
+            </div>
+            <div class="about-value-card reveal reveal-delay-1" data-num="02">
+                <div class="about-value-icon">
+                    <svg viewBox="0 0 24 24" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+                </div>
+                <div class="about-value-name">May kỹ,<br>từng đường chỉ</div>
+                <p class="about-value-desc">Chúng tôi kiểm tra thủ công từng sản phẩm trước khi xuất xưởng. Quy trình chậm hơn — nhưng kết quả đáng tin hơn.</p>
+            </div>
+            <div class="about-value-card reveal reveal-delay-2" data-num="03">
+                <div class="about-value-icon">
+                    <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                </div>
+                <div class="about-value-name">Thiết kế cho<br>người mặc thật</div>
+                <p class="about-value-desc">Không phải người mẫu, không phải ảnh studio. Beemate được thiết kế để mặc đi làm, đi chợ, ở nhà — đẹp trong tất cả hoàn cảnh đó.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- STORY -->
+    <div class="about-story">
+        <div class="about-story-img-wrap reveal">
+            <div class="about-story-img">
+                <div class="about-story-img-bg"></div>
+            </div>
+            <div class="about-story-img-caption">
+                <strong>Beemate</strong>
+                Ra đời tại Hà Nội, 2019
+            </div>
+        </div>
+        <div class="about-story-right reveal reveal-delay-1">
+            <div class="about-story-eyebrow">Câu chuyện của chúng tôi</div>
+            <h2 class="about-story-title">Từ một câu hỏi<br>đơn giản <em>mà khó trả lời</em></h2>
+            <ul class="about-timeline">
+                <li class="about-timeline-item">
+                    <div class="about-timeline-year">2019</div>
+                    <div class="about-timeline-content">
+                        <div class="about-timeline-title">Beemate ra đời</div>
+                        <p class="about-timeline-desc">Bắt đầu từ 12 chiếc áo linen, một xưởng may nhỏ ở Hà Nội và câu hỏi: "Tại sao mặc đẹp mà vẫn thấy khó chịu?"</p>
+                    </div>
+                </li>
+                <li class="about-timeline-item">
+                    <div class="about-timeline-year">2021</div>
+                    <div class="about-timeline-content">
+                        <div class="about-timeline-title">The Basics ra mắt</div>
+                        <p class="about-timeline-desc">Dòng sản phẩm không có mùa, không có trend. Chỉ có những chiếc áo tốt mà bạn muốn mặc mãi.</p>
+                    </div>
+                </li>
+                <li class="about-timeline-item">
+                    <div class="about-timeline-year">2023</div>
+                    <div class="about-timeline-content">
+                        <div class="about-timeline-title">Cam kết xanh</div>
+                        <p class="about-timeline-desc">Chuyển 100% sang thuốc nhuộm tự nhiên, bao bì tái chế và giảm lượng hàng tồn kho xuống 40%.</p>
+                    </div>
+                </li>
+                <li class="about-timeline-item">
+                    <div class="about-timeline-year">2025</div>
+                    <div class="about-timeline-content">
+                        <div class="about-timeline-title">SS25 — Breathing Space</div>
+                        <p class="about-timeline-desc">Bộ sưu tập lớn nhất từ trước đến nay. 48 mẫu, 3 chất liệu, một tinh thần: nhẹ hơn, thở hơn.</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- TEAM -->
+    <div class="about-team">
+        <div class="about-team-header reveal">
+            <div class="about-team-eyebrow">Con người</div>
+            <h2 class="about-team-title">Những người<br><em>đứng sau Beemate</em></h2>
+        </div>
+        <div class="about-team-grid">
+            <div class="about-team-card reveal">
+                <div class="about-team-photo">
+                    <div class="about-team-photo-bg" style="background:linear-gradient(160deg,#e8ddd1,#c4b49d)"></div>
+                </div>
+                <div class="about-team-name">Nguyễn Minh An</div>
+                <div class="about-team-role">Founder & Creative Director</div>
+                <p class="about-team-bio">Tốt nghiệp ESMOD Hà Nội. 10 năm làm việc với vải tự nhiên tại Nhật Bản trước khi về Việt Nam gây dựng Beemate.</p>
+            </div>
+            <div class="about-team-card reveal reveal-delay-1">
+                <div class="about-team-photo">
+                    <div class="about-team-photo-bg" style="background:linear-gradient(160deg,#c5cfc7,#3D5A4C)"></div>
+                </div>
+                <div class="about-team-name">Trần Phương Linh</div>
+                <div class="about-team-role">Head of Production</div>
+                <p class="about-team-bio">Phụ trách chất lượng và quy trình sản xuất. Người đứng sau từng đường kim mũi chỉ của Beemate trong 5 năm qua.</p>
+            </div>
+            <div class="about-team-card reveal reveal-delay-2">
+                <div class="about-team-photo">
+                    <div class="about-team-photo-bg" style="background:linear-gradient(160deg,#d4cfc9,#b0a99f)"></div>
+                </div>
+                <div class="about-team-name">Lê Hoàng Nam</div>
+                <div class="about-team-role">Brand & Visual</div>
+                <p class="about-team-bio">Mang đến ngôn ngữ hình ảnh của Beemate — tối giản, ấm áp, và luôn nhất quán dù trên website hay bao bì sản phẩm.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CLOSING CTA -->
+    <div class="about-closing reveal">
+        <h2 class="about-closing-title">
+            Muốn mặc thử<br>
+            <em>triết lý của chúng tôi?</em>
+        </h2>
+        <button class="about-closing-cta" onclick="location.hash='#collection'">
+            Xem bộ sưu tập
+            <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+    </div>
+
+    <script>
+        window.AboutApp = {
+            init: function() {
+                const reveals = document.querySelectorAll('#about-section .reveal');
+                const obs = new IntersectionObserver(entries => {
+                    entries.forEach(e => {
+                        if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+                    });
+                }, { threshold: 0.1 });
+                reveals.forEach(r => obs.observe(r));
+                setTimeout(() => {
+                    reveals.forEach(r => {
+                        if (r.getBoundingClientRect().top < window.innerHeight) r.classList.add('visible');
+                    });
+                }, 100);
+            }
+        };
+    </script>
+</section>

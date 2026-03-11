@@ -17,14 +17,9 @@ public class SecurityConfig {
     @Autowired
     private CustomAuthenticationSuccessHandler successHandler;
 
-//    @Bean
-//    public PasswordEncoder passwordEncoder() {
-//        return new BCryptPasswordEncoder();
-//    }
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // Sử dụng NoOpPasswordEncoder để Spring hiểu mật khẩu lưu dưới dạng chữ thường (plain text)
-        return org.springframework.security.crypto.password.NoOpPasswordEncoder.getInstance();
+        return new BCryptPasswordEncoder();
     }
 
     @Bean

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beemate — Breathing Space</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #F7F5F2; --white: #FFFFFF; --text: #1A1A1A;
+            --muted: #8A8A8A; --accent: #3D5A4C; --accent-light: #5a7d6c;
+            --card-shadow: 0 2px 20px rgba(0,0,0,0.06);
+            --card-shadow-hover: 0 8px 40px rgba(0,0,0,0.12);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
+        body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; font-weight:300; overflow-x:hidden; cursor:none; }
+
+        .cursor { width:10px; height:10px; background:var(--accent); border-radius:50%; position:fixed; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); transition:transform .1s ease,width .3s ease,height .3s ease,background .3s ease; }
+        .cursor-ring { width:36px; height:36px; border:1px solid var(--accent); border-radius:50%; position:fixed; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); transition:transform .18s ease,width .3s ease,height .3s ease,opacity .3s ease; opacity:.5; }
+
+        #site-header { position:fixed; top:0; left:0; right:0; z-index:100; background:var(--bg); transition:background .4s ease,box-shadow .4s ease; }
+        #site-header.scrolled { background:rgba(247,245,242,0.98); backdrop-filter:blur(12px); box-shadow:0 2px 20px rgba(0,0,0,.05); }
+        nav { display:flex; align-items:center; justify-content:space-between; padding:20px 60px; }
+        .logo { font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:600; letter-spacing:.12em; color:var(--text); text-decoration:none; text-transform:uppercase; flex:1; cursor:none; }
+        .logo span { color:var(--accent); }
+        .nav-links { display:flex; gap:40px; list-style:none; justify-content:center; flex:2; }
+        .nav-links a { font-size:13px; letter-spacing:.08em; color:var(--text); text-decoration:none; font-weight:400; text-transform:uppercase; position:relative; padding-bottom:2px; cursor:none; }
+        .nav-links a::after { content:''; position:absolute; bottom:0; left:0; width:0; height:1px; background:var(--accent); transition:width .3s ease; }
+        .nav-links a:hover::after { width:100%; }
+        .nav-actions { display:flex; gap:24px; align-items:center; justify-content:flex-end; flex:1; }
+        .cart-icon { position:relative; cursor:none; }
+        .cart-badge { position:absolute; top:-6px; right:-6px; width:16px; height:16px; background:var(--accent); border-radius:50%; font-size:9px; color:white; display:flex; align-items:center; justify-content:center; font-weight:500; }
+
+        /* NOTIFICATION */
+        .notif-wrap { position:relative; cursor:none; }
+        .notif-bell-btn { background:none; border:none; cursor:none; color:var(--text); display:flex; align-items:center; padding:0; line-height:1; }
+        .notif-bell-btn i { font-size:17px; }
+        .notif-badge { position:absolute; top:-6px; right:-6px; width:16px; height:16px; background:#c08060; border-radius:50%; font-size:9px; color:white; display:flex; align-items:center; justify-content:center; font-weight:500; font-family:'DM Sans',sans-serif; pointer-events:none; transition:opacity .3s,transform .3s; }
+        .notif-dropdown { position:absolute; top:calc(100% + 16px); right:-12px; width:340px; background:var(--white); box-shadow:0 8px 40px rgba(0,0,0,.12); z-index:200; opacity:0; transform:translateY(-8px); pointer-events:none; transition:opacity .25s ease,transform .25s ease; }
+        .notif-dropdown.open { opacity:1; transform:translateY(0); pointer-events:all; }
+        .notif-dropdown::before { content:''; position:absolute; top:-6px; right:18px; width:12px; height:12px; background:var(--white); transform:rotate(45deg); box-shadow:-2px -2px 5px rgba(0,0,0,.04); }
+        .notif-header { padding:18px 20px 14px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(0,0,0,.06); }
+        .notif-header-title { font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--text); font-weight:500; }
+        .notif-mark-all { font-size:11px; color:var(--accent); background:none; border:none; cursor:pointer; letter-spacing:.06em; font-family:'DM Sans',sans-serif; font-weight:400; transition:opacity .2s; }
+        .notif-mark-all:hover { opacity:.7; }
+        .notif-tabs { display:flex; border-bottom:1px solid rgba(0,0,0,.06); }
+        .notif-tab { flex:1; padding:10px 0; font-size:11px; letter-spacing:.1em; text-transform:uppercase; background:none; border:none; font-family:'DM Sans',sans-serif; color:var(--muted); font-weight:400; cursor:pointer; border-bottom:2px solid transparent; transition:color .2s,border-color .2s; position:relative; bottom:-1px; }
+        .notif-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+        .notif-list { max-height:320px; overflow-y:auto; }
+        .notif-list::-webkit-scrollbar { width:3px; }
+        .notif-list::-webkit-scrollbar-thumb { background:rgba(0,0,0,.1); }
+        .notif-item { display:flex; gap:14px; align-items:flex-start; padding:16px 20px; border-bottom:1px solid rgba(0,0,0,.04); cursor:pointer; transition:background .2s; position:relative; }
+        .notif-item:hover { background:rgba(0,0,0,.02); }
+        .notif-item.unread { background:rgba(61,90,76,.03); }
+        .notif-item.unread::after { content:''; position:absolute; left:8px; top:50%; transform:translateY(-50%); width:4px; height:4px; border-radius:50%; background:var(--accent); }
+        .notif-icon { width:36px; height:36px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:14px; }
+        .notif-icon.order   { background:rgba(61,90,76,.1);  color:var(--accent); }
+        .notif-icon.voucher { background:rgba(192,128,96,.1); color:#c08060; }
+        .notif-icon.event   { background:rgba(26,26,26,.07);  color:var(--text); }
+        .notif-body { flex:1; min-width:0; }
+        .notif-body-title { font-size:13px; font-weight:400; color:var(--text); margin-bottom:3px; line-height:1.35; }
+        .notif-body-desc { font-size:12px; color:var(--muted); font-weight:300; line-height:1.5; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .notif-time { font-size:10px; color:var(--muted); letter-spacing:.04em; white-space:nowrap; margin-top:2px; flex-shrink:0; }
+        .notif-empty { padding:40px 20px; text-align:center; font-size:13px; color:var(--muted); font-weight:300; display:none; }
+        .notif-empty i { font-size:28px; display:block; margin-bottom:12px; opacity:.3; }
+        .notif-footer { padding:12px 20px; border-top:1px solid rgba(0,0,0,.06); text-align:center; }
+        .notif-footer a { font-size:11px; letter-spacing:.12em; color:var(--accent); text-decoration:none; text-transform:uppercase; font-weight:400; transition:opacity .2s; cursor:none; }
+        .notif-footer a:hover { opacity:.7; }
+
+        .page-selector { display:flex; gap:20px; padding:0 60px; border-top:1px solid rgba(0,0,0,.06); border-bottom:1px solid rgba(0,0,0,.06); background:var(--bg); }
+        .page-tab { padding:16px 24px 16px 0; font-size:12px; letter-spacing:.1em; text-transform:uppercase; cursor:none; border:none; background:none; font-family:'DM Sans',sans-serif; color:var(--muted); font-weight:500; border-bottom:2px solid transparent; transition:color .2s ease,border-color .2s ease; display:flex; align-items:center; gap:8px; text-decoration:none; }
+        .page-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+        .page-tab:hover { color:var(--text); }
+
+        #content-area { padding-top:0; min-height:100vh; transition:opacity .2s ease; }
+        #globalLoader { position:fixed; top:0; left:0; width:100%; height:3px; background:transparent; z-index:9999; opacity:0; transition:opacity .2s; pointer-events:none; }
+        #globalLoader.show { opacity:1; }
+        #globalLoader::after { content:''; display:block; width:0; height:100%; background:var(--accent); animation:loadProgress 1s infinite ease-in-out; }
+        @keyframes loadProgress { 0%{width:0;margin-left:0} 50%{width:100%;margin-left:0} 100%{width:0;margin-left:100%} }
+
+        .cart-toast { position:fixed; bottom:40px; right:40px; background:var(--text); color:white; padding:20px 28px; display:flex; align-items:center; gap:16px; font-size:13px; transform:translateY(100px); opacity:0; transition:transform .4s ease,opacity .4s ease; z-index:9999; pointer-events:none; max-width:320px; }
+        .cart-toast.show { transform:translateY(0); opacity:1; pointer-events:all; }
+        .toast-icon { width:32px; height:32px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .toast-icon svg { width:16px; height:16px; stroke:white; fill:none; }
+
+        footer { background:var(--text); color:rgba(255,255,255,.7); padding:80px 60px 40px; }
+        .footer-top { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:60px; margin-bottom:60px; }
+        .footer-brand { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:300; color:white; margin-bottom:16px; }
+        .footer-brand span { color:var(--accent-light); }
+        .footer-desc { font-size:14px; line-height:1.8; font-weight:300; max-width:280px; color:rgba(255,255,255,.5); }
+        .footer-col-title { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:white; font-weight:500; margin-bottom:20px; }
+        .footer-links { list-style:none; }
+        .footer-links li { margin-bottom:12px; }
+        .footer-links a { font-size:14px; color:rgba(255,255,255,.5); text-decoration:none; font-weight:300; transition:color .2s ease; cursor:none; }
+        .footer-links a:hover { color:white; }
+        .footer-bottom { padding-top:32px; border-top:1px solid rgba(255,255,255,.08); display:flex; justify-content:space-between; align-items:center; }
+        .footer-copy { font-size:12px; color:rgba(255,255,255,.35); font-weight:300; }
+        .footer-socials { display:flex; gap:20px; }
+        .footer-socials a { font-size:12px; letter-spacing:.1em; color:rgba(255,255,255,.4); text-decoration:none; text-transform:uppercase; transition:color .2s ease; cursor:none; }
+        .footer-socials a:hover { color:var(--accent-light); }
+
+        @media (max-width:900px) {
+            nav { padding:20px 24px; }
+            .page-selector { padding:0 24px; }
+            .footer-top { grid-template-columns:1fr 1fr; }
+            .notif-dropdown { right:-60px; width:300px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div id="globalLoader"></div>
+
+<div class="cart-toast" id="cartToast">
+    <div class="toast-icon"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div>
+    <div><strong>Đã thêm vào giỏ hàng</strong><div style="font-size:12px;opacity:.7;margin-top:2px">Sản phẩm đã được cập nhật</div></div>
+</div>
+
+<div id="site-header">
+    <nav>
+        <a href="#home" class="logo">Bee<span>mate</span></a>
+        <ul class="nav-links">
+            <li><a href="#shop">Bộ sưu tập</a></li>
+            <li><a href="#home?scroll=new-arrivals">Mới về</a></li>
+            <li><a href="#about">About Beemate</a></li>
+            <li><a href="#sale">Sale</a></li>
+        </ul>
+        <div class="nav-actions">
+
+            <!-- Search -->
+            <i class="fa-solid fa-magnifying-glass" style="font-size:17px;color:var(--text);cursor:none" onclick="openSearch()"></i>
+
+            <!-- User -->
+            <i class="fa-solid fa-user" style="font-size:17px;color:var(--text);cursor:none" onclick="location.hash='#account'"></i>
+
+            <!-- Bell -->
+            <div class="notif-wrap" id="notifWrap">
+                <button class="notif-bell-btn" onclick="toggleNotif(event)">
+                    <i class="fa-solid fa-bell"></i>
+                </button>
+                <div class="notif-badge" id="notifBadge">2</div>
+                <div class="notif-dropdown" id="notifDropdown">
+                    <div class="notif-header">
+                        <span class="notif-header-title">Thông báo</span>
+                        <button class="notif-mark-all" onclick="markAllRead()">Đánh dấu đã đọc</button>
+                    </div>
+                    <div class="notif-tabs">
+                        <button class="notif-tab active" onclick="switchNotifTab(this,'all')">Tất cả</button>
+                        <button class="notif-tab" onclick="switchNotifTab(this,'order')">Đơn hàng</button>
+                        <button class="notif-tab" onclick="switchNotifTab(this,'voucher')">Voucher</button>
+                        <button class="notif-tab" onclick="switchNotifTab(this,'event')">Tin tức</button>
+                    </div>
+                    <div class="notif-list" id="notifList">
+                        <div class="notif-item unread" data-notif-type="order" onclick="location.hash='#account';closeNotif()">
+                            <div class="notif-icon order"><i class="fa-solid fa-truck-fast"></i></div>
+                            <div class="notif-body">
+                                <div class="notif-body-title">Đơn hàng đang trên đường giao</div>
+                                <div class="notif-body-desc">#BM-2025-0067 · Dự kiến hôm nay 17:00–21:00</div>
+                            </div>
+                            <div class="notif-time">2 giờ</div>
+                        </div>
+                        <div class="notif-item unread" data-notif-type="voucher">
+                            <div class="notif-icon voucher"><i class="fa-solid fa-tag"></i></div>
+                            <div class="notif-body">
+                                <div class="notif-body-title">Voucher 10% dành riêng cho bạn</div>
+                                <div class="notif-body-desc">Dùng mã BEESALE10 · Hết hạn 14/03</div>
+                            </div>
+                            <div class="notif-time">1 ngày</div>
+                        </div>
+                        <div class="notif-item" data-notif-type="order" onclick="location.hash='#account';closeNotif()">
+                            <div class="notif-icon order"><i class="fa-solid fa-circle-check"></i></div>
+                            <div class="notif-body">
+                                <div class="notif-body-title">Đơn hàng đã giao thành công</div>
+                                <div class="notif-body-desc">#BM-2025-0081 · Nhận lúc 14:32 ngày 17/03</div>
+                            </div>
+                            <div class="notif-time">3 ngày</div>
+                        </div>
+                        <div class="notif-item" data-notif-type="event">
+                            <div class="notif-icon event"><i class="fa-solid fa-shirt"></i></div>
+                            <div class="notif-body">
+                                <div class="notif-body-title">BST SS25 chính thức ra mắt</div>
+                                <div class="notif-body-desc">Khám phá 12 mẫu áo mới cho mùa hè</div>
+                            </div>
+                            <div class="notif-time">5 ngày</div>
+                        </div>
+                    </div>
+                    <div class="notif-empty" id="notifEmpty">
+                        <i class="fa-regular fa-bell-slash"></i>Không có thông báo nào
+                    </div>
+                    <div class="notif-footer">
+                        <a href="#account" onclick="closeNotif()">Xem tất cả thông báo</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cart -->
+            <div class="cart-icon" onclick="location.hash='#cart'">
+                <i class="fa-solid fa-bag-shopping" style="font-size:19px;color:var(--text)"></i>
+                <div class="cart-badge" id="cartBadge">0</div>
+            </div>
+        </div>
+    </nav>
+    <div class="page-selector" id="pageSelector">
+        <a href="#home"   class="page-tab" data-tab="home"><i class="fa-solid fa-house"></i> Trang chủ</a>
+        <a href="#shop"   class="page-tab" data-tab="shop"><i class="fa-solid fa-shirt"></i> Sản phẩm</a>
+        <a href="#detail" class="page-tab" data-tab="detail"><i class="fa-solid fa-magnifying-glass"></i> Chi tiết SP</a>
+    </div>
+</div>
+
+<main id="content-area"></main>
+
+<footer>
+    <div class="footer-top">
+        <div>
+            <div class="footer-brand">Bee<span>mate</span></div>
+            <p class="footer-desc">Trang phục tự nhiên cho những người yêu sự thoải mái trong từng hơi thở.</p>
+        </div>
+        <div>
+            <div class="footer-col-title">Khám phá</div>
+            <ul class="footer-links">
+                <li><a href="#shop">Bộ sưu tập mới</a></li>
+                <li><a href="#shop">Áo nam</a></li>
+                <li><a href="#shop">Áo nữ</a></li>
+                <li><a href="#sale">Sale</a></li>
+            </ul>
+        </div>
+        <div>
+            <div class="footer-col-title">Hỗ trợ</div>
+            <ul class="footer-links">
+                <li><a href="#">Hướng dẫn chọn size</a></li>
+                <li><a href="#">Chính sách đổi trả</a></li>
+                <li><a href="#">Vận chuyển</a></li>
+                <li><a href="#">Liên hệ</a></li>
+            </ul>
+        </div>
+        <div>
+            <div class="footer-col-title">Câu chuyện</div>
+            <ul class="footer-links">
+                <li><a href="#">Về Beemate</a></li>
+                <li><a href="#">Vải & Chất liệu</a></li>
+                <li><a href="#">Cam kết xanh</a></li>
+                <li><a href="#">Blog</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <div class="footer-copy">© 2026 Beemate. Tất cả quyền được bảo lưu.</div>
+        <div class="footer-socials">
+            <a href="#">Instagram</a><a href="#">TikTok</a><a href="#">Shopee</a><a href="#">Lazada</a>
+        </div>
+    </div>
+</footer>
+
+<script src="/js/customer-router.js"></script>
+<script>
+    /* Cursor */
+    const cursor = document.getElementById('cursor');
+    const cursorRing = document.getElementById('cursorRing');
+    document.addEventListener('mousemove', e => {
+        cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px';
+        setTimeout(() => { cursorRing.style.left = e.clientX + 'px'; cursorRing.style.top = e.clientY + 'px'; }, 60);
+    });
+
+    /* Scroll */
+    window.addEventListener('scroll', () => {
+        document.getElementById('site-header').classList.toggle('scrolled', window.scrollY > 20);
+    });
+
+    /* Cart toast */
+    let toastTimeout;
+    window.showToast = function() {
+        const toast = document.getElementById('cartToast');
+        toast.classList.add('show');
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
+        const badge = document.getElementById('cartBadge');
+        badge.textContent = parseInt(badge.textContent) + 1;
+    };
+
+    /* Active tab */
+    window.addEventListener('hashchange', () => {
+        const hash = window.location.hash.slice(1).split('?')[0] || 'home';
+        document.querySelectorAll('.page-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === hash));
+    });
+    window.dispatchEvent(new Event('hashchange'));
+
+    /* Padding */
+    function adjustContentPadding() {
+        document.getElementById('content-area').style.paddingTop = document.getElementById('site-header').offsetHeight + 'px';
+    }
+    window.addEventListener('resize', adjustContentPadding);
+    adjustContentPadding();
+
+    /* ── NOTIFICATION ── */
+    function toggleNotif(e) {
+        e.stopPropagation();
+        document.getElementById('notifDropdown').classList.toggle('open');
+    }
+    function closeNotif() { document.getElementById('notifDropdown').classList.remove('open'); }
+    document.addEventListener('click', e => {
+        if (!document.getElementById('notifWrap').contains(e.target)) closeNotif();
+    });
+    function switchNotifTab(btn, type) {
+        document.querySelectorAll('.notif-tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        let visible = 0;
+        document.querySelectorAll('#notifList .notif-item').forEach(item => {
+            const show = type === 'all' || item.dataset.notifType === type;
+            item.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+        document.getElementById('notifEmpty').style.display = visible === 0 ? 'block' : 'none';
+    }
+    function markAllRead() {
+        document.querySelectorAll('#notifList .notif-item.unread').forEach(item => item.classList.remove('unread'));
+        const badge = document.getElementById('notifBadge');
+        badge.style.opacity = '0'; badge.style.transform = 'scale(0)';
+        setTimeout(() => badge.style.display = 'none', 300);
+    }
+
+    /* ── SEARCH OVERLAY ── */
+    const MOCK_PRODUCTS = [
+        { name:'Áo Linen Oversize Dài Tay', price:'490.000 ₫', color:'linear-gradient(160deg,#e8ddd1,#c4b49d)' },
+        { name:'Áo Sơ Mi Linen Xanh Rêu',  price:'450.000 ₫', color:'linear-gradient(160deg,#c5cfc7,#3D5A4C)' },
+        { name:'Áo Cotton Cổ Tròn Basic',   price:'320.000 ₫', color:'linear-gradient(160deg,#d4cfc9,#b0a99f)' },
+        { name:'Áo Thun Bamboo Nhẹ',        price:'280.000 ₫', color:'linear-gradient(160deg,#cfd4cc,#94a091)' },
+        { name:'Áo Polo Cotton Wash',       price:'380.000 ₫', color:'linear-gradient(160deg,#d1c9c0,#a89e93)' },
+    ];
+    window.openSearch = function() {
+        closeNotif();
+        const o = document.getElementById('searchOverlay');
+        o.style.opacity='1'; o.style.pointerEvents='all';
+        ['searchLabel','searchInputRow','searchSuggestions'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.style.opacity='1'; el.style.transform='translateY(0)'; }
+        });
+        setTimeout(() => document.getElementById('searchInput')?.focus(), 200);
+        document.body.style.overflow='hidden';
+    };
+    window.closeSearch = function() {
+        const o = document.getElementById('searchOverlay');
+        o.style.opacity='0'; o.style.pointerEvents='none';
+        ['searchLabel','searchInputRow','searchSuggestions'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.style.opacity='0'; el.style.transform='translateY(16px)'; }
+        });
+        document.body.style.overflow='';
+        clearSearch();
+    };
+    window.clearSearch = function() {
+        const input = document.getElementById('searchInput'); if (input) input.value='';
+        const cb = document.getElementById('searchClearBtn'); if (cb) cb.style.display='none';
+        const pop = document.getElementById('searchPopular'); if (pop) pop.style.display='';
+        const res = document.getElementById('searchResults'); if (res) res.style.display='none';
+    };
+    window.setSearch = function(val) {
+        const input = document.getElementById('searchInput');
+        if (input) { input.value=val; input.focus(); handleSearchInput(val); }
+    };
+    window.handleSearchInput = function(val) {
+        const cb=document.getElementById('searchClearBtn'), pop=document.getElementById('searchPopular'),
+            res=document.getElementById('searchResults'), lst=document.getElementById('searchResultList');
+        if (cb) cb.style.display = val.length ? 'block' : 'none';
+        if (!val.trim()) { if(pop) pop.style.display=''; if(res) res.style.display='none'; return; }
+        if (pop) pop.style.display='none'; if (res) res.style.display='';
+        const filtered = MOCK_PRODUCTS.filter(p => p.name.toLowerCase().includes(val.toLowerCase()));
+        if (!lst) return;
+        lst.innerHTML = filtered.length===0
+            ? '<div style="font-size:14px;color:var(--muted);font-weight:300;padding:16px 0">Không tìm thấy sản phẩm phù hợp.</div>'
+            : filtered.map(p=>`<div style="display:flex;align-items:center;gap:20px;padding:14px 0;border-bottom:1px solid rgba(0,0,0,.06);cursor:none" onclick="closeSearch();location.hash='#detail'"><div style="width:44px;height:56px;flex-shrink:0;background:${p.color}"></div><div style="font-family:'Cormorant Garamond',serif;font-size:18px;flex:1">${p.name}</div><div style="font-size:13px;color:var(--muted)">${p.price}</div></div>`).join('');
+    };
+    document.addEventListener('keydown', e => { if (e.key==='Escape') closeSearch(); });
+</script>
+
+<!-- SEARCH OVERLAY -->
+<div id="searchOverlay" style="position:fixed;inset:0;z-index:9000;background:rgba(247,245,242,0.97);backdrop-filter:blur(16px);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s ease;">
+    <button onclick="closeSearch()" style="position:absolute;top:28px;right:48px;background:none;border:none;cursor:none;font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:10px;transition:color .2s" onmouseenter="this.style.color='var(--text)'" onmouseleave="this.style.color='var(--muted)'">Đóng <i class="fa-solid fa-xmark"></i></button>
+    <div style="width:100%;max-width:680px;padding:0 24px">
+        <div id="searchLabel" style="font-size:11px;letter-spacing:.25em;color:var(--accent);text-transform:uppercase;font-weight:500;margin-bottom:20px;display:flex;align-items:center;gap:10px;opacity:0;transform:translateY(12px);transition:opacity .4s ease .1s,transform .4s ease .1s"><span style="width:20px;height:1px;background:var(--accent);display:inline-block"></span>Tìm kiếm</div>
+        <div id="searchInputRow" style="display:flex;align-items:center;border-bottom:1.5px solid var(--text);padding-bottom:16px;gap:16px;opacity:0;transform:translateY(16px);transition:opacity .4s ease .15s,transform .4s ease .15s">
+            <i class="fa-solid fa-magnifying-glass" style="font-size:20px;color:var(--muted);flex-shrink:0"></i>
+            <input id="searchInput" type="text" placeholder="Bạn đang tìm gì? Ví dụ: áo linen, oversize..." autocomplete="off" style="flex:1;border:none;background:none;font-family:'Cormorant Garamond',serif;font-size:clamp(24px,4vw,40px);font-weight:300;color:var(--text);outline:none" oninput="handleSearchInput(this.value)">
+            <button id="searchClearBtn" onclick="clearSearch()" style="display:none;background:none;border:none;cursor:none;color:var(--muted)"><i class="fa-solid fa-xmark" style="font-size:18px"></i></button>
+        </div>
+        <div id="searchSuggestions" style="margin-top:40px;opacity:0;transform:translateY(16px);transition:opacity .4s ease .2s,transform .4s ease .2s">
+            <div id="searchPopular">
+                <div style="font-size:10px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:16px">Tìm kiếm phổ biến</div>
+                <div style="display:flex;flex-wrap:wrap;gap:10px">
+                    <button onclick="setSearch('Áo linen')" style="padding:10px 20px;background:none;border:1px solid rgba(0,0,0,.1);font-family:'DM Sans',sans-serif;font-size:12px;letter-spacing:.08em;color:var(--muted);cursor:none;text-transform:uppercase" onmouseenter="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseleave="this.style.borderColor='rgba(0,0,0,.1)';this.style.color='var(--muted)'">Áo linen</button>
+                    <button onclick="setSearch('Oversize')" style="padding:10px 20px;background:none;border:1px solid rgba(0,0,0,.1);font-family:'DM Sans',sans-serif;font-size:12px;letter-spacing:.08em;color:var(--muted);cursor:none;text-transform:uppercase" onmouseenter="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseleave="this.style.borderColor='rgba(0,0,0,.1)';this.style.color='var(--muted)'">Oversize</button>
+                    <button onclick="setSearch('Cotton')" style="padding:10px 20px;background:none;border:1px solid rgba(0,0,0,.1);font-family:'DM Sans',sans-serif;font-size:12px;letter-spacing:.08em;color:var(--muted);cursor:none;text-transform:uppercase" onmouseenter="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseleave="this.style.borderColor='rgba(0,0,0,.1)';this.style.color='var(--muted)'">Cotton</button>
+                    <button onclick="setSearch('Áo sơ mi')" style="padding:10px 20px;background:none;border:1px solid rgba(0,0,0,.1);font-family:'DM Sans',sans-serif;font-size:12px;letter-spacing:.08em;color:var(--muted);cursor:none;text-transform:uppercase" onmouseenter="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseleave="this.style.borderColor='rgba(0,0,0,.1)';this.style.color='var(--muted)'">Áo sơ mi</button>
+                    <button onclick="setSearch('Sale')" style="padding:10px 20px;background:none;border:1px solid rgba(0,0,0,.1);font-family:'DM Sans',sans-serif;font-size:12px;letter-spacing:.08em;color:var(--muted);cursor:none;text-transform:uppercase" onmouseenter="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseleave="this.style.borderColor='rgba(0,0,0,.1)';this.style.color='var(--muted)'">Sale</button>
+                </div>
+            </div>
+            <div id="searchResults" style="display:none">
+                <div style="font-size:10px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:20px">Kết quả gợi ý</div>
+                <div id="searchResultList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
