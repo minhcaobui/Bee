@@ -1,0 +1,207 @@
+<section id="home-section">
+    <style>
+        .hero { height: calc(100vh - 120px); display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; position: relative; }
+        .hero-image-side { position: relative; overflow: hidden; }
+        .hero-img-placeholder { width: 100%; height: 100%; background: linear-gradient(160deg, #d4c9b8 0%, #b8a990 40%, #9e9080 100%); display: flex; align-items: flex-end; padding: 60px; position: relative; }
+        .hero-img-placeholder::before { content: ''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+        .hero-img-placeholder::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 55%; height: 92%; background: linear-gradient(180deg, transparent 0%, #c4b49d 30%, #a89070 100%); clip-path: polygon(30% 0%, 70% 0%, 85% 15%, 90% 40%, 80% 100%, 20% 100%, 10% 40%, 15% 15%); opacity: 0.7; }
+        .hero-label { font-size: 11px; letter-spacing: 0.2em; color: rgba(255,255,255,0.7); text-transform: uppercase; font-family: 'DM Sans', sans-serif; position: relative; z-index: 2; }
+        .hero-text-side { display: flex; flex-direction: column; justify-content: center; padding: 80px 80px 80px 70px; position: relative; }
+        .hero-season { font-size: 11px; letter-spacing: 0.25em; color: var(--accent); text-transform: uppercase; font-weight: 500; margin-bottom: 32px; display: flex; align-items: center; gap: 12px; }
+        .hero-season::before { content: ''; width: 32px; height: 1px; background: var(--accent); }
+        .hero-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(52px, 6vw, 82px); line-height: 1.05; font-weight: 300; margin-bottom: 28px; letter-spacing: -0.01em; }
+        .hero-title em { font-style: italic; color: var(--accent); }
+        .hero-desc { font-size: 15px; color: var(--muted); line-height: 1.8; max-width: 380px; margin-bottom: 52px; font-weight: 300; }
+        .hero-cta { display: inline-flex; align-items: center; gap: 16px; background: var(--accent); color: white; padding: 18px 40px; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; font-family: 'DM Sans', sans-serif; font-weight: 400; width: fit-content; transition: background 0.3s ease, gap 0.3s ease; position: relative; overflow: hidden; cursor: none; }
+        .hero-cta::before { content: ''; position: absolute; inset: 0; background: var(--accent-light); transform: translateX(-100%); transition: transform 0.4s ease; }
+        .hero-cta:hover::before { transform: translateX(0); }
+        .hero-cta span, .hero-cta svg { position: relative; z-index: 1; }
+        .hero-cta svg { width: 16px; height: 16px; stroke: white; fill: none; transition: transform 0.3s ease; }
+        .hero-cta:hover svg { transform: translateX(4px); }
+        .hero-scroll-hint { position: absolute; bottom: 48px; left: 70px; display: flex; align-items: center; gap: 12px; font-size: 11px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; }
+        .scroll-line { width: 1px; height: 48px; background: linear-gradient(to bottom, transparent, var(--muted)); animation: scrollPulse 2s ease-in-out infinite; }
+        @keyframes scrollPulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+        .hero-stats { position: absolute; bottom: 48px; right: 80px; display: flex; gap: 40px; }
+        .stat { text-align: right; }
+        .stat-number { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 300; color: var(--text); line-height: 1; }
+        .stat-label { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; margin-top: 4px; }
+        .marquee-section { padding: 20px 0; border-top: 1px solid rgba(0,0,0,0.08); border-bottom: 1px solid rgba(0,0,0,0.08); overflow: hidden; background: var(--white); }
+        .marquee-track { display: flex; gap: 0; animation: marquee 20s linear infinite; white-space: nowrap; }
+        .marquee-item { font-family: 'Cormorant Garamond', serif; font-size: 14px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; padding: 0 60px; display: flex; align-items: center; gap: 60px; }
+        .marquee-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .brand-section { padding: 120px 60px; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+        .brand-img-wrap { position: relative; }
+        .brand-img-frame { width: 100%; aspect-ratio: 4/5; overflow: hidden; position: relative; }
+        .brand-img-frame .img-placeholder { width: 100%; height: 100%; background: linear-gradient(160deg, #c9c4bc, #9e998f); }
+        .brand-img-accent { position: absolute; width: 50%; aspect-ratio: 1; bottom: -32px; right: -32px; border: 12px solid var(--bg); background: var(--accent); opacity: 0.15; z-index: -1; }
+        .brand-year { position: absolute; top: 32px; left: -20px; writing-mode: vertical-lr; font-family: 'Cormorant Garamond', serif; font-size: 13px; letter-spacing: 0.2em; color: var(--muted); transform: rotate(180deg); }
+        .brand-eyebrow { font-size: 11px; letter-spacing: 0.22em; color: var(--accent); text-transform: uppercase; font-weight: 500; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; }
+        .brand-eyebrow::before { content: ''; width: 28px; height: 1px; background: var(--accent); }
+        .brand-headline { font-family: 'Cormorant Garamond', serif; font-size: clamp(32px, 4vw, 54px); font-weight: 300; line-height: 1.1; margin-bottom: 28px; }
+        .brand-headline em { font-style: italic; }
+        .brand-body { font-size: 15px; color: var(--muted); line-height: 1.9; font-weight: 300; margin-bottom: 20px; }
+        .brand-body + .brand-body { margin-bottom: 44px; }
+        .brand-link { font-size: 13px; color: var(--accent); text-decoration: none; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 400; display: inline-flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--accent); padding-bottom: 4px; cursor: none; }
+        .brand-link svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+        .brand-values { display: flex; gap: 40px; margin-top: 52px; padding-top: 40px; border-top: 1px solid rgba(0,0,0,0.08); }
+        .brand-value-num { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 300; color: var(--accent); line-height: 1; }
+        .brand-value-label { font-size: 12px; color: var(--muted); letter-spacing: 0.08em; margin-top: 4px; }
+
+        .products-section { padding: 80px 0 100px; }
+        .section-header { display: flex; justify-content: space-between; align-items: flex-end; padding: 0 60px; margin-bottom: 52px; }
+        .section-eyebrow { font-size: 11px; letter-spacing: 0.22em; color: var(--accent); text-transform: uppercase; font-weight: 500; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+        .section-eyebrow::before { content: ''; width: 20px; height: 1px; background: var(--accent); }
+        .section-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(32px, 4vw, 52px); font-weight: 300; line-height: 1.1; }
+        .section-title em { font-style: italic; }
+        .view-all { font-size: 12px; letter-spacing: 0.12em; color: var(--text); text-decoration: none; text-transform: uppercase; font-weight: 400; display: flex; align-items: center; gap: 8px; padding-bottom: 2px; border-bottom: 1px solid transparent; transition: border-color 0.3s ease; cursor: none; }
+        .view-all:hover { border-color: var(--accent); color: var(--accent); }
+        .view-all svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+        .products-grid { padding: 0 60px; display: grid; grid-template-columns: 1.4fr 1fr 1fr 1.2fr; grid-template-rows: auto auto; gap: 24px; }
+        .product-card { background: var(--white); box-shadow: var(--card-shadow); overflow: hidden; position: relative; cursor: none; transition: box-shadow 0.4s ease; }
+        .product-card:hover { box-shadow: var(--card-shadow-hover); }
+        .product-card:nth-child(1), .product-card:nth-child(4) { grid-row: span 2; }
+        .product-img { width: 100%; aspect-ratio: 3/4; position: relative; overflow: hidden; }
+        .product-card:nth-child(1) .product-img, .product-card:nth-child(4) .product-img { aspect-ratio: unset; height: 100%; min-height: 480px; }
+        .img-placeholder { width: 100%; height: 100%; display: block; transition: transform 0.6s ease; }
+        .product-card:hover .img-placeholder { transform: scale(1.04); }
+        .c1 { background: linear-gradient(160deg, #e8ddd1, #c4b49d); } .c2 { background: linear-gradient(160deg, #d4cfc9, #b0a99f); } .c3 { background: linear-gradient(160deg, #c5cfc7, #8fa694); } .c4 { background: linear-gradient(160deg, #d1c9c0, #a89e93); }
+        .img-placeholder::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px); }
+        .product-overlay { position: absolute; inset: 0; background: rgba(26,26,26,0.0); display: flex; align-items: flex-end; padding: 24px; transition: background 0.4s ease; }
+        .product-card:hover .product-overlay { background: rgba(26,26,26,0.08); }
+        .quick-add { background: white; color: var(--text); border: none; padding: 12px 24px; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: none; transform: translateY(8px); opacity: 0; transition: transform 0.3s ease, opacity 0.3s ease; width: 100%; }
+        .product-card:hover .quick-add { transform: translateY(0); opacity: 1; }
+        .product-info { padding: 20px 20px 24px; }
+        .product-tag { font-size: 10px; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase; font-weight: 500; margin-bottom: 6px; }
+        .product-name { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 400; margin-bottom: 8px; line-height: 1.2; }
+        .product-price-row { display: flex; justify-content: space-between; align-items: center; }
+        .product-price { font-size: 14px; color: var(--text); font-weight: 400; }
+        .product-colors { display: flex; gap: 6px; }
+        .color-dot { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); cursor: none; transition: transform 0.2s ease; }
+        .color-dot:hover { transform: scale(1.3); }
+        .color-dot.active { border: 1.5px solid var(--text); }
+        .label-new, .label-sale { position: absolute; top: 16px; left: 16px; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 500; padding: 5px 10px; z-index: 2; }
+        .label-new { background: var(--accent); color: white; } .label-sale { background: #c08060; color: white; }
+        .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+        .reveal-delay-1 { transition-delay: 0.1s; } .reveal-delay-2 { transition-delay: 0.2s; } .reveal-delay-3 { transition-delay: 0.35s; }
+        @media (max-width: 900px) { .hero { grid-template-columns: 1fr; height: auto; } .hero-image-side { height: 60vw; } .hero-text-side { padding: 48px 24px; } .brand-section { grid-template-columns: 1fr; padding: 60px 24px; } .products-grid { grid-template-columns: 1fr 1fr; padding: 0 24px; } .product-card:nth-child(1), .product-card:nth-child(4) { grid-row: span 1; } .section-header { padding: 0 24px; } }
+    </style>
+
+    <section class="hero">
+        <div class="hero-image-side">
+            <div class="hero-img-placeholder">
+                <span class="hero-label">SS25 · Bộ sưu tập mới</span>
+            </div>
+        </div>
+        <div class="hero-text-side">
+            <div class="hero-season">Spring / Summer 2025</div>
+            <h1 class="hero-title">Mặc để<br><em>thở thôi,</em><br>không hơn</h1>
+            <p class="hero-desc">Beemate tin rằng trang phục tốt nhất là thứ bạn không cần nghĩ đến — nó chỉ cần ở đó, đúng lúc, đúng người.</p>
+            <a href="#shop" class="hero-cta">
+                <span>Khám phá bộ sưu tập</span>
+                <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+            <div class="hero-scroll-hint"><div class="scroll-line"></div><span>Cuộn xuống</span></div>
+            <div class="hero-stats">
+                <div class="stat"><div class="stat-number">48</div><div class="stat-label">Mẫu mới</div></div>
+                <div class="stat"><div class="stat-number">100%</div><div class="stat-label">Vải tự nhiên</div></div>
+            </div>
+        </div>
+    </section>
+
+    <div class="marquee-section">
+        <div class="marquee-track">
+            <div class="marquee-item">
+                Linen <div class="marquee-dot"></div> Cotton <div class="marquee-dot"></div> Bamboo <div class="marquee-dot"></div> Thân thiện môi trường <div class="marquee-dot"></div> Free shipping từ 500k <div class="marquee-dot"></div> Đổi trả 30 ngày <div class="marquee-dot"></div> Vải tự nhiên 100% <div class="marquee-dot"></div> Linen <div class="marquee-dot"></div> Cotton <div class="marquee-dot"></div> Bamboo <div class="marquee-dot"></div> Thân thiện môi trường <div class="marquee-dot"></div> Free shipping từ 500k <div class="marquee-dot"></div> Đổi trả 30 ngày <div class="marquee-dot"></div> Vải tự nhiên 100% <div class="marquee-dot"></div>
+            </div>
+        </div>
+    </div>
+
+    <section class="products-section" id="new-arrivals">
+        <div class="section-header reveal">
+            <div>
+                <div class="section-eyebrow">Mới về</div>
+                <h2 class="section-title">Những chiếc áo<br><em>đang được yêu thích</em></h2>
+            </div>
+            <a href="#shop" class="view-all">Xem tất cả <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+        <div class="products-grid">
+            <div class="product-card reveal">
+                <div class="label-new">Mới</div>
+                <div class="product-img"><div class="img-placeholder c1"></div><div class="product-overlay"><button class="quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div></div>
+                <div class="product-info">
+                    <div class="product-tag">Bestseller</div><div class="product-name">Áo Linen Oversize<br>Dài Tay</div>
+                    <div class="product-price-row"><div class="product-price">490.000 ₫</div><div class="product-colors"><div class="color-dot active" style="background:#c4b49d"></div><div class="color-dot" style="background:#3D5A4C"></div><div class="color-dot" style="background:#1A1A1A"></div></div></div>
+                </div>
+            </div>
+            <div class="product-card reveal reveal-delay-1">
+                <div class="product-img"><div class="img-placeholder c2"></div><div class="product-overlay"><button class="quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div></div>
+                <div class="product-info">
+                    <div class="product-tag">Tự nhiên</div><div class="product-name">Áo Cotton Cổ Tròn</div>
+                    <div class="product-price-row"><div class="product-price">320.000 ₫</div><div class="product-colors"><div class="color-dot active" style="background:#d4cfc9"></div><div class="color-dot" style="background:#c8a882"></div></div></div>
+                </div>
+            </div>
+            <div class="product-card reveal reveal-delay-2">
+                <div class="product-img"><div class="img-placeholder c3"></div><div class="product-overlay"><button class="quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div></div>
+                <div class="product-info">
+                    <div class="product-tag">Mới</div><div class="product-name">Áo Sơ Mi Linen Xanh Rêu</div>
+                    <div class="product-price-row"><div class="product-price">450.000 ₫</div><div class="product-colors"><div class="color-dot active" style="background:#3D5A4C"></div><div class="color-dot" style="background:#c4b49d"></div></div></div>
+                </div>
+            </div>
+            <div class="product-card reveal reveal-delay-3">
+                <div class="label-sale">Sale</div>
+                <div class="product-img"><div class="img-placeholder c4"></div><div class="product-overlay"><button class="quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div></div>
+                <div class="product-info">
+                    <div class="product-tag">Limited</div><div class="product-name">Set Áo Quần<br>Linen Tonal</div>
+                    <div class="product-price-row"><div class="product-price">790.000 ₫ <span style="color:var(--muted);text-decoration:line-through;font-size:12px">990k</span></div><div class="product-colors"><div class="color-dot active" style="background:#a89e93"></div><div class="color-dot" style="background:#1A1A1A"></div></div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="brand-section">
+        <div class="brand-img-wrap reveal">
+            <div class="brand-img-frame"><div class="img-placeholder"></div></div>
+            <div class="brand-img-accent"></div>
+            <span class="brand-year">Beemate · Kể từ 2019</span>
+        </div>
+        <div class="brand-text reveal reveal-delay-1">
+            <div class="brand-eyebrow">Câu chuyện của chúng tôi</div>
+            <h2 class="brand-headline">Áo không phải<br>để gây ấn tượng —<br><em>mà để bạn thoải mái.</em></h2>
+            <p class="brand-body">Beemate ra đời từ một câu hỏi đơn giản: tại sao mặc đẹp lại phải cảm thấy khó chịu? Chúng tôi tin rằng vải tốt, dáng chuẩn, và màu sắc phù hợp có thể tạo ra sự khác biệt mà bạn cảm nhận được ngay từ khoảnh khắc mặc vào.</p>
+            <p class="brand-body">Mỗi mẫu áo Beemate đều được may từ vải tự nhiên, được kiểm tra kỹ ở từng đường chỉ — để bạn không cần lo nghĩ, chỉ cần mặc và đi.</p>
+            <a href="#" class="brand-link">Đọc thêm về Beemate <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+            <div class="brand-values">
+                <div class="brand-value"><div class="brand-value-num">100%</div><div class="brand-value-label">Vải tự nhiên</div></div>
+                <div class="brand-value"><div class="brand-value-num">48h</div><div class="brand-value-label">Giao hàng</div></div>
+                <div class="brand-value"><div class="brand-value-num">30</div><div class="brand-value-label">Ngày đổi trả</div></div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        window.HomeApp = {
+            init: function() {
+                const reveals = document.querySelectorAll('#home-section .reveal');
+                const observer = new IntersectionObserver(entries => {
+                    entries.forEach(e => {
+                        if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+                    });
+                }, { threshold: 0.12 });
+                reveals.forEach(r => observer.observe(r));
+                setTimeout(() => {
+                    reveals.forEach(r => { if (r.getBoundingClientRect().top < window.innerHeight * 0.9) r.classList.add('visible'); });
+                }, 100);
+
+                const params = new URLSearchParams(window.location.hash.split('?')[1]);
+                if (params.get('scroll') === 'new-arrivals') {
+                    setTimeout(() => {
+                        document.getElementById('new-arrivals')
+                            ?.scrollIntoView({ behavior: 'smooth' });
+                    }, 100); // đợi fragment render xong
+                }
+            }
+        };
+    </script>
+</section>

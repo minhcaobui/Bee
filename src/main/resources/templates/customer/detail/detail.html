@@ -1,0 +1,147 @@
+<section id="detail-section">
+    <style>
+        .detail-section { padding: 40px 0 120px; background: var(--white); }
+        .detail-label { font-size: 11px; letter-spacing: 0.22em; color: var(--muted); text-transform: uppercase; text-align: center; margin-bottom: 16px; font-weight: 400; }
+        .product-detail-layout { display: grid; grid-template-columns: 60fr 40fr; gap: 0; align-items: start; max-width: 1200px; margin: 40px auto 0; padding: 0 60px; }
+        .detail-images { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .detail-img-main { grid-column: span 2; aspect-ratio: 4/3; overflow: hidden; position: relative; }
+        .detail-img-thumb { aspect-ratio: 1; overflow: hidden; position: relative; }
+        .img-placeholder { width: 100%; height: 100%; display: block; }
+        .c1 { background: linear-gradient(160deg, #e8ddd1, #c4b49d); } .c2 { background: linear-gradient(160deg, #d4cfc9, #b0a99f); } .c3 { background: linear-gradient(160deg, #c5cfc7, #8fa694); }
+        .img-placeholder::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px); }
+
+        .detail-info { padding: 0 0 0 60px; position: sticky; top: 120px; }
+        .detail-category { font-size: 11px; letter-spacing: 0.2em; color: var(--accent); text-transform: uppercase; font-weight: 500; margin-bottom: 16px; }
+        .detail-name { font-family: 'Cormorant Garamond', serif; font-size: 38px; font-weight: 300; line-height: 1.1; margin-bottom: 12px; }
+        .detail-price { font-size: 22px; color: var(--text); font-weight: 300; margin-bottom: 32px; }
+        .detail-divider { width: 40px; height: 1px; background: var(--accent); margin-bottom: 28px; }
+        .detail-desc { font-size: 14px; color: var(--muted); line-height: 1.9; font-weight: 300; margin-bottom: 36px; }
+
+        .size-label { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 400; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .size-guide-btn { font-size: 11px; color: var(--accent); text-decoration: underline; cursor: none; background: none; border: none; font-family: 'DM Sans', sans-serif; font-weight: 300; }
+        .size-options { display: flex; gap: 10px; margin-bottom: 32px; flex-wrap: wrap; }
+        .size-btn { width: 48px; height: 48px; border: 1px solid rgba(0,0,0,0.15); background: none; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: none; transition: all 0.2s ease; color: var(--text); }
+        .size-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .size-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+        .size-btn.unavailable { color: var(--muted); opacity: 0.4; }
+
+        .add-to-cart-btn { width: 100%; padding: 18px; background: var(--accent); color: white; border: none; font-family: 'DM Sans', sans-serif; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; cursor: none; position: relative; overflow: hidden; transition: background 0.3s ease; margin-bottom: 14px; }
+        .add-to-cart-btn::after { content: ''; position: absolute; inset: 0; background: var(--accent-light); transform: scaleX(0); transform-origin: left; transition: transform 0.4s ease; }
+        .add-to-cart-btn:hover::after { transform: scaleX(1); }
+        .add-to-cart-btn span { position: relative; z-index: 1; }
+        .wishlist-btn { width: 100%; padding: 16px; background: transparent; color: var(--text); border: 1px solid rgba(0,0,0,0.12); font-family: 'DM Sans', sans-serif; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; cursor: none; display: flex; align-items: center; justify-content: center; gap: 10px; transition: border-color 0.3s ease, color 0.3s ease; }
+        .wishlist-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; }
+        .wishlist-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+        .color-dot { width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); cursor: none; transition: transform 0.2s ease; }
+        .color-dot:hover { transform: scale(1.1); }
+        .color-dot.active { border: 2px solid var(--text); }
+
+        .size-tooltip { position: absolute; background: var(--text); color: white; padding: 16px 20px; font-size: 12px; line-height: 1.8; white-space: nowrap; display: none; z-index: 10; pointer-events: none; }
+
+        @media (max-width: 900px) { .product-detail-layout { grid-template-columns: 1fr; padding: 0 24px; } .detail-info { padding: 40px 0 0; position: static; } }
+    </style>
+
+    <section class="detail-section">
+        <div style="text-align:center;">
+            <div class="detail-label">Chi tiết sản phẩm</div>
+        </div>
+
+        <div class="product-detail-layout">
+            <div class="detail-images">
+                <div class="detail-img-main"><div class="img-placeholder c1"></div></div>
+                <div class="detail-img-thumb"><div class="img-placeholder c3"></div></div>
+                <div class="detail-img-thumb"><div class="img-placeholder c2"></div></div>
+            </div>
+
+            <div class="detail-info">
+                <div class="detail-category">Áo · Linen Collection</div>
+                <div class="detail-name">Áo Linen Oversize<br>Dài Tay</div>
+                <div class="detail-price">490.000 ₫</div>
+                <div class="detail-divider"></div>
+                <p class="detail-desc">Được may từ 100% linen tự nhiên, thoáng khí và nhẹ tay, dáng oversize vừa phải — không quá rộng, không bó. Phù hợp cho cả ngày ở nhà lẫn đi ra ngoài mà không cần thay đồ.</p>
+
+                <div style="margin-bottom:28px">
+                    <div class="size-label">Màu sắc <span style="color:var(--accent);font-size:12px;font-weight:400">Sand Beige</span></div>
+                    <div style="display:flex;gap:12px;margin-top:10px">
+                        <div class="color-dot active" style="background:#c4b49d"></div>
+                        <div class="color-dot" style="background:#3D5A4C"></div>
+                        <div class="color-dot" style="background:#1A1A1A"></div>
+                    </div>
+                </div>
+
+                <div style="position:relative">
+                    <div class="size-label">
+                        Kích cỡ
+                        <button class="size-guide-btn" id="sizeGuideBtn">Hướng dẫn size</button>
+                    </div>
+
+                    <div class="size-tooltip" id="sizeTooltip" style="top:100%; right:0; margin-top:8px;">
+                        <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;color:rgba(255,255,255,0.5)">Bảng quy đổi size</div>
+                        <table style="border-collapse:collapse;font-size:12px">
+                            <tr><td style="padding-right:24px;color:rgba(255,255,255,0.5)">Size</td><td style="padding-right:24px;color:rgba(255,255,255,0.5)">Ngực (cm)</td><td style="color:rgba(255,255,255,0.5)">Dài (cm)</td></tr>
+                            <tr><td>S</td><td>88–92</td><td>65</td></tr>
+                            <tr><td>M</td><td>92–96</td><td>67</td></tr>
+                            <tr><td>L</td><td>96–100</td><td>69</td></tr>
+                            <tr><td>XL</td><td>100–105</td><td>71</td></tr>
+                        </table>
+                    </div>
+
+                    <div class="size-options">
+                        <button class="size-btn">S</button>
+                        <button class="size-btn active">M</button>
+                        <button class="size-btn">L</button>
+                        <button class="size-btn">XL</button>
+                        <button class="size-btn unavailable">XXL</button>
+                    </div>
+                </div>
+
+                <button class="add-to-cart-btn" onclick="window.showToast()"><span>Thêm vào giỏ hàng</span></button>
+                <button class="wishlist-btn"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg> Lưu vào yêu thích</button>
+
+                <div style="margin-top:32px;border-top:1px solid rgba(0,0,0,0.08)">
+                    <div style="padding:20px 0;border-bottom:1px solid rgba(0,0,0,0.08);display:flex;justify-content:space-between;align-items:center;cursor:none">
+                        <span style="font-size:12px;letter-spacing:0.1em;text-transform:uppercase;font-weight:400">Chất liệu & Chăm sóc</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg>
+                    </div>
+                    <div style="padding:20px 0;border-bottom:1px solid rgba(0,0,0,0.08);display:flex;justify-content:space-between;align-items:center;cursor:none">
+                        <span style="font-size:12px;letter-spacing:0.1em;text-transform:uppercase;font-weight:400">Vận chuyển & Đổi trả</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg>
+                    </div>
+                    <div style="padding:20px 0;display:flex;justify-content:space-between;align-items:center;cursor:none">
+                        <span style="font-size:12px;letter-spacing:0.1em;text-transform:uppercase;font-weight:400">Đánh giá (24)</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        window.DetailApp = {
+            init: function() {
+                const sizeGuideBtn = document.getElementById('sizeGuideBtn');
+                const sizeTooltip = document.getElementById('sizeTooltip');
+                let tooltipVisible = false;
+
+                if (sizeGuideBtn) {
+                    sizeGuideBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        tooltipVisible = !tooltipVisible;
+                        sizeTooltip.style.display = tooltipVisible ? 'block' : 'none';
+                    });
+                    document.addEventListener('click', e => {
+                        if (!sizeGuideBtn.contains(e.target) && !sizeTooltip.contains(e.target)) {
+                            sizeTooltip.style.display = 'none';
+                            tooltipVisible = false;
+                        }
+                    });
+                }
+
+                document.querySelectorAll('#detail-section .size-btn:not(.unavailable)').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        btn.closest('.size-options').querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                    });
+                });
+            }
+        };
+    </script>
+</section>

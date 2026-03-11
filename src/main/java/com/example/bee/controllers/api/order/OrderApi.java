@@ -146,11 +146,25 @@ public class OrderApi {
 
         TrangThaiHoaDon nextStatus = ttRepo.findByMa(nextMa);
         hd.setTrangThaiHoaDon(nextStatus);
+
+        // --- ĐOẠN FIX: Lấy thằng đang thao tác để gán vào Hóa đơn ---
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        var nhanVienThaoTac = (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser"))
+                ? nvRepo.findByTaiKhoan_TenDangNhap(auth.getName()).orElse(null)
+                : null;
+
+        // Nếu hóa đơn chưa có ai phụ trách thì gán thằng này vào luôn
+        if (hd.getNhanVien() == null && nhanVienThaoTac != null) {
+            hd.setNhanVien(nhanVienThaoTac);
+        }
+
         hdRepo.save(hd);
 
+        // Lưu luôn cả thằng thao tác vào Lịch Sử để sau này lôi đầu ra chửi nếu làm sai
         lsRepo.save(LichSuHoaDon.builder()
                 .hoaDon(hd)
                 .trangThaiHoaDon(nextStatus)
+                .nhanVien(nhanVienThaoTac) // Gắn tên thằng nhân viên vào đây!
                 .ghiChu(ghiChu)
                 .build());
 
@@ -168,13 +182,24 @@ public class OrderApi {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy hóa đơn"));
 
         TrangThaiHoaDon ttHuy = ttRepo.findByMa("DA_HUY");
-
         hd.setTrangThaiHoaDon(ttHuy);
+
+        // --- FIX TƯƠNG TỰ CHO NÚT HỦY ---
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        var nhanVienThaoTac = (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser"))
+                ? nvRepo.findByTaiKhoan_TenDangNhap(auth.getName()).orElse(null)
+                : null;
+
+        if (hd.getNhanVien() == null && nhanVienThaoTac != null) {
+            hd.setNhanVien(nhanVienThaoTac);
+        }
+
         hdRepo.save(hd);
 
         lsRepo.save(LichSuHoaDon.builder()
                 .hoaDon(hd)
                 .trangThaiHoaDon(ttHuy)
+                .nhanVien(nhanVienThaoTac) // Gắn tên vào lịch sử hủy
                 .ghiChu(req.getOrDefault("ghiChu", "Khách hàng/Admin yêu cầu hủy đơn"))
                 .build());
 

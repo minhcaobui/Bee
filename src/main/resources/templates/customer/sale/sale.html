@@ -1,0 +1,626 @@
+<section id="sale-section">
+    <style>
+        #sale-section {
+            min-height: 100vh;
+            background: var(--bg);
+        }
+
+        /* ── HERO ── */
+        .sale-hero {
+            padding: 72px 60px 80px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            border-bottom: 1px solid rgba(0,0,0,0.07);
+            position: relative;
+            overflow: hidden;
+        }
+        .sale-hero::before {
+            content: 'SALE';
+            position: absolute;
+            right: -20px; top: -20px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 220px; font-weight: 300;
+            color: rgba(61,90,76,0.05);
+            line-height: 1; letter-spacing: -0.04em;
+            pointer-events: none; user-select: none;
+        }
+
+        .sale-hero-left {}
+        .sale-hero-eyebrow {
+            font-size: 11px; letter-spacing: 0.25em;
+            color: var(--accent); text-transform: uppercase;
+            font-weight: 500; margin-bottom: 20px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .sale-hero-eyebrow::before { content:''; width:20px; height:1px; background:var(--accent); }
+        .sale-hero-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(44px, 6vw, 80px);
+            font-weight: 300; line-height: 1.0;
+            letter-spacing: -0.01em;
+        }
+        .sale-hero-title em { font-style: italic; color: var(--accent); }
+
+        .sale-hero-right {
+            padding-left: 80px;
+            display: flex; flex-direction: column;
+            justify-content: flex-end; gap: 32px;
+        }
+        .sale-hero-desc {
+            font-size: 15px; color: var(--muted);
+            line-height: 1.8; font-weight: 300;
+            max-width: 360px;
+        }
+
+        /* Countdown */
+        .sale-countdown {
+            display: flex; gap: 0;
+            align-items: stretch;
+        }
+        .sale-countdown-block {
+            background: var(--text); color: white;
+            padding: 20px 24px; text-align: center;
+            min-width: 72px;
+            position: relative;
+        }
+        .sale-countdown-block:not(:last-child) {
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+        .sale-countdown-num {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 36px; font-weight: 300;
+            line-height: 1; display: block;
+            letter-spacing: -0.02em;
+        }
+        .sale-countdown-label {
+            font-size: 9px; letter-spacing: 0.18em;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase; margin-top: 6px;
+            display: block; font-weight: 400;
+        }
+        .sale-countdown-note {
+            font-size: 11px; color: var(--muted);
+            letter-spacing: 0.06em; margin-top: 12px;
+            font-weight: 300;
+        }
+
+        /* ── FILTER ── */
+        .sale-filter-bar {
+            padding: 0 60px;
+            display: flex; justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,0.07);
+        }
+        .sale-filter-tabs { display: flex; gap: 0; }
+        .sale-filter-tab {
+            padding: 16px 24px;
+            font-size: 12px; letter-spacing: 0.1em;
+            text-transform: uppercase; cursor: pointer;
+            border: none; background: none;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--muted); font-weight: 400;
+            border-bottom: 2px solid transparent;
+            transition: color 0.2s, border-color 0.2s;
+            position: relative; bottom: -1px;
+            white-space: nowrap;
+        }
+        .sale-filter-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+        .sale-filter-tab:hover { color: var(--text); }
+        .sale-filter-right {
+            display: flex; align-items: center; gap: 16px;
+        }
+        .sale-sort {
+            border: 1px solid rgba(0,0,0,0.1); padding: 10px 16px;
+            font-family: 'DM Sans', sans-serif; font-size: 12px;
+            background: var(--white); color: var(--text);
+            letter-spacing: 0.08em; cursor: pointer; outline: none;
+        }
+        .sale-count-label {
+            font-size: 12px; color: var(--muted);
+            letter-spacing: 0.06em; font-weight: 300;
+        }
+
+        /* ── FEATURED ROW (editorial top) ── */
+        .sale-featured {
+            padding: 64px 60px 0;
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        .sale-featured-card {
+            position: relative; overflow: hidden;
+            background: var(--white);
+            cursor: pointer;
+        }
+        .sale-featured-card:hover .sale-card-img-bg { transform: scale(1.04); }
+        .sale-featured-img {
+            width: 100%; aspect-ratio: 16/9;
+            overflow: hidden; position: relative;
+        }
+        .sale-featured-card:nth-child(2) .sale-featured-img { aspect-ratio: 3/4; height: 100%; }
+        .sale-card-img-bg {
+            width: 100%; height: 100%;
+            transition: transform 0.7s ease;
+        }
+
+        /* ── REGULAR GRID ── */
+        .sale-grid {
+            padding: 0 60px 100px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2px;
+            background: rgba(0,0,0,0.04);
+        }
+
+        /* ── PRODUCT CARD (shared) ── */
+        .sale-product-card {
+            background: var(--white);
+            position: relative; overflow: hidden;
+            cursor: pointer;
+            transition: box-shadow 0.4s ease;
+        }
+        .sale-product-card:hover { box-shadow: var(--card-shadow-hover); }
+        .sale-product-card:hover .sale-card-img-bg { transform: scale(1.04); }
+
+        .sale-product-img {
+            width: 100%; aspect-ratio: 3/4;
+            overflow: hidden; position: relative;
+        }
+        .sale-featured-img .sale-card-img-bg,
+        .sale-product-img .sale-card-img-bg {
+            width: 100%; height: 100%;
+            transition: transform 0.7s ease;
+        }
+
+        /* Discount badge */
+        .sale-badge {
+            position: absolute; top: 16px; left: 16px;
+            background: #c08060; color: white;
+            font-size: 11px; font-weight: 500;
+            letter-spacing: 0.08em; padding: 6px 12px;
+            z-index: 2;
+        }
+        .sale-badge-big {
+            position: absolute; top: 20px; left: 20px;
+            background: var(--accent); color: white;
+            font-size: 13px; font-weight: 500;
+            letter-spacing: 0.06em; padding: 8px 16px;
+            z-index: 2;
+        }
+
+        /* Quick add overlay */
+        .sale-product-overlay {
+            position: absolute; inset: 0;
+            background: rgba(26,26,26,0);
+            display: flex; align-items: flex-end;
+            padding: 20px;
+            transition: background 0.4s ease;
+        }
+        .sale-product-card:hover .sale-product-overlay,
+        .sale-featured-card:hover .sale-product-overlay { background: rgba(26,26,26,0.07); }
+        .sale-quick-add {
+            background: white; color: var(--text);
+            border: none; padding: 12px 24px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 12px; letter-spacing: 0.1em;
+            text-transform: uppercase; cursor: pointer;
+            transform: translateY(8px); opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            width: 100%; font-weight: 400;
+        }
+        .sale-product-card:hover .sale-quick-add,
+        .sale-featured-card:hover .sale-quick-add {
+            transform: translateY(0); opacity: 1;
+        }
+
+        /* Card info */
+        .sale-card-info {
+            padding: 18px 20px 22px;
+        }
+        .sale-card-tag {
+            font-size: 10px; letter-spacing: 0.18em;
+            color: var(--accent); text-transform: uppercase;
+            font-weight: 500; margin-bottom: 6px;
+        }
+        .sale-card-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 18px; font-weight: 400;
+            margin-bottom: 10px; line-height: 1.2;
+        }
+        .sale-card-prices {
+            display: flex; align-items: baseline; gap: 10px;
+        }
+        .sale-price-new {
+            font-size: 15px; color: var(--accent); font-weight: 500;
+        }
+        .sale-price-old {
+            font-size: 13px; color: var(--muted);
+            text-decoration: line-through; font-weight: 300;
+        }
+        .sale-price-save {
+            font-size: 11px; color: #c08060;
+            letter-spacing: 0.06em; font-weight: 400;
+        }
+
+        /* Featured card info (bigger) */
+        .sale-featured-info {
+            padding: 24px 28px 28px;
+        }
+        .sale-featured-info .sale-card-name {
+            font-size: 22px;
+        }
+
+        /* ── PROMO BANNER ── */
+        .sale-promo-banner {
+            margin: 0 60px 24px;
+            background: var(--accent);
+            padding: 28px 40px;
+            display: flex; align-items: center;
+            justify-content: space-between; gap: 24px;
+        }
+        .sale-promo-text {
+            color: white;
+        }
+        .sale-promo-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 24px; font-weight: 300;
+            margin-bottom: 4px;
+        }
+        .sale-promo-title em { font-style: italic; }
+        .sale-promo-sub {
+            font-size: 13px; color: rgba(255,255,255,0.7);
+            font-weight: 300;
+        }
+        .sale-promo-code {
+            display: flex; align-items: center; gap: 0; flex-shrink: 0;
+        }
+        .sale-promo-code-box {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 12px 20px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 16px; font-weight: 500;
+            color: white; letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+        .sale-promo-copy {
+            background: white; color: var(--accent);
+            border: none; padding: 12px 20px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 11px; letter-spacing: 0.12em;
+            text-transform: uppercase; font-weight: 500;
+            cursor: pointer; transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .sale-promo-copy:hover { background: var(--bg); }
+
+        /* Reveal */
+        .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+        .reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal-delay-2 { transition-delay: 0.2s; }
+
+        /* responsive */
+        @media (max-width: 900px) {
+            .sale-hero { grid-template-columns: 1fr; padding: 48px 24px 60px; }
+            .sale-hero::before { font-size: 120px; }
+            .sale-hero-right { padding-left: 0; margin-top: 32px; }
+            .sale-filter-bar { padding: 0 24px; flex-direction: column; align-items: flex-start; gap: 0; }
+            .sale-featured { grid-template-columns: 1fr; padding: 40px 24px 0; }
+            .sale-grid { grid-template-columns: 1fr 1fr; padding: 0 24px 80px; }
+            .sale-promo-banner { margin: 0 24px 24px; flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+
+    <!-- HERO -->
+    <div class="sale-hero reveal">
+        <div class="sale-hero-left">
+            <div class="sale-hero-eyebrow">Ưu đãi đặc biệt</div>
+            <h1 class="sale-hero-title">
+                Những chiếc áo<br>
+                tốt, giá<br>
+                <em>tốt hơn.</em>
+            </h1>
+        </div>
+        <div class="sale-hero-right">
+            <p class="sale-hero-desc">
+                Beemate không sale vì hàng không bán được — mà vì chúng tôi muốn nhiều người hơn được mặc những chiếc áo tốt. Đợt sale này kết thúc khi hết hàng.
+            </p>
+            <!-- Countdown -->
+            <div>
+                <div class="sale-countdown" id="saleCountdown">
+                    <div class="sale-countdown-block">
+                        <span class="sale-countdown-num" id="cdDays">03</span>
+                        <span class="sale-countdown-label">Ngày</span>
+                    </div>
+                    <div class="sale-countdown-block">
+                        <span class="sale-countdown-num" id="cdHours">12</span>
+                        <span class="sale-countdown-label">Giờ</span>
+                    </div>
+                    <div class="sale-countdown-block">
+                        <span class="sale-countdown-num" id="cdMins">44</span>
+                        <span class="sale-countdown-label">Phút</span>
+                    </div>
+                    <div class="sale-countdown-block">
+                        <span class="sale-countdown-num" id="cdSecs">08</span>
+                        <span class="sale-countdown-label">Giây</span>
+                    </div>
+                </div>
+                <div class="sale-countdown-note">Sale kết thúc: 14/03/2026 · 23:59</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="sale-filter-bar">
+        <div class="sale-filter-tabs">
+            <button class="sale-filter-tab active" data-sale-filter="all">Tất cả</button>
+            <button class="sale-filter-tab" data-sale-filter="upto50">Giảm đến 50%</button>
+            <button class="sale-filter-tab" data-sale-filter="upto30">Giảm đến 30%</button>
+            <button class="sale-filter-tab" data-sale-filter="limited">Hàng giới hạn</button>
+        </div>
+        <div class="sale-filter-right">
+            <span class="sale-count-label" id="saleCountLabel">9 sản phẩm</span>
+            <select class="sale-sort">
+                <option>Giảm nhiều nhất</option>
+                <option>Giá thấp → cao</option>
+                <option>Giá cao → thấp</option>
+                <option>Mới nhất</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- PROMO CODE BANNER -->
+    <div class="sale-promo-banner reveal">
+        <div class="sale-promo-text">
+            <div class="sale-promo-title">Giảm thêm <em>10%</em> cho đơn từ 800k</div>
+            <div class="sale-promo-sub">Áp dụng mã khi thanh toán · Không kết hợp với ưu đãi khác</div>
+        </div>
+        <div class="sale-promo-code">
+            <div class="sale-promo-code-box">BEESALE10</div>
+            <button class="sale-promo-copy" onclick="copyPromoCode(this)">Sao chép</button>
+        </div>
+    </div>
+
+    <!-- FEATURED (2 sản phẩm lớn) -->
+    <div class="sale-featured">
+        <!-- Featured 1 — landscape -->
+        <div class="sale-featured-card reveal" data-sale-tag="upto50">
+            <div class="sale-featured-img">
+                <div class="sale-card-img-bg" style="background:linear-gradient(160deg,#e8ddd1,#c4b49d)"></div>
+                <span class="sale-badge-big">−40%</span>
+                <div class="sale-product-overlay">
+                    <button class="sale-quick-add" onclick="window.showToast()">+ Thêm nhanh</button>
+                </div>
+            </div>
+            <div class="sale-featured-info">
+                <div class="sale-card-tag">Bestseller · Limited</div>
+                <div class="sale-card-name">Set Áo Quần Linen Tonal</div>
+                <div class="sale-card-prices">
+                    <span class="sale-price-new">594.000 ₫</span>
+                    <span class="sale-price-old">990.000 ₫</span>
+                    <span class="sale-price-save">Tiết kiệm 396k</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Featured 2 — portrait -->
+        <div class="sale-featured-card reveal reveal-delay-1" data-sale-tag="upto50">
+            <div class="sale-featured-img" style="aspect-ratio:unset;height:100%;min-height:320px">
+                <div class="sale-card-img-bg" style="background:linear-gradient(160deg,#c5cfc7,#3D5A4C)"></div>
+                <span class="sale-badge-big">−35%</span>
+                <div class="sale-product-overlay">
+                    <button class="sale-quick-add" onclick="window.showToast()">+ Thêm nhanh</button>
+                </div>
+            </div>
+            <div class="sale-featured-info">
+                <div class="sale-card-tag">AW 2024 · Xanh rêu</div>
+                <div class="sale-card-name">Áo Sơ Mi Linen Xanh Rêu</div>
+                <div class="sale-card-prices">
+                    <span class="sale-price-new">292.000 ₫</span>
+                    <span class="sale-price-old">450.000 ₫</span>
+                    <span class="sale-price-save">Tiết kiệm 158k</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- REGULAR GRID -->
+    <div class="sale-grid" id="saleGrid">
+
+        <div class="sale-product-card reveal" data-sale-tag="upto30">
+            <div class="sale-product-img">
+                <div class="sale-card-img-bg" style="background:linear-gradient(160deg,#d4cfc9,#b0a99f)"></div>
+                <span class="sale-badge">−20%</span>
+                <div class="sale-product-overlay"><button class="sale-quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div>
+            </div>
+            <div class="sale-card-info">
+                <div class="sale-card-tag">Cotton · Cơ bản</div>
+                <div class="sale-card-name">Áo Cotton Cổ Tròn Basic</div>
+                <div class="sale-card-prices">
+                    <span class="sale-price-new">256.000 ₫</span>
+                    <span class="sale-price-old">320.000 ₫</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="sale-product-card reveal reveal-delay-1" data-sale-tag="upto30">
+            <div class="sale-product-img">
+                <div class="sale-card-img-bg" style="background:linear-gradient(160deg,#cfd4cc,#94a091)"></div>
+                <span class="sale-badge">−25%</span>
+                <div class="sale-product-overlay"><button class="sale-quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div>
+            </div>
+            <div class="sale-card-info">
+                <div class="sale-card-tag">Bamboo · Nhẹ</div>
+                <div class="sale-card-name">Áo Thun Bamboo Nhẹ</div>
+                <div class="sale-card-prices">
+                    <span class="sale-price-new">210.000 ₫</span>
+                    <span class="sale-price-old">280.000 ₫</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="sale-product-card reveal reveal-delay-2" data-sale-tag="upto30">
+            <div class="sale-product-img">
+                <div class="sale-card-img-bg" style="background:linear-gradient(160deg,#d1c9c0,#a89e93)"></div>
+                <span class="sale-badge">−20%</span>
+                <div class="sale-product-overlay"><button class="sale-quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div>
+            </div>
+            <div class="sale-card-info">
+                <div class="sale-card-tag">Cotton · Classic</div>
+                <div class="sale-card-name">Áo Polo Cotton Wash</div>
+                <div class="sale-card-prices">
+                    <span class="sale-price-new">304.000 ₫</span>
+                    <span class="sale-price-old">380.000 ₫</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="sale-product-card reveal" data-sale-tag="upto50 limited">
+            <div class="sale-product-img">
+                <div class="sale-card-img-bg" style="background:linear-gradient(160deg,#d4c5b0,#a08060)"></div>
+                <span class="sale-badge">−50%</span>
+                <div class="sale-product-overlay"><button class="sale-quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div>
+            </div>
+            <div class="sale-card-info">
+                <div class="sale-card-tag">Limited · Còn 2</div>
+                <div class="sale-card-name">Áo Linen Wash Vintage</div>
+                <div class="sale-card-prices">
+                    <span class="sale-price-new">225.000 ₫</span>
+                    <span class="sale-price-old">450.000 ₫</span>
+                    <span class="sale-price-save">−50%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="sale-product-card reveal reveal-delay-1" data-sale-tag="upto30 limited">
+            <div class="sale-product-img">
+                <div class="sale-card-img-bg" style="background:linear-gradient(160deg,#c8c0b8,#706860)"></div>
+                <span class="sale-badge">−30%</span>
+                <div class="sale-product-overlay"><button class="sale-quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div>
+            </div>
+            <div class="sale-card-info">
+                <div class="sale-card-tag">AW24 · Còn 3</div>
+                <div class="sale-card-name">Áo Len Mỏng Oversize</div>
+                <div class="sale-card-prices">
+                    <span class="sale-price-new">315.000 ₫</span>
+                    <span class="sale-price-old">450.000 ₫</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="sale-product-card reveal reveal-delay-2" data-sale-tag="upto50">
+            <div class="sale-product-img">
+                <div class="sale-card-img-bg" style="background:linear-gradient(160deg,#b8c4b0,#607858)"></div>
+                <span class="sale-badge">−45%</span>
+                <div class="sale-product-overlay"><button class="sale-quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div>
+            </div>
+            <div class="sale-card-info">
+                <div class="sale-card-tag">Linen · AW24</div>
+                <div class="sale-card-name">Áo Linen Tay Lỡ Xanh</div>
+                <div class="sale-card-prices">
+                    <span class="sale-price-new">247.000 ₫</span>
+                    <span class="sale-price-old">450.000 ₫</span>
+                    <span class="sale-price-save">Tiết kiệm 203k</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="sale-product-card reveal" data-sale-tag="upto30">
+            <div class="sale-product-img">
+                <div class="sale-card-img-bg" style="background:linear-gradient(160deg,#e0d8cc,#c0b8a8)"></div>
+                <span class="sale-badge">−15%</span>
+                <div class="sale-product-overlay"><button class="sale-quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div>
+            </div>
+            <div class="sale-card-info">
+                <div class="sale-card-tag">The Basics</div>
+                <div class="sale-card-name">Áo Cotton Tay Dài Trắng</div>
+                <div class="sale-card-prices">
+                    <span class="sale-price-new">272.000 ₫</span>
+                    <span class="sale-price-old">320.000 ₫</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        window.SaleApp = {
+            init: function() {
+                // Countdown timer — đặt target 3 ngày từ lúc load
+                const target = new Date();
+                target.setDate(target.getDate() + 3);
+                target.setHours(23, 59, 0, 0);
+
+                function updateCountdown() {
+                    const now = new Date();
+                    const diff = target - now;
+                    if (diff <= 0) return;
+                    const d = Math.floor(diff / 86400000);
+                    const h = Math.floor((diff % 86400000) / 3600000);
+                    const m = Math.floor((diff % 3600000) / 60000);
+                    const s = Math.floor((diff % 60000) / 1000);
+                    const pad = n => String(n).padStart(2, '0');
+                    const cd = document.getElementById('cdDays');
+                    const ch = document.getElementById('cdHours');
+                    const cm = document.getElementById('cdMins');
+                    const cs = document.getElementById('cdSecs');
+                    if (cd) cd.textContent = pad(d);
+                    if (ch) ch.textContent = pad(h);
+                    if (cm) cm.textContent = pad(m);
+                    if (cs) cs.textContent = pad(s);
+                }
+                updateCountdown();
+                setInterval(updateCountdown, 1000);
+
+                // Filter tabs
+                document.querySelectorAll('#sale-section .sale-filter-tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        document.querySelectorAll('#sale-section .sale-filter-tab').forEach(t => t.classList.remove('active'));
+                        tab.classList.add('active');
+                        const filter = tab.dataset.saleFilter;
+                        const allCards = document.querySelectorAll('#sale-section [data-sale-tag]');
+                        let count = 0;
+                        allCards.forEach(card => {
+                            const tags = card.dataset.saleTag || '';
+                            const show = filter === 'all' || tags.includes(filter);
+                            card.style.display = show ? '' : 'none';
+                            if (show) count++;
+                        });
+                        const lbl = document.getElementById('saleCountLabel');
+                        if (lbl) lbl.textContent = count + ' sản phẩm';
+                    });
+                });
+
+                // Reveal on scroll
+                const reveals = document.querySelectorAll('#sale-section .reveal');
+                const obs = new IntersectionObserver(entries => {
+                    entries.forEach(e => {
+                        if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+                    });
+                }, { threshold: 0.1 });
+                reveals.forEach(r => obs.observe(r));
+                setTimeout(() => {
+                    reveals.forEach(r => {
+                        if (r.getBoundingClientRect().top < window.innerHeight) r.classList.add('visible');
+                    });
+                }, 100);
+            }
+        };
+
+        window.copyPromoCode = function(btn) {
+            navigator.clipboard?.writeText('BEESALE10').then(() => {
+                btn.textContent = '✓ Đã chép';
+                btn.style.background = 'var(--accent-light)';
+                btn.style.color = 'white';
+                setTimeout(() => {
+                    btn.textContent = 'Sao chép';
+                    btn.style.background = '';
+                    btn.style.color = '';
+                }, 2000);
+            });
+        };
+    </script>
+</section>
