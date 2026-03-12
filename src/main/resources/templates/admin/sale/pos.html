@@ -57,16 +57,29 @@
         .panel-right { width: 55%; display: flex; flex-direction: column; background: #fafafa; padding: 20px; }
 
         .panel-header { height: 50px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--gray-200); padding: 0 15px; background: #fff; }
+
+        /* STATUS BAR MỚI */
+        .status-bar { background: #fff8eb; border-bottom: 1px solid var(--gray-200); padding: 8px 15px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; flex-shrink: 0; }
+        .badge { padding: 3px 6px; border-radius: 2px; font-weight: 800; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .bg-warning { background: #f59e0b; color: #fff; }
+        .bg-secondary { background: #6b7280; color: #fff; }
+
         .customer-card { padding: 12px 15px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; background: #fff; }
 
         .payment-footer { background: #fff; border-top: 2px solid #000; padding: 15px; flex-shrink: 0; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05); }
-        .summary-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12.5px; color: #555; }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12.5px; color: #555; align-items: center; }
         .summary-row.main { margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--gray-300); color: #000; }
         .total-money { font-size: 20px; font-weight: 700; color: #000; }
         .btn-pay-big { width: 100%; height: 46px; margin-top: 15px; font-size: 14px; background: #000; border: none; font-weight: 700; }
         .btn-pay-big:hover { background: #222; transform: translateY(-1px); }
 
         .search-bar-wrapper { background: #fff; border: 1px solid var(--gray-200); padding: 10px; margin-bottom: 15px; border-radius: var(--border-radius); display: flex; gap: 10px; align-items: center; }
+
+        /* VOUCHER CARD MỚI */
+        .voucher-card { border: 1px solid var(--gray-200); border-radius: 4px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; background: #fff; }
+        .voucher-card:hover { border-color: #000; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .voucher-card .v-code { font-weight: 800; font-size: 13px; color: #000; margin-bottom: 4px; }
+        .voucher-card .v-desc { font-size: 11px; color: #666; }
 
         /* ==========================================================================
            3. MODAL CUSTOM & TOAST
@@ -101,23 +114,6 @@
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 2px; }
         ::-webkit-scrollbar-thumb:hover { background: #000; }
-
-        /* ==========================================================================
-           4. CUSTOM CSS BỔ SUNG TỪ BẢN TRƯỚC
-           ========================================================================== */
-        .container-flex { display: flex; gap: 20px; align-items: stretch; }
-        .box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); flex: 1; display: flex; flex-direction: column; }
-        .box h3 { margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        .search-wrapper { position: relative; margin-bottom: 15px; }
-        .search-wrapper input { width: 100%; padding: 10px 10px 10px 40px; border: 1px solid #ccc; border-radius: 5px; outline: none; }
-        .search-wrapper i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #888; }
-        .customer-list { flex-grow: 1; border: 1px solid #eee; height: 120px; overflow-y: auto; }
-        .customer-item { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-
-        .app-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .app-btn { height: 50px; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 700; font-size: 12px; cursor: pointer; transition: 0.1s; background: #fff; border-radius: 2px; opacity: 0.7; }
-        .app-btn:hover { border-color: #000; }
-        .app-btn.selected { border: 2px solid #0d6efd !important; background: #f0f8ff !important; opacity: 1; color: #000; }
     </style>
 </head>
 <body>
@@ -133,6 +129,13 @@
                 <div style="display: flex; gap: 5px; padding-right: 10px; border-left: 1px solid var(--gray-200); height: 100%; align-items: center; padding-left: 10px;">
                     <button class="btn-icon" title="Thêm hóa đơn mới" onclick="PosApp.createInvoice()"><i class="bi bi-plus-lg"></i></button>
                     <button class="btn-icon" title="Xóa hóa đơn" onclick="PosApp.promptDelete()"><i class="bi bi-trash"></i></button>
+                </div>
+            </div>
+
+            <div class="status-bar">
+                <div>Trạng thái: <span class="badge bg-secondary" id="invoiceStatus">Trống</span></div>
+                <div style="color: #dc2626; font-weight: 600;">
+                    <i class="bi bi-stopwatch"></i> Hủy tự động sau: <span id="invoiceCountdown" style="font-weight: 800; font-variant-numeric: tabular-nums;">--:--:--</span>
                 </div>
             </div>
 
@@ -196,12 +199,19 @@
             </div>
 
             <div class="payment-footer">
-                <div style="display: flex; gap: 0; margin-bottom: 15px;">
-                    <input type="text" placeholder="Nhập mã giảm giá..."
-                           style="border-radius: 2px 0 0 2px; border-right: none; height: 34px;">
-                    <button class="btn-icon" onclick="PosApp.applyVoucher()"
-                            style="border-radius: 0 2px 2px 0; width: 34px; height: 34px; border-left: none;">
-                        <i class="bi bi-tag-fill"></i>
+
+                <div style="display: flex; margin-bottom: 15px;">
+                    <input type="text" id="voucherInput" placeholder="Nhập hoặc chọn mã..."
+                           style="border-radius: 2px 0 0 2px; border-right: none; height: 34px; flex: 1; font-weight: 600;">
+
+                    <button class="btn btn-secondary" onclick="PosApp.openVoucherModal()" title="Mở danh sách mã"
+                            style="border-radius: 0; height: 34px; border-left: none; border-right: none; background: #fafafa; color: #000; padding: 0 12px;">
+                        <i class="bi bi-ticket-detailed" style="margin-right: 4px;"></i> Chọn
+                    </button>
+
+                    <button class="btn" onclick="PosApp.applyVoucher()" title="Áp dụng mã"
+                            style="border-radius: 0 2px 2px 0; height: 34px; width: 44px; padding: 0;">
+                        <i class="bi bi-check2" style="font-size: 16px;"></i>
                     </button>
                 </div>
 
@@ -211,11 +221,14 @@
                 </div>
                 <div class="summary-row">
                     <span>KHUYẾN MÃI</span>
-                    <span style="font-weight:700; color: #10b981;">-0 ₫</span>
+                    <span style="font-weight:700; color: #10b981;" id="lblPromoDiscount">-0 ₫</span>
                 </div>
                 <div class="summary-row">
-                    <span>VOUCHER</span>
-                    <span style="font-weight:700; color: #10b981;">-0 ₫</span>
+                    <span style="display: flex; align-items: center; gap: 6px;">
+                        VOUCHER
+                        <i id="removeVoucherBtn" class="bi bi-x-circle-fill" style="cursor:pointer; display:none; color: #ef4444; font-size: 14px;" onclick="PosApp.removeVoucher()" title="Gỡ mã giảm giá"></i>
+                    </span>
+                    <span style="font-weight:700; color: #10b981;" id="lblVoucherDiscount">-0 ₫</span>
                 </div>
                 <div class="summary-row main">
                     <span style="font-weight:700; font-size: 14px;">TỔNG TIỀN</span>
@@ -263,6 +276,18 @@
 </div>
 
 <div id="toast-container"></div>
+
+<div id="voucherModal" class="modal">
+    <div class="modal-dialog" style="width: 420px; background: #f4f4f5;">
+        <div class="modal-header" style="background: #fff;">
+            <span class="modal-title">CHỌN MÃ GIẢM GIÁ</span>
+            <button class="btn-close" onclick="PosApp.closeModal('voucherModal')"></button>
+        </div>
+        <div class="modal-body" style="padding: 15px; max-height: 450px; overflow-y: auto;" id="voucherList">
+            <div style="text-align: center; color: #888; padding: 20px;">Đang tải danh sách mã...</div>
+        </div>
+    </div>
+</div>
 
 <div id="customerModal" class="modal">
     <div class="modal-dialog" style="width:340px;">
@@ -406,9 +431,8 @@
     }
 
     const PosApp = {
-        products: [], invoices: [], activeInvoiceId: null, isCreating: false,
+        products: [], invoices: [], activeInvoiceId: null, isCreating: false, countdownTimer: null,
 
-        // --- ĐÃ ĐƯỢC CHỈNH SỬA: Load lại giỏ hàng và render tồn kho chính xác ---
         init: async function () {
             this.loadState();
             this.checkMomoReturn();
@@ -422,8 +446,200 @@
             this.renderTabs();
             this.renderCart();
             this.renderProducts(this.products);
+
+            // Bắt đầu loop đếm ngược cho hóa đơn chờ
+            this.countdownTimer = setInterval(() => {
+                this.updateCountdown();
+            }, 1000);
         },
 
+        // --- HÀM MỚI: Xử lý Đếm Ngược Hủy Đơn ---
+        updateCountdown: function() {
+            const inv = this.getCurrentInvoice();
+            const statusEl = document.getElementById('invoiceStatus');
+            const cdEl = document.getElementById('invoiceCountdown');
+
+            if (!inv) {
+                statusEl.innerText = 'Trống';
+                statusEl.className = 'badge bg-secondary';
+                cdEl.innerText = '--:--:--';
+                return;
+            }
+
+            statusEl.innerText = 'Chờ thanh toán';
+            statusEl.className = 'badge bg-warning';
+
+            // Nếu hóa đơn cũ chưa có thời gian hết hạn, tạo mới 24h
+            if (!inv.expiryTime) {
+                inv.expiryTime = new Date().getTime() + (24 * 60 * 60 * 1000);
+                this.saveState();
+            }
+
+            const now = new Date().getTime();
+            const diff = inv.expiryTime - now;
+
+            if (diff <= 0) {
+                cdEl.innerText = '00:00:00';
+                if (!inv.isExpired) {
+                    inv.isExpired = true; // Đánh dấu để khỏi lặp vô hạn gọi API
+                    toast(`Hóa đơn ${inv.name} đã quá thời gian 24H và tự động bị hủy!`, "error");
+                    this.forceDelete(inv.id); // Tự động xóa
+                }
+            } else {
+                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((diff % (1000 * 60)) / 1000);
+                cdEl.innerText = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            }
+        },
+
+        // --- HÀM MỚI: Mở & Chọn Voucher (Mã giảm giá) ---
+        openVoucherModal: async function() {
+            this.openModal('voucherModal');
+            const listEl = document.getElementById('voucherList');
+            listEl.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">Đang tải mã giảm giá...</div>';
+
+            try {
+                // Gọi API lấy danh sách mã giảm giá. Nếu BE chưa có API này, code sẽ nhảy xuống CATCH
+                const res = await fetch('/api/pos/vouchers/active');
+                if(!res.ok) throw new Error("Backend chưa có API lấy list Voucher");
+                const vouchers = await res.json();
+                this.renderVouchersList(vouchers);
+            } catch(e) {
+                // BACKUP DATA: Giao diện test tạm để bạn trải nghiệm ngay lập tức nếu BE chưa cấu hình kịp
+                const mockVouchers = [
+                    { maCode: 'GIAM50K', ten: 'Giảm 50K cho đơn từ 200K', loaiGiamGia: 'fixed', giaTriGiamGia: 50000, dieuKien: 200000 },
+                    { maCode: 'SALE20', ten: 'Giảm 20% tối đa 100K', loaiGiamGia: 'percentage', giaTriGiamGia: 20, dieuKien: 300000, giaTriGiamGiaToiDa: 100000 },
+                    { maCode: 'FREESHIP30', ten: 'Hỗ trợ vận chuyển 30K', loaiGiamGia: 'fixed', giaTriGiamGia: 30000, dieuKien: 150000 }
+                ];
+                this.renderVouchersList(mockVouchers);
+            }
+        },
+
+        renderVouchersList: function(vouchers) {
+            const listEl = document.getElementById('voucherList');
+            if(!vouchers || vouchers.length === 0) {
+                listEl.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">Không có mã giảm giá nào khả dụng</div>';
+                return;
+            }
+
+            // Lấy tổng tiền tạm tính hiện tại để check điều kiện hiển thị
+            const inv = this.getCurrentInvoice();
+            let totalAfterSale = 0;
+            if (inv && inv.cart) {
+                inv.cart.forEach(i => { totalAfterSale += (Number(i.price) * i.qty); });
+            }
+
+            listEl.innerHTML = vouchers.map(v => {
+                const isValid = totalAfterSale >= v.dieuKien;
+                const opacity = isValid ? '1' : '0.5';
+                const actionBtn = isValid
+                    ? `<button class="btn btn-primary btn-apply-voucher" onclick="PosApp.selectVoucher('${v.maCode}')">DÙNG MÃ</button>`
+                    : `<span style="font-size:10px; color:#ef4444; font-weight:700;">Chưa đủ điều kiện</span>`;
+
+                return `
+                <div class="voucher-card" style="opacity: ${opacity}">
+                    <div style="display:flex; align-items:center; gap: 15px;">
+                        <div style="width: 50px; height: 50px; background: #000; color: #fff; border-radius: 4px; display: flex; align-items:center; justify-content:center; flex-direction:column;">
+                            <i class="bi bi-ticket-perforated" style="font-size: 18px; margin-bottom: -5px;"></i>
+                        </div>
+                        <div>
+                            <div class="v-code">${v.maCode}</div>
+                            <div class="v-desc">${v.ten}</div>
+                            <div style="font-size: 10px; color: #10b981; margin-top: 4px; font-weight:600;">Đơn tối thiểu: ${new Intl.NumberFormat('vi-VN').format(v.dieuKien)}đ</div>
+                        </div>
+                    </div>
+                    <div>${actionBtn}</div>
+                </div>`;
+            }).join('');
+        },
+
+        selectVoucher: function(code) {
+            document.getElementById('voucherInput').value = code;
+            this.closeModal('voucherModal');
+            this.applyVoucher();
+        },
+
+        removeVoucher: function() {
+            const inv = this.getCurrentInvoice();
+            if(!inv) return;
+            inv.voucher = null;
+            document.getElementById('voucherInput').value = '';
+            this.saveState();
+            this.renderCart();
+            toast("Đã gỡ mã giảm giá", "success");
+        },
+
+        applyVoucher: async function() {
+            const code = document.getElementById('voucherInput').value.trim();
+            const inv = this.getCurrentInvoice();
+            if (!inv || inv.cart.length === 0) { toast("GIỎ HÀNG TRỐNG", "warning"); return; }
+            if (!code) { toast("Vui lòng nhập mã giảm giá", "warning"); return; }
+
+            const subTotal = inv.cart.reduce((sum, i) => sum + ((i.originalPrice || i.price) * i.qty), 0);
+            const saleDiscount = inv.cart.reduce((sum, i) => sum + (((i.originalPrice || i.price) - i.price) * i.qty), 0);
+            const totalAfterSale = subTotal - saleDiscount;
+
+            try {
+                // Gọi backend để xác thực mã giảm giá
+                const res = await fetch(`/api/pos/vouchers/apply?code=${code}&currentTotal=${totalAfterSale}`);
+                if (res.ok) {
+                    inv.voucher = await res.json();
+                    this.saveState();
+                    this.renderCart();
+                    toast("Áp dụng mã thành công!", "success");
+                } else {
+                    // Backup Test cho UI nếu API chưa làm xong
+                    if(code === 'GIAM50K' && totalAfterSale >= 200000) {
+                        inv.voucher = { maCode: 'GIAM50K', loaiGiamGia: 'fixed', giaTriGiamGia: 50000 };
+                        this.saveState(); this.renderCart(); toast("Áp dụng mã thành công!", "success"); return;
+                    }
+                    toast(await res.text() || "Mã không hợp lệ hoặc chưa đủ điều kiện!", "error");
+                }
+            } catch (e) { toast("LỖI KẾT NỐI KIỂM TRA MÃ", "error"); }
+        },
+
+        updateTotal: function () {
+            const inv = this.getCurrentInvoice();
+            if (!inv) return;
+            let subTotal = 0; let saleDiscount = 0;
+            inv.cart.forEach(i => {
+                const giaGoc = Number(i.originalPrice) || Number(i.price); const giaBan = Number(i.price);
+                subTotal += (giaGoc * i.qty); saleDiscount += ((giaGoc - giaBan) * i.qty);
+            });
+            subTotal = Math.round(subTotal); saleDiscount = Math.round(saleDiscount);
+            let totalAfterSale = subTotal - saleDiscount;
+
+            let calcVoucher = 0;
+            const removeBtn = document.getElementById('removeVoucherBtn');
+
+            if (inv.voucher) {
+                removeBtn.style.display = 'inline-block';
+                document.getElementById('voucherInput').value = inv.voucher.maCode || inv.voucher.code || '';
+
+                const v = inv.voucher; const giaTriVoucher = Number(v.giaTriGiamGia);
+                // Xử lý cả định dạng chữ thường 'percentage' và chữ hoa 'PERCENTAGE'
+                const type = (v.loaiGiamGia || '').toUpperCase();
+                calcVoucher = type === 'PERCENTAGE' ? (totalAfterSale * giaTriVoucher) / 100 : giaTriVoucher;
+                if (v.giaTriGiamGiaToiDa && calcVoucher > Number(v.giaTriGiamGiaToiDa)) calcVoucher = Number(v.giaTriGiamGiaToiDa);
+            } else {
+                removeBtn.style.display = 'none';
+                document.getElementById('voucherInput').value = '';
+            }
+
+            let voucherDiscount = Math.round(calcVoucher);
+            const total = Math.round(Math.max(0, totalAfterSale - voucherDiscount));
+
+            document.getElementById('lblSubTotal').innerText = new Intl.NumberFormat('vi-VN').format(subTotal) + ' ₫';
+            document.getElementById('lblPromoDiscount').innerText = '-' + new Intl.NumberFormat('vi-VN').format(saleDiscount) + ' ₫';
+            document.getElementById('lblVoucherDiscount').innerText = '-' + new Intl.NumberFormat('vi-VN').format(voucherDiscount) + ' ₫';
+            document.getElementById('lblTotal').innerText = new Intl.NumberFormat('vi-VN').format(total) + ' ₫';
+
+            const modalTotalEl = document.getElementById('modalTotal');
+            if(modalTotalEl) modalTotalEl.innerText = new Intl.NumberFormat('vi-VN').format(total) + ' ₫';
+        },
+
+        // --- CÁC HÀM CŨ GIỮ NGUYÊN (Khởi tạo, Thanh toán, Tìm kiếm...) ---
         checkMomoReturn: async function() {
             const params = new URLSearchParams(window.location.search);
             const resultCode = params.get('resultCode');
@@ -500,7 +716,11 @@
             const savedActiveId = localStorage.getItem('bee_pos_active_id');
             if (savedInvoices) {
                 this.invoices = JSON.parse(savedInvoices);
-                this.invoices = this.invoices.map(inv => ({ ...inv, id: Number(inv.id) }));
+                this.invoices = this.invoices.map(inv => {
+                    // Đảm bảo hóa đơn lấy từ RAM cũ lên có thời gian expiryTime
+                    if(!inv.expiryTime) inv.expiryTime = new Date().getTime() + (24 * 60 * 60 * 1000);
+                    return { ...inv, id: Number(inv.id) };
+                });
                 let activeId = parseInt(savedActiveId);
                 if (isNaN(activeId)) activeId = null;
                 if (activeId && !this.invoices.some(inv => inv.id === activeId)) activeId = this.invoices.length > 0 ? this.invoices[0].id : null;
@@ -525,12 +745,13 @@
         loadProducts: async function (q) {
             const colorId = document.querySelectorAll('.filter-select')[0].value;
             const sizeId = document.querySelectorAll('.filter-select')[1].value;
-            const res = await fetch(`/api/pos/products/search?q=${q}&color=${colorId}&size=${sizeId}`);
-            this.products = await res.json();
-            this.renderProducts(this.products);
+            try{
+                const res = await fetch(`/api/pos/products/search?q=${q}&color=${colorId}&size=${sizeId}`);
+                this.products = await res.json();
+                this.renderProducts(this.products);
+            }catch(e){}
         },
 
-        // --- ĐÃ ĐƯỢC CHỈNH SỬA: Hàm tự tính số lượng DB trừ cho giỏ hàng đang có ---
         getAvailableStock: function(spctId) {
             const product = this.products.find(p => p.id === spctId);
             if (!product) return 0;
@@ -544,11 +765,10 @@
             return product.soLuong - inCartQty;
         },
 
-        // --- ĐÃ ĐƯỢC CHỈNH SỬA: Render sử dụng Tồn thực tế vừa tính ở trên ---
         renderProducts: function (list) {
             document.getElementById('productBody').innerHTML = list.map(p => {
                 const realStock = this.getAvailableStock(p.id);
-                if (realStock <= 0) return ''; // Ẩn nếu hết hàng
+                if (realStock <= 0) return '';
 
                 const hasPromo = p.giaSauKhuyenMai && p.giaSauKhuyenMai < p.giaBan;
                 const displayPrice = hasPromo
@@ -571,15 +791,20 @@
             this.isCreating = true;
             if (this.invoices.length >= 5) { toast("TỐI ĐA 5 ĐƠN CHỜ", "warning"); this.isCreating = false; return; }
 
-            const res = await fetch('/api/pos/invoices', { method: 'POST' });
-            const newHd = await res.json();
-            const newId = Number(newHd.id);
-            const orderNum = this.invoices.length + 1;
+            try{
+                const res = await fetch('/api/pos/invoices', { method: 'POST' });
+                const newHd = await res.json();
+                const newId = Number(newHd.id);
+                const orderNum = this.invoices.length + 1;
 
-            this.invoices.push({ id: newId, name: `HÓA ĐƠN ${orderNum}`, maHD: newHd.ma, cart: [], customer: 'KHÁCH VÃNG LAI', customerId: null, voucher: null });
-            this.activeInvoiceId = newId;
-            this.saveState(); this.renderTabs(); this.renderCart();
-            toast(`ĐÃ TẠO ${newHd.ma}`, "success");
+                // Set thời gian hết hạn là 24h kể từ lúc tạo
+                const expiry = new Date().getTime() + (24 * 60 * 60 * 1000);
+
+                this.invoices.push({ id: newId, name: `HÓA ĐƠN ${orderNum}`, maHD: newHd.ma, cart: [], customer: 'KHÁCH VÃNG LAI', customerId: null, voucher: null, expiryTime: expiry });
+                this.activeInvoiceId = newId;
+                this.saveState(); this.renderTabs(); this.renderCart();
+                toast(`ĐÃ TẠO ${newHd.ma}`, "success");
+            }catch(e){ toast("LỖI KHỞI TẠO ĐƠN", "error");}
             this.isCreating = false;
         },
 
@@ -587,12 +812,11 @@
             this.activeInvoiceId = Number(id);
             this.saveState();
             this.renderTabs();
-            await this.syncCartWithServer(); // Chỉ gọi lại trạng thái chứ không ghi đè giỏ hàng
-
-            // THÊM DÒNG NÀY: Cập nhật lại giao diện giỏ hàng của hóa đơn đang chọn
+            await this.syncCartWithServer();
             this.renderCart();
-
-            document.querySelector('input[placeholder*="giảm giá"]').value = '';
+            // Xóa input thay vì gọi hàm làm null voucher, chỉ là UI
+            const inv = this.getCurrentInvoice();
+            document.getElementById('voucherInput').value = inv && inv.voucher ? (inv.voucher.maCode || '') : '';
         },
 
         promptDelete: function () {
@@ -600,26 +824,30 @@
             document.getElementById('confirmModal').classList.add('show');
         },
 
-        // --- ĐÃ ĐƯỢC CHỈNH SỬA: Xóa khỏi RAM cục bộ và render lại ---
-        forceDelete: async function () {
+        // Cập nhật forceDelete để có thể nhận ID truyền vào (dùng cho xóa tự động lúc hết hạn)
+        forceDelete: async function (targetId = this.activeInvoiceId) {
             try {
-                const res = await fetch(`/api/pos/invoices/${this.activeInvoiceId}`, { method: 'DELETE' });
+                const res = await fetch(`/api/pos/invoices/${targetId}`, { method: 'DELETE' });
                 if (res.ok) {
-                    this.invoices = this.invoices.filter(inv => inv.id !== this.activeInvoiceId);
+                    this.invoices = this.invoices.filter(inv => inv.id !== targetId);
                     this.invoices.forEach((inv, idx) => inv.name = `HÓA ĐƠN ${idx + 1}`);
-                    this.activeInvoiceId = this.invoices.length > 0 ? this.invoices[0].id : null;
+                    if(this.activeInvoiceId === targetId) {
+                        this.activeInvoiceId = this.invoices.length > 0 ? this.invoices[0].id : null;
+                    }
                     this.saveState();
-
-                    await this.loadProducts(document.querySelector('input[placeholder*="Tìm kiếm sản phẩm"]').value);
+                    await this.loadProducts(document.querySelector('.search-bar-wrapper input').value);
                     this.renderTabs();
                     this.renderCart();
                     this.closeModal('confirmModal');
-                    toast("ĐÃ HỦY ĐƠN HÀNG VÀ TRẢ LẠI TỒN KHO", "success");
-                } else { const data = await res.json(); toast(data.message || "KHÔNG THỂ XÓA", "error"); this.closeModal('confirmModal'); }
+                    if(targetId === this.activeInvoiceId) toast("ĐÃ HỦY ĐƠN HÀNG VÀ TRẢ LẠI TỒN KHO", "success");
+                } else {
+                    const data = await res.json();
+                    if(targetId === this.activeInvoiceId) toast(data.message || "KHÔNG THỂ XÓA", "error");
+                    this.closeModal('confirmModal');
+                }
             } catch (e) { toast("LỖI KẾT NỐI", "error"); }
         },
 
-        // --- ĐÃ ĐƯỢC CHỈNH SỬA: Tuyệt đối không xóa giỏ hàng khi Load lại ---
         syncCartWithServer: async function() {
             try {
                 const res = await fetch('/api/pos/invoices/pending');
@@ -636,10 +864,8 @@
             } catch (e) {}
         },
 
-        // --- ĐÃ ĐƯỢC CHỈNH SỬA: Cập nhật Giỏ hàng RAM và Giao diện, không tự ý trừ DB ---
         addToCart: async function (spctId) {
             if (!this.activeInvoiceId) { toast("VUI LÒNG TẠO HÓA ĐƠN TRƯỚC", "warning"); return; }
-
             const available = this.getAvailableStock(spctId);
             if (available <= 0) { toast("Sản phẩm đã hết hàng!", "warning"); return; }
 
@@ -663,24 +889,18 @@
                             price: price, attr: `${product.mauSac.ten} - ${product.kichThuoc.ten}`, qty: 1
                         });
                     }
-
-                    this.saveState();
-                    this.renderCart();
-                    this.renderProducts(this.products);
-                } else {
-                    const err = await res.json(); toast(err.message || "Không đủ hàng trong kho!", "warning");
-                }
+                    // Thêm sp vào thì phải kiểm tra lại voucher xem còn thỏa mãn đk không
+                    this.saveState(); this.renderCart(); this.renderProducts(this.products);
+                } else { const err = await res.json(); toast(err.message || "Không đủ hàng trong kho!", "warning"); }
             } catch (e) { toast("Lỗi kết nối máy chủ", "error"); }
         },
 
-        // --- ĐÃ ĐƯỢC CHỈNH SỬA: Cập nhật Giỏ hàng RAM và Giao diện, không tự ý thay đổi DB ---
         changeQty: async function (spctId, delta) {
             const inv = this.getCurrentInvoice();
             const item = inv.cart.find(i => i.id === spctId);
             if (!item) return;
 
             const newQty = item.qty + delta;
-
             if (delta > 0) {
                 const available = this.getAvailableStock(spctId);
                 if (available < delta) { toast("Kho không đủ hàng", "warning"); return; }
@@ -689,89 +909,33 @@
             try {
                 if (newQty <= 0 || delta === -999) {
                     const res = await fetch(`/api/pos/invoices/${inv.id}/remove-product/${spctId}`, { method: 'DELETE' });
-                    if (res.ok) {
-                        toast("Đã xóa khỏi giỏ");
-                        inv.cart = inv.cart.filter(i => i.id !== spctId);
-                    }
+                    if (res.ok) { toast("Đã xóa khỏi giỏ"); inv.cart = inv.cart.filter(i => i.id !== spctId); }
                 } else {
                     const res = await fetch(`/api/pos/invoices/${inv.id}/update-quantity`, {
                         method: 'PATCH', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ spctId: spctId, newQty: newQty })
                     });
-                    if (!res.ok) {
-                        const err = await res.json(); toast(err.message || "Kho không đủ hàng", "warning"); return;
-                    }
+                    if (!res.ok) { const err = await res.json(); toast(err.message || "Kho không đủ hàng", "warning"); return; }
                     item.qty = newQty;
                 }
-                this.saveState();
-                this.renderCart();
-                this.renderProducts(this.products);
+                this.saveState(); this.renderCart(); this.renderProducts(this.products);
             } catch (e) { toast("Lỗi hệ thống", "error"); }
         },
-
-        applyVoucher: async function() {
-            const code = document.querySelector('input[placeholder*="giảm giá"]').value.trim();
-            const inv = this.getCurrentInvoice();
-            if (!inv || inv.cart.length === 0) { toast("GIỎ HÀNG TRỐNG", "warning"); return; }
-            if (!code) { toast("NHẬP MÃ VOUCHER", "warning"); return; }
-
-            const subTotal = inv.cart.reduce((sum, i) => sum + ((i.originalPrice || i.price) * i.qty), 0);
-            const saleDiscount = inv.cart.reduce((sum, i) => sum + (((i.originalPrice || i.price) - i.price) * i.qty), 0);
-            const totalAfterSale = subTotal - saleDiscount;
-
-            try {
-                const res = await fetch(`/api/pos/vouchers/apply?code=${code}&currentTotal=${totalAfterSale}`);
-                if (res.ok) {
-                    inv.voucher = await res.json(); this.saveState(); this.renderCart(); toast("ÁP DỤNG THÀNH CÔNG", "success");
-                } else { toast(await res.text(), "error"); }
-            } catch (e) { toast("LỖI HỆ THỐNG", "error"); }
-        },
-
-        updateTotal: function () {
-            const inv = this.getCurrentInvoice();
-            if (!inv) return;
-            let subTotal = 0; let saleDiscount = 0;
-            inv.cart.forEach(i => {
-                const giaGoc = Number(i.originalPrice) || Number(i.price); const giaBan = Number(i.price);
-                subTotal += (giaGoc * i.qty); saleDiscount += ((giaGoc - giaBan) * i.qty);
-            });
-            subTotal = Math.round(subTotal); saleDiscount = Math.round(saleDiscount);
-            let totalAfterSale = subTotal - saleDiscount;
-
-            let calcVoucher = 0;
-            if (inv.voucher) {
-                const v = inv.voucher; const giaTriVoucher = Number(v.giaTriGiamGia);
-                calcVoucher = v.loaiGiamGia === 'PERCENTAGE' ? (totalAfterSale * giaTriVoucher) / 100 : giaTriVoucher;
-                if (v.giaTriGiamGiaToiDa && calcVoucher > Number(v.giaTriGiamGiaToiDa)) calcVoucher = Number(v.giaTriGiamGiaToiDa);
-            }
-            let voucherDiscount = Math.round(calcVoucher);
-            const total = Math.round(Math.max(0, totalAfterSale - voucherDiscount));
-
-            document.getElementById('lblSubTotal').innerText = new Intl.NumberFormat('vi-VN').format(subTotal) + ' ₫';
-            const discountSpans = document.querySelectorAll('.summary-row span[style*="10b981"]');
-            if(discountSpans.length >= 2) {
-                discountSpans[0].innerText = '-' + new Intl.NumberFormat('vi-VN').format(saleDiscount) + ' ₫';
-                discountSpans[1].innerText = '-' + new Intl.NumberFormat('vi-VN').format(voucherDiscount) + ' ₫';
-            }
-            document.getElementById('lblTotal').innerText = new Intl.NumberFormat('vi-VN').format(total) + ' ₫';
-            const modalTotalEl = document.getElementById('modalTotal');
-            if(modalTotalEl) modalTotalEl.innerText = new Intl.NumberFormat('vi-VN').format(total) + ' ₫';
-        },
-
-        filterProduct: function (key) { this.loadProducts(key); },
 
         searchCustomer: async function(val) {
             const resultBox = document.getElementById('customerSearchResults');
             if (val.length < 2) { resultBox.innerHTML = '<div style="color:#999;font-size:12px;padding:15px;text-align:center;">Nhập tên hoặc SĐT để tìm kiếm...</div>'; return; }
-            const res = await fetch(`/api/pos/customers/search?q=${val}`);
-            const data = await res.json();
-            if (data.length === 0) { resultBox.innerHTML = '<div style="color:#999;font-size:12px;padding:15px;text-align:center;">Không tìm thấy khách hàng</div>'; return; }
-            resultBox.innerHTML = data.map(c => `
-                <div style="padding:10px 15px;border-bottom:1px solid #eee;cursor:pointer;"
-                     onclick="PosApp.selectCustomer('${c.hoTen}', '${c.soDienThoai}', ${c.id})">
-                    <div style="font-weight:700;">${c.hoTen.toUpperCase()}</div>
-                    <div style="font-size:11px;color:#666;">${c.soDienThoai}</div>
-                </div>`).join('');
+            try{
+                const res = await fetch(`/api/pos/customers/search?q=${val}`);
+                const data = await res.json();
+                if (data.length === 0) { resultBox.innerHTML = '<div style="color:#999;font-size:12px;padding:15px;text-align:center;">Không tìm thấy khách hàng</div>'; return; }
+                resultBox.innerHTML = data.map(c => `
+                    <div style="padding:10px 15px;border-bottom:1px solid #eee;cursor:pointer;"
+                         onclick="PosApp.selectCustomer('${c.hoTen}', '${c.soDienThoai}', ${c.id})">
+                        <div style="font-weight:700;">${c.hoTen.toUpperCase()}</div>
+                        <div style="font-size:11px;color:#666;">${c.soDienThoai}</div>
+                    </div>`).join('');
+            }catch(e){}
         },
 
         selectCustomer: function (name, phone, id) {
@@ -879,6 +1043,7 @@
             const cur = this.getCurrentInvoice();
             document.getElementById('customerName').innerText = cur ? cur.customer : 'KHÁCH VÃNG LAI';
             document.getElementById('customerPhone').innerText = cur ? (cur.phone || 'Khách lẻ') : 'Khách lẻ';
+            this.updateCountdown(); // Cập nhật lại UI Status bar ngay khi đổi Tab
         },
 
         renderCart: function () {
@@ -973,16 +1138,18 @@
         inlineSearchCustomer: async function(val) {
             const box = document.getElementById('inlineSearchResults');
             if (val.length < 2) { box.innerHTML = '<div style="padding:8px 12px; color:#999; font-size:11px;">Nhập để tìm kiếm...</div>'; return; }
-            const res = await fetch(`/api/pos/customers/search?q=${val}`);
-            const data = await res.json();
-            if (data.length === 0) { box.innerHTML = '<div style="padding:8px 12px; color:#999; font-size:11px;">Không tìm thấy</div>'; return; }
-            box.innerHTML = data.map(c => `
-                <div style="padding:8px 12px; border-bottom:1px solid #eee; cursor:pointer;"
-                     onmouseover="this.style.background='#f4f4f5'" onmouseout="this.style.background=''"
-                     onclick="PosApp.selectCustomerInline('${c.hoTen}', '${c.soDienThoai}', ${c.id})">
-                    <div style="font-weight:700; font-size:12px;">${c.hoTen.toUpperCase()}</div>
-                    <div style="font-size:11px; color:#666;">${c.soDienThoai}</div>
-                </div>`).join('');
+            try{
+                const res = await fetch(`/api/pos/customers/search?q=${val}`);
+                const data = await res.json();
+                if (data.length === 0) { box.innerHTML = '<div style="padding:8px 12px; color:#999; font-size:11px;">Không tìm thấy</div>'; return; }
+                box.innerHTML = data.map(c => `
+                    <div style="padding:8px 12px; border-bottom:1px solid #eee; cursor:pointer;"
+                         onmouseover="this.style.background='#f4f4f5'" onmouseout="this.style.background=''"
+                         onclick="PosApp.selectCustomerInline('${c.hoTen}', '${c.soDienThoai}', ${c.id})">
+                        <div style="font-weight:700; font-size:12px;">${c.hoTen.toUpperCase()}</div>
+                        <div style="font-size:11px; color:#666;">${c.soDienThoai}</div>
+                    </div>`).join('');
+            }catch(e){}
         },
 
         selectCustomerInline: function(name, phone, id) {

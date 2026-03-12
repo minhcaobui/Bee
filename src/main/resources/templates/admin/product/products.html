@@ -27,6 +27,8 @@
         .btn-secondary:hover { background: #f4f4f5; }
         .btn-danger { background: #fff; color: #dc2626; border: 1px solid #dc2626; }
         .btn-danger:hover { background: #dc2626; color: #fff; }
+        .btn-primary { background: #2563eb; color: #fff; border: 1px solid #2563eb; }
+        .btn-primary:hover { background: #1d4ed8; }
 
         /* Search Section */
         .search-section { margin-bottom: 15px; }
@@ -74,6 +76,13 @@
         .form-input:disabled { background: #f5f5f5; color: #888; cursor: not-allowed; border-color: #eee; }
         .form-textarea { min-height: 80px; resize: vertical; }
 
+        /* Checkbox Group cho Tạo Hàng Loạt */
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; }
+        .checkbox-item { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid var(--gray-200); border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; background: #fafafa; transition: 0.2s; user-select: none; }
+        .checkbox-item:hover { border-color: #999; }
+        .checkbox-item input { display: none; }
+        .checkbox-item.active { border-color: #000; background: #000; color: #fff; }
+
         /* Switch Vuông (Form) & Tròn (Table) */
         .switch-wrapper { display: flex; align-items: center; gap: 10px; }
         .switch-square { position: relative; display: inline-block; width: 40px; height: 20px; }
@@ -105,8 +114,9 @@
         #mainDrawer { width: 600px; }
         #variantDrawer { width: 850px; z-index: 1050; }
         #vFormDrawer { width: 450px; z-index: 1101; }
+        #bulkDrawer { width: 650px; z-index: 1101; } /* Drawer cho Tạo Hàng Loạt */
         #stockDrawer { width: 350px; z-index: 1201; }
-        #vFormOverlay { z-index: 1100; }
+        #vFormOverlay, #bulkOverlay { z-index: 1100; }
         #stockOverlay { z-index: 1200; }
 
         /* Cột Ảnh + Tên gộp chung */
@@ -263,7 +273,8 @@
     <div class="drawer-header">
         <h3 class="drawer-title">CHI TIẾT: <span id="vTitle" style="color:#555"></span></h3>
         <div style="display: flex; gap: 10px;">
-            <button class="btn" onclick="ProductApp.openAddVariantForm()">+ THÊM SKU</button>
+            <button class="btn btn-secondary" onclick="ProductApp.openAddVariantForm()"><i class="bi bi-plus-lg"></i> THÊM TỪNG SKU</button>
+            <button class="btn btn-primary" onclick="ProductApp.openBulkDrawer()"><i class="bi bi-grid-3x3-gap-fill"></i> TẠO HÀNG LOẠT</button>
             <button class="btn-icon" onclick="ProductApp.closeVariantDrawer()" style="border:none;"><i class="bi bi-x-lg"></i></button>
         </div>
     </div>
@@ -315,6 +326,61 @@
     </div>
 </aside>
 
+<div id="bulkOverlay" class="overlay" onclick="ProductApp.closeBulkDrawer()"></div>
+<aside class="drawer" id="bulkDrawer">
+    <div class="drawer-header">
+        <h3 class="drawer-title">TẠO BIẾN THỂ HÀNG LOẠT (MA TRẬN)</h3>
+        <button class="btn-icon" onclick="ProductApp.closeBulkDrawer()" style="border:none;"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="drawer-body">
+        <div style="background: #fafafa; padding: 15px; border-radius: 4px; border: 1px solid #eee; margin-bottom: 20px;">
+            <div class="form-group">
+                <label class="form-label">BƯỚC 1: CHỌN MÀU SẮC</label>
+                <div class="checkbox-group" id="bulkColorGroup">
+                    <span style="color:#888; font-size:12px;">Đang tải danh sách...</span>
+                </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">BƯỚC 2: CHỌN KÍCH THƯỚC</label>
+                <div class="checkbox-group" id="bulkSizeGroup">
+                    <span style="color:#888; font-size:12px;">Đang tải danh sách...</span>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="margin-top:15px;" onclick="ProductApp.generateBulkMatrix()">
+                <i class="bi bi-magic"></i> SINH MA TRẬN SKU
+            </button>
+        </div>
+
+        <div id="bulkSettings" style="display:none; background: #fff; padding: 15px; border-radius: 4px; border: 1px dashed #ccc; margin-bottom: 20px;">
+            <label class="form-label">THIẾT LẬP NHANH CHO TẤT CẢ TỔ HỢP DƯỚI ĐÂY</label>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <input type="text" id="bulkCommonPrice" class="form-input" placeholder="Nhập giá bán chung..." style="flex:1" oninput="ProductApp.formatCurrencyInput(this)">
+                <button class="btn btn-secondary" onclick="ProductApp.applyBulkPrice()"><i class="bi bi-check2-all"></i> ÁP DỤNG MỨC GIÁ</button>
+            </div>
+        </div>
+
+        <h5 style="font-weight:800; font-size:12px; margin-bottom:10px;">DANH SÁCH BIẾN THỂ CHUẨN BỊ TẠO</h5>
+        <div class="table-wrapper">
+            <table style="min-width: 100%;">
+                <thead>
+                <tr>
+                    <th>MÀU SẮC</th>
+                    <th>KÍCH THƯỚC</th>
+                    <th>GIÁ BÁN (VNĐ) <span style="color:red">*</span></th>
+                    <th style="width:40px; text-align:center;">XÓA</th>
+                </tr>
+                </thead>
+                <tbody id="bulkMatrixBody">
+                <tr><td colspan="4" style="text-align:center; color:#888; padding:20px;">Vui lòng chọn Màu và Kích thước rồi bấm "Sinh ma trận"</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="drawer-footer">
+        <button class="btn btn-secondary" style="flex:1" onclick="ProductApp.closeBulkDrawer()">HỦY</button>
+        <button class="btn" id="btnSaveBulk" style="flex:1" onclick="ProductApp.saveBulkVariants()">LƯU TẤT CẢ SKU</button>
+    </div>
+</aside>
 <div id="vFormOverlay" class="overlay" onclick="ProductApp.closeVariantForm()"></div>
 <aside class="drawer" id="vFormDrawer">
     <div class="drawer-header">
@@ -447,6 +513,9 @@
             isLoading: false,
             abortController: null,
             isUploadingVariantImg: false,
+
+            // LƯU CACHE MÀU VÀ SIZE CHO FORM TẠO HÀNG LOẠT
+            cachedColors: [], cachedSizes: []
         },
 
         init: async function() {
@@ -760,6 +829,146 @@
             );
         },
 
+        /* ==================== TẠO MA TRẬN HÀNG LOẠT (BULK) ==================== */
+        openBulkDrawer: function() {
+            // Render giao diện checkbox từ cache
+            this.renderBulkCheckboxes('bulkColorGroup', this.state.cachedColors);
+            this.renderBulkCheckboxes('bulkSizeGroup', this.state.cachedSizes);
+
+            document.getElementById('bulkMatrixBody').innerHTML = `<tr><td colspan="4" style="text-align:center; color:#888; padding:20px;">Vui lòng chọn Màu và Kích thước rồi bấm "Sinh ma trận"</td></tr>`;
+            document.getElementById('bulkSettings').style.display = 'none';
+            document.getElementById('bulkCommonPrice').value = '';
+
+            document.getElementById('bulkDrawer').classList.add('show');
+            document.getElementById('bulkOverlay').classList.add('show');
+        },
+
+        closeBulkDrawer: function() {
+            document.getElementById('bulkDrawer').classList.remove('show');
+            document.getElementById('bulkOverlay').classList.remove('show');
+        },
+
+        renderBulkCheckboxes: function(containerId, list) {
+            const container = document.getElementById(containerId);
+            if (!list || list.length === 0) {
+                container.innerHTML = '<span style="color:#ef4444; font-size:12px;">Không có dữ liệu thuộc tính!</span>';
+                return;
+            }
+            container.innerHTML = list.map(item => `
+                <label class="checkbox-item">
+                    <input type="checkbox" value="${item.id}" data-name="${item.ten}" onchange="this.parentElement.classList.toggle('active', this.checked)">
+                    ${item.ten}
+                </label>
+            `).join('');
+        },
+
+        generateBulkMatrix: function() {
+            const colorChecks = Array.from(document.querySelectorAll('#bulkColorGroup input[type="checkbox"]:checked'));
+            const sizeChecks = Array.from(document.querySelectorAll('#bulkSizeGroup input[type="checkbox"]:checked'));
+
+            if (colorChecks.length === 0 || sizeChecks.length === 0) {
+                window.toast("Vui lòng chọn ít nhất 1 màu sắc và 1 kích thước!", "warning");
+                return;
+            }
+
+            const tbody = document.getElementById('bulkMatrixBody');
+            let html = '';
+
+            colorChecks.forEach(c => {
+                sizeChecks.forEach(s => {
+                    const cid = c.value, cName = c.dataset.name;
+                    const sid = s.value, sName = s.dataset.name;
+                    // id dòng dùng làm key để tránh trùng lặp
+                    const rowId = `row_${cid}_${sid}`;
+
+                    html += `
+                    <tr id="${rowId}" data-color="${cid}" data-size="${sid}">
+                        <td><span style="font-weight:700;">${cName}</span></td>
+                        <td><span style="font-weight:700;">${sName}</span></td>
+                        <td>
+                            <input type="text" class="form-input bulk-price-input" placeholder="Nhập giá..." oninput="ProductApp.formatCurrencyInput(this)" style="min-width: 120px;">
+                        </td>
+                        <td style="text-align:center;">
+                            <button class="btn-icon" style="color: #ef4444; border-color: #fca5a5;" onclick="this.closest('tr').remove()"><i class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>`;
+                });
+            });
+
+            tbody.innerHTML = html;
+            document.getElementById('bulkSettings').style.display = 'block';
+        },
+
+        applyBulkPrice: function() {
+            const val = document.getElementById('bulkCommonPrice').value;
+            if (!val) { window.toast("Vui lòng nhập mức giá chung!", "warning"); return; }
+            document.querySelectorAll('.bulk-price-input').forEach(input => {
+                input.value = val;
+            });
+            window.toast("Đã áp dụng mức giá chung cho tất cả!", "success");
+        },
+
+        saveBulkVariants: async function() {
+            const rows = document.querySelectorAll('#bulkMatrixBody tr[data-color]');
+            if (rows.length === 0) {
+                window.toast("Danh sách trống. Vui lòng sinh ma trận trước!", "warning");
+                return;
+            }
+
+            const payloadList = [];
+            let isValid = true;
+
+            rows.forEach(row => {
+                const colorId = row.dataset.color;
+                const sizeId = row.dataset.size;
+                const priceStr = row.querySelector('.bulk-price-input').value;
+                const price = priceStr ? parseFloat(priceStr.replace(/,/g, '')) : null;
+
+                if (!price) isValid = false;
+
+                payloadList.push({
+                    idMauSac: parseInt(colorId),
+                    idKichThuoc: parseInt(sizeId),
+                    giaBan: price,
+                    hinhAnh: null // Bulk create mặc định để null, sau cập nhật từng cái nếu cần
+                });
+            });
+
+            if (!isValid) {
+                window.toast("Vui lòng nhập đầy đủ giá bán cho tất cả tổ hợp SKU!", "error");
+                return;
+            }
+
+            const btn = document.getElementById('btnSaveBulk');
+            btn.disabled = true;
+            btn.textContent = 'ĐANG LƯU...';
+
+            try {
+                // Tạm thời dùng Promise.all để bắn song song các request POST độc lập.
+                // Điều này giúp tính năng hoạt động ngay lập tức với BE hiện tại mà không cần sửa controller Java.
+                const requests = payloadList.map(payload =>
+                    fetch(`/api/products/${this.state.currentProductId}/variants`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    })
+                );
+
+                await Promise.all(requests);
+
+                window.toast(`Đã tạo thành công ${payloadList.length} biến thể SKU!`, "success");
+                this.closeBulkDrawer();
+                this.loadVariants(this.state.currentProductId);
+
+            } catch (error) {
+                window.toast("Có lỗi xảy ra trong quá trình lưu dữ liệu hàng loạt.", "error");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'LƯU TẤT CẢ SKU';
+            }
+        },
+        /* ==================== END BULK ==================== */
+
         /* --- LOGIC THÊM/SỬA SKU --- */
         openAddVariantForm: function() {
             this.state.editingVariantId = null;
@@ -1039,7 +1248,9 @@
 
         /* --- QUẢN LÝ ĐÓNG MỞ DRAWER --- */
         handleOverlayClick: function() {
-            if (document.getElementById('variantDrawer').classList.contains('show')) {
+            if (document.getElementById('bulkDrawer').classList.contains('show')) {
+                this.closeBulkDrawer();
+            } else if (document.getElementById('variantDrawer').classList.contains('show')) {
                 this.closeVariantDrawer();
             } else {
                 this.closeDrawer();
@@ -1075,13 +1286,27 @@
 
         loadSelectOptions: async function() {
             if (this.state.optionsLoaded) return;
-            const fill = async (url, id) => { try { const r = await fetch(url); const d = await r.json(); document.getElementById(id).innerHTML = '<option value="">-- Chọn --</option>' + (d.content || d).map(i => `<option value="${i.id}">${i.ten}</option>`).join(''); } catch(e){} };
+            const fill = async (url, id, cacheKey = null) => {
+                try {
+                    const r = await fetch(url);
+                    const d = await r.json();
+                    const list = d.content || d;
+
+                    // Lưu Cache nếu có yêu cầu (dùng cho form tạo Bulk)
+                    if(cacheKey) {
+                        this.state[cacheKey] = list;
+                    }
+
+                    document.getElementById(id).innerHTML = '<option value="">-- Chọn --</option>' + list.map(i => `<option value="${i.id}">${i.ten}</option>`).join('');
+                } catch(e){}
+            };
+
             await Promise.all([
                 fill('/api/danh-muc/all-active', 'fDanhMuc'),
                 fill('/api/hang/all-active', 'fHang'),
                 fill('/api/chat-lieu/all-active', 'fChatLieu'),
-                fill('/api/mau-sac/all-active', 'vMauSac'),
-                fill('/api/kich-thuoc/all-active', 'vKichThuoc')
+                fill('/api/mau-sac/all-active', 'vMauSac', 'cachedColors'),
+                fill('/api/kich-thuoc/all-active', 'vKichThuoc', 'cachedSizes')
             ]);
             this.state.optionsLoaded = true;
         },
