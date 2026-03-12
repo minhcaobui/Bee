@@ -787,6 +787,27 @@
 
         container.prepend(notifItem);
     }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // Lấy thông tin từ thanh địa chỉ URL
+        const urlParams = new URLSearchParams(window.location.search);
+
+        // Kiểm tra xem có chứa biến error=403 do Spring Security đẩy về không
+        if (urlParams.has('error') && urlParams.get('error') === '403') {
+
+            // Hiện Toast thông báo lỗi
+            if (typeof window.toast === 'function') {
+                window.toast('Bạn không có quyền truy cập vào chức năng này!', 'error');
+            } else {
+                alert('Bạn không có quyền truy cập vào chức năng này!');
+            }
+
+            // Xóa biến ?error=403 khỏi thanh URL (dọn dẹp URL cho sạch)
+            // Tránh việc người dùng F5 tải lại trang lại bị hiện Toast lần nữa
+            const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            window.history.replaceState({path: cleanUrl}, '', cleanUrl);
+        }
+    });
 </script>
 
 </body>

@@ -409,6 +409,34 @@
         }, 3500);
     };
 
+    /* --- TOAST CONFIRM DIALOG --- */
+    window.toastConfirm = function(message, onConfirm, onCancel) {
+        const container = document.getElementById('toastHost');
+        if (!container) return;
+
+        const el = document.createElement('div');
+        el.className = `toast warning`;
+        el.style.flexDirection = 'column';
+        el.style.alignItems = 'flex-start';
+        el.style.gap = '10px';
+
+        el.innerHTML = `
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <i class="bi bi-exclamation-circle-fill" style="color:#f59e0b; font-size:18px;"></i>
+                <span style="font-weight:600; font-size:13px;">${message}</span>
+            </div>
+            <div style="display: flex; gap: 8px; width: 100%; justify-content: flex-end;">
+                <button class="btn btn-secondary" id="toastCancel" style="height: 24px; font-size: 10px; padding: 0 10px;">HỦY</button>
+                <button class="btn" id="toastOk" style="height: 24px; font-size: 10px; padding: 0 10px;">XÁC NHẬN</button>
+            </div>
+        `;
+
+        container.appendChild(el);
+
+        el.querySelector('#toastOk').onclick = () => { el.remove(); onConfirm(); };
+        el.querySelector('#toastCancel').onclick = () => { el.remove(); onCancel(); };
+    };
+
     const ProductApp = {
         state: {
             page: 0, size: 10, totalPages: 0, q: '', trangThai: '', editingId: null,
@@ -708,19 +736,28 @@
 
         changeVariantPage: function(step) { this.state.variantPage += step; this.renderVariantTable(); },
 
-        quickToggleVariant: async function(id, cb) {
-            try {
-                const res = await fetch(`/api/products/variants/${id}/trang-thai`, { method: 'PATCH' });
-                if(res.ok) {
-                    window.toast("Đã thay đổi trạng thái SKU", "success");
-                } else {
-                    window.toast("Hệ thống từ chối thay đổi.", "error");
-                    cb.checked = !cb.checked;
+        quickToggleVariant: function(id, cb) {
+            const originalState = !cb.checked; // Lưu trạng thái cũ nếu người dùng Hủy
+            window.toastConfirm(
+                "Bạn có chắc chắn muốn thay đổi trạng thái kinh doanh của SKU này không?",
+                async () => {
+                    try {
+                        const res = await fetch(`/api/products/variants/${id}/trang-thai`, { method: 'PATCH' });
+                        if(res.ok) {
+                            window.toast("Đã thay đổi trạng thái SKU", "success");
+                        } else {
+                            window.toast("Hệ thống từ chối thay đổi.", "error");
+                            cb.checked = originalState; // Hoàn tác
+                        }
+                    } catch(e) {
+                        cb.checked = originalState; // Hoàn tác
+                        window.toast("Mất kết nối server.", "error");
+                    }
+                },
+                () => {
+                    cb.checked = originalState; // Hoàn tác nếu chọn Hủy
                 }
-            } catch(e) {
-                cb.checked = !cb.checked;
-                window.toast("Mất kết nối server.", "error");
-            }
+            );
         },
 
         /* --- LOGIC THÊM/SỬA SKU --- */
@@ -774,9 +811,6 @@
                 window.toast('Vui lòng chờ ảnh SKU tải lên hoàn tất!', 'warning');
                 return;
             }
-            console.log('=== DEBUG saveVariant ===');
-            console.log('editingVariantId:', this.state.editingVariantId);
-            console.log('vTempImage:', this.state.vTempImage);  // ← NULL hay URL?
 
             const mauSac = document.getElementById('vMauSac').value;
             const kichThuoc = document.getElementById('vKichThuoc').value;
@@ -979,19 +1013,28 @@
             }
         },
 
-        quickToggle: async function(id, cb) {
-            try {
-                const res = await fetch(`/api/products/${id}/trang-thai`, { method: 'PATCH' });
-                if(res.ok) {
-                    window.toast("Cập nhật trạng thái thành công.", "success");
-                } else {
-                    window.toast("Từ chối thay đổi trạng thái.", "error");
-                    cb.checked = !cb.checked;
+        quickToggle: function(id, cb) {
+            const originalState = !cb.checked; // Lưu trạng thái cũ
+            window.toastConfirm(
+                "Bạn có chắc chắn muốn thay đổi trạng thái kinh doanh của sản phẩm này không?",
+                async () => {
+                    try {
+                        const res = await fetch(`/api/products/${id}/trang-thai`, { method: 'PATCH' });
+                        if(res.ok) {
+                            window.toast("Cập nhật trạng thái thành công.", "success");
+                        } else {
+                            window.toast("Từ chối thay đổi trạng thái.", "error");
+                            cb.checked = originalState; // Hoàn tác
+                        }
+                    } catch(e) {
+                        cb.checked = originalState; // Hoàn tác
+                        window.toast("Sự cố đường truyền.", "error");
+                    }
+                },
+                () => {
+                    cb.checked = originalState; // Hoàn tác nếu chọn Hủy
                 }
-            } catch(e) {
-                cb.checked = !cb.checked;
-                window.toast("Sự cố đường truyền.", "error");
-            }
+            );
         },
 
         /* --- QUẢN LÝ ĐÓNG MỞ DRAWER --- */
@@ -1033,7 +1076,13 @@
         loadSelectOptions: async function() {
             if (this.state.optionsLoaded) return;
             const fill = async (url, id) => { try { const r = await fetch(url); const d = await r.json(); document.getElementById(id).innerHTML = '<option value="">-- Chọn --</option>' + (d.content || d).map(i => `<option value="${i.id}">${i.ten}</option>`).join(''); } catch(e){} };
-            await Promise.all([fill('/api/danh-muc', 'fDanhMuc'), fill('/api/hang', 'fHang'), fill('/api/chat-lieu', 'fChatLieu'), fill('/api/mau-sac', 'vMauSac'), fill('/api/kich-thuoc', 'vKichThuoc')]);
+            await Promise.all([
+                fill('/api/danh-muc/all-active', 'fDanhMuc'),
+                fill('/api/hang/all-active', 'fHang'),
+                fill('/api/chat-lieu/all-active', 'fChatLieu'),
+                fill('/api/mau-sac/all-active', 'vMauSac'),
+                fill('/api/kich-thuoc/all-active', 'vKichThuoc')
+            ]);
             this.state.optionsLoaded = true;
         },
 

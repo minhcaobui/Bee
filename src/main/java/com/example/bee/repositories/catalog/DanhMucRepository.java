@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface DanhMucRepository extends JpaRepository<DanhMuc, Integer> {
 
     boolean existsByMaIgnoreCase(String ma);
@@ -21,4 +23,5 @@ public interface DanhMucRepository extends JpaRepository<DanhMuc, Integer> {
 
     boolean existsByTenIgnoreCase(String ten);
     boolean existsByTenIgnoreCaseAndIdNot(String ten, Integer id);
+    List<DanhMuc> findByTrangThaiTrue();
 }

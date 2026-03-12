@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -34,9 +35,6 @@ import java.util.Random;
 public class KichThuocApi {
     @Autowired
     private KichThuocRepository kichThuocRepository;
-
-    @Autowired
-    private KhuyenMaiRepository khuyenMaiRepo;
 
     @Autowired
     private final SanPhamChiTietRepository sanPhamChiTietRepository;
@@ -59,6 +57,11 @@ public class KichThuocApi {
                                 @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         return kichThuocRepository.search(q, trangThai, pageable);
+    }
+
+    @GetMapping("/all-active")
+    public ResponseEntity<List<KichThuoc>> getAllActive() {
+        return ResponseEntity.ok(kichThuocRepository.findByTrangThaiTrue());
     }
 
     @GetMapping("/{id}")

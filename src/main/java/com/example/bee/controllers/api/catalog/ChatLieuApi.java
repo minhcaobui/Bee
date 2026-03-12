@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -36,14 +37,10 @@ public class ChatLieuApi {
 
     @Autowired
     private final ChatLieuRepository chatLieuRepository;
-    @Autowired
-    private final KhuyenMaiRepository khuyenMaiRepository;
 
     @Autowired
     private final SanPhamRepository sanPhamRepository;
 
-
-    // --- 1. SỬA LẠI LOGIC GEN MÃ (CL_ + SỐ) ---
     private String generateMa() {
         String ma;
         Random random = new Random();
@@ -63,6 +60,11 @@ public class ChatLieuApi {
         return chatLieuRepository.search(q, trangThai, pageable);
     }
 
+    @GetMapping("/all-active")
+    public ResponseEntity<List<ChatLieu>> getAllActive() {
+        return ResponseEntity.ok(chatLieuRepository.findByTrangThaiTrue());
+    }
+
     @GetMapping("/{id}")
     public ChatLieu getById(@PathVariable Integer id) {
         return chatLieuRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -75,15 +77,14 @@ public class ChatLieuApi {
                 ? generateMa()
                 : body.getMa().trim().toUpperCase();
 
-        // --- 2. SỬA REGEX CHO PHÉP DẤU _ ---
         if (ma.length() > 20 || !ma.matches("^[A-Z0-9_]*$")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã max 20, không dấu tiếng Việt, cho phép '_'");
         }
 
         if (ten.isEmpty() || ten.length() > 100) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên max 100 chữ!");
 
-        // --- 3. CHECK TRÙNG CẢ MÃ VÀ TÊN ---
         if (chatLieuRepository.existsByTenIgnoreCase(ten)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên chất liệu này có rồi!");
+
         if (chatLieuRepository.existsByMaIgnoreCase(ma)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã chất liệu này bị trùng!");
 
         ChatLieu entity = new ChatLieu();
@@ -112,28 +113,22 @@ public class ChatLieuApi {
         entity.setNgaySua(LocalDateTime.now());
         return chatLieuRepository.save(entity);
     }
+
     @PatchMapping("/{id}/trang-thai")
     public ResponseEntity<?> toggleStatus(@PathVariable Integer id) {
         ChatLieu chatLieu = chatLieuRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        // KIỂM TRA: Nếu trạng thái hiện tại đang là BẬT (true) và chuẩn bị TẮT
         if (chatLieu.getTrangThai() != null && chatLieu.getTrangThai() == true) {
-            // Kiểm tra xem có sản phẩm nào đang dùng chất liệu này và đang hoạt động không
             boolean isUsed = sanPhamRepository.existsByChatLieu_IdAndTrangThaiTrue(id);
-
             if (isUsed) {
-                // Nếu có, chặn lại và trả về lỗi 400
                 return ResponseEntity.badRequest().body(Map.of(
                         "message", "Không thể ngừng hoạt động! Đang có sản phẩm sử dụng chất liệu này đang được bày bán."
                 ));
             }
         }
-
-        // Nếu không vướng sản phẩm nào (hoặc đang từ TẮT bật lên) thì cho đổi bình thường
         chatLieu.setTrangThai(!chatLieu.getTrangThai());
         chatLieuRepository.save(chatLieu);
-
         return ResponseEntity.ok().build();
     }
 

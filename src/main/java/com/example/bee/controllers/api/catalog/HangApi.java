@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -35,8 +36,7 @@ public class HangApi {
 
     @Autowired
     private final HangRepository hangRepository;
-    @Autowired
-    private final KhuyenMaiRepository khuyenMaiRepository;
+
     @Autowired
     private final SanPhamRepository sanPhamRepository;
 
@@ -57,6 +57,11 @@ public class HangApi {
                            @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         return hangRepository.search(q, trangThai, pageable);
+    }
+
+    @GetMapping("/all-active")
+    public ResponseEntity<List<Hang>> getAllActive() {
+        return ResponseEntity.ok(hangRepository.findByTrangThaiTrue());
     }
 
     @GetMapping("/{id}")

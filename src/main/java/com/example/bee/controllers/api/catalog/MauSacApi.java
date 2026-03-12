@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -35,8 +36,6 @@ public class MauSacApi {
     @Autowired
     private MauSacRepository mauSacRepository;
 
-    @Autowired
-    private KhuyenMaiRepository khuyenMaiRepo;
     @Autowired
     private final SanPhamChiTietRepository sanPhamChiTietRepository;
 
@@ -58,6 +57,11 @@ public class MauSacApi {
                              @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         return mauSacRepository.search(q, trangThai, pageable);
+    }
+
+    @GetMapping("/all-active")
+    public ResponseEntity<List<MauSac>> getAllActive() {
+        return ResponseEntity.ok(mauSacRepository.findByTrangThaiTrue());
     }
 
     @GetMapping("/{id}")
