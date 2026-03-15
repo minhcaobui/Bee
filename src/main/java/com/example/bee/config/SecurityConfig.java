@@ -27,7 +27,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/register", "/login", "/css/**", "/js/**", "/images/**", "/api/products/**", "/api/hoa-don/tra-cuu/**", "/api/hoa-don/checkout", "/customer/**").permitAll()
+                        .requestMatchers("/register", "/login", "/css/**", "/js/**", "/images/**", "/api/**", "/api/products/**", "/api/hoa-don/tra-cuu/**", "/api/hoa-don/checkout", "/customer/**").permitAll()
                         .requestMatchers("/customer/**").hasAuthority("ROLE_CUSTOMER")
                         .requestMatchers("/api/khach-hang/my-profile", "/api/khach-hang/change-password", "/api/khach-hang/*/dia-chi/**").hasAuthority("ROLE_CUSTOMER")
                         .requestMatchers("/api/hoa-don/my-orders").hasAuthority("ROLE_CUSTOMER")
