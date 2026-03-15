@@ -4,6 +4,7 @@ import com.example.bee.entities.catalog.KichThuoc;
 import com.example.bee.entities.catalog.MauSac;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.math.BigDecimal;
 
 @Entity
@@ -33,8 +34,6 @@ public class SanPhamChiTiet {
 
     @Column(name = "trang_thai", nullable = false)
     private Boolean trangThai = true;
-
-    // --- Mối quan hệ giữa các bảng ---
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_san_pham", nullable = false)

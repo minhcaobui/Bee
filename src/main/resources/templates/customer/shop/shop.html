@@ -1,97 +1,470 @@
 <section id="shop-section">
     <style>
-        .products-section { padding-top: 40px; padding-bottom: 100px; }
+        .products-section { padding-top: 40px; padding-bottom: 100px; position: relative; }
         .section-header { display: flex; justify-content: space-between; align-items: flex-end; padding: 0 60px; margin-bottom: 52px; }
         .section-eyebrow { font-size: 11px; letter-spacing: 0.22em; color: var(--accent); text-transform: uppercase; font-weight: 500; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
         .section-eyebrow::before { content: ''; width: 20px; height: 1px; background: var(--accent); }
         .section-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(32px, 4vw, 52px); font-weight: 300; line-height: 1.1; }
         .section-title em { font-style: italic; }
-        .products-grid { padding: 0 60px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
-        .product-card { background: var(--white); box-shadow: var(--card-shadow); overflow: hidden; position: relative; cursor: none; transition: box-shadow 0.4s ease; }
-        .product-card:hover { box-shadow: var(--card-shadow-hover); }
-        .product-img { width: 100%; position: relative; overflow: hidden; }
-        .img-placeholder { display: block; transition: transform 0.6s ease; }
+
+        /* --- CSS MỚI CHO BỘ LỌC VÀ LƯỚI --- */
+        .shop-container {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 40px;
+            padding: 0 60px;
+            align-items: start;
+        }
+
+        .shop-filters { position: sticky; top: 120px; }
+        .filter-widget { margin-bottom: 32px; }
+        .filter-title { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; margin-bottom: 16px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 8px;}
+        .filter-list { list-style: none; padding: 0; margin: 0; }
+        .filter-list li { margin-bottom: 12px; font-size: 13px; color: var(--muted); cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px;}
+        .filter-list li::before { content: ''; width: 12px; height: 12px; border: 1px solid rgba(0,0,0,0.2); border-radius: 2px; transition: 0.2s; display: inline-block;}
+        .filter-list li:hover { color: var(--text); }
+        .filter-list li.active { color: var(--accent); font-weight: 500; }
+        .filter-list li.active::before { background: var(--accent); border-color: var(--accent); }
+
+        .products-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 32px 24px; }
+
+        #qa-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 90; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; cursor: pointer; }
+        #qa-backdrop.show { opacity: 1; pointer-events: all; }
+
+        .product-card { background: var(--white); box-shadow: var(--card-shadow); overflow: hidden; position: relative; cursor: pointer; transition: box-shadow 0.4s ease, transform 0.4s ease; display: flex; flex-direction: column; height: 100%; z-index: 1; }
+        .product-card:hover { box-shadow: var(--card-shadow-hover); transform: translateY(-4px); }
+        .product-card.show-selection { z-index: 95; transform: translateY(-8px); box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
+
+        .product-img { width: 100%; position: relative; overflow: hidden; background: #f4f4f5; aspect-ratio: 3/4;}
+        .img-placeholder { display: block; transition: transform 0.6s ease; width: 100%; height: 100%; object-fit: cover; }
         .product-card:hover .img-placeholder { transform: scale(1.04); }
-        .c1 { background: linear-gradient(160deg, #e8ddd1, #c4b49d); height: 340px; } .c2 { background: linear-gradient(160deg, #d4cfc9, #b0a99f); height: 340px; } .c3 { background: linear-gradient(160deg, #c5cfc7, #8fa694); height: 300px; } .c4 { background: linear-gradient(160deg, #d1c9c0, #a89e93); height: 300px; } .c5 { background: linear-gradient(160deg, #c9c4bc, #9e998f); height: 320px; } .c6 { background: linear-gradient(160deg, #cfd4cc, #94a091); height: 340px; }
-        .img-placeholder::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px); }
-        .product-overlay { position: absolute; inset: 0; background: rgba(26,26,26,0.0); display: flex; align-items: flex-end; padding: 24px; transition: background 0.4s ease; }
+
+        /* --- ẢNH HOVER --- */
+        .img-hover { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.5s ease, transform 0.6s ease; z-index: 1; }
+        .product-card:hover .img-hover { opacity: 1; transform: scale(1.04); }
+
+        .img-overlay-pattern { position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px); z-index: 2;}
+        .product-overlay { position: absolute; inset: 0; background: rgba(26,26,26,0.0); display: flex; align-items: flex-end; padding: 24px; transition: background 0.4s ease; z-index: 3; }
         .product-card:hover .product-overlay { background: rgba(26,26,26,0.08); }
-        .quick-add { background: white; color: var(--text); border: none; padding: 12px 24px; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: none; transform: translateY(8px); opacity: 0; transition: transform 0.3s ease, opacity 0.3s ease; width: 100%; }
+
+        .quick-add { background: white; color: var(--text); border: none; padding: 12px 24px; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transform: translateY(8px); opacity: 0; transition: transform 0.3s ease, opacity 0.3s ease; width: 100%; }
         .product-card:hover .quick-add { transform: translateY(0); opacity: 1; }
-        .product-info { padding: 20px 20px 24px; }
+
+        .quick-selection-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.98); z-index: 5; display: flex; flex-direction: column; justify-content: center; padding: 20px; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: default; }
+        .product-card.show-selection .quick-selection-overlay { transform: translateY(0); }
+
+        .qs-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; margin-bottom: 15px; text-align: center; }
+        .qs-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px; text-align: center; }
+        .qs-options { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; justify-content: center; }
+        .qs-dot { width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.15); cursor: pointer; box-shadow: inset 0 0 0 2px #fff; transition: all 0.2s ease; }
+        .qs-dot.active { border: 1.5px solid var(--text); transform: scale(1.15); }
+        .qs-size-btn { padding: 6px 12px; border: 1px solid #ddd; background: none; font-size: 11px; cursor: pointer; min-width: 35px; }
+        .qs-size-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
+        .qs-size-btn.disabled { opacity: 0.3; cursor: not-allowed; text-decoration: line-through; }
+        .qs-confirm-btn { width: 100%; padding: 12px; background: var(--accent); color: #fff; border: none; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; margin-top: 10px; transition: background 0.3s;}
+        .qs-confirm-btn:hover { opacity: 0.9; }
+        .qs-close { position: absolute; top: 10px; right: 10px; background: none; border: none; cursor: pointer; color: var(--muted); font-size: 20px; padding: 5px; }
+
+        .product-info { padding: 20px 20px 24px; flex-grow: 1; display: flex; flex-direction: column; }
         .product-tag { font-size: 10px; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase; font-weight: 500; margin-bottom: 6px; }
-        .product-name { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 400; margin-bottom: 8px; line-height: 1.2; }
-        .product-price-row { display: flex; justify-content: space-between; align-items: center; }
+        .product-name { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 400; margin-bottom: auto; line-height: 1.2; padding-bottom: 12px; }
         .product-price { font-size: 14px; color: var(--text); font-weight: 400; }
-        .product-colors { display: flex; gap: 6px; }
-        .color-dot { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); cursor: none; transition: transform 0.2s ease; }
-        .color-dot:hover { transform: scale(1.3); }
-        .color-dot.active { border: 1.5px solid var(--text); }
-        .label-sale { position: absolute; top: 16px; left: 16px; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 500; padding: 5px 10px; z-index: 2; background: #c08060; color: white; }
+
+        .label-new, .label-sale { position: absolute; top: 16px; left: 16px; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 500; padding: 5px 10px; z-index: 3; }
+        .label-new { background: var(--text); color: white; }
+        .label-sale { background: #c08060; color: white; }
+
         .skeleton { background: linear-gradient(90deg, #ede9e3 25%, #e4dfd8 50%, #ede9e3 75%); background-size: 200% 100%; animation: skeleton-shimmer 1.5s infinite; }
         @keyframes skeleton-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-        @media (max-width: 900px) { .section-header { padding: 0 24px; } .products-grid { grid-template-columns: 1fr 1fr; padding: 0 24px; } }
+
+        .load-more-btn { background: transparent; border: 1px solid var(--text); color: var(--text); padding: 12px 32px; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: 0.3s ease; margin-top: 20px; }
+        .load-more-btn:hover { background: var(--text); color: var(--white); }
+
+        @media (max-width: 900px) {
+            .section-header { padding: 0 24px; flex-direction: column; align-items: flex-start; gap: 20px; }
+            .shop-container { grid-template-columns: 1fr; padding: 0 24px; gap: 20px; }
+            .shop-filters { display: none; /* Mobile ẩn filter tạm thời cho đỡ rối */ }
+            .products-grid { grid-template-columns: 1fr 1fr; gap: 24px 16px; }
+        }
+        @media (max-width: 600px) { .products-grid { grid-template-columns: 1fr; } }
     </style>
 
     <section class="products-section">
+        <div id="qa-backdrop" onclick="window.ShopApp.closeAllSelections()"></div>
+
         <div class="section-header">
             <div>
                 <div class="section-eyebrow">Bộ sưu tập</div>
                 <h2 class="section-title">Tất cả sản phẩm<br><em>Spring / Summer 2025</em></h2>
             </div>
-            <div style="display:flex;gap:16px;align-items:center">
-                <select style="border:1px solid rgba(0,0,0,0.12);padding:10px 16px;font-family:'DM Sans',sans-serif;font-size:12px;background:var(--white);color:var(--text);letter-spacing:0.08em;cursor:none;outline:none">
-                    <option>Sắp xếp: Nổi bật</option>
-                    <option>Giá thấp → cao</option>
-                    <option>Giá cao → thấp</option>
-                    <option>Mới nhất</option>
+            <div style="display:flex; gap:16px; align-items:center;">
+                <select id="sortSelect" style="border:1px solid rgba(0,0,0,0.12); padding:10px 16px; font-family:'DM Sans',sans-serif; font-size:12px; background:var(--white); color:var(--text); letter-spacing:0.08em; cursor:pointer; outline:none">
+                    <option value="newest">Sắp xếp: Mới nhất</option>
+                    <option value="price_asc">Giá thấp → cao</option>
+                    <option value="price_desc">Giá cao → thấp</option>
                 </select>
             </div>
         </div>
 
-        <div class="products-grid">
-            <div class="product-card">
-                <div class="product-img"><div class="img-placeholder c1"></div><div class="product-overlay"><button class="quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div></div>
-                <div class="product-info"><div class="product-tag">Bestseller</div><div class="product-name">Áo Linen Oversize Dài Tay</div><div class="product-price-row"><div class="product-price">490.000 ₫</div><div class="product-colors"><div class="color-dot active" style="background:#c4b49d"></div><div class="color-dot" style="background:#3D5A4C"></div></div></div></div>
-            </div>
-            <div class="product-card" style="margin-top:40px">
-                <div class="product-img"><div class="img-placeholder c3"></div><div class="product-overlay"><button class="quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div></div>
-                <div class="product-info"><div class="product-tag">Mới</div><div class="product-name">Áo Sơ Mi Linen Xanh Rêu</div><div class="product-price-row"><div class="product-price">450.000 ₫</div></div></div>
-            </div>
-            <div class="product-card">
-                <div class="product-img"><div class="img-placeholder c2"></div><div class="product-overlay"><button class="quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div></div>
-                <div class="product-info"><div class="product-tag">Tự nhiên</div><div class="product-name">Áo Cotton Cổ Tròn Basic</div><div class="product-price-row"><div class="product-price">320.000 ₫</div></div></div>
-            </div>
-            <div class="product-card" style="margin-top:-30px">
-                <div class="label-sale">Sale</div>
-                <div class="product-img"><div class="img-placeholder c5"></div><div class="product-overlay"><button class="quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div></div>
-                <div class="product-info"><div class="product-tag">Giới hạn</div><div class="product-name">Set Áo Quần Linen Tonal</div><div class="product-price-row"><div class="product-price">790.000 ₫ <span style="color:var(--muted);text-decoration:line-through;font-size:12px">990k</span></div></div></div>
-            </div>
-            <div class="product-card">
-                <div class="product-img"><div class="img-placeholder c6"></div><div class="product-overlay"><button class="quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div></div>
-                <div class="product-info"><div class="product-tag">Mới</div><div class="product-name">Áo Thun Bamboo Nhẹ</div><div class="product-price-row"><div class="product-price">280.000 ₫</div></div></div>
-            </div>
-            <div class="product-card" style="margin-top:40px">
-                <div class="product-img"><div class="img-placeholder c4"></div><div class="product-overlay"><button class="quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div></div>
-                <div class="product-info"><div class="product-tag">Classic</div><div class="product-name">Áo Polo Cotton Wash</div><div class="product-price-row"><div class="product-price">380.000 ₫</div></div></div>
-            </div>
-        </div>
+        <div class="shop-container">
+            <aside class="shop-filters">
+                <div class="filter-widget">
+                    <div class="filter-title">Danh mục</div>
+                    <ul class="filter-list" id="categoryFilter">
+                        <li class="active" onclick="window.ShopApp.applyFilter('categoryId', null, this)">Tất cả</li>
+                        <li onclick="window.ShopApp.applyFilter('categoryId', 1, this)">Áo Thun</li>
+                        <li onclick="window.ShopApp.applyFilter('categoryId', 2, this)">Áo Polo</li>
+                        <li onclick="window.ShopApp.applyFilter('categoryId', 3, this)">Áo Sơ Mi</li>
+                    </ul>
+                </div>
+                <div class="filter-widget">
+                    <div class="filter-title">Khoảng giá</div>
+                    <ul class="filter-list" id="priceFilter">
+                        <li class="active" onclick="window.ShopApp.applyFilter('price', null, this)">Tất cả mức giá</li>
+                        <li onclick="window.ShopApp.applyFilter('price', '0-300000', this)">Dưới 300,000₫</li>
+                        <li onclick="window.ShopApp.applyFilter('price', '300000-500000', this)">300,000₫ - 500,000₫</li>
+                        <li onclick="window.ShopApp.applyFilter('price', '500000-9999999', this)">Trên 500,000₫</li>
+                    </ul>
+                </div>
+            </aside>
 
-        <div style="padding:40px 60px 0;display:flex;gap:16px;align-items:center">
-            <span style="font-size:12px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase">Đang tải thêm</span>
-            <div style="display:flex;gap:8px">
-                <div class="skeleton" style="width:80px;height:12px;border-radius:2px"></div>
-                <div class="skeleton" style="width:60px;height:12px;border-radius:2px"></div>
-                <div class="skeleton" style="width:100px;height:12px;border-radius:2px"></div>
+            <div>
+                <div class="products-grid" id="dynamicShopGrid"></div>
+                <div id="loadingContainer" style="padding: 60px 0 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <div id="loadingSkeleton" style="display:flex; gap:16px; align-items:center;">
+                        <span style="font-size:12px; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase">Đang tải thêm</span>
+                        <div style="display:flex; gap:8px">
+                            <div class="skeleton" style="width:80px; height:12px; border-radius:2px"></div>
+                            <div class="skeleton" style="width:60px; height:12px; border-radius:2px"></div>
+                            <div class="skeleton" style="width:100px; height:12px; border-radius:2px"></div>
+                        </div>
+                    </div>
+                    <button id="btnLoadMore" class="load-more-btn" style="display: none;" onclick="window.ShopApp.loadProducts()">Tải thêm sản phẩm</button>
+                    <div id="endOfListMsg" style="display: none; font-size:12px; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase; margin-top: 20px;">Đã hiển thị toàn bộ sản phẩm</div>
+                </div>
             </div>
         </div>
     </section>
 
     <script>
         window.ShopApp = {
+            state: {
+                page: 0,
+                size: 9,
+                sort: 'newest',
+                products: [],
+                isLoading: false,
+                hasMore: true,
+                filters: { categoryId: null, minPrice: null, maxPrice: null }
+            },
+            tempSelection: {},
+
             init: function() {
-                // Thêm JS tương tác tại đây nếu cần
+                const select = document.getElementById('sortSelect');
+                if (select) {
+                    select.addEventListener('change', (e) => {
+                        this.state.sort = e.target.value;
+                        this.resetAndLoad();
+                    });
+                }
+                this.setupKeyboardEvents();
+                this.loadProducts();
+            },
+
+            // --- LỌC SẢN PHẨM MỚI ---
+            applyFilter: function(type, value, el) {
+                // Update UI active class
+                const ul = el.closest('ul');
+                ul.querySelectorAll('li').forEach(li => li.classList.remove('active'));
+                el.classList.add('active');
+
+                if (type === 'categoryId') {
+                    this.state.filters.categoryId = value;
+                } else if (type === 'price') {
+                    if (value) {
+                        const parts = value.split('-');
+                        this.state.filters.minPrice = parts[0];
+                        this.state.filters.maxPrice = parts[1];
+                    } else {
+                        this.state.filters.minPrice = null;
+                        this.state.filters.maxPrice = null;
+                    }
+                }
+                this.resetAndLoad();
+            },
+
+            resetAndLoad: function() {
+                this.state.page = 0;
+                this.state.products = [];
+                this.state.hasMore = true;
+                document.getElementById('dynamicShopGrid').innerHTML = '';
+                this.loadProducts();
+            },
+
+            setupKeyboardEvents: function() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') this.closeAllSelections();
+                });
+            },
+
+            closeAllSelections: function() {
+                document.querySelectorAll('.product-card.show-selection').forEach(card => {
+                    card.classList.remove('show-selection');
+                });
+                const backdrop = document.getElementById('qa-backdrop');
+                if(backdrop) backdrop.classList.remove('show');
+            },
+
+            handleOutsideClick: function(productId, event) {
+                const card = document.getElementById('shop-card-' + productId);
+                if (card && card.classList.contains('show-selection')) {
+                    if (!event.target.closest('.quick-selection-overlay')) {
+                        this.closeSelection(productId, event);
+                    }
+                }
+            },
+
+            getVariants: function(product) {
+                if (!product) return [];
+                return product.chiTietSanPhams || product.chiTietSanPhamList || product.listChiTietSanPham || product.bienThes || product.skus || [];
+            },
+
+            loadProducts: async function() {
+                if (this.state.isLoading || !this.state.hasMore) return;
+                this.state.isLoading = true;
+                document.getElementById('loadingSkeleton').style.display = 'flex';
+                document.getElementById('btnLoadMore').style.display = 'none';
+                document.getElementById('endOfListMsg').style.display = 'none';
+
+                try {
+                    let paramStr = `?page=${this.state.page}&size=${this.state.size}&trangThai=true`;
+
+                    if(this.state.sort === 'newest') paramStr += '&sort=id,desc';
+                    else if(this.state.sort === 'price_asc') paramStr += '&sort=giaBan,asc';
+                    else if(this.state.sort === 'price_desc') paramStr += '&sort=giaBan,desc';
+
+                    // Gắn filter vào API (Nếu Backend của bạn chưa hỗ trợ những Query Param này, nó sẽ tự lờ đi)
+                    if (this.state.filters.categoryId) paramStr += `&danhMucId=${this.state.filters.categoryId}`;
+                    if (this.state.filters.minPrice) paramStr += `&minGia=${this.state.filters.minPrice}`;
+                    if (this.state.filters.maxPrice) paramStr += `&maxGia=${this.state.filters.maxPrice}`;
+
+                    const url = `/api/products${paramStr}`;
+                    const res = await fetch(url);
+                    const data = await res.json();
+                    const list = data.content || data;
+
+                    if (!list || list.length < this.state.size) this.state.hasMore = false;
+                    const startIndex = this.state.products.length;
+                    this.state.products = [...this.state.products, ...list];
+                    this.renderProducts(list, startIndex);
+                    this.state.page++;
+                } catch (error) {
+                    console.error("Lỗi lấy dữ liệu:", error);
+                } finally {
+                    this.state.isLoading = false;
+                    document.getElementById('loadingSkeleton').style.display = 'none';
+                    if (this.state.hasMore) document.getElementById('btnLoadMore').style.display = 'block';
+                    else if (this.state.products.length > 0) document.getElementById('endOfListMsg').style.display = 'block';
+                }
+            },
+
+            renderProducts: function(newList, startIndex) {
+                const grid = document.getElementById('dynamicShopGrid');
+                let html = '';
+
+                for (let i = 0; i < newList.length; i++) {
+                    const p = newList[i];
+                    let imgUrl = p.hinhAnhs && p.hinhAnhs.length > 0 ? p.hinhAnhs[0].url : 'https://placehold.co/400x533?text=No+Image';
+                    if (imgUrl.includes('res.cloudinary.com')) imgUrl = imgUrl.replace('/image/upload/', '/image/upload/c_fill,w_400,h_533,f_auto,q_auto/');
+
+                    // --- TẠO ẢNH HOVER & THÊM LAZY LOAD ---
+                    let imgHoverHtml = '';
+                    if (p.hinhAnhs && p.hinhAnhs.length > 1) {
+                        let hoverUrl = p.hinhAnhs[1].url;
+                        if (hoverUrl.includes('res.cloudinary.com')) {
+                            hoverUrl = hoverUrl.replace('/image/upload/', '/image/upload/c_fill,w_400,h_533,f_auto,q_auto/');
+                        }
+                        imgHoverHtml = `<img src="${hoverUrl}" loading="lazy" class="img-hover" alt="${p.ten}">`;
+                    }
+
+                    const variants = this.getVariants(p);
+                    const minPrice = variants.length > 0 ? Math.min.apply(null, variants.map(v => v.giaBan || 0)) : (p.giaBan || 0);
+
+                    let priceHtml = (p.giaSauKhuyenMai && p.giaSauKhuyenMai < minPrice && minPrice > 0)
+                        ? `<span style="color:#c08060; font-weight: 600;">${new Intl.NumberFormat('vi-VN').format(p.giaSauKhuyenMai)} ₫</span><span style="color:var(--muted); text-decoration:line-through; font-size:12px; margin-left: 6px;">${minPrice / 1000}k</span>`
+                        : (minPrice > 0 ? new Intl.NumberFormat('vi-VN').format(minPrice) + ' ₫' : 'Đang cập nhật');
+
+                    let badgeHtml = (startIndex + i < 3 && this.state.sort === 'newest') ? '<div class="label-new">Mới</div>' : '';
+
+                    html += `<div class="product-card" id="shop-card-${p.id}">` +
+                        badgeHtml +
+                        `<div class="product-img" onclick="window.ShopApp.viewDetail(${p.id})">` +
+                        '<div class="img-overlay-pattern"></div>' +
+                        `<img src="${imgUrl}" loading="lazy" class="img-placeholder" alt="${p.ten}">` +
+                        imgHoverHtml +
+                        '<div class="product-overlay"><button class="quick-add" onclick="window.ShopApp.openSelection(' + p.id + ', event)">+ Thêm nhanh</button></div>' +
+                        '</div>' +
+
+                        '<div class="quick-selection-overlay" onclick="event.stopPropagation()">' +
+                        `<button class="qs-close" onclick="window.ShopApp.closeSelection(${p.id}, event)">×</button>` +
+                        `<div class="qs-title">${p.ten}</div>` +
+                        `<div class="qs-label">Màu sắc <span id="shop-qs-color-name-${p.id}" style="color:var(--text); font-weight:600; text-transform:none; margin-left:4px;"></span></div>` +
+                        `<div class="qs-options" id="shop-qs-colors-${p.id}"></div>` +
+                        '<div class="qs-label">Kích cỡ</div>' +
+                        `<div class="qs-options" id="shop-qs-sizes-${p.id}"></div>` +
+                        `<div id="shop-qs-price-${p.id}" style="font-size:14px; font-weight:500; text-align:center; margin-bottom:10px;">${priceHtml}</div>` +
+                        '<div style="display:flex; gap:8px; margin-top:10px;">' +
+                        `<button class="qs-confirm-btn" style="margin-top:0; background:transparent; color:var(--text); border:1px solid rgba(0,0,0,0.2);" onclick="window.ShopApp.confirmAdd(${p.id}, event, false)">Thêm giỏ</button>` +
+                        `<button class="qs-confirm-btn" style="margin-top:0;" onclick="window.ShopApp.confirmAdd(${p.id}, event, true)">Mua ngay</button>` +
+                        '</div>' +
+                        '</div>' +
+
+                        `<div class="product-info" onclick="window.ShopApp.viewDetail(${p.id})">` +
+                        `<div class="product-tag">${p.danhMuc ? p.danhMuc.ten : 'Bee Collection'}</div>` +
+                        `<div class="product-name">${p.ten}</div>` +
+                        `<div class="product-price">${priceHtml}</div>` +
+                        '</div></div>';
+                }
+                grid.insertAdjacentHTML('beforeend', html);
+            },
+
+            openSelection: function(productId, event) {
+                if (event) event.stopPropagation();
+                this.closeAllSelections();
+
+                const card = document.getElementById('shop-card-' + productId);
+                const product = this.state.products.find(p => p.id === productId);
+                if (!product || this.getVariants(product).length === 0) {
+                    window.showToast("Sản phẩm đang cập nhật kho", "warning"); return;
+                }
+                card.classList.add('show-selection');
+                document.getElementById('qa-backdrop').classList.add('show');
+
+                this.tempSelection[productId] = { colorId: null, sizeId: null, sku: null };
+                this.renderSelectionOptions(productId);
+            },
+
+            closeSelection: function(productId, event) {
+                if (event) event.stopPropagation();
+                this.closeAllSelections();
+            },
+
+            renderSelectionOptions: function(productId) {
+                const product = this.state.products.find(p => p.id === productId);
+                const skus = this.getVariants(product);
+                const colorsMap = new Map(), sizesMap = new Map();
+                skus.forEach(s => { if(s.mauSac) colorsMap.set(s.mauSac.id, s.mauSac); if(s.kichThuoc) sizesMap.set(s.kichThuoc.id, s.kichThuoc); });
+
+                const colorContainer = document.getElementById('shop-qs-colors-' + productId);
+                const sizeContainer = document.getElementById('shop-qs-sizes-' + productId);
+                const fallbackColorMap = { 'trắng': '#ffffff', 'đen': '#1a1a1a', 'be': '#c4b49d', 'nâu': '#a89e93', 'rêu': '#3D5A4C' };
+
+                let cHtml = '';
+                colorsMap.forEach(c => {
+                    const isActive = this.tempSelection[productId].colorId === c.id;
+                    const hexCode = c.maMau || fallbackColorMap[c.ten?.toLowerCase().trim()] || '#eeeeee';
+                    cHtml += `<div class="qs-dot ${isActive ? 'active' : ''}" style="background:${hexCode}" onclick="window.ShopApp.selectAttr(${productId}, 'color', ${c.id}, event)"></div>`;
+                    if (isActive) document.getElementById('shop-qs-color-name-' + productId).innerText = '- ' + c.ten;
+                });
+                colorContainer.innerHTML = cHtml;
+
+                let sHtml = '';
+                sizesMap.forEach(s => {
+                    const colorId = this.tempSelection[productId].colorId;
+                    const isAvailable = !colorId || skus.some(sku => sku.mauSac.id === colorId && sku.kichThuoc.id === s.id && sku.soLuong > 0);
+                    sHtml += `<button class="qs-size-btn ${this.tempSelection[productId].sizeId === s.id ? 'active' : ''} ${!isAvailable ? 'disabled' : ''}" onclick="window.ShopApp.selectAttr(${productId}, 'size', ${s.id}, event)">${s.ten}</button>`;
+                });
+                sizeContainer.innerHTML = sHtml;
+            },
+
+            selectAttr: function(productId, type, attrId, event) {
+                if (event) event.stopPropagation();
+
+                const product = this.state.products.find(p => p.id === productId);
+                const skus = this.getVariants(product);
+
+                if (type === 'color') {
+                    this.tempSelection[productId].colorId = attrId;
+                    this.tempSelection[productId].sizeId = null;
+
+                    // ĐỔI ẢNH KHI CHỌN MÀU
+                    const colorSku = skus.find(s => s.mauSac.id === attrId && s.hinhAnh);
+                    if (colorSku && colorSku.hinhAnh) {
+                        const imgEl = document.querySelector(`#shop-card-${productId} .img-placeholder`);
+                        if (imgEl) {
+                            let imgUrl = colorSku.hinhAnh;
+                            if (imgUrl.includes('res.cloudinary.com')) {
+                                imgUrl = imgUrl.replace('/image/upload/', '/image/upload/c_fill,w_400,h_533,f_auto,q_auto/');
+                            }
+                            imgEl.style.transition = 'opacity 0.2s ease';
+                            imgEl.style.opacity = 0.5;
+                            setTimeout(() => { imgEl.src = imgUrl; imgEl.style.opacity = 1; }, 150);
+                        }
+                    }
+                }
+                else this.tempSelection[productId].sizeId = attrId;
+
+                const sku = skus.find(s => s.mauSac.id === this.tempSelection[productId].colorId && s.kichThuoc.id === this.tempSelection[productId].sizeId);
+                if (sku) {
+                    this.tempSelection[productId].sku = sku;
+                    document.getElementById('shop-qs-price-' + productId).innerText = new Intl.NumberFormat('vi-VN').format(sku.giaBan) + ' ₫';
+                }
+                this.renderSelectionOptions(productId);
+            },
+
+            confirmAdd: function(productId, event, isBuyNow) {
+                if (event) event.stopPropagation();
+                const selection = this.tempSelection[productId];
+
+                if (!selection.colorId && !selection.sizeId) { window.showToast("Vui lòng chọn màu sắc và kích cỡ", "warning"); return; }
+                if (!selection.colorId) { window.showToast("Bạn chưa chọn màu sắc", "warning"); return; }
+                if (!selection.sizeId) { window.showToast("Bạn chưa chọn kích cỡ", "warning"); return; }
+                if (!selection.sku) { window.showToast("Phiên bản này đã hết hàng", "warning"); return; }
+
+                const product = this.state.products.find(p => p.id === productId);
+                let cart = JSON.parse(localStorage.getItem('bee_cart') || '[]');
+                let exist = cart.find(item => item.skuId === selection.sku.id);
+
+                if (exist) {
+                    if (exist.qty + 1 > selection.sku.soLuong) { window.showToast("Vượt quá số lượng kho!", "warning"); return; }
+                    exist.qty++;
+                } else {
+                    cart.push({
+                        skuId: selection.sku.id, productId: productId, name: product.ten,
+                        price: selection.sku.giaBan, qty: 1, colorName: selection.sku.mauSac.ten,
+                        sizeName: selection.sku.kichThuoc.ten, maxStock: selection.sku.soLuong,
+                        img: selection.sku.hinhAnh || (product.hinhAnhs?.[0]?.url || '')
+                    });
+                }
+                localStorage.setItem('bee_cart', JSON.stringify(cart));
+                this.closeAllSelections();
+
+                if (window.updateCartBadge) window.updateCartBadge();
+
+                if (isBuyNow) {
+                    window.location.hash = 'checkout';
+                } else {
+                    window.showToast("Đã cập nhật giỏ hàng", "success");
+                }
+            },
+
+            viewDetail: function(productId) {
+                const product = this.state.products.find(p => p.id === productId);
+                if (product) {
+                    let recent = JSON.parse(localStorage.getItem('bee_recent_viewed') || '[]');
+                    recent = recent.filter(item => item.id !== productId);
+                    recent.unshift({
+                        id: product.id,
+                        ten: product.ten,
+                        giaBan: product.giaBan,
+                        hinhAnh: product.hinhAnhs && product.hinhAnhs.length > 0 ? product.hinhAnhs[0].url : 'https://placehold.co/400x533'
+                    });
+                    if (recent.length > 8) recent.pop();
+                    localStorage.setItem('bee_recent_viewed', JSON.stringify(recent));
+                }
+                window.location.hash = 'detail?id=' + productId;
             }
         };
+        setTimeout(() => window.ShopApp.init(), 100);
     </script>
 </section>

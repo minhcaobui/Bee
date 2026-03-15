@@ -325,7 +325,7 @@
                 </fieldset>
 
                 <button class="btn w-100" onclick="PosApp.createNewCustomer()" style="border-radius:0 !important;">
-                    <i class="bi bi-person-plus-fill"></i> LƯU & CHỌN
+                    <i class="bi bi-person-plus-fill"></i> LƯU & CHỌN TÀI KHOẢN
                 </button>
             </div>
         </div>
@@ -399,7 +399,7 @@
         <div class="modal-footer" style="padding: 15px 20px;">
             <button class="btn btn-secondary" style="border-radius: 0; font-weight: 700; text-transform: uppercase; font-size: 12px;" onclick="PosApp.closeModal('payModal')">Hủy</button>
             <button class="btn btn-primary" style="border-radius: 0; min-width: 150px; font-weight: 800; text-transform: uppercase; font-size: 13px; background: #000; border: none;" onclick="PosApp.finishOrder()">
-                Xác nhận thanh toán
+                Xác nhận & In Hóa Đơn
             </button>
         </div>
     </div>
@@ -447,13 +447,11 @@
             this.renderCart();
             this.renderProducts(this.products);
 
-            // Bắt đầu loop đếm ngược cho hóa đơn chờ
             this.countdownTimer = setInterval(() => {
                 this.updateCountdown();
             }, 1000);
         },
 
-        // --- HÀM MỚI: Xử lý Đếm Ngược Hủy Đơn ---
         updateCountdown: function() {
             const inv = this.getCurrentInvoice();
             const statusEl = document.getElementById('invoiceStatus');
@@ -469,7 +467,6 @@
             statusEl.innerText = 'Chờ thanh toán';
             statusEl.className = 'badge bg-warning';
 
-            // Nếu hóa đơn cũ chưa có thời gian hết hạn, tạo mới 24h
             if (!inv.expiryTime) {
                 inv.expiryTime = new Date().getTime() + (24 * 60 * 60 * 1000);
                 this.saveState();
@@ -481,9 +478,9 @@
             if (diff <= 0) {
                 cdEl.innerText = '00:00:00';
                 if (!inv.isExpired) {
-                    inv.isExpired = true; // Đánh dấu để khỏi lặp vô hạn gọi API
+                    inv.isExpired = true;
                     toast(`Hóa đơn ${inv.name} đã quá thời gian 24H và tự động bị hủy!`, "error");
-                    this.forceDelete(inv.id); // Tự động xóa
+                    this.forceDelete(inv.id);
                 }
             } else {
                 const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -493,20 +490,17 @@
             }
         },
 
-        // --- HÀM MỚI: Mở & Chọn Voucher (Mã giảm giá) ---
         openVoucherModal: async function() {
             this.openModal('voucherModal');
             const listEl = document.getElementById('voucherList');
             listEl.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">Đang tải mã giảm giá...</div>';
 
             try {
-                // Gọi API lấy danh sách mã giảm giá. Nếu BE chưa có API này, code sẽ nhảy xuống CATCH
                 const res = await fetch('/api/pos/vouchers/active');
                 if(!res.ok) throw new Error("Backend chưa có API lấy list Voucher");
                 const vouchers = await res.json();
                 this.renderVouchersList(vouchers);
             } catch(e) {
-                // BACKUP DATA: Giao diện test tạm để bạn trải nghiệm ngay lập tức nếu BE chưa cấu hình kịp
                 const mockVouchers = [
                     { maCode: 'GIAM50K', ten: 'Giảm 50K cho đơn từ 200K', loaiGiamGia: 'fixed', giaTriGiamGia: 50000, dieuKien: 200000 },
                     { maCode: 'SALE20', ten: 'Giảm 20% tối đa 100K', loaiGiamGia: 'percentage', giaTriGiamGia: 20, dieuKien: 300000, giaTriGiamGiaToiDa: 100000 },
@@ -523,7 +517,6 @@
                 return;
             }
 
-            // Lấy tổng tiền tạm tính hiện tại để check điều kiện hiển thị
             const inv = this.getCurrentInvoice();
             let totalAfterSale = 0;
             if (inv && inv.cart) {
@@ -581,7 +574,6 @@
             const totalAfterSale = subTotal - saleDiscount;
 
             try {
-                // Gọi backend để xác thực mã giảm giá
                 const res = await fetch(`/api/pos/vouchers/apply?code=${code}&currentTotal=${totalAfterSale}`);
                 if (res.ok) {
                     inv.voucher = await res.json();
@@ -589,7 +581,6 @@
                     this.renderCart();
                     toast("Áp dụng mã thành công!", "success");
                 } else {
-                    // Backup Test cho UI nếu API chưa làm xong
                     if(code === 'GIAM50K' && totalAfterSale >= 200000) {
                         inv.voucher = { maCode: 'GIAM50K', loaiGiamGia: 'fixed', giaTriGiamGia: 50000 };
                         this.saveState(); this.renderCart(); toast("Áp dụng mã thành công!", "success"); return;
@@ -618,7 +609,6 @@
                 document.getElementById('voucherInput').value = inv.voucher.maCode || inv.voucher.code || '';
 
                 const v = inv.voucher; const giaTriVoucher = Number(v.giaTriGiamGia);
-                // Xử lý cả định dạng chữ thường 'percentage' và chữ hoa 'PERCENTAGE'
                 const type = (v.loaiGiamGia || '').toUpperCase();
                 calcVoucher = type === 'PERCENTAGE' ? (totalAfterSale * giaTriVoucher) / 100 : giaTriVoucher;
                 if (v.giaTriGiamGiaToiDa && calcVoucher > Number(v.giaTriGiamGiaToiDa)) calcVoucher = Number(v.giaTriGiamGiaToiDa);
@@ -639,7 +629,6 @@
             if(modalTotalEl) modalTotalEl.innerText = new Intl.NumberFormat('vi-VN').format(total) + ' ₫';
         },
 
-        // --- CÁC HÀM CŨ GIỮ NGUYÊN (Khởi tạo, Thanh toán, Tìm kiếm...) ---
         checkMomoReturn: async function() {
             const params = new URLSearchParams(window.location.search);
             const resultCode = params.get('resultCode');
@@ -653,8 +642,10 @@
                         body: JSON.stringify({ maHD: maHDFromUrl })
                     });
                     if (res.ok) {
+                        let completedInvoiceId = null; // 🌟 Lấy ID hóa đơn trực tiếp từ RAM trước khi xóa
                         const idx = this.invoices.findIndex(inv => inv.maHD === maHDFromUrl);
                         if (idx !== -1) {
+                            completedInvoiceId = this.invoices[idx].id;
                             this.invoices.splice(idx, 1);
                             this.invoices.forEach((inv, i) => inv.name = `HÓA ĐƠN ${i + 1}`);
                             this.activeInvoiceId = this.invoices.length > 0 ? this.invoices[0].id : null;
@@ -664,6 +655,11 @@
                         await this.loadProducts(document.querySelector('input[placeholder*="Tìm kiếm sản phẩm"]').value);
                         this.renderTabs();
                         this.renderCart();
+
+                        // 🌟 Gọi in hóa đơn bằng ID vừa lấy
+                        if(completedInvoiceId) {
+                            this.inHoaDon(completedInvoiceId);
+                        }
                     }
                 } catch (e) { console.error("Lỗi xác nhận MoMo:", e); }
                 window.history.replaceState({}, document.title, window.location.pathname);
@@ -686,8 +682,10 @@
                         body: JSON.stringify({ maHD: maHDFromUrl })
                     });
                     if (res.ok) {
+                        let completedInvoiceId = null; // 🌟 Tương tự như Momo
                         const idx = this.invoices.findIndex(inv => inv.maHD === maHDFromUrl);
                         if (idx !== -1) {
+                            completedInvoiceId = this.invoices[idx].id;
                             this.invoices.splice(idx, 1);
                             this.invoices.forEach((inv, i) => inv.name = `HÓA ĐƠN ${i + 1}`);
                             this.activeInvoiceId = this.invoices.length > 0 ? this.invoices[0].id : null;
@@ -697,6 +695,10 @@
                         await this.loadProducts(document.querySelector('input[placeholder*="Tìm kiếm sản phẩm"]').value);
                         this.renderTabs();
                         this.renderCart();
+
+                        if(completedInvoiceId) {
+                            this.inHoaDon(completedInvoiceId);
+                        }
                     }
                 } catch (e) { console.error("Lỗi xác nhận VNPay:", e); }
                 window.history.replaceState({}, document.title, window.location.pathname);
@@ -717,7 +719,6 @@
             if (savedInvoices) {
                 this.invoices = JSON.parse(savedInvoices);
                 this.invoices = this.invoices.map(inv => {
-                    // Đảm bảo hóa đơn lấy từ RAM cũ lên có thời gian expiryTime
                     if(!inv.expiryTime) inv.expiryTime = new Date().getTime() + (24 * 60 * 60 * 1000);
                     return { ...inv, id: Number(inv.id) };
                 });
@@ -797,7 +798,6 @@
                 const newId = Number(newHd.id);
                 const orderNum = this.invoices.length + 1;
 
-                // Set thời gian hết hạn là 24h kể từ lúc tạo
                 const expiry = new Date().getTime() + (24 * 60 * 60 * 1000);
 
                 this.invoices.push({ id: newId, name: `HÓA ĐƠN ${orderNum}`, maHD: newHd.ma, cart: [], customer: 'KHÁCH VÃNG LAI', customerId: null, voucher: null, expiryTime: expiry });
@@ -814,7 +814,6 @@
             this.renderTabs();
             await this.syncCartWithServer();
             this.renderCart();
-            // Xóa input thay vì gọi hàm làm null voucher, chỉ là UI
             const inv = this.getCurrentInvoice();
             document.getElementById('voucherInput').value = inv && inv.voucher ? (inv.voucher.maCode || '') : '';
         },
@@ -824,7 +823,6 @@
             document.getElementById('confirmModal').classList.add('show');
         },
 
-        // Cập nhật forceDelete để có thể nhận ID truyền vào (dùng cho xóa tự động lúc hết hạn)
         forceDelete: async function (targetId = this.activeInvoiceId) {
             try {
                 const res = await fetch(`/api/pos/invoices/${targetId}`, { method: 'DELETE' });
@@ -889,7 +887,6 @@
                             price: price, attr: `${product.mauSac.ten} - ${product.kichThuoc.ten}`, qty: 1
                         });
                     }
-                    // Thêm sp vào thì phải kiểm tra lại voucher xem còn thỏa mãn đk không
                     this.saveState(); this.renderCart(); this.renderProducts(this.products);
                 } else { const err = await res.json(); toast(err.message || "Không đủ hàng trong kho!", "warning"); }
             } catch (e) { toast("Lỗi kết nối máy chủ", "error"); }
@@ -945,6 +942,7 @@
             this.saveState(); this.renderTabs(); this.closeModal('customerModal');
         },
 
+        // --- MÀN HÌNH THANH TOÁN: XỬ LÝ CHỐT ĐƠN VÀ GỌI IN HÓA ĐƠN MỘT MẠCH ---
         finishOrder: async function () {
             const inv = this.getCurrentInvoice();
             const total = parseInt(document.getElementById('lblTotal').innerText.replace(/\D/g, '')) || 0;
@@ -997,7 +995,11 @@
                     body: JSON.stringify(payload)
                 });
                 if (res.ok) {
-                    toast("Thanh toán thành công!", "success");
+                    toast("Thanh toán thành công! Máy đang in hóa đơn...", "success");
+
+                    // LƯU LẠI ID TRƯỚC KHI XÓA KHỎI RAM
+                    const completedInvoiceId = inv.id;
+
                     this.invoices = this.invoices.filter(i => i.id !== this.activeInvoiceId);
                     this.invoices.forEach((i, idx) => i.name = `HÓA ĐƠN ${idx + 1}`);
                     this.activeInvoiceId = this.invoices.length > 0 ? this.invoices[0].id : null;
@@ -1007,12 +1009,130 @@
                     else this.renderCart();
 
                     this.closeModal('payModal');
+
+                    // GỌI HÀM IN NGAY LẬP TỨC
+                    this.inHoaDon(completedInvoiceId);
+
                 } else {
                     let errorMsg = "Thanh toán thất bại.";
                     try { const errData = await res.json(); errorMsg = errData.message || errorMsg; } catch (ex) {}
                     toast(errorMsg, "error");
                 }
             } catch (e) { toast("Lỗi kết nối đến máy chủ!", "error"); }
+        },
+
+        // --- HÀM IN HÓA ĐƠN CHUYÊN NGHIỆP ---
+        inHoaDon: async function(idHoaDon) {
+            try {
+                const res = await fetch('/api/hoa-don/' + idHoaDon + '/print-data');
+                if (!res.ok) throw new Error("Không lấy được dữ liệu in");
+                const data = await res.json();
+
+                const formatTien = (num) => new Intl.NumberFormat('vi-VN').format(num) + ' ₫';
+
+                let htmlContent = `
+                    <html><head><title>In hóa đơn ${data.order.maHoaDon}</title><style>
+                        body { font-family: 'Courier New', Courier, monospace; width: 80mm; margin: 0 auto; font-size: 12px; color: #000; }
+                        h2 { text-align: center; font-size: 16px; margin-bottom: 5px; }
+                        p { margin: 2px 0; }
+                        .center { text-align: center; }
+                        .line { border-top: 1px dashed #000; margin: 10px 0; }
+                        table { width: 100%; border-collapse: collapse; }
+                        th, td { text-align: right; vertical-align: top; padding: 2px 0; }
+                        th:first-child, td:first-child { text-align: left; }
+                        .bold { font-weight: bold; }
+                        .footer-msg { text-align: center; font-style: italic; margin-top: 15px; font-size: 11px; }
+                        .account-info { border: 1px solid #000; padding: 8px; margin-top: 15px; border-radius: 4px; }
+                    </style></head><body>
+
+                    <h2>${data.store.tenCuaHang}</h2>
+                    <p class="center">${data.store.diaChi}</p>
+                    <p class="center">ĐT: ${data.store.soDienThoai}</p>
+
+                    <div class="line"></div>
+                    <p class="bold center">HÓA ĐƠN BÁN LẺ</p>
+                    <p>Mã HĐ: ${data.order.maHoaDon}</p>
+                    <p>Ngày: ${data.order.ngayTao}</p>
+                    <p>Thu ngân: ${data.order.thuNgan}</p>
+                    <p>Khách hàng: ${data.order.tenKhachHang}</p>
+
+                    <div class="line"></div>
+                    <table>
+                        <thead><tr><th>Sản phẩm</th><th style="width:15%;">SL</th><th style="width:30%;">T.Tiền</th></tr></thead>
+                        <tbody>
+                `;
+
+                data.items.forEach(item => {
+                    htmlContent += `
+                        <tr>
+                            <td>${item.ten}<br><small>${formatTien(item.donGia)}</small></td>
+                            <td class="center">${item.soLuong}</td>
+                            <td>${formatTien(item.thanhTien)}</td>
+                        </tr>
+                    `;
+                });
+
+                htmlContent += `
+                        </tbody>
+                    </table>
+                    <div class="line"></div>
+
+                    <table>
+                        <tr><td>Tổng tiền hàng:</td><td>${formatTien(data.summary.tongTienHang)}</td></tr>
+                        ${data.summary.giamGia > 0 ? `<tr><td>Giảm giá (Voucher):</td><td>- ${formatTien(data.summary.giamGia)}</td></tr>` : ''}
+                        ${data.summary.phiVanChuyen > 0 ? `<tr><td>Phí vận chuyển:</td><td>${formatTien(data.summary.phiVanChuyen)}</td></tr>` : ''}
+                        <tr><td class="bold">KHÁCH PHẢI TRẢ:</td><td class="bold" style="font-size:14px;">${formatTien(data.summary.tongThanhToan)}</td></tr>
+                    </table>
+
+                    <p style="margin-top:10px;">P.Thức: ${data.summary.phuongThuc}</p>
+                `;
+
+                if (data.order.inThongTinTaiKhoan) {
+                    htmlContent += `
+                        <div class="account-info">
+                            <p class="bold center">CẬP NHẬT TÀI KHOẢN</p>
+                            <p>Truy cập: www.beemate.vn</p>
+                            <p>Tài khoản: ${data.order.sdtKhachHang}</p>
+                            <p>Mật khẩu: <b style="font-size:14px;">123456</b></p>
+                            <p style="font-size: 10px; margin-top: 5px;">(Vui lòng đổi mật khẩu để bảo mật tích điểm)</p>
+                        </div>
+                    `;
+                }
+
+                htmlContent += `
+                    <p class="footer-msg">Xin cảm ơn và hẹn gặp lại quý khách!</p>
+                    </body></html>
+                `;
+
+                // 🌟 TẠO IFRAME ẨN ĐỂ IN (Tránh 100% bị trình duyệt chặn Pop-up)
+                let printFrame = document.getElementById('hidden-print-frame');
+                if (!printFrame) {
+                    printFrame = document.createElement('iframe');
+                    printFrame.id = 'hidden-print-frame';
+                    printFrame.style.position = 'fixed';
+                    printFrame.style.right = '0';
+                    printFrame.style.bottom = '0';
+                    printFrame.style.width = '0';
+                    printFrame.style.height = '0';
+                    printFrame.style.border = '0';
+                    document.body.appendChild(printFrame);
+                }
+
+                const frameDoc = printFrame.contentWindow.document;
+                frameDoc.open();
+                frameDoc.write(htmlContent);
+                frameDoc.close();
+
+                // Đợi nội dung load xong rồi tự động in
+                setTimeout(() => {
+                    printFrame.contentWindow.focus();
+                    printFrame.contentWindow.print();
+                }, 500);
+
+            } catch (e) {
+                console.error("Lỗi in hóa đơn:", e);
+                toast("Không thể in hóa đơn lúc này!", "error");
+            }
         },
 
         openPayModal: function () {
@@ -1043,7 +1163,7 @@
             const cur = this.getCurrentInvoice();
             document.getElementById('customerName').innerText = cur ? cur.customer : 'KHÁCH VÃNG LAI';
             document.getElementById('customerPhone').innerText = cur ? (cur.phone || 'Khách lẻ') : 'Khách lẻ';
-            this.updateCountdown(); // Cập nhật lại UI Status bar ngay khi đổi Tab
+            this.updateCountdown();
         },
 
         renderCart: function () {
@@ -1115,7 +1235,8 @@
             if (res.ok) {
                 const kh = await res.json();
                 this.selectCustomer(kh.hoTen, kh.soDienThoai, kh.id);
-                toast("ĐÃ THÊM KHÁCH HÀNG", "success");
+                // NHẮC THU NGÂN MẬT KHẨU TẠO LÀ 123456
+                toast("Đã thêm khách. Hãy báo khách đăng nhập bằng Mật khẩu: 123456", "success");
             } else { toast("LỖI KHI THÊM KHÁCH", "error"); }
         },
 

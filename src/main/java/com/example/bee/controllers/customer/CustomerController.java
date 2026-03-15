@@ -1,5 +1,7 @@
 package com.example.bee.controllers.customer;
 
+import com.example.bee.repositories.customer.KhachHangRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -7,20 +9,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("/customer")
 public class CustomerController {
+    @Autowired
+    private KhachHangRepository khachHangRepository;
 
-    // =============================================
-    // SHELL LAYOUT — trang gốc, chứa navbar + footer
-    // Truy cập: http://localhost:8080/
-    // =============================================
     @GetMapping({"", "/"})
     public String layout() {
-        return "customer/customer-layout";
+        return "layout/customer-layout";
     }
-
-    // =============================================
-    // FRAGMENTS — router fetch vào #content-area
-    // Giống pattern /orders, /products bên admin
-    // =============================================
 
     @GetMapping("/home")
     public String home() {
@@ -32,7 +27,7 @@ public class CustomerController {
         return "customer/shop/shop";
     }
 
-    @GetMapping("/detail")
+    @GetMapping({"/detail", "/detail/{id}"})
     public String detail() {
         return "customer/detail/detail";
     }
@@ -44,7 +39,7 @@ public class CustomerController {
 
     @GetMapping("/checkout")
     public String checkout() {
-        return "customer/checkout/checkout";
+        return "customer/cart/checkout";
     }
 
     @GetMapping("/order")
@@ -53,14 +48,27 @@ public class CustomerController {
     }
 
     @GetMapping("/account")
-    public String account() { return "customer/account/account"; }
+    public String account(java.security.Principal principal, org.springframework.ui.Model model) {
+        if (principal != null) {
+            String username = principal.getName();
+            model.addAttribute("user", khachHangRepository.findByTaiKhoan_TenDangNhap(username).orElse(null));
+        }
+        return "customer/account/account";
+    }
 
     @GetMapping("/about")
-    public String about() { return "customer/about/about"; }
+    public String about() {
+        return "customer/about/about";
+    }
 
     @GetMapping("/collection")
-    public String collection() { return "customer/collection/collection"; }
+    public String collection() {
+        return "customer/collection/collection";
+    }
 
     @GetMapping("/sale")
-    public String sale() { return "customer/sale/sale"; }
+    public String sale() {
+        return "customer/sale/sale";
+    }
+
 }

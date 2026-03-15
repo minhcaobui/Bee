@@ -16,15 +16,10 @@ import java.util.List;
 @Repository
 public interface KhuyenMaiRepository extends JpaRepository<KhuyenMai, Integer> {
 
-    // Check trùng mã
     boolean existsByMa(String ma);
 
     boolean existsByMaIgnoreCase(String ma);
 
-    // Tìm các khuyến mãi hết hạn để Scheduler quét
-    List<KhuyenMai> findByTrangThaiAndNgayKetThucBefore(Boolean trangThai, LocalDateTime now);
-
-    // --- HÀM SEARCH TỔNG HỢP (Chỉ giữ lại 1 hàm này thôi) ---
     @Query("SELECT k FROM KhuyenMai k WHERE " +
             "(:keyword IS NULL OR LOWER(k.ten) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(k.ma) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
             "(:trangThai IS NULL OR k.trangThai = :trangThai) AND " +
@@ -56,7 +51,8 @@ public interface KhuyenMaiRepository extends JpaRepository<KhuyenMai, Integer> {
     @Query("SELECT COUNT(sp) FROM SanPham sp " +
             "JOIN KhuyenMaiSanPham kmsp ON sp.id = kmsp.idSanPham " +
             "WHERE kmsp.idKhuyenMai = :kmId " +
-            "AND sp.trangThai = true") // Chỉ check duy nhất trạng thái sản phẩm
+            "AND sp.trangThai = true")
+        // Chỉ check duy nhất trạng thái sản phẩm
     long countValidProductsInPromotion(@Param("kmId") Integer kmId);
 
     @Modifying

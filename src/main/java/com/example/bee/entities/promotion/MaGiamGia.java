@@ -1,11 +1,6 @@
 package com.example.bee.entities.promotion;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,16 +27,16 @@ public class MaGiamGia {
     private String ten;
 
     @Column(name = "loai_giam_gia", nullable = false)
-    private String loaiGiamGia; // 'FIXED' hoặc 'PERCENTAGE'
+    private String loaiGiamGia;
 
     @Column(name = "gia_tri_giam_gia", nullable = false)
     private BigDecimal giaTriGiamGia;
 
     @Column(name = "gia_tri_giam_gia_toi_da")
-    private BigDecimal giaTriGiamGiaToiDa; // Chỉ dùng khi là PERCENTAGE
+    private BigDecimal giaTriGiamGiaToiDa;
 
     @Column(name = "dieu_kien", nullable = false)
-    private BigDecimal dieuKien; // Giá trị đơn hàng tối thiểu
+    private BigDecimal dieuKien;
 
     @Column(name = "so_luong", nullable = false)
     private Integer soLuong;

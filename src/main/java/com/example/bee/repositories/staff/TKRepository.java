@@ -2,10 +2,8 @@ package com.example.bee.repositories.staff;
 
 import com.example.bee.entities.staff.TK;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
-
-public interface TKRepository extends JpaRepository<TK,Integer> {
-    boolean existsByTenDangNhap(String username);
-    Optional<TK> findByTenDangNhap(String tenDangNhap);
+@Repository
+public interface TKRepository extends JpaRepository<TK, Integer> {
 }

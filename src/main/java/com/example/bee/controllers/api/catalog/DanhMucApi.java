@@ -2,31 +2,21 @@ package com.example.bee.controllers.api.catalog;
 
 import com.example.bee.entities.catalog.DanhMuc;
 import com.example.bee.repositories.catalog.DanhMucRepository;
-import com.example.bee.repositories.promotion.KhuyenMaiRepository;
-import com.example.bee.repositories.products.SanPhamRepository; // THÊM IMPORT NÀY
+import com.example.bee.repositories.products.SanPhamRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map; // THÊM IMPORT NÀY
+import java.util.Map;
 import java.util.Random;
 
 @RestController
@@ -34,10 +24,7 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class DanhMucApi {
 
-    @Autowired
     private final DanhMucRepository danhMucRepository;
-
-    @Autowired
     private final SanPhamRepository sanPhamRepository;
 
     private String generateMa() {
@@ -76,21 +63,17 @@ public class DanhMucApi {
         String ma = (body.getMa() == null || body.getMa().trim().isEmpty())
                 ? generateMa()
                 : body.getMa().trim().toUpperCase();
-
         if (ma.length() > 20) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã tối đa 20 ký tự thôi cu!");
-
         if (!ma.matches("^[A-Z0-9_]*$")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã chỉ được chứa chữ hoa, số và dấu gạch dưới (_)");
         }
-
         if (ten.isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên đéo được để trống!");
-
-        if (ten.length() > 100) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên dài quá (max 100), bớt văn vở lại!");
-
-        if (danhMucRepository.existsByTenIgnoreCase(ten)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên này có thằng dùng rồi!");
-
-        if (danhMucRepository.existsByMaIgnoreCase(ma)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã này bị trùng rồi!");
-
+        if (ten.length() > 100)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên dài quá (max 100), bớt văn vở lại!");
+        if (danhMucRepository.existsByTenIgnoreCase(ten))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên này có thằng dùng rồi!");
+        if (danhMucRepository.existsByMaIgnoreCase(ma))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã này bị trùng rồi!");
         DanhMuc entity = new DanhMuc();
         entity.setMa(ma);
         entity.setTen(ten);
@@ -105,15 +88,12 @@ public class DanhMucApi {
         DanhMuc entity = danhMucRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         String newTen = body.getTen() != null ? body.getTen().trim() : "";
-
         if (newTen.isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên không được để trống!");
-
-        if (newTen.length() > 100) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên tối đa 100 ký tự thôi!");
-
+        if (newTen.length() > 100)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên tối đa 100 ký tự thôi!");
         if (!entity.getTen().equalsIgnoreCase(newTen) && danhMucRepository.existsByTenIgnoreCase(newTen)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên này đã tồn tại ở bản ghi khác!");
         }
-
         entity.setTen(newTen);
         if (body.getMoTa() != null) entity.setMoTa(body.getMoTa().trim());
         entity.setTrangThai(body.getTrangThai() != null ? body.getTrangThai() : entity.getTrangThai());

@@ -6,12 +6,13 @@ import lombok.*;
 
 @Entity
 @Table(name = "hinh_anh_san_pham")
-@Getter // CHỈ DÙNG GETTER & SETTER, BỎ @Data ĐI
+@Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class HinhAnhSanPham {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

@@ -8,9 +8,13 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "hoa_don_chi_tiet")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class HoaDonChiTiet {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

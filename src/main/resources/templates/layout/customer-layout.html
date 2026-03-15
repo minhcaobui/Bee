@@ -32,7 +32,7 @@
         .nav-links a:hover::after { width:100%; }
         .nav-actions { display:flex; gap:24px; align-items:center; justify-content:flex-end; flex:1; }
         .cart-icon { position:relative; cursor:none; }
-        .cart-badge { position:absolute; top:-6px; right:-6px; width:16px; height:16px; background:var(--accent); border-radius:50%; font-size:9px; color:white; display:flex; align-items:center; justify-content:center; font-weight:500; }
+        .cart-badge { position:absolute; top:-6px; right:-6px; width:16px; height:16px; background:var(--accent); border-radius:50%; font-size:9px; color:white; display:none; align-items:center; justify-content:center; font-weight:500; }
 
         /* NOTIFICATION */
         .notif-wrap { position:relative; cursor:none; }
@@ -81,7 +81,7 @@
         #globalLoader::after { content:''; display:block; width:0; height:100%; background:var(--accent); animation:loadProgress 1s infinite ease-in-out; }
         @keyframes loadProgress { 0%{width:0;margin-left:0} 50%{width:100%;margin-left:0} 100%{width:0;margin-left:100%} }
 
-        .cart-toast { position:fixed; bottom:40px; right:40px; background:var(--text); color:white; padding:20px 28px; display:flex; align-items:center; gap:16px; font-size:13px; transform:translateY(100px); opacity:0; transition:transform .4s ease,opacity .4s ease; z-index:9999; pointer-events:none; max-width:320px; }
+        .cart-toast { position:fixed; bottom:100px; right:40px; background:var(--text); color:white; padding:20px 28px; display:flex; align-items:center; gap:16px; font-size:13px; transform:translateY(100px); opacity:0; transition:transform .4s ease,opacity .4s ease; z-index:9999; pointer-events:none; max-width:320px; }
         .cart-toast.show { transform:translateY(0); opacity:1; pointer-events:all; }
         .toast-icon { width:32px; height:32px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
         .toast-icon svg { width:16px; height:16px; stroke:white; fill:none; }
@@ -102,6 +102,30 @@
         .footer-socials a { font-size:12px; letter-spacing:.1em; color:rgba(255,255,255,.4); text-decoration:none; text-transform:uppercase; transition:color .2s ease; cursor:none; }
         .footer-socials a:hover { color:var(--accent-light); }
 
+        /* --- HIỆU ỨNG GIỎ HÀNG GIẬT NẢY --- */
+        @keyframes cartBounce {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.3) translateY(-3px); }
+            60% { transform: scale(0.9); }
+            80% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+        .cart-icon.bounce i, .cart-icon.bounce .cart-badge {
+            animation: cartBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* --- NÚT CUỘN LÊN ĐẦU TRANG --- */
+        #back-to-top {
+            position: fixed; bottom: 30px; right: 30px;
+            width: 44px; height: 44px; background: var(--text); color: white;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 8900; border: none;
+            opacity: 0; transform: translateY(20px); pointer-events: none;
+            transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        #back-to-top.show { opacity: 1; transform: translateY(0); pointer-events: all; }
+        #back-to-top:hover { background: var(--accent); transform: translateY(-4px); }
+
         @media (max-width:900px) {
             nav { padding:20px 24px; }
             .page-selector { padding:0 24px; }
@@ -118,7 +142,7 @@
 
 <div class="cart-toast" id="cartToast">
     <div class="toast-icon"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div>
-    <div><strong>Đã thêm vào giỏ hàng</strong><div style="font-size:12px;opacity:.7;margin-top:2px">Sản phẩm đã được cập nhật</div></div>
+    <div><strong>Đã thêm vào giỏ hàng</strong><div style="font-size:12px;opacity:.7;margin-top:2px" id="cartToastDesc">Sản phẩm đã được cập nhật</div></div>
 </div>
 
 <div id="site-header">
@@ -132,22 +156,19 @@
         </ul>
         <div class="nav-actions">
 
-            <!-- Search -->
             <i class="fa-solid fa-magnifying-glass" style="font-size:17px;color:var(--text);cursor:none" onclick="openSearch()"></i>
 
-            <!-- User -->
             <i class="fa-solid fa-user" style="font-size:17px;color:var(--text);cursor:none" onclick="location.hash='#account'"></i>
 
-            <!-- Bell -->
             <div class="notif-wrap" id="notifWrap">
                 <button class="notif-bell-btn" onclick="toggleNotif(event)">
                     <i class="fa-solid fa-bell"></i>
                 </button>
-                <div class="notif-badge" id="notifBadge">2</div>
+                <div class="notif-badge" id="notifBadge" style="display: none;">0</div>
                 <div class="notif-dropdown" id="notifDropdown">
                     <div class="notif-header">
                         <span class="notif-header-title">Thông báo</span>
-                        <button class="notif-mark-all" onclick="markAllRead()">Đánh dấu đã đọc</button>
+                        <button class="notif-mark-all" onclick="window.NotificationApp.markAllRead()">Đánh dấu đã đọc</button>
                     </div>
                     <div class="notif-tabs">
                         <button class="notif-tab active" onclick="switchNotifTab(this,'all')">Tất cả</button>
@@ -155,40 +176,9 @@
                         <button class="notif-tab" onclick="switchNotifTab(this,'voucher')">Voucher</button>
                         <button class="notif-tab" onclick="switchNotifTab(this,'event')">Tin tức</button>
                     </div>
-                    <div class="notif-list" id="notifList">
-                        <div class="notif-item unread" data-notif-type="order" onclick="location.hash='#account';closeNotif()">
-                            <div class="notif-icon order"><i class="fa-solid fa-truck-fast"></i></div>
-                            <div class="notif-body">
-                                <div class="notif-body-title">Đơn hàng đang trên đường giao</div>
-                                <div class="notif-body-desc">#BM-2025-0067 · Dự kiến hôm nay 17:00–21:00</div>
-                            </div>
-                            <div class="notif-time">2 giờ</div>
-                        </div>
-                        <div class="notif-item unread" data-notif-type="voucher">
-                            <div class="notif-icon voucher"><i class="fa-solid fa-tag"></i></div>
-                            <div class="notif-body">
-                                <div class="notif-body-title">Voucher 10% dành riêng cho bạn</div>
-                                <div class="notif-body-desc">Dùng mã BEESALE10 · Hết hạn 14/03</div>
-                            </div>
-                            <div class="notif-time">1 ngày</div>
-                        </div>
-                        <div class="notif-item" data-notif-type="order" onclick="location.hash='#account';closeNotif()">
-                            <div class="notif-icon order"><i class="fa-solid fa-circle-check"></i></div>
-                            <div class="notif-body">
-                                <div class="notif-body-title">Đơn hàng đã giao thành công</div>
-                                <div class="notif-body-desc">#BM-2025-0081 · Nhận lúc 14:32 ngày 17/03</div>
-                            </div>
-                            <div class="notif-time">3 ngày</div>
-                        </div>
-                        <div class="notif-item" data-notif-type="event">
-                            <div class="notif-icon event"><i class="fa-solid fa-shirt"></i></div>
-                            <div class="notif-body">
-                                <div class="notif-body-title">BST SS25 chính thức ra mắt</div>
-                                <div class="notif-body-desc">Khám phá 12 mẫu áo mới cho mùa hè</div>
-                            </div>
-                            <div class="notif-time">5 ngày</div>
-                        </div>
-                    </div>
+
+                    <div class="notif-list" id="notifList"></div>
+
                     <div class="notif-empty" id="notifEmpty">
                         <i class="fa-regular fa-bell-slash"></i>Không có thông báo nào
                     </div>
@@ -198,7 +188,6 @@
                 </div>
             </div>
 
-            <!-- Cart -->
             <div class="cart-icon" onclick="location.hash='#cart'">
                 <i class="fa-solid fa-bag-shopping" style="font-size:19px;color:var(--text)"></i>
                 <div class="cart-badge" id="cartBadge">0</div>
@@ -254,10 +243,200 @@
             <a href="#">Instagram</a><a href="#">TikTok</a><a href="#">Shopee</a><a href="#">Lazada</a>
         </div>
     </div>
+    <button id="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <i class="fa-solid fa-arrow-up"></i>
+    </button>
 </footer>
 
 <script src="/js/customer-router.js"></script>
 <script>
+    /* ── TOÀN CỤC: QUẢN LÝ THÔNG BÁO API ── */
+    window.NotificationApp = {
+        notifications: [],
+
+        init: async function() {
+            await this.fetchData();
+        },
+
+        fetchData: async function() {
+            try {
+                // TODO: Đổi URL này khớp với đường dẫn Java Controller của bạn
+                const res = await fetch('/api/thong-bao/my-notifications');
+                if (!res.ok) return; // Bỏ qua nếu khách chưa đăng nhập
+
+                this.notifications = await res.json();
+                this.render();
+            } catch(e) {
+                console.warn("Chưa gọi được API Thông báo thực tế, bỏ qua lỗi.");
+            }
+        },
+
+        render: function() {
+            const list = document.getElementById('notifList');
+            const badge = document.getElementById('notifBadge');
+            const empty = document.getElementById('notifEmpty');
+
+            if (!list) return;
+
+            if (!this.notifications || this.notifications.length === 0) {
+                list.innerHTML = '';
+                empty.style.display = 'block';
+                if(badge) badge.style.display = 'none';
+                return;
+            }
+
+            empty.style.display = 'none';
+            let html = '';
+            let unreadCount = 0;
+
+            this.notifications.forEach(n => {
+                if (!n.daDoc) unreadCount++;
+
+                // Xác định Icon (Tùy biến theo Field loaiThongBao của Backend)
+                let iconClass = 'event'; let iconHtml = '<i class="fa-solid fa-bell"></i>';
+                let typeStr = n.loaiThongBao ? n.loaiThongBao.toLowerCase() : 'event';
+
+                if (typeStr.includes('order') || typeStr.includes('don_hang')) {
+                    iconClass = 'order'; iconHtml = '<i class="fa-solid fa-truck-fast"></i>';
+                } else if (typeStr.includes('voucher') || typeStr.includes('khuyen_mai')) {
+                    iconClass = 'voucher'; iconHtml = '<i class="fa-solid fa-tag"></i>';
+                }
+
+                const unreadClass = n.daDoc ? '' : 'unread';
+
+                html += `
+                    <div class="notif-item ${unreadClass}" data-notif-type="${iconClass}" onclick="window.NotificationApp.markAsRead(${n.id}, this)">
+                        <div class="notif-icon ${iconClass}">${iconHtml}</div>
+                        <div class="notif-body">
+                            <div class="notif-body-title">${n.tieuDe}</div>
+                            <div class="notif-body-desc">${n.noiDung}</div>
+                        </div>
+                        <div class="notif-time">${this.timeAgo(n.ngayTao)}</div>
+                    </div>
+                `;
+            });
+
+            list.innerHTML = html;
+
+            // Xử lý đếm Badge màu đỏ
+            if (badge) {
+                if (unreadCount > 0) {
+                    badge.innerText = unreadCount > 99 ? '99+' : unreadCount;
+                    badge.style.display = 'flex';
+                    badge.style.opacity = '1';
+                    badge.style.transform = 'scale(1)';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+
+            // Ghi nhớ Tab đang chọn
+            const activeTab = document.querySelector('.notif-tab.active');
+            if(activeTab) {
+                const typeMatch = activeTab.getAttribute('onclick').match(/'([^']+)'/);
+                if(typeMatch) switchNotifTab(activeTab, typeMatch[1]);
+            }
+        },
+
+        markAsRead: async function(id, el) {
+            try {
+                // Chặn hành vi mở link mặc định nếu có thẻ a bên trong
+                const notif = this.notifications.find(n => n.id === id);
+                if (!notif) return;
+
+                // Nếu chưa đọc thì mới gọi API update
+                if (!notif.daDoc) {
+                    // TODO: Đổi URL API này
+                    await fetch(`/api/thong-bao/${id}/read`, { method: 'PUT' });
+                    notif.daDoc = true;
+                    if (el) el.classList.remove('unread');
+                    this.updateBadgeOnly();
+                }
+
+                // Nếu là đơn hàng -> chuyển sang account
+                if (notif.loaiThongBao && (notif.loaiThongBao.toLowerCase().includes('order') || notif.loaiThongBao.toLowerCase().includes('don_hang'))) {
+                    window.location.hash = '#account';
+                }
+                closeNotif();
+
+            } catch(e) { console.error(e); }
+        },
+
+        markAllRead: async function() {
+            try {
+                // TODO: Đổi URL API này
+                await fetch(`/api/thong-bao/mark-all-read`, { method: 'PUT' });
+
+                this.notifications.forEach(n => n.daDoc = true);
+                document.querySelectorAll('#notifList .notif-item.unread').forEach(item => item.classList.remove('unread'));
+                this.updateBadgeOnly();
+            } catch(e) { console.error(e); }
+        },
+
+        updateBadgeOnly: function() {
+            const badge = document.getElementById('notifBadge');
+            const unreadCount = this.notifications.filter(n => !n.daDoc).length;
+            if (badge) {
+                if (unreadCount > 0) {
+                    badge.innerText = unreadCount > 99 ? '99+' : unreadCount;
+                } else {
+                    badge.style.opacity = '0';
+                    badge.style.transform = 'scale(0)';
+                    setTimeout(() => badge.style.display = 'none', 300);
+                }
+            }
+        },
+
+        timeAgo: function(dateStr) {
+            if(!dateStr) return '';
+            const date = new Date(dateStr);
+            const seconds = Math.floor((new Date() - date) / 1000);
+            let interval = seconds / 31536000;
+            if (interval > 1) return Math.floor(interval) + " năm trước";
+            interval = seconds / 2592000;
+            if (interval > 1) return Math.floor(interval) + " tháng trước";
+            interval = seconds / 86400;
+            if (interval > 1) return Math.floor(interval) + " ngày trước";
+            interval = seconds / 3600;
+            if (interval > 1) return Math.floor(interval) + " giờ trước";
+            interval = seconds / 60;
+            if (interval > 1) return Math.floor(interval) + " phút trước";
+            return "Vừa xong";
+        }
+    };
+
+    /* ── TOÀN CỤC: CẬP NHẬT & GIẬT NẢY GIỎ HÀNG ── */
+    window.updateCartBadge = function() {
+        try {
+            const cart = JSON.parse(localStorage.getItem('bee_cart') || '[]');
+            const totalQty = cart.reduce((sum, item) => sum + (parseInt(item.qty) || 0), 0);
+
+            const badge = document.getElementById('cartBadge');
+            const iconWrap = document.querySelector('.cart-icon');
+
+            if (badge) {
+                if (totalQty > parseInt(badge.textContent || 0)) {
+                    iconWrap.classList.remove('bounce');
+                    void iconWrap.offsetWidth;
+                    iconWrap.classList.add('bounce');
+                }
+                badge.textContent = totalQty;
+                badge.style.display = totalQty > 0 ? 'flex' : 'none';
+            }
+        } catch (e) { console.error("Lỗi cập nhật badge:", e); }
+    };
+
+    /* Scroll - Cập nhật để hiện nút Back to Top */
+    window.addEventListener('scroll', () => {
+        document.getElementById('site-header').classList.toggle('scrolled', window.scrollY > 20);
+
+        const btt = document.getElementById('back-to-top');
+        if (btt) {
+            if (window.scrollY > 400) btt.classList.add('show');
+            else btt.classList.remove('show');
+        }
+    });
+
     /* Cursor */
     const cursor = document.getElementById('cursor');
     const cursorRing = document.getElementById('cursorRing');
@@ -266,20 +445,33 @@
         setTimeout(() => { cursorRing.style.left = e.clientX + 'px'; cursorRing.style.top = e.clientY + 'px'; }, 60);
     });
 
-    /* Scroll */
-    window.addEventListener('scroll', () => {
-        document.getElementById('site-header').classList.toggle('scrolled', window.scrollY > 20);
-    });
-
     /* Cart toast */
     let toastTimeout;
-    window.showToast = function() {
+    window.showToast = function(message, type = 'success') {
         const toast = document.getElementById('cartToast');
+        const toastIcon = toast.querySelector('.toast-icon');
+        const toastTitle = toast.querySelector('strong');
+        const toastDesc = document.getElementById('cartToastDesc');
+
+        if (type === 'warning') {
+            toastIcon.style.background = '#c08060';
+            toastIcon.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2" style="width:16px;height:16px;stroke:white;fill:none;"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>';
+            toastTitle.innerText = 'Lưu ý';
+        } else {
+            toastIcon.style.background = 'var(--accent)';
+            toastIcon.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2" style="width:16px;height:16px;stroke:white;fill:none;"><path d="M5 13l4 4L19 7"/></svg>';
+            toastTitle.innerText = 'Đã thêm vào giỏ hàng';
+        }
+
+        toastDesc.innerText = message;
         toast.classList.add('show');
-        clearTimeout(toastTimeout);
-        toastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
-        const badge = document.getElementById('cartBadge');
-        badge.textContent = parseInt(badge.textContent) + 1;
+
+        clearTimeout(window.toastTimeout);
+        window.toastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
+
+        if (type === 'success') {
+            if (window.updateCartBadge) window.updateCartBadge();
+        }
     };
 
     /* Active tab */
@@ -287,16 +479,27 @@
         const hash = window.location.hash.slice(1).split('?')[0] || 'home';
         document.querySelectorAll('.page-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === hash));
     });
-    window.dispatchEvent(new Event('hashchange'));
+
+    /* Khi load trang (F5) */
+    document.addEventListener('DOMContentLoaded', () => {
+        window.updateCartBadge();
+        window.dispatchEvent(new Event('hashchange'));
+        adjustContentPadding();
+
+        // Khởi tạo Thông báo
+        window.NotificationApp.init();
+    });
 
     /* Padding */
     function adjustContentPadding() {
-        document.getElementById('content-area').style.paddingTop = document.getElementById('site-header').offsetHeight + 'px';
+        const header = document.getElementById('site-header');
+        if (header) {
+            document.getElementById('content-area').style.paddingTop = header.offsetHeight + 'px';
+        }
     }
     window.addEventListener('resize', adjustContentPadding);
-    adjustContentPadding();
 
-    /* ── NOTIFICATION ── */
+    /* ── TAB THÔNG BÁO UI ── */
     function toggleNotif(e) {
         e.stopPropagation();
         document.getElementById('notifDropdown').classList.toggle('open');
@@ -316,20 +519,14 @@
         });
         document.getElementById('notifEmpty').style.display = visible === 0 ? 'block' : 'none';
     }
-    function markAllRead() {
-        document.querySelectorAll('#notifList .notif-item.unread').forEach(item => item.classList.remove('unread'));
-        const badge = document.getElementById('notifBadge');
-        badge.style.opacity = '0'; badge.style.transform = 'scale(0)';
-        setTimeout(() => badge.style.display = 'none', 300);
-    }
 
     /* ── SEARCH OVERLAY ── */
     const MOCK_PRODUCTS = [
-        { name:'Áo Linen Oversize Dài Tay', price:'490.000 ₫', color:'linear-gradient(160deg,#e8ddd1,#c4b49d)' },
-        { name:'Áo Sơ Mi Linen Xanh Rêu',  price:'450.000 ₫', color:'linear-gradient(160deg,#c5cfc7,#3D5A4C)' },
-        { name:'Áo Cotton Cổ Tròn Basic',   price:'320.000 ₫', color:'linear-gradient(160deg,#d4cfc9,#b0a99f)' },
-        { name:'Áo Thun Bamboo Nhẹ',        price:'280.000 ₫', color:'linear-gradient(160deg,#cfd4cc,#94a091)' },
-        { name:'Áo Polo Cotton Wash',       price:'380.000 ₫', color:'linear-gradient(160deg,#d1c9c0,#a89e93)' },
+        { id: 1, name:'Áo Linen Oversize Dài Tay', price:'490.000 ₫', color:'linear-gradient(160deg,#e8ddd1,#c4b49d)' },
+        { id: 2, name:'Áo Sơ Mi Linen Xanh Rêu',  price:'450.000 ₫', color:'linear-gradient(160deg,#c5cfc7,#3D5A4C)' },
+        { id: 3, name:'Áo Cotton Cổ Tròn Basic',   price:'320.000 ₫', color:'linear-gradient(160deg,#d4cfc9,#b0a99f)' },
+        { id: 4, name:'Áo Thun Bamboo Nhẹ',        price:'280.000 ₫', color:'linear-gradient(160deg,#cfd4cc,#94a091)' },
+        { id: 5, name:'Áo Polo Cotton Wash',       price:'380.000 ₫', color:'linear-gradient(160deg,#d1c9c0,#a89e93)' },
     ];
     window.openSearch = function() {
         closeNotif();
@@ -363,21 +560,41 @@
         if (input) { input.value=val; input.focus(); handleSearchInput(val); }
     };
     window.handleSearchInput = function(val) {
-        const cb=document.getElementById('searchClearBtn'), pop=document.getElementById('searchPopular'),
-            res=document.getElementById('searchResults'), lst=document.getElementById('searchResultList');
+        const cb = document.getElementById('searchClearBtn');
+        const pop = document.getElementById('searchPopular');
+        const res = document.getElementById('searchResults');
+        const lst = document.getElementById('searchResultList');
+
         if (cb) cb.style.display = val.length ? 'block' : 'none';
-        if (!val.trim()) { if(pop) pop.style.display=''; if(res) res.style.display='none'; return; }
-        if (pop) pop.style.display='none'; if (res) res.style.display='';
+        if (!val.trim()) {
+            if(pop) pop.style.display='';
+            if(res) res.style.display='none';
+            return;
+        }
+        if (pop) pop.style.display='none';
+        if (res) res.style.display='';
+
         const filtered = MOCK_PRODUCTS.filter(p => p.name.toLowerCase().includes(val.toLowerCase()));
         if (!lst) return;
-        lst.innerHTML = filtered.length===0
-            ? '<div style="font-size:14px;color:var(--muted);font-weight:300;padding:16px 0">Không tìm thấy sản phẩm phù hợp.</div>'
-            : filtered.map(p=>`<div style="display:flex;align-items:center;gap:20px;padding:14px 0;border-bottom:1px solid rgba(0,0,0,.06);cursor:none" onclick="closeSearch();location.hash='#detail'"><div style="width:44px;height:56px;flex-shrink:0;background:${p.color}"></div><div style="font-family:'Cormorant Garamond',serif;font-size:18px;flex:1">${p.name}</div><div style="font-size:13px;color:var(--muted)">${p.price}</div></div>`).join('');
+
+        if (filtered.length === 0) {
+            lst.innerHTML = '<div style="font-size:14px;color:var(--muted);font-weight:300;padding:16px 0">Không tìm thấy sản phẩm phù hợp.</div>';
+            return;
+        }
+
+        const regex = new RegExp(`(${val})`, "gi");
+        lst.innerHTML = filtered.map(p => {
+            const highlightedName = p.name.replace(regex, '<span style="color: var(--accent); font-weight: 600; background: rgba(61,90,76,0.1); padding: 0 2px; border-radius: 2px;">$1</span>');
+            return `<div style="display:flex;align-items:center;gap:20px;padding:14px 0;border-bottom:1px solid rgba(0,0,0,.06);cursor:pointer" onclick="closeSearch();location.hash='#detail?id=${p.id || 1}'">
+                <div style="width:44px;height:56px;flex-shrink:0;background:${p.color}"></div>
+                <div style="font-family:'Cormorant Garamond',serif;font-size:18px;flex:1">${highlightedName}</div>
+                <div style="font-size:13px;color:var(--muted)">${p.price}</div>
+            </div>`;
+        }).join('');
     };
     document.addEventListener('keydown', e => { if (e.key==='Escape') closeSearch(); });
 </script>
 
-<!-- SEARCH OVERLAY -->
 <div id="searchOverlay" style="position:fixed;inset:0;z-index:9000;background:rgba(247,245,242,0.97);backdrop-filter:blur(16px);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s ease;">
     <button onclick="closeSearch()" style="position:absolute;top:28px;right:48px;background:none;border:none;cursor:none;font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:10px;transition:color .2s" onmouseenter="this.style.color='var(--text)'" onmouseleave="this.style.color='var(--muted)'">Đóng <i class="fa-solid fa-xmark"></i></button>
     <div style="width:100%;max-width:680px;padding:0 24px">

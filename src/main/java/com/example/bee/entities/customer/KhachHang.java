@@ -1,8 +1,10 @@
 package com.example.bee.entities.customer;
 
+import com.example.bee.entities.account.TaiKhoan;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +33,6 @@ public class KhachHang {
     @Column(name = "ngay_sinh")
     private LocalDate ngaySinh;
 
-    // Giữ trường này để hiển thị nhanh (dù DB hơi thừa)
     @Column(name = "dia_chi")
     private String diaChi;
 
@@ -44,14 +45,14 @@ public class KhachHang {
     @Column(name = "hinh_anh")
     private String hinhAnh;
 
-    @Column(name = "id_tai_khoan")
-    private Integer idTaiKhoan;
-
     @Column(name = "trang_thai")
     private Boolean trangThai = true;
 
-    // QUAN TRỌNG: mappedBy phải trỏ đúng tên biến "khachHang" ở file dưới
     @OneToMany(mappedBy = "khachHang", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<DiaChiKhachHang> diaChiList = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_tai_khoan", referencedColumnName = "id")
+    private TaiKhoan taiKhoan;
 }

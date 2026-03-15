@@ -1,8 +1,8 @@
 package com.example.bee.entities.order;
 
 import com.example.bee.entities.customer.KhachHang;
-import com.example.bee.entities.user.NhanVien; // Check lại package nhan vien của mày
-import com.example.bee.entities.promotion.MaGiamGia; // Check lại package ma giam gia
+import com.example.bee.entities.promotion.MaGiamGia;
+import com.example.bee.entities.user.NhanVien;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,9 +12,13 @@ import java.util.Date;
 
 @Entity
 @Table(name = "hoa_don")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class HoaDon {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -23,8 +27,11 @@ public class HoaDon {
     private String ma;
 
     private BigDecimal giaTamThoi;
+
     private BigDecimal phiVanChuyen;
+
     private BigDecimal giaTriKhuyenMai;
+
     private BigDecimal giaTong;
 
     @Column(name = "ten_nguoi_nhan")
@@ -55,7 +62,7 @@ public class HoaDon {
     @JoinColumn(name = "id_trang_thai_hoa_don")
     private TrangThaiHoaDon trangThaiHoaDon;
 
-    private Integer loaiHoaDon; // 0: Tại quầy, 1: Online
+    private Integer loaiHoaDon;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     @Temporal(TemporalType.TIMESTAMP)

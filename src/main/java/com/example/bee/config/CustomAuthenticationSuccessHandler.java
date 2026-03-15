@@ -11,31 +11,20 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.Collection;
 
-@Component // Đánh dấu đây là một Bean để Spring quản lý
+@Component
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request,
-                                        HttpServletResponse response,
-                                        Authentication authentication) throws IOException, ServletException {
-
-        // URL mặc định dành cho Khách hàng (Customer)
-        String redirectUrl = "/";
-
-        // Lấy danh sách quyền của người dùng vừa đăng nhập
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+        String redirectUrl = "/customer";
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-
         for (GrantedAuthority grantedAuthority : authorities) {
             String role = grantedAuthority.getAuthority();
-
-            // Nếu có quyền ADMIN hoặc STAFF thì đổi hướng sang trang Quản trị
             if (role.equals("ROLE_ADMIN") || role.equals("ROLE_STAFF")) {
                 redirectUrl = "/admin";
-                break; // Tìm thấy quyền cao rồi thì thoát vòng lặp
+                break;
             }
         }
-
-        // Thực hiện chuyển hướng
         response.sendRedirect(redirectUrl);
     }
 }

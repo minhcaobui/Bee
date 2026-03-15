@@ -25,6 +25,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class SanPham {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -62,6 +63,10 @@ public class SanPham {
 
     private Boolean trangThai = true;
 
+    @OneToMany(mappedBy = "sanPham", fetch = FetchType.EAGER)
+    @JsonIgnoreProperties("sanPham")
+    private List<SanPhamChiTiet> chiTietSanPhams;
+
     @org.hibernate.annotations.BatchSize(size = 20)
     @OneToMany(mappedBy = "sanPham", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
@@ -74,12 +79,12 @@ public class SanPham {
 
     @PrePersist
     public void prePersist() {
-        this.ngayTao = new Date(); // Khi lưu lần đầu thì gán ngày tạo
+        this.ngayTao = new Date();
     }
 
     @PreUpdate
     public void preUpdate() {
-        this.ngaySua = new Date(); // Khi cập nhật thì gán ngày sửa
+        this.ngaySua = new Date();
     }
 
 }

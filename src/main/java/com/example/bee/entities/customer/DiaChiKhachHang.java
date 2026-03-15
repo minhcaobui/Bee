@@ -18,7 +18,7 @@ public class DiaChiKhachHang {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_khach_hang", nullable = false)
-    @JsonIgnore // Chặn vòng lặp khi gọi API lấy địa chỉ
+    @JsonIgnore
     private KhachHang khachHang;
 
     @Column(name = "ho_ten_nhan")

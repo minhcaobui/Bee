@@ -12,7 +12,7 @@
         .hero-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(52px, 6vw, 82px); line-height: 1.05; font-weight: 300; margin-bottom: 28px; letter-spacing: -0.01em; }
         .hero-title em { font-style: italic; color: var(--accent); }
         .hero-desc { font-size: 15px; color: var(--muted); line-height: 1.8; max-width: 380px; margin-bottom: 52px; font-weight: 300; }
-        .hero-cta { display: inline-flex; align-items: center; gap: 16px; background: var(--accent); color: white; padding: 18px 40px; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; font-family: 'DM Sans', sans-serif; font-weight: 400; width: fit-content; transition: background 0.3s ease, gap 0.3s ease; position: relative; overflow: hidden; cursor: none; }
+        .hero-cta { display: inline-flex; align-items: center; gap: 16px; background: var(--accent); color: white; padding: 18px 40px; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; font-family: 'DM Sans', sans-serif; font-weight: 400; width: fit-content; transition: background 0.3s ease, gap 0.3s ease; position: relative; overflow: hidden; cursor: pointer; border:none;}
         .hero-cta::before { content: ''; position: absolute; inset: 0; background: var(--accent-light); transform: translateX(-100%); transition: transform 0.4s ease; }
         .hero-cta:hover::before { transform: translateX(0); }
         .hero-cta span, .hero-cta svg { position: relative; z-index: 1; }
@@ -25,11 +25,13 @@
         .stat { text-align: right; }
         .stat-number { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 300; color: var(--text); line-height: 1; }
         .stat-label { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; margin-top: 4px; }
+
         .marquee-section { padding: 20px 0; border-top: 1px solid rgba(0,0,0,0.08); border-bottom: 1px solid rgba(0,0,0,0.08); overflow: hidden; background: var(--white); }
         .marquee-track { display: flex; gap: 0; animation: marquee 20s linear infinite; white-space: nowrap; }
         .marquee-item { font-family: 'Cormorant Garamond', serif; font-size: 14px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; padding: 0 60px; display: flex; align-items: center; gap: 60px; }
         .marquee-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
         .brand-section { padding: 120px 60px; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
         .brand-img-wrap { position: relative; }
         .brand-img-frame { width: 100%; aspect-ratio: 4/5; overflow: hidden; position: relative; }
@@ -42,46 +44,70 @@
         .brand-headline em { font-style: italic; }
         .brand-body { font-size: 15px; color: var(--muted); line-height: 1.9; font-weight: 300; margin-bottom: 20px; }
         .brand-body + .brand-body { margin-bottom: 44px; }
-        .brand-link { font-size: 13px; color: var(--accent); text-decoration: none; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 400; display: inline-flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--accent); padding-bottom: 4px; cursor: none; }
+        .brand-link { background:none; border:none; font-size: 13px; color: var(--accent); text-decoration: none; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 400; display: inline-flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--accent); padding-bottom: 4px; cursor: pointer; }
         .brand-link svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
         .brand-values { display: flex; gap: 40px; margin-top: 52px; padding-top: 40px; border-top: 1px solid rgba(0,0,0,0.08); }
         .brand-value-num { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 300; color: var(--accent); line-height: 1; }
         .brand-value-label { font-size: 12px; color: var(--muted); letter-spacing: 0.08em; margin-top: 4px; }
 
-        .products-section { padding: 80px 0 100px; }
+        .products-section { padding: 80px 0 100px; position: relative; }
         .section-header { display: flex; justify-content: space-between; align-items: flex-end; padding: 0 60px; margin-bottom: 52px; }
         .section-eyebrow { font-size: 11px; letter-spacing: 0.22em; color: var(--accent); text-transform: uppercase; font-weight: 500; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
         .section-eyebrow::before { content: ''; width: 20px; height: 1px; background: var(--accent); }
         .section-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(32px, 4vw, 52px); font-weight: 300; line-height: 1.1; }
         .section-title em { font-style: italic; }
-        .view-all { font-size: 12px; letter-spacing: 0.12em; color: var(--text); text-decoration: none; text-transform: uppercase; font-weight: 400; display: flex; align-items: center; gap: 8px; padding-bottom: 2px; border-bottom: 1px solid transparent; transition: border-color 0.3s ease; cursor: none; }
+        .view-all { font-size: 12px; letter-spacing: 0.12em; color: var(--text); text-decoration: none; text-transform: uppercase; font-weight: 400; display: flex; align-items: center; gap: 8px; padding-bottom: 2px; border-bottom: 1px solid transparent; transition: border-color 0.3s ease; cursor: pointer; background:none;}
         .view-all:hover { border-color: var(--accent); color: var(--accent); }
         .view-all svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+
         .products-grid { padding: 0 60px; display: grid; grid-template-columns: 1.4fr 1fr 1fr 1.2fr; grid-template-rows: auto auto; gap: 24px; }
-        .product-card { background: var(--white); box-shadow: var(--card-shadow); overflow: hidden; position: relative; cursor: none; transition: box-shadow 0.4s ease; }
+
+        #home-qa-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 90; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; cursor: pointer; }
+        #home-qa-backdrop.show { opacity: 1; pointer-events: all; }
+
+        .product-card { background: var(--white); box-shadow: var(--card-shadow); overflow: hidden; position: relative; cursor: pointer; transition: box-shadow 0.4s ease, transform 0.4s ease; z-index: 1; }
         .product-card:hover { box-shadow: var(--card-shadow-hover); }
         .product-card:nth-child(1), .product-card:nth-child(4) { grid-row: span 2; }
-        .product-img { width: 100%; aspect-ratio: 3/4; position: relative; overflow: hidden; }
+        .product-card.show-selection { z-index: 95; transform: translateY(-8px); box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
+
+        .product-img { width: 100%; aspect-ratio: 3/4; position: relative; overflow: hidden; background: #f9f9f9; }
         .product-card:nth-child(1) .product-img, .product-card:nth-child(4) .product-img { aspect-ratio: unset; height: 100%; min-height: 480px; }
-        .img-placeholder { width: 100%; height: 100%; display: block; transition: transform 0.6s ease; }
+        .img-placeholder { width: 100%; height: 100%; display: block; transition: transform 0.6s ease; object-fit: cover; }
         .product-card:hover .img-placeholder { transform: scale(1.04); }
-        .c1 { background: linear-gradient(160deg, #e8ddd1, #c4b49d); } .c2 { background: linear-gradient(160deg, #d4cfc9, #b0a99f); } .c3 { background: linear-gradient(160deg, #c5cfc7, #8fa694); } .c4 { background: linear-gradient(160deg, #d1c9c0, #a89e93); }
-        .img-placeholder::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px); }
-        .product-overlay { position: absolute; inset: 0; background: rgba(26,26,26,0.0); display: flex; align-items: flex-end; padding: 24px; transition: background 0.4s ease; }
+
+        /* --- CSS: HIỆU ỨNG ẢNH THỨ 2 LÚC HOVER --- */
+        .img-hover { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.5s ease, transform 0.6s ease; z-index: 1; }
+        .product-card:hover .img-hover { opacity: 1; transform: scale(1.04); }
+
+        .img-overlay-pattern { position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px); z-index: 2;}
+        .product-overlay { position: absolute; inset: 0; background: rgba(26,26,26,0.0); display: flex; align-items: flex-end; padding: 24px; transition: background 0.4s ease; z-index: 3; }
         .product-card:hover .product-overlay { background: rgba(26,26,26,0.08); }
-        .quick-add { background: white; color: var(--text); border: none; padding: 12px 24px; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: none; transform: translateY(8px); opacity: 0; transition: transform 0.3s ease, opacity 0.3s ease; width: 100%; }
+
+        .quick-add { background: white; color: var(--text); border: none; padding: 12px 24px; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transform: translateY(8px); opacity: 0; transition: transform 0.3s ease, opacity 0.3s ease; width: 100%; }
         .product-card:hover .quick-add { transform: translateY(0); opacity: 1; }
+
+        .quick-selection-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.98); z-index: 5; display: flex; flex-direction: column; justify-content: center; padding: 20px; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: default;}
+        .product-card.show-selection .quick-selection-overlay { transform: translateY(0); }
+        .qs-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; margin-bottom: 15px; text-align: center; }
+        .qs-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px; text-align: center; }
+        .qs-options { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; justify-content: center; }
+        .qs-dot { width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.15); cursor: pointer; box-shadow: inset 0 0 0 2px #fff; transition: all 0.2s ease; }
+        .qs-dot.active { border: 1.5px solid var(--text); transform: scale(1.15); }
+        .qs-size-btn { padding: 6px 12px; border: 1px solid #ddd; background: none; font-size: 11px; cursor: pointer; min-width: 35px; }
+        .qs-size-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
+        .qs-size-btn.disabled { opacity: 0.3; cursor: not-allowed; text-decoration: line-through; }
+        .qs-confirm-btn { width: 100%; padding: 12px; background: var(--accent); color: #fff; border: none; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; margin-top: 10px; transition: background 0.3s;}
+        .qs-confirm-btn:hover { opacity: 0.9; }
+        .qs-close { position: absolute; top: 10px; right: 10px; background: none; border: none; cursor: pointer; color: var(--muted); font-size: 20px; padding: 5px; }
+
         .product-info { padding: 20px 20px 24px; }
         .product-tag { font-size: 10px; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase; font-weight: 500; margin-bottom: 6px; }
         .product-name { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 400; margin-bottom: 8px; line-height: 1.2; }
         .product-price-row { display: flex; justify-content: space-between; align-items: center; }
         .product-price { font-size: 14px; color: var(--text); font-weight: 400; }
-        .product-colors { display: flex; gap: 6px; }
-        .color-dot { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); cursor: none; transition: transform 0.2s ease; }
-        .color-dot:hover { transform: scale(1.3); }
-        .color-dot.active { border: 1.5px solid var(--text); }
-        .label-new, .label-sale { position: absolute; top: 16px; left: 16px; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 500; padding: 5px 10px; z-index: 2; }
-        .label-new { background: var(--accent); color: white; } .label-sale { background: #c08060; color: white; }
+
+        .label-new, .label-sale { position: absolute; top: 16px; left: 16px; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 500; padding: 5px 10px; z-index: 3; }
+        .label-new { background: var(--text); color: white; } .label-sale { background: #c08060; color: white; }
         .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
         .reveal.visible { opacity: 1; transform: translateY(0); }
         .reveal-delay-1 { transition-delay: 0.1s; } .reveal-delay-2 { transition-delay: 0.2s; } .reveal-delay-3 { transition-delay: 0.35s; }
@@ -98,10 +124,10 @@
             <div class="hero-season">Spring / Summer 2025</div>
             <h1 class="hero-title">Mặc để<br><em>thở thôi,</em><br>không hơn</h1>
             <p class="hero-desc">Beemate tin rằng trang phục tốt nhất là thứ bạn không cần nghĩ đến — nó chỉ cần ở đó, đúng lúc, đúng người.</p>
-            <a href="#shop" class="hero-cta">
+            <button class="hero-cta" onclick="document.getElementById('new-arrivals').scrollIntoView({ behavior: 'smooth' })">
                 <span>Khám phá bộ sưu tập</span>
                 <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
+            </button>
             <div class="hero-scroll-hint"><div class="scroll-line"></div><span>Cuộn xuống</span></div>
             <div class="hero-stats">
                 <div class="stat"><div class="stat-number">48</div><div class="stat-label">Mẫu mới</div></div>
@@ -119,50 +145,25 @@
     </div>
 
     <section class="products-section" id="new-arrivals">
+        <div id="home-qa-backdrop" onclick="window.HomeApp.closeAllSelections()"></div>
+
         <div class="section-header reveal">
             <div>
                 <div class="section-eyebrow">Mới về</div>
                 <h2 class="section-title">Những chiếc áo<br><em>đang được yêu thích</em></h2>
             </div>
-            <a href="#shop" class="view-all">Xem tất cả <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+            <button class="view-all" onclick="window.location.hash='shop'" style="border:none">Xem tất cả <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
         </div>
-        <div class="products-grid">
-            <div class="product-card reveal">
-                <div class="label-new">Mới</div>
-                <div class="product-img"><div class="img-placeholder c1"></div><div class="product-overlay"><button class="quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div></div>
-                <div class="product-info">
-                    <div class="product-tag">Bestseller</div><div class="product-name">Áo Linen Oversize<br>Dài Tay</div>
-                    <div class="product-price-row"><div class="product-price">490.000 ₫</div><div class="product-colors"><div class="color-dot active" style="background:#c4b49d"></div><div class="color-dot" style="background:#3D5A4C"></div><div class="color-dot" style="background:#1A1A1A"></div></div></div>
-                </div>
-            </div>
-            <div class="product-card reveal reveal-delay-1">
-                <div class="product-img"><div class="img-placeholder c2"></div><div class="product-overlay"><button class="quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div></div>
-                <div class="product-info">
-                    <div class="product-tag">Tự nhiên</div><div class="product-name">Áo Cotton Cổ Tròn</div>
-                    <div class="product-price-row"><div class="product-price">320.000 ₫</div><div class="product-colors"><div class="color-dot active" style="background:#d4cfc9"></div><div class="color-dot" style="background:#c8a882"></div></div></div>
-                </div>
-            </div>
-            <div class="product-card reveal reveal-delay-2">
-                <div class="product-img"><div class="img-placeholder c3"></div><div class="product-overlay"><button class="quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div></div>
-                <div class="product-info">
-                    <div class="product-tag">Mới</div><div class="product-name">Áo Sơ Mi Linen Xanh Rêu</div>
-                    <div class="product-price-row"><div class="product-price">450.000 ₫</div><div class="product-colors"><div class="color-dot active" style="background:#3D5A4C"></div><div class="color-dot" style="background:#c4b49d"></div></div></div>
-                </div>
-            </div>
-            <div class="product-card reveal reveal-delay-3">
-                <div class="label-sale">Sale</div>
-                <div class="product-img"><div class="img-placeholder c4"></div><div class="product-overlay"><button class="quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div></div>
-                <div class="product-info">
-                    <div class="product-tag">Limited</div><div class="product-name">Set Áo Quần<br>Linen Tonal</div>
-                    <div class="product-price-row"><div class="product-price">790.000 ₫ <span style="color:var(--muted);text-decoration:line-through;font-size:12px">990k</span></div><div class="product-colors"><div class="color-dot active" style="background:#a89e93"></div><div class="color-dot" style="background:#1A1A1A"></div></div></div>
-                </div>
+        <div class="products-grid" id="dynamicProductsGrid">
+            <div style="grid-column: 1/-1; padding: 60px; text-align: center; color: #999; font-style: italic;">
+                Đang tải sản phẩm mới nhất...
             </div>
         </div>
     </section>
 
     <section class="brand-section">
         <div class="brand-img-wrap reveal">
-            <div class="brand-img-frame"><div class="img-placeholder"></div></div>
+            <div class="brand-img-frame"><div class="img-placeholder" style="background: linear-gradient(160deg, #c9c4bc, #9e998f);"></div></div>
             <div class="brand-img-accent"></div>
             <span class="brand-year">Beemate · Kể từ 2019</span>
         </div>
@@ -171,7 +172,7 @@
             <h2 class="brand-headline">Áo không phải<br>để gây ấn tượng —<br><em>mà để bạn thoải mái.</em></h2>
             <p class="brand-body">Beemate ra đời từ một câu hỏi đơn giản: tại sao mặc đẹp lại phải cảm thấy khó chịu? Chúng tôi tin rằng vải tốt, dáng chuẩn, và màu sắc phù hợp có thể tạo ra sự khác biệt mà bạn cảm nhận được ngay từ khoảnh khắc mặc vào.</p>
             <p class="brand-body">Mỗi mẫu áo Beemate đều được may từ vải tự nhiên, được kiểm tra kỹ ở từng đường chỉ — để bạn không cần lo nghĩ, chỉ cần mặc và đi.</p>
-            <a href="#" class="brand-link">Đọc thêm về Beemate <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+            <button class="brand-link" onclick="window.location.hash='about'">Đọc thêm về Beemate <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
             <div class="brand-values">
                 <div class="brand-value"><div class="brand-value-num">100%</div><div class="brand-value-label">Vải tự nhiên</div></div>
                 <div class="brand-value"><div class="brand-value-num">48h</div><div class="brand-value-label">Giao hàng</div></div>
@@ -182,26 +183,371 @@
 
     <script>
         window.HomeApp = {
+            state: { products: [] },
+            tempSelection: {},
+
             init: function() {
-                const reveals = document.querySelectorAll('#home-section .reveal');
-                const observer = new IntersectionObserver(entries => {
-                    entries.forEach(e => {
-                        if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+                this.setupKeyboardEvents();
+                this.loadProducts();
+            },
+
+            setupKeyboardEvents: function() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') this.closeAllSelections();
+                });
+            },
+
+            closeAllSelections: function() {
+                document.querySelectorAll('#dynamicProductsGrid .product-card.show-selection').forEach(card => {
+                    card.classList.remove('show-selection');
+                });
+                const backdrop = document.getElementById('home-qa-backdrop');
+                if(backdrop) backdrop.classList.remove('show');
+            },
+
+            handleOutsideClick: function(productId, event) {
+                const card = document.getElementById('home-card-' + productId);
+                if (card && card.classList.contains('show-selection')) {
+                    if (!event.target.closest('.quick-selection-overlay')) {
+                        this.closeSelection(productId);
+                    }
+                }
+            },
+
+            loadProducts: async function() {
+                try {
+                    const res = await fetch('/api/products?page=0&size=4&trangThai=true');
+                    const contentType = res.headers.get("content-type");
+                    if (!res.ok || !contentType || !contentType.includes("application/json")) {
+                        throw new Error("Không nhận được JSON");
+                    }
+                    const data = await res.json();
+                    const list = data.content || data;
+
+                    if (!list || list.length === 0) {
+                        this.renderFallback();
+                    } else {
+                        this.state.products = list;
+                        this.renderProducts(list);
+                    }
+                } catch (e) {
+                    console.warn("Dùng dữ liệu mẫu do lỗi API:", e.message);
+                    this.renderFallback();
+                }
+            },
+
+            renderProducts: function(list) {
+                const grid = document.getElementById('dynamicProductsGrid');
+                let html = '';
+                const delayClasses = ['', 'reveal-delay-1', 'reveal-delay-2', 'reveal-delay-3'];
+
+                for (let i = 0; i < Math.min(list.length, 4); i++) {
+                    const p = list[i];
+                    const delay = delayClasses[i] || '';
+
+                    let imgUrl = p.hinhAnhs && p.hinhAnhs.length > 0 ? p.hinhAnhs[0].url : 'https://placehold.co/400x600?text=No+Image';
+                    if (imgUrl.includes('res.cloudinary.com')) {
+                        imgUrl = imgUrl.replace('/image/upload/', '/image/upload/c_fill,w_400,h_600,f_auto,q_auto/');
+                    }
+
+                    // --- TẠO ẢNH THỨ 2 LÚC HOVER & LAZY LOAD ---
+                    let imgHoverHtml = '';
+                    if (p.hinhAnhs && p.hinhAnhs.length > 1) {
+                        let hoverUrl = p.hinhAnhs[1].url;
+                        if (hoverUrl.includes('res.cloudinary.com')) {
+                            hoverUrl = hoverUrl.replace('/image/upload/', '/image/upload/c_fill,w_400,h_600,f_auto,q_auto/');
+                        }
+                        imgHoverHtml = `<img src="${hoverUrl}" loading="lazy" class="img-hover" alt="${p.ten}">`;
+                    }
+
+                    const minPrice = p.chiTietSanPhams && p.chiTietSanPhams.length > 0
+                        ? Math.min.apply(null, p.chiTietSanPhams.map(function(v) { return v.giaBan || 0; }))
+                        : (p.giaBan || 0);
+                    const priceText = minPrice > 0 ? new Intl.NumberFormat('vi-VN').format(minPrice) + ' ₫' : 'Đang cập nhật';
+
+                    let badgeHtml = '';
+                    if (i === 0) badgeHtml = '<div class="label-new">Mới</div>';
+                    if (i === 3) badgeHtml = '<div class="label-sale">Sale</div>';
+
+                    html += '<div class="product-card reveal ' + delay + '" id="home-card-' + p.id + '">' +
+                        badgeHtml +
+                        '<div class="product-img" onclick="window.HomeApp.viewDetail(' + p.id + ')">' +
+                        '<div class="img-overlay-pattern"></div>' +
+                        `<img src="${imgUrl}" loading="lazy" class="img-placeholder" alt="${p.ten}">` +
+                        imgHoverHtml +
+                        '<div class="product-overlay">' +
+                        '<button class="quick-add" onclick="window.HomeApp.openSelection(' + p.id + ', event)">+ Thêm nhanh</button>' +
+                        '</div>' +
+                        '</div>' +
+
+                        '<div class="quick-selection-overlay" onclick="event.stopPropagation()">' +
+                        '<button class="qs-close" onclick="window.HomeApp.closeSelection(' + p.id + ', event)">×</button>' +
+                        '<div class="qs-title">' + p.ten + '</div>' +
+                        '<div class="qs-label">Màu sắc <span id="home-qs-color-name-' + p.id + '" style="color:var(--text); font-weight:600; text-transform:none; margin-left:4px;"></span></div>' +
+                        '<div class="qs-options" id="home-qs-colors-' + p.id + '"></div>' +
+                        '<div class="qs-label">Kích cỡ</div>' +
+                        '<div class="qs-options" id="home-qs-sizes-' + p.id + '"></div>' +
+                        '<div id="home-qs-price-' + p.id + '" style="font-size:14px; font-weight:500; text-align:center; margin-bottom:10px;">' + priceText + '</div>' +
+
+                        '<div style="display:flex; gap:8px; margin-top:10px;">' +
+                        `<button class="qs-confirm-btn" style="margin-top:0; background:transparent; color:var(--text); border:1px solid rgba(0,0,0,0.2);" onclick="window.HomeApp.confirmAdd(${p.id}, event, false)">Thêm giỏ</button>` +
+                        `<button class="qs-confirm-btn" style="margin-top:0;" onclick="window.HomeApp.confirmAdd(${p.id}, event, true)">Mua ngay</button>` +
+                        '</div>' +
+                        '</div>' +
+
+                        '<div class="product-info" onclick="window.HomeApp.viewDetail(' + p.id + ')">' +
+                        '<div class="product-tag">' + (p.danhMuc ? p.danhMuc.ten : 'BeeMate') + '</div>' +
+                        '<div class="product-name">' + p.ten + '</div>' +
+                        '<div class="product-price-row">' +
+                        '<div class="product-price">' + priceText + '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+                }
+
+                grid.innerHTML = html;
+                this.setupAnimations();
+            },
+
+            openSelection: async function(productId, event) {
+                if (event) event.stopPropagation();
+                this.closeAllSelections();
+
+                const card = document.getElementById('home-card-' + productId);
+                const product = this.state.products.find(function(p) { return p.id === productId; });
+                if (!product) return;
+
+                try {
+                    const res = await fetch('/api/products/' + productId + '/variants');
+                    if (!res.ok) throw new Error("Lỗi API");
+                    const variants = await res.json();
+
+                    if (!variants || variants.length === 0) {
+                        window.showToast("Sản phẩm đang được cập nhật kho", "warning"); return;
+                    }
+
+                    product.chiTietSanPhams = variants;
+
+                    card.classList.add('show-selection');
+                    document.getElementById('home-qa-backdrop').classList.add('show');
+
+                    this.tempSelection[productId] = { colorId: null, sizeId: null, sku: null };
+                    this.renderSelectionOptions(productId);
+
+                } catch (error) {
+                    console.error("Lỗi lấy variants:", error);
+                    window.showToast("Không thể kết nối máy chủ", "warning");
+                }
+            },
+
+            closeSelection: function(productId, event) {
+                if (event) event.stopPropagation();
+                this.closeAllSelections();
+            },
+
+            renderSelectionOptions: function(productId) {
+                const product = this.state.products.find(function(p) { return p.id === productId; });
+                const skus = product.chiTietSanPhams || [];
+                const colorsMap = new Map();
+                const sizesMap = new Map();
+
+                for (let i = 0; i < skus.length; i++) {
+                    const s = skus[i];
+                    if (s.mauSac) colorsMap.set(s.mauSac.id, s.mauSac);
+                    if (s.kichThuoc) sizesMap.set(s.kichThuoc.id, s.kichThuoc);
+                }
+
+                const colors = Array.from(colorsMap.values());
+                const sizes = Array.from(sizesMap.values());
+
+                const colorContainer = document.getElementById('home-qs-colors-' + productId);
+                const sizeContainer = document.getElementById('home-qs-sizes-' + productId);
+
+                const fallbackColorMap = {
+                    'trắng': '#ffffff', 'đen': '#1a1a1a', 'xám': '#c5cfc7', 'ghi': '#d4cfc9',
+                    'be': '#c4b49d', 'nâu': '#a89e93', 'rêu': '#3D5A4C', 'xanh rêu': '#3D5A4C',
+                    'đỏ': '#8b0000', 'hồng': '#ffc0cb', 'xanh biển': '#4682b4', 'xanh dương': '#4682b4'
+                };
+
+                let cHtml = '';
+                let selectedColorName = '';
+
+                for(let i=0; i<colors.length; i++) {
+                    const c = colors[i];
+                    const isActive = this.tempSelection[productId].colorId === c.id;
+                    if (isActive) selectedColorName = c.ten;
+                    const safeColorName = c.ten ? c.ten.toLowerCase().trim() : '';
+                    const hexCode = c.maMau || fallbackColorMap[safeColorName] || '#eeeeee';
+                    const activeClass = isActive ? ' active' : '';
+
+                    cHtml += '<div class="qs-dot' + activeClass + '" style="background:' + hexCode + '" title="' + c.ten + '" ' +
+                        'onclick="window.HomeApp.selectAttr(' + productId + ', \'color\', ' + c.id + ', event)"></div>';
+                }
+                colorContainer.innerHTML = cHtml;
+
+                const colorNameLabel = document.getElementById('home-qs-color-name-' + productId);
+                if (colorNameLabel) {
+                    colorNameLabel.innerText = selectedColorName ? '- ' + selectedColorName : '';
+                }
+
+                let sHtml = '';
+                for(let i=0; i<sizes.length; i++) {
+                    const s = sizes[i];
+                    const colorId = this.tempSelection[productId].colorId;
+                    let isAvailable = false;
+
+                    if (!colorId) {
+                        isAvailable = true;
+                    } else {
+                        for(let j=0; j<skus.length; j++) {
+                            if (skus[j].mauSac.id === colorId && skus[j].kichThuoc.id === s.id && skus[j].soLuong > 0) {
+                                isAvailable = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    const isActive = this.tempSelection[productId].sizeId === s.id ? ' active' : '';
+                    const isDis = !isAvailable ? ' disabled' : '';
+
+                    sHtml += '<button class="qs-size-btn' + isActive + isDis + '" ' +
+                        'onclick="window.HomeApp.selectAttr(' + productId + ', \'size\', ' + s.id + ', event)">' + s.ten + '</button>';
+                }
+                sizeContainer.innerHTML = sHtml;
+            },
+
+            selectAttr: function(productId, type, attrId, event) {
+                if (event) event.stopPropagation();
+
+                const product = this.state.products.find(function(p) { return p.id === productId; });
+                const skus = product.chiTietSanPhams || [];
+
+                if (type === 'color') {
+                    this.tempSelection[productId].colorId = attrId;
+                    this.tempSelection[productId].sizeId = null;
+
+                    const colorSku = skus.find(s => s.mauSac.id === attrId && s.hinhAnh);
+                    if (colorSku && colorSku.hinhAnh) {
+                        const imgEl = document.querySelector(`#home-card-${productId} .img-placeholder`);
+                        if (imgEl) {
+                            let imgUrl = colorSku.hinhAnh;
+                            if (imgUrl.includes('res.cloudinary.com')) {
+                                imgUrl = imgUrl.replace('/image/upload/', '/image/upload/c_fill,w_400,h_600,f_auto,q_auto/');
+                            }
+                            imgEl.style.transition = 'opacity 0.2s ease';
+                            imgEl.style.opacity = 0.5;
+                            setTimeout(() => {
+                                imgEl.src = imgUrl;
+                                imgEl.style.opacity = 1;
+                            }, 150);
+                        }
+                    }
+                }
+                else {
+                    this.tempSelection[productId].sizeId = attrId;
+                }
+
+                const sku = skus.find((s) => {
+                    return s.mauSac.id === this.tempSelection[productId].colorId &&
+                        s.kichThuoc.id === this.tempSelection[productId].sizeId;
+                });
+
+                if (sku) {
+                    this.tempSelection[productId].sku = sku;
+                    document.getElementById('home-qs-price-' + productId).innerText = new Intl.NumberFormat('vi-VN').format(sku.giaBan) + ' ₫';
+                }
+
+                this.renderSelectionOptions(productId);
+            },
+
+            confirmAdd: function(productId, event, isBuyNow) {
+                if (event) event.stopPropagation();
+                const selection = this.tempSelection[productId];
+
+                if (!selection.colorId && !selection.sizeId) { window.showToast("Vui lòng chọn màu sắc và kích cỡ", "warning"); return; }
+                if (!selection.colorId) { window.showToast("Bạn chưa chọn màu sắc sản phẩm", "warning"); return; }
+                if (!selection.sizeId) { window.showToast("Bạn chưa chọn kích cỡ sản phẩm", "warning"); return; }
+                if (!selection.sku) { window.showToast("Phiên bản này hiện đang hết hàng", "warning"); return; }
+
+                const sku = selection.sku;
+                const product = this.state.products.find(function(p) { return p.id === productId; });
+
+                let cart = JSON.parse(localStorage.getItem('bee_cart') || '[]');
+                let exist = cart.find(function(item) { return item.skuId === sku.id; });
+
+                if (exist) {
+                    if (exist.qty + 1 > sku.soLuong) { window.showToast("Vượt quá số lượng kho!", "warning"); return; }
+                    exist.qty++;
+                } else {
+                    cart.push({
+                        skuId: sku.id,
+                        productId: productId,
+                        name: product.ten,
+                        price: sku.giaBan,
+                        qty: 1,
+                        img: sku.hinhAnh || (product.hinhAnhs && product.hinhAnhs.length > 0 ? product.hinhAnhs[0].url : ''),
+                        colorName: sku.mauSac.ten,
+                        sizeName: sku.kichThuoc.ten,
+                        maxStock: sku.soLuong
                     });
+                }
+
+                localStorage.setItem('bee_cart', JSON.stringify(cart));
+                this.closeAllSelections();
+
+                if (window.updateCartBadge) window.updateCartBadge();
+
+                if (isBuyNow) {
+                    window.location.hash = 'checkout';
+                } else {
+                    window.showToast("Sản phẩm đã được cập nhật vào giỏ hàng", "success");
+                }
+            },
+
+            viewDetail: function(productId) {
+                const product = this.state.products.find(p => p.id === productId);
+                if (product) {
+                    let recent = JSON.parse(localStorage.getItem('bee_recent_viewed') || '[]');
+
+                    recent = recent.filter(item => item.id !== productId);
+
+                    recent.unshift({
+                        id: product.id,
+                        ten: product.ten,
+                        giaBan: product.giaBan,
+                        hinhAnh: product.hinhAnhs && product.hinhAnhs.length > 0 ? product.hinhAnhs[0].url : 'https://placehold.co/400x533'
+                    });
+
+                    if (recent.length > 8) recent.pop();
+
+                    localStorage.setItem('bee_recent_viewed', JSON.stringify(recent));
+                }
+
+                window.location.hash = 'detail?id=' + productId;
+            },
+
+            renderFallback: function() {
+                const mock = [
+                    { id: 1, ten: 'Áo Linen Basic', giaBan: 490000, chiTietSanPhams: [{id: 101, giaBan: 490000, soLuong: 10, mauSac: {id: 1, ten: 'Be', maMau: '#c4b49d'}, kichThuoc: {id: 1, ten: 'M'}}] },
+                    { id: 2, ten: 'T-Shirt Cotton', giaBan: 320000, chiTietSanPhams: [{id: 102, giaBan: 320000, soLuong: 5, mauSac: {id: 2, ten: 'Trắng', maMau: '#fff'}, kichThuoc: {id: 2, ten: 'L'}}] },
+                    { id: 3, ten: 'Áo Sơ Mi Lụa', giaBan: 450000, chiTietSanPhams: [{id: 103, giaBan: 450000, soLuong: 0, mauSac: {id: 3, ten: 'Xanh', maMau: '#4682b4'}, kichThuoc: {id: 1, ten: 'M'}}] },
+                    { id: 4, ten: 'Quần Âu Form Rộng', giaBan: 590000, chiTietSanPhams: [{id: 104, giaBan: 590000, soLuong: 2, mauSac: {id: 4, ten: 'Đen', maMau: '#1a1a1a'}, kichThuoc: {id: 3, ten: 'XL'}}] }
+                ];
+                this.state.products = mock;
+                this.renderProducts(mock);
+            },
+
+            setupAnimations: function() {
+                const reveals = document.querySelectorAll('#home-section .reveal:not(.visible)');
+                const observer = new IntersectionObserver(entries => {
+                    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
                 }, { threshold: 0.12 });
                 reveals.forEach(r => observer.observe(r));
-                setTimeout(() => {
-                    reveals.forEach(r => { if (r.getBoundingClientRect().top < window.innerHeight * 0.9) r.classList.add('visible'); });
-                }, 100);
-
-                const params = new URLSearchParams(window.location.hash.split('?')[1]);
-                if (params.get('scroll') === 'new-arrivals') {
-                    setTimeout(() => {
-                        document.getElementById('new-arrivals')
-                            ?.scrollIntoView({ behavior: 'smooth' });
-                    }, 100); // đợi fragment render xong
-                }
             }
         };
+
+        setTimeout(function() {
+            if (window.HomeApp) window.HomeApp.init();
+        }, 100);
     </script>
 </section>

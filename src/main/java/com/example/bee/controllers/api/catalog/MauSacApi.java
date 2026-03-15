@@ -3,26 +3,15 @@ package com.example.bee.controllers.api.catalog;
 import com.example.bee.entities.catalog.MauSac;
 import com.example.bee.repositories.catalog.MauSacRepository;
 import com.example.bee.repositories.products.SanPhamChiTietRepository;
-import com.example.bee.repositories.products.SanPhamRepository;
-import com.example.bee.repositories.promotion.KhuyenMaiRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -33,13 +22,10 @@ import java.util.Random;
 @RequestMapping("/api/mau-sac")
 @RequiredArgsConstructor
 public class MauSacApi {
-    @Autowired
+
+    private final SanPhamChiTietRepository sanPhamChiTietRepository;
     private MauSacRepository mauSacRepository;
 
-    @Autowired
-    private final SanPhamChiTietRepository sanPhamChiTietRepository;
-
-    // --- GEN MÃ MÀU (MS_ + 6 số) ---
     private String generateMa() {
         String ma;
         Random random = new Random();
@@ -76,22 +62,19 @@ public class MauSacApi {
         String ma = (body.getMa() == null || body.getMa().trim().isEmpty())
                 ? generateMa()
                 : body.getMa().trim().toUpperCase();
-
         if (ma.length() > 20 || !ma.matches("^[A-Z0-9_]*$")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã max 20, cho phép dấu '_'");
         }
-
-        if (ten.isEmpty() || ten.length() > 100) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên màu max 100!");
-
-        if (mauSacRepository.existsByTenIgnoreCase(ten)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Màu này có rồi!");
-        if (mauSacRepository.existsByMaIgnoreCase(ma)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã màu bị trùng!");
-
+        if (ten.isEmpty() || ten.length() > 100)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên màu max 100!");
+        if (mauSacRepository.existsByTenIgnoreCase(ten))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Màu này có rồi!");
+        if (mauSacRepository.existsByMaIgnoreCase(ma))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã màu bị trùng!");
         MauSac entity = new MauSac();
         entity.setMa(ma);
         entity.setTen(ten);
-        // Đã xóa ngày tạo, ngày sửa
         entity.setTrangThai(body.getTrangThai() != null ? body.getTrangThai() : true);
-
         return ResponseEntity.ok(mauSacRepository.save(entity));
     }
 
@@ -99,17 +82,13 @@ public class MauSacApi {
     public MauSac update(@PathVariable Integer id, @Valid @RequestBody MauSac body) {
         MauSac entity = mauSacRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         String newTen = body.getTen() != null ? body.getTen().trim() : "";
-
-        if (newTen.isEmpty() || newTen.length() > 100) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên màu max 100!");
-
+        if (newTen.isEmpty() || newTen.length() > 100)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên màu max 100!");
         if (!entity.getTen().equalsIgnoreCase(newTen) && mauSacRepository.existsByTenIgnoreCase(newTen)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Trùng tên màu!");
         }
-
         entity.setTen(newTen);
         entity.setTrangThai(body.getTrangThai() != null ? body.getTrangThai() : entity.getTrangThai());
-        // Đã xóa ngày sửa, người sửa
-
         return mauSacRepository.save(entity);
     }
 
@@ -117,9 +96,7 @@ public class MauSacApi {
     public ResponseEntity<?> toggleStatus(@PathVariable Integer id) {
         MauSac mauSac = mauSacRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-
         if (mauSac.getTrangThai() != null && mauSac.getTrangThai() == true) {
-            // Chú ý: Dùng sanPhamChiTietRepository vì màu sắc gắn ở bản ghi chi tiết
             boolean isUsed = sanPhamChiTietRepository.existsByMauSac_IdAndTrangThaiTrue(id);
             if (isUsed) {
                 return ResponseEntity.badRequest().body(Map.of(
@@ -127,7 +104,6 @@ public class MauSacApi {
                 ));
             }
         }
-
         mauSac.setTrangThai(!mauSac.getTrangThai());
         mauSacRepository.save(mauSac);
         return ResponseEntity.ok().build();

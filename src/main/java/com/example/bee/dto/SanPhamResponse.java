@@ -1,10 +1,9 @@
 package com.example.bee.dto;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -18,7 +17,7 @@ public class SanPhamResponse {
     private String tenDanhMuc;
     private String tenHang;
     private String tenChatLieu;
-    private Integer tongSoLuong; // Trường tổng kho bạn đang cần
+    private Integer tongSoLuong;
     private Boolean trangThai;
     private String anhDaiDien;
 }

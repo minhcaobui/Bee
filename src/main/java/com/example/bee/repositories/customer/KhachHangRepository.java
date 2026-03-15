@@ -12,14 +12,17 @@ import java.util.Optional;
 
 @Repository
 public interface KhachHangRepository extends JpaRepository<KhachHang, Integer> {
+
     boolean existsByMaIgnoreCase(String ma);
+
     boolean existsBySoDienThoai(String sdt);
+
     boolean existsByEmail(String email);
 
     boolean existsBySoDienThoaiAndIdNot(String sdt, Integer id);
+
     boolean existsByEmailAndIdNot(String email, Integer id);
 
-    // Hàm search cho trang danh sách
     @Query("SELECT k FROM KhachHang k WHERE " +
             "(:q IS NULL OR k.hoTen LIKE %:q% OR k.soDienThoai LIKE %:q% OR k.email LIKE %:q% OR k.ma LIKE %:q%) " +
             "AND (:trangThai IS NULL OR k.trangThai = :trangThai)")
@@ -28,4 +31,7 @@ public interface KhachHangRepository extends JpaRepository<KhachHang, Integer> {
     Optional<KhachHang> findBySoDienThoai(String sdt);
 
     List<KhachHang> findBySoDienThoaiContainingOrHoTenContaining(String q, String q1);
+
+    Optional<KhachHang> findByTaiKhoan_TenDangNhap(String name);
+
 }

@@ -6,13 +6,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public interface ChatLieuRepository extends JpaRepository<ChatLieu, Integer> {
 
     boolean existsByMaIgnoreCase(String ma);
-
 
     @Query("SELECT c FROM ChatLieu c WHERE " +
             "(:q IS NULL OR LOWER(c.ma) LIKE LOWER(CONCAT('%', :q, '%')) " +
@@ -23,6 +24,7 @@ public interface ChatLieuRepository extends JpaRepository<ChatLieu, Integer> {
                           Pageable pageable);
 
     boolean existsByTenIgnoreCase(String ten);
+
     List<ChatLieu> findByTrangThaiTrue();
 }
 

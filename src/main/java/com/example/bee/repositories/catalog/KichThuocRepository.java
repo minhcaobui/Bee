@@ -6,17 +6,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
+@Repository
 public interface KichThuocRepository extends JpaRepository<KichThuoc, Integer> {
 
     boolean existsByMaIgnoreCase(String ma);
-
-    boolean existsByMaIgnoreCaseAndIdNot(String ma, Integer id);
-
-    Optional<KichThuoc> findByMa(String ma);
 
     @Query("SELECT k FROM KichThuoc k WHERE " +  // ✅ FIX: KichThuoc
             "(:q IS NULL OR LOWER(k.ma) LIKE LOWER(CONCAT('%', :q, '%')) " +
@@ -27,5 +24,6 @@ public interface KichThuocRepository extends JpaRepository<KichThuoc, Integer> {
                            Pageable pageable);
 
     boolean existsByTenIgnoreCase(String newTen);
+
     List<KichThuoc> findByTrangThaiTrue();
 }

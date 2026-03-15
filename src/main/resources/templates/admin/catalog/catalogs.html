@@ -3,165 +3,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản Lý Thuộc Tính</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    <style>
-        /* --- CẤU HÌNH CHUNG --- */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --black: #000; --white: #fff; --gray-100: #f4f4f5; --gray-200: #e4e4e7; --gray-300: #d4d4d8; --font-size: 12.5px; }
-        body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--black); font-size: var(--font-size); line-height: 1.4; }
-        .container { max-width: 100%; padding: 20px 30px; }
-
-        /* --- ACTIONS BAR --- */
-        .actions-bar { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--gray-200); margin-bottom: 20px; padding-bottom: 0; }
-        .tabs { display: flex; gap: 30px; margin-bottom: 0; border: none; }
-        .tab { font-size: 12.5px; font-weight: 700; color: #888; padding: 0 0 12px 0; cursor: pointer; text-transform: uppercase; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: 0.2s; }
-        .tab:hover { color: #000; }
-        .tab.active { color: #000; border-bottom-color: #000; }
-        .btn { font-size: 11px; font-weight: 800; text-transform: uppercase; height: 30px; padding: 0 14px; background: #000; color: #fff; border: 1px solid #000; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; border-radius: 2px; }
-        .btn:hover { background: #333; }
-
-        /* --- SEARCH --- */
-        .search-section { margin-bottom: 15px; }
-        .search-wrapper { display: flex; gap: 15px; }
-        .search-input, .filter-select { padding: 8px 12px; font-size: 12.5px; border: 1px solid var(--gray-300); outline: none; background: #fff; height: 34px; border-radius: 2px; }
-        .search-input { width: 300px; }
-        .filter-select { width: 150px; }
-        .search-input:focus, .filter-select:focus { border-color: #000; }
-
-        /* --- TABLE --- */
-        .table-wrapper { border: 1px solid var(--gray-200); width: 100%; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 1000px; }
-        thead th { text-align: left; padding: 10px 15px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #666; background: #fafafa; border-bottom: 1px solid var(--gray-200); white-space: nowrap; }
-        tbody td { padding: 8px 15px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; font-size: 12.5px; word-wrap: break-word; }
-        tbody tr:hover { background: var(--gray-100); }
-
-        /* ICON BUTTONS */
-        .btn-icon { width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--gray-200); background: #fff; cursor: pointer; border-radius: 2px; transition: 0.2s; margin-left: 4px; }
-        .btn-icon:hover { border-color: #000; background: #000; color: #fff; }
-        .btn-icon.view:hover { background: #2563eb; border-color: #2563eb; }
-
-        /* --- PAGINATION --- */
-        /* Pagination Đồng Bộ */
-        .pagination-wrapper { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; }
-        .pagination-info { font-size: 11px; font-weight: 800; color: #888; text-transform: uppercase; }
-        .pagination { display: flex; gap: 5px; }
-        .page-number { min-width: 26px; height: 26px; font-size: 12px; font-weight: 700; background: transparent; border: 1px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 2px; transition: 0.2s; }
-        .page-number:hover:not(:disabled) { background: #eee; }
-        .page-number.active { background: #000; color: #fff; }
-        .page-number:disabled { opacity: 0.4; cursor: not-allowed; }
-
-        /* --- DRAWER --- */
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
-        .overlay.show { display: block; }
-        .drawer { position: fixed; top: 0; right: -450px; width: 450px; height: 100vh; background: #fff; border-left: 1px solid var(--gray-200); z-index: 1000; transition: 0.3s; display: flex; flex-direction: column; box-shadow: -5px 0 20px rgba(0,0,0,0.1); }
-        .drawer.show { right: 0; }
-        .drawer-header { padding: 15px 20px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center;}
-        .drawer-title { font-size: 14px; font-weight: 800; text-transform: uppercase; margin: 0; }
-        .drawer-body { flex: 1; padding: 20px; overflow-y: auto; }
-        .drawer-footer { padding: 15px 20px; border-top: 1px solid var(--gray-200); display: flex; gap: 10px; }
-        .form-group { margin-bottom: 15px; }
-        .form-label { font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; display: block; }
-        .form-input, .form-textarea { width: 100%; padding: 8px; font-size: 12.5px; border: 1px solid var(--gray-300); outline: none; }
-        .form-input:disabled, .form-textarea:disabled { background: #f9f9f9; color: #555; }
-        .form-input:focus { border-color: #000; }
-        .form-textarea { min-height: 80px; resize: vertical; }
-
-        /* Switch trong Form (Lớn) */
-        .switch-wrapper { display: flex; align-items: center; gap: 10px; }
-        .switch { width: 36px; height: 20px; position: relative; appearance: none; background: #ddd; outline: none; cursor: pointer; transition: 0.2s; }
-        .switch::before { content:''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #fff; transition: 0.2s; }
-        .switch:checked { background: #000; }
-        .switch:checked::before { left: 18px; }
-
-        /* Switch nhỏ dùng trong bảng */
-        .switch-sm { position: relative; display: inline-block; width: 30px; height: 16px; }
-        .switch-sm input { opacity: 0; width: 0; height: 0; }
-        .slider-sm { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 16px; }
-        .slider-sm:before { position: absolute; content: ""; height: 12px; width: 12px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider-sm { background-color: #000; }
-        input:checked + .slider-sm:before { transform: translateX(14px); }
-        .switch-sm.loading { opacity: 0.5; pointer-events: none; }
-
-        /* --- TOAST NOTIFICATION (STYLE GIỐNG KHUYẾN MÃI) --- */
-        .toast-container {
-            position: fixed;
-            top: 20px; /* Đưa lên TRÊN thay vì ở dưới */
-            right: 20px;
-            z-index: 10002;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .toast {
-            min-width: 280px;
-            padding: 14px 22px;
-            border-radius: 6px;
-            background: #fff;
-            color: #000;
-            /* Bóng đổ xịn hơn */
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-left: 5px solid #000;
-            /* Hiệu ứng trượt vào mượt mà (Cubic Bezier) */
-            animation: toastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
-            transition: all 0.5s ease;
-        }
-
-        .toast.success { border-left-color: #10b981; }
-        .toast.error { border-left-color: #ef4444; }
-        .toast.warning { border-left-color: #f59e0b; }
-
-        /* Hiệu ứng khi ẩn đi (Co lại) */
-        .toast.hiding {
-            transform: translateX(130%);
-            opacity: 0;
-            margin-top: -60px; /* Giúp các thông báo bên dưới trượt lên */
-        }
-
-        @keyframes toastSlideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        .empty-state { text-align: center; padding: 40px; color: #888; font-size: 12px; }
-
-        /* Ô tìm kiếm có icon */
-        .search-box { position: relative; width: 100%; }
-        .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 14px; pointer-events: none; }
-        .search-input { width: 100%; padding: 8px 12px 8px 36px !important; font-size: 12.5px; border: 1px solid var(--gray-300); outline: none; background: #fff; height: 34px; border-radius: 2px; }
-        .search-input:focus { border-color: #000; }
-
-        /* Quick Switch (Table) - Style Vuông */
-        .switch-sm { position: relative; display: inline-block; width: 30px; height: 16px; }
-        .switch-sm input { opacity: 0; width: 0; height: 0; }
-
-        /* Bỏ border-radius: 16px đi để nó vuông */
-        .slider-sm {
-            position: absolute; cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 0; /* Vuông chằn chặn */
-        }
-
-        /* Bỏ border-radius: 50% đi để cục trượt cũng vuông */
-        .slider-sm:before {
-            position: absolute; content: "";
-            height: 12px; width: 12px;
-            left: 2px; bottom: 2px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 0; /* Vuông chằn chặn */
-        }
-
-        /* Màu khi bật (Checked) */
-        input:checked + .slider-sm { background-color: #000; }
-        input:checked + .slider-sm:before { transform: translateX(14px); }
-
-        .switch-sm.loading { opacity: 0.5; pointer-events: none; }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/admin/catalog/catalog.css}">
 </head>
 <body>
 <div class="container">
@@ -175,7 +17,6 @@
         </nav>
         <button class="btn" id="btnAdd"><i class="bi bi-plus-lg"></i> THÊM MỚI</button>
     </div>
-
     <section class="search-section">
         <div style="display: flex; gap: 16px;">
             <div class="search-wrapper" style="flex: 1;">
@@ -195,48 +36,39 @@
             </select>
         </div>
     </section>
-
     <div class="table-wrapper">
         <table>
             <thead id="thead"></thead>
             <tbody id="tbody"></tbody>
         </table>
     </div>
-
     <div class="pagination-wrapper">
         <div class="pagination-info" id="info">Showing 0 items</div>
         <div class="pagination">
             <button class="page-number" id="prev">←</button>
-<!--            <span id="pageNumbers"></span>-->
             <button class="page-number" id="next">→</button>
         </div>
     </div>
 </div>
-
 <div class="overlay" id="overlay"></div>
 <aside class="drawer" id="drawer">
     <div class="drawer-header">
         <h3 class="drawer-title" id="drawerTitle">THÊM MỚI</h3>
     </div>
-
     <div class="drawer-body">
         <h5 style="font-weight:700; margin-bottom:10px; font-size:13px; color:#555;">1. Thông tin chung</h5>
-
         <div class="form-group">
             <label class="form-label">Mã thuộc tính <span style="font-weight:400; color:#888;">(Để trống tự sinh)</span></label>
             <input id="fMa" class="form-input" placeholder="Mã tự động..." disabled style="background: #f9fafb;">
         </div>
-
         <div class="form-group">
             <label class="form-label">Tên thuộc tính <span style="color:red">*</span> <span style="font-weight:400; color:#888;">(Tối đa 100 ký tự)</span></label>
             <input id="fTen" class="form-input" placeholder="Nhập tên thuộc tính...">
         </div>
-
         <div class="form-group" id="groupMoTa">
             <label class="form-label">Mô tả</label>
             <textarea id="fMoTa" class="form-input" style="height: 80px; resize: vertical; font-family: 'Inter', sans-serif;" placeholder="Nhập mô tả chi tiết..."></textarea>
         </div>
-
         <div class="form-group">
             <label class="form-label">Trạng thái</label>
             <div class="switch-wrapper">
@@ -244,10 +76,8 @@
                 <span class="switch-label">Kích hoạt</span>
             </div>
         </div>
-
         <div id="groupFullDetail" style="display: none; border-top: 1px solid #eee; padding-top: 20px; margin-top: 20px;">
             <h5 style="font-weight:700; margin-bottom:10px; font-size:13px; color:#555;">2. Thông tin hệ thống</h5>
-
             <div style="display: flex; gap: 15px;">
                 <div class="form-group" style="flex: 1;">
                     <label class="form-label">Ngày tạo</label>
@@ -260,326 +90,13 @@
             </div>
         </div>
     </div>
-
     <div class="drawer-footer">
         <button class="btn btn-secondary" id="btnClose" style="flex: 1;">Thoát</button>
         <button class="btn" id="btnSave" style="flex: 1;">Lưu</button>
     </div>
 </aside>
 <div class="toast-container" id="toastHost"></div>
-
-<script>
-    // --- 1. HÀM TOAST THÔNG BÁO ---
-    window.toast = function(message, type = 'success') {
-        const container = document.getElementById('toastHost');
-        if (!container) return;
-        const el = document.createElement('div');
-        el.className = `toast ${type}`;
-
-        const prefix = type === 'success' ? 'THÀNH CÔNG: ' : (type === 'error' ? 'LỖI: ' : 'THÔNG BÁO: ');
-
-        el.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-            <div style="display: flex; flex-direction: column;">
-                <span style="font-weight:700; font-size:11px; text-transform: uppercase; margin-bottom: 2px;">${prefix}</span>
-                <span style="font-weight:500; font-size:13px;">${message}</span>
-            </div>
-            <i class="bi bi-x-lg" style="cursor: pointer; margin-left: 10px; font-size: 14px; margin-top: 2px;" onclick="this.parentElement.parentElement.parentElement.remove()"></i>
-        </div>
-    `;
-
-        container.appendChild(el);
-        setTimeout(() => {
-            if (el.parentNode) {
-                el.classList.add('hiding');
-                el.addEventListener('transitionend', () => el.remove());
-            }
-        }, 3500);
-    };
-
-    // --- 2. ỨNG DỤNG CATALOG ---
-    const CatalogApp = {
-        state: { activeTab: 'danh-muc', hasDesc: true, page: 0, size: 10, totalPages: 0, q: '', trangThai: '', editingId: null },
-
-        init: function() { this.bindEvents(); this.loadData(); },
-
-        bindEvents: function() {
-            const self = this;
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.onclick = function() {
-                    if (self.state.activeTab === this.dataset.tab) return;
-                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    self.state.activeTab = this.dataset.tab;
-                    self.state.hasDesc = (this.dataset.hasDesc === 'true');
-                    self.state.page = 0; self.state.q = ''; self.state.trangThai = '';
-                    document.getElementById('search').value = '';
-                    document.getElementById('fTrangThaiFilter').value = '';
-                    self.loadData();
-                };
-            });
-
-            document.getElementById('btnAdd').onclick = () => self.openDrawer('create');
-            document.getElementById('btnSave').onclick = () => self.saveItem();
-            document.getElementById('btnClose').onclick = () => self.closeDrawer();
-            document.getElementById('overlay').onclick = () => self.closeDrawer();
-            document.getElementById('prev').onclick = () => { if(self.state.page > 0) { self.state.page--; self.loadData(); }};
-            document.getElementById('next').onclick = () => { if(self.state.page < self.state.totalPages - 1) { self.state.page++; self.loadData(); }};
-            document.getElementById('fTrangThaiFilter').onchange = (e) => { self.state.trangThai = e.target.value; self.state.page = 0; self.loadData(); };
-        },
-
-        getTabName: function() {
-            const map = { 'danh-muc': 'danh mục', 'hang': 'thương hiệu', 'chat-lieu': 'chất liệu', 'mau-sac': 'màu sắc', 'kich-thuoc': 'kích thước' };
-            return map[this.state.activeTab] || 'dữ liệu';
-        },
-
-        handleSearch: function(val) {
-            clearTimeout(this.timeout);
-            this.timeout = setTimeout(() => { this.state.q = val.trim(); this.state.page = 0; this.loadData(); }, 500);
-        },
-
-        loadData: async function() {
-            this.renderHeader();
-            const { activeTab, page, size, q, trangThai } = this.state;
-            const url = `/api/${activeTab}?page=${page}&size=${size}&q=${q}&trangThai=${trangThai}`;
-            try {
-                const res = await fetch(url);
-                const data = await res.json();
-                this.renderTable(data.content || []);
-                this.renderPagination(data);
-            } catch (err) { console.error(err); }
-        },
-
-        renderHeader: function() {
-            const extraCols = this.state.hasDesc ? `<th>MÔ TẢ</th><th>NGÀY TẠO</th>` : '';
-            document.getElementById('thead').innerHTML = `
-                <tr>
-                    <th style="width:50px; text-align:center;">STT</th>
-                    <th style="width:80px">MÃ</th>
-                    <th>TÊN</th>
-                    ${extraCols} <th style="text-align:center">TRẠNG THÁI</th>
-                    <th style="text-align:right">THAO TÁC</th>
-                </tr>`;
-        },
-
-        renderTable: function(list) {
-            const tbody = document.getElementById('tbody');
-            const colSpan = this.state.hasDesc ? 7 : 5;
-            if(list.length === 0) { tbody.innerHTML = `<tr><td colspan="${colSpan}" class="empty-state">Không có dữ liệu</td></tr>`; return; }
-
-            tbody.innerHTML = list.map((item, index) => {
-                const stt = (this.state.page * this.state.size) + index + 1;
-                let extraCells = '';
-                if (this.state.hasDesc) {
-                    const moTa = item.moTa || '—';
-                    const ngayTao = item.ngayTao ? new Date(item.ngayTao).toLocaleDateString('vi-VN') : '—';
-                    extraCells = `<td style="color:#666; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${moTa}</td>
-                                  <td style="font-size:12px; color:#888">${ngayTao}</td>`;
-                }
-
-                const toggleHtml = `
-                    <label class="switch-sm">
-                        <input type="checkbox" ${item.trangThai ? 'checked' : ''} onchange="window.CatalogApp.quickToggle(${item.id}, this)">
-                        <span class="slider-sm"></span>
-                    </label>
-                `;
-
-                return `<tr>
-                    <td style="text-align:center;">${stt}</td>
-                    <td>${item.ma || '—'}</td>
-                    <td style="font-weight:600">${item.ten || '—'}</td>
-                    ${extraCells}
-                    <td style="text-align:center;">${toggleHtml}</td>
-                    <td style="text-align:right">
-                        <button class="btn-icon view" onclick="CatalogApp.openDetail(${item.id})"><i class="bi bi-eye"></i></button>
-                        <button class="btn-icon" onclick="CatalogApp.openEdit(${item.id})"><i class="bi bi-pencil"></i></button>
-                    </td>
-                </tr>`;
-            }).join('');
-        },
-
-        // --- HÀM TOGGLE CÓ CONFIRM ---
-        quickToggle: async function(id, el) {
-            const originalState = !el.checked;
-            const actionText = el.checked ? "kích hoạt" : "ngừng hoạt động";
-            const name = this.getTabName();
-
-            // Gọi Toast Confirm trước
-            this.toastConfirm(
-                `Bạn có chắc chắn muốn ${actionText} ${name} này không?`,
-                async () => {
-                    // Nếu OK thì mới gọi API
-                    const parent = el.closest('.switch-sm');
-                    try {
-                        parent.classList.add('loading');
-                        const res = await fetch(`/api/${this.state.activeTab}/${id}/trang-thai`, { method: 'PATCH' });
-
-                        if (res.ok) {
-                            window.toast(`Cập nhật trạng thái thành công.`, 'success');
-                        } else {
-                            const err = await res.json();
-                            window.toast(err.message || "Lỗi cập nhật.", 'error');
-                            el.checked = originalState; // Rollback
-                        }
-                    } catch (e) {
-                        window.toast("Mất kết nối server!", 'error');
-                        el.checked = originalState;
-                    } finally {
-                        parent.classList.remove('loading');
-                    }
-                },
-                () => {
-                    // Nếu Hủy thì trả lại trạng thái cũ
-                    el.checked = originalState;
-                }
-            );
-        },
-
-        // --- HÀM CONFIRM (MỚI THÊM) ---
-        toastConfirm: function(message, onConfirm, onCancel) {
-            const container = document.getElementById('toastHost');
-            if (!container) return;
-
-            const el = document.createElement('div');
-            el.className = `toast warning`;
-            el.style.flexDirection = 'column';
-            el.style.alignItems = 'flex-start';
-            el.style.gap = '10px';
-
-            el.innerHTML = `
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <i class="bi bi-exclamation-circle-fill" style="color:#f59e0b; font-size:18px;"></i>
-                    <span style="font-weight:600; font-size:13px;">${message}</span>
-                </div>
-                <div style="display: flex; gap: 8px; width: 100%; justify-content: flex-end;">
-                    <button class="btn btn-secondary" id="toastCancel" style="height: 24px; font-size: 10px; padding: 0 10px;">HỦY</button>
-                    <button class="btn" id="toastOk" style="height: 24px; font-size: 10px; padding: 0 10px;">XÁC NHẬN</button>
-                </div>
-            `;
-
-            container.appendChild(el);
-
-            el.querySelector('#toastOk').onclick = () => { el.remove(); onConfirm(); };
-            el.querySelector('#toastCancel').onclick = () => { el.remove(); onCancel(); };
-        },
-
-        renderPagination: function(data) {
-            this.state.totalPages = data.totalPages;
-            document.getElementById('info').textContent = `${data.numberOfElements}/${data.totalElements} bản ghi`;
-            document.getElementById('prev').disabled = data.first;
-            document.getElementById('next').disabled = data.last;
-            const pageNumbers = document.getElementById('pageNumbers');
-            pageNumbers.innerHTML = '';
-            for(let i = 0; i < data.totalPages; i++) {
-                if(i === 0 || i === data.totalPages - 1 || (i >= this.state.page - 1 && i <= this.state.page + 1)) {
-                    const btn = document.createElement('button');
-                    btn.className = `page-number ${i === this.state.page ? 'active' : ''}`;
-                    btn.textContent = i + 1;
-                    btn.onclick = () => { this.state.page = i; this.loadData(); };
-                    pageNumbers.appendChild(btn);
-                }
-            }
-        },
-
-        openDrawer: function(mode, item) {
-            this.state.editingId = item ? item.id : null;
-            const titleEl = document.getElementById('drawerTitle');
-            const btnSave = document.getElementById('btnSave');
-            const fMa = document.getElementById('fMa');
-            const fTen = document.getElementById('fTen');
-            const fMoTa = document.getElementById('fMoTa');
-            const fTrangThai = document.getElementById('fTrangThai');
-            const groupFullDetail = document.getElementById('groupFullDetail');
-
-            if (mode === 'create') {
-                titleEl.textContent = 'THÊM MỚI';
-                btnSave.style.display = 'block'; groupFullDetail.style.display = 'none';
-                fMa.value = ''; fMa.disabled = false;
-                fTen.value = ''; fTen.disabled = false;
-                fMoTa.value = ''; fMoTa.disabled = false;
-                fTrangThai.checked = true; fTrangThai.disabled = false;
-            } else if (mode === 'edit') {
-                titleEl.textContent = 'CẬP NHẬT';
-                btnSave.style.display = 'block'; groupFullDetail.style.display = 'none';
-                fMa.value = item.ma || ''; fMa.disabled = true;
-                fTen.value = item.ten || ''; fTen.disabled = false;
-                fMoTa.value = item.moTa || ''; fMoTa.disabled = false;
-                fTrangThai.checked = item.trangThai; fTrangThai.disabled = false;
-            } else if (mode === 'view') {
-                titleEl.textContent = 'CHI TIẾT';
-                btnSave.style.display = 'none';
-                groupFullDetail.style.display = (this.state.hasDesc) ? 'block' : 'none';
-                fMa.value = item.ma || ''; fMa.disabled = true;
-                fTen.value = item.ten || ''; fTen.disabled = true;
-                fMoTa.value = item.moTa || ''; fMoTa.disabled = true;
-                fTrangThai.checked = item.trangThai; fTrangThai.disabled = true;
-                if(this.state.hasDesc) {
-                    document.getElementById('fNgayTao').value = item.ngayTao ? new Date(item.ngayTao).toLocaleString('vi-VN') : '';
-                    document.getElementById('fNgaySua').value = item.ngaySua ? new Date(item.ngaySua).toLocaleString('vi-VN') : '';
-                }
-            }
-
-            if(document.getElementById('groupMoTa')) {
-                document.getElementById('groupMoTa').style.display = this.state.hasDesc ? 'block' : 'none';
-            }
-            document.getElementById('overlay').classList.add('show');
-            document.getElementById('drawer').classList.add('show');
-        },
-
-        closeDrawer: function() {
-            document.getElementById('overlay').classList.remove('show');
-            document.getElementById('drawer').classList.remove('show');
-        },
-
-        openEdit: async function(id) {
-            try {
-                const res = await fetch(`/api/${this.state.activeTab}/${id}`);
-                const item = await res.json();
-                this.openDrawer('edit', item);
-            } catch(e) { console.error(e); }
-        },
-
-        openDetail: async function(id) {
-            try {
-                const res = await fetch(`/api/${this.state.activeTab}/${id}`);
-                const item = await res.json();
-                this.openDrawer('view', item);
-            } catch(e) { console.error(e); }
-        },
-
-        saveItem: async function() {
-            const ten = document.getElementById('fTen').value.trim();
-            if(!ten) { window.toast('Tên không được để trống', 'error'); return; }
-
-            const payload = { ten: ten, trangThai: document.getElementById('fTrangThai').checked };
-            const fMa = document.getElementById('fMa');
-            if(fMa && fMa.value.trim()) payload.ma = fMa.value.trim();
-            if(this.state.hasDesc) payload.moTa = document.getElementById('fMoTa').value.trim();
-
-            const id = this.state.editingId;
-            const url = id ? `/api/${this.state.activeTab}/${id}` : `/api/${this.state.activeTab}`;
-            const name = this.getTabName();
-
-            try {
-                const res = await fetch(url, { method: id ? 'PUT' : 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
-
-                if(!res.ok) {
-                    const err = await res.json();
-                    throw new Error(err.message || "Có lỗi xảy ra, vui lòng thử lại.");
-                }
-
-                if(id) window.toast(`Cập nhật thông tin ${name} thành công!`, 'success');
-                else window.toast(`Thêm mới ${name} vào hệ thống thành công!`, 'success');
-
-                this.closeDrawer(); this.loadData();
-            } catch(e) { window.toast(e.message, 'error'); }
-        }
-    };
-
-    window.CatalogApp = CatalogApp;
-    window.initCatalogs = function() { CatalogApp.init(); };
-    CatalogApp.init();
-</script>
+<script th:src="@{/js/admin/catalog/catalog.js}"></script>
 </body>
 
 

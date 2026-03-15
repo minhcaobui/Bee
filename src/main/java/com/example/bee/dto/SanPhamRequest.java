@@ -9,7 +9,6 @@ import java.util.List;
 public class SanPhamRequest {
     @NotBlank(message = "Tên không được để trống")
     private String ten;
-
     private String ma;
     private String moTa;
     private Integer idDanhMuc;

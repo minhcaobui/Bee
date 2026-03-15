@@ -2,7 +2,11 @@ package com.example.bee.entities.cart;
 
 import com.example.bee.entities.account.TaiKhoan;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -17,7 +21,6 @@ public class GioHang {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    // Quan hệ 1-1: Mỗi tài khoản chỉ có 1 giỏ hàng
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
             name = "id_tai_khoan",

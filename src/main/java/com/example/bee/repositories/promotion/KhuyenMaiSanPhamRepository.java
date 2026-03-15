@@ -11,10 +11,9 @@ import java.util.List;
 
 @Repository
 public interface KhuyenMaiSanPhamRepository extends JpaRepository<KhuyenMaiSanPham, Integer> {
-    // 1. Lấy danh sách SP theo ID khuyến mãi (để tích sẵn checkbox khi sửa)
+
     List<KhuyenMaiSanPham> findAllByIdKhuyenMai(Integer idKhuyenMai);
 
-    // 2. Xóa hết SP cũ khi cập nhật khuyến mãi
     @Modifying
     @Query("DELETE FROM KhuyenMaiSanPham k WHERE k.idKhuyenMai = :idKhuyenMai")
     void deleteByIdKhuyenMai(@Param("idKhuyenMai") Integer idKhuyenMai);

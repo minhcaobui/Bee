@@ -26,10 +26,4 @@ public interface MaGiamGiaRepository extends JpaRepository<MaGiamGia, Integer> {
     boolean existsByMaCodeIgnoreCase(String maCode);
 
     Optional<MaGiamGia> findByMaCode(String code);
-
-    @Modifying
-    @org.springframework.transaction.annotation.Transactional
-    @Query("UPDATE MaGiamGia v SET v.trangThai = false " +
-            "WHERE v.trangThai = true AND (v.ngayKetThuc < :now OR v.luotSuDung >= v.soLuong)")
-    void autoDeactivateExpiredVouchers(@org.springframework.data.repository.query.Param("now") LocalDateTime now);
 }

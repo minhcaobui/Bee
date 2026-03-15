@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập / Đăng ký - BEEMATE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/login/login.css}">
+</head>
+<body>
+<div class="auth-wrapper">
+    <div class="auth-logo">B E E M A T E</div>
+    <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchTab('login')">Đăng nhập</button>
+        <button class="auth-tab" onclick="switchTab('register')">Đăng ký nhanh</button>
+    </div>
+    <div id="form-login" class="auth-form active">
+        <div th:if="${param.error}" class="error-message">
+            Tài khoản hoặc mật khẩu không chính xác.
+        </div>
+        <div th:if="${param.logout}"
+             style="background: #f0fdf4; color: #166534; padding: 12px 16px; font-size: 13px; border-left: 3px solid #166534; margin-bottom: 24px;">
+            Bạn đã đăng xuất thành công.
+        </div>
+        <div th:if="${param.registered}"
+             style="background: #f0fdf4; color: #166534; padding: 12px 16px; font-size: 13px; border-left: 3px solid #166534; margin-bottom: 24px;">
+            Đăng ký tài khoản thành công! Vui lòng đăng nhập.
+        </div>
+        <div th:if="${param.regError}" class="error-message" th:text="${param.regError}">
+            Lỗi đăng ký
+        </div>
+        <form th:action="@{/login}" method="POST">
+            <div class="form-group">
+                <label class="form-label">Số điện thoại / Tên đăng nhập</label>
+                <input type="text" name="username" class="form-input" placeholder="Nhập số điện thoại..." required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Mật khẩu</label>
+                <input type="password" name="password" id="login-pw" class="form-input" placeholder="Nhập mật khẩu..."
+                       required>
+                <button type="button" class="toggle-pw-btn" onclick="togglePassword('login-pw')">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="1.5"
+                         fill="none">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="form-options">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="remember-me"> Ghi nhớ tôi
+                </label>
+                <a href="#" class="forgot-link">Quên mật khẩu?</a>
+            </div>
+            <button type="submit" class="btn-submit">Đăng nhập</button>
+        </form>
+    </div>
+    <div id="form-register" class="auth-form">
+        <form th:action="@{/register}" method="POST" id="registerForm">
+            <div class="form-group">
+                <label class="form-label">Họ và Tên</label>
+                <input type="text" name="hoTen" class="form-input" placeholder="VD: Nguyễn Văn A" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Số điện thoại</label>
+                <input type="tel" name="soDienThoai" id="reg-phone" class="form-input"
+                       placeholder="Dùng để đăng nhập..." pattern="^0[0-9]{9}$"
+                       title="Vui lòng nhập đúng số điện thoại (VD: 0987654321)" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Mật khẩu</label>
+                <input type="password" name="password" id="reg-pw" class="form-input" placeholder="Tối thiểu 8 ký tự..."
+                       required>
+                <button type="button" class="toggle-pw-btn" onclick="togglePassword('reg-pw')">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="1.5"
+                         fill="none">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </button>
+            </div>
+            <button type="submit" class="btn-submit">Tạo tài khoản</button>
+        </form>
+    </div>
+</div>
+<script th:src="@{/js/login/login.js}"></script>
+</body>
+</html>

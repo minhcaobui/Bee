@@ -6,17 +6,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
+@Repository
 public interface MauSacRepository extends JpaRepository<MauSac, Integer> {
 
     boolean existsByMaIgnoreCase(String ma);
-
-    boolean existsByMaIgnoreCaseAndIdNot(String ma, Integer id);
-
-    Optional<MauSac> findByMa(String ma);
 
     @Query("SELECT m FROM MauSac m WHERE " +  // ✅ FIX: MauSac thay vì ChatLieu
             "(:q IS NULL OR LOWER(m.ma) LIKE LOWER(CONCAT('%', :q, '%')) " +
@@ -27,5 +24,6 @@ public interface MauSacRepository extends JpaRepository<MauSac, Integer> {
                         Pageable pageable);
 
     boolean existsByTenIgnoreCase(String newTen);
+
     List<MauSac> findByTrangThaiTrue();
 }

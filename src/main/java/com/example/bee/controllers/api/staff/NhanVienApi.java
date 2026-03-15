@@ -7,7 +7,7 @@ import com.example.bee.entities.staff.VT;
 import com.example.bee.repositories.staff.NVRepository;
 import com.example.bee.repositories.staff.TKRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
@@ -18,7 +18,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,23 +25,16 @@ import java.util.Random;
 
 @Controller
 @RequestMapping("/api/admin/nhan-vien")
+@RequiredArgsConstructor
 public class NhanVienApi {
-    @Autowired
-    private NVRepository nvRepo;
-    @Autowired private TKRepository tkRepo;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    // Kéo cấu hình Mail vào
-    @Autowired
-    private JavaMailSender mailSender;
-
+    private static final Map<String, String> otpStorage = new HashMap<>();
+    private final NVRepository nvRepo;
+    private final TKRepository tkRepo;
+    private final PasswordEncoder passwordEncoder;
+    private final JavaMailSender mailSender;
     @Value("${spring.mail.username}")
     private String senderEmail;
-
-    // Bộ nhớ lưu OTP tạm thời
-    private static final Map<String, String> otpStorage = new HashMap<>();
 
     @PostMapping("/send-otp")
     @ResponseBody
@@ -50,7 +42,6 @@ public class NhanVienApi {
         try {
             String otp = String.format("%06d", new Random().nextInt(999999));
             otpStorage.put(email, otp);
-
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(senderEmail);
             message.setTo(email);
@@ -59,7 +50,6 @@ public class NhanVienApi {
                     + "Mã xác thực OTP của bạn là: " + otp + "\n\n"
                     + "Vui lòng nhập mã này vào hệ thống để hoàn tất.\n"
                     + "Trân trọng,\nBan Quản Trị Hệ Thống BeeMate.");
-
             mailSender.send(message); // Bắn mail đi
             return ResponseEntity.ok("Đã gửi mã OTP thành công đến email: " + email);
         } catch (Exception e) {
@@ -84,11 +74,12 @@ public class NhanVienApi {
     public ResponseEntity<?> checkEmail(@RequestParam String email, @RequestParam(required = false) Integer id) {
         if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"))
             return ResponseEntity.badRequest().body("Email không đúng định dạng!");
-
         if (id == null) {
-            if (nvRepo.existsByEmail(email)) return ResponseEntity.badRequest().body("Email này đã tồn tại trong hệ thống!");
+            if (nvRepo.existsByEmail(email))
+                return ResponseEntity.badRequest().body("Email này đã tồn tại trong hệ thống!");
         } else {
-            if (nvRepo.existsByEmailAndIdNot(email, id)) return ResponseEntity.badRequest().body("Email này đã thuộc về tài khoản khác!");
+            if (nvRepo.existsByEmailAndIdNot(email, id))
+                return ResponseEntity.badRequest().body("Email này đã thuộc về tài khoản khác!");
         }
         return ResponseEntity.ok("Email hợp lệ");
     }
@@ -98,11 +89,12 @@ public class NhanVienApi {
     public ResponseEntity<?> checkPhone(@RequestParam String phone, @RequestParam(required = false) Integer id) {
         if (!phone.matches("^0[0-9]{9}$"))
             return ResponseEntity.badRequest().body("SĐT phải đủ 10 số và bắt đầu bằng 0!");
-
         if (id == null) {
-            if (nvRepo.existsBySoDienThoai(phone)) return ResponseEntity.badRequest().body("Số điện thoại này đã tồn tại trong hệ thống!");
+            if (nvRepo.existsBySoDienThoai(phone))
+                return ResponseEntity.badRequest().body("Số điện thoại này đã tồn tại trong hệ thống!");
         } else {
-            if (nvRepo.existsBySoDienThoaiAndIdNot(phone, id)) return ResponseEntity.badRequest().body("Số điện thoại này đã thuộc về nhân viên khác!");
+            if (nvRepo.existsBySoDienThoaiAndIdNot(phone, id))
+                return ResponseEntity.badRequest().body("Số điện thoại này đã thuộc về nhân viên khác!");
         }
         return ResponseEntity.ok("SĐT hợp lệ");
     }
@@ -130,7 +122,6 @@ public class NhanVienApi {
     public ResponseEntity<?> toggleStatus(@PathVariable Integer id) {
         NV nv = nvRepo.findById(id).orElse(null);
         if (nv == null) return ResponseEntity.notFound().build();
-
         nv.setTrangThai(!nv.getTrangThai());
         nvRepo.save(nv);
         return ResponseEntity.ok(nv.getTrangThai() ? "Hồ sơ đã được kích hoạt!" : "Nhân viên đã tạm nghỉ việc!");
@@ -143,34 +134,36 @@ public class NhanVienApi {
                                   @RequestParam(value = "password", required = false) String pass,
                                   @RequestParam(value = "confirmPassword", required = false) String confirm) {
         try {
-            if (nv.getHoTen() == null || nv.getHoTen().trim().isEmpty()) return ResponseEntity.badRequest().body("Họ tên không được để trống!");
-            if (nv.getSoDienThoai() == null || nv.getSoDienThoai().isBlank()) return ResponseEntity.badRequest().body("Số điện thoại không được để trống!");
+            if (nv.getHoTen() == null || nv.getHoTen().trim().isEmpty())
+                return ResponseEntity.badRequest().body("Họ tên không được để trống!");
+            if (nv.getSoDienThoai() == null || nv.getSoDienThoai().isBlank())
+                return ResponseEntity.badRequest().body("Số điện thoại không được để trống!");
 
-            if (!nv.getSoDienThoai().matches("^0[0-9]{9}$")) return ResponseEntity.badRequest().body("SĐT phải đủ 10 số và bắt đầu bằng 0!");
-            if (nv.getEmail() == null || nv.getEmail().isBlank()) return ResponseEntity.badRequest().body("Email không được để trống!");
-
+            if (!nv.getSoDienThoai().matches("^0[0-9]{9}$"))
+                return ResponseEntity.badRequest().body("SĐT phải đủ 10 số và bắt đầu bằng 0!");
+            if (nv.getEmail() == null || nv.getEmail().isBlank())
+                return ResponseEntity.badRequest().body("Email không được để trống!");
             if (!nv.getEmail().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"))
                 return ResponseEntity.badRequest().body("Email không đúng định dạng!");
-
             if (nv.getNgaySinh() == null) return ResponseEntity.badRequest().body("Ngày sinh không được để trống!");
-
             java.time.LocalDate ngaySinh = nv.getNgaySinh();
             java.time.LocalDate hienTai = java.time.LocalDate.now();
             int tuoi = java.time.Period.between(ngaySinh, hienTai).getYears();
             if (tuoi < 15) return ResponseEntity.badRequest().body("Nhân viên phải từ đủ 15 tuổi trở lên!");
-
             NV target;
             boolean isNew = (nv.getId() == null);
-
             if (!isNew) {
                 target = nvRepo.findByIdWithTaiKhoan(nv.getId()).orElseThrow();
-                if (target.getChucVu() != null && target.getChucVu().getId() == 1) return ResponseEntity.badRequest().body("Thông tin Admin là bảo mật, không thể xem hoặc sửa!");
-                if (nvRepo.existsBySoDienThoaiAndIdNot(nv.getSoDienThoai(), nv.getId())) return ResponseEntity.badRequest().body("Số điện thoại này đã thuộc về nhân viên khác!");
-                if (nvRepo.existsByEmailAndIdNot(nv.getEmail(), nv.getId())) return ResponseEntity.badRequest().body("Email/Tài khoản này đã tồn tại!");
+                if (target.getChucVu() != null && target.getChucVu().getId() == 1)
+                    return ResponseEntity.badRequest().body("Thông tin Admin là bảo mật, không thể xem hoặc sửa!");
+                if (nvRepo.existsBySoDienThoaiAndIdNot(nv.getSoDienThoai(), nv.getId()))
+                    return ResponseEntity.badRequest().body("Số điện thoại này đã thuộc về nhân viên khác!");
+                if (nvRepo.existsByEmailAndIdNot(nv.getEmail(), nv.getId()))
+                    return ResponseEntity.badRequest().body("Email/Tài khoản này đã tồn tại!");
             } else {
-                if (nvRepo.existsBySoDienThoai(nv.getSoDienThoai())) return ResponseEntity.badRequest().body("Số điện thoại đã tồn tại!");
+                if (nvRepo.existsBySoDienThoai(nv.getSoDienThoai()))
+                    return ResponseEntity.badRequest().body("Số điện thoại đã tồn tại!");
                 if (nvRepo.existsByEmail(nv.getEmail())) return ResponseEntity.badRequest().body("Email đã tồn tại!");
-
                 target = new NV();
                 target.setMa("TEMP");
                 target.setTrangThai(true);
@@ -178,28 +171,22 @@ public class NhanVienApi {
                 cv.setId(2);
                 target.setChucVu(cv);
             }
-
             TK tk = (target.getTaiKhoan() == null) ? new TK() : target.getTaiKhoan();
             tk.setTenDangNhap(nv.getEmail());
-
             if (isNew) {
-                // Tự động set pass 12345678 và mã hóa ngay
                 tk.setMatKhau(passwordEncoder.encode("12345678"));
                 tk.setTrangThai(true);
                 VT vt = new VT();
                 vt.setId(2);
                 tk.setVaiTro(vt);
             } else {
-                // Sửa pass nếu người dùng có gõ vào
                 if (pass != null && !pass.trim().isEmpty()) {
                     if (!pass.equals(confirm)) return ResponseEntity.badRequest().body("Mật khẩu xác nhận không khớp!");
                     tk.setMatKhau(passwordEncoder.encode(pass));
                 }
             }
-
             TK savedTk = tkRepo.save(tk);
             target.setTaiKhoan(savedTk);
-
             target.setHoTen(nv.getHoTen());
             target.setSoDienThoai(nv.getSoDienThoai());
             target.setEmail(nv.getEmail());
@@ -207,25 +194,17 @@ public class NhanVienApi {
             target.setGioiTinh(nv.getGioiTinh());
             if (nv.getDiaChi() != null) target.setDiaChi(nv.getDiaChi());
             target.setTrangThai(nv.getTrangThai());
-
-            // [THÊM MỚI] Ép buộc trạng thái hoạt động 100% nếu là nhân viên mới
             if (isNew) {
                 target.setTrangThai(true);
             }
-
-            // ==========================================
-            // TÍCH HỢP CLOUDINARY - THAY THẾ CHỖ MÃ HÓA CŨ
-            // ==========================================
             if (nv.getHinhAnh() != null && !nv.getHinhAnh().trim().isEmpty()) {
                 target.setHinhAnh(nv.getHinhAnh());
             }
-
             NV saved = nvRepo.save(target);
             if (isNew) {
                 saved.setMa(String.format("NV%03d", saved.getId()));
                 nvRepo.save(saved);
             }
-
             return ResponseEntity.ok("Lưu hồ sơ thành công!");
         } catch (Exception e) {
             e.printStackTrace();

@@ -10,9 +10,13 @@ import java.util.Date;
 
 @Entity
 @Table(name = "thanh_toan")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ThanhToan {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -25,13 +29,13 @@ public class ThanhToan {
     private BigDecimal soTien;
 
     @Column(nullable = false, length = 50)
-    private String phuongThuc; // TIEN_MAT, CHUYEN_KHOAN, VNPAY...
+    private String phuongThuc;
 
-    @Builder.Default // THÊM DÒNG NÀY VÀO
+    @Builder.Default
     @Column(length = 20)
-    private String loaiThanhToan = "THANH_TOAN"; // THANH_TOAN, HOAN_TIEN
+    private String loaiThanhToan = "THANH_TOAN";
 
-    @Builder.Default // THÊM CẢ VÀO ĐÂY NỮA CHO CHẮC CÚ
+    @Builder.Default
     @Column(length = 20)
     private String trangThai = "THANH_CONG";
 

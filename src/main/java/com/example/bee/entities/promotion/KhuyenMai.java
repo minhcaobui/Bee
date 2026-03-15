@@ -2,16 +2,7 @@ package com.example.bee.entities.promotion;
 
 import com.example.bee.entities.product.SanPham;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,6 +20,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class KhuyenMai {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -40,7 +32,7 @@ public class KhuyenMai {
     private String ten;
 
     @Column(name = "loai", nullable = false, length = 20)
-    private String loai; // PERCENT hoặc AMOUNT
+    private String loai;
 
     @Column(name = "gia_tri", nullable = false)
     private BigDecimal giaTri;

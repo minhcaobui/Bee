@@ -1,9 +1,25 @@
 <section id="account-section">
     <style>
         #account-section { min-height: 100vh; background: var(--bg); }
+
+        /* ── MÀN HÌNH CHƯA ĐĂNG NHẬP (GUEST VIEW) ── */
+        #guest-view { display: none; padding: 100px 20px; animation: fadeIn 0.5s ease; }
+        .guest-container { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; max-width: 500px; margin: 0 auto; background: var(--white); padding: 60px 40px; border: 1px solid rgba(0,0,0,0.06); border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
+        .guest-icon { width: 72px; height: 72px; border-radius: 50%; background: rgba(61,90,76,0.06); color: var(--accent); display: flex; align-items: center; justify-content: center; margin-bottom: 24px; }
+        .guest-icon svg { width: 32px; height: 32px; stroke: currentColor; fill: none; }
+        .guest-title { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 400; margin-bottom: 12px; }
+        .guest-desc { font-size: 14px; color: var(--muted); font-weight: 300; margin-bottom: 36px; line-height: 1.6; }
+        .guest-actions { display: flex; gap: 16px; width: 100%; justify-content: center; flex-wrap: wrap;}
+        .guest-btn-login { padding: 14px 32px; background: var(--text); color: white; border: none; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: 0.3s; text-decoration: none; border-radius: 2px;}
+        .guest-btn-login:hover { background: var(--accent); }
+        .guest-btn-shop { padding: 14px 32px; background: transparent; color: var(--text); border: 1px solid rgba(0,0,0,0.2); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: 0.3s; text-decoration: none; border-radius: 2px;}
+        .guest-btn-shop:hover { border-color: var(--text); }
+
+        /* ── MÀN HÌNH ĐÃ ĐĂNG NHẬP (ACCOUNT VIEW) ── */
+        #account-view { display: none; }
         .account-layout { display: grid; grid-template-columns: 260px 1fr; gap: 0; min-height: 80vh; }
 
-        /* ── SIDEBAR ── */
+        /* Sidebar */
         .account-sidebar { background: var(--white); border-right: 1px solid rgba(0,0,0,0.07); padding: 60px 0; position: sticky; top: 125px; height: fit-content; }
         .account-user { padding: 0 36px 40px; border-bottom: 1px solid rgba(0,0,0,0.07); margin-bottom: 28px; }
         .account-avatar-wrap { position: relative; width: 64px; margin-bottom: 16px; }
@@ -24,49 +40,58 @@
         .account-logout-btn:hover { color: #c08060; }
         .account-logout-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
 
-        /* ── PANELS ── */
+        /* Panels */
         .account-content { padding: 60px; }
         .account-panel { display: none; }
-        .account-panel.active { display: block; }
+        .account-panel.active { display: block; animation: fadeIn 0.4s ease; }
         .account-panel-title { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 300; margin-bottom: 8px; }
         .account-panel-subtitle { font-size: 13px; color: var(--muted); font-weight: 300; margin-bottom: 48px; }
 
-        /* ── OVERVIEW ── */
+        /* Overview */
         .account-overview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: rgba(0,0,0,0.06); margin-bottom: 52px; }
         .account-stat-card { background: var(--white); padding: 32px 28px; }
         .account-stat-num { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 300; color: var(--accent); line-height: 1; margin-bottom: 8px; }
         .account-stat-label { font-size: 12px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
         .account-recent-title { font-size: 11px; letter-spacing: 0.2em; color: var(--accent); text-transform: uppercase; font-weight: 500; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
         .account-recent-title::before { content:''; width:20px; height:1px; background:var(--accent); }
-        .account-recent-order { display: grid; grid-template-columns: 1fr auto auto; gap: 24px; align-items: center; padding: 20px 0; border-bottom: 1px solid rgba(0,0,0,0.06); }
+        .account-recent-order { display: grid; grid-template-columns: 1fr auto auto; gap: 24px; align-items: center; padding: 20px 0; border-bottom: 1px solid rgba(0,0,0,0.06); cursor: pointer;}
+        .account-recent-order:hover { background: rgba(0,0,0,0.01); }
         .account-order-id { font-size: 13px; font-weight: 500; margin-bottom: 4px; letter-spacing: 0.05em; }
         .account-order-meta { font-size: 12px; color: var(--muted); font-weight: 300; }
         .account-order-total { font-size: 15px; font-weight: 400; text-align: right; }
-        .account-order-status { padding: 6px 14px; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 500; }
+        .account-order-status { padding: 6px 14px; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 500; border-radius: 2px; }
         .status-delivered { background: rgba(61,90,76,0.1); color: var(--accent); }
         .status-shipping { background: rgba(192,128,96,0.1); color: #c08060; }
         .status-processing { background: rgba(0,0,0,0.05); color: var(--muted); }
         .status-cancelled { background: rgba(192,60,60,0.08); color: #c03c3c; }
 
-        /* ── ORDERS ── */
+        /* Orders */
         .orders-filter-bar { display: flex; gap: 0; margin-bottom: 32px; border-bottom: 1px solid rgba(0,0,0,0.08); }
         .orders-filter-tab { padding: 12px 20px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border: none; background: none; font-family: 'DM Sans', sans-serif; color: var(--muted); font-weight: 400; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; position: relative; bottom: -1px; white-space: nowrap; }
         .orders-filter-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
         .orders-filter-tab:hover { color: var(--text); }
 
-        .account-order-card { background: var(--white); border: 1px solid rgba(0,0,0,0.07); margin-bottom: 16px; overflow: hidden; }
-        .account-order-card-header { display: flex; justify-content: space-between; align-items: flex-start; padding: 24px 28px; border-bottom: 1px solid rgba(0,0,0,0.06); }
+        .account-order-card { background: var(--white); border: 1px solid rgba(0,0,0,0.07); margin-bottom: 16px; overflow: hidden; border-radius: 4px; }
+        .account-order-card-header { display: flex; justify-content: space-between; align-items: flex-start; padding: 24px 28px; border-bottom: 1px solid rgba(0,0,0,0.06); background: #fcfcfc;}
         .order-header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-
-        /* Timeline */
         .order-timeline { padding: 24px 28px; border-bottom: 1px solid rgba(0,0,0,0.06); }
         .order-timeline-label { font-size: 10px; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; margin-bottom: 20px; font-weight: 400; }
         .order-timeline-steps { display: flex; align-items: flex-start; gap: 0; }
         .order-timeline-step { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; position: relative; }
-        .order-timeline-step:not(:last-child)::after { content: ''; position: absolute; top: 13px; left: calc(50% + 14px); width: calc(100% - 28px); height: 1px; background: rgba(0,0,0,0.1); z-index: 0; }
+        /* Đảm bảo thanh nối (line) hiển thị chuẩn cho 4 bước */
+        .order-timeline-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 13px;
+            left: calc(50% + 14px);
+            width: calc(100% - 28px);
+            height: 1px;
+            background: rgba(0,0,0,0.1);
+            z-index: 0;
+        }
         .order-timeline-step.done:not(:last-child)::after { background: var(--accent); }
-        .order-step-dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.1); background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 1; position: relative; }
-        .order-step-dot svg { width: 12px; height: 12px; stroke: var(--muted); fill: none; }
+        .order-step-dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.1); background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 1; position: relative; transition: 0.3s; }
+        .order-step-dot svg { width: 12px; height: 12px; stroke: var(--muted); fill: none; transition: 0.3s; }
         .order-timeline-step.done .order-step-dot { background: var(--accent); border-color: var(--accent); }
         .order-timeline-step.done .order-step-dot svg { stroke: white; }
         .order-timeline-step.current .order-step-dot { border-color: #c08060; background: white; }
@@ -75,118 +100,123 @@
         .order-timeline-step.done .order-step-label { color: var(--accent); font-weight: 500; }
         .order-timeline-step.current .order-step-label { color: #c08060; font-weight: 500; }
 
-        /* Product detail collapsible */
-        .order-detail-body { display: none; }
-        .order-detail-body.open { display: block; }
-        .order-products-detail { padding: 8px 28px 4px; border-bottom: 1px solid rgba(0,0,0,0.06); }
-        .order-product-row { display: grid; grid-template-columns: 56px 1fr auto; gap: 16px; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(0,0,0,0.04); }
-        .order-product-row:last-child { border-bottom: none; }
-        .order-product-img { width: 56px; height: 72px; overflow: hidden; }
-        .order-product-img-bg { width: 100%; height: 100%; }
-        .order-product-name { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 400; margin-bottom: 4px; }
-        .order-product-variant { font-size: 11px; color: var(--muted); font-weight: 300; }
-        .order-product-price { font-size: 14px; font-weight: 400; text-align: right; white-space: nowrap; }
-
         .account-order-card-footer { display: flex; justify-content: space-between; align-items: center; padding: 16px 28px; }
         .order-total-text { font-size: 13px; color: var(--muted); font-weight: 300; }
         .order-total-text strong { color: var(--text); font-weight: 500; font-size: 15px; }
-        .order-actions { display: flex; gap: 10px; }
-        .account-reorder-btn { font-size: 11px; letter-spacing: 0.1em; color: var(--accent); text-transform: uppercase; background: none; border: 1px solid var(--accent); padding: 10px 20px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 400; transition: background 0.2s, color 0.2s; }
+        .account-reorder-btn { font-size: 11px; letter-spacing: 0.1em; color: var(--accent); text-transform: uppercase; background: none; border: 1px solid var(--accent); padding: 10px 20px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 400; transition: background 0.2s, color 0.2s; border-radius: 2px; text-decoration:none;}
         .account-reorder-btn:hover { background: var(--accent); color: white; }
-        .order-detail-toggle { font-size: 11px; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; background: none; border: 1px solid rgba(0,0,0,0.1); padding: 10px 20px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 400; transition: border-color 0.2s, color 0.2s; display: flex; align-items: center; gap: 6px; }
-        .order-detail-toggle:hover { border-color: var(--text); color: var(--text); }
-        .order-detail-toggle svg { width: 12px; height: 12px; stroke: currentColor; fill: none; transition: transform 0.3s; }
-        .order-detail-toggle.open svg { transform: rotate(180deg); }
 
-        /* ── WISHLIST ── */
-        .account-wishlist-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        .account-wish-card { background: var(--white); position: relative; overflow: hidden; }
-        .account-wish-img { width: 100%; aspect-ratio: 3/4; overflow: hidden; position: relative; }
-        .account-wish-img-bg { width: 100%; height: 100%; transition: transform 0.6s ease; }
-        .account-wish-card:hover .account-wish-img-bg { transform: scale(1.04); }
-        .account-wish-remove { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; background: rgba(255,255,255,0.9); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2; }
-        .account-wish-remove svg { width: 14px; height: 14px; stroke: var(--muted); fill: none; }
-        .account-wish-info { padding: 16px 16px 20px; }
-        .account-wish-name { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 400; margin-bottom: 6px; line-height: 1.2; }
-        .account-wish-price { font-size: 13px; color: var(--text); margin-bottom: 14px; }
-        .account-wish-add { width: 100%; padding: 11px; background: var(--accent); color: white; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 400; transition: background 0.2s; }
-        .account-wish-add:hover { background: var(--accent-light); }
-
-        /* ── PROFILE ── */
-        .profile-avatar-section { display: flex; align-items: center; gap: 28px; padding: 28px 32px; background: var(--white); border: 1px solid rgba(0,0,0,0.07); margin-bottom: 40px; max-width: 640px; }
+        /* Profile */
+        .profile-avatar-section { display: flex; align-items: center; gap: 28px; padding: 28px 32px; background: var(--white); border: 1px solid rgba(0,0,0,0.07); margin-bottom: 40px; max-width: 640px; border-radius: 4px; }
         .profile-avatar-big { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(160deg, #e8ddd1, #c4b49d); display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 300; color: var(--accent); flex-shrink: 0; overflow: hidden; }
         .profile-avatar-big img { width: 100%; height: 100%; object-fit: cover; }
         .profile-avatar-name { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; margin-bottom: 4px; }
         .profile-avatar-sub { font-size: 12px; color: var(--muted); font-weight: 300; margin-bottom: 14px; }
-        .profile-avatar-upload { font-size: 11px; letter-spacing: 0.1em; color: var(--accent); text-transform: uppercase; background: none; border: 1px solid var(--accent); padding: 9px 18px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 400; transition: background 0.2s, color 0.2s; display: inline-block; }
+        .profile-avatar-upload { font-size: 11px; letter-spacing: 0.1em; color: var(--accent); text-transform: uppercase; background: none; border: 1px solid var(--accent); padding: 9px 18px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 400; transition: background 0.2s, color 0.2s; display: inline-block; border-radius: 2px; }
         .profile-avatar-upload:hover { background: var(--accent); color: white; }
 
         .account-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 640px; margin-bottom: 32px; }
         .account-form-field { display: flex; flex-direction: column; gap: 8px; }
         .account-form-field.full { grid-column: span 2; }
         .account-form-label { font-size: 10px; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; font-weight: 400; }
-        .account-form-input { padding: 13px 16px; border: 1px solid rgba(0,0,0,0.1); background: var(--white); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 300; color: var(--text); outline: none; transition: border-color 0.2s; }
+        .account-form-input { padding: 13px 16px; border: 1px solid rgba(0,0,0,0.1); background: var(--white); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 300; color: var(--text); outline: none; transition: border-color 0.2s; border-radius: 2px; width: 100%;}
         .account-form-input:focus { border-color: var(--accent); }
-        .account-form-input:disabled { background: rgba(0,0,0,0.02); color: var(--muted); cursor: not-allowed; }
-        .account-form-save { padding: 15px 40px; background: var(--accent); color: white; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 400; transition: background 0.2s; }
-        .account-form-save:hover { background: var(--accent-light); }
-        .account-section-divider { width: 100%; height: 1px; background: rgba(0,0,0,0.07); margin: 48px 0; }
+        .account-form-input:disabled { background: rgba(0,0,0,0.03); color: var(--muted); cursor: not-allowed; border-color: rgba(0,0,0,0.05); }
 
-        /* Password */
+        .account-form-save { padding: 15px 40px; background: var(--accent); color: white; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 400; transition: background 0.2s; border-radius: 2px; }
+        .account-form-save:hover { background: var(--accent-light); }
+        .account-section-divider { width: 100%; height: 1px; background: rgba(0,0,0,0.07); margin: 48px 0; max-width: 640px; }
+
         .input-password-wrap { position: relative; max-width: 640px; }
         .input-password-wrap .account-form-input { width: 100%; padding-right: 48px; }
         .toggle-pw-btn { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--muted); display: flex; align-items: center; opacity: 0.5; transition: opacity 0.2s; }
         .toggle-pw-btn:hover { opacity: 1; }
         .toggle-pw-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; }
-        .password-strength { height: 3px; background: rgba(0,0,0,0.08); margin-top: 8px; }
+        .password-strength { height: 3px; background: rgba(0,0,0,0.08); margin-top: 8px; border-radius: 2px; overflow: hidden; }
         .password-strength-bar { height: 100%; width: 0; transition: width 0.3s, background 0.3s; }
         .password-strength-label { font-size: 11px; color: var(--muted); margin-top: 6px; letter-spacing: 0.06em; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ── CSS BỔ SUNG CHO CHI TIẾT ĐƠN HÀNG ── */
+        .btn-back-orders { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); cursor: pointer; margin-bottom: 32px; border: none; background: none; transition: color 0.2s; padding: 0; }
+        .btn-back-orders:hover { color: var(--text); }
+        .detail-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 48px; padding: 32px; background: var(--white); border: 1px solid rgba(0,0,0,0.07); }
+        .detail-info-item label { font-size: 10px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 8px; }
+        .detail-info-item p { font-size: 14px; color: var(--text); line-height: 1.6;}
+        .detail-product-table { width: 100%; border-collapse: collapse; margin-bottom: 40px; }
+        .detail-product-table th { text-align: left; padding: 16px 0; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid rgba(0,0,0,0.08); }
+        .detail-product-table td { padding: 20px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .detail-prod-img { width: 60px; aspect-ratio: 3/4; object-fit: cover; border-radius: 2px; margin-right: 15px; border: 1px solid rgba(0,0,0,0.05);}
 
         @media (max-width: 900px) {
             .account-layout { grid-template-columns: 1fr; }
             .account-sidebar { position: static; padding: 32px 0; border-right: none; border-bottom: 1px solid rgba(0,0,0,0.07); }
             .account-content { padding: 40px 24px; }
             .account-overview-grid { grid-template-columns: 1fr 1fr; }
-            .account-wishlist-grid { grid-template-columns: 1fr 1fr; }
             .account-form-grid { grid-template-columns: 1fr; }
             .account-form-field.full { grid-column: span 1; }
             .order-timeline-step:not(:last-child)::after { display: none; }
             .orders-filter-bar { overflow-x: auto; }
+            .detail-info-grid { grid-template-columns: 1fr; }
         }
+
+        .guest-divider { margin: 35px 0 25px; width: 100%; display: flex; align-items: center; text-align: center; color: var(--muted); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; }
+        .guest-divider::before, .guest-divider::after { content: ''; flex: 1; border-bottom: 1px solid rgba(0,0,0,0.08); }
+        .guest-divider:not(:empty)::before { margin-right: 15px; }
+        .guest-divider:not(:empty)::after { margin-left: 15px; }
+        .guest-track-wrap { width: 100%; display: flex; gap: 10px; margin-bottom: 10px; }
+        .guest-track-input { flex: 1; padding: 14px 16px; border: 1px solid rgba(0,0,0,0.1); outline: none; font-family: 'DM Sans', sans-serif; font-size: 13px; border-radius: 2px; transition: border-color 0.2s;}
+        .guest-track-input:focus { border-color: var(--accent); }
+        .guest-track-btn { padding: 0 24px; background: var(--accent); color: white; border: none; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: 0.3s; border-radius: 2px; }
+        .guest-track-btn:hover { background: #2c4238; }
+        .guest-track-result { width: 100%; text-align: left; display: none; background: var(--white); border: 1px solid rgba(0,0,0,0.07); padding: 24px; border-radius: 4px; margin-top: 15px; animation: fadeIn 0.4s ease; box-shadow: 0 5px 15px rgba(0,0,0,0.02);}
     </style>
 
-    <div class="account-layout">
+    <div id="guest-view">
+        <div class="guest-container">
+            <div class="guest-icon">
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg>
+            </div>
+            <div class="guest-title">Xin chào!</div>
+            <div class="guest-desc">Vui lòng đăng nhập tài khoản để xem chi tiết thông tin hồ sơ cá nhân và theo dõi quá trình giao hàng của bạn.</div>
+            <div class="guest-actions">
+                <a href="/login" class="guest-btn-login">Đăng nhập ngay</a>
+                <a href="/#shop" class="guest-btn-shop">Đến cửa hàng</a>
+            </div>
 
-        <!-- SIDEBAR -->
+            <div class="guest-divider">Hoặc tra cứu đơn hàng</div>
+            <div class="guest-track-wrap">
+                <input type="text" id="guestOrderCode" class="guest-track-input" placeholder="Nhập mã đơn hàng (VD: HD17735...)">
+                <button class="guest-track-btn" onclick="window.AccountApp.guestTrackOrder()">Tra cứu</button>
+            </div>
+            <div id="guestOrderResult" class="guest-track-result"></div>
+        </div>
+    </div>
+
+    <div class="account-layout" id="account-view">
         <div class="account-sidebar">
             <div class="account-user">
                 <div class="account-avatar-wrap">
-                    <div class="account-avatar" id="sidebarAvatar">N</div>
+                    <div class="account-avatar" id="sidebarAvatar">
+                        <i class="bi bi-person" style="font-size: 28px;"></i>
+                    </div>
                     <div class="account-avatar-edit" onclick="document.getElementById('avatarFileInput').click()">
                         <svg viewBox="0 0 24 24" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     </div>
                 </div>
-                <div class="account-user-name">Nguyễn Minh</div>
-                <div class="account-user-email">minh@email.com</div>
-                <div class="account-user-since">Thành viên từ 2023</div>
+                <div class="account-user-name" id="sidebarName">Đang tải...</div>
+                <div class="account-user-email" id="sidebarEmail">...</div>
+                <div class="account-user-since" id="sidebarSince"></div>
             </div>
             <ul class="account-nav">
-                <li><button class="account-nav-btn active" data-panel="overview">
-                    <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>Tổng quan
-                </button></li>
-                <li><button class="account-nav-btn" data-panel="orders">
-                    <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M9 12h6M9 16h6M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h5l5 5v11a2 2 0 01-2 2z"/></svg>Đơn hàng của tôi
-                </button></li>
-                <li><button class="account-nav-btn disabled" disabled style="opacity:0.45;cursor:not-allowed;pointer-events:none">
-                    <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Yêu thích
-                    <span style="margin-left:auto;font-size:9px;letter-spacing:0.1em;background:rgba(61,90,76,0.12);color:var(--accent);padding:3px 8px;text-transform:uppercase;font-weight:500">Sắp có</span>
-                </button></li>
-                <li><button class="account-nav-btn" data-panel="profile">
-                    <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg>Thông tin cá nhân
-                </button></li>
+                <li><button class="account-nav-btn active" data-panel="overview"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>Tổng quan</button></li>
+                <li><button class="account-nav-btn" data-panel="orders"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M9 12h6M9 16h6M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h5l5 5v11a2 2 0 01-2 2z"/></svg>Đơn hàng của tôi</button></li>
+                <li><button class="account-nav-btn disabled" disabled style="opacity:0.45;cursor:not-allowed;pointer-events:none"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Yêu thích<span style="margin-left:auto;font-size:9px;letter-spacing:0.1em;background:rgba(61,90,76,0.12);color:var(--accent);padding:3px 8px;text-transform:uppercase;font-weight:500; border-radius: 2px;">Sắp có</span></button></li>
+                <li><button class="account-nav-btn" data-panel="profile"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg>Thông tin cá nhân</button></li>
             </ul>
             <div class="account-nav-logout">
-                <button class="account-logout-btn" onclick="confirmLogout()">
+                <button class="account-logout-btn" onclick="window.AccountApp.confirmLogout()">
                     <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Đăng xuất
                 </button>
             </div>
@@ -194,238 +224,116 @@
 
         <div class="account-content">
 
-            <!-- ═══ OVERVIEW ═══ -->
             <div class="account-panel active" id="panel-overview">
-                <div class="account-panel-title">Xin chào, Minh 👋</div>
+                <div class="account-panel-title" id="overviewGreeting">Xin chào...</div>
                 <div class="account-panel-subtitle">Đây là tóm tắt hoạt động tài khoản của bạn.</div>
+
                 <div class="account-overview-grid">
-                    <div class="account-stat-card"><div class="account-stat-num">8</div><div class="account-stat-label">Đơn hàng</div></div>
-                    <div class="account-stat-card"><div class="account-stat-num">3</div><div class="account-stat-label">Yêu thích</div></div>
-                    <div class="account-stat-card"><div class="account-stat-num">3.2M</div><div class="account-stat-label">Tổng chi tiêu</div></div>
+                    <div class="account-stat-card"><div class="account-stat-num" id="statOrders">0</div><div class="account-stat-label">Đơn hàng</div></div>
+                    <div class="account-stat-card"><div class="account-stat-num" id="statWishlist">0</div><div class="account-stat-label">Yêu thích</div></div>
+                    <div class="account-stat-card"><div class="account-stat-num" id="statTotalSpent">0 ₫</div><div class="account-stat-label">Tổng chi tiêu</div></div>
                 </div>
+
                 <div class="account-recent-title">Đơn hàng gần đây</div>
-                <div class="account-recent-order">
-                    <div><div class="account-order-id">#BM-2025-0081</div><div class="account-order-meta">15/03/2025 · 3 sản phẩm</div></div>
-                    <span class="account-order-status status-delivered">Đã giao</span>
-                    <div class="account-order-total">1.210.000 ₫</div>
-                </div>
-                <div class="account-recent-order">
-                    <div><div class="account-order-id">#BM-2025-0067</div><div class="account-order-meta">28/02/2025 · 1 sản phẩm</div></div>
-                    <span class="account-order-status status-shipping">Đang giao</span>
-                    <div class="account-order-total">490.000 ₫</div>
-                </div>
-                <div class="account-recent-order">
-                    <div><div class="account-order-id">#BM-2025-0054</div><div class="account-order-meta">10/02/2025 · 2 sản phẩm</div></div>
-                    <span class="account-order-status status-delivered">Đã giao</span>
-                    <div class="account-order-total">940.000 ₫</div>
-                </div>
+                <div id="recentOrdersList"></div>
             </div>
 
-            <!-- ═══ ORDERS ═══ -->
             <div class="account-panel" id="panel-orders">
                 <div class="account-panel-title">Đơn hàng của tôi</div>
                 <div class="account-panel-subtitle">Lịch sử và trạng thái tất cả đơn hàng.</div>
-                <div class="orders-filter-bar">
+
+                <div class="orders-filter-bar" id="ordersFilterBar">
                     <button class="orders-filter-tab active" data-filter="all">Tất cả</button>
-                    <button class="orders-filter-tab" data-filter="processing">Đang xử lý</button>
-                    <button class="orders-filter-tab" data-filter="shipping">Đang giao</button>
-                    <button class="orders-filter-tab" data-filter="delivered">Đã giao</button>
-                    <button class="orders-filter-tab" data-filter="cancelled">Đã huỷ</button>
+                    <button class="orders-filter-tab" data-filter="CHO_XAC_NHAN">Chờ xác nhận</button>
+                    <button class="orders-filter-tab" data-filter="DANG_GIAO">Đang giao</button>
+                    <button class="orders-filter-tab" data-filter="HOAN_THANH">Đã giao</button>
+                    <button class="orders-filter-tab" data-filter="DA_HUY">Đã huỷ</button>
                 </div>
 
-                <!-- Đã giao -->
-                <div class="account-order-card" data-status="delivered">
-                    <div class="account-order-card-header">
-                        <div><div class="account-order-id">#BM-2025-0081</div><div class="account-order-meta" style="margin-top:4px">15/03/2025 · 3 sản phẩm</div></div>
-                        <div class="order-header-right">
-                            <span class="account-order-status status-delivered">Đã giao</span>
-                            <div style="font-size:11px;color:var(--muted);font-weight:300">Giao lúc 14:32 · 17/03/2025</div>
-                        </div>
-                    </div>
-                    <div class="order-timeline">
-                        <div class="order-timeline-label">Trạng thái đơn hàng</div>
-                        <div class="order-timeline-steps">
-                            <div class="order-timeline-step done"><div class="order-step-dot"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div><div class="order-step-label">Đặt hàng</div></div>
-                            <div class="order-timeline-step done"><div class="order-step-dot"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div><div class="order-step-label">Xác nhận</div></div>
-                            <div class="order-timeline-step done"><div class="order-step-dot"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div><div class="order-step-label">Đóng gói</div></div>
-                            <div class="order-timeline-step done"><div class="order-step-dot"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div><div class="order-step-label">Đang giao</div></div>
-                            <div class="order-timeline-step done"><div class="order-step-dot"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div><div class="order-step-label">Đã giao</div></div>
-                        </div>
-                    </div>
-                    <div class="account-order-card-footer">
-                        <div class="order-total-text">Tổng: <strong>1.210.000 ₫</strong></div>
-                        <div class="order-actions">
-                            <button class="order-detail-toggle" onclick="toggleOrderDetail(this)">Xem sản phẩm <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
-                            <button class="account-reorder-btn">Đặt lại</button>
-                        </div>
-                    </div>
-                    <div class="order-detail-body">
-                        <div class="order-products-detail">
-                            <div class="order-product-row">
-                                <div class="order-product-img"><div class="order-product-img-bg" style="background:linear-gradient(160deg,#e8ddd1,#c4b49d)"></div></div>
-                                <div><div class="order-product-name">Áo Linen Oversize Dài Tay</div><div class="order-product-variant">Sand Beige · Size M · x1</div></div>
-                                <div class="order-product-price">490.000 ₫</div>
-                            </div>
-                            <div class="order-product-row">
-                                <div class="order-product-img"><div class="order-product-img-bg" style="background:linear-gradient(160deg,#c5cfc7,#3D5A4C)"></div></div>
-                                <div><div class="order-product-name">Áo Sơ Mi Linen Xanh Rêu</div><div class="order-product-variant">Sage Green · Size L · x2</div></div>
-                                <div class="order-product-price">900.000 ₫</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Đang giao -->
-                <div class="account-order-card" data-status="shipping">
-                    <div class="account-order-card-header">
-                        <div><div class="account-order-id">#BM-2025-0067</div><div class="account-order-meta" style="margin-top:4px">28/02/2025 · 1 sản phẩm</div></div>
-                        <div class="order-header-right">
-                            <span class="account-order-status status-shipping">Đang giao</span>
-                            <div style="font-size:11px;color:var(--muted);font-weight:300">Dự kiến: 12/03/2025</div>
-                        </div>
-                    </div>
-                    <div class="order-timeline">
-                        <div class="order-timeline-label">Trạng thái đơn hàng</div>
-                        <div class="order-timeline-steps">
-                            <div class="order-timeline-step done"><div class="order-step-dot"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div><div class="order-step-label">Đặt hàng</div></div>
-                            <div class="order-timeline-step done"><div class="order-step-dot"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div><div class="order-step-label">Xác nhận</div></div>
-                            <div class="order-timeline-step done"><div class="order-step-dot"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div><div class="order-step-label">Đóng gói</div></div>
-                            <div class="order-timeline-step current"><div class="order-step-dot"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div><div class="order-step-label">Đang giao</div></div>
-                            <div class="order-timeline-step"><div class="order-step-dot"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div><div class="order-step-label">Đã giao</div></div>
-                        </div>
-                    </div>
-                    <div class="account-order-card-footer">
-                        <div class="order-total-text">Tổng: <strong>490.000 ₫</strong></div>
-                        <div class="order-actions">
-                            <button class="order-detail-toggle" onclick="toggleOrderDetail(this)">Xem sản phẩm <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
-                        </div>
-                    </div>
-                    <div class="order-detail-body">
-                        <div class="order-products-detail">
-                            <div class="order-product-row">
-                                <div class="order-product-img"><div class="order-product-img-bg" style="background:linear-gradient(160deg,#e8ddd1,#c4b49d)"></div></div>
-                                <div><div class="order-product-name">Áo Linen Oversize Dài Tay</div><div class="order-product-variant">Sand Beige · Size M · x1</div></div>
-                                <div class="order-product-price">490.000 ₫</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Đang xử lý -->
-                <div class="account-order-card" data-status="processing">
-                    <div class="account-order-card-header">
-                        <div><div class="account-order-id">#BM-2025-0092</div><div class="account-order-meta" style="margin-top:4px">10/03/2025 · 2 sản phẩm</div></div>
-                        <div class="order-header-right"><span class="account-order-status status-processing">Đang xử lý</span></div>
-                    </div>
-                    <div class="order-timeline">
-                        <div class="order-timeline-label">Trạng thái đơn hàng</div>
-                        <div class="order-timeline-steps">
-                            <div class="order-timeline-step done"><div class="order-step-dot"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div><div class="order-step-label">Đặt hàng</div></div>
-                            <div class="order-timeline-step current"><div class="order-step-dot"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg></div><div class="order-step-label">Xác nhận</div></div>
-                            <div class="order-timeline-step"><div class="order-step-dot"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div><div class="order-step-label">Đóng gói</div></div>
-                            <div class="order-timeline-step"><div class="order-step-dot"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div><div class="order-step-label">Đang giao</div></div>
-                            <div class="order-timeline-step"><div class="order-step-dot"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div><div class="order-step-label">Đã giao</div></div>
-                        </div>
-                    </div>
-                    <div class="account-order-card-footer">
-                        <div class="order-total-text">Tổng: <strong>770.000 ₫</strong></div>
-                        <div class="order-actions">
-                            <button class="order-detail-toggle" onclick="toggleOrderDetail(this)">Xem sản phẩm <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
-                        </div>
-                    </div>
-                    <div class="order-detail-body">
-                        <div class="order-products-detail">
-                            <div class="order-product-row">
-                                <div class="order-product-img"><div class="order-product-img-bg" style="background:linear-gradient(160deg,#d4cfc9,#b0a99f)"></div></div>
-                                <div><div class="order-product-name">Áo Cotton Cổ Tròn Basic</div><div class="order-product-variant">Light Grey · Size M · x1</div></div>
-                                <div class="order-product-price">320.000 ₫</div>
-                            </div>
-                            <div class="order-product-row">
-                                <div class="order-product-img"><div class="order-product-img-bg" style="background:linear-gradient(160deg,#cfd4cc,#94a091)"></div></div>
-                                <div><div class="order-product-name">Áo Thun Bamboo Nhẹ</div><div class="order-product-variant">Sage Mist · Size L · x1</div></div>
-                                <div class="order-product-price">280.000 ₫</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div id="ordersContainer"></div>
             </div>
 
-            <!-- ═══ WISHLIST ═══ -->
-            <div class="account-panel" id="panel-wishlist">
-                <div class="account-panel-title">Yêu thích</div>
-                <div class="account-panel-subtitle">Sản phẩm đang được lưu.</div>
-                <div class="account-wishlist-grid">
-                    <div class="account-wish-card">
-                        <div class="account-wish-img">
-                            <div class="account-wish-img-bg" style="background:linear-gradient(160deg,#e8ddd1,#c4b49d)"></div>
-                            <button class="account-wish-remove"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
-                        </div>
-                        <div class="account-wish-info">
-                            <div class="account-wish-name">Áo Linen Oversize Dài Tay</div>
-                            <div class="account-wish-price">490.000 ₫</div>
-                            <button class="account-wish-add">Thêm vào giỏ</button>
-                        </div>
-                    </div>
+            <div class="account-panel" id="panel-order-detail">
+                <button class="btn-back-orders" onclick="window.AccountApp.switchPanel('orders')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Quay lại
+                </button>
+                <div class="account-panel-title" id="detOrderMa">Chi tiết</div>
+                <div class="detail-info-grid">
+                    <div class="detail-info-item"><label>Người nhận</label><p id="detTenNhan"></p><p id="detSdtNhan"></p><p id="detDiaChi"></p></div>
+                    <div class="detail-info-item"><label>Thanh toán</label><p id="detPayment"></p><p id="detStatus"></p></div>
                 </div>
+                <table class="detail-product-table">
+                    <thead><tr><th>Sản phẩm</th><th style="text-align:center">SL</th><th style="text-align:right">Giá</th></tr></thead>
+                    <tbody id="detProductList"></tbody>
+                </table>
             </div>
 
-            <!-- ═══ PROFILE ═══ -->
             <div class="account-panel" id="panel-profile">
                 <div class="account-panel-title">Thông tin cá nhân</div>
                 <div class="account-panel-subtitle">Cập nhật hồ sơ và thông tin giao hàng.</div>
 
-                <!-- Avatar -->
                 <div class="profile-avatar-section">
-                    <div class="profile-avatar-big" id="profileAvatar">N</div>
+                    <div class="profile-avatar-big" id="profileAvatarBig">
+                        <i class="bi bi-person" style="font-size: 36px;"></i>
+                    </div>
                     <div>
-                        <div class="profile-avatar-name">Nguyễn Minh</div>
-                        <div class="profile-avatar-sub">Thành viên từ tháng 3, 2023</div>
+                        <div class="profile-avatar-name" id="profileNameBig">Đang tải...</div>
+                        <div class="profile-avatar-sub" id="profileSinceBig">...</div>
                         <label class="profile-avatar-upload" for="avatarFileInput">Đổi ảnh đại diện</label>
                         <input type="file" id="avatarFileInput" accept="image/*" style="display:none">
                     </div>
                 </div>
 
-                <!-- Basic info -->
                 <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;margin-bottom:8px">Thông tin cơ bản</div>
-                <div style="font-size:13px;color:var(--muted);font-weight:300;margin-bottom:28px">Tên hiển thị và thông tin liên hệ.</div>
                 <div class="account-form-grid">
-                    <div class="account-form-field"><label class="account-form-label">Họ</label><input class="account-form-input" type="text" value="Nguyễn"></div>
-                    <div class="account-form-field"><label class="account-form-label">Tên</label><input class="account-form-input" type="text" value="Minh"></div>
-                    <div class="account-form-field full"><label class="account-form-label">Email</label><input class="account-form-input" type="email" value="minh@email.com"></div>
-                    <div class="account-form-field full"><label class="account-form-label">Số điện thoại</label><input class="account-form-input" type="tel" value="0901 234 567"></div>
+                    <div class="account-form-field">
+                        <label class="account-form-label">Họ và Tên</label>
+                        <input id="inpFirstName" class="account-form-input" type="text" placeholder="Nhập họ và tên...">
+                    </div>
+
+                    <div class="account-form-field">
+                        <label class="account-form-label">Số điện thoại</label>
+                        <input id="inpPhone" class="account-form-input" type="tel" placeholder="Nhập số điện thoại...">
+                    </div>
+
+                    <div class="account-form-field">
+                        <label class="account-form-label">Email</label>
+                        <input id="inpEmail" class="account-form-input" type="email" placeholder="Nhập địa chỉ email của bạn...">
+                    </div>
+
+                    <div class="account-form-field">
+                        <label class="account-form-label">Ngày sinh</label>
+                        <input id="inpDob" class="account-form-input" type="date">
+                    </div>
+
+                    <div class="account-form-field full">
+                        <label class="account-form-label">Giới tính</label>
+                        <select id="inpGender" class="account-form-input" style="cursor: pointer;">
+                            <option value="">Chọn giới tính</option>
+                            <option value="Nam">Nam</option>
+                            <option value="Nữ">Nữ</option>
+                            <option value="Khác">Khác</option>
+                        </select>
+                    </div>
                 </div>
-                <button class="account-form-save">Lưu thay đổi</button>
+                <button class="account-form-save" id="btnSaveProfile" onclick="window.AccountApp.confirmAction('profile')">Lưu thay đổi</button>
 
                 <div class="account-section-divider"></div>
 
-                <!-- Address -->
-                <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;margin-bottom:8px">Địa chỉ giao hàng</div>
-                <div style="font-size:13px;color:var(--muted);font-weight:300;margin-bottom:28px">Địa chỉ mặc định sẽ được dùng khi thanh toán.</div>
-                <div class="account-form-grid">
-                    <div class="account-form-field full"><label class="account-form-label">Địa chỉ</label><input class="account-form-input" type="text" placeholder="Số nhà, tên đường"></div>
-                    <div class="account-form-field"><label class="account-form-label">Quận / Huyện</label><input class="account-form-input" type="text" placeholder="Ví dụ: Cầu Giấy"></div>
-                    <div class="account-form-field"><label class="account-form-label">Tỉnh / Thành phố</label><input class="account-form-input" type="text" placeholder="Ví dụ: Hà Nội"></div>
-                </div>
-                <button class="account-form-save">Lưu địa chỉ</button>
-
-                <div class="account-section-divider"></div>
-
-                <!-- Change password -->
                 <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;margin-bottom:8px">Đổi mật khẩu</div>
-                <div style="font-size:13px;color:var(--muted);font-weight:300;margin-bottom:28px">Mật khẩu mới phải có ít nhất 8 ký tự.</div>
                 <div class="account-form-grid">
                     <div class="account-form-field full">
                         <label class="account-form-label">Mật khẩu hiện tại</label>
                         <div class="input-password-wrap">
                             <input class="account-form-input" type="password" id="pwCurrent" placeholder="Nhập mật khẩu hiện tại">
-                            <button class="toggle-pw-btn" type="button" onclick="togglePassword('pwCurrent', this)"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                            <button class="toggle-pw-btn" type="button" onclick="window.AccountApp.togglePassword('pwCurrent', this)"><svg viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
                         </div>
                     </div>
                     <div class="account-form-field full">
                         <label class="account-form-label">Mật khẩu mới</label>
                         <div class="input-password-wrap">
-                            <input class="account-form-input" type="password" id="pwNew" placeholder="Tối thiểu 8 ký tự" oninput="checkPasswordStrength(this.value)">
-                            <button class="toggle-pw-btn" type="button" onclick="togglePassword('pwNew', this)"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                            <input class="account-form-input" type="password" id="pwNew" placeholder="Tối thiểu 8 ký tự" oninput="window.AccountApp.checkPasswordStrength(this.value)">
+                            <button class="toggle-pw-btn" type="button" onclick="window.AccountApp.togglePassword('pwNew', this)"><svg viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
                         </div>
                         <div class="password-strength"><div class="password-strength-bar" id="pwStrengthBar"></div></div>
                         <div class="password-strength-label" id="pwStrengthLabel"></div>
@@ -434,119 +342,518 @@
                         <label class="account-form-label">Xác nhận mật khẩu mới</label>
                         <div class="input-password-wrap">
                             <input class="account-form-input" type="password" id="pwConfirm" placeholder="Nhập lại mật khẩu mới">
-                            <button class="toggle-pw-btn" type="button" onclick="togglePassword('pwConfirm', this)"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                            <button class="toggle-pw-btn" type="button" onclick="window.AccountApp.togglePassword('pwConfirm', this)"><svg viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
                         </div>
                     </div>
                 </div>
-                <button class="account-form-save" onclick="handleChangePassword()">Đổi mật khẩu</button>
+                <button class="account-form-save" onclick="window.AccountApp.confirmAction('password')">Đổi mật khẩu</button>
             </div>
 
         </div>
     </div>
 
-    <script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
         window.AccountApp = {
-            init: function() {
-                // Tab switching
+            state: {
+                user: null,
+                orders: [],
+                stats: { orderCount: 0, wishlistCount: 0, totalSpent: 0 }
+            },
+
+            init: async function() {
+                this.bindEvents();
+                await this.fetchData();
+            },
+
+            bindEvents: function() {
                 document.querySelectorAll('#account-section .account-nav-btn[data-panel]').forEach(btn => {
                     btn.addEventListener('click', () => {
+                        this.switchPanel(btn.dataset.panel);
                         document.querySelectorAll('#account-section .account-nav-btn').forEach(b => b.classList.remove('active'));
                         btn.classList.add('active');
-                        document.querySelectorAll('#account-section .account-panel').forEach(p => p.classList.remove('active'));
-                        const target = document.getElementById('panel-' + btn.dataset.panel);
-                        if (target) target.classList.add('active');
                     });
                 });
 
-                // Avatar upload — sync cả sidebar và profile
-                document.getElementById('avatarFileInput')?.addEventListener('change', function() {
-                    const file = this.files[0];
-                    if (!file) return;
-                    const reader = new FileReader();
-                    reader.onload = e => {
-                        ['sidebarAvatar','profileAvatar'].forEach(id => {
-                            const el = document.getElementById(id);
-                            if (el) el.innerHTML = `<img src="${e.target.result}" alt="Avatar">`;
-                        });
-                    };
-                    reader.readAsDataURL(file);
-                });
-
-                // Orders filter
-                document.querySelectorAll('#panel-orders .orders-filter-tab').forEach(tab => {
+                document.querySelectorAll('#ordersFilterBar .orders-filter-tab').forEach(tab => {
                     tab.addEventListener('click', () => {
-                        document.querySelectorAll('#panel-orders .orders-filter-tab').forEach(t => t.classList.remove('active'));
+                        document.querySelectorAll('#ordersFilterBar .orders-filter-tab').forEach(t => t.classList.remove('active'));
                         tab.classList.add('active');
                         const filter = tab.dataset.filter;
-                        document.querySelectorAll('#panel-orders .account-order-card').forEach(card => {
-                            card.style.display = (filter === 'all' || card.dataset.status === filter) ? '' : 'none';
+
+                        document.querySelectorAll('#ordersContainer .account-order-card').forEach(card => {
+                            if (filter === 'all' || card.dataset.status === filter) {
+                                card.style.display = 'block';
+                            } else {
+                                card.style.display = 'none';
+                            }
                         });
                     });
                 });
+            },
 
-                // Wishlist remove
-                document.querySelectorAll('#account-section .account-wish-remove').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const card = btn.closest('.account-wish-card');
-                        card.style.transition = 'opacity 0.3s, transform 0.3s';
-                        card.style.opacity = '0'; card.style.transform = 'scale(0.95)';
-                        setTimeout(() => card.remove(), 300);
+            switchPanel: function(pId) {
+                document.querySelectorAll('.account-panel').forEach(p => p.classList.remove('active'));
+                const target = document.getElementById('panel-' + pId);
+                if (target) target.classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            },
+
+            showAccountNotification: function(title, message, isError = false) {
+                let toast = document.createElement('div');
+                toast.style.cssText = `position:fixed; bottom:20px; right:20px; background:${isError ? '#c03c3c' : '#1a1a1a'}; color:#fff; padding:16px 24px; border-radius:2px; z-index:10000; display:flex; align-items:center; gap:16px; animation: accSlideInUp 0.3s ease forwards; font-family:"DM Sans", sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,0.2);`;
+
+                let icon = isError ? '<svg style="width:14px;height:14px;stroke:#fff;fill:none;" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 6L6 18M6 6l12 12"/></svg>' : '<svg style="width:14px;height:14px;stroke:#4ade80;fill:none;" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>';
+
+                toast.innerHTML =
+                    `<div style="width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">${icon}</div>` +
+                    `<div><div style="font-size:13px;font-weight:500;margin-bottom:2px;">${title}</div><div style="font-size:11px;color:rgba(255,255,255,0.7);">${message}</div></div>`;
+
+                if (!document.getElementById('acc-toast-styles')) {
+                    const style = document.createElement('style');
+                    style.id = 'acc-toast-styles';
+                    style.innerHTML = '@keyframes accSlideInUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } } @keyframes accFadeOutDown { from { transform: translateY(0); opacity: 1; } to { transform: translateY(100px); opacity: 0; } }';
+                    document.head.appendChild(style);
+                }
+
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.animation = 'accFadeOutDown 0.3s ease forwards';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            },
+
+            fetchData: async function() {
+                try {
+                    const userRes = await fetch('/api/khach-hang/my-profile');
+
+                    if (!userRes.ok) {
+                        document.getElementById('guest-view').style.display = 'block';
+                        document.getElementById('account-view').style.display = 'none';
+                        return;
+                    }
+
+                    this.state.user = await userRes.json();
+                    document.getElementById('guest-view').style.display = 'none';
+                    document.getElementById('account-view').style.display = 'grid';
+
+                    const ordersRes = await fetch('/api/hoa-don/my-orders');
+                    if (ordersRes.ok) {
+                        this.state.orders = await ordersRes.json();
+                        this.state.stats.orderCount = this.state.orders.length;
+                        this.state.stats.totalSpent = this.state.orders.reduce((sum, ord) => sum + (ord.tongTien || 0), 0);
+                    }
+                    this.renderAll();
+                } catch (error) {
+                    document.getElementById('guest-view').style.display = 'block';
+                    document.getElementById('account-view').style.display = 'none';
+                }
+            },
+
+            // Modal chung cho mọi hành động (Đăng xuất, Lưu Profile, Đổi Mật Khẩu)
+            confirmAction: function(actionType) {
+                let title = "";
+                let message = "";
+                let confirmBtnText = "";
+                let actionFunc = null;
+
+                if (actionType === 'logout') {
+                    title = "Đăng xuất";
+                    message = "Bạn có chắc chắn muốn đăng xuất khỏi tài khoản không?";
+                    confirmBtnText = "Đăng xuất";
+                    actionFunc = async () => {
+                        await fetch('/logout', { method: 'POST' });
+                        location.reload();
+                    };
+                } else if (actionType === 'profile') {
+                    title = "Lưu thay đổi";
+                    message = "Bạn có chắc chắn muốn cập nhật thông tin cá nhân?";
+                    confirmBtnText = "Lưu thông tin";
+                    actionFunc = () => this.updateProfile();
+                } else if (actionType === 'password') {
+                    const pwC = document.getElementById('pwCurrent').value;
+                    const pwN = document.getElementById('pwNew').value;
+                    const pwCf = document.getElementById('pwConfirm').value;
+
+                    if(!pwC || !pwN || !pwCf) {
+                        this.showAccountNotification('Lỗi', 'Vui lòng nhập đầy đủ thông tin mật khẩu!', true);
+                        return;
+                    }
+                    if(pwN !== pwCf) {
+                        this.showAccountNotification('Lỗi', 'Mật khẩu xác nhận không khớp!', true);
+                        return;
+                    }
+                    if(pwN.length < 8) {
+                        this.showAccountNotification('Lỗi', 'Mật khẩu mới phải có ít nhất 8 ký tự!', true);
+                        return;
+                    }
+
+                    title = "Đổi mật khẩu";
+                    message = "Bạn có chắc chắn muốn thay đổi mật khẩu hiện tại?";
+                    confirmBtnText = "Xác nhận đổi";
+                    actionFunc = () => this.handleChangePassword();
+                }
+
+                const overlay = document.createElement('div');
+                overlay.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:10000; display:flex; align-items:center; justify-content:center; animation:fadeIn 0.3s ease; backdrop-filter:blur(2px);';
+
+                const modal = document.createElement('div');
+                modal.style.cssText = 'background:var(--white); padding:40px 32px; border-radius:4px; max-width:400px; width:90%; text-align:center; box-shadow:0 20px 40px rgba(0,0,0,0.15); transform:translateY(20px); animation:accSlideUp 0.3s ease forwards;';
+
+                modal.innerHTML =
+                    `<h3 style="font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:400; margin-bottom:12px; color:var(--text);">${title}</h3>` +
+                    `<p style="font-size:14px; color:var(--muted); margin-bottom:32px;">${message}</p>` +
+                    `<div style="display:flex; gap:12px; justify-content:center;">` +
+                    `<button id="btn-cancel-action" style="padding:12px 24px; background:none; border:1px solid rgba(0,0,0,0.2); cursor:pointer; flex:1; border-radius:2px; font-family:'DM Sans',sans-serif; font-size:12px; letter-spacing:0.1em; text-transform:uppercase;">Hủy</button>` +
+                    `<button id="btn-execute-action" style="padding:12px 24px; background:var(--text); color:white; border:none; cursor:pointer; flex:1; border-radius:2px; font-family:'DM Sans',sans-serif; font-size:12px; letter-spacing:0.1em; text-transform:uppercase;">${confirmBtnText}</button>` +
+                    `</div>`;
+
+                overlay.appendChild(modal);
+                document.body.appendChild(overlay);
+
+                if (!document.getElementById('acc-modal-styles')) {
+                    const style = document.createElement('style');
+                    style.id = 'acc-modal-styles';
+                    style.innerHTML = '@keyframes accSlideUp { to { transform: translateY(0); } }';
+                    document.head.appendChild(style);
+                }
+
+                document.getElementById('btn-cancel-action').onclick = () => overlay.remove();
+                document.getElementById('btn-execute-action').onclick = () => {
+                    overlay.remove();
+                    if(actionFunc) actionFunc();
+                };
+            },
+
+            confirmLogout: function() {
+                this.confirmAction('logout');
+            },
+
+            viewOrderDetail: async function(orderId) {
+                try {
+                    this.switchPanel('order-detail');
+                    const res = await fetch('/api/hoa-don/' + orderId);
+                    const data = await res.json();
+
+                    document.getElementById('detOrderMa').innerText = 'Đơn hàng #' + data.ma;
+                    document.getElementById('detTenNhan').innerText = data.tenKhachHang || data.tenNguoiNhan;
+                    document.getElementById('detSdtNhan').innerText = data.sdtNhan;
+                    document.getElementById('detDiaChi').innerText = data.diaChiGiaoHang;
+                    document.getElementById('detPayment').innerText = data.phuongThucThanhToan;
+                    document.getElementById('detStatus').innerText = data.trangThaiTen;
+
+                    let html = '';
+                    data.chiTiets.forEach(item => {
+                        html += `<tr><td><div style="display:flex;align-items:center;"><img src="${item.hinhAnh||''}" class="detail-prod-img"><div><div style="font-family:'Cormorant Garamond', serif; font-size: 16px;">${item.tenSanPham}</div><small style="color:var(--muted)">${item.thuocTinh}</small></div></div></td><td style="text-align:center">${item.soLuong}</td><td style="text-align:right">${this.formatCurrency(item.giaBan)}</td></tr>`;
                     });
+                    document.getElementById('detProductList').innerHTML = html;
+                } catch (e) {
+                    this.switchPanel('orders');
+                }
+            },
+
+            renderAll: function() {
+                this.renderSidebar();
+                this.renderOverview();
+                this.renderOrders();
+                this.renderProfileForm();
+            },
+
+            renderSidebar: function() {
+                const user = this.state.user;
+                if (!user) return;
+                const year = user.ngayThamGia ? new Date(user.ngayThamGia).getFullYear() : new Date().getFullYear();
+                const initial = user.hoTen ? user.hoTen.charAt(0).toUpperCase() : 'U';
+
+                document.getElementById('sidebarName').innerText = user.hoTen || 'Khách hàng';
+                document.getElementById('sidebarEmail').innerText = user.email || user.soDienThoai || 'Chưa cập nhật thông tin';
+                document.getElementById('sidebarSince').innerText = 'Thành viên từ ' + year;
+
+                const avatarHtml = user.hinhAnh ? '<img src="' + user.hinhAnh + '">' : initial;
+                document.getElementById('sidebarAvatar').innerHTML = avatarHtml;
+                document.getElementById('profileAvatarBig').innerHTML = avatarHtml;
+                document.getElementById('overviewGreeting').innerText = 'Xin chào, ' + (user.hoTen || 'bạn');
+                document.getElementById('profileNameBig').innerText = user.hoTen || 'Khách hàng';
+            },
+
+            renderOverview: function() {
+                document.getElementById('statOrders').innerText = this.state.stats.orderCount;
+                document.getElementById('statTotalSpent').innerText = this.formatCurrency(this.state.stats.totalSpent);
+
+                const recentContainer = document.getElementById('recentOrdersList');
+                if (!this.state.orders.length) {
+                    recentContainer.innerHTML = '<div style="color:var(--muted); font-size:13px;">Bạn chưa có đơn hàng nào.</div>';
+                    return;
+                }
+
+                let html = '';
+                this.state.orders.slice(0, 3).forEach(ord => {
+                    const statusObj = this.getStatusConfig(ord.trangThaiMa);
+                    html += `<div class="account-recent-order" onclick="window.AccountApp.viewOrderDetail(${ord.id})">
+                        <div><div class="account-order-id">#${ord.ma}</div><div class="account-order-meta">${ord.ngayTao}</div></div>
+                        <span class="account-order-status ${statusObj.cssClass}">${statusObj.label}</span>
+                        <div class="account-order-total">${this.formatCurrency(ord.tongTien)}</div>
+                    </div>`;
                 });
+                recentContainer.innerHTML = html;
+            },
+
+            renderOrders: function() {
+                const container = document.getElementById('ordersContainer');
+                if (!this.state.orders.length) {
+                    container.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--muted); border: 1px dashed #ccc;">Bạn chưa có đơn hàng nào.</div>';
+                    return;
+                }
+
+                let html = '';
+                this.state.orders.forEach(ord => {
+                    const statusObj = this.getStatusConfig(ord.trangThaiMa);
+                    html += `<div class="account-order-card" data-status="${ord.trangThaiMa}">
+                        <div class="account-order-card-header">
+                            <div><div class="account-order-id">#${ord.ma}</div><div class="account-order-meta">${ord.ngayTao}</div></div>
+                            <span class="account-order-status ${statusObj.cssClass}">${statusObj.label}</span>
+                        </div>
+                        <div class="order-timeline">${this.generateTimelineHTML(ord.trangThaiMa)}</div>
+                        <div class="account-order-card-footer">
+                            <div class="order-total-text">Tổng: <strong>${this.formatCurrency(ord.tongTien)}</strong></div>
+                            <button onclick="window.AccountApp.viewOrderDetail(${ord.id})" class="account-reorder-btn">Xem Chi Tiết</button>
+                        </div>
+                    </div>`;
+                });
+                container.innerHTML = html;
+            },
+
+            renderProfileForm: function() {
+                const user = this.state.user;
+
+                document.getElementById('inpFirstName').value = user.hoTen || '';
+                document.getElementById('inpPhone').value = user.soDienThoai || '';
+                document.getElementById('inpEmail').value = user.email || '';
+                document.getElementById('inpGender').value = user.gioiTinh || '';
+
+                if(user.ngaySinh) {
+                    document.getElementById('inpDob').value = user.ngaySinh.substring(0, 10);
+                }
+            },
+
+            formatCurrency: (num) => new Intl.NumberFormat('vi-VN').format(num || 0) + ' ₫',
+
+            getStatusConfig: function(statusCode) {
+                const map = {
+                    'CHO_XAC_NHAN': { label: 'Chờ duyệt', cssClass: 'status-processing' },
+                    'DANG_GIAO': { label: 'Đang giao', cssClass: 'status-shipping' },
+                    'HOAN_THANH': { label: 'Đã nhận', cssClass: 'status-delivered' },
+                    'DA_HUY': { label: 'Đã hủy', cssClass: 'status-cancelled' }
+                };
+                return map[statusCode] || { label: statusCode, cssClass: 'status-processing' };
+            },
+
+            generateTimelineHTML: function(currentStatus) {
+                if (currentStatus === 'DA_HUY') return '<div style="color:#c03c3c; font-size:12px; padding: 10px 0;">Đơn hàng đã bị hủy.</div>';
+
+                const steps = [
+                    { code: 'CHO_XAC_NHAN', label: 'ĐẶT HÀNG' },
+                    { code: 'CHO_GIAO',     label: 'CHUẨN BỊ' },
+                    { code: 'DANG_GIAO',    label: 'GIAO HÀNG' },
+                    { code: 'HOAN_THANH',   label: 'THÀNH CÔNG' }
+                ];
+
+                let curIdx = steps.findIndex(s => s.code === currentStatus);
+                if(currentStatus === 'HOAN_THANH') curIdx = 3;
+
+                let html = '<div class="order-timeline-steps">';
+                steps.forEach((s, idx) => {
+                    let cls = (idx < curIdx || currentStatus === 'HOAN_THANH') ? 'done' : (idx === curIdx ? 'current' : '');
+                    html += `
+            <div class="order-timeline-step ${cls}">
+                <div class="order-step-dot"><svg viewBox="0 0 24 24" stroke-width="2" fill="none" stroke="currentColor"><path d="M5 13l4 4L19 7"/></svg></div>
+                <div class="order-step-label">${s.label}</div>
+            </div>`;
+                });
+                return html + '</div>';
+            },
+
+            updateProfile: async function() {
+                const btn = document.getElementById('btnSaveProfile');
+                const oldText = btn.innerText;
+                btn.innerText = "Đang lưu...";
+                btn.disabled = true;
+
+                const payload = {
+                    hoTen: document.getElementById('inpFirstName').value,
+                    soDienThoai: document.getElementById('inpPhone').value,
+                    gioiTinh: document.getElementById('inpGender').value,
+                    ngaySinh: document.getElementById('inpDob').value,
+                    email: document.getElementById('inpEmail').value
+                };
+
+                try {
+                    const res = await fetch('/api/khach-hang/my-profile', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if(res.ok) {
+                        this.showAccountNotification('Thành công', 'Đã cập nhật hồ sơ cá nhân!');
+                        await this.fetchData();
+                    } else {
+                        const err = await res.json();
+                        this.showAccountNotification('Lỗi', err.message || "Không thể cập nhật thông tin", true);
+                    }
+                } catch(e) {
+                    this.showAccountNotification('Lỗi', "Lỗi kết nối máy chủ!", true);
+                } finally {
+                    btn.innerText = oldText;
+                    btn.disabled = false;
+                }
+            },
+
+            togglePassword: function(id, btn) {
+                const input = document.getElementById(id);
+                input.type = input.type === 'password' ? 'text' : 'password';
+                btn.style.opacity = input.type === 'text' ? '1' : '0.5';
+            },
+
+            checkPasswordStrength: function(val) {
+                const bar = document.getElementById('pwStrengthBar');
+                const label = document.getElementById('pwStrengthLabel');
+                let score = 0;
+                if (val.length >= 8) score++;
+                if (/[A-Z]/.test(val)) score++;
+                if (/[0-9]/.test(val)) score++;
+                const levels = [{ w:'33%', c:'#c03c3c', t:'Yếu' }, { w:'66%', c:'#c08060', t:'Trung bình' }, { w:'100%', c:'#3D5A4C', t:'Mạnh' }];
+                const lv = val.length ? levels[Math.min(score, 2)] : {w:'0', c:'', t:''};
+                bar.style.width = lv.w; bar.style.background = lv.c;
+                label.textContent = lv.t; label.style.color = lv.c;
+            },
+
+            handleChangePassword: async function() {
+                const btn = document.querySelector('button[onclick="window.AccountApp.confirmAction(\'password\')"]');
+                const oldText = btn.innerText;
+                btn.innerText = "Đang đổi...";
+                btn.disabled = true;
+
+                const payload = {
+                    oldPassword: document.getElementById('pwCurrent').value,
+                    newPassword: document.getElementById('pwNew').value
+                };
+
+                try {
+                    const res = await fetch('/api/khach-hang/change-password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if(res.ok) {
+                        this.showAccountNotification('Thành công', 'Mật khẩu của bạn đã được thay đổi an toàn!');
+                        document.getElementById('pwCurrent').value = '';
+                        document.getElementById('pwNew').value = '';
+                        document.getElementById('pwConfirm').value = '';
+                        this.checkPasswordStrength(''); // Reset thanh màu
+                    } else {
+                        // Hiện thông báo lỗi màu đỏ góc dưới
+                        this.showAccountNotification('Thất bại', 'Sai mật khẩu hiện tại, vui lòng thử lại!', true);
+                    }
+                } catch(e) {
+                    this.showAccountNotification('Lỗi', 'Không thể kết nối đến máy chủ!', true);
+                } finally {
+                    btn.innerText = oldText;
+                    btn.disabled = false;
+                }
+            },
+
+            guestTrackOrder: async function() {
+                const ma = document.getElementById('guestOrderCode').value.trim();
+                const resultDiv = document.getElementById('guestOrderResult');
+
+                if (!ma) {
+                    this.showAccountNotification('Lỗi', 'Vui lòng nhập mã đơn hàng!', true);
+                    return;
+                }
+
+                resultDiv.style.display = 'none';
+
+                try {
+                    const res = await fetch('/api/hoa-don/tra-cuu/' + ma);
+
+                    if (!res.ok) {
+                        resultDiv.innerHTML = '<div style="color:#c03c3c; text-align:center; font-size:13px;">Không tìm thấy đơn hàng hoặc mã không hợp lệ!</div>';
+                        resultDiv.style.display = 'block';
+                        return;
+                    }
+
+                    const data = await res.json();
+                    const maTrangThai = (data.trangThaiHoaDon && data.trangThaiHoaDon.ma) ? data.trangThaiHoaDon.ma : 'UNDEFINED';
+                    const tongTien = data.giaTong || 0;
+                    const tenKhach = data.tenNguoiNhan || 'Khách hàng';
+                    const statusObj = this.getStatusConfig(maTrangThai);
+
+                    const dsSanPham = data.chiTiets || data.hoaDonChiTiets || [];
+                    let dsSanPhamHtml = '';
+
+                    if (dsSanPham.length > 0) {
+                        dsSanPhamHtml = '<div style="margin-top: 15px; border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 15px;">';
+                        dsSanPhamHtml += '<div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:12px;">Sản phẩm đã đặt</div>';
+
+                        dsSanPham.forEach(item => {
+                            const hinhAnh = item.hinhAnh || (item.sanPhamChiTiet ? item.sanPhamChiTiet.hinhAnh : '');
+                            const tenSP = item.tenSanPham || (item.sanPhamChiTiet && item.sanPhamChiTiet.sanPham ? item.sanPhamChiTiet.sanPham.ten : 'Sản phẩm Beemate');
+                            const phanLoai = item.thuocTinh || (item.sanPhamChiTiet && item.sanPhamChiTiet.mauSac && item.sanPhamChiTiet.kichThuoc ? `${item.sanPhamChiTiet.mauSac.ten} - ${item.sanPhamChiTiet.kichThuoc.ten}` : 'Mặc định');
+                            const gia = item.giaBan || item.giaTien || 0;
+                            const sl = item.soLuong || 1;
+
+                            dsSanPhamHtml += `
+                                <div style="display:flex; align-items:center; margin-bottom: 12px; gap: 12px;">
+                                    <img src="${hinhAnh || 'https://placehold.jp/150x150.png'}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid rgba(0,0,0,0.05);">
+                                    <div style="flex: 1;">
+                                        <div style="font-size:13px; font-weight:500; color:var(--text);">${tenSP}</div>
+                                        <div style="font-size:11px; color:var(--muted); margin-top: 3px;">Phân loại: ${phanLoai}</div>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <div style="font-size:13px; font-weight:500; color:var(--text);">${this.formatCurrency(gia)}</div>
+                                        <div style="font-size:11px; color:var(--muted); margin-top: 3px;">x${sl}</div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        dsSanPhamHtml += '</div>';
+                    }
+
+                    let html = `
+                        <div style="margin-bottom: 20px;">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 15px;">
+                                <div>
+                                    <div style="font-size:14px; font-weight:500;">Đơn hàng #${data.ma}</div>
+                                    <div style="font-size:12px; color:var(--muted);">${data.ngayTao ? data.ngayTao.substring(0, 10) : ''}</div>
+                                </div>
+                                <span class="account-order-status ${statusObj.cssClass}" style="padding: 4px 10px;">${statusObj.label}</span>
+                            </div>
+                            <div class="order-timeline" style="padding: 10px 0; border: none;">
+                                ${this.generateTimelineHTML(maTrangThai)}
+                            </div>
+                        </div>
+
+                        ${dsSanPhamHtml}
+
+                        <div style="border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 15px; display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:13px; color:var(--muted);">Người nhận: <strong>${tenKhach}</strong></span>
+                            <span style="font-size:13px; color:var(--muted);">Tổng: <strong style="color:var(--text); font-size:16px;">${this.formatCurrency(tongTien)}</strong></span>
+                        </div>
+                    `;
+
+                    resultDiv.innerHTML = html;
+                    resultDiv.style.display = 'block';
+
+                } catch (error) {
+                    resultDiv.innerHTML = '<div style="color:#c03c3c; text-align:center; font-size:13px;">Lỗi kết nối máy chủ!</div>';
+                    resultDiv.style.display = 'block';
+                }
             }
         };
 
-        window.confirmLogout = function() {
-            if (confirm('Bạn có chắc muốn đăng xuất không?')) {
-                window.location.href = '/logout';
-            }
-        };
-
-        window.toggleOrderDetail = function(btn) {
-            const body = btn.closest('.account-order-card').querySelector('.order-detail-body');
-            const isOpen = body.classList.toggle('open');
-            btn.classList.toggle('open', isOpen);
-            btn.childNodes[0].textContent = isOpen ? 'Ẩn sản phẩm ' : 'Xem sản phẩm ';
-        };
-
-        window.togglePassword = function(id, btn) {
-            const input = document.getElementById(id);
-            if (!input) return;
-            input.type = input.type === 'password' ? 'text' : 'password';
-            btn.style.opacity = input.type === 'text' ? '1' : '0.5';
-        };
-
-        window.checkPasswordStrength = function(val) {
-            const bar = document.getElementById('pwStrengthBar');
-            const label = document.getElementById('pwStrengthLabel');
-            if (!bar || !label) return;
-            let score = 0;
-            if (val.length >= 8) score++;
-            if (/[A-Z]/.test(val)) score++;
-            if (/[0-9]/.test(val)) score++;
-            if (/[^A-Za-z0-9]/.test(val)) score++;
-            const levels = [
-                { w:'25%', color:'#c03c3c', text:'Yếu' },
-                { w:'50%', color:'#c08060', text:'Trung bình' },
-                { w:'75%', color:'#c0a840', text:'Khá mạnh' },
-                { w:'100%', color:'var(--accent)', text:'Mạnh' },
-            ];
-            const lv = val.length ? levels[Math.max(0, score - 1)] : null;
-            bar.style.width = lv ? lv.w : '0';
-            bar.style.background = lv ? lv.color : '';
-            label.textContent = lv ? lv.text : '';
-            label.style.color = lv ? lv.color : '';
-        };
-
-        window.handleChangePassword = function() {
-            const cur = document.getElementById('pwCurrent')?.value;
-            const nw  = document.getElementById('pwNew')?.value;
-            const cf  = document.getElementById('pwConfirm')?.value;
-            if (!cur || !nw || !cf) { alert('Vui lòng điền đầy đủ thông tin.'); return; }
-            if (nw.length < 8)       { alert('Mật khẩu mới phải có ít nhất 8 ký tự.'); return; }
-            if (nw !== cf)            { alert('Mật khẩu xác nhận không khớp.'); return; }
-            // TODO: gọi API đổi mật khẩu
-            alert('Đổi mật khẩu thành công!');
-        };
+        setTimeout(() => window.AccountApp.init(), 100);
+        /*]]>*/
     </script>
 </section>

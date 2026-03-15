@@ -3,7 +3,11 @@ package com.example.bee.entities.wishlist;
 import com.example.bee.entities.account.TaiKhoan;
 import com.example.bee.entities.product.SanPham;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -24,7 +28,6 @@ public class YeuThich {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    // Một tài khoản có thể thích nhiều sản phẩm
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
             name = "id_tai_khoan",
@@ -33,7 +36,6 @@ public class YeuThich {
     )
     private TaiKhoan taiKhoan;
 
-    // Một sản phẩm có thể được nhiều tài khoản thích
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
             name = "id_san_pham",

@@ -1,6 +1,5 @@
 package com.example.bee.config;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -28,16 +27,15 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // 1. Cho phép tất cả truy cập trang đăng nhập và tài nguyên tĩnh
-                        .requestMatchers("/login", "/css/**", "/js/**", "/images/**", "/fonts/**").permitAll()
-
-                        // 2. QUYỀN ADMIN: Các request nhạy cảm chỉ Giám đốc/Quản lý mới được vào
-                        .requestMatchers("/staff", "/dashboards", "/promotions").hasAuthority("ROLE_ADMIN")
-
-                        // 3. QUYỀN STAFF + ADMIN: Các chức năng bán hàng, sản phẩm, khách hàng
-                        .requestMatchers("/admin", "/catalogs", "/products", "/pos", "/orders", "/customers").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
-
-                        // 4. Các request còn lại trong hệ thống đều yêu cầu phải đăng nhập
+                        .requestMatchers("/register", "/login", "/css/**", "/js/**", "/images/**", "/api/products/**", "/api/hoa-don/tra-cuu/**", "/api/hoa-don/checkout", "/customer/**").permitAll()
+                        .requestMatchers("/customer/**").hasAuthority("ROLE_CUSTOMER")
+                        .requestMatchers("/api/khach-hang/my-profile", "/api/khach-hang/change-password", "/api/khach-hang/*/dia-chi/**").hasAuthority("ROLE_CUSTOMER")
+                        .requestMatchers("/api/hoa-don/my-orders").hasAuthority("ROLE_CUSTOMER")
+                        .requestMatchers("/staff/**", "/dashboards/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/admin/**", "/products/**", "/pos/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
+                        .requestMatchers("/api/khach-hang", "/api/khach-hang/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
+                        .requestMatchers("/api/hoa-don", "/api/hoa-don/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
+                        .requestMatchers("/api/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -56,18 +54,13 @@ public class SecurityConfig {
                 )
                 .exceptionHandling(ex -> ex
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            // Cấu hình không redirect để tránh lỗi AJAX lồng layout
                             boolean isApi = request.getRequestURI().startsWith("/api/");
-
                             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                             response.setCharacterEncoding("UTF-8");
-
                             if (isApi) {
-                                // Nếu là lời gọi API (như đổi trạng thái) bị chặn
                                 response.setContentType("application/json");
                                 response.getWriter().write("{\"message\": \"Bạn không có quyền thực hiện thao tác này!\"}");
                             } else {
-                                // Nếu là lời gọi load giao diện HTML bị chặn
                                 response.setContentType("text/html; charset=UTF-8");
                                 response.getWriter().write(
                                         "<div style=\"display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 50px; text-align: center; height: 100%;\">" +
@@ -85,7 +78,6 @@ public class SecurityConfig {
                             }
                         })
                 );
-
         return http.build();
     }
 }

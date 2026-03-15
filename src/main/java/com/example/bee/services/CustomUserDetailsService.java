@@ -19,18 +19,20 @@ public class CustomUserDetailsService implements UserDetailsService {
     private TaiKhoanRepository taiKhoanRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // 1. Tìm tài khoản trong DB
-        TaiKhoan taiKhoan = taiKhoanRepository.findByTenDangNhapAndTrangThaiTrue(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy tài khoản hoặc tài khoản bị khóa"));
+    public UserDetails loadUserByUsername(String loginIdentifier) throws UsernameNotFoundException {
+        // 1. Tìm tài khoản bằng Tên đăng nhập / Email / SĐT (thông qua hàm custom trong Repo)
+        TaiKhoan taiKhoan = taiKhoanRepository.findByLoginIdentifier(loginIdentifier)
+                .orElseThrow(() -> new UsernameNotFoundException("Tài khoản, Email hoặc Số điện thoại không tồn tại hoặc bị khóa"));
 
-        // 2. Chuyển đổi Role từ DB sang GrantedAuthority của Spring Security
-        SimpleGrantedAuthority authority = new SimpleGrantedAuthority(taiKhoan.getVaiTro().getMa());
+        // 2. Lấy mã vai trò (ví dụ: ROLE_ADMIN, ROLE_CUSTOMER)
+        String roleCode = taiKhoan.getVaiTro().getMa();
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority(roleCode);
 
         // 3. Trả về đối tượng User của Spring Security
+        // Lưu ý: Dù đăng nhập bằng Email hay SĐT, ta vẫn nên trả về tenDangNhap làm username chính của phiên làm việc
         return new User(
                 taiKhoan.getTenDangNhap(),
-                taiKhoan.getMatKhau(), // Đây là mật khẩu đã mã hóa BCrypt
+                taiKhoan.getMatKhau(),
                 Collections.singletonList(authority)
         );
     }

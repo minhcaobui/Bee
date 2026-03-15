@@ -10,7 +10,10 @@ import com.example.bee.repositories.promotion.KhuyenMaiSanPhamRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,28 +35,17 @@ public class KhuyenMaiApi {
     private final KhuyenMaiSanPhamRepository khuyenMaiSanPhamRepository;
     private final SanPhamRepository sanPhamRepo;
 
-    // --- LOGIC VALIDATE TRÙNG LỊCH & CỘNG DỒN (MỚI THÊM) ---
     private void validateConflict(Integer currentId, PromotionRequest request) {
-        // Nếu tạo mới thì ID là -1 để không trùng ai
         Integer safeId = (currentId == null) ? -1 : currentId;
-
-        // Gọi Repo kiểm tra xem có KM nào đang chạy đè lên không
-        // LƯU Ý: Mày phải chắc chắn đã thêm hàm checkTrungLich vào KhuyenMaiRepository như tao bảo lúc nãy nhé!
         List<KhuyenMai> conflicts = khuyenMaiRepository.checkTrungLich(
                 request.getIdSanPhams(),
                 request.getNgayBatDau(),
                 request.getNgayKetThuc(),
                 safeId
         );
-
         for (KhuyenMai km : conflicts) {
-            // Logic: Cả 2 phải cùng bật Cộng Dồn thì mới được
             boolean isBothCumulative = km.getChoPhepCongDon() && request.getChoPhepCongDon();
-
             if (!isBothCumulative) {
-                // Lọc ra tên các sản phẩm bị trùng để báo lỗi
-                // Đoạn này giả định trong Entity KhuyenMai mày có list SanPham (OneToMany/ManyToMany)
-                // Nếu chưa map thì nó chỉ báo tên KM thôi.
                 String tenSpTrung = "các sản phẩm đã chọn";
                 if (km.getSanPhams() != null && !km.getSanPhams().isEmpty()) {
                     tenSpTrung = km.getSanPhams().stream()
@@ -61,7 +53,6 @@ public class KhuyenMaiApi {
                             .map(SanPham::getTen)
                             .collect(Collectors.joining(", "));
                 }
-
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Sản phẩm [" + tenSpTrung + "] đang thuộc đợt KM: '" + km.getTen() +
                                 "'. Yêu cầu cả 2 đợt phải bật 'Cộng dồn' mới được áp dụng!");
@@ -70,13 +61,12 @@ public class KhuyenMaiApi {
     }
 
     private boolean checkDaSuDung(Integer khuyenMaiId) {
-        return false; // TẠM THỜI
+        return false;
     }
 
     @Scheduled(fixedRate = 60000)
     @Transactional
     public void autoUpdateStatus() {
-        // Dùng hàm UPDATE trực tiếp dưới DB cho nhanh
         khuyenMaiRepository.autoDeactivateExpiredPromotions(LocalDateTime.now());
     }
 
@@ -88,7 +78,6 @@ public class KhuyenMaiApi {
     @GetMapping("/san-pham")
     public ResponseEntity<?> getAllProducts() {
         List<SanPham> list = sanPhamRepo.getAllActiveProducts();
-
         List<Map<String, Object>> result = list.stream().map(sp -> {
             Map<String, Object> item = new HashMap<>();
             item.put("id", sp.getId());
@@ -96,7 +85,6 @@ public class KhuyenMaiApi {
             item.put("ten", sp.getTen());
             return item;
         }).collect(Collectors.toList());
-
         return ResponseEntity.ok(result);
     }
 
@@ -121,7 +109,6 @@ public class KhuyenMaiApi {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         List<Integer> productIds = khuyenMaiSanPhamRepository.findAllByIdKhuyenMai(id)
                 .stream().map(KhuyenMaiSanPham::getIdSanPham).collect(Collectors.toList());
-
         Map<String, Object> response = new HashMap<>();
         response.put("data", khuyenMai);
         response.put("productIds", productIds);
@@ -133,22 +120,16 @@ public class KhuyenMaiApi {
     @Transactional
     public ResponseEntity<?> create(@Valid @RequestBody PromotionRequest body) {
         validate(body);
-
-        // 1. Check Trùng Lịch & Cộng Dồn (GỌI HÀM VALIDATE Ở ĐÂY)
         validateConflict(null, body);
-
         String code = (body.getMa() != null && !body.getMa().trim().isEmpty())
                 ? body.getMa().trim().toUpperCase()
                 : generateCode();
-
         if (khuyenMaiRepository.existsByMa(code)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã khuyến mãi đã tồn tại!");
         }
-
         KhuyenMai entity = new KhuyenMai();
         entity.setMa(code);
         mapToEntity(body, entity);
-
         KhuyenMai saved = khuyenMaiRepository.save(entity);
         saveProducts(saved.getId(), body.getIdSanPhams());
         return ResponseEntity.ok(saved);
@@ -159,19 +140,14 @@ public class KhuyenMaiApi {
     public ResponseEntity<?> update(@PathVariable Integer id, @Valid @RequestBody PromotionRequest body) {
         KhuyenMai entity = khuyenMaiRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-
         validate(body);
         validateConflict(id, body);
-
-        // LOGIC MỚI: Nếu KM đã/đang diễn ra (Ngày bắt đầu nhỏ hơn hiện tại)
         if (entity.getNgayBatDau().isBefore(LocalDateTime.now())) {
-            // Chặn không cho đổi Ngày Bắt Đầu
             if (!entity.getNgayBatDau().isEqual(body.getNgayBatDau())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Chương trình đã hoặc đang diễn ra, không thể thay đổi Ngày Bắt Đầu!");
             }
         }
-
         mapToEntity(body, entity);
         KhuyenMai saved = khuyenMaiRepository.save(entity);
         khuyenMaiSanPhamRepository.deleteByIdKhuyenMai(id);
@@ -183,8 +159,6 @@ public class KhuyenMaiApi {
         if (body.getTen() == null || body.getTen().trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên chương trình không được để trống.");
         }
-
-        // Kiểm tra giá trị chiết khấu dựa trên loại hình
         if ("PERCENT".equals(body.getLoai())) {
             if (body.getGiaTri() == null || body.getGiaTri().doubleValue() <= 0 || body.getGiaTri().doubleValue() > 80) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tỷ lệ chiết khấu không hợp lệ (Yêu cầu từ 1% đến 80%).");
@@ -194,12 +168,9 @@ public class KhuyenMaiApi {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Giá trị giảm tối thiểu phải từ 1.000đ.");
             }
         }
-
-        // Kiểm tra logic thời gian
         if (body.getNgayBatDau() == null || body.getNgayKetThuc() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vui lòng thiết lập đầy đủ thời gian bắt đầu và kết thúc.");
         }
-
         if (body.getNgayKetThuc().isBefore(body.getNgayBatDau().plusMinutes(5))) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Thời hạn chương trình phải có độ dài tối thiểu 5 phút.");
         }
@@ -217,8 +188,6 @@ public class KhuyenMaiApi {
 
     private void saveProducts(Integer kmId, List<Integer> productIds) {
         if (productIds == null || productIds.isEmpty()) return;
-
-        // Lọc sản phẩm tồn tại để tránh lỗi Foreign Key
         List<Integer> validIds = sanPhamRepo.findAllById(productIds).stream()
                 .map(SanPham::getId).collect(Collectors.toList());
 
@@ -233,42 +202,29 @@ public class KhuyenMaiApi {
     public ResponseEntity<?> quickToggleStatus(@PathVariable Integer id) {
         KhuyenMai entity = khuyenMaiRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy thông tin chương trình yêu cầu."));
-
         boolean newStatus = !entity.getTrangThai();
         String message;
-
-        // Chỉ kiểm tra điều kiện khi thực hiện kích hoạt (chuyển từ OFF sang ON)
         if (newStatus) {
-            // 1. Kiểm tra thời hạn
             if (entity.getNgayKetThuc().isBefore(LocalDateTime.now())) {
                 return ResponseEntity.badRequest().body(Collections.singletonMap("message",
                         "Không thể kích hoạt chương trình đã quá hạn thời gian kết thúc."));
             }
-
-            // 2. CHẶN KÍCH HOẠT KHI CHƯA CÓ SẢN PHẨM (Lỗi mày đang gặp)
             if (entity.getSanPhams() == null || entity.getSanPhams().isEmpty()) {
-                // Thay vì throw, hãy return badRequest kèm map chứa message
                 return ResponseEntity.badRequest().body(Collections.singletonMap("message",
                         "Kích hoạt thất bại: Đợt khuyến mãi hiện chưa có sản phẩm áp dụng. Vui lòng bổ sung sản phẩm trước khi vận hành."));
             }
-
-            // 3. Kiểm tra tính khả dụng của sản phẩm
             long validCount = khuyenMaiRepository.countValidProductsInPromotion(id);
             long totalCount = entity.getSanPhams().size();
-
             if (validCount == 0) {
                 return ResponseEntity.badRequest().body(Collections.singletonMap("message",
                         "Kích hoạt thất bại. Toàn bộ sản phẩm được chọn hiện đang ở trạng thái ngừng hoạt động."));
             }
-
             if (validCount < totalCount) {
                 long diff = totalCount - validCount;
                 message = "Kích hoạt thành công. Lưu ý: Có " + diff + " sản phẩm đang ngừng kinh doanh sẽ không được áp dụng chiết khấu.";
             } else {
                 message = "Chiến dịch khuyến mãi đã được kích hoạt thành công trên toàn bộ danh mục sản phẩm.";
             }
-
-            // 4. Validate xung đột (Cần try-catch nếu hàm này ném Exception)
             try {
                 PromotionRequest fakeRequest = new PromotionRequest();
                 fakeRequest.setIdSanPhams(entity.getSanPhams().stream().map(SanPham::getId).collect(Collectors.toList()));
@@ -278,17 +234,14 @@ public class KhuyenMaiApi {
                 fakeRequest.setTrangThai(true);
                 validateConflict(id, fakeRequest);
             } catch (ResponseStatusException e) {
-                // Bắt lỗi từ hàm validateConflict và trả về JSON
                 return ResponseEntity.badRequest().body(Collections.singletonMap("message", e.getReason()));
             }
 
         } else {
             message = "Chương trình đã được chuyển sang trạng thái ngừng áp dụng.";
         }
-
         entity.setTrangThai(newStatus);
         khuyenMaiRepository.save(entity);
-
         return ResponseEntity.ok(Collections.singletonMap("message", message));
     }
 }

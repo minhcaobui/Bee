@@ -32,12 +32,9 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
             "WHERE s.trangThai = true ")
     List<SanPham> getAllActiveProducts();
 
-    // Kiểm tra xem có Sản phẩm nào đang HOẠT ĐỘNG (trang_thai = true/1) thuộc Danh mục này không?
     boolean existsByDanhMuc_IdAndTrangThaiTrue(Integer danhMucId);
 
-    // Kiểm tra xem có Sản phẩm nào đang HOẠT ĐỘNG thuộc Hãng này không?
     boolean existsByHang_IdAndTrangThaiTrue(Integer hangId);
 
-    // Kiểm tra xem có Sản phẩm nào đang HOẠT ĐỘNG thuộc Chất liệu này không?
     boolean existsByChatLieu_IdAndTrangThaiTrue(Integer chatLieuId);
 }

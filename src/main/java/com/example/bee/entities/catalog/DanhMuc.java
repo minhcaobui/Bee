@@ -35,7 +35,7 @@ public class DanhMuc {
     @Column(name = "ngay_tao", nullable = false, updatable = false)
     private LocalDateTime ngayTao = LocalDateTime.now();
 
-    @Column(name = "ngay_sua")  // ✅ FIX
+    @Column(name = "ngay_sua")
     private LocalDateTime ngaySua;
 
     @Column(name = "trang_thai", nullable = false)

@@ -1,10 +1,11 @@
-package com.example.bee.entities.user; // Kiểm tra lại package cho đúng folder của mày
+package com.example.bee.entities.user;
 
+import com.example.bee.entities.account.TaiKhoan;
 import com.example.bee.entities.role.ChucVu;
-import com.example.bee.entities.account.TaiKhoan; // Hoặc package chứa bảng Tài Khoản của mày
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.util.Date;
 
 @Entity
@@ -15,11 +16,12 @@ import java.util.Date;
 @AllArgsConstructor
 @Builder
 public class NhanVien {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "ma",unique = true, nullable = false, length = 50)
+    @Column(name = "ma", unique = true, nullable = false, length = 50)
     private String ma;
 
     @Column(name = "ho_ten", nullable = false, length = 150)
@@ -36,10 +38,10 @@ public class NhanVien {
     @Column(name = "dia_chi", columnDefinition = "NVARCHAR(MAX)")
     private String diaChi;
 
-    @Column(name = "so_dien_thoai",length = 12)
+    @Column(name = "so_dien_thoai", length = 12)
     private String soDienThoai;
 
-    @Column(name = "email",length = 150)
+    @Column(name = "email", length = 150)
     private String email;
 
     @Column(name = "hinh_anh", columnDefinition = "NVARCHAR(MAX)")
