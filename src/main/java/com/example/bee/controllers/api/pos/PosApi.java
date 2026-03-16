@@ -190,29 +190,33 @@ public class PosApi {
         try {
             Integer invoiceId = (Integer) payload.get("invoiceId");
             Integer customerId = (Integer) payload.get("customerId");
-            String method = (String) payload.get("method");
+            String method     = (String)  payload.get("method");
             Integer voucherId = (Integer) payload.get("voucherId");
-            List<Map<String, Object>> cart = (List<Map<String, Object>>) payload.get("cart");
-            HoaDon hd = hoaDonRepo.findById(invoiceId).orElseThrow(() -> new RuntimeException("Không tìm thấy HD!"));
-            if (customerId != null) {
-                hd.setKhachHang(khachHangRepo.findById(customerId).orElse(null));
-            }
 
+            HoaDon hd = hoaDonRepo.findById(invoiceId)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy HD!"));
+
+            // Lấy cart từ pendingCarts (đã lưu lúc open-payment)
+            Map<String, Object> cachedPayload = pendingCarts.get(hd.getMa());
+            List<Map<String, Object>> cart = cachedPayload != null
+                    ? (List<Map<String, Object>>) cachedPayload.get("cart")
+                    : (List<Map<String, Object>>) payload.get("cart");
+
+            if (customerId != null) hd.setKhachHang(khachHangRepo.findById(customerId).orElse(null));
             NhanVien nvChotDon = getLoggedInNhanVien();
-            if (hd.getNhanVien() == null && nvChotDon != null) {
-                hd.setNhanVien(nvChotDon);
-            }
+            if (hd.getNhanVien() == null && nvChotDon != null) hd.setNhanVien(nvChotDon);
 
             BigDecimal giaTamTinh = BigDecimal.ZERO;
-            if (cart != null && !cart.isEmpty()) {
+
+            // Tạo chi tiết + trừ kho (chỉ nếu chưa có)
+            if (cart != null && hdctRepo.findByHoaDonId(hd.getId()).isEmpty()) {
                 for (Map<String, Object> item : cart) {
                     Integer spctId = Integer.valueOf(item.get("id").toString());
-                    Integer qty = Integer.valueOf(item.get("qty").toString());
+                    Integer qty    = Integer.valueOf(item.get("qty").toString());
                     BigDecimal price = new BigDecimal(item.get("price").toString());
-                    SanPhamChiTiet spct = variantRepo.findById(spctId).orElseThrow(() -> new RuntimeException("Lỗi kho"));
-                    if (spct.getSoLuong() < qty) {
-                        throw new RuntimeException("Sản phẩm không đủ số lượng để chốt đơn!");
-                    }
+                    SanPhamChiTiet spct = variantRepo.findById(spctId)
+                            .orElseThrow(() -> new RuntimeException("Lỗi kho"));
+                    if (spct.getSoLuong() < qty) throw new RuntimeException("Sản phẩm không đủ số lượng!");
                     spct.setSoLuong(spct.getSoLuong() - qty);
                     if (spct.getSoLuong() <= 0) spct.setTrangThai(false);
                     variantRepo.save(spct);
@@ -630,5 +634,86 @@ public class PosApi {
         responseData.put("summary", summary);
 
         return ResponseEntity.ok(responseData);
+    }
+    // Endpoint MỚI: tạo HĐ + chi tiết vào DB khi bước vào thanh toán
+    @PostMapping("/invoices/open-payment")
+    @Transactional
+    public ResponseEntity<?> openPayment(@RequestBody Map<String, Object> payload) {
+        try {
+            Integer customerId = (Integer) payload.get("customerId");
+            List<Map<String, Object>> cart = (List<Map<String, Object>>) payload.get("cart");
+
+            if (cart == null || cart.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Giỏ hàng trống!"));
+            }
+
+            // Kiểm tra tồn kho trước khi tạo HĐ
+            for (Map<String, Object> item : cart) {
+                Integer spctId = Integer.valueOf(item.get("id").toString());
+                Integer qty    = Integer.valueOf(item.get("qty").toString());
+                SanPhamChiTiet spct = variantRepo.findById(spctId)
+                        .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
+                if (spct.getSoLuong() < qty) {
+                    throw new RuntimeException("Sản phẩm [" + spct.getSanPham().getTen() + "] không đủ số lượng!");
+                }
+            }
+
+            // Tạo mã HĐ
+            String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            StringBuilder sb = new StringBuilder("HD");
+            Random random = new Random();
+            for (int i = 0; i < 6; i++) sb.append(characters.charAt(random.nextInt(characters.length())));
+
+            NhanVien nv = getLoggedInNhanVien();
+            TrangThaiHoaDon ttCho = trangThaiRepo.findByMa("CHO_THANH_TOAN");
+
+            HoaDon hd = HoaDon.builder()
+                    .ma(sb.toString())
+                    .giaTamThoi(BigDecimal.ZERO)
+                    .giaTong(BigDecimal.ZERO)
+                    .loaiHoaDon(0)
+                    .trangThaiHoaDon(ttCho)
+                    .nhanVien(nv)
+                    .ngayTao(new Date())
+                    .build();
+
+            if (customerId != null) {
+                hd.setKhachHang(khachHangRepo.findById(customerId).orElse(null));
+            }
+
+            HoaDon savedHd = hoaDonRepo.save(hd);
+
+            lichSuRepo.save(LichSuHoaDon.builder()
+                    .hoaDon(savedHd)
+                    .trangThaiHoaDon(ttCho)
+                    .ghiChu("Bắt đầu thanh toán tại quầy")
+                    .nhanVien(nv)
+                    .build());
+
+            // Lưu cart vào pendingCarts để dùng lại ở finishOrder
+            pendingCarts.put(savedHd.getMa(), payload);
+
+            return ResponseEntity.ok(Map.of(
+                    "id",  savedHd.getId(),
+                    "ma",  savedHd.getMa()
+            ));
+
+        } catch (Exception e) {
+            org.springframework.transaction.interceptor.TransactionAspectSupport
+                    .currentTransactionStatus().setRollbackOnly();
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/invoices/check-stock")
+    public ResponseEntity<?> checkStock(@RequestBody Map<String, Object> body) {
+        Integer spctId = (Integer) body.get("spctId");
+        Integer qty    = (Integer) body.get("qty");
+        SanPhamChiTiet spct = variantRepo.findById(spctId)
+                .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
+        if (spct.getSoLuong() < qty) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Sản phẩm không đủ số lượng!"));
+        }
+        return ResponseEntity.ok(Map.of("message", "OK"));
     }
 }

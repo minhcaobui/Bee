@@ -71,8 +71,8 @@ async function loadModule(moduleName) {
             title = 'QUẢN LÝ NHÂN VIÊN';
             break;
 
-        case 'users':
-            url = '/users.html';
+        case 'profiles':
+            url = '/profiles';
             title = 'QUẢN LÝ TÀI KHOẢN';
             break;
 
@@ -158,6 +158,22 @@ function executeScripts(container, moduleName) {
                 window.CustomerApp.init();
             } else {
                 console.warn("Chưa tìm thấy CustomerApp");
+            }
+        } else if (moduleName === 'profiles') {
+            if (typeof window.ProfileApp !== 'undefined') {
+                window.ProfileApp.init();
+            } else {
+                console.warn("Chưa tìm thấy CustomerApp");
+            }
+        } else if (moduleName === 'dashboard') {
+            if (typeof window.DB !== 'undefined') {
+                window.DB.init();
+            } else {
+                console.warn("Chưa tìm thấy DB");
+            }
+        } else if (moduleName === 'staff') {
+            if (typeof window.StaffApp !== 'undefined') {
+                window.StaffApp.init();
             }
         }
     }, 100);
