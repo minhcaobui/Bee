@@ -10,4 +10,5 @@ public class VariantRequest {
     private Integer idKichThuoc;
     private BigDecimal giaBan;
     private String hinhAnh;
+    private Integer soLuong;
 }

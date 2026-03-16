@@ -78,16 +78,9 @@
         .order-timeline-label { font-size: 10px; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; margin-bottom: 20px; font-weight: 400; }
         .order-timeline-steps { display: flex; align-items: flex-start; gap: 0; }
         .order-timeline-step { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; position: relative; }
-        /* Đảm bảo thanh nối (line) hiển thị chuẩn cho 4 bước */
         .order-timeline-step:not(:last-child)::after {
-            content: '';
-            position: absolute;
-            top: 13px;
-            left: calc(50% + 14px);
-            width: calc(100% - 28px);
-            height: 1px;
-            background: rgba(0,0,0,0.1);
-            z-index: 0;
+            content: ''; position: absolute; top: 13px; left: calc(50% + 14px);
+            width: calc(100% - 28px); height: 1px; background: rgba(0,0,0,0.1); z-index: 0;
         }
         .order-timeline-step.done:not(:last-child)::after { background: var(--accent); }
         .order-step-dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.1); background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 1; position: relative; transition: 0.3s; }
@@ -285,7 +278,20 @@
                 </div>
 
                 <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;margin-bottom:8px">Thông tin cơ bản</div>
+
                 <div class="account-form-grid">
+                    <div class="account-form-field full">
+                        <label class="account-form-label">
+                            Tên đăng nhập
+                            <span style="text-transform:none; color:#c08060; font-size:10px; margin-left:8px; font-style:italic;">(Chỉ được phép thay đổi 1 lần duy nhất)</span>
+                        </label>
+                        <input id="inpUsername" class="account-form-input" type="text" placeholder="Nhập tên đăng nhập tùy chọn...">
+                        <div id="usernameWarning" style="display:none; font-size:11px; color:#c03c3c; margin-top:4px;">
+                            <svg viewBox="0 0 24 24" style="width:12px; height:12px; stroke:currentColor; fill:none; vertical-align:middle; margin-right:2px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            Tên đăng nhập đã được thay đổi, bạn không thể sửa đổi thêm.
+                        </div>
+                    </div>
+
                     <div class="account-form-field">
                         <label class="account-form-label">Họ và Tên</label>
                         <input id="inpFirstName" class="account-form-input" type="text" placeholder="Nhập họ và tên...">
@@ -306,7 +312,7 @@
                         <input id="inpDob" class="account-form-input" type="date">
                     </div>
 
-                    <div class="account-form-field full">
+                    <div class="account-form-field">
                         <label class="account-form-label">Giới tính</label>
                         <select id="inpGender" class="account-form-input" style="cursor: pointer;">
                             <option value="">Chọn giới tính</option>
@@ -314,6 +320,11 @@
                             <option value="Nữ">Nữ</option>
                             <option value="Khác">Khác</option>
                         </select>
+                    </div>
+
+                    <div class="account-form-field full">
+                        <label class="account-form-label">Địa chỉ giao hàng</label>
+                        <input id="inpAddress" class="account-form-input" type="text" placeholder="Ví dụ: Số 12, ngõ 34, đường Lê Lợi, TP. Hà Nội...">
                     </div>
                 </div>
                 <button class="account-form-save" id="btnSaveProfile" onclick="window.AccountApp.confirmAction('profile')">Lưu thay đổi</button>
@@ -342,7 +353,7 @@
                         <label class="account-form-label">Xác nhận mật khẩu mới</label>
                         <div class="input-password-wrap">
                             <input class="account-form-input" type="password" id="pwConfirm" placeholder="Nhập lại mật khẩu mới">
-                            <button class="toggle-pw-btn" type="button" onclick="window.AccountApp.togglePassword('pwConfirm', this)"><svg viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                            <button class="toggle-pw-btn" type="button" onclick="window.AccountApp.togglePassword('pwConfirm', this)"><svg viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8-11-8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
                         </div>
                     </div>
                 </div>
@@ -450,7 +461,6 @@
                 }
             },
 
-            // Modal chung cho mọi hành động (Đăng xuất, Lưu Profile, Đổi Mật Khẩu)
             confirmAction: function(actionType) {
                 let title = "";
                 let message = "";
@@ -623,6 +633,7 @@
                 container.innerHTML = html;
             },
 
+            // HÀM RENDER FORM THÔNG TIN MỚI
             renderProfileForm: function() {
                 const user = this.state.user;
 
@@ -630,9 +641,21 @@
                 document.getElementById('inpPhone').value = user.soDienThoai || '';
                 document.getElementById('inpEmail').value = user.email || '';
                 document.getElementById('inpGender').value = user.gioiTinh || '';
+                document.getElementById('inpAddress').value = user.diaChi || '';
+
+                const inpUser = document.getElementById('inpUsername');
+                inpUser.value = user.tenDangNhap || '';
 
                 if(user.ngaySinh) {
                     document.getElementById('inpDob').value = user.ngaySinh.substring(0, 10);
+                }
+
+                // KIỂM TRA KHÓA THÔNG MINH (SMART LOCK):
+                // Nếu tên đăng nhập (tenDangNhap) khác với số điện thoại (soDienThoai)
+                // Hoặc backend trả về cờ daDoiTenDangNhap = true, thì khóa ô nhập liệu lại!
+                if (user.daDoiTenDangNhap || (user.tenDangNhap && user.tenDangNhap !== user.soDienThoai)) {
+                    inpUser.disabled = true;
+                    document.getElementById('usernameWarning').style.display = 'block';
                 }
             },
 
@@ -673,18 +696,22 @@
                 return html + '</div>';
             },
 
+            // HÀM LƯU THÔNG TIN MỚI
             updateProfile: async function() {
                 const btn = document.getElementById('btnSaveProfile');
                 const oldText = btn.innerText;
                 btn.innerText = "Đang lưu...";
                 btn.disabled = true;
 
+                // Thu thập toàn bộ data bao gồm Tên đăng nhập và Địa chỉ mới
                 const payload = {
                     hoTen: document.getElementById('inpFirstName').value,
                     soDienThoai: document.getElementById('inpPhone').value,
                     gioiTinh: document.getElementById('inpGender').value,
                     ngaySinh: document.getElementById('inpDob').value,
-                    email: document.getElementById('inpEmail').value
+                    email: document.getElementById('inpEmail').value,
+                    diaChi: document.getElementById('inpAddress').value,
+                    tenDangNhap: document.getElementById('inpUsername').value
                 };
 
                 try {
@@ -696,10 +723,10 @@
 
                     if(res.ok) {
                         this.showAccountNotification('Thành công', 'Đã cập nhật hồ sơ cá nhân!');
-                        await this.fetchData();
+                        await this.fetchData(); // Reset form, cờ Smart Lock sẽ tự kiểm tra và khóa ô đổi tên nếu cần
                     } else {
                         const err = await res.json();
-                        this.showAccountNotification('Lỗi', err.message || "Không thể cập nhật thông tin", true);
+                        this.showAccountNotification('Lỗi', err.message || "Tên đăng nhập đã trùng hoặc bị lỗi. Vui lòng thử lại!", true);
                     }
                 } catch(e) {
                     this.showAccountNotification('Lỗi', "Lỗi kết nối máy chủ!", true);
@@ -751,9 +778,8 @@
                         document.getElementById('pwCurrent').value = '';
                         document.getElementById('pwNew').value = '';
                         document.getElementById('pwConfirm').value = '';
-                        this.checkPasswordStrength(''); // Reset thanh màu
+                        this.checkPasswordStrength('');
                     } else {
-                        // Hiện thông báo lỗi màu đỏ góc dưới
                         this.showAccountNotification('Thất bại', 'Sai mật khẩu hiện tại, vui lòng thử lại!', true);
                     }
                 } catch(e) {

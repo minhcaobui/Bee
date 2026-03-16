@@ -24,7 +24,7 @@ import java.util.Random;
 public class MauSacApi {
 
     private final SanPhamChiTietRepository sanPhamChiTietRepository;
-    private MauSacRepository mauSacRepository;
+    private final MauSacRepository mauSacRepository;
 
     private String generateMa() {
         String ma;

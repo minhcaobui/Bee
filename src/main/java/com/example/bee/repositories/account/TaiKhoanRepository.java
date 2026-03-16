@@ -21,4 +21,6 @@ public interface TaiKhoanRepository extends JpaRepository<TaiKhoan, Integer> {
     Optional<TaiKhoan> findByLoginIdentifier(@Param("loginStr") String loginStr);
 
     boolean existsByTenDangNhap(String tenDangNhap);
+
+    Optional<TaiKhoan> findByTenDangNhap(String username);
 }

@@ -75,7 +75,6 @@
         .img-placeholder { width: 100%; height: 100%; display: block; transition: transform 0.6s ease; object-fit: cover; }
         .product-card:hover .img-placeholder { transform: scale(1.04); }
 
-        /* --- CSS: HIỆU ỨNG ẢNH THỨ 2 LÚC HOVER --- */
         .img-hover { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.5s ease, transform 0.6s ease; z-index: 1; }
         .product-card:hover .img-hover { opacity: 1; transform: scale(1.04); }
 
@@ -92,7 +91,7 @@
         .qs-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px; text-align: center; }
         .qs-options { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; justify-content: center; }
         .qs-dot { width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.15); cursor: pointer; box-shadow: inset 0 0 0 2px #fff; transition: all 0.2s ease; }
-        .qs-dot.active { border: 1.5px solid var(--text); transform: scale(1.15); }
+        .qs-dot.active { border: 1.5px solid var(--text); transform: scale(1.15); padding: 2px; background-clip: content-box; } /* CSS MỚI ĐỒNG BỘ NÚT CHỌN MÀU */
         .qs-size-btn { padding: 6px 12px; border: 1px solid #ddd; background: none; font-size: 11px; cursor: pointer; min-width: 35px; }
         .qs-size-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
         .qs-size-btn.disabled { opacity: 0.3; cursor: not-allowed; text-decoration: line-through; }
@@ -186,9 +185,73 @@
             state: { products: [] },
             tempSelection: {},
 
+            // Map màu sắc dự phòng
+            colorMap: {
+                'trắng': '#ffffff', 'đen': '#1a1a1a', 'xám': '#c5cfc7', 'ghi': '#d4cfc9',
+                'be': '#c4b49d', 'kem': '#fef3c7', 'nâu': '#a89e93', 'rêu': '#3D5A4C',
+                'đỏ': '#8b0000', 'hồng': '#ffc0cb', 'xanh biển': '#4682b4', 'xanh dương': '#4682b4',
+                'vàng': '#FBC02D', 'cam': '#f97316', 'xanh lá': '#15803d', 'tím': '#a855f7'
+            },
+
             init: function() {
                 this.setupKeyboardEvents();
                 this.loadProducts();
+            },
+
+            // ==========================================
+            // THUẬT TOÁN NHẬN DIỆN MÀU THÔNG MINH
+            // ==========================================
+            getColorHex: function(name) {
+                if(!name) return '#000';
+                const n = name.toLowerCase().trim();
+
+                if (this.colorMap[n]) return this.colorMap[n];
+
+                if (n.includes('đỏ')) return '#b91c1c';
+                if (n.includes('xanh dương') || n.includes('xanh biển') || n.includes('navy')) return '#1d4ed8';
+                if (n.includes('xanh lá') || n.includes('rêu')) return '#15803d';
+                if (n.includes('vàng')) return '#eab308';
+                if (n.includes('cam')) return '#ea580c';
+                if (n.includes('hồng')) return '#ec4899';
+                if (n.includes('tím')) return '#a855f7';
+                if (n.includes('nâu')) return '#78350f';
+                if (n.includes('xám') || n.includes('ghi')) return '#64748b';
+                if (n.includes('be') || n.includes('kem')) return '#fef3c7';
+                if (n.includes('trắng')) return '#ffffff';
+                if (n.includes('đen')) return '#111827';
+
+                let hash = 0;
+                for (let i = 0; i < n.length; i++) hash = n.charCodeAt(i) + ((hash << 5) - hash);
+                let color = '#';
+                for (let i = 0; i < 3; i++) color += ('00' + ((hash >> (i * 8)) & 0xFF).toString(16)).substr(-2);
+                return color;
+            },
+
+            // ==========================================
+            // THUẬT TOÁN SẮP XẾP SIZE THÔNG MINH
+            // ==========================================
+            sortSizes: function(sizes) {
+                const orderMap = {
+                    'freesize': 0, 'one size': 0, 'os': 0,
+                    'xxs': 1, 'xs': 2, 's': 3, 'm': 4, 'l': 5, 'xl': 6,
+                    'xxl': 7, '2xl': 7, 'xxxl': 8, '3xl': 8, '4xl': 9
+                };
+
+                return sizes.sort((a, b) => {
+                    const nameA = a.ten.toLowerCase().replace('size', '').trim();
+                    const nameB = b.ten.toLowerCase().replace('size', '').trim();
+
+                    const numA = parseFloat(nameA);
+                    const numB = parseFloat(nameB);
+                    if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+
+                    const weightA = orderMap[nameA] !== undefined ? orderMap[nameA] : 99;
+                    const weightB = orderMap[nameB] !== undefined ? orderMap[nameB] : 99;
+
+                    if (weightA !== weightB) return weightA - weightB;
+
+                    return nameA.localeCompare(nameB);
+                });
             },
 
             setupKeyboardEvents: function() {
@@ -250,7 +313,6 @@
                         imgUrl = imgUrl.replace('/image/upload/', '/image/upload/c_fill,w_400,h_600,f_auto,q_auto/');
                     }
 
-                    // --- TẠO ẢNH THỨ 2 LÚC HOVER & LAZY LOAD ---
                     let imgHoverHtml = '';
                     if (p.hinhAnhs && p.hinhAnhs.length > 1) {
                         let hoverUrl = p.hinhAnhs[1].url;
@@ -358,16 +420,13 @@
                 }
 
                 const colors = Array.from(colorsMap.values());
-                const sizes = Array.from(sizesMap.values());
+
+                // --- SỬ DỤNG HÀM SẮP XẾP SIZE ---
+                let sizes = Array.from(sizesMap.values());
+                sizes = this.sortSizes(sizes);
 
                 const colorContainer = document.getElementById('home-qs-colors-' + productId);
                 const sizeContainer = document.getElementById('home-qs-sizes-' + productId);
-
-                const fallbackColorMap = {
-                    'trắng': '#ffffff', 'đen': '#1a1a1a', 'xám': '#c5cfc7', 'ghi': '#d4cfc9',
-                    'be': '#c4b49d', 'nâu': '#a89e93', 'rêu': '#3D5A4C', 'xanh rêu': '#3D5A4C',
-                    'đỏ': '#8b0000', 'hồng': '#ffc0cb', 'xanh biển': '#4682b4', 'xanh dương': '#4682b4'
-                };
 
                 let cHtml = '';
                 let selectedColorName = '';
@@ -376,8 +435,9 @@
                     const c = colors[i];
                     const isActive = this.tempSelection[productId].colorId === c.id;
                     if (isActive) selectedColorName = c.ten;
-                    const safeColorName = c.ten ? c.ten.toLowerCase().trim() : '';
-                    const hexCode = c.maMau || fallbackColorMap[safeColorName] || '#eeeeee';
+
+                    // --- SỬ DỤNG HÀM NHẬN DIỆN MÀU ---
+                    const hexCode = c.maMau || this.getColorHex(c.ten);
                     const activeClass = isActive ? ' active' : '';
 
                     cHtml += '<div class="qs-dot' + activeClass + '" style="background:' + hexCode + '" title="' + c.ten + '" ' +

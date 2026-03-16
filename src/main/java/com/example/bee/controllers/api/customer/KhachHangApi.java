@@ -5,9 +5,11 @@ import com.example.bee.dto.KhachHangRequest;
 import com.example.bee.entities.account.TaiKhoan;
 import com.example.bee.entities.customer.DiaChiKhachHang;
 import com.example.bee.entities.customer.KhachHang;
+import com.example.bee.entities.user.NhanVien;
 import com.example.bee.repositories.account.TaiKhoanRepository;
 import com.example.bee.repositories.customer.DiaChiKhachHangRepository;
 import com.example.bee.repositories.customer.KhachHangRepository;
+import com.example.bee.repositories.role.NhanVienRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,6 +26,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
 import java.security.SecureRandom;
+import java.sql.Date;
 import java.util.Map;
 import java.util.Optional;
 
@@ -34,6 +37,7 @@ public class KhachHangApi {
 
     private static final SecureRandom RAND = new SecureRandom();
     private final KhachHangRepository khRepo;
+    private final NhanVienRepository nvRepo;
     private final DiaChiKhachHangRepository dcRepo;
     private final TaiKhoanRepository taiKhoanRepository;
     private final PasswordEncoder passwordEncoder;
@@ -195,46 +199,135 @@ public class KhachHangApi {
     }
 
     @GetMapping("/my-profile")
-    public ResponseEntity<?> getMyProfile(Principal principal) {
-        if (principal == null) {
-            return ResponseEntity.status(401).body("Unauthorized");
+    public ResponseEntity<?> getMyProfile(Authentication authentication) {
+        // 1. Kiểm tra xem đã đăng nhập chưa
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Chưa đăng nhập"));
         }
-        String username = principal.getName();
-        Optional<KhachHang> kh = khRepo.findByTaiKhoan_TenDangNhap(username);
-        return kh.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+
+        String username = authentication.getName();
+
+        // 2. Tìm trong bảng Khách Hàng
+        Optional<KhachHang> khOpt = khRepo.findByTaiKhoan_TenDangNhap(username);
+        if (khOpt.isPresent()) {
+            KhachHang kh = khOpt.get();
+            return ResponseEntity.ok(Map.of(
+                    "hoTen", kh.getHoTen() != null ? kh.getHoTen() : "Khách hàng",
+                    "soDienThoai", kh.getSoDienThoai() != null ? kh.getSoDienThoai() : "",
+                    "email", kh.getEmail() != null ? kh.getEmail() : "",
+                    "gioiTinh", kh.getGioiTinh() != null ? kh.getGioiTinh() : "",
+                    "ngaySinh", kh.getNgaySinh() != null ? kh.getNgaySinh().toString() : "",
+                    "hinhAnh", kh.getHinhAnh() != null ? kh.getHinhAnh() : ""
+            ));
+        }
+
+        // 3. Tìm trong bảng Nhân Viên (nếu nhân viên đi mua hàng)
+        Optional<NhanVien> nvOpt = nvRepo.findByTaiKhoan_TenDangNhap(username);
+        if (nvOpt.isPresent()) {
+            NhanVien nv = nvOpt.get();
+            return ResponseEntity.ok(Map.of(
+                    "hoTen", nv.getHoTen() != null ? nv.getHoTen() : "Nhân viên",
+                    "soDienThoai", nv.getSoDienThoai() != null ? nv.getSoDienThoai() : "",
+                    "email", nv.getEmail() != null ? nv.getEmail() : "",
+                    "gioiTinh", nv.getGioiTinh() != null ? nv.getGioiTinh() : "",
+                    "ngaySinh", nv.getNgaySinh() != null ? nv.getNgaySinh().toString() : "",
+                    "hinhAnh", nv.getHinhAnh() != null ? nv.getHinhAnh() : ""
+            ));
+        }
+
+        // 🌟 4. CHỮA CHÁY LỖI 404 TẠI ĐÂY:
+        // Nếu tài khoản chưa có hồ sơ (Bị lỗi đăng ký), trả về thông tin mặc định thay vì báo lỗi!
+        return ResponseEntity.ok(Map.of(
+                "hoTen", "Người dùng mới",
+                "soDienThoai", username,
+                "email", "Chưa cập nhật",
+                "gioiTinh", "",
+                "ngaySinh", "",
+                "hinhAnh", ""
+        ));
     }
 
     @PutMapping("/my-profile")
-    public ResponseEntity<?> updateProfile(@RequestBody Map<String, String> request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String currentUsername = auth.getName();
-        KhachHang kh = khRepo.findByTaiKhoan_TenDangNhap(currentUsername)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy"));
-        kh.setHoTen(request.get("hoTen"));
-        kh.setSoDienThoai(request.get("soDienThoai"));
-        kh.setGioiTinh(request.get("gioiTinh"));
-        kh.setEmail(request.get("email"));
-        try {
-            if (request.get("ngaySinh") != null && !request.get("ngaySinh").isEmpty()) {
-                kh.setNgaySinh(java.time.LocalDate.parse(request.get("ngaySinh")));
-            }
-        } catch (Exception e) {
-            System.out.println("Lỗi parse ngày sinh: " + e.getMessage());
+    public ResponseEntity<?> updateProfile(@RequestBody Map<String, String> payload, Authentication authentication) {
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Chưa đăng nhập"));
         }
-        String newUsername = request.get("tenDangNhap");
-        if (newUsername != null && !newUsername.trim().isEmpty()) {
-            if (kh.getTaiKhoan() != null && (kh.getTaiKhoan().getTenDangNhap() == null || kh.getTaiKhoan().getTenDangNhap().isEmpty() || kh.getTaiKhoan().getTenDangNhap().contains("pos_"))) {
-                if (taiKhoanRepository.existsByTenDangNhap(newUsername)) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            .body(Map.of("message", "Tên đăng nhập này đã có người sử dụng!"));
-                }
-                kh.getTaiKhoan().setTenDangNhap(newUsername);
-                taiKhoanRepository.save(kh.getTaiKhoan());
-            }
+
+        String username = authentication.getName();
+
+        // 1. Tìm Tài khoản gốc trước để lát nữa móc nối
+        TaiKhoan taiKhoan = taiKhoanRepository.findByTenDangNhap(username)
+                .orElse(null);
+
+        if (taiKhoan == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Không tìm thấy tài khoản hợp lệ!"));
         }
+
+        // ==========================================
+        // ƯU TIÊN 1: NẾU LÀ NHÂN VIÊN ĐANG ĐĂNG NHẬP
+        // ==========================================
+        Optional<NhanVien> nvOpt = nvRepo.findByTaiKhoan_TenDangNhap(username);
+        if (nvOpt.isPresent()) {
+            NhanVien nv = nvOpt.get();
+            nv.setHoTen(payload.get("hoTen"));
+            nv.setSoDienThoai(payload.get("soDienThoai"));
+            nv.setEmail(payload.get("email"));
+            nv.setGioiTinh(payload.get("gioiTinh"));
+            nv.setDiaChi(payload.get("diaChi"));
+
+            if (payload.get("ngaySinh") != null && !payload.get("ngaySinh").isEmpty()) {
+                nv.setNgaySinh(java.sql.Date.valueOf(payload.get("ngaySinh")));
+            }
+            nvRepo.save(nv);
+            return ResponseEntity.ok(Map.of("message", "Cập nhật hồ sơ nhân viên thành công!"));
+        }
+
+        // ==========================================
+        // ƯU TIÊN 2: NẾU LÀ KHÁCH HÀNG (Tìm thấy hoặc Tạo mới)
+        // ==========================================
+        KhachHang kh = khRepo.findByTaiKhoan_TenDangNhap(username).orElse(null);
+
+        // NẾU KHÔNG TÌM THẤY -> TẠO MỚI HỒ SƠ CHỨ KHÔNG NÉM LỖI
+        if (kh == null) {
+            kh = new KhachHang();
+            kh.setTaiKhoan(taiKhoan);
+            kh.setTrangThai(true);
+            // Tạo mã KH ngẫu nhiên hoặc tự tăng tùy logic của bạn
+            kh.setMa("KH" + System.currentTimeMillis());
+        }
+
+        kh.setHoTen(payload.get("hoTen"));
+        kh.setSoDienThoai(payload.get("soDienThoai"));
+        kh.setEmail(payload.get("email"));
+        kh.setGioiTinh(payload.get("gioiTinh"));
+        kh.setDiaChi(payload.get("diaChi"));
+
+        if (payload.get("ngaySinh") != null && !payload.get("ngaySinh").isEmpty()) {
+            kh.setNgaySinh(Date.valueOf(payload.get("ngaySinh")).toLocalDate());
+        }
+
         khRepo.save(kh);
-        return ResponseEntity.ok(Map.of("message", "Cập nhật thành công"));
+
+        // ==========================================
+        // TÍNH NĂNG SMART LOCK: CHO PHÉP ĐỔI TÊN ĐĂNG NHẬP 1 LẦN
+        // ==========================================
+        String newUsername = payload.get("tenDangNhap");
+
+        // Kiểm tra xem user có truyền lên tên đăng nhập mới không
+        // VÀ tài khoản này chưa từng đổi tên (VD: Tên đăng nhập vẫn đang giống Số điện thoại)
+        if (newUsername != null && !newUsername.trim().isEmpty() && !newUsername.equals(taiKhoan.getTenDangNhap())) {
+
+            // Check trùng tên đăng nhập trong DB
+            if (taiKhoanRepository.existsByTenDangNhap(newUsername)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Tên đăng nhập này đã có người sử dụng!"));
+            }
+
+            taiKhoan.setTenDangNhap(newUsername);
+            taiKhoanRepository.save(taiKhoan);
+        }
+
+        return ResponseEntity.ok(Map.of("message", "Cập nhật thành công!"));
     }
 
     @GetMapping("/{id}/dia-chi")

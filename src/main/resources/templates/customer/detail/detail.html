@@ -13,18 +13,16 @@
            ================================================================== */
         .detail-gallery { width: 100%; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
 
-        /* Khung ảnh chính có hiệu ứng Kính Lúp (Zoom) */
         .main-view-container {
             width: 100%; aspect-ratio: 3/4; background: #f8f9fa; border-radius: 4px;
             overflow: hidden; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-            cursor: crosshair; /* Đổi con trỏ thành hình dấu thập để báo hiệu zoom */
+            cursor: crosshair;
         }
         .main-view-container img {
             width: 100%; height: 100%; object-fit: cover; object-position: top center;
-            transition: opacity 0.3s ease, transform 0.1s ease-out; /* Thêm transform transition mượt */
+            transition: opacity 0.3s ease, transform 0.1s ease-out;
             transform-origin: center center;
         }
-        /* Phóng to ảnh 2 lần khi hover */
         .main-view-container:hover img { transform: scale(2); }
 
         .bee-nav-btn {
@@ -51,7 +49,6 @@
            ================================================================== */
         .detail-info { padding-top: 10px; position: sticky; top: 100px; }
 
-        /* BREADCRUMBS (Đường dẫn bánh mì) */
         .detail-breadcrumbs { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 16px; color: var(--muted); }
         .detail-breadcrumbs a { color: var(--text); text-decoration: none; cursor: pointer; transition: color 0.3s; font-weight: 500;}
         .detail-breadcrumbs a:hover { color: var(--accent); }
@@ -85,7 +82,7 @@
         .color-options { display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
         .color-dot { width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s ease, border-color 0.2s ease; position: relative; }
         .color-dot:hover { transform: scale(1.1); }
-        .color-dot.active { border: 2px solid var(--text); }
+        .color-dot.active { border: 2px solid var(--text); padding: 2px; background-clip: content-box; } /* Cải tiến CSS viền màu sáng/tối đều nhìn thấy */
         .color-dot.unavailable::after { content:''; position:absolute; width:100%; height:1px; background:rgba(0,0,0,0.4); top:50%; left:0; transform:rotate(45deg); }
 
         .size-tooltip { position: absolute; background: var(--text); color: white; padding: 16px 20px; font-size: 12px; line-height: 1.8; white-space: nowrap; display: none; z-index: 10; border-radius: 2px; }
@@ -93,9 +90,6 @@
         .stock-status.low { color: #f59e0b; }
         .stock-status.out { color: #ef4444; }
 
-        /* ==================================================================
-           CSS CHO ACCORDION (Menu thả xuống)
-           ================================================================== */
         .accordion-wrapper { margin-top: 32px; border-top: 1px solid rgba(0,0,0,0.08); }
         .accordion-item { border-bottom: 1px solid rgba(0,0,0,0.08); }
         .accordion-header { padding: 20px 0; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: opacity 0.2s; }
@@ -106,9 +100,6 @@
         .accordion-item.active .accordion-content { max-height: 200px; padding-bottom: 20px; }
         .accordion-item.active .accordion-header svg { transform: rotate(180deg); stroke: var(--text); }
 
-        /* ==================================================================
-           CSS CHO THANH SẢN PHẨM VỪA XEM
-           ================================================================== */
         #recentViewedSection { max-width: 1100px; margin: 100px auto 0; padding: 0 40px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 80px;}
         .recent-scroll-container { display: flex; gap: 24px; overflow-x: auto; padding-bottom: 20px; scrollbar-width: none; }
         .recent-scroll-container::-webkit-scrollbar { display: none; }
@@ -206,7 +197,6 @@
             </div>
             <div class="recent-scroll-container" id="recentViewedList"></div>
         </div>
-
     </section>
 
     <script>
@@ -215,10 +205,13 @@
                 productId: null, product: null, variants: [], uniqueColors: [], uniqueSizes: [],
                 selectedColorId: null, selectedSizeId: null, images: [], currentImageIndex: 0
             },
+
+            // Map cơ bản (dự phòng)
             colorMap: {
                 'trắng': '#ffffff', 'đen': '#1a1a1a', 'xám': '#c5cfc7', 'ghi': '#d4cfc9',
-                'be': '#c4b49d', 'nâu': '#a89e93', 'rêu': '#3D5A4C', 'xanh rêu': '#3D5A4C',
-                'đỏ': '#8b0000', 'hồng': '#ffc0cb', 'xanh biển': '#4682b4', 'xanh dương': '#4682b4'
+                'be': '#c4b49d', 'kem': '#fef3c7', 'nâu': '#a89e93', 'rêu': '#3D5A4C',
+                'đỏ': '#8b0000', 'hồng': '#ffc0cb', 'xanh biển': '#4682b4', 'xanh dương': '#4682b4',
+                'vàng': '#FBC02D', 'cam': '#f97316', 'xanh lá': '#15803d', 'tím': '#a855f7'
             },
 
             init: async function() {
@@ -250,14 +243,53 @@
                 }
             },
 
+            // ==========================================
+            // THUẬT TOÁN SẮP XẾP SIZE THÔNG MINH
+            // ==========================================
+            // ==========================================
+            // THUẬT TOÁN SẮP XẾP SIZE THÔNG MINH (ĐÃ FIX CHỮ "SIZE")
+            // ==========================================
+            sortSizes: function(sizes) {
+                const orderMap = {
+                    'freesize': 0, 'one size': 0, 'os': 0,
+                    'xxs': 1, 'xs': 2, 's': 3, 'm': 4, 'l': 5, 'xl': 6,
+                    'xxl': 7, '2xl': 7, 'xxxl': 8, '3xl': 8, '4xl': 9
+                };
+
+                return sizes.sort((a, b) => {
+                    // Tự động bóc tách chữ "size " (nếu có) ra khỏi tên để lấy lõi s, m, l
+                    const nameA = a.ten.toLowerCase().replace('size', '').trim();
+                    const nameB = b.ten.toLowerCase().replace('size', '').trim();
+
+                    // Nếu là size số (giày dép, quần: 38, 39, 40)
+                    const numA = parseFloat(nameA);
+                    const numB = parseFloat(nameB);
+                    if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+
+                    // Nhận diện theo từ điển chuẩn
+                    const weightA = orderMap[nameA] !== undefined ? orderMap[nameA] : 99;
+                    const weightB = orderMap[nameB] !== undefined ? orderMap[nameB] : 99;
+
+                    if (weightA !== weightB) return weightA - weightB;
+
+                    // Fallback theo Alphabet
+                    return nameA.localeCompare(nameB);
+                });
+            },
+
             processData: function() {
                 const colorMap = new Map(), sizeMap = new Map();
                 this.state.variants.forEach(v => {
                     if (v.mauSac) colorMap.set(v.mauSac.id, v.mauSac);
                     if (v.kichThuoc) sizeMap.set(v.kichThuoc.id, v.kichThuoc);
                 });
+
                 this.state.uniqueColors = Array.from(colorMap.values());
-                this.state.uniqueSizes = Array.from(sizeMap.values());
+
+                // Gọi hàm sắp xếp Size
+                let rawSizes = Array.from(sizeMap.values());
+                this.state.uniqueSizes = this.sortSizes(rawSizes);
+
                 if (this.state.uniqueColors.length > 0) this.state.selectedColorId = this.state.uniqueColors[0].id;
                 if (this.state.product.hinhAnhs && this.state.product.hinhAnhs.length > 0) {
                     this.state.images = this.state.product.hinhAnhs.map(img => img.url);
@@ -269,14 +301,13 @@
                 document.getElementById('productContent').style.opacity = '1';
                 this.renderInfo();
                 this.buildGalleryHTML();
-                this.bindImageZoom(); // Gọi hàm zoom ảnh sau khi build html ảnh
+                this.bindImageZoom();
                 this.renderColors();
                 this.renderSizes();
                 this.updatePriceAndStock();
                 this.renderRecentlyViewed();
             },
 
-            // --- HÀM MENU THẢ XUỐNG ---
             toggleAccordion: function(headerEl) {
                 const item = headerEl.parentElement;
                 item.classList.toggle('active');
@@ -285,16 +316,12 @@
             renderInfo: function() {
                 const p = this.state.product;
                 const catName = p.danhMuc ? p.danhMuc.ten : 'Sản phẩm';
-
-                // Hiển thị Breadcrumbs
                 const breadcrumbHtml = `<a href="#home">Trang chủ</a><span class="sep">/</span><a href="#shop">${catName}</a><span class="sep">/</span><span style="color:var(--muted)">${p.ten}</span>`;
                 document.getElementById('dynBreadcrumb').innerHTML = breadcrumbHtml;
-
                 document.getElementById('dynName').innerText = p.ten;
                 document.getElementById('dynDesc').innerText = p.moTa || 'Sản phẩm dệt may thủ công chất lượng cao.';
             },
 
-            // --- TẠO ẢNH VÀ GẮN SỰ KIỆN ZOOM ---
             buildGalleryHTML: function() {
                 const container = document.getElementById('dynGallery');
                 const images = this.state.images;
@@ -320,25 +347,21 @@
                 container.innerHTML = html;
             },
 
-            // LOGIC KÍNH LÚP (ZOOM IN KHI HOVER)
             bindImageZoom: function() {
                 const container = document.getElementById('mainZoomContainer');
                 const img = document.getElementById('mainImageDisplay');
                 if (!container || !img) return;
 
-                // Chỉ chạy trên Desktop (mouse)
                 container.addEventListener('mousemove', function(e) {
                     const rect = container.getBoundingClientRect();
                     const x = e.clientX - rect.left;
                     const y = e.clientY - rect.top;
-                    // Tính phần trăm vị trí chuột so với chiều ngang dọc của ảnh
                     const xPercent = (x / rect.width) * 100;
                     const yPercent = (y / rect.height) * 100;
                     img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
                 });
 
                 container.addEventListener('mouseleave', function() {
-                    // Trả về mặc định khi chuột ra ngoài
                     img.style.transformOrigin = 'center center';
                 });
             },
@@ -361,7 +384,7 @@
             },
 
             changeSlide: function(direction, event) {
-                if(event) event.stopPropagation(); // Ngăn lỗi nổi bọt click
+                if(event) event.stopPropagation();
                 const total = this.state.images.length;
                 if(total <= 1) return;
                 this.state.currentImageIndex = (this.state.currentImageIndex + direction + total) % total;
@@ -373,15 +396,49 @@
                 this.updateGalleryUI();
             },
 
+            // ==========================================
+            // THUẬT TOÁN NHẬN DIỆN MÀU THÔNG MINH
+            // ==========================================
+            getColorHex: function(name) {
+                const n = name.toLowerCase().trim();
+
+                // 1. Tìm trong map có sẵn
+                if (this.colorMap[n]) return this.colorMap[n];
+
+                // 2. Nhận diện tương đối theo từ khóa (Ví dụ Đỏ mận, Đỏ tươi -> Đỏ)
+                if (n.includes('đỏ')) return '#b91c1c';
+                if (n.includes('xanh dương') || n.includes('xanh biển') || n.includes('navy')) return '#1d4ed8';
+                if (n.includes('xanh lá') || n.includes('rêu')) return '#15803d';
+                if (n.includes('vàng')) return '#eab308';
+                if (n.includes('cam')) return '#ea580c';
+                if (n.includes('hồng')) return '#ec4899';
+                if (n.includes('tím')) return '#a855f7';
+                if (n.includes('nâu')) return '#78350f';
+                if (n.includes('xám') || n.includes('ghi')) return '#64748b';
+                if (n.includes('be') || n.includes('kem')) return '#fef3c7';
+                if (n.includes('trắng')) return '#ffffff';
+                if (n.includes('đen')) return '#111827';
+
+                // 3. Dự phòng cuối cùng: Băm chuỗi text thành một mã màu HEX ngẫu nhiên nhưng cố định
+                let hash = 0;
+                for (let i = 0; i < n.length; i++) hash = n.charCodeAt(i) + ((hash << 5) - hash);
+                let color = '#';
+                for (let i = 0; i < 3; i++) color += ('00' + ((hash >> (i * 8)) & 0xFF).toString(16)).substr(-2);
+                return color;
+            },
+
             renderColors: function() {
                 const colorContainer = document.getElementById('dynColors');
                 const nameLabel = document.getElementById('dynColorName');
                 if (this.state.uniqueColors.length === 0) { colorContainer.innerHTML = '<span style="font-size:12px; color:#888;">Mặc định</span>'; return; }
                 let html = '';
+
                 this.state.uniqueColors.forEach(color => {
                     const isSelected = this.state.selectedColorId === color.id ? 'active' : '';
-                    const normalizedName = color.ten.toLowerCase().trim();
-                    let hex = this.colorMap[normalizedName] || '#000';
+
+                    // Gọi hàm nhận diện mã màu thay vì mặc định lấy #000
+                    let hex = this.getColorHex(color.ten);
+
                     const availableVariants = this.state.variants.filter(v => v.mauSac.id === color.id && v.soLuong > 0);
                     const isUnavailable = availableVariants.length === 0 ? 'unavailable' : '';
                     if (isSelected) nameLabel.innerText = color.ten;
@@ -395,7 +452,6 @@
                 document.getElementById('dynColorName').innerText = colorName;
                 this.state.selectedSizeId = null;
 
-                // Tự động chuyển ảnh nếu màu này có ảnh riêng
                 const variantWithImg = this.state.variants.find(v => v.mauSac.id === colorId && v.hinhAnh);
                 if (variantWithImg && variantWithImg.hinhAnh) {
                     const idx = this.state.images.indexOf(variantWithImg.hinhAnh);
@@ -539,13 +595,6 @@
             optimizeImage: function(url, w, h) {
                 if (!url || !url.includes('res.cloudinary.com')) return url;
                 return url.replace('/image/upload/', `/image/upload/c_fill,w_${w},h_${h},f_auto,q_auto/`);
-            },
-
-            useFallbackData: function() {
-                this.state.product = { id: 1, ten: "Áo Phông Form Rộng Nam Nữ", giaBan: 490000, danhMuc: { ten: "T-Shirt Collection" }, moTa: "Chất liệu cotton 100% thoáng mát, form dáng chuẩn đẹp y hệt các mẫu áo local brand đang thịnh hành.", hinhAnhs: [{ url: "https://placehold.co/600x800/f4f4f5/333?text=Anh+Toan+Canh" }, { url: "https://placehold.co/600x800/e4e4e7/333?text=Anh+Mat+Truoc" }, { url: "https://placehold.co/600x800/d4d4d8/333?text=Anh+Mat+Sau" }, { url: "https://placehold.co/600x800/cccccc/333?text=Anh+Chi+Tiet" }] };
-                this.state.variants = [{ id: 1, sku: 'TS-TRANG-S', mauSac: {id: 1, ten: 'Trắng'}, kichThuoc: {id: 1, ten: 'S'}, giaBan: 490000, soLuong: 5 }, { id: 2, sku: 'TS-TRANG-M', mauSac: {id: 1, ten: 'Trắng'}, kichThuoc: {id: 2, ten: 'M'}, giaBan: 490000, soLuong: 15 }, { id: 3, sku: 'TS-TRANG-L', mauSac: {id: 1, ten: 'Trắng'}, kichThuoc: {id: 3, ten: 'L'}, giaBan: 490000, soLuong: 0 }, { id: 4, sku: 'TS-DEN-M', mauSac: {id: 2, ten: 'Đen'}, kichThuoc: {id: 2, ten: 'M'}, giaBan: 490000, soLuong: 20 }];
-                this.processData();
-                this.renderAll();
             }
         };
 

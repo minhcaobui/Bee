@@ -24,7 +24,7 @@ import java.util.Random;
 public class KichThuocApi {
 
     private final SanPhamChiTietRepository sanPhamChiTietRepository;
-    private KichThuocRepository kichThuocRepository;
+    private final KichThuocRepository kichThuocRepository;
 
     private String generateMa() {
         String ma;

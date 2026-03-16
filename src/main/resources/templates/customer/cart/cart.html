@@ -49,13 +49,16 @@
         .cart-summary { padding: 48px 60px 80px; position: sticky; top: 125px; }
         .cart-summary-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; margin-bottom: 32px; }
 
-        .cart-promo { display: flex; gap: 0; margin-bottom: 28px; }
-        .cart-promo-input { flex: 1; padding: 13px 16px; border: 1px solid rgba(0,0,0,0.1); background: var(--white); font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 0.05em; color: var(--text); outline: none; border-right: none; transition: border-color 0.2s; border-radius: 2px 0 0 2px; }
-        .cart-promo-input:focus { border-color: var(--accent); }
-        .cart-promo-input::placeholder { color: var(--muted); }
-        .cart-promo-btn { padding: 13px 20px; background: var(--text); color: white; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 400; transition: background 0.2s; flex-shrink: 0; border-radius: 0 2px 2px 0; }
-        .cart-promo-btn:hover { background: var(--accent); }
-        .promo-msg { font-size: 11px; margin-top: -20px; margin-bottom: 20px; display: block; }
+        /* Nút chọn mã giảm giá mới */
+        .promo-selector-btn { width: 100%; padding: 14px 16px; border: 1px dashed var(--accent); background: rgba(61,90,76,0.04); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 400; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-radius: 2px; transition: all 0.2s; margin-bottom: 16px; }
+        .promo-selector-btn:hover { background: rgba(61,90,76,0.08); }
+        .promo-selector-btn svg { width: 16px; height: 16px; stroke: var(--accent); fill: none; }
+        .promo-selector-btn.applied { border-style: solid; background: var(--text); color: white; }
+        .promo-selector-btn.applied svg { stroke: white; }
+        .promo-selector-btn.applied .promo-remove-icon { cursor: pointer; padding: 4px; }
+        .promo-selector-btn.applied .promo-remove-icon:hover { color: #ffcccc; stroke: #ffcccc; }
+
+        .promo-msg { font-size: 11px; margin-bottom: 20px; display: block; text-align: center; }
         .promo-msg.error { color: #c03c3c; }
         .promo-msg.success { color: #10b981; }
 
@@ -67,7 +70,7 @@
 
         .cart-summary-total { border-top: 1px solid rgba(0,0,0,0.1); padding-top: 20px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: baseline; }
         .cart-total-label { font-size: 13px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; }
-        .cart-total-val { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 300; }
+        .cart-total-val { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 300; transition: color 0.3s; }
 
         .cart-checkout-btn { width: 100%; padding: 18px; background: var(--accent); color: white; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 400; display: flex; align-items: center; justify-content: center; gap: 12px; position: relative; overflow: hidden; transition: background 0.3s; margin-bottom: 12px; border-radius: 2px; }
         .cart-checkout-btn::after { content: ''; position: absolute; inset: 0; background: var(--accent-light); transform: scaleX(0); transform-origin: left; transition: transform 0.4s ease; }
@@ -92,6 +95,31 @@
         .cart-empty-desc { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 36px; font-weight: 300; }
         .cart-empty-btn { display: inline-flex; background: var(--text); color: #fff; padding: 14px 32px; text-decoration: none; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 2px; transition: 0.3s; }
         .cart-empty-btn:hover { background: var(--accent); }
+
+        /* ── MODAL CHỌN MÃ GIẢM GIÁ ── */
+        .voucher-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: flex-end; justify-content: center; backdrop-filter: blur(2px); animation: fadeIn 0.3s ease; }
+        .voucher-modal { width: 100%; max-width: 450px; background: #fff; border-radius: 12px 12px 0 0; padding: 24px; box-shadow: 0 -10px 40px rgba(0,0,0,0.15); transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); max-height: 80vh; display: flex; flex-direction: column; }
+        .voucher-modal.open { transform: translateY(0); }
+        .voucher-modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.06); padding-bottom: 16px; margin-bottom: 16px; }
+        .voucher-modal-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 400; }
+        .voucher-close-btn { background: none; border: none; cursor: pointer; color: var(--muted); padding: 4px; transition: color 0.2s; }
+        .voucher-close-btn:hover { color: var(--text); }
+        .voucher-close-btn svg { width: 24px; height: 24px; stroke: currentColor; fill: none; }
+        .voucher-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-bottom: 20px; }
+
+        .voucher-card { border: 1px solid rgba(0,0,0,0.1); border-radius: 4px; padding: 16px; display: flex; gap: 16px; align-items: center; position: relative; overflow: hidden; background: #fafafa; transition: border-color 0.2s, background 0.2s; cursor: pointer;}
+        .voucher-card:hover:not(.disabled) { border-color: var(--accent); background: #fff; }
+        .voucher-card.disabled { opacity: 0.5; cursor: not-allowed; }
+        .voucher-icon { width: 48px; height: 48px; background: rgba(61,90,76,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--accent); flex-shrink: 0; }
+        .voucher-icon svg { width: 24px; height: 24px; stroke: currentColor; fill: none; }
+        .voucher-info { flex: 1; }
+        .voucher-code { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 4px; font-family: monospace; letter-spacing: 1px; }
+        .voucher-desc { font-size: 12px; color: var(--muted); line-height: 1.4; margin-bottom: 6px; }
+        .voucher-meta { font-size: 10px; color: #c08060; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; }
+
+        .voucher-apply-btn { padding: 8px 16px; background: var(--text); color: #fff; border: none; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: 2px; }
+        .voucher-card:hover .voucher-apply-btn { background: var(--accent); }
+        .voucher-card.disabled .voucher-apply-btn { display: none; }
 
         @media (max-width: 900px) {
             .cart-page-header { padding: 48px 24px 32px; flex-direction: column; align-items: flex-start; gap: 20px; }
@@ -148,10 +176,16 @@
         <div class="cart-summary" id="cartSummarySection">
             <div class="cart-summary-title">Tóm tắt đơn hàng</div>
 
-            <div class="cart-promo">
-                <input class="cart-promo-input" id="promoInput" type="text" placeholder="Mã giảm giá">
-                <button class="cart-promo-btn" onclick="window.CartApp.applyPromo()">Áp dụng</button>
+            <div id="promoSelectorArea">
+                <button class="promo-selector-btn" id="btnOpenPromoModal" onclick="window.CartApp.openPromoModal()">
+                    <span style="display:flex; align-items:center; gap:8px;">
+                        <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M21.44 11.05l-9.19 9.19a2.003 2.003 0 01-2.83 0l-7.07-7.07a2.002 2.002 0 010-2.83l9.19-9.19a2 2 0 011.41-.58h6.58c1.1 0 2 .9 2 2v6.58c0 .53-.21 1.04-.59 1.41z"/><line x1="17" y1="7" x2="17.01" y2="7"/></svg>
+                        <span id="promoBtnText">Chọn mã giảm giá / Ưu đãi</span>
+                    </span>
+                    <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M9 5l7 7-7 7"/></svg>
+                </button>
             </div>
+
             <span id="promoMessage" class="promo-msg"></span>
 
             <div class="cart-summary-rows">
@@ -160,7 +194,7 @@
                     <span class="cart-summary-val" id="cartSubtotal">0 ₫</span>
                 </div>
                 <div class="cart-summary-row" id="discountRow" style="display: none;">
-                    <span class="cart-summary-label">Mã giảm giá</span>
+                    <span class="cart-summary-label">Mã giảm giá <span id="cartDiscountLabelInfo" style="font-weight:500; color:var(--text); margin-left:4px;"></span></span>
                     <span class="cart-summary-val" id="cartDiscount" style="color: #10b981;">-0 ₫</span>
                 </div>
                 <div class="cart-summary-row">
@@ -194,6 +228,23 @@
         </div>
     </div>
 
+    <div class="voucher-modal-overlay" id="voucherModalOverlay" onclick="if(event.target === this) window.CartApp.closePromoModal()">
+        <div class="voucher-modal" id="voucherModal">
+            <div class="voucher-modal-header">
+                <div class="voucher-modal-title">Ưu đãi của bạn</div>
+                <button class="voucher-close-btn" onclick="window.CartApp.closePromoModal()">
+                    <svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <div style="font-size:12px; color:var(--muted); margin-bottom:16px;">Vui lòng chọn 1 mã giảm giá phù hợp nhất với đơn hàng của bạn.</div>
+
+            <div class="voucher-list" id="voucherListContainer">
+                <div style="text-align:center; padding:40px; color:var(--muted); font-style:italic;">Đang tải danh sách voucher...</div>
+            </div>
+        </div>
+    </div>
+
     <script>
         window.CartApp = {
             state: {
@@ -201,13 +252,16 @@
                 isLoggedIn: false,
                 subTotal: 0,
                 discount: 0,
-                appliedPromoCode: null
+                appliedPromoCode: null,
+                appliedPromoMaxAmount: 0,
+                availableVouchers: []
             },
 
             colorMap: {
                 'trắng': '#ffffff', 'đen': '#1a1a1a', 'xám': '#c5cfc7', 'ghi': '#d4cfc9',
-                'be': '#c4b49d', 'nâu': '#a89e93', 'rêu': '#3D5A4C', 'xanh rêu': '#3D5A4C',
-                'đỏ': '#8b0000', 'hồng': '#ffc0cb', 'xanh biển': '#4682b4', 'xanh dương': '#4682b4'
+                'be': '#c4b49d', 'kem': '#fef3c7', 'nâu': '#a89e93', 'rêu': '#3D5A4C',
+                'đỏ': '#8b0000', 'hồng': '#ffc0cb', 'xanh biển': '#4682b4', 'xanh dương': '#4682b4',
+                'vàng': '#FBC02D', 'cam': '#f97316', 'xanh lá': '#15803d', 'tím': '#a855f7'
             },
 
             init: async function() {
@@ -226,16 +280,69 @@
                 this.render();
             },
 
+            // THUẬT TOÁN NHẬN DIỆN MÀU THÔNG MINH
+            getColorHex: function(name) {
+                if(!name) return '#000';
+                const n = name.toLowerCase().trim();
+
+                if (this.colorMap[n]) return this.colorMap[n];
+
+                if (n.includes('đỏ')) return '#b91c1c';
+                if (n.includes('xanh dương') || n.includes('xanh biển') || n.includes('navy')) return '#1d4ed8';
+                if (n.includes('xanh lá') || n.includes('rêu')) return '#15803d';
+                if (n.includes('vàng')) return '#eab308';
+                if (n.includes('cam')) return '#ea580c';
+                if (n.includes('hồng')) return '#ec4899';
+                if (n.includes('tím')) return '#a855f7';
+                if (n.includes('nâu')) return '#78350f';
+                if (n.includes('xám') || n.includes('ghi')) return '#64748b';
+                if (n.includes('be') || n.includes('kem')) return '#fef3c7';
+                if (n.includes('trắng')) return '#ffffff';
+                if (n.includes('đen')) return '#111827';
+
+                let hash = 0;
+                for (let i = 0; i < n.length; i++) hash = n.charCodeAt(i) + ((hash << 5) - hash);
+                let color = '#';
+                for (let i = 0; i < 3; i++) color += ('00' + ((hash >> (i * 8)) & 0xFF).toString(16)).substr(-2);
+                return color;
+            },
+
             checkLoginStatus: async function() {
                 try {
                     const res = await fetch('/api/khach-hang/my-profile');
                     if (res.ok) {
                         this.state.isLoggedIn = true;
+                        this.fetchVouchers(); // Nhanh tay tải voucher ngầm nếu đã login
                     } else {
                         this.state.isLoggedIn = false;
                     }
                 } catch (e) {
                     this.state.isLoggedIn = false;
+                }
+            },
+
+            // GỌI API LẤY DANH SÁCH MÃ GIẢM GIÁ
+            fetchVouchers: async function() {
+                try {
+                    // Thay URL API này bằng URL API thực tế của hệ thống bạn
+                    const res = await fetch('/api/ma-giam-gia/danh-sach');
+                    if (res.ok) {
+                        this.state.availableVouchers = await res.json();
+                    } else {
+                        // Dữ liệu mẫu (MOCK) nếu API chưa chạy
+                        this.state.availableVouchers = [
+                            { id: 1, maCode: 'BEE50K', ten: 'Giảm 50K cho đơn từ 200K', dieuKien: 200000, loaiGiamGia: 'TIEN', giaTriGiamGia: 50000, giaTriGiamGiaToiDa: 50000, soLuong: 100 },
+                            { id: 2, maCode: 'FREESHIP', ten: 'Miễn phí vận chuyển tới 30K', dieuKien: 300000, loaiGiamGia: 'TIEN', giaTriGiamGia: 30000, giaTriGiamGiaToiDa: 30000, soLuong: 50 },
+                            { id: 3, maCode: 'VIP10', ten: 'Giảm 10% tối đa 100K cho đơn từ 500K', dieuKien: 500000, loaiGiamGia: 'PHAN_TRAM', giaTriGiamGia: 10, giaTriGiamGiaToiDa: 100000, soLuong: 10 }
+                        ];
+                    }
+                } catch(e) {
+                    console.log("Dùng MOCK Voucher");
+                    this.state.availableVouchers = [
+                        { id: 1, maCode: 'BEE50K', ten: 'Giảm 50K cho đơn từ 200K', dieuKien: 200000, loaiGiamGia: 'TIEN', giaTriGiamGia: 50000, giaTriGiamGiaToiDa: 50000, soLuong: 100 },
+                        { id: 2, maCode: 'FREESHIP', ten: 'Miễn phí vận chuyển tới 30K', dieuKien: 300000, loaiGiamGia: 'TIEN', giaTriGiamGia: 30000, giaTriGiamGiaToiDa: 30000, soLuong: 50 },
+                        { id: 3, maCode: 'VIP10', ten: 'Giảm 10% tối đa 100K cho đơn từ 500K', dieuKien: 500000, loaiGiamGia: 'PHAN_TRAM', giaTriGiamGia: 10, giaTriGiamGiaToiDa: 100000, soLuong: 10 }
+                    ];
                 }
             },
 
@@ -281,11 +388,9 @@
                     const item = this.state.items[i];
                     totalItems += item.qty;
 
-                    const safeColorName = item.colorName ? item.colorName.toLowerCase().trim() : '';
-                    const hexColor = this.colorMap[safeColorName] || '#ccc';
+                    const hexColor = this.getColorHex(item.colorName);
                     const imgSrc = item.img || 'https://placehold.co/100x130?text=No+Img';
 
-                    // Sử dụng cộng chuỗi truyền thống để chống lỗi biên dịch của Thymeleaf Spring Boot
                     html += '<div class="cart-item" id="cart-item-' + i + '">' +
                         '<div class="cart-item-img">' +
                         '<img src="' + imgSrc + '" class="cart-item-img-bg" alt="' + item.name + '">' +
@@ -327,7 +432,6 @@
                 let newQty = item.qty + change;
                 if (newQty < 1) newQty = 1;
 
-                // Giới hạn theo tồn kho nếu có lưu
                 if (item.maxStock && newQty > item.maxStock) {
                     alert('Chỉ còn ' + item.maxStock + ' sản phẩm trong kho!');
                     return;
@@ -341,7 +445,6 @@
                     row.querySelector('.cart-qty-num').textContent = newQty;
                 }
 
-                // Cập nhật lại tổng số lượng trên tiêu đề
                 let totalItems = 0;
                 for (let i = 0; i < this.state.items.length; i++) {
                     totalItems += this.state.items[i].qty;
@@ -349,6 +452,16 @@
                 document.getElementById('headerCartCount').textContent = totalItems + ' sản phẩm';
                 window.updateCartBadge();
                 this.calculateTotals();
+
+                // KIỂM TRA LẠI MÃ GIẢM GIÁ NẾU CÓ
+                if (this.state.appliedPromoCode) {
+                    const activeVoucher = this.state.availableVouchers.find(v => v.maCode === this.state.appliedPromoCode);
+                    if (activeVoucher && this.state.subTotal < activeVoucher.dieuKien) {
+                        this.removePromo();
+                        document.getElementById('promoMessage').className = 'promo-msg error';
+                        document.getElementById('promoMessage').textContent = 'Đơn hàng không còn đủ điều kiện áp dụng mã ' + activeVoucher.maCode;
+                    }
+                }
             },
 
             removeItem: function(index) {
@@ -364,6 +477,13 @@
                     this.saveCartToStorage();
                     this.render();
                     window.updateCartBadge();
+
+                    if (this.state.appliedPromoCode) {
+                        const activeVoucher = this.state.availableVouchers.find(v => v.maCode === this.state.appliedPromoCode);
+                        if (activeVoucher && this.state.subTotal < activeVoucher.dieuKien) {
+                            this.removePromo();
+                        }
+                    }
                 }, 300);
             },
 
@@ -374,63 +494,174 @@
                 }
                 this.state.subTotal = subTotal;
 
+                // TÍNH TOÁN LẠI TIỀN GIẢM GIÁ (Đặc biệt cho loại Phần Trăm)
+                if (this.state.appliedPromoCode) {
+                    const activeVoucher = this.state.availableVouchers.find(v => v.maCode === this.state.appliedPromoCode);
+                    if (activeVoucher) {
+                        if (activeVoucher.loaiGiamGia === 'PHAN_TRAM') {
+                            let calculatedDiscount = (this.state.subTotal * activeVoucher.giaTriGiamGia) / 100;
+                            // Kiểm tra giảm tối đa
+                            if (calculatedDiscount > activeVoucher.giaTriGiamGiaToiDa) {
+                                calculatedDiscount = activeVoucher.giaTriGiamGiaToiDa;
+                            }
+                            this.state.discount = calculatedDiscount;
+                            document.getElementById('cartDiscount').textContent = '-' + this.formatCurrency(this.state.discount);
+                        }
+                    }
+                }
+
                 this.state.total = Math.max(0, this.state.subTotal - this.state.discount);
 
                 document.getElementById('cartSubtotal').textContent = this.formatCurrency(this.state.subTotal);
-                document.getElementById('cartTotal').textContent = this.formatCurrency(this.state.total);
+
+                const totalEl = document.getElementById('cartTotal');
+                totalEl.textContent = this.formatCurrency(this.state.total);
+                if (this.state.discount > 0) {
+                    totalEl.style.color = '#c03c3c';
+                } else {
+                    totalEl.style.color = 'var(--text)';
+                }
             },
 
-            applyPromo: async function() {
-                const msgEl = document.getElementById('promoMessage');
-                const input = document.getElementById('promoInput');
-                const code = input.value.trim();
-
+            // ── CÁC HÀM XỬ LÝ MÃ GIẢM GIÁ ──
+            openPromoModal: function() {
                 if (!this.state.isLoggedIn) {
+                    const msgEl = document.getElementById('promoMessage');
                     msgEl.className = 'promo-msg error';
                     msgEl.textContent = 'Bạn cần đăng nhập tài khoản để sử dụng Mã giảm giá.';
                     return;
                 }
 
-                if (!code) {
-                    msgEl.textContent = '';
-                    this.removePromo();
+                document.getElementById('promoMessage').textContent = '';
+                document.getElementById('voucherModalOverlay').style.display = 'flex';
+                // Đợi render xong CSS display flex rồi mới thêm class open để tạo hiệu ứng trượt mượt
+                setTimeout(() => {
+                    document.getElementById('voucherModal').classList.add('open');
+                }, 10);
+
+                this.renderVoucherList();
+            },
+
+            closePromoModal: function() {
+                document.getElementById('voucherModal').classList.remove('open');
+                setTimeout(() => {
+                    document.getElementById('voucherModalOverlay').style.display = 'none';
+                }, 350); // Đợi CSS transition chạy xong (0.4s)
+            },
+
+            renderVoucherList: function() {
+                const listContainer = document.getElementById('voucherListContainer');
+
+                if (this.state.availableVouchers.length === 0) {
+                    listContainer.innerHTML = '<div style="text-align:center; padding:40px; color:var(--muted); font-style:italic;">Hiện không có mã giảm giá nào phù hợp với bạn.</div>';
                     return;
                 }
 
-                try {
-                    // MÔ PHỎNG KIỂM TRA MÃ (BEE50K)
-                    if (code === 'BEE50K' && this.state.subTotal >= 200000) {
-                        this.state.appliedPromoCode = code;
-                        this.state.discount = 50000;
+                let html = '';
 
-                        msgEl.className = 'promo-msg success';
-                        msgEl.textContent = 'Đã áp dụng giảm 50.000đ thành công!';
+                this.state.availableVouchers.forEach(v => {
+                    const isEligible = this.state.subTotal >= v.dieuKien;
+                    const disabledClass = isEligible ? '' : 'disabled';
+                    const isSelected = this.state.appliedPromoCode === v.maCode;
+                    const selectedStyle = isSelected ? 'border-color: var(--accent); background: rgba(61,90,76,0.04);' : '';
 
-                        document.getElementById('discountRow').style.display = 'flex';
-                        document.getElementById('cartDiscount').textContent = '-' + this.formatCurrency(this.state.discount);
-
-                        this.calculateTotals();
+                    let discountText = '';
+                    if (v.loaiGiamGia === 'PHAN_TRAM') {
+                        discountText = `Giảm ${v.giaTriGiamGia}% (Tối đa ${this.formatCurrency(v.giaTriGiamGiaToiDa)})`;
                     } else {
-                        throw new Error("Mã giảm giá không hợp lệ hoặc chưa đủ điều kiện.");
+                        discountText = `Giảm ${this.formatCurrency(v.giaTriGiamGia)}`;
                     }
-                } catch (err) {
-                    msgEl.className = 'promo-msg error';
-                    msgEl.textContent = err.message || 'Mã không hợp lệ';
-                    this.removePromo();
+
+                    html += `
+                        <div class="voucher-card ${disabledClass}" style="${selectedStyle}" onclick="${isEligible ? `window.CartApp.applyVoucher('${v.maCode}')` : ''}">
+                            <div class="voucher-icon">
+                                <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M21.44 11.05l-9.19 9.19a2.003 2.003 0 01-2.83 0l-7.07-7.07a2.002 2.002 0 010-2.83l9.19-9.19a2 2 0 011.41-.58h6.58c1.1 0 2 .9 2 2v6.58c0 .53-.21 1.04-.59 1.41z"/><line x1="17" y1="7" x2="17.01" y2="7"/></svg>
+                            </div>
+                            <div class="voucher-info">
+                                <div class="voucher-code">${v.maCode}</div>
+                                <div class="voucher-desc">${v.ten}</div>
+                                <div class="voucher-meta">
+                                    ${isEligible ? '<span style="color:#10b981">Đủ điều kiện áp dụng</span>' : `Mua thêm ${this.formatCurrency(v.dieuKien - this.state.subTotal)} để dùng`}
+                                </div>
+                            </div>
+                            <button class="voucher-apply-btn">${isSelected ? 'Đang dùng' : 'Dùng ngay'}</button>
+                        </div>
+                    `;
+                });
+
+                listContainer.innerHTML = html;
+            },
+
+            applyVoucher: function(code) {
+                const voucher = this.state.availableVouchers.find(v => v.maCode === code);
+                if (!voucher || this.state.subTotal < voucher.dieuKien) return;
+
+                this.state.appliedPromoCode = voucher.maCode;
+
+                if (voucher.loaiGiamGia === 'TIEN') {
+                    this.state.discount = voucher.giaTriGiamGia;
+                } else {
+                    let calculatedDiscount = (this.state.subTotal * voucher.giaTriGiamGia) / 100;
+                    if (calculatedDiscount > voucher.giaTriGiamGiaToiDa) calculatedDiscount = voucher.giaTriGiamGiaToiDa;
+                    this.state.discount = calculatedDiscount;
                 }
+
+                // Cập nhật Giao diện nút chọn mã
+                const btn = document.getElementById('btnOpenPromoModal');
+                btn.classList.add('applied');
+                btn.innerHTML = `
+                    <span style="display:flex; align-items:center; gap:8px;">
+                        <svg viewBox="0 0 24 24" stroke-width="1.5" style="stroke:white;"><path d="M21.44 11.05l-9.19 9.19a2.003 2.003 0 01-2.83 0l-7.07-7.07a2.002 2.002 0 010-2.83l9.19-9.19a2 2 0 011.41-.58h6.58c1.1 0 2 .9 2 2v6.58c0 .53-.21 1.04-.59 1.41z"/><line x1="17" y1="7" x2="17.01" y2="7"/></svg>
+                        <span>Đã áp dụng mã: <strong>${voucher.maCode}</strong></span>
+                    </span>
+                    <svg class="promo-remove-icon" onclick="event.stopPropagation(); window.CartApp.removePromo()" viewBox="0 0 24 24" stroke-width="2" style="width:20px;height:20px;"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                `;
+
+                // Hiển thị hàng tính tiền giảm giá
+                document.getElementById('discountRow').style.display = 'flex';
+                document.getElementById('cartDiscountLabelInfo').textContent = `(${voucher.maCode})`;
+                document.getElementById('cartDiscount').textContent = '-' + this.formatCurrency(this.state.discount);
+
+                this.calculateTotals();
+                this.closePromoModal();
+
+                const msgEl = document.getElementById('promoMessage');
+                msgEl.className = 'promo-msg success';
+                msgEl.textContent = `Tuyệt vời! Bạn được giảm ${this.formatCurrency(this.state.discount)}.`;
             },
 
             removePromo: function() {
                 this.state.appliedPromoCode = null;
                 this.state.discount = 0;
-                const discountRow = document.getElementById('discountRow');
-                if (discountRow) discountRow.style.display = 'none';
+
+                // Reset Giao diện nút chọn mã
+                const btn = document.getElementById('btnOpenPromoModal');
+                btn.classList.remove('applied');
+                btn.innerHTML = `
+                    <span style="display:flex; align-items:center; gap:8px;">
+                        <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M21.44 11.05l-9.19 9.19a2.003 2.003 0 01-2.83 0l-7.07-7.07a2.002 2.002 0 010-2.83l9.19-9.19a2 2 0 011.41-.58h6.58c1.1 0 2 .9 2 2v6.58c0 .53-.21 1.04-.59 1.41z"/><line x1="17" y1="7" x2="17.01" y2="7"/></svg>
+                        <span>Chọn mã giảm giá / Ưu đãi</span>
+                    </span>
+                    <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M9 5l7 7-7 7"/></svg>
+                `;
+
+                document.getElementById('promoMessage').textContent = '';
+                document.getElementById('discountRow').style.display = 'none';
+
                 this.calculateTotals();
             },
 
             proceedToCheckout: function() {
                 if (this.state.items.length === 0) return;
+
+                // Lưu lại mã khuyến mãi và tiền giảm giá để truyền sang trang Thanh Toán
                 localStorage.setItem('bee_checkout_discount', this.state.discount);
+                if (this.state.appliedPromoCode) {
+                    localStorage.setItem('bee_checkout_promo_code', this.state.appliedPromoCode);
+                } else {
+                    localStorage.removeItem('bee_checkout_promo_code');
+                }
+
                 window.location.hash = 'checkout';
             },
 
@@ -439,12 +670,8 @@
             }
         };
 
-        // KÍCH HOẠT SCRIPT TRONG MÔ HÌNH SPA (Chạy chậm lại 1 chút để DOM kip load vào html)
         setTimeout(function() {
-            if (window.CartApp) {
-                window.CartApp.init();
-            }
+            if (window.CartApp) window.CartApp.init();
         }, 100);
-
     </script>
 </section>

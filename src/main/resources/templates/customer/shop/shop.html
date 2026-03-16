@@ -7,14 +7,7 @@
         .section-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(32px, 4vw, 52px); font-weight: 300; line-height: 1.1; }
         .section-title em { font-style: italic; }
 
-        /* --- CSS MỚI CHO BỘ LỌC VÀ LƯỚI --- */
-        .shop-container {
-            display: grid;
-            grid-template-columns: 240px 1fr;
-            gap: 40px;
-            padding: 0 60px;
-            align-items: start;
-        }
+        .shop-container { display: grid; grid-template-columns: 240px 1fr; gap: 40px; padding: 0 60px; align-items: start; }
 
         .shop-filters { position: sticky; top: 120px; }
         .filter-widget { margin-bottom: 32px; }
@@ -39,7 +32,6 @@
         .img-placeholder { display: block; transition: transform 0.6s ease; width: 100%; height: 100%; object-fit: cover; }
         .product-card:hover .img-placeholder { transform: scale(1.04); }
 
-        /* --- ẢNH HOVER --- */
         .img-hover { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.5s ease, transform 0.6s ease; z-index: 1; }
         .product-card:hover .img-hover { opacity: 1; transform: scale(1.04); }
 
@@ -57,7 +49,7 @@
         .qs-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px; text-align: center; }
         .qs-options { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; justify-content: center; }
         .qs-dot { width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.15); cursor: pointer; box-shadow: inset 0 0 0 2px #fff; transition: all 0.2s ease; }
-        .qs-dot.active { border: 1.5px solid var(--text); transform: scale(1.15); }
+        .qs-dot.active { border: 1.5px solid var(--text); transform: scale(1.15); padding: 2px; background-clip: content-box; }
         .qs-size-btn { padding: 6px 12px; border: 1px solid #ddd; background: none; font-size: 11px; cursor: pointer; min-width: 35px; }
         .qs-size-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
         .qs-size-btn.disabled { opacity: 0.3; cursor: not-allowed; text-decoration: line-through; }
@@ -83,7 +75,7 @@
         @media (max-width: 900px) {
             .section-header { padding: 0 24px; flex-direction: column; align-items: flex-start; gap: 20px; }
             .shop-container { grid-template-columns: 1fr; padding: 0 24px; gap: 20px; }
-            .shop-filters { display: none; /* Mobile ẩn filter tạm thời cho đỡ rối */ }
+            .shop-filters { display: none; }
             .products-grid { grid-template-columns: 1fr 1fr; gap: 24px 16px; }
         }
         @media (max-width: 600px) { .products-grid { grid-template-columns: 1fr; } }
@@ -159,6 +151,14 @@
             },
             tempSelection: {},
 
+            // Map màu sắc dự phòng (Giống bên chi tiết)
+            colorMap: {
+                'trắng': '#ffffff', 'đen': '#1a1a1a', 'xám': '#c5cfc7', 'ghi': '#d4cfc9',
+                'be': '#c4b49d', 'kem': '#fef3c7', 'nâu': '#a89e93', 'rêu': '#3D5A4C',
+                'đỏ': '#8b0000', 'hồng': '#ffc0cb', 'xanh biển': '#4682b4', 'xanh dương': '#4682b4',
+                'vàng': '#FBC02D', 'cam': '#f97316', 'xanh lá': '#15803d', 'tím': '#a855f7'
+            },
+
             init: function() {
                 const select = document.getElementById('sortSelect');
                 if (select) {
@@ -171,9 +171,63 @@
                 this.loadProducts();
             },
 
-            // --- LỌC SẢN PHẨM MỚI ---
+            // ==========================================
+            // THUẬT TOÁN NHẬN DIỆN MÀU THÔNG MINH
+            // ==========================================
+            getColorHex: function(name) {
+                if(!name) return '#000';
+                const n = name.toLowerCase().trim();
+
+                if (this.colorMap[n]) return this.colorMap[n];
+
+                if (n.includes('đỏ')) return '#b91c1c';
+                if (n.includes('xanh dương') || n.includes('xanh biển') || n.includes('navy')) return '#1d4ed8';
+                if (n.includes('xanh lá') || n.includes('rêu')) return '#15803d';
+                if (n.includes('vàng')) return '#eab308';
+                if (n.includes('cam')) return '#ea580c';
+                if (n.includes('hồng')) return '#ec4899';
+                if (n.includes('tím')) return '#a855f7';
+                if (n.includes('nâu')) return '#78350f';
+                if (n.includes('xám') || n.includes('ghi')) return '#64748b';
+                if (n.includes('be') || n.includes('kem')) return '#fef3c7';
+                if (n.includes('trắng')) return '#ffffff';
+                if (n.includes('đen')) return '#111827';
+
+                let hash = 0;
+                for (let i = 0; i < n.length; i++) hash = n.charCodeAt(i) + ((hash << 5) - hash);
+                let color = '#';
+                for (let i = 0; i < 3; i++) color += ('00' + ((hash >> (i * 8)) & 0xFF).toString(16)).substr(-2);
+                return color;
+            },
+
+            // ==========================================
+            // THUẬT TOÁN SẮP XẾP SIZE THÔNG MINH
+            // ==========================================
+            sortSizes: function(sizes) {
+                const orderMap = {
+                    'freesize': 0, 'one size': 0, 'os': 0,
+                    'xxs': 1, 'xs': 2, 's': 3, 'm': 4, 'l': 5, 'xl': 6,
+                    'xxl': 7, '2xl': 7, 'xxxl': 8, '3xl': 8, '4xl': 9
+                };
+
+                return sizes.sort((a, b) => {
+                    const nameA = a.ten.toLowerCase().replace('size', '').trim();
+                    const nameB = b.ten.toLowerCase().replace('size', '').trim();
+
+                    const numA = parseFloat(nameA);
+                    const numB = parseFloat(nameB);
+                    if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+
+                    const weightA = orderMap[nameA] !== undefined ? orderMap[nameA] : 99;
+                    const weightB = orderMap[nameB] !== undefined ? orderMap[nameB] : 99;
+
+                    if (weightA !== weightB) return weightA - weightB;
+
+                    return nameA.localeCompare(nameB);
+                });
+            },
+
             applyFilter: function(type, value, el) {
-                // Update UI active class
                 const ul = el.closest('ul');
                 ul.querySelectorAll('li').forEach(li => li.classList.remove('active'));
                 el.classList.add('active');
@@ -243,7 +297,6 @@
                     else if(this.state.sort === 'price_asc') paramStr += '&sort=giaBan,asc';
                     else if(this.state.sort === 'price_desc') paramStr += '&sort=giaBan,desc';
 
-                    // Gắn filter vào API (Nếu Backend của bạn chưa hỗ trợ những Query Param này, nó sẽ tự lờ đi)
                     if (this.state.filters.categoryId) paramStr += `&danhMucId=${this.state.filters.categoryId}`;
                     if (this.state.filters.minPrice) paramStr += `&minGia=${this.state.filters.minPrice}`;
                     if (this.state.filters.maxPrice) paramStr += `&maxGia=${this.state.filters.maxPrice}`;
@@ -277,7 +330,6 @@
                     let imgUrl = p.hinhAnhs && p.hinhAnhs.length > 0 ? p.hinhAnhs[0].url : 'https://placehold.co/400x533?text=No+Image';
                     if (imgUrl.includes('res.cloudinary.com')) imgUrl = imgUrl.replace('/image/upload/', '/image/upload/c_fill,w_400,h_533,f_auto,q_auto/');
 
-                    // --- TẠO ẢNH HOVER & THÊM LAZY LOAD ---
                     let imgHoverHtml = '';
                     if (p.hinhAnhs && p.hinhAnhs.length > 1) {
                         let hoverUrl = p.hinhAnhs[1].url;
@@ -353,23 +405,31 @@
                 const product = this.state.products.find(p => p.id === productId);
                 const skus = this.getVariants(product);
                 const colorsMap = new Map(), sizesMap = new Map();
-                skus.forEach(s => { if(s.mauSac) colorsMap.set(s.mauSac.id, s.mauSac); if(s.kichThuoc) sizesMap.set(s.kichThuoc.id, s.kichThuoc); });
+
+                skus.forEach(s => {
+                    if(s.mauSac) colorsMap.set(s.mauSac.id, s.mauSac);
+                    if(s.kichThuoc) sizesMap.set(s.kichThuoc.id, s.kichThuoc);
+                });
 
                 const colorContainer = document.getElementById('shop-qs-colors-' + productId);
                 const sizeContainer = document.getElementById('shop-qs-sizes-' + productId);
-                const fallbackColorMap = { 'trắng': '#ffffff', 'đen': '#1a1a1a', 'be': '#c4b49d', 'nâu': '#a89e93', 'rêu': '#3D5A4C' };
 
+                // --- GỌI HÀM LẤY MÀU SẮC ---
                 let cHtml = '';
                 colorsMap.forEach(c => {
                     const isActive = this.tempSelection[productId].colorId === c.id;
-                    const hexCode = c.maMau || fallbackColorMap[c.ten?.toLowerCase().trim()] || '#eeeeee';
-                    cHtml += `<div class="qs-dot ${isActive ? 'active' : ''}" style="background:${hexCode}" onclick="window.ShopApp.selectAttr(${productId}, 'color', ${c.id}, event)"></div>`;
+                    const hexCode = c.maMau || this.getColorHex(c.ten);
+                    cHtml += `<div class="qs-dot ${isActive ? 'active' : ''}" style="background:${hexCode}" onclick="window.ShopApp.selectAttr(${productId}, 'color', ${c.id}, event)" title="${c.ten}"></div>`;
                     if (isActive) document.getElementById('shop-qs-color-name-' + productId).innerText = '- ' + c.ten;
                 });
                 colorContainer.innerHTML = cHtml;
 
+                // --- GỌI HÀM SẮP XẾP KÍCH CỠ ---
                 let sHtml = '';
-                sizesMap.forEach(s => {
+                let uniqueSizes = Array.from(sizesMap.values());
+                uniqueSizes = this.sortSizes(uniqueSizes);
+
+                uniqueSizes.forEach(s => {
                     const colorId = this.tempSelection[productId].colorId;
                     const isAvailable = !colorId || skus.some(sku => sku.mauSac.id === colorId && sku.kichThuoc.id === s.id && sku.soLuong > 0);
                     sHtml += `<button class="qs-size-btn ${this.tempSelection[productId].sizeId === s.id ? 'active' : ''} ${!isAvailable ? 'disabled' : ''}" onclick="window.ShopApp.selectAttr(${productId}, 'size', ${s.id}, event)">${s.ten}</button>`;
@@ -387,7 +447,6 @@
                     this.tempSelection[productId].colorId = attrId;
                     this.tempSelection[productId].sizeId = null;
 
-                    // ĐỔI ẢNH KHI CHỌN MÀU
                     const colorSku = skus.find(s => s.mauSac.id === attrId && s.hinhAnh);
                     if (colorSku && colorSku.hinhAnh) {
                         const imgEl = document.querySelector(`#shop-card-${productId} .img-placeholder`);

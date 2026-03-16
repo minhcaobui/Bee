@@ -57,12 +57,11 @@
         .filter-row-1 { display: grid; gap: 16px; align-items: end; }
         .filter-row-2 { display: grid; gap: 16px; align-items: end; margin-top: 14px; }
 
-        /* Online: 1 hàng — tìm kiếm rộng, trạng thái, ngày, nút */
-        .filter-row-1.online-mode  { grid-template-columns: 2.5fr 1fr 1.5fr auto; }
+        /* Online/Chờ xử lý: Đã thêm cột Loại hóa đơn */
+        .filter-row-1.online-mode  { grid-template-columns: 2fr 1fr 1fr 1.5fr auto; }
 
-        /* Lịch sử hàng 1: 4 ô lọc */
+        /* Lịch sử hàng 1 & 2 */
         .filter-row-1.history-mode { grid-template-columns: 2.5fr 1fr 1fr 1fr; }
-        /* Lịch sử hàng 2: tìm NV + ngày + nút */
         .filter-row-2.history-mode { grid-template-columns: 1.5fr 2fr auto; }
 
         .filter-group { display: flex; flex-direction: column; gap: 5px; }
@@ -95,7 +94,6 @@
         .highlight-order { background-color: #f1f5f9 !important; outline: 1.5px solid #000 !important; animation: subtleBlink 1.2s infinite ease-in-out; }
         @keyframes subtleBlink { 0%, 100% { background-color: #f1f5f9; } 50% { background-color: #ffffff; } }
 
-
     </style>
 </head>
 <body>
@@ -103,7 +101,7 @@
     <div class="actions-bar">
         <nav class="tabs">
             <button class="tab active" onclick="OrderApp.switchTab('don-hang')" id="tabDonHang">
-                <i class="bi bi-box-seam-fill"></i> ĐƠN HÀNG ONLINE
+                <i class="bi bi-box-seam-fill"></i> ĐƠN CHỜ XỬ LÝ
             </button>
             <button class="tab" onclick="OrderApp.switchTab('lich-su')" id="tabLichSu">
                 <i class="bi bi-clock-history"></i> LỊCH SỬ HÓA ĐƠN
@@ -111,7 +109,6 @@
         </nav>
     </div>
 
-    <!-- BỘ LỌC ĐỘNG — renderFilterSection() ghi vào đây -->
     <section class="search-section" id="filterSection"></section>
 
     <div class="table-wrapper">
@@ -203,7 +200,6 @@
             const section = document.getElementById('filterSection');
             const isHistory = this.state.activeTab === 'lich-su';
 
-            // Phần date range dùng chung — tái sử dụng HTML
             const dateRangeHtml = `
                 <div class="filter-group">
                     <label class="filter-label">Khoảng ngày tạo</label>
@@ -224,14 +220,14 @@
                 </div>`;
 
             if (!isHistory) {
-                // ---- TAB ĐƠN HÀNG ONLINE: 1 hàng ----
+                // Đã bổ sung Loại Hóa Đơn vào Tab 1
                 section.innerHTML = `
                     <div class="filter-row-1 online-mode">
                         <div class="filter-group">
                             <label class="filter-label">Tìm kiếm</label>
                             <div style="position:relative;">
                                 <i class="bi bi-search" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#999; font-size:12px;"></i>
-                                <input type="text" id="search" placeholder="Mã đơn, tên KH, SĐT, email..."
+                                <input type="text" id="search" placeholder="Mã đơn, tên KH, SĐT..."
                                     style="padding-left:32px;" oninput="OrderApp.handleSearch(this.value)">
                             </div>
                         </div>
@@ -241,18 +237,25 @@
                                 <option value="">Tất cả</option>
                             </select>
                         </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Loại hóa đơn</label>
+                            <select id="filterLoai" onchange="OrderApp.handleFilterChange()">
+                                <option value="">Tất cả</option>
+                                <option value="1">Online</option>
+                                <option value="0">Tại quầy</option>
+                            </select>
+                        </div>
                         ${dateRangeHtml}
                         ${resetBtnHtml}
                     </div>`;
             } else {
-                // ---- TAB LỊCH SỬ HÓA ĐƠN: 2 hàng ----
                 section.innerHTML = `
                     <div class="filter-row-1 history-mode">
                         <div class="filter-group">
                             <label class="filter-label">Tìm kiếm</label>
                             <div style="position:relative;">
                                 <i class="bi bi-search" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#999; font-size:12px;"></i>
-                                <input type="text" id="search" placeholder="Mã đơn, tên KH, SĐT, email..."
+                                <input type="text" id="search" placeholder="Mã đơn, tên KH, SĐT..."
                                     style="padding-left:32px;" oninput="OrderApp.handleSearch(this.value)">
                             </div>
                         </div>
@@ -298,10 +301,7 @@
                     </div>`;
             }
 
-            // Đổ options trạng thái vào select vừa render
             this.populateStatusSelect();
-
-            // Khôi phục giá trị state lên form
             this.restoreFilterValues();
         },
 
@@ -340,8 +340,23 @@
         },
 
         // =============================================
-        // INIT
+        // HOÀN THIỆN CHỨC NĂNG LÀM MỚI
         // =============================================
+        resetFilters: function() {
+            // Đặt lại state nhưng giữ nguyên Tab đang đứng
+            this.state = {
+                activeTab: this.state.activeTab,
+                q: '', statusId: '', loai: '', pttt: '',
+                nhanVienId: '', dateFrom: '', dateTo: ''
+            };
+            this._nvSelectedId = null;
+
+            // Xóa rỗng các ô trên giao diện
+            this.renderFilterSection();
+            this.loadData();
+            if (typeof toast === 'function') toast("Đã làm mới bộ lọc", "success");
+        },
+
         init: async function() {
             await this.loadFilterOptions();
             this.renderFilterSection();
@@ -362,9 +377,6 @@
             }
         },
 
-        // =============================================
-        // FILTER HANDLERS
-        // =============================================
         handleFilterChange: function() {
             this.state.statusId = document.getElementById('filterStatus')?.value || '';
             this.state.loai     = document.getElementById('filterLoai')?.value   || '';
@@ -397,21 +409,6 @@
             this.handleFilterChange();
         },
 
-        // resetFilters: function() {
-        //     this.state = {
-        //         activeTab: this.state.activeTab,
-        //         q: '', statusId: '', loai: '', pttt: '',
-        //         nhanVienId: '', dateFrom: '', dateTo: ''
-        //     };
-        //     this._nvSelectedId = null;
-        //     this.renderFilterSection();
-        //     this.loadData();
-        //     if (typeof toast === 'function') toast("Đã làm mới bộ lọc", "success");
-        // },
-
-        // =============================================
-        // NHÂN VIÊN SEARCH
-        // =============================================
         handleNhanVienSearch: function(val) {
             clearTimeout(this._nvTimeout);
             this._nvTimeout = setTimeout(() => this.renderNvDropdown(val.trim()), 200);
@@ -468,15 +465,11 @@
             this.loadData();
         },
 
-        // =============================================
-        // SWITCH TAB
-        // =============================================
         switchTab: function(tab) {
             this.state.activeTab = tab;
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.getElementById(tab === 'don-hang' ? 'tabDonHang' : 'tabLichSu').classList.add('active');
 
-            // Reset toàn bộ filter khi đổi tab
             this.state.q = ''; this.state.statusId = ''; this.state.loai = '';
             this.state.pttt = ''; this.state.nhanVienId = ''; this.state.dateFrom = ''; this.state.dateTo = '';
             this._nvSelectedId = null;
@@ -486,9 +479,6 @@
             this.loadData();
         },
 
-        // =============================================
-        // TABLE
-        // =============================================
         renderHeader: function() {
             const thead = document.querySelector('thead');
             if (this.state.activeTab === 'don-hang') {
@@ -599,9 +589,6 @@
             }
         },
 
-        // =============================================
-        // DRAWER DETAIL
-        // =============================================
         openDetail: async function(id) {
             if (window.showLoading) window.showLoading();
             try {
@@ -661,12 +648,20 @@
                     </div>`;
                 sBox.style.float = 'none';
 
+                // =============================================
+                // HIỂN THỊ TÙY BIẾN CHO HÓA ĐƠN TẠI QUẦY (OFFLINE)
+                // =============================================
                 const isPos = hd.loaiHoaDon === 0;
                 document.getElementById('cardTimeline').style.display = isPos ? 'none' : 'block';
-                document.getElementById('cardActions').style.display  = isPos ? 'none' : 'block';
+
+                // Mở cardActions cho cả Online và Offline để gắn nút xóa/hủy
+                document.getElementById('cardActions').style.display  = 'block';
+
                 if (!isPos) {
                     this.renderTimeline(hd.trangThaiMa);
                     this.renderActions(hd);
+                } else {
+                    this.renderPosActions(hd);
                 }
 
                 document.getElementById('drawer').classList.add('show');
@@ -738,6 +733,48 @@
 
             footer.appendChild(btnHuy);
             footer.appendChild(btnNext);
+        },
+
+        // =============================================
+        // NÚT XÓA KHÔNG LƯU LỊCH SỬ DÀNH CHO POS
+        // =============================================
+        renderPosActions: function(hd) {
+            const footer = document.getElementById('drawerFooter');
+            footer.innerHTML = '';
+            const currentMa = hd.trangThaiMa;
+
+            // Nếu Hóa đơn tại quầy đang ở trạng thái Chờ xác nhận/Chờ thanh toán (Tùy theo cấu hình trạng thái POS của bạn)
+            if (currentMa !== 'HOAN_THANH' && currentMa !== 'DA_HUY') {
+                const btnXoa = document.createElement('button');
+                btnXoa.className = 'btn btn-secondary';
+                btnXoa.style.cssText = 'flex:1; color:#dc3545; border-color:#dc3545; height:36px !important;';
+                btnXoa.innerHTML = '<i class="bi bi-trash"></i> XÓA HÓA ĐƠN';
+                btnXoa.onclick = () => this.xoaDonPOS(hd.id);
+                footer.appendChild(btnXoa);
+            } else {
+                footer.innerHTML = `<div style="width:100%; text-align:center; font-weight:700; color:#888; padding:10px 0;">Hóa đơn tại quầy đã thanh toán.</div>`;
+            }
+        },
+
+        xoaDonPOS: async function(id) {
+            if (!confirm("Bạn có chắc chắn muốn xóa vĩnh viễn hóa đơn này?\nHành động này sẽ xóa hoàn toàn khỏi cơ sở dữ liệu và KHÔNG lưu vào lịch sử.")) return;
+            try {
+                if (window.showLoading) window.showLoading();
+
+                // GỌI API HARD DELETE XUỐNG SPRING BOOT
+                const res = await fetch(`/api/hoa-don/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!res.ok) throw new Error("Xóa thất bại");
+                if (typeof toast === 'function') toast("Đã xóa hóa đơn thành công!", "success");
+                this.closeDrawer();
+                this.loadData();
+            } catch (err) {
+                if (typeof toast === 'function') toast(err.message, "error");
+            } finally {
+                if (window.hideLoading) window.hideLoading();
+            }
         },
 
         nextStatus: async function(id) {

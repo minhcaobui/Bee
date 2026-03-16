@@ -114,7 +114,7 @@
         #mainDrawer { width: 600px; }
         #variantDrawer { width: 850px; z-index: 1050; }
         #vFormDrawer { width: 450px; z-index: 1101; }
-        #bulkDrawer { width: 650px; z-index: 1101; } /* Drawer cho Tạo Hàng Loạt */
+        #bulkDrawer { width: 800px; z-index: 1101; } /* Mở rộng Drawer Bulk để chứa ảnh */
         #stockDrawer { width: 350px; z-index: 1201; }
         #vFormOverlay, #bulkOverlay { z-index: 1100; }
         #stockOverlay { z-index: 1200; }
@@ -130,6 +130,16 @@
         .preview-item img { width: 100%; height: 100%; object-fit: cover; }
         .preview-item .remove-btn { position: absolute; top: 2px; right: 2px; background: #ef4444; color: #fff; border: none; width: 18px; height: 18px; cursor: pointer; font-size: 12px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         .preview-item .remove-btn:hover { background: #dc2626; }
+
+        /* CSS MỚI CHO ẢNH THEO MÀU SẮC BULK */
+        .bulk-color-images-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 15px; margin-top: 15px; border-top: 1px dashed #ddd; padding-top: 15px; }
+        .bulk-color-img-box { border: 1px solid #eee; padding: 10px; border-radius: 4px; text-align: center; background: #fff; }
+        .bulk-color-label { font-size: 11px; font-weight: 700; margin-bottom: 8px; color: #555; text-transform: uppercase; }
+        .bulk-img-preview { width: 60px; height: 60px; border-radius: 4px; object-fit: cover; border: 1px dashed #ccc; margin: 0 auto 8px; background: #fafafa; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+        .bulk-img-preview img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .bulk-img-preview i { font-size: 20px; color: #ccc; }
+        .bulk-img-btn { font-size: 10px; padding: 4px 8px; width: 100%; }
+        .loading-text-bulk { position: absolute; inset: 0; background: rgba(255,255,255,0.7); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: bold; color: #000; z-index: 2; }
 
         /* Carousel xem chi tiết */
         .carousel-container { position: relative; width: 100%; height: 240px; background: #fafafa; border: 1px solid #eee; border-radius: 4px; overflow: hidden; margin-bottom: 20px; }
@@ -339,8 +349,13 @@
                 <div class="checkbox-group" id="bulkColorGroup">
                     <span style="color:#888; font-size:12px;">Đang tải danh sách...</span>
                 </div>
+
+                <div id="bulkColorImagesSection" class="bulk-color-images-container" style="display: none;">
+                </div>
+                <input type="file" id="bulkHiddenFileInput" accept="image/*" style="display:none">
             </div>
-            <div class="form-group" style="margin-bottom: 0;">
+
+            <div class="form-group" style="margin-bottom: 0; border-top: 1px dashed #ddd; padding-top: 15px; margin-top: 15px;">
                 <label class="form-label">BƯỚC 2: CHỌN KÍCH THƯỚC</label>
                 <div class="checkbox-group" id="bulkSizeGroup">
                     <span style="color:#888; font-size:12px;">Đang tải danh sách...</span>
@@ -354,8 +369,13 @@
         <div id="bulkSettings" style="display:none; background: #fff; padding: 15px; border-radius: 4px; border: 1px dashed #ccc; margin-bottom: 20px;">
             <label class="form-label">THIẾT LẬP NHANH CHO TẤT CẢ TỔ HỢP DƯỚI ĐÂY</label>
             <div style="display:flex; gap:10px; align-items:center;">
-                <input type="text" id="bulkCommonPrice" class="form-input" placeholder="Nhập giá bán chung..." style="flex:1" oninput="ProductApp.formatCurrencyInput(this)">
-                <button class="btn btn-secondary" onclick="ProductApp.applyBulkPrice()"><i class="bi bi-check2-all"></i> ÁP DỤNG MỨC GIÁ</button>
+                <div style="flex:1;">
+                    <input type="text" id="bulkCommonPrice" class="form-input" placeholder="Nhập giá bán chung..." oninput="ProductApp.formatCurrencyInput(this)">
+                </div>
+                <div style="flex:1;">
+                    <input type="text" id="bulkCommonQty" class="form-input" placeholder="Nhập số lượng chung (Tồn kho)..." oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                </div>
+                <button class="btn btn-secondary" style="height: 34px !important;" onclick="ProductApp.applyBulkSettings()"><i class="bi bi-check2-all"></i> ÁP DỤNG TẤT CẢ</button>
             </div>
         </div>
 
@@ -364,14 +384,16 @@
             <table style="min-width: 100%;">
                 <thead>
                 <tr>
+                    <th style="width: 80px;">MÃ SKU</th>
                     <th>MÀU SẮC</th>
                     <th>KÍCH THƯỚC</th>
                     <th>GIÁ BÁN (VNĐ) <span style="color:red">*</span></th>
+                    <th>TỒN KHO <span style="color:red">*</span></th>
                     <th style="width:40px; text-align:center;">XÓA</th>
                 </tr>
                 </thead>
                 <tbody id="bulkMatrixBody">
-                <tr><td colspan="4" style="text-align:center; color:#888; padding:20px;">Vui lòng chọn Màu và Kích thước rồi bấm "Sinh ma trận"</td></tr>
+                <tr><td colspan="6" style="text-align:center; color:#888; padding:20px;">Vui lòng chọn Màu và Kích thước rồi bấm "Sinh ma trận"</td></tr>
                 </tbody>
             </table>
         </div>
@@ -381,6 +403,7 @@
         <button class="btn" id="btnSaveBulk" style="flex:1" onclick="ProductApp.saveBulkVariants()">LƯU TẤT CẢ SKU</button>
     </div>
 </aside>
+
 <div id="vFormOverlay" class="overlay" onclick="ProductApp.closeVariantForm()"></div>
 <aside class="drawer" id="vFormDrawer">
     <div class="drawer-header">
@@ -503,10 +526,32 @@
         el.querySelector('#toastCancel').onclick = () => { el.remove(); onCancel(); };
     };
 
+    // Hàm chuyển Text Tiếng Việt có dấu thành Không dấu (Ví dụ: ĐEN -> DEN)
+    function removeVietnameseTones(str) {
+        if (!str) return "";
+        str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+        str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+        str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+        str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+        str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+        str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+        str = str.replace(/đ/g, "d");
+        str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
+        str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
+        str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
+        str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
+        str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
+        str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
+        str = str.replace(/Đ/g, "D");
+        // Xóa ký tự đặc biệt
+        str = str.replace(/[^a-zA-Z0-9 ]/g, "");
+        return str.replace(/\s+/g, "").toUpperCase();
+    }
+
     const ProductApp = {
         state: {
             page: 0, size: 10, totalPages: 0, q: '', trangThai: '', editingId: null,
-            tempImages: [], currentProductId: null, vTempImage: null,
+            tempImages: [], currentProductId: null, currentProductMa: null, vTempImage: null,
             activeVariantId: null, activeCurrentQty: 0,
             currentSlide: 0, variantList: [], variantPage: 0, variantSize: 5,
             editingVariantId: null,
@@ -515,7 +560,7 @@
             isUploadingVariantImg: false,
 
             // LƯU CACHE MÀU VÀ SIZE CHO FORM TẠO HÀNG LOẠT
-            cachedColors: [], cachedSizes: []
+            cachedColors: [], cachedSizes: [], bulkColorImages: {} // Format: { colorId: 'url_anh' }
         },
 
         init: async function() {
@@ -537,7 +582,6 @@
                 e.target.value = '';
 
                 for (const file of files) {
-                    // Hiện preview tạm ngay lập tức
                     const blobUrl = URL.createObjectURL(file);
                     self.state.tempImages.push({ uploading: true, preview: blobUrl });
                     self.renderPreview();
@@ -549,7 +593,6 @@
                         const data = await res.json();
 
                         if (res.ok && data.url) {
-                            // Thay blob bằng URL Cloudinary thật
                             const idx = self.state.tempImages.findIndex(i => i.preview === blobUrl);
                             if (idx !== -1) self.state.tempImages[idx] = data.url;
                             URL.revokeObjectURL(blobUrl);
@@ -571,32 +614,28 @@
                 if (!file) return;
                 e.target.value = '';
 
-                // --- XỬ LÝ GIAO DIỆN LÚC ĐANG TẢI ---
                 const blobUrl = URL.createObjectURL(file);
                 const imgDisplay = document.getElementById('vImgDisplay');
                 const placeholder = document.getElementById('vImgPlaceholder');
                 const previewContainer = document.getElementById('vImagePreview');
 
-                // 1. Hiện ảnh Blob, làm mờ nó đi và ẩn icon placeholder
                 imgDisplay.src = blobUrl;
                 imgDisplay.style.display = 'block';
                 imgDisplay.style.opacity = '0.4';
                 placeholder.style.display = 'none';
 
-                // 2. Tạo text "Đang tải..." đè lên trên
                 let loadingText = document.getElementById('vImgLoadingText');
                 if (!loadingText) {
                     loadingText = document.createElement('div');
                     loadingText.id = 'vImgLoadingText';
                     loadingText.style.cssText = 'position:absolute; font-size:10px; font-weight:700; color:#555; z-index:2; pointer-events:none;';
                     loadingText.innerText = 'Đang tải...';
-                    previewContainer.style.position = 'relative'; // Cần cái này để chữ nằm giữa khung
+                    previewContainer.style.position = 'relative';
                     previewContainer.appendChild(loadingText);
                 }
                 loadingText.style.display = 'block';
 
-                // --- BẮT ĐẦU GỌI API ---
-                self.state.isUploadingVariantImg = true; // <-- Bật cờ đang tải
+                self.state.isUploadingVariantImg = true;
                 try {
                     const formData = new FormData();
                     formData.append('file', file);
@@ -604,7 +643,7 @@
                     const data = await res.json();
 
                     if (res.ok && data.url) {
-                        self.state.vTempImage = data.url; // URL Cloudinary thật
+                        self.state.vTempImage = data.url;
                         imgDisplay.src = data.url;
                         window.toast('Tải ảnh SKU thành công!', 'success');
                     } else {
@@ -619,11 +658,53 @@
                     placeholder.style.display = 'block';
                     self.state.vTempImage = null;
                 } finally {
-                    // --- DỌN DẸP SAU KHI TẢI XONG ---
                     self.state.isUploadingVariantImg = false;
-                    imgDisplay.style.opacity = '1'; // Trả lại độ sáng bình thường
-                    if (loadingText) loadingText.style.display = 'none'; // Ẩn chữ đi
-                    URL.revokeObjectURL(blobUrl); // Dọn rác bộ nhớ
+                    imgDisplay.style.opacity = '1';
+                    if (loadingText) loadingText.style.display = 'none';
+                    URL.revokeObjectURL(blobUrl);
+                }
+            };
+
+            // Xử lý upload ảnh cho Bulk Color
+            document.getElementById('bulkHiddenFileInput').onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const colorId = e.target.dataset.colorId;
+                e.target.value = '';
+
+                const previewBox = document.getElementById(`bulk-preview-${colorId}`);
+                const imgDisplay = previewBox.querySelector('img');
+                const placeholder = previewBox.querySelector('i');
+                const loading = previewBox.querySelector('.loading-text-bulk');
+
+                const blobUrl = URL.createObjectURL(file);
+                imgDisplay.src = blobUrl;
+                imgDisplay.style.display = 'block';
+                placeholder.style.display = 'none';
+                loading.style.display = 'flex';
+
+                try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                    const data = await res.json();
+
+                    if (res.ok && data.url) {
+                        self.state.bulkColorImages[colorId] = data.url;
+                        imgDisplay.src = data.url;
+                    } else {
+                        window.toast('Upload ảnh thất bại.', 'error');
+                        imgDisplay.style.display = 'none';
+                        placeholder.style.display = 'block';
+                    }
+                } catch (err) {
+                    window.toast('Lỗi kết nối khi upload ảnh.', 'error');
+                    imgDisplay.style.display = 'none';
+                    placeholder.style.display = 'block';
+                } finally {
+                    loading.style.display = 'none';
+                    URL.revokeObjectURL(blobUrl);
                 }
             };
         },
@@ -666,7 +747,7 @@
                     <td>${item.chatLieu?.ten || '---'}</td>
                     <td style="text-align:center;">${toggleHtml}</td>
                     <td style="text-align:right; white-space: nowrap;">
-                        <button class="btn-icon" onclick="ProductApp.viewVariants(${item.id}, '${item.ten}')" title="Xem chi tiết & SKU"><i class="bi bi-eye"></i></button>
+                        <button class="btn-icon" onclick="ProductApp.viewVariants(${item.id}, '${item.ten.replace(/'/g, "\\'")}', '${item.ma}')" title="Xem chi tiết & SKU"><i class="bi bi-eye"></i></button>
                         <button class="btn-icon" onclick="ProductApp.openEdit(${item.id})" title="Sửa sản phẩm"><i class="bi bi-pencil"></i></button>
                     </td>
                 </tr>`;
@@ -674,7 +755,7 @@
         },
 
         /* --- CHI TIẾT & BIẾN THỂ & SLIDE --- */
-        viewVariants: async function(id, name) {
+        viewVariants: async function(id, name, ma) {
             if (this.state.isLoading) return;
             this.state.isLoading = true;
 
@@ -682,6 +763,7 @@
             this.state.abortController = new AbortController();
 
             this.state.currentProductId = id;
+            this.state.currentProductMa = ma; // Lưu lại mã SP để lát sinh SKU tự động
             document.getElementById('vTitle').textContent = name;
 
             try {
@@ -692,29 +774,21 @@
 
                 document.getElementById('bMa').textContent = item.ma;
 
-                // --- HÀM FIX DATE SIÊU CẤP ---
                 const fmt = (d) => {
                     if (!d) return '---';
-
-                    // Nếu d là chuỗi (do đã dùng @JsonFormat ở Backend)
                     if (typeof d === 'string') {
-                        // Thay '-' bằng '/' để trình duyệt nào cũng đọc được (đặc biệt là Safari)
                         const dateObj = new Date(d.replace(/-/g, '/'));
                         return isNaN(dateObj.getTime()) ? d : dateObj.toLocaleString('vi-VN');
                     }
-
-                    // Đề phòng trường hợp nó vẫn trả về mảng số
                     if (Array.isArray(d)) {
                         const dateObj = new Date(d[0], d[1] - 1, d[2], d[3] || 0, d[4] || 0, d[5] || 0);
                         return dateObj.toLocaleString('vi-VN');
                     }
-
                     return new Date(d).toLocaleString('vi-VN');
                 };
 
                 document.getElementById('bNgayTao').textContent = fmt(item.ngayTao);
                 document.getElementById('bNgaySua').textContent = fmt(item.ngaySua);
-                // --- KẾT THÚC ĐOẠN FIX ---
 
                 document.getElementById('bMoTa').textContent = item.moTa || 'Không có mô tả.';
 
@@ -729,7 +803,6 @@
                     window.toast('Không thể tải chi tiết sản phẩm.', 'error');
                 }
             } finally {
-                // SỬA Ở ĐÂY: Mở khóa để có thể bấm Sửa/Xem tiếp
                 this.state.isLoading = false;
             }
 
@@ -806,7 +879,7 @@
         changeVariantPage: function(step) { this.state.variantPage += step; this.renderVariantTable(); },
 
         quickToggleVariant: function(id, cb) {
-            const originalState = !cb.checked; // Lưu trạng thái cũ nếu người dùng Hủy
+            const originalState = !cb.checked;
             window.toastConfirm(
                 "Bạn có chắc chắn muốn thay đổi trạng thái kinh doanh của SKU này không?",
                 async () => {
@@ -816,28 +889,33 @@
                             window.toast("Đã thay đổi trạng thái SKU", "success");
                         } else {
                             window.toast("Hệ thống từ chối thay đổi.", "error");
-                            cb.checked = originalState; // Hoàn tác
+                            cb.checked = originalState;
                         }
                     } catch(e) {
-                        cb.checked = originalState; // Hoàn tác
+                        cb.checked = originalState;
                         window.toast("Mất kết nối server.", "error");
                     }
                 },
                 () => {
-                    cb.checked = originalState; // Hoàn tác nếu chọn Hủy
+                    cb.checked = originalState;
                 }
             );
         },
 
         /* ==================== TẠO MA TRẬN HÀNG LOẠT (BULK) ==================== */
         openBulkDrawer: function() {
-            // Render giao diện checkbox từ cache
-            this.renderBulkCheckboxes('bulkColorGroup', this.state.cachedColors);
-            this.renderBulkCheckboxes('bulkSizeGroup', this.state.cachedSizes);
+            this.state.bulkColorImages = {};
 
-            document.getElementById('bulkMatrixBody').innerHTML = `<tr><td colspan="4" style="text-align:center; color:#888; padding:20px;">Vui lòng chọn Màu và Kích thước rồi bấm "Sinh ma trận"</td></tr>`;
+            this.renderBulkCheckboxes('bulkColorGroup', this.state.cachedColors, true);
+            this.renderBulkCheckboxes('bulkSizeGroup', this.state.cachedSizes, false);
+
+            document.getElementById('bulkColorImagesSection').style.display = 'none';
+            document.getElementById('bulkColorImagesSection').innerHTML = '';
+
+            document.getElementById('bulkMatrixBody').innerHTML = `<tr><td colspan="6" style="text-align:center; color:#888; padding:20px;">Vui lòng chọn Màu và Kích thước rồi bấm "Sinh ma trận"</td></tr>`;
             document.getElementById('bulkSettings').style.display = 'none';
             document.getElementById('bulkCommonPrice').value = '';
+            document.getElementById('bulkCommonQty').value = '';
 
             document.getElementById('bulkDrawer').classList.add('show');
             document.getElementById('bulkOverlay').classList.add('show');
@@ -848,18 +926,80 @@
             document.getElementById('bulkOverlay').classList.remove('show');
         },
 
-        renderBulkCheckboxes: function(containerId, list) {
+        renderBulkCheckboxes: function(containerId, list, isColor) {
             const container = document.getElementById(containerId);
             if (!list || list.length === 0) {
                 container.innerHTML = '<span style="color:#ef4444; font-size:12px;">Không có dữ liệu thuộc tính!</span>';
                 return;
             }
+
+            // Đối với màu sắc, thêm hàm theo dõi để render ô upload ảnh
+            const onChangeAttr = isColor ? `onchange="this.parentElement.classList.toggle('active', this.checked); ProductApp.updateBulkColorImages();"`
+                : `onchange="this.parentElement.classList.toggle('active', this.checked);"`;
+
             container.innerHTML = list.map(item => `
                 <label class="checkbox-item">
-                    <input type="checkbox" value="${item.id}" data-name="${item.ten}" onchange="this.parentElement.classList.toggle('active', this.checked)">
+                    <input type="checkbox" value="${item.id}" data-name="${item.ten}" ${onChangeAttr}>
                     ${item.ten}
                 </label>
             `).join('');
+        },
+
+        updateBulkColorImages: function() {
+            const colorChecks = Array.from(document.querySelectorAll('#bulkColorGroup input[type="checkbox"]:checked'));
+            const container = document.getElementById('bulkColorImagesSection');
+
+            if (colorChecks.length === 0) {
+                container.style.display = 'none';
+                container.innerHTML = '';
+                return;
+            }
+
+            container.style.display = 'grid';
+
+            // Giữ lại các ô đã upload ảnh, chỉ render mới các ô màu được tick thêm
+            let newHtml = '';
+            colorChecks.forEach(c => {
+                const colorId = c.value;
+                const colorName = c.dataset.name;
+
+                // Nếu màu này đã có trong giao diện thì không vẽ lại để giữ ảnh
+                if (!document.getElementById(`bulk-color-box-${colorId}`)) {
+                    newHtml += `
+                        <div class="bulk-color-img-box" id="bulk-color-box-${colorId}">
+                            <div class="bulk-color-label">${colorName}</div>
+                            <div class="bulk-img-preview" id="bulk-preview-${colorId}">
+                                <div class="loading-text-bulk" style="display:none;">Đang tải...</div>
+                                <img src="" alt="preview">
+                                <i class="bi bi-image"></i>
+                            </div>
+                            <button class="btn btn-secondary bulk-img-btn" onclick="ProductApp.triggerBulkUpload(${colorId})">Chọn ảnh</button>
+                        </div>
+                    `;
+                }
+            });
+
+            // Thêm HTML mới vào container
+            if (newHtml) {
+                container.insertAdjacentHTML('beforeend', newHtml);
+            }
+
+            // Xóa các ô màu đã bị uncheck khỏi giao diện
+            const currentBoxes = document.querySelectorAll('.bulk-color-img-box');
+            currentBoxes.forEach(box => {
+                const boxId = box.id.replace('bulk-color-box-', '');
+                const stillChecked = colorChecks.some(c => c.value === boxId);
+                if (!stillChecked) {
+                    box.remove();
+                    delete this.state.bulkColorImages[boxId]; // Xóa data
+                }
+            });
+        },
+
+        triggerBulkUpload: function(colorId) {
+            const fileInput = document.getElementById('bulkHiddenFileInput');
+            fileInput.dataset.colorId = colorId; // Nhớ lại id màu để lát up xong map lại
+            fileInput.click();
         },
 
         generateBulkMatrix: function() {
@@ -873,20 +1013,30 @@
 
             const tbody = document.getElementById('bulkMatrixBody');
             let html = '';
+            const rootMa = this.state.currentProductMa || 'SP'; // Lấy mã SP cha
 
             colorChecks.forEach(c => {
                 sizeChecks.forEach(s => {
                     const cid = c.value, cName = c.dataset.name;
                     const sid = s.value, sName = s.dataset.name;
-                    // id dòng dùng làm key để tránh trùng lặp
+
                     const rowId = `row_${cid}_${sid}`;
+
+                    // Xử lý chuỗi để tạo SKU đẹp: SP001-DEN-XL
+                    const cCode = removeVietnameseTones(cName);
+                    const sCode = removeVietnameseTones(sName);
+                    const skuCode = `${rootMa}-${cCode}-${sCode}`;
 
                     html += `
                     <tr id="${rowId}" data-color="${cid}" data-size="${sid}">
+                        <td><span style="font-size:11px; font-weight:600; color:#555;">${skuCode}</span></td>
                         <td><span style="font-weight:700;">${cName}</span></td>
                         <td><span style="font-weight:700;">${sName}</span></td>
                         <td>
-                            <input type="text" class="form-input bulk-price-input" placeholder="Nhập giá..." oninput="ProductApp.formatCurrencyInput(this)" style="min-width: 120px;">
+                            <input type="text" class="form-input bulk-price-input" placeholder="Nhập giá..." oninput="ProductApp.formatCurrencyInput(this)" style="min-width: 100px;">
+                        </td>
+                        <td>
+                            <input type="number" class="form-input bulk-qty-input" placeholder="SL..." style="min-width: 60px;" min="0">
                         </td>
                         <td style="text-align:center;">
                             <button class="btn-icon" style="color: #ef4444; border-color: #fca5a5;" onclick="this.closest('tr').remove()"><i class="bi bi-trash"></i></button>
@@ -899,13 +1049,28 @@
             document.getElementById('bulkSettings').style.display = 'block';
         },
 
-        applyBulkPrice: function() {
-            const val = document.getElementById('bulkCommonPrice').value;
-            if (!val) { window.toast("Vui lòng nhập mức giá chung!", "warning"); return; }
-            document.querySelectorAll('.bulk-price-input').forEach(input => {
-                input.value = val;
-            });
-            window.toast("Đã áp dụng mức giá chung cho tất cả!", "success");
+        applyBulkSettings: function() {
+            const priceVal = document.getElementById('bulkCommonPrice').value;
+            const qtyVal = document.getElementById('bulkCommonQty').value;
+
+            if (!priceVal && !qtyVal) {
+                window.toast("Vui lòng nhập mức giá hoặc số lượng chung!", "warning");
+                return;
+            }
+
+            if (priceVal) {
+                document.querySelectorAll('.bulk-price-input').forEach(input => {
+                    input.value = priceVal;
+                });
+            }
+
+            if (qtyVal) {
+                document.querySelectorAll('.bulk-qty-input').forEach(input => {
+                    input.value = qtyVal;
+                });
+            }
+
+            window.toast("Đã áp dụng các thông số chung!", "success");
         },
 
         saveBulkVariants: async function() {
@@ -924,13 +1089,20 @@
                 const priceStr = row.querySelector('.bulk-price-input').value;
                 const price = priceStr ? parseFloat(priceStr.replace(/,/g, '')) : null;
 
+                const qtyStr = row.querySelector('.bulk-qty-input').value;
+                const qty = qtyStr ? parseInt(qtyStr) : 0;
+
+                // Lấy ảnh đã map theo màu sắc
+                const imgUrl = this.state.bulkColorImages[colorId] || null;
+
                 if (!price) isValid = false;
 
                 payloadList.push({
                     idMauSac: parseInt(colorId),
                     idKichThuoc: parseInt(sizeId),
                     giaBan: price,
-                    hinhAnh: null // Bulk create mặc định để null, sau cập nhật từng cái nếu cần
+                    soLuong: qty, // Thêm số lượng tồn kho lúc tạo
+                    hinhAnh: imgUrl
                 });
             });
 
@@ -944,8 +1116,6 @@
             btn.textContent = 'ĐANG LƯU...';
 
             try {
-                // Tạm thời dùng Promise.all để bắn song song các request POST độc lập.
-                // Điều này giúp tính năng hoạt động ngay lập tức với BE hiện tại mà không cần sửa controller Java.
                 const requests = payloadList.map(payload =>
                     fetch(`/api/products/${this.state.currentProductId}/variants`, {
                         method: 'POST',
@@ -1026,7 +1196,6 @@
             const giaStr = document.getElementById('vGia').value;
             const giaBan = giaStr ? parseFloat(giaStr.replace(/,/g, '')) : null;
 
-            // 1. VALIDATE TRƯỚC
             if (!mauSac || !kichThuoc || !giaBan) {
                 window.toast('Vui lòng cung cấp đủ Màu sắc, Kích thước và Giá bán.', 'warning');
                 return;
@@ -1119,7 +1288,7 @@
         },
 
         openEdit: async function(id) {
-            if (this.state.isLoading) return; // ✅ Chống double click
+            if (this.state.isLoading) return;
             this.state.isLoading = true;
             try {
                 const r = await fetch(`/api/products/${id}`);
@@ -1146,7 +1315,6 @@
             btn.textContent = 'Đang lưu...';
 
 
-            // Ép kiểu chuẩn, tránh lỗi Bad Request từ Backend
             const payload = {
                 ten: tenSp,
                 ma: document.getElementById('fMa').value.trim(),
@@ -1176,7 +1344,6 @@
             } catch (e) {
                 window.toast("Sự cố kết nối mạng.", "error");
             } finally {
-                // ✅ Luôn restore nút
                 btn.disabled = false;
                 btn.textContent = 'Lưu Thông Tin';
             }
@@ -1201,14 +1368,11 @@
         removeImg: async function(i) {
             const imgUrl = this.state.tempImages[i];
 
-            // 1. Gỡ ảnh khỏi giao diện ngay lập tức cho người dùng đỡ phải đợi
             this.state.tempImages.splice(i, 1);
             this.renderPreview();
 
-            // 2. Nếu nó là link Cloudinary thật (chứ không phải Blob tải dở), thì gọi API bắn chết nó trên mây
             if (typeof imgUrl === 'string' && imgUrl.includes('res.cloudinary.com')) {
                 try {
-                    // Gọi method DELETE kèm url cần xóa
                     const res = await fetch(`/api/upload?url=${encodeURIComponent(imgUrl)}`, {
                         method: 'DELETE'
                     });
@@ -1223,7 +1387,7 @@
         },
 
         quickToggle: function(id, cb) {
-            const originalState = !cb.checked; // Lưu trạng thái cũ
+            const originalState = !cb.checked;
             window.toastConfirm(
                 "Bạn có chắc chắn muốn thay đổi trạng thái kinh doanh của sản phẩm này không?",
                 async () => {
@@ -1233,15 +1397,15 @@
                             window.toast("Cập nhật trạng thái thành công.", "success");
                         } else {
                             window.toast("Từ chối thay đổi trạng thái.", "error");
-                            cb.checked = originalState; // Hoàn tác
+                            cb.checked = originalState;
                         }
                     } catch(e) {
-                        cb.checked = originalState; // Hoàn tác
+                        cb.checked = originalState;
                         window.toast("Sự cố đường truyền.", "error");
                     }
                 },
                 () => {
-                    cb.checked = originalState; // Hoàn tác nếu chọn Hủy
+                    cb.checked = originalState;
                 }
             );
         },
@@ -1259,12 +1423,12 @@
         closeDrawer: () => {
             document.getElementById('mainDrawer').classList.remove('show');
             document.getElementById('overlay').classList.remove('show');
-            ProductApp.state.isLoading = false; // Mở khóa nút
+            ProductApp.state.isLoading = false;
         },
         closeVariantDrawer: () => {
             document.getElementById('variantDrawer').classList.remove('show');
             document.getElementById('overlay').classList.remove('show');
-            ProductApp.state.isLoading = false; // Mở khóa nút
+            ProductApp.state.isLoading = false;
         },
         closeVariantForm: () => {
             document.getElementById('vFormDrawer').classList.remove('show');
@@ -1292,7 +1456,6 @@
                     const d = await r.json();
                     const list = d.content || d;
 
-                    // Lưu Cache nếu có yêu cầu (dùng cho form tạo Bulk)
                     if(cacheKey) {
                         this.state[cacheKey] = list;
                     }
@@ -1326,12 +1489,9 @@
     function getOptimizedImg(url, width = null, height = null) {
         if (!url || !url.includes('res.cloudinary.com')) return url;
 
-        // f_auto: tự chuyển sang định dạng nhẹ nhất (WebP/AVIF)
-        // q_auto: tự giảm chất lượng xuống mức tối ưu
         let params = 'f_auto,q_auto';
 
         if (width && height) {
-            // c_fill: cắt ảnh cho vừa khít khung, tránh méo ảnh
             params += `,c_fill,w_${width},h_${height}`;
         }
 

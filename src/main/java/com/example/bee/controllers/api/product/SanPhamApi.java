@@ -149,17 +149,39 @@ public class SanPhamApi {
         }
         SanPhamChiTiet variant = new SanPhamChiTiet();
         variant.setSanPham(sp);
-        variant.setMauSac(mauSacRepo.findById(req.getIdMauSac()).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Màu sắc không hợp lệ")));
-        variant.setKichThuoc(kichThuocRepo.findById(req.getIdKichThuoc()).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kích thước không hợp lệ")));
+
+        // 1. Lấy ra Object Màu và Kích thước thật từ DB
+        var mauSac = mauSacRepo.findById(req.getIdMauSac())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Màu sắc không hợp lệ"));
+        var kichThuoc = kichThuocRepo.findById(req.getIdKichThuoc())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kích thước không hợp lệ"));
+
+        variant.setMauSac(mauSac);
+        variant.setKichThuoc(kichThuoc);
+
         variant.setGiaBan(req.getGiaBan());
         variant.setHinhAnh(req.getHinhAnh());
-        variant.setSoLuong(0);
-        variant.setTrangThai(false);
-        String skuCode;
-        do {
-            long nextId = (variantRepo.findMaxId() != null ? variantRepo.findMaxId() : 0L) + 1;
-            skuCode = String.format("SKU%05d", nextId); // SKU00001 → SKU99999
-        } while (variantRepo.existsBySku(skuCode));
+
+        // 🌟 2. CẬP NHẬT: Nhận Tồn kho từ Frontend truyền lên (Thay vì set cứng = 0)
+        int soLuongNhap = (req.getSoLuong() != null) ? req.getSoLuong() : 0;
+        variant.setSoLuong(soLuongNhap);
+
+        // Bật trạng thái Tự động (Nếu SL > 0 thì tự bật Đang kinh doanh)
+        variant.setTrangThai(soLuongNhap > 0);
+
+        // 🌟 3. NÂNG CẤP: Logic sinh mã SKU thông minh (Ví dụ: SP0001-DEN-XL)
+        String maSanPham = sp.getMa(); // Lấy mã SP gốc
+        String maMau = removeVietnameseTones(mauSac.getTen()); // Hàm chuyển tiếng việt không dấu
+        String maKichThuoc = removeVietnameseTones(kichThuoc.getTen());
+
+        // Ép chuỗi thành mã (Ví dụ: SP0001-DEN-XL)
+        String skuCode = String.format("%s-%s-%s", maSanPham, maMau, maKichThuoc);
+
+        // Nếu mã này lỡ bị trùng (Hiếm khi xảy ra), thì cộng thêm random
+        if (variantRepo.existsBySku(skuCode)) {
+            skuCode += "-" + System.currentTimeMillis();
+        }
+
         variant.setSku(skuCode);
         return ResponseEntity.ok(variantRepo.save(variant));
     }
@@ -217,4 +239,21 @@ public class SanPhamApi {
     private String safeTrim(String s) {
         return s == null ? null : s.trim();
     }
+
+    // 🌟 HÀM TIỆN ÍCH DÙNG ĐỂ BÓC DẤU TIẾNG VIỆT (Nên để ở cuối class SanPhamApi)
+    private String removeVietnameseTones(String str) {
+        if (str == null) return "";
+        str = str.replaceAll("à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ", "a");
+        str = str.replaceAll("è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ", "e");
+        str = str.replaceAll("ì|í|ị|ỉ|ĩ", "i");
+        str = str.replaceAll("ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ", "o");
+        str = str.replaceAll("ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ", "u");
+        str = str.replaceAll("ỳ|ý|ỵ|ỷ|ỹ", "y");
+        str = str.replaceAll("đ", "d");
+        str = str.replaceAll("À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ", "A");
+        // ... Cắt các ký tự đặc biệt
+        str = str.replaceAll("[^a-zA-Z0-9 ]", "");
+        return str.replaceAll("\\s+", "").toUpperCase();
+    }
+
 }
