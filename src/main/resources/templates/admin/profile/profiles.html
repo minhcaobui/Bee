@@ -1,0 +1,659 @@
+<!-- /profiles — inject vào #content-area -->
+<style>
+    #profile-page {
+        font-family: 'Inter', sans-serif;
+        font-size: 12.5px;
+        line-height: 1.4;
+        color: #000;
+        padding: 20px 30px;
+        --gray-100: #f4f4f5;
+        --gray-200: #e4e4e7;
+        --gray-300: #d4d4d8;
+    }
+    #profile-page *, #profile-page *::before, #profile-page *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Header ── */
+    #profile-page .pf-header {
+        background: #000; padding: 16px 20px;
+        display: flex; align-items: center; gap: 16px;
+        margin-bottom: 20px;
+    }
+    #profile-page .pf-avatar-wrap {
+        position: relative; flex-shrink: 0; cursor: pointer;
+        width: 46px; height: 46px;
+    }
+    #profile-page .pf-avatar {
+        width: 46px; height: 46px; background: #fff; color: #000;
+        font-size: 15px; font-weight: 800;
+        display: flex; align-items: center; justify-content: center;
+        overflow: hidden; transition: filter 0.15s;
+        user-select: none;
+    }
+    #profile-page .pf-avatar img {
+        width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+    #profile-page .pf-avatar-overlay {
+        position: absolute; inset: 0;
+        background: rgba(0,0,0,0.52);
+        display: flex; align-items: center; justify-content: center;
+        opacity: 0; transition: opacity 0.15s;
+        pointer-events: none;
+    }
+    #profile-page .pf-avatar-overlay i { color: #fff; font-size: 16px; }
+    #profile-page .pf-avatar-wrap:hover .pf-avatar-overlay { opacity: 1; }
+    #profile-page .pf-avatar-wrap:hover .pf-avatar { filter: brightness(0.6); }
+    #profile-page #pf-avatar-input { display: none; }
+    #profile-page .pf-name  { font-size: 13px; font-weight: 800; color: #fff; text-transform: uppercase; }
+    #profile-page .pf-meta  { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 3px; }
+    #profile-page .pf-badge {
+        margin-left: auto; flex-shrink: 0;
+        font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+        padding: 3px 10px; border: 1px solid rgba(255,255,255,0.4); color: #fff;
+    }
+
+    /* ── Stats ── */
+    #profile-page .pf-stats {
+        display: grid; grid-template-columns: repeat(3, minmax(0,1fr));
+        border: 1px solid var(--gray-200); margin-bottom: 20px;
+    }
+    #profile-page .pf-stat { padding: 14px 18px; background: #fff; border-right: 1px solid var(--gray-200); }
+    #profile-page .pf-stat:last-child { border-right: none; }
+    #profile-page .pf-stat-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #888; margin-bottom: 6px; }
+    #profile-page .pf-stat-value { font-size: 20px; font-weight: 800; color: #000; }
+    #profile-page .pf-stat-sub   { font-size: 11px; color: #888; margin-top: 3px; }
+
+    /* ── Two col ── */
+    #profile-page .pf-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+
+    /* ── Card ── */
+    #profile-page .pf-card { border: 1px solid var(--gray-200); background: #fff; }
+    #profile-page .pf-card-header {
+        background: #fafafa; border-bottom: 1px solid var(--gray-200);
+        padding: 9px 15px; font-size: 11px; font-weight: 800;
+        text-transform: uppercase; color: #666;
+        display: flex; align-items: center; gap: 6px;
+    }
+
+    /* ── Info rows ── */
+    #profile-page .pf-info-row {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 9px 15px; border-bottom: 1px solid var(--gray-200);
+        min-height: 38px; font-size: 12.5px;
+    }
+    #profile-page .pf-info-row:last-child { border-bottom: none; }
+    #profile-page .pf-info-key { color: #666; flex-shrink: 0; }
+    #profile-page .pf-info-val-wrap { display: flex; align-items: center; gap: 8px; }
+    #profile-page .pf-info-val { font-weight: 700; color: #000; transition: opacity 0.2s; }
+
+    /* ── Inline edit ── */
+    #profile-page .pf-edit-btn {
+        font-size: 10px; font-weight: 800; text-transform: uppercase;
+        height: 24px; padding: 0 10px;
+        background: #fff; color: #000; border: 1px solid #ccc;
+        cursor: pointer; border-radius: 2px; white-space: nowrap;
+        transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    #profile-page .pf-edit-btn:hover { background: #000; color: #fff; border-color: #000; }
+
+    #profile-page .pf-inline-edit {
+        display: flex; align-items: center; gap: 6px;
+        max-width: 0; overflow: hidden; opacity: 0;
+        transition: max-width 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.2s ease;
+    }
+    #profile-page .pf-inline-edit.open { max-width: 320px; opacity: 1; }
+    #profile-page .pf-inline-edit input {
+        height: 28px; padding: 0 8px; width: 150px;
+        border: 1px solid var(--gray-300); border-radius: 2px;
+        font-family: 'Inter', sans-serif; font-size: 12px; color: #000;
+        outline: none; background: #fff; transition: border-color 0.15s;
+    }
+    #profile-page .pf-inline-edit input:focus { border-color: #000; }
+    #profile-page .pf-save-btn {
+        font-size: 10px; font-weight: 800; text-transform: uppercase;
+        height: 28px; padding: 0 12px;
+        background: #000; color: #fff; border: 1px solid #000;
+        border-radius: 2px; cursor: pointer; white-space: nowrap; transition: opacity 0.15s;
+    }
+    #profile-page .pf-save-btn:hover { opacity: 0.75; }
+    #profile-page .pf-cancel-btn {
+        font-size: 10px; font-weight: 800; text-transform: uppercase;
+        height: 28px; padding: 0 10px;
+        background: #fff; color: #000; border: 1px solid #ccc;
+        border-radius: 2px; cursor: pointer; white-space: nowrap;
+    }
+    #profile-page .pf-cancel-btn:hover { border-color: #000; }
+
+    /* ── Badges ── */
+    #profile-page .pf-role-badge {
+        font-size: 10px; font-weight: 800; text-transform: uppercase;
+        padding: 2px 8px; border-radius: 2px; background: #000; color: #fff;
+    }
+    #profile-page .pf-status-badge {
+        font-size: 10px; font-weight: 800; text-transform: uppercase;
+        padding: 2px 8px; border-radius: 2px;
+    }
+    #profile-page .pf-status-badge.active   { background: #dcfce7; color: #166534; }
+    #profile-page .pf-status-badge.inactive { background: #fee2e2; color: #991b1b; }
+
+    /* ── Inline password form ── */
+    #profile-page .pf-pwd-expand {
+        max-height: 0; overflow: hidden;
+        transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease;
+        opacity: 0;
+        border-top: 0 solid var(--gray-200);
+    }
+    #profile-page .pf-pwd-expand.open {
+        max-height: 260px; opacity: 1;
+        border-top: 1px solid var(--gray-200);
+    }
+    #profile-page .pf-pwd-inner { padding: 14px 15px; display: flex; flex-direction: column; gap: 10px; background: #fafafa; }
+    #profile-page .pf-pwd-field { display: flex; flex-direction: column; gap: 4px; }
+    #profile-page .pf-pwd-label {
+        font-size: 10px; font-weight: 800; text-transform: uppercase;
+        color: #888; letter-spacing: 0.04em;
+    }
+    #profile-page .pf-pwd-input {
+        height: 32px; padding: 0 10px;
+        border: 1px solid var(--gray-300); border-radius: 2px;
+        font-family: 'Inter', sans-serif; font-size: 12px; color: #000;
+        outline: none; background: #fff; transition: border-color 0.15s;
+    }
+    #profile-page .pf-pwd-input:focus { border-color: #000; }
+    #profile-page .pf-pwd-actions { display: flex; gap: 8px; padding-top: 2px; }
+    #profile-page .pf-pwd-msg { font-size: 11px; font-weight: 600; display: none; }
+    #profile-page .pf-pwd-msg.success { color: #16a34a; }
+    #profile-page .pf-pwd-msg.error   { color: #dc2626; }
+
+    /* ── Bottom actions ── */
+    #profile-page .pf-bottom { display: flex; gap: 8px; }
+    #profile-page .btn {
+        font-size: 11px; font-weight: 800; text-transform: uppercase;
+        height: 34px; padding: 0 16px; background: #000; color: #fff;
+        border: 1px solid #000; cursor: pointer;
+        display: inline-flex; align-items: center; gap: 6px;
+        border-radius: 2px; line-height: 1; transition: opacity 0.15s;
+    }
+    #profile-page .btn:hover { opacity: 0.8; }
+    #profile-page .btn-secondary { background: #fff; color: #000; border: 1px solid #ccc; }
+    #profile-page .btn-secondary:hover { border-color: #000; opacity: 1; }
+
+    @media (max-width: 700px) {
+        #profile-page .pf-two-col { grid-template-columns: 1fr; }
+        #profile-page .pf-stats   { grid-template-columns: 1fr 1fr; }
+        #profile-page .pf-stats .pf-stat:last-child { grid-column: 1/-1; border-right: none; border-top: 1px solid var(--gray-200); }
+    }
+</style>
+
+<div id="profile-page">
+
+    <!-- Header -->
+    <div class="pf-header">
+        <div class="pf-avatar-wrap" id="pf-avatar-wrap" title="Đổi ảnh đại diện">
+            <div class="pf-avatar" id="pf-avatar"></div>
+            <div class="pf-avatar-overlay"><i class="bi bi-camera-fill"></i></div>
+            <input type="file" id="pf-avatar-input" accept="image/*" />
+        </div>
+        <div>
+            <div class="pf-name" id="pf-name"></div>
+            <div class="pf-meta" id="pf-meta"></div>
+        </div>
+        <div class="pf-badge" id="pf-badge"></div>
+    </div>
+
+    <!-- Stats -->
+    <div class="pf-stats">
+        <div class="pf-stat">
+            <div class="pf-stat-label">Doanh thu hôm nay</div>
+            <div class="pf-stat-value" id="pf-revenue">—</div>
+            <div class="pf-stat-sub" id="pf-revenue-sub"></div>
+        </div>
+        <div class="pf-stat">
+            <div class="pf-stat-label">Hóa đơn hôm nay</div>
+            <div class="pf-stat-value" id="pf-tx">—</div>
+            <div class="pf-stat-sub" id="pf-tx-sub"></div>
+        </div>
+        <div class="pf-stat">
+            <div class="pf-stat-label">Mã nhân viên</div>
+            <div class="pf-stat-value" id="pf-empid">—</div>
+            <div class="pf-stat-sub" id="pf-empid-sub"></div>
+        </div>
+    </div>
+
+    <!-- Info + Account -->
+    <div class="pf-two-col">
+
+        <!-- Thông tin cá nhân -->
+        <div class="pf-card">
+            <div class="pf-card-header"><i class="bi bi-person-fill"></i> Thông tin cá nhân</div>
+            <div id="pf-info-list"></div>
+        </div>
+
+        <!-- Thông tin tài khoản -->
+        <div class="pf-card">
+            <div class="pf-card-header"><i class="bi bi-shield-lock-fill"></i> Thông tin tài khoản</div>
+            <div id="pf-account-list">
+                <!-- Các row tĩnh -->
+                <div class="pf-info-row">
+                    <span class="pf-info-key">Tên đăng nhập</span>
+                    <div class="pf-info-val-wrap"><span class="pf-info-val" id="pf-username"></span></div>
+                </div>
+                <div class="pf-info-row">
+                    <span class="pf-info-key">Vai trò</span>
+                    <div class="pf-info-val-wrap"><span class="pf-role-badge" id="pf-vaitro"></span></div>
+                </div>
+                <div class="pf-info-row">
+                    <span class="pf-info-key">Trạng thái</span>
+                    <div class="pf-info-val-wrap"><span id="pf-trangthai"></span></div>
+                </div>
+                <!-- Mật khẩu row + toggle -->
+                <div class="pf-info-row" style="border-bottom:none;">
+                    <span class="pf-info-key">Mật khẩu</span>
+                    <div class="pf-info-val-wrap">
+                        <span class="pf-info-val" style="color:#aaa;letter-spacing:2px;">••••••••</span>
+                        <button class="pf-edit-btn" id="pf-toggle-pwd">Đổi</button>
+                    </div>
+                </div>
+                <!-- Form đổi mật khẩu xổ xuống -->
+                <div class="pf-pwd-expand" id="pf-pwd-expand">
+                    <div class="pf-pwd-inner">
+                        <div class="pf-pwd-field">
+                            <div class="pf-pwd-label">Mật khẩu hiện tại</div>
+                            <input class="pf-pwd-input" type="password" id="pf-pwd-cur" placeholder="••••••••" />
+                        </div>
+                        <div class="pf-pwd-field">
+                            <div class="pf-pwd-label">Mật khẩu mới</div>
+                            <input class="pf-pwd-input" type="password" id="pf-pwd-new" placeholder="••••••••" />
+                        </div>
+                        <div class="pf-pwd-field">
+                            <div class="pf-pwd-label">Xác nhận mật khẩu mới</div>
+                            <input class="pf-pwd-input" type="password" id="pf-pwd-cfm" placeholder="••••••••" />
+                        </div>
+                        <div class="pf-pwd-msg" id="pf-pwd-msg"></div>
+                        <div class="pf-pwd-actions">
+                            <button class="btn" id="pf-pwd-submit"><i class="bi bi-check-lg"></i> LƯU</button>
+                            <button class="btn btn-secondary" id="pf-pwd-cancel">HUỶ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bottom -->
+    <div class="pf-bottom">
+        <button class="btn btn-secondary" id="pf-logout"><i class="bi bi-box-arrow-right"></i> ĐĂNG XUẤT</button>
+    </div>
+
+</div>
+
+<script>
+    window.ProfileApp = {
+
+        data: null,
+        _pwdOpen: false,
+
+        async init() {
+            this._destroyListeners();
+            this._pwdOpen = false;
+
+            // TODO: thay bằng API thực tế — GET /api/profile/me
+            this.data = {
+                ma:          'NV-0047',
+                hinhAnh:     null, // TODO: lấy từ API — nhan_vien.hinh_anh
+                hoTen:       'Nguyễn Thành',
+                gioiTinh:    'Nam',
+                ngaySinh:    '15/08/1998',
+                soDienThoai: '090 123 4567',
+                email:       'thanh.nv@bee.vn',
+                chucVu:      'Thu ngân',
+                diaChiThanhPho: 'Hà Nội', // parse từ dia_chi hoặc field riêng
+                diaChi: '123 Nguyễn Trãi, Thanh Xuân, Hà Nội',
+                tenDangNhap: 'thanh.nv',
+                tenVaiTro:   'Nhân viên',
+                trangThai:   true,
+                stats: {
+                    revenue:    '4,820,000đ',
+                    revenueSub: 'Tổng hóa đơn tại quầy',
+                    tx:         38,
+                    txSub:      'Hóa đơn hoàn thành',
+                }
+            };
+
+            this._render();
+            this._bindEvents();
+        },
+
+        _initials(name) {
+            return name.trim().split(' ').map(w => w[0]).slice(-2).join('').toUpperCase();
+        },
+
+        _calcAge(ngaySinhStr) {
+            // Nhận dd/MM/yyyy hoặc ISO
+            if (!ngaySinhStr) return null;
+            let d;
+            if (ngaySinhStr.includes('/')) {
+                const [dd, mm, yyyy] = ngaySinhStr.split('/');
+                d = new Date(+yyyy, +mm - 1, +dd);
+            } else {
+                d = new Date(ngaySinhStr);
+            }
+            const now = new Date();
+            let age = now.getFullYear() - d.getFullYear();
+            if (now < new Date(now.getFullYear(), d.getMonth(), d.getDate())) age--;
+            return age;
+        },
+
+        _render() {
+            const d = this.data;
+
+            const avatarEl = document.getElementById('pf-avatar');
+            if (d.hinhAnh) {
+                avatarEl.innerHTML = `<img src="${d.hinhAnh}" alt="${d.hoTen}" />`;
+            } else {
+                avatarEl.textContent = this._initials(d.hoTen);
+            }
+            document.getElementById('pf-name').textContent   = d.hoTen;
+            const isAdmin = d.vaiTro === 'ROLE_ADMIN';
+            if (isAdmin) {
+                document.getElementById('pf-meta').textContent = d.chucVu + ' · ' + d.tenVaiTro;
+            } else {
+                const age   = this._calcAge(d.ngaySinh);
+                const parts = [];
+                if (age)              parts.push(age + ' tuổi');
+                if (d.diaChiThanhPho) parts.push(d.diaChiThanhPho);
+                document.getElementById('pf-meta').textContent = parts.join(' · ');
+            }
+            document.getElementById('pf-badge').textContent  = d.tenVaiTro;
+
+            document.getElementById('pf-revenue').textContent     = d.stats.revenue;
+            document.getElementById('pf-revenue-sub').textContent = d.stats.revenueSub;
+            document.getElementById('pf-tx').textContent          = d.stats.tx;
+            document.getElementById('pf-tx-sub').textContent      = d.stats.txSub;
+            document.getElementById('pf-empid').textContent       = d.ma;
+            document.getElementById('pf-empid-sub').textContent   = d.chucVu;
+
+            // Account card
+            document.getElementById('pf-username').textContent  = d.tenDangNhap;
+            document.getElementById('pf-vaitro').textContent    = d.tenVaiTro;
+            document.getElementById('pf-trangthai').innerHTML   = d.trangThai
+                ? '<span class="pf-status-badge active">Đang hoạt động</span>'
+                : '<span class="pf-status-badge inactive">Đã khoá</span>';
+
+            // Info cá nhân
+            const fields = [
+                { key: 'Họ và tên',     val: d.hoTen,       editable: false },
+                { key: 'Giới tính',     val: d.gioiTinh,    editable: false },
+                { key: 'Ngày sinh',     val: d.ngaySinh,    editable: false },
+                { key: 'Số điện thoại', val: d.soDienThoai, editable: true,  field: 'soDienThoai' },
+                { key: 'Email',         val: d.email,       editable: true,  field: 'email'       },
+                { key: 'Chức vụ',       val: d.chucVu,      editable: false },
+                { key: 'Địa chỉ',       val: d.diaChi || '—', editable: false },
+            ];
+
+            document.getElementById('pf-info-list').innerHTML = fields.map((r, i) => `
+      <div class="pf-info-row">
+        <span class="pf-info-key">${r.key}</span>
+        <div class="pf-info-val-wrap">
+          <span class="pf-info-val" id="pf-iv-${i}">${r.val}</span>
+          ${r.editable ? `
+            <button class="pf-edit-btn" id="pf-eb-${i}" data-idx="${i}">Sửa</button>
+            <div class="pf-inline-edit" id="pf-ie-${i}">
+              <input type="text" id="pf-ei-${i}" value="${r.val}" data-idx="${i}" data-field="${r.field}" />
+              <button class="pf-save-btn" data-save="${i}">Lưu</button>
+              <button class="pf-cancel-btn" data-cancel="${i}">Huỷ</button>
+            </div>` : ''}
+        </div>
+      </div>`).join('');
+        },
+
+        _bindEvents() {
+            const self = this;
+
+            // Inline edit
+            const infoList = document.getElementById('pf-info-list');
+            this._infoClick = e => {
+                const eb = e.target.closest('[data-idx].pf-edit-btn');
+                const sb = e.target.closest('[data-save]');
+                const cb = e.target.closest('[data-cancel]');
+                if (eb) self._startEdit(+eb.dataset.idx);
+                if (sb) self._saveEdit(+sb.dataset.save);
+                if (cb) self._cancelEdit(+cb.dataset.cancel);
+            };
+            this._infoKey = e => {
+                if (e.target.matches('[data-idx]')) {
+                    const i = +e.target.dataset.idx;
+                    if (e.key === 'Enter')  self._saveEdit(i);
+                    if (e.key === 'Escape') self._cancelEdit(i);
+                }
+            };
+            infoList.addEventListener('click',   this._infoClick);
+            infoList.addEventListener('keydown', this._infoKey);
+
+            // Toggle password form
+            document.getElementById('pf-toggle-pwd').addEventListener('click', () => self._togglePwd());
+            document.getElementById('pf-pwd-cancel').addEventListener('click', () => self._closePwd());
+            document.getElementById('pf-pwd-submit').addEventListener('click', () => self._changePassword());
+
+            // Enter trong các field mật khẩu
+            ['pf-pwd-cur','pf-pwd-new','pf-pwd-cfm'].forEach(id => {
+                document.getElementById(id).addEventListener('keydown', e => {
+                    if (e.key === 'Enter') self._changePassword();
+                });
+            });
+
+            // Avatar upload
+            document.getElementById('pf-avatar-wrap').addEventListener('click', () => {
+                document.getElementById('pf-avatar-input').click();
+            });
+            document.getElementById('pf-avatar-input').addEventListener('change', (e) => {
+                self._handleAvatarChange(e);
+            });
+
+            // Logout
+            document.getElementById('pf-logout').addEventListener('click', () => self._logout());
+        },
+
+        _destroyListeners() {},
+
+        // ── Inline edit ──
+        _startEdit(i) {
+            document.getElementById('pf-eb-' + i).style.opacity      = '0';
+            document.getElementById('pf-eb-' + i).style.pointerEvents = 'none';
+            document.getElementById('pf-iv-' + i).style.opacity      = '0.3';
+            document.getElementById('pf-ie-' + i).classList.add('open');
+            setTimeout(() => document.getElementById('pf-ei-' + i).focus(), 50);
+        },
+        _saveEdit(i) {
+            const input = document.getElementById('pf-ei-' + i);
+            const v = input.value.trim();
+            if (!v) return;
+            this.data[input.dataset.field] = v;
+            document.getElementById('pf-iv-' + i).textContent = v;
+            this._cancelEdit(i);
+            // TODO: PATCH /api/profile/me  { [field]: v }
+            window.toast && window.toast('Đã lưu thông tin.', 'success');
+        },
+        _cancelEdit(i) {
+            document.getElementById('pf-ie-' + i).classList.remove('open');
+            document.getElementById('pf-iv-' + i).style.opacity = '1';
+            setTimeout(() => {
+                const eb = document.getElementById('pf-eb-' + i);
+                if (eb) { eb.style.opacity = '1'; eb.style.pointerEvents = ''; }
+            }, 220);
+        },
+
+        // ── Password form ──
+        _togglePwd() {
+            this._pwdOpen ? this._closePwd() : this._openPwd();
+        },
+        _openPwd() {
+            this._pwdOpen = true;
+            document.getElementById('pf-pwd-expand').classList.add('open');
+            document.getElementById('pf-toggle-pwd').textContent = 'Đóng';
+            setTimeout(() => document.getElementById('pf-pwd-cur').focus(), 80);
+        },
+        _closePwd() {
+            this._pwdOpen = false;
+            document.getElementById('pf-pwd-expand').classList.remove('open');
+            document.getElementById('pf-toggle-pwd').textContent = 'Đổi';
+            ['pf-pwd-cur','pf-pwd-new','pf-pwd-cfm'].forEach(id => document.getElementById(id).value = '');
+            const msg = document.getElementById('pf-pwd-msg');
+            msg.style.display = 'none';
+        },
+        _changePassword() {
+            const cur = document.getElementById('pf-pwd-cur').value;
+            const nxt = document.getElementById('pf-pwd-new').value;
+            const cfm = document.getElementById('pf-pwd-cfm').value;
+            const showMsg = (text, type) => {
+                const el = document.getElementById('pf-pwd-msg');
+                el.textContent = text; el.className = 'pf-pwd-msg ' + type; el.style.display = 'block';
+            };
+            if (!cur || !nxt || !cfm) { showMsg('Vui lòng điền đầy đủ.', 'error'); return; }
+            if (nxt.length < 6)        { showMsg('Mật khẩu mới tối thiểu 6 ký tự.', 'error'); return; }
+            if (nxt !== cfm)           { showMsg('Mật khẩu xác nhận không khớp.', 'error'); return; }
+            // TODO: POST /api/auth/change-password { matKhauCu: cur, matKhauMoi: nxt }
+            window.toast && window.toast('Đổi mật khẩu thành công!', 'success');
+            setTimeout(() => this._closePwd(), 300);
+        },
+
+        async _handleAvatarChange(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            e.target.value = ''; // reset ngay để có thể chọn lại cùng file
+
+            if (!file.type.startsWith('image/')) {
+                window.toast && window.toast('Chỉ chấp nhận file ảnh.', 'error'); return;
+            }
+            if (file.size > 2 * 1024 * 1024) {
+                window.toast && window.toast('Ảnh tối đa 2MB.', 'error'); return;
+            }
+
+            const avatarEl  = document.getElementById('pf-avatar');
+            const overlay   = document.getElementById('pf-avatar-overlay');
+            const blobUrl   = URL.createObjectURL(file);
+            const oldUrl    = this.data.hinhAnh || null;
+
+            // 1. Preview blob ngay lập tức, làm mờ + spinner
+            avatarEl.innerHTML = `<img src="${blobUrl}" alt="avatar" style="opacity:0.45;" />`;
+            if (overlay) overlay.innerHTML = '<i class="bi bi-arrow-repeat" style="color:#fff;font-size:16px;animation:pf-spin 0.8s linear infinite;"></i>';
+
+            // Inject spin keyframe nếu chưa có
+            if (!document.getElementById('pf-spin-style')) {
+                const s = document.createElement('style');
+                s.id = 'pf-spin-style';
+                s.textContent = '@keyframes pf-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
+                document.head.appendChild(s);
+            }
+
+            try {
+                // 2. Upload lên Cloudinary qua /api/upload (đúng pattern ProductApp)
+                const formData = new FormData();
+                formData.append('file', file);
+                const res  = await fetch('/api/upload', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (res.ok && data.url) {
+                    // 3. Thay blob bằng URL Cloudinary thật
+                    avatarEl.innerHTML = `<img src="${data.url}" alt="avatar" />`;
+                    this.data.hinhAnh  = data.url;
+                    URL.revokeObjectURL(blobUrl);
+
+                    // 4. Xóa ảnh cũ trên Cloudinary nếu có
+                    if (oldUrl && oldUrl.includes('res.cloudinary.com')) {
+                        fetch(`/api/upload?url=${encodeURIComponent(oldUrl)}`, { method: 'DELETE' })
+                            .catch(() => {}); // fire-and-forget, không block UI
+                    }
+
+                    window.toast && window.toast('Đã cập nhật ảnh đại diện.', 'success');
+                } else {
+                    throw new Error(data.message || 'Upload thất bại');
+                }
+            } catch (err) {
+                // Rollback về trạng thái cũ
+                if (oldUrl) {
+                    avatarEl.innerHTML = `<img src="${oldUrl}" alt="avatar" />`;
+                } else {
+                    avatarEl.textContent = this._initials(this.data.hoTen);
+                }
+                URL.revokeObjectURL(blobUrl);
+                window.toast && window.toast('Lỗi tải ảnh: ' + err.message, 'error');
+            } finally {
+                // Khôi phục overlay camera
+                if (overlay) overlay.innerHTML = '<i class="bi bi-camera-fill"></i>';
+            }
+        },
+
+        _initOverlayTransition() {
+            if (document.getElementById('pf-overlay-style')) return;
+            const s = document.createElement('style');
+            s.id = 'pf-overlay-style';
+            s.textContent = `
+      #confirmOverlay {
+        opacity: 0 !important;
+        transition: opacity 0.2s ease !important;
+        pointer-events: none;
+      }
+      #confirmOverlay.pf-visible {
+        opacity: 1 !important;
+        pointer-events: all;
+      }
+      #confirmOverlay .card {
+        transform: translateY(12px) scale(0.97);
+        transition: transform 0.25s cubic-bezier(0.4,0,0.2,1) !important;
+      }
+      #confirmOverlay.pf-visible .card {
+        transform: translateY(0) scale(1);
+      }
+    `;
+            document.head.appendChild(s);
+        },
+
+        _showOverlay(overlay) {
+            overlay.style.display = 'flex';
+            requestAnimationFrame(() => requestAnimationFrame(() => overlay.classList.add('pf-visible')));
+        },
+
+        _hideOverlay(overlay) {
+            overlay.classList.remove('pf-visible');
+            setTimeout(() => { overlay.style.display = 'none'; }, 200);
+        },
+
+        _logout() {
+            const overlay = document.getElementById('confirmOverlay');
+            const msg     = document.getElementById('confirmMsg');
+            if (!overlay) {
+                if (confirm('Bạn có chắc muốn đăng xuất không?')) {
+                    const form = document.querySelector('form[action*="/logout"]');
+                    if (form) form.submit();
+                }
+                return;
+            }
+
+            this._initOverlayTransition();
+            if (msg) msg.textContent = 'Bạn có chắc muốn thoát phiên làm việc không?';
+
+            const cancelBtn = overlay.querySelector('.btn:not(.primary)');
+            if (cancelBtn) {
+                const nb = cancelBtn.cloneNode(true);
+                cancelBtn.replaceWith(nb);
+                nb.onclick = () => this._hideOverlay(overlay);
+            }
+
+            const confirmBtn = overlay.querySelector('.btn.primary');
+            if (confirmBtn) {
+                const nb = confirmBtn.cloneNode(true);
+                confirmBtn.replaceWith(nb);
+                nb.onclick = () => {
+                    this._hideOverlay(overlay);
+                    setTimeout(() => {
+                        const form = document.querySelector('form[action*="/logout"]');
+                        if (form) form.submit();
+                    }, 210);
+                };
+            }
+
+            this._showOverlay(overlay);
+        },
+    };
+</script>

@@ -645,7 +645,7 @@
                         let completedInvoiceId = null; // 🌟 Lấy ID hóa đơn trực tiếp từ RAM trước khi xóa
                         const idx = this.invoices.findIndex(inv => inv.maHD === maHDFromUrl);
                         if (idx !== -1) {
-                            completedInvoiceId = this.invoices[idx].id;
+                            completedInvoiceId = this.invoices[idx].dbId;
                             this.invoices.splice(idx, 1);
                             this.invoices.forEach((inv, i) => inv.name = `HÓA ĐƠN ${i + 1}`);
                             this.activeInvoiceId = this.invoices.length > 0 ? this.invoices[0].id : null;
@@ -664,6 +664,15 @@
                 } catch (e) { console.error("Lỗi xác nhận MoMo:", e); }
                 window.history.replaceState({}, document.title, window.location.pathname);
             } else if (resultCode && resultCode !== '0') {
+                // Hủy HĐ trong DB nếu có
+                const maHDFromUrl = orderId?.split('_')[0];
+                const failedInv = this.invoices.find(inv => inv.maHD === maHDFromUrl);
+                if (failedInv?.dbId) {
+                    await fetch(`/api/pos/invoices/${failedInv.dbId}`, { method: 'DELETE' });
+                    failedInv.dbId = null; // reset để có thể mở lại thanh toán
+                    failedInv.maHD = null;
+                    this.saveState();
+                }
                 toast("Giao dịch MoMo thất bại hoặc đã hủy", "warning");
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
@@ -685,7 +694,7 @@
                         let completedInvoiceId = null; // 🌟 Tương tự như Momo
                         const idx = this.invoices.findIndex(inv => inv.maHD === maHDFromUrl);
                         if (idx !== -1) {
-                            completedInvoiceId = this.invoices[idx].id;
+                            completedInvoiceId = this.invoices[idx].dbId;
                             this.invoices.splice(idx, 1);
                             this.invoices.forEach((inv, i) => inv.name = `HÓA ĐƠN ${i + 1}`);
                             this.activeInvoiceId = this.invoices.length > 0 ? this.invoices[0].id : null;
@@ -703,6 +712,14 @@
                 } catch (e) { console.error("Lỗi xác nhận VNPay:", e); }
                 window.history.replaceState({}, document.title, window.location.pathname);
             } else if (vnp_ResponseCode && vnp_ResponseCode !== '00') {
+                const maHDFromUrl = vnp_TxnRef?.split('_')[0];
+                const failedInv = this.invoices.find(inv => inv.maHD === maHDFromUrl);
+                if (failedInv?.dbId) {
+                    await fetch(`/api/pos/invoices/${failedInv.dbId}`, { method: 'DELETE' });
+                    failedInv.dbId = null;
+                    failedInv.maHD = null;
+                    this.saveState();
+                }
                 toast("Thanh toán VNPay thất bại hoặc đã hủy", "warning");
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
@@ -787,25 +804,29 @@
             }).join('');
         },
 
-        createInvoice: async function () {
-            if (this.isCreating) return;
-            this.isCreating = true;
-            if (this.invoices.length >= 5) { toast("TỐI ĐA 5 ĐƠN CHỜ", "warning"); this.isCreating = false; return; }
+        createInvoice: function () {
+            if (this.invoices.length >= 5) { toast("TỐI ĐA 5 ĐƠN CHỜ", "warning"); return; }
 
-            try{
-                const res = await fetch('/api/pos/invoices', { method: 'POST' });
-                const newHd = await res.json();
-                const newId = Number(newHd.id);
-                const orderNum = this.invoices.length + 1;
+            const orderNum = this.invoices.length + 1;
+            const tempId   = Date.now(); // ID tạm thời, chưa có trong DB
+            const expiry   = new Date().getTime() + (24 * 60 * 60 * 1000);
 
-                const expiry = new Date().getTime() + (24 * 60 * 60 * 1000);
-
-                this.invoices.push({ id: newId, name: `HÓA ĐƠN ${orderNum}`, maHD: newHd.ma, cart: [], customer: 'KHÁCH VÃNG LAI', customerId: null, voucher: null, expiryTime: expiry });
-                this.activeInvoiceId = newId;
-                this.saveState(); this.renderTabs(); this.renderCart();
-                toast(`ĐÃ TẠO ${newHd.ma}`, "success");
-            }catch(e){ toast("LỖI KHỞI TẠO ĐƠN", "error");}
-            this.isCreating = false;
+            this.invoices.push({
+                id: tempId,
+                dbId: null,     // ← chưa có DB id
+                maHD: null,
+                name: `HÓA ĐƠN ${orderNum}`,
+                cart: [],
+                customer: 'KHÁCH VÃNG LAI',
+                customerId: null,
+                voucher: null,
+                expiryTime: expiry
+            });
+            this.activeInvoiceId = tempId;
+            this.saveState();
+            this.renderTabs();
+            this.renderCart();
+            toast(`ĐÃ TẠO HÓA ĐƠN ${orderNum}`, "success");
         },
 
         switchTab: async function (id) {
@@ -824,23 +845,40 @@
         },
 
         forceDelete: async function (targetId = this.activeInvoiceId) {
+            const inv = this.invoices.find(i => i.id === targetId);
+
+            // Chưa vào bước thanh toán → chỉ xóa RAM
+            if (!inv || !inv.dbId) {
+                this.invoices = this.invoices.filter(i => i.id !== targetId);
+                this.invoices.forEach((i, idx) => i.name = `HÓA ĐƠN ${idx + 1}`);
+                if (this.activeInvoiceId === targetId) {
+                    this.activeInvoiceId = this.invoices.length > 0 ? this.invoices[0].id : null;
+                }
+                this.saveState();
+                await this.loadProducts(document.querySelector('.search-bar-wrapper input').value);
+                this.renderTabs(); this.renderCart();
+                this.closeModal('confirmModal');
+                toast("ĐÃ HỦY HÓA ĐƠN", "success");
+                return;
+            }
+
+            // Đã vào bước thanh toán → gọi API hủy DB
             try {
-                const res = await fetch(`/api/pos/invoices/${targetId}`, { method: 'DELETE' });
+                const res = await fetch(`/api/pos/invoices/${inv.dbId}`, { method: 'DELETE' });
                 if (res.ok) {
-                    this.invoices = this.invoices.filter(inv => inv.id !== targetId);
-                    this.invoices.forEach((inv, idx) => inv.name = `HÓA ĐƠN ${idx + 1}`);
-                    if(this.activeInvoiceId === targetId) {
+                    this.invoices = this.invoices.filter(i => i.id !== targetId);
+                    this.invoices.forEach((i, idx) => i.name = `HÓA ĐƠN ${idx + 1}`);
+                    if (this.activeInvoiceId === targetId) {
                         this.activeInvoiceId = this.invoices.length > 0 ? this.invoices[0].id : null;
                     }
                     this.saveState();
                     await this.loadProducts(document.querySelector('.search-bar-wrapper input').value);
-                    this.renderTabs();
-                    this.renderCart();
+                    this.renderTabs(); this.renderCart();
                     this.closeModal('confirmModal');
-                    if(targetId === this.activeInvoiceId) toast("ĐÃ HỦY ĐƠN HÀNG VÀ TRẢ LẠI TỒN KHO", "success");
+                    toast("ĐÃ HỦY HÓA ĐƠN VÀ GHI NHẬN VÀO DB", "success");
                 } else {
                     const data = await res.json();
-                    if(targetId === this.activeInvoiceId) toast(data.message || "KHÔNG THỂ XÓA", "error");
+                    toast(data.message || "KHÔNG THỂ XÓA", "error");
                     this.closeModal('confirmModal');
                 }
             } catch (e) { toast("LỖI KẾT NỐI", "error"); }
@@ -851,8 +889,9 @@
                 const res = await fetch('/api/pos/invoices/pending');
                 const pendingInvoices = await res.json();
 
+                // Chỉ xóa các đơn đã có dbId nhưng không còn trên server
                 this.invoices = this.invoices.filter(localInv =>
-                    pendingInvoices.some(serverInv => serverInv.id === localInv.id)
+                    !localInv.dbId || pendingInvoices.some(s => s.id === localInv.dbId)
                 );
 
                 if (!this.invoices.some(inv => inv.id === this.activeInvoiceId)) {
@@ -867,56 +906,57 @@
             const available = this.getAvailableStock(spctId);
             if (available <= 0) { toast("Sản phẩm đã hết hàng!", "warning"); return; }
 
+            // ✅ Chỉ check tồn kho qua API, không lưu DB
             try {
-                const res = await fetch(`/api/pos/invoices/${this.activeInvoiceId}/add-product`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ spctId: spctId, qty: 1 })
+                const res = await fetch(`/api/pos/invoices/check-stock`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ spctId, qty: 1 })
                 });
+                if (!res.ok) {
+                    const err = await res.json();
+                    toast(err.message || "Không đủ hàng!", "warning");
+                    return;
+                }
+            } catch (e) { toast("Lỗi kết nối!", "error"); return; }
 
-                if (res.ok) {
-                    toast("Đã thêm vào giỏ hàng");
-                    const inv = this.getCurrentInvoice();
-                    const product = this.products.find(p => p.id === spctId);
-                    const item = inv.cart.find(i => i.id === spctId);
-
-                    if (item) { item.qty += 1; }
-                    else {
-                        const price = (product.giaSauKhuyenMai && product.giaSauKhuyenMai < product.giaBan) ? product.giaSauKhuyenMai : product.giaBan;
-                        inv.cart.push({
-                            id: product.id, name: product.sanPham.ten, originalPrice: product.giaBan,
-                            price: price, attr: `${product.mauSac.ten} - ${product.kichThuoc.ten}`, qty: 1
-                        });
-                    }
-                    this.saveState(); this.renderCart(); this.renderProducts(this.products);
-                } else { const err = await res.json(); toast(err.message || "Không đủ hàng trong kho!", "warning"); }
-            } catch (e) { toast("Lỗi kết nối máy chủ", "error"); }
+            // Thêm vào RAM
+            const inv     = this.getCurrentInvoice();
+            const product = this.products.find(p => p.id === spctId);
+            const item    = inv.cart.find(i => i.id === spctId);
+            if (item) { item.qty += 1; }
+            else {
+                const price = (product.giaSauKhuyenMai && product.giaSauKhuyenMai < product.giaBan)
+                    ? product.giaSauKhuyenMai : product.giaBan;
+                inv.cart.push({
+                    id: product.id, name: product.sanPham.ten,
+                    originalPrice: product.giaBan, price,
+                    attr: `${product.mauSac.ten} - ${product.kichThuoc.ten}`, qty: 1
+                });
+            }
+            this.saveState(); this.renderCart(); this.renderProducts(this.products);
+            toast("Đã thêm vào giỏ hàng");
         },
 
-        changeQty: async function (spctId, delta) {
-            const inv = this.getCurrentInvoice();
+        changeQty: function (spctId, delta) {
+            const inv  = this.getCurrentInvoice();
             const item = inv.cart.find(i => i.id === spctId);
             if (!item) return;
 
             const newQty = item.qty + delta;
+
             if (delta > 0) {
                 const available = this.getAvailableStock(spctId);
                 if (available < delta) { toast("Kho không đủ hàng", "warning"); return; }
             }
 
-            try {
-                if (newQty <= 0 || delta === -999) {
-                    const res = await fetch(`/api/pos/invoices/${inv.id}/remove-product/${spctId}`, { method: 'DELETE' });
-                    if (res.ok) { toast("Đã xóa khỏi giỏ"); inv.cart = inv.cart.filter(i => i.id !== spctId); }
-                } else {
-                    const res = await fetch(`/api/pos/invoices/${inv.id}/update-quantity`, {
-                        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ spctId: spctId, newQty: newQty })
-                    });
-                    if (!res.ok) { const err = await res.json(); toast(err.message || "Kho không đủ hàng", "warning"); return; }
-                    item.qty = newQty;
-                }
-                this.saveState(); this.renderCart(); this.renderProducts(this.products);
-            } catch (e) { toast("Lỗi hệ thống", "error"); }
+            if (newQty <= 0 || delta === -999) {
+                inv.cart = inv.cart.filter(i => i.id !== spctId);
+                toast("Đã xóa khỏi giỏ");
+            } else {
+                item.qty = newQty;
+            }
+            this.saveState(); this.renderCart(); this.renderProducts(this.products);
         },
 
         searchCustomer: async function(val) {
@@ -960,7 +1000,7 @@
 
             if (finalMethod === 'VÍ VNPAY') {
                 try {
-                    const res = await fetch(`/api/pos/vnpay-payment/${inv.id}`, {
+                    const res = await fetch(`/api/pos/vnpay-payment/${inv.dbId}`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ cart: inv.cart, amount: total, customerId: inv.customerId })
                     });
@@ -973,7 +1013,7 @@
 
             if (finalMethod === 'VÍ MOMO') {
                 try {
-                    const resMomo = await fetch(`/api/pos/momo-payment/${inv.id}`, {
+                    const resMomo = await fetch(`/api/pos/momo-payment/${inv.dbId}`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ cart: inv.cart, amount: total, customerId: inv.customerId })
                     });
@@ -985,8 +1025,12 @@
             }
 
             const payload = {
-                invoiceId: inv.id, customerId: inv.customerId, total: total,
-                method: finalMethod, cart: inv.cart, voucherId: inv.voucher ? inv.voucher.id : null
+                invoiceId: inv.dbId,
+                customerId: inv.customerId,
+                total: total,
+                method: finalMethod,
+                cart: inv.cart,
+                voucherId: inv.voucher ? inv.voucher.id : null
             };
 
             try {
@@ -998,7 +1042,7 @@
                     toast("Thanh toán thành công! Máy đang in hóa đơn...", "success");
 
                     // LƯU LẠI ID TRƯỚC KHI XÓA KHỎI RAM
-                    const completedInvoiceId = inv.id;
+                    const completedInvoiceId = inv.dbId;
 
                     this.invoices = this.invoices.filter(i => i.id !== this.activeInvoiceId);
                     this.invoices.forEach((i, idx) => i.name = `HÓA ĐƠN ${idx + 1}`);
@@ -1135,16 +1179,42 @@
             }
         },
 
-        openPayModal: function () {
+        openPayModal: async function () {
             const inv = this.getCurrentInvoice();
             if (!inv) { toast("Vui lòng chọn hoặc tạo hóa đơn trước", "warning"); return; }
             if (!inv.cart || inv.cart.length === 0) { toast("Giỏ hàng đang trống", "warning"); return; }
 
+            // ✅ Lưu DB lần đầu tiên khi bước vào thanh toán
+            if (!inv.dbId) {
+                try {
+                    const res = await fetch('/api/pos/invoices/open-payment', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            customerId: inv.customerId,
+                            cart: inv.cart,
+                            voucherId: inv.voucher ? inv.voucher.id : null
+                        })
+                    });
+                    if (!res.ok) {
+                        const err = await res.json();
+                        toast(err.message || "Không thể mở thanh toán!", "error");
+                        return;
+                    }
+                    const data = await res.json();
+                    inv.dbId = data.id;   // ← lưu DB id thật
+                    inv.maHD = data.ma;
+                    this.saveState();
+                } catch (e) {
+                    toast("Lỗi kết nối máy chủ!", "error");
+                    return;
+                }
+            }
+
             document.getElementById('inpKhachDua').value = '';
             document.getElementById('lblTienThua').innerText = '0 ₫';
-
             const tabs = document.querySelectorAll('.payment-tab');
-            if(tabs.length > 0) this.switchPaymentMethod('cash', tabs[0]);
+            if (tabs.length > 0) this.switchPaymentMethod('cash', tabs[0]);
             this.openModal('payModal');
         },
 

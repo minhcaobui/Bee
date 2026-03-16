@@ -17,7 +17,7 @@
         </div>
         <div class="sidebar-menu">
             <div class="sidebar-label">TỔNG QUAN</div>
-            <a href="#dashboard" class="sidebar-item active"><i class="bi bi-grid-fill"></i> <span>DASHBOARD</span></a>
+            <a href="#dashboard" class="sidebar-item"><i class="bi bi-grid-fill"></i> <span>DASHBOARD</span></a>
             <a href="#pos" class="sidebar-item"><i class="bi bi-cart-fill"></i> <span>BÁN HÀNG</span></a>
             <div class="sidebar-label">QUẢN LÝ</div>
             <a href="#orders" class="sidebar-item"><i class="bi bi-collection-fill"></i> <span>HÓA ĐƠN</span></a>
@@ -27,7 +27,7 @@
             <a href="#customers" class="sidebar-item"><i class="bi bi-receipt-cutoff"></i> <span>KHÁCH HÀNG</span></a>
             <a href="#staff" class="sidebar-item"><i class="bi bi-tags-fill"></i> <span>NHÂN VIÊN</span></a>
             <div class="sidebar-label">HỆ THỐNG</div>
-            <a href="#users" class="sidebar-item"><i class="bi bi-person-fill"></i> <span>TÀI KHOẢN</span></a>
+            <a href="#profiles" class="sidebar-item"><i class="bi bi-person-fill"></i> <span>TÀI KHOẢN</span></a>
         </div>
         <div class="sidebar-user-panel" onclick="alert('Trang cá nhân')">
             <img th:src="${loggedInUser != null ? 'https://ui-avatars.com/api/?name=' + loggedInUser.hoTen + '&background=000&color=fff&size=64' : 'https://ui-avatars.com/api/?name=Admin&background=000&color=fff&size=64'}"

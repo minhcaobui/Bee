@@ -567,6 +567,26 @@
             this.bindEvents();
             await this.loadSelectOptions();
             await this.loadData();
+            const highlightId = sessionStorage.getItem('highlightProductId');
+            if (highlightId) {
+                sessionStorage.removeItem('highlightProductId');
+                setTimeout(() => {
+                    const rows = document.querySelectorAll('#tbody tr');
+                    rows.forEach(row => {
+                        if (row.innerHTML.includes(`viewVariants(${highlightId},`)) {
+                            row.style.outline = '2px solid #000';
+                            row.style.background = '#f1f5f9';
+                            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            setTimeout(() => {
+                                row.style.outline = '';
+                                row.style.background = '';
+                            }, 3000);
+                            // Mở drawer chi tiết luôn
+                            row.querySelector(`button[onclick*="viewVariants(${highlightId},"]`)?.click();
+                        }
+                    });
+                }, 500); // đợi loadData xong
+            }
         },
 
         bindEvents: function() {

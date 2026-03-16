@@ -55,6 +55,11 @@ public class AdminController {
         return "admin/customer/customers";
     }
 
+    @GetMapping("/profiles")
+    public String profiles() {
+        return "admin/profile/profiles";
+    }
+
     @GetMapping("/staff")
     public String staffPage(Model model) {
         List<NV> list = nvRepo.getAllNhanVienCustom();
