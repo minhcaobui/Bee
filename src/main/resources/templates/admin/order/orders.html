@@ -15,8 +15,10 @@
         .tab { font-size: 12.5px; font-weight: 700; color: #888; padding: 0 0 12px 0; cursor: pointer; text-transform: uppercase; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
         .tab.active { color: #000; border-bottom-color: #000; }
 
-        .btn { font-size: 11px; font-weight: 800; text-transform: uppercase; height: 34px !important; padding: 0 16px !important; background: #000; color: #fff; border: 1px solid #000; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 2px; line-height: 1; }
+        .btn { font-size: 11px; font-weight: 800; text-transform: uppercase; height: 34px !important; padding: 0 16px !important; background: #000; color: #fff; border: 1px solid #000; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 2px; line-height: 1; transition: 0.2s; }
+        .btn:hover { background: #333; }
         .btn-secondary { background: #fff; color: #000; border: 1px solid #ccc; }
+        .btn-secondary:hover { background: #f4f4f5; }
         .btn-icon { width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--gray-200); background: #fff; cursor: pointer; border-radius: 2px; margin-left: 4px; }
 
         .table-wrapper { border: 1px solid var(--gray-200); width: 100%; overflow-x: auto; }
@@ -27,6 +29,9 @@
         .badge-type { font-size: 10px; padding: 2px 6px; border-radius: 2px; font-weight: 800; text-transform: uppercase; }
         .type-pos { background: #e0f2fe; color: #0369a1; }
         .type-online { background: #fef3c7; color: #92400e; }
+
+        /* BADGE TRẠNG THÁI HÓA ĐƠN */
+        .badge-status { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; text-transform: uppercase; color: #fff; white-space: nowrap; display: inline-block; }
 
         /* DRAWER */
         .drawer { position: fixed; top: 0; right: -900px; width: 900px; height: 100vh; background: #f4f4f5; border-left: 1px solid var(--gray-200); z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -5px 0 20px rgba(0,0,0,0.1); }
@@ -57,10 +62,7 @@
         .filter-row-1 { display: grid; gap: 16px; align-items: end; }
         .filter-row-2 { display: grid; gap: 16px; align-items: end; margin-top: 14px; }
 
-        /* Online/Chờ xử lý: Đã thêm cột Loại hóa đơn */
         .filter-row-1.online-mode  { grid-template-columns: 2fr 1fr 1fr 1.5fr auto; }
-
-        /* Lịch sử hàng 1 & 2 */
         .filter-row-1.history-mode { grid-template-columns: 2.5fr 1fr 1fr 1fr; }
         .filter-row-2.history-mode { grid-template-columns: 1.5fr 2fr auto; }
 
@@ -94,6 +96,40 @@
         .highlight-order { background-color: #f1f5f9 !important; outline: 1.5px solid #000 !important; animation: subtleBlink 1.2s infinite ease-in-out; }
         @keyframes subtleBlink { 0%, 100% { background-color: #f1f5f9; } 50% { background-color: #ffffff; } }
 
+        /* PAGINATION */
+        .pagination-wrapper { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; }
+        .pagination-info { font-size: 11px; font-weight: 600; color: #888; }
+        .pagination { display: flex; gap: 5px; }
+        .page-number { min-width: 26px; height: 26px; font-size: 12px; font-weight: 700; background: transparent; border: 1px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .page-number:hover:not(:disabled) { background: #eee; }
+        .page-number.active { background: #000; color: #fff; border-radius: 2px; }
+        .page-number:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* TOAST XỊN XÒ TỰ BUILD */
+        #toastHost { position: fixed; top: 20px; right: 20px; z-index: 10002; display: flex; flex-direction: column; gap: 10px; }
+        .toast-box { min-width: 280px; padding: 14px 22px; border-radius: 4px; background: #fff; color: #000; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); display: flex; align-items: flex-start; gap: 12px; border-left: 4px solid #000; animation: toastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; transition: all 0.4s ease; }
+        .toast-box.success { border-left-color: #10b981; }
+        .toast-box.error { border-left-color: #ef4444; }
+        .toast-box.warning { border-left-color: #f59e0b; }
+        .toast-box.hiding { transform: translateX(130%); opacity: 0; margin-top: -60px; }
+
+        .toast-content { flex: 1; }
+        .toast-title { font-weight: 800; font-size: 12px; margin-bottom: 4px; text-transform: uppercase; }
+        .toast-message { font-weight: 500; font-size: 12px; color: #555; }
+
+        /* Modal Custom */
+        .toast-dialog-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 10005; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); animation: fadeIn 0.2s; }
+        .toast-dialog { background: #fff; width: 380px; max-width: 90%; border-radius: 4px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); padding: 24px; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .toast-dialog-title { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 14px; margin-bottom: 12px; text-transform: uppercase; }
+        .toast-dialog-desc { font-size: 13px; color: #555; margin-bottom: 20px; line-height: 1.5; }
+        .toast-dialog-input { width: 100%; height: 38px; border: 1px solid #ccc; border-radius: 2px; padding: 0 12px; font-family: inherit; font-size: 13px; margin-bottom: 20px; outline: none; }
+        .toast-dialog-input:focus { border-color: #000; }
+        .toast-dialog-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+        @keyframes toastSlideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
     </style>
 </head>
 <body>
@@ -117,6 +153,8 @@
             <tbody id="tbody"></tbody>
         </table>
     </div>
+
+    <div id="paginationContainer" class="pagination-wrapper"></div>
 </div>
 
 <div class="overlay" id="overlay" onclick="OrderApp.closeDrawer()"></div>
@@ -173,7 +211,95 @@
     </div>
 </aside>
 
+<div id="toastHost"></div>
+
 <script>
+    // ========================================================================
+    // TOAST & DIALOG SYSTEM
+    // ========================================================================
+    window.toast = function(message, type = 'success') {
+        const container = document.getElementById('toastHost');
+        if (!container) return;
+        const el = document.createElement('div');
+        el.className = `toast-box ${type}`;
+
+        let icon = type === 'success' ? 'bi-check-circle-fill' : (type === 'error' ? 'bi-x-circle-fill' : 'bi-exclamation-triangle-fill');
+        let title = type === 'success' ? 'Thành công' : (type === 'error' ? 'Lỗi' : 'Cảnh báo');
+
+        el.innerHTML = `
+            <i class="bi ${icon}" style="font-size: 20px; color: ${type === 'success' ? '#10b981' : (type === 'error' ? '#ef4444' : '#f59e0b')};"></i>
+            <div class="toast-content">
+                <div class="toast-title">${title}</div>
+                <div class="toast-message">${message}</div>
+            </div>
+            <i class="bi bi-x" style="cursor: pointer; font-size: 18px; color: #999;" onclick="this.parentElement.remove()"></i>
+        `;
+        container.appendChild(el);
+        setTimeout(() => {
+            if(el.parentNode) {
+                el.classList.add('hiding');
+                el.addEventListener('transitionend', () => el.remove());
+            }
+        }, 3000);
+    };
+
+    window.toastConfirm = function(title, message, onConfirm) {
+        const overlay = document.createElement('div');
+        overlay.className = 'toast-dialog-overlay';
+
+        overlay.innerHTML = `
+            <div class="toast-dialog">
+                <div class="toast-dialog-title">
+                    <i class="bi bi-question-circle-fill" style="color: #000; font-size: 18px;"></i> ${title}
+                </div>
+                <div class="toast-dialog-desc">${message.replace(/\n/g, '<br>')}</div>
+                <div class="toast-dialog-actions">
+                    <button class="btn btn-secondary" id="dgCancel">HỦY BỎ</button>
+                    <button class="btn" id="dgOk">XÁC NHẬN</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        overlay.querySelector('#dgCancel').onclick = () => overlay.remove();
+        overlay.querySelector('#dgOk').onclick = () => { overlay.remove(); onConfirm(); };
+    };
+
+    window.toastPrompt = function(title, placeholder, onConfirm) {
+        const overlay = document.createElement('div');
+        overlay.className = 'toast-dialog-overlay';
+
+        overlay.innerHTML = `
+            <div class="toast-dialog">
+                <div class="toast-dialog-title">
+                    <i class="bi bi-pencil-square" style="color: #dc2626; font-size: 18px;"></i> ${title}
+                </div>
+                <input type="text" class="toast-dialog-input" id="dgInput" placeholder="${placeholder}">
+                <div class="toast-dialog-actions">
+                    <button class="btn btn-secondary" id="dgCancel">ĐÓNG</button>
+                    <button class="btn btn-danger" id="dgOk" style="background:#dc2626; color:#fff; border:none;">XÁC NHẬN</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        const input = overlay.querySelector('#dgInput');
+        setTimeout(() => input.focus(), 100);
+
+        overlay.querySelector('#dgCancel').onclick = () => overlay.remove();
+        overlay.querySelector('#dgOk').onclick = () => {
+            const val = input.value.trim();
+            overlay.remove();
+            onConfirm(val);
+        };
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') overlay.querySelector('#dgOk').click();
+        });
+    };
+
+    // ========================================================================
+    // ORDER APP
+    // ========================================================================
     const formatVNTime = (dateStr) => {
         if (!dateStr) return '';
         const d = new Date(dateStr);
@@ -182,20 +308,31 @@
         return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
     };
 
+    // HÀM TẠO BADGE TRẠNG THÁI (ĐỎ - XANH MƯỢT MÀ)
+    const getStatusBadge = (tt) => {
+        if (!tt) return '<span class="badge-status" style="background:#9ca3af;">N/A</span>';
+        const id = tt.id;
+        const ten = tt.ten;
+        // Dựa vào ID trong DB: 2 là Hoàn Thành, 3 là Đã Hủy
+        if (id === 2) return `<span class="badge-status" style="background:#10b981;">${ten}</span>`; // Xanh lá
+        if (id === 3) return `<span class="badge-status" style="background:#ef4444;">${ten}</span>`; // Đỏ
+        if (id === 1) return `<span class="badge-status" style="background:#f59e0b;">${ten}</span>`; // Cam
+        if (id === 6) return `<span class="badge-status" style="background:#3b82f6;">${ten}</span>`; // Xanh dương
+        return `<span class="badge-status" style="background:#6366f1;">${ten}</span>`; // Mặc định cho các trạng thái chờ khác
+    };
+
     const OrderApp = {
         state: {
             activeTab: 'don-hang',
             q: '', statusId: '', loai: '', pttt: '',
-            nhanVienId: '', dateFrom: '', dateTo: ''
+            nhanVienId: '', dateFrom: '', dateTo: '',
+            page: 0, size: 10, totalPages: 0
         },
 
         _nvList: [],
         _nvSelectedId: null,
         _statusList: [],
 
-        // =============================================
-        // RENDER BỘ LỌC ĐỘNG THEO TAB
-        // =============================================
         renderFilterSection: function() {
             const section = document.getElementById('filterSection');
             const isHistory = this.state.activeTab === 'lich-su';
@@ -220,7 +357,6 @@
                 </div>`;
 
             if (!isHistory) {
-                // Đã bổ sung Loại Hóa Đơn vào Tab 1
                 section.innerHTML = `
                     <div class="filter-row-1 online-mode">
                         <div class="filter-group">
@@ -305,11 +441,28 @@
             this.restoreFilterValues();
         },
 
+        // =======================================================
+        // ĐÃ NÂNG CẤP LỌC TRẠNG THÁI BẰNG ID (2: Hoàn thành, 3: Đã hủy)
+        // ĐỂ TRÁNH LỖI KHOẢNG TRẮNG CỦA DATABASE
+        // =======================================================
         populateStatusSelect: function() {
             const sel = document.getElementById('filterStatus');
-            if (!sel || !this._statusList.length) return;
+            if (!sel || !this._statusList || !this._statusList.length) return;
+
+            const isHistory = this.state.activeTab === 'lich-su';
+
+            const filteredStatuses = this._statusList.filter(s => {
+                // Dùng ID để phân biệt cho chính xác tuyệt đối
+                if (isHistory) {
+                    return s.id === 2 || s.id === 3;
+                } else {
+                    return s.id !== 2 && s.id !== 3;
+                }
+            });
+
             sel.innerHTML = '<option value="">Tất cả</option>' +
-                this._statusList.map(s => `<option value="${s.id}">${s.ten}</option>`).join('');
+                filteredStatuses.map(s => `<option value="${s.id}">${s.ten}</option>`).join('');
+
             sel.value = this.state.statusId;
         },
 
@@ -339,22 +492,18 @@
             }
         },
 
-        // =============================================
-        // HOÀN THIỆN CHỨC NĂNG LÀM MỚI
-        // =============================================
         resetFilters: function() {
-            // Đặt lại state nhưng giữ nguyên Tab đang đứng
             this.state = {
                 activeTab: this.state.activeTab,
                 q: '', statusId: '', loai: '', pttt: '',
-                nhanVienId: '', dateFrom: '', dateTo: ''
+                nhanVienId: '', dateFrom: '', dateTo: '',
+                page: 0, size: 10, totalPages: 0
             };
             this._nvSelectedId = null;
 
-            // Xóa rỗng các ô trên giao diện
             this.renderFilterSection();
             this.loadData();
-            if (typeof toast === 'function') toast("Đã làm mới bộ lọc", "success");
+            window.toast("Đã làm mới bộ lọc", "success");
         },
 
         init: async function() {
@@ -370,8 +519,16 @@
                     fetch('/api/trang-thai-hoa-don'),
                     fetch('/api/nhan-vien/active')
                 ]);
-                if (resStatus.ok) this._statusList = await resStatus.json();
-                if (resNv.ok)     this._nvList     = await resNv.json();
+
+                // Trích xuất an toàn cho cả trường hợp API trả về Page (có content) hoặc List
+                if (resStatus.ok) {
+                    const dataStatus = await resStatus.json();
+                    this._statusList = dataStatus.content ? dataStatus.content : dataStatus;
+                }
+                if (resNv.ok) {
+                    const dataNv = await resNv.json();
+                    this._nvList = dataNv.content ? dataNv.content : dataNv;
+                }
             } catch (e) {
                 console.error("Lỗi load bộ lọc:", e);
             }
@@ -383,6 +540,7 @@
             this.state.pttt     = document.getElementById('filterPTTT')?.value   || '';
             this.state.dateFrom = document.getElementById('dateFrom')?.value     || '';
             this.state.dateTo   = document.getElementById('dateTo')?.value       || '';
+            this.state.page     = 0;
             this.loadData();
         },
 
@@ -390,6 +548,7 @@
             clearTimeout(this.searchTimeout);
             this.searchTimeout = setTimeout(() => {
                 this.state.q = val.trim();
+                this.state.page = 0;
                 this.loadData();
             }, 400);
         },
@@ -452,6 +611,7 @@
             if (inp) inp.value = name;
             if (clr) clr.classList.add('show');
             if (dd)  dd.classList.remove('open');
+            this.state.page = 0;
             this.loadData();
         },
 
@@ -462,6 +622,7 @@
             const clr = document.getElementById('nvClear');
             if (inp) inp.value = '';
             if (clr) clr.classList.remove('show');
+            this.state.page = 0;
             this.loadData();
         },
 
@@ -472,6 +633,7 @@
 
             this.state.q = ''; this.state.statusId = ''; this.state.loai = '';
             this.state.pttt = ''; this.state.nhanVienId = ''; this.state.dateFrom = ''; this.state.dateTo = '';
+            this.state.page = 0;
             this._nvSelectedId = null;
 
             this.renderFilterSection();
@@ -522,16 +684,57 @@
                     loaiHoaDon:          this.state.loai,
                     phuongThucThanhToan: this.state.pttt,
                     startDate:           this.state.dateFrom,
-                    endDate:             this.state.dateTo
+                    endDate:             this.state.dateTo,
+                    page:                this.state.page,
+                    size:                this.state.size
                 });
 
                 const res = await fetch(`${endpoint}?${params.toString()}`);
                 if (!res.ok) throw new Error("Lỗi fetch data");
                 const data = await res.json();
-                this.renderTable(data);
+
+                const listData = data.content ? data.content : data;
+
+                this.renderTable(listData);
+
+                if (data.totalPages !== undefined) {
+                    this.renderPagination(data);
+                } else {
+                    document.getElementById('paginationContainer').innerHTML = '';
+                }
+
             } catch (error) {
                 console.error(error);
             }
+        },
+
+        renderPagination: function(data) {
+            this.state.totalPages = data.totalPages || 0;
+            const container = document.getElementById('paginationContainer');
+
+            if (this.state.totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = `<div class="pagination-info">Trang ${this.state.page + 1} / ${this.state.totalPages}</div><div class="pagination">`;
+
+            html += `<button class="page-number" ${this.state.page === 0 ? 'disabled' : ''} onclick="OrderApp.changePage(${this.state.page - 1})"><i class="bi bi-chevron-left"></i></button>`;
+
+            for (let i = 0; i < this.state.totalPages; i++) {
+                html += `<button class="page-number ${i === this.state.page ? 'active' : ''}" onclick="OrderApp.changePage(${i})">${i + 1}</button>`;
+            }
+
+            html += `<button class="page-number" ${this.state.page === this.state.totalPages - 1 ? 'disabled' : ''} onclick="OrderApp.changePage(${this.state.page + 1})"><i class="bi bi-chevron-right"></i></button>`;
+
+            html += `</div>`;
+            container.innerHTML = html;
+        },
+
+        changePage: function(p) {
+            if (p < 0 || p >= this.state.totalPages) return;
+            this.state.page = p;
+            this.loadData();
         },
 
         renderTable: function(list) {
@@ -545,29 +748,33 @@
                 return;
             }
 
+            const startSTT = this.state.page * this.state.size + 1;
+
             tbody.innerHTML = list.map((hd, idx) => {
-                const tenKhach    = hd.khachHang ? hd.khachHang.hoTen : 'Khách vãng lai';
+                const tenKhach    = hd.khachHang ? hd.khachHang.hoTen : (hd.tenNguoiNhan ? hd.tenNguoiNhan : 'Khách vãng lai');
                 const tenNhanVien = hd.nhanVien  ? hd.nhanVien.hoTen  : '<span style="color:#aaa; font-style:italic;">Hệ thống</span>';
                 const hinhThucTT  = hd.phuongThucThanhToan || (hd.loaiHoaDon === 0 ? 'Tiền mặt' : 'Chuyển khoản');
                 const ngayTaoVN   = formatVNTime(hd.ngayTao);
-                const trangThaiTen = hd.trangThaiHoaDon ? hd.trangThaiHoaDon.ten : 'N/A';
                 const isHighlight  = highlightId && Number(highlightId) === Number(hd.id);
 
+                // HIỂN THỊ BADGE MÀU SẮC ĐÃ ĐƯỢC TÙY BIẾN
+                const trangThaiBadge = getStatusBadge(hd.trangThaiHoaDon);
+
                 let trContent = `
-                    <td style="text-align:center;">${idx + 1}</td>
+                    <td style="text-align:center;">${startSTT + idx}</td>
                     <td style="font-weight:800;">${hd.ma}</td>
                     <td>${tenKhach}</td>`;
 
                 if (isHistory) trContent += `<td style="font-weight:600;">${tenNhanVien}</td>`;
 
-                trContent += `<td style="font-weight:700; color:#d63384;">${(hd.giaTong || 0).toLocaleString('vi-VN')} đ</td>`;
+                trContent += `<td style="font-weight:700; color:#dc2626;">${(hd.giaTong || 0).toLocaleString('vi-VN')} đ</td>`;
 
                 if (isHistory) trContent += `<td><span class="badge-type" style="background:#e0e7ff; color:#3730a3;">${hinhThucTT}</span></td>`;
 
                 trContent += `
                     <td><span class="badge-type ${hd.loaiHoaDon === 0 ? 'type-pos' : 'type-online'}">${hd.loaiHoaDon === 0 ? 'TẠI QUẦY' : 'ONLINE'}</span></td>
                     <td style="font-size:11px;">${ngayTaoVN}</td>
-                    <td style="text-align:center; font-weight:700; font-size:11px;">${trangThaiTen}</td>
+                    <td style="text-align:center;">${trangThaiBadge}</td>
                     <td style="text-align:right;">
                         <button class="btn-icon" title="Xem chi tiết" onclick="OrderApp.openDetail(${hd.id})"><i class="bi bi-eye"></i></button>
                     </td>`;
@@ -648,13 +855,8 @@
                     </div>`;
                 sBox.style.float = 'none';
 
-                // =============================================
-                // HIỂN THỊ TÙY BIẾN CHO HÓA ĐƠN TẠI QUẦY (OFFLINE)
-                // =============================================
                 const isPos = hd.loaiHoaDon === 0;
                 document.getElementById('cardTimeline').style.display = isPos ? 'none' : 'block';
-
-                // Mở cardActions cho cả Online và Offline để gắn nút xóa/hủy
                 document.getElementById('cardActions').style.display  = 'block';
 
                 if (!isPos) {
@@ -668,7 +870,7 @@
                 document.getElementById('overlay').classList.add('show');
             } catch (err) {
                 console.error("Lỗi:", err);
-                if (typeof toast === 'function') toast("Lỗi tải chi tiết đơn hàng", "error");
+                if (typeof window.toast === 'function') window.toast("Lỗi tải chi tiết đơn hàng", "error");
             } finally {
                 if (window.hideLoading) window.hideLoading();
             }
@@ -715,19 +917,21 @@
             const footer    = document.getElementById('drawerFooter');
             footer.innerHTML = '';
             const currentMa  = hd.trangThaiMa;
+
             if (currentMa === 'DA_HUY' || currentMa === 'HOAN_THANH') {
-                footer.innerHTML = `<div style="width:100%; text-align:center; font-weight:700; color:#888; padding:10px 0;">Đơn hàng đã đóng, không thể thao tác thêm.</div>`;
+                footer.innerHTML = `<div style="width:100%; text-align:center; font-weight:700; color:#888; padding:10px 0;">Đơn hàng đã đóng.</div>`;
                 return;
             }
+
             const btnNext = document.createElement('button');
             btnNext.className = 'btn';
-            btnNext.style.cssText = 'flex:2; background:#000; color:#fff; height:36px !important;';
+            btnNext.style.cssText = 'flex:2; background:#000; color:#fff; height:36px !important; border:none; border-radius:2px;';
             btnNext.innerHTML = 'XÁC NHẬN BƯỚC TIẾP THEO <i class="bi bi-arrow-right"></i>';
             btnNext.onclick = () => this.nextStatus(hd.id);
 
             const btnHuy = document.createElement('button');
             btnHuy.className = 'btn btn-secondary';
-            btnHuy.style.cssText = 'flex:1; color:#dc3545; border-color:#dc3545; height:36px !important;';
+            btnHuy.style.cssText = 'flex:1; color:#dc3545; border-color:#dc3545; height:36px !important; border-radius:2px;';
             btnHuy.innerHTML = '<i class="bi bi-x-lg"></i> HỦY ĐƠN';
             btnHuy.onclick = () => this.huyDon(hd.id);
 
@@ -735,87 +939,69 @@
             footer.appendChild(btnNext);
         },
 
-        // =============================================
-        // NÚT XÓA KHÔNG LƯU LỊCH SỬ DÀNH CHO POS
-        // =============================================
         renderPosActions: function(hd) {
             const footer = document.getElementById('drawerFooter');
             footer.innerHTML = '';
             const currentMa = hd.trangThaiMa;
 
-            // Nếu Hóa đơn tại quầy đang ở trạng thái Chờ xác nhận/Chờ thanh toán (Tùy theo cấu hình trạng thái POS của bạn)
             if (currentMa !== 'HOAN_THANH' && currentMa !== 'DA_HUY') {
-                const btnXoa = document.createElement('button');
-                btnXoa.className = 'btn btn-secondary';
-                btnXoa.style.cssText = 'flex:1; color:#dc3545; border-color:#dc3545; height:36px !important;';
-                btnXoa.innerHTML = '<i class="bi bi-trash"></i> XÓA HÓA ĐƠN';
-                btnXoa.onclick = () => this.xoaDonPOS(hd.id);
-                footer.appendChild(btnXoa);
+                footer.innerHTML = `<div style="width:100%; text-align:center; font-weight:700; color:#888; padding:10px 0;">Hóa đơn tại quầy đang chờ thanh toán.</div>`;
             } else {
-                footer.innerHTML = `<div style="width:100%; text-align:center; font-weight:700; color:#888; padding:10px 0;">Hóa đơn tại quầy đã thanh toán.</div>`;
+                footer.innerHTML = `<div style="width:100%; text-align:center; font-weight:700; color:#888; padding:10px 0;">Hóa đơn tại quầy đã đóng.</div>`;
             }
         },
 
-        xoaDonPOS: async function(id) {
-            if (!confirm("Bạn có chắc chắn muốn xóa vĩnh viễn hóa đơn này?\nHành động này sẽ xóa hoàn toàn khỏi cơ sở dữ liệu và KHÔNG lưu vào lịch sử.")) return;
-            try {
-                if (window.showLoading) window.showLoading();
+        nextStatus: function(id) {
+            window.toastConfirm(
+                "XÁC NHẬN TRẠNG THÁI",
+                "Chuyển đơn hàng sang bước tiếp theo trong quy trình xử lý?",
+                async () => {
+                    try {
+                        if (window.showLoading) window.showLoading();
+                        const res = await fetch(`/api/hoa-don/${id}/next-status`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ ghiChu: "Admin chuyển trạng thái" })
+                        });
+                        if (!res.ok) throw new Error("Chuyển trạng thái thất bại");
 
-                // GỌI API HARD DELETE XUỐNG SPRING BOOT
-                const res = await fetch(`/api/hoa-don/${id}`, {
-                    method: 'DELETE'
-                });
-
-                if (!res.ok) throw new Error("Xóa thất bại");
-                if (typeof toast === 'function') toast("Đã xóa hóa đơn thành công!", "success");
-                this.closeDrawer();
-                this.loadData();
-            } catch (err) {
-                if (typeof toast === 'function') toast(err.message, "error");
-            } finally {
-                if (window.hideLoading) window.hideLoading();
-            }
+                        window.toast("Chuyển trạng thái thành công!", "success");
+                        this.loadData();
+                        this.openDetail(id);
+                    } catch (err) {
+                        window.toast(err.message, "error");
+                    } finally {
+                        if (window.hideLoading) window.hideLoading();
+                    }
+                }
+            );
         },
 
-        nextStatus: async function(id) {
-            if (!confirm("Xác nhận chuyển đơn hàng sang bước tiếp theo?")) return;
-            try {
-                if (window.showLoading) window.showLoading();
-                const res = await fetch(`/api/hoa-don/${id}/next-status`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ghiChu: "Admin chuyển trạng thái" })
-                });
-                if (!res.ok) throw new Error("Chuyển trạng thái thất bại");
-                if (typeof toast === 'function') toast("Chuyển trạng thái thành công!", "success");
-                this.loadData();
-                this.openDetail(id);
-            } catch (err) {
-                if (typeof toast === 'function') toast(err.message, "error");
-            } finally {
-                if (window.hideLoading) window.hideLoading();
-            }
-        },
+        huyDon: function(id) {
+            window.toastPrompt(
+                "HỦY HÓA ĐƠN",
+                "Nhập lý do hủy (Tùy chọn)...",
+                async (reason) => {
+                    if (!reason) reason = "Admin hủy đơn";
+                    try {
+                        if (window.showLoading) window.showLoading();
+                        const res = await fetch(`/api/hoa-don/${id}/huy`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ ghiChu: reason })
+                        });
+                        if (!res.ok) throw new Error("Hủy đơn thất bại");
 
-        huyDon: async function(id) {
-            const reason = prompt("Nhập lý do hủy đơn hàng:");
-            if (reason === null) return;
-            try {
-                if (window.showLoading) window.showLoading();
-                const res = await fetch(`/api/hoa-don/${id}/huy`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ghiChu: reason || "Admin hủy đơn" })
-                });
-                if (!res.ok) throw new Error("Hủy đơn thất bại");
-                if (typeof toast === 'function') toast("Đã hủy đơn hàng!", "success");
-                this.closeDrawer();
-                this.loadData();
-            } catch (err) {
-                if (typeof toast === 'function') toast(err.message, "error");
-            } finally {
-                if (window.hideLoading) window.hideLoading();
-            }
+                        window.toast("Đã hủy đơn hàng!", "success");
+                        this.closeDrawer();
+                        this.loadData();
+                    } catch (err) {
+                        window.toast(err.message, "error");
+                    } finally {
+                        if (window.hideLoading) window.hideLoading();
+                    }
+                }
+            );
         },
 
         closeDrawer: function() {

@@ -26,6 +26,17 @@ public class DangNhapController {
     private final VaiTroRepository vaiTroRepository;
     private final PasswordEncoder passwordEncoder;
 
+    private String generateMa() {
+        long count = khachHangRepository.count();
+        String ma;
+        do {
+            count++;
+            ma = String.format("KH%08d", count);
+
+        } while (khachHangRepository.existsByMaIgnoreCase(ma));
+        return ma;
+    }
+
     @PostMapping("/register")
     @Transactional
     public String registerCustomer(
@@ -53,9 +64,8 @@ public class DangNhapController {
                 existingKh.setHoTen(hoTen);
                 khachHangRepository.save(existingKh);
             } else {
-                // TRƯỜNG HỢP B: Khách mới toanh -> Tạo mới 100%
                 KhachHang newCustomer = new KhachHang();
-                newCustomer.setMa("KH" + System.currentTimeMillis());
+                newCustomer.setMa(generateMa());
                 newCustomer.setHoTen(hoTen);
                 newCustomer.setSoDienThoai(soDienThoai);
                 newCustomer.setTaiKhoan(savedAccount);

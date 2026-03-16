@@ -41,7 +41,7 @@
                 </div>
             </div>
             <form th:action="@{/logout}" method="POST" style="display:inline;">
-                <button type="submit" class="logout-icon-btn" title="Đăng xuất" onclick="event.stopPropagation();">
+                <button type="button" class="logout-icon-btn" title="Đăng xuất" onclick="confirmLogout(event)">
                     <i class="bi bi-box-arrow-right"></i>
                 </button>
             </form>
@@ -88,7 +88,7 @@
         <div id="confirmMsg" style="margin-bottom:20px; color:#444;">Bạn có chắc muốn thoát phiên làm việc không?</div>
         <div style="display:flex; justify-content:flex-end; gap:8px;">
             <button onclick="document.getElementById('confirmOverlay').style.display='none'" class="btn">Hủy</button>
-            <button onclick="location.reload()" class="btn primary">Đồng ý</button>
+            <button onclick="executeLogout()" class="btn primary" style="background: #000; color: #fff;">Đồng ý</button>
         </div>
     </div>
 </div>

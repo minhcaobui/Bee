@@ -46,7 +46,6 @@ import java.util.*;
 @RequiredArgsConstructor
 public class PosApi {
 
-    // 🚀 BỘ NHỚ TẠM ĐỂ LƯU GIỎ HÀNG KHI CHỜ THANH TOÁN ONLINE (MOMO/VNPAY)
     private static final Map<String, Map<String, Object>> pendingCarts = new java.util.concurrent.ConcurrentHashMap<>();
 
     private final SanPhamChiTietRepository variantRepo;
@@ -129,16 +128,10 @@ public class PosApi {
     @PostMapping("/invoices")
     @Transactional
     public HoaDon createInvoice() {
-        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        StringBuilder sb = new StringBuilder("HD");
-        Random random = new Random();
-        for (int i = 0; i < 6; i++) {
-            sb.append(characters.charAt(random.nextInt(characters.length())));
-        }
         TrangThaiHoaDon trangThai = trangThaiRepo.findByMa("CHO_THANH_TOAN");
         NhanVien nvTaoDon = getLoggedInNhanVien();
         HoaDon hd = HoaDon.builder()
-                .ma(sb.toString())
+                .ma("HD" + System.currentTimeMillis())
                 .giaTamThoi(BigDecimal.ZERO)
                 .giaTong(BigDecimal.ZERO)
                 .loaiHoaDon(0)
@@ -208,7 +201,6 @@ public class PosApi {
 
             BigDecimal giaTamTinh = BigDecimal.ZERO;
 
-            // Tạo chi tiết + trừ kho (chỉ nếu chưa có)
             if (cart != null && hdctRepo.findByHoaDonId(hd.getId()).isEmpty()) {
                 for (Map<String, Object> item : cart) {
                     Integer spctId = Integer.valueOf(item.get("id").toString());
@@ -486,6 +478,17 @@ public class PosApi {
         return khachHangRepo.findBySoDienThoaiContainingOrHoTenContaining(q, q);
     }
 
+    private String generateMa() {
+        long count = khachHangRepo.count();
+        String ma;
+        do {
+            count++;
+            ma = String.format("KH%08d", count);
+        } while (khachHangRepo.existsByMaIgnoreCase(ma));
+
+        return ma;
+    }
+
     @PostMapping("/customers")
     @Transactional
     public ResponseEntity<?> createCustomer(@RequestBody KhachHang kh) {
@@ -493,12 +496,17 @@ public class PosApi {
         if (sdt == null || sdt.trim().isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("message", "Vui lòng nhập số điện thoại của khách hàng!"));
         }
+
+        // Kiểm tra xem SĐT này đã tồn tại trong DB chưa
         if (taiKhoanRepo.existsByTenDangNhap(sdt)) {
             return ResponseEntity.badRequest().body(Map.of("message", "Số điện thoại này đã được đăng ký trên hệ thống!"));
         }
+
         try {
             VaiTro roleCustomer = vaiTroRepo.findByMa("ROLE_CUSTOMER")
                     .orElseThrow(() -> new RuntimeException("Chưa cấu hình quyền ROLE_CUSTOMER"));
+
+            // 1. Tạo Tài Khoản
             String defaultPassword = "123456";
             TaiKhoan tk = new TaiKhoan();
             tk.setTenDangNhap(sdt);
@@ -507,14 +515,21 @@ public class PosApi {
             tk.setTrangThai(true);
             TaiKhoan savedTk = taiKhoanRepo.save(tk);
 
-            kh.setMa("KH" + System.currentTimeMillis());
+            // 2. Tạo Hồ Sơ Khách Hàng (Hoàn toàn ĐỘC LẬP với Hóa Đơn)
+            kh.setMa(generateMa());
             kh.setHoTen(kh.getHoTen() == null || kh.getHoTen().trim().isEmpty() ? "Khách vãng lai" : kh.getHoTen());
             kh.setTaiKhoan(savedTk);
             kh.setTrangThai(true);
+
             KhachHang savedKh = khachHangRepo.save(kh);
+
+            // Trả thẳng thông tin khách hàng vừa tạo về cho Frontend tự xử lý hiển thị
             return ResponseEntity.ok(savedKh);
+
         } catch (Exception e) {
             e.printStackTrace();
+            // Rollback an toàn nếu có lỗi
+            org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return ResponseEntity.internalServerError().body(Map.of("message", "Lỗi hệ thống khi tạo tài khoản: " + e.getMessage()));
         }
     }

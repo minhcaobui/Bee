@@ -20,6 +20,10 @@ import com.example.bee.repositories.role.NhanVienRepository;
 import com.example.bee.services.EmailService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -48,14 +52,63 @@ public class OrderApi {
     private final ThongBaoRepository thongBaoRepository;
 
     @GetMapping("/don-hang")
-    public List<HoaDon> getDonHangOnline() {
-        return hdRepo.findByLoaiHoaDonAndTrangThaiHoaDonMaInOrderByNgayTaoDesc(1,
-                Arrays.asList("CHO_THANH_TOAN", "HOAN_THANH", "DA_HUY", "CHO_XAC_NHAN", "CHO_GIAO", "DANG_GIAO"));
+    public ResponseEntity<?> getDonHangChoXuLy(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) Integer statusId,
+            @RequestParam(required = false) Integer loaiHoaDon,
+            @RequestParam(required = false) String phuongThucThanhToan,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        q = (q != null && !q.trim().isEmpty()) ? q.trim() : null;
+        phuongThucThanhToan = (phuongThucThanhToan != null && !phuongThucThanhToan.trim().isEmpty()) ? phuongThucThanhToan : null;
+
+        if (endDate != null) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(endDate);
+            cal.set(Calendar.HOUR_OF_DAY, 23);
+            cal.set(Calendar.MINUTE, 59);
+            cal.set(Calendar.SECOND, 59);
+            endDate = cal.getTime();
+        }
+
+        Page<HoaDon> result = hdRepo.searchDonHangChoXuLy(q, statusId, loaiHoaDon, phuongThucThanhToan, startDate, endDate, pageable);
+        return ResponseEntity.ok(result);
     }
 
+    // =======================================================
+    // 2. API LẤY LỊCH SỬ HÓA ĐƠN (Chỉ lấy Hoàn thành & Đã hủy)
+    // =======================================================
     @GetMapping("/lich-su")
-    public List<HoaDon> getLichSu() {
-        return hdRepo.findLichSuHoaDon();
+    public ResponseEntity<?> getLichSu(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) Integer statusId,
+            @RequestParam(required = false) Integer nhanVienId,
+            @RequestParam(required = false) Integer loaiHoaDon,
+            @RequestParam(required = false) String phuongThucThanhToan,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        q = (q != null && !q.trim().isEmpty()) ? q.trim() : null;
+        phuongThucThanhToan = (phuongThucThanhToan != null && !phuongThucThanhToan.trim().isEmpty()) ? phuongThucThanhToan : null;
+
+        if (endDate != null) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(endDate);
+            cal.set(Calendar.HOUR_OF_DAY, 23);
+            cal.set(Calendar.MINUTE, 59);
+            cal.set(Calendar.SECOND, 59);
+            endDate = cal.getTime();
+        }
+
+        Page<HoaDon> result = hdRepo.searchLichSuHoaDon(q, statusId, nhanVienId, loaiHoaDon, phuongThucThanhToan, startDate, endDate, pageable);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{id}")
@@ -462,6 +515,25 @@ public class OrderApi {
         boolean isEmployee = nvRepo.existsBySoDienThoaiAndTrangThaiTrue(phone.trim());
 
         return ResponseEntity.ok(Map.of("isEmployee", isEmployee));
+    }
+
+    @GetMapping("/thong-bao-moi")
+    public ResponseEntity<?> getNewOnlineOrders() {
+        // Tìm 5 đơn Online (loaiHoaDon = 1) đang Chờ xác nhận
+        List<HoaDon> list = hdRepo.findTop5ByLoaiHoaDonAndTrangThaiHoaDon_MaOrderByNgayTaoDesc(1, "CHO_XAC_NHAN");
+
+        // Trả về DTO rút gọn cho nhẹ
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (HoaDon hd : list) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", hd.getId());
+            map.put("ma", hd.getMa());
+            map.put("khachHang", hd.getTenNguoiNhan() != null ? hd.getTenNguoiNhan() : "Khách hàng");
+            map.put("tongTien", hd.getGiaTong());
+            map.put("ngayTao", hd.getNgayTao());
+            result.add(map);
+        }
+        return ResponseEntity.ok(result);
     }
 
     public static class CheckoutRequest {

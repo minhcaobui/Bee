@@ -297,31 +297,59 @@
             this._destroyListeners();
             this._pwdOpen = false;
 
-            // TODO: thay bằng API thực tế — GET /api/profile/me
-            this.data = {
-                ma:          'NV-0047',
-                hinhAnh:     null, // TODO: lấy từ API — nhan_vien.hinh_anh
-                hoTen:       'Nguyễn Thành',
-                gioiTinh:    'Nam',
-                ngaySinh:    '15/08/1998',
-                soDienThoai: '090 123 4567',
-                email:       'thanh.nv@bee.vn',
-                chucVu:      'Thu ngân',
-                diaChiThanhPho: 'Hà Nội', // parse từ dia_chi hoặc field riêng
-                diaChi: '123 Nguyễn Trãi, Thanh Xuân, Hà Nội',
-                tenDangNhap: 'thanh.nv',
-                tenVaiTro:   'Nhân viên',
-                trangThai:   true,
-                stats: {
-                    revenue:    '4,820,000đ',
-                    revenueSub: 'Tổng hóa đơn tại quầy',
-                    tx:         38,
-                    txSub:      'Hóa đơn hoàn thành',
-                }
-            };
+            // GỌI API DÀNH RIÊNG CHO NHÂN VIÊN
+            try {
+                const res = await fetch('/api/admin/nhan-vien/my-profile');
+                if (!res.ok) throw new Error("Chưa đăng nhập hoặc phiên hết hạn");
+                const userData = await res.json();
 
-            this._render();
-            this._bindEvents();
+                // Mapping dữ liệu từ API vào cấu trúc của ProfileApp
+                this.data = {
+                    ma:          userData.ma || '---',
+                    hinhAnh:     userData.hinhAnh || null,
+                    hoTen:       userData.hoTen || 'Nhân viên',
+                    gioiTinh:    userData.gioiTinh || '---',
+                    ngaySinh:    userData.ngaySinh ? this._formatDate(userData.ngaySinh) : '---',
+                    soDienThoai: userData.soDienThoai || '---',
+                    email:       userData.email || '---',
+                    chucVu:      userData.chucVu || 'Nhân sự',
+                    diaChiThanhPho: userData.diaChi ? userData.diaChi.split(',').pop().trim() : '',
+                    diaChi:      userData.diaChi || '---',
+                    tenDangNhap: userData.tenDangNhap || userData.soDienThoai || '---',
+                    tenVaiTro:   userData.vaiTro || 'Nhân viên',
+                    trangThai:   userData.trangThai !== false,
+                    stats: {
+                        revenue:    'Đang cập nhật...',
+                        revenueSub: 'Doanh thu cá nhân',
+                        tx:         '--',
+                        txSub:      'Đơn đã xử lý',
+                    }
+                };
+
+                this._render();
+                this._bindEvents();
+
+            } catch (error) {
+                window.toast && window.toast("Vui lòng đăng nhập lại!", "error");
+                console.error("Lỗi load profile nhân viên:", error);
+            }
+        },
+
+        _formatDate(dateStr) {
+            try {
+                const d = new Date(dateStr);
+                const pad = n => n < 10 ? '0' + n : n;
+                return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+            } catch(e) { return dateStr; }
+        },
+
+        _parseDateForServer(dateStr) {
+            if (!dateStr || !dateStr.includes('/')) return dateStr;
+            const parts = dateStr.split('/');
+            if (parts.length === 3) {
+                return `${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
+            return dateStr;
         },
 
         _initials(name) {
@@ -329,8 +357,7 @@
         },
 
         _calcAge(ngaySinhStr) {
-            // Nhận dd/MM/yyyy hoặc ISO
-            if (!ngaySinhStr) return null;
+            if (!ngaySinhStr || ngaySinhStr === '---') return null;
             let d;
             if (ngaySinhStr.includes('/')) {
                 const [dd, mm, yyyy] = ngaySinhStr.split('/');
@@ -338,6 +365,8 @@
             } else {
                 d = new Date(ngaySinhStr);
             }
+            if (isNaN(d.getTime())) return null;
+
             const now = new Date();
             let age = now.getFullYear() - d.getFullYear();
             if (now < new Date(now.getFullYear(), d.getMonth(), d.getDate())) age--;
@@ -354,7 +383,8 @@
                 avatarEl.textContent = this._initials(d.hoTen);
             }
             document.getElementById('pf-name').textContent   = d.hoTen;
-            const isAdmin = d.vaiTro === 'ROLE_ADMIN';
+
+            const isAdmin = d.tenVaiTro && d.tenVaiTro.includes('ADMIN');
             if (isAdmin) {
                 document.getElementById('pf-meta').textContent = d.chucVu + ' · ' + d.tenVaiTro;
             } else {
@@ -362,8 +392,9 @@
                 const parts = [];
                 if (age)              parts.push(age + ' tuổi');
                 if (d.diaChiThanhPho) parts.push(d.diaChiThanhPho);
-                document.getElementById('pf-meta').textContent = parts.join(' · ');
+                document.getElementById('pf-meta').textContent = parts.join(' · ') || d.chucVu;
             }
+
             document.getElementById('pf-badge').textContent  = d.tenVaiTro;
 
             document.getElementById('pf-revenue').textContent     = d.stats.revenue;
@@ -373,22 +404,20 @@
             document.getElementById('pf-empid').textContent       = d.ma;
             document.getElementById('pf-empid-sub').textContent   = d.chucVu;
 
-            // Account card
             document.getElementById('pf-username').textContent  = d.tenDangNhap;
             document.getElementById('pf-vaitro').textContent    = d.tenVaiTro;
             document.getElementById('pf-trangthai').innerHTML   = d.trangThai
-                ? '<span class="pf-status-badge active">Đang hoạt động</span>'
-                : '<span class="pf-status-badge inactive">Đã khoá</span>';
+                ? '<span class="pf-status-badge active">Đang làm việc</span>'
+                : '<span class="pf-status-badge inactive">Đã nghỉ</span>';
 
-            // Info cá nhân
             const fields = [
-                { key: 'Họ và tên',     val: d.hoTen,       editable: false },
-                { key: 'Giới tính',     val: d.gioiTinh,    editable: false },
-                { key: 'Ngày sinh',     val: d.ngaySinh,    editable: false },
+                { key: 'Họ và tên',     val: d.hoTen,       editable: true,  field: 'hoTen' },
+                { key: 'Giới tính',     val: d.gioiTinh,    editable: true,  field: 'gioiTinh' },
+                { key: 'Ngày sinh',     val: d.ngaySinh,    editable: true,  field: 'ngaySinh' },
                 { key: 'Số điện thoại', val: d.soDienThoai, editable: true,  field: 'soDienThoai' },
                 { key: 'Email',         val: d.email,       editable: true,  field: 'email'       },
                 { key: 'Chức vụ',       val: d.chucVu,      editable: false },
-                { key: 'Địa chỉ',       val: d.diaChi || '—', editable: false },
+                { key: 'Địa chỉ',       val: d.diaChi || '—', editable: true,  field: 'diaChi' },
             ];
 
             document.getElementById('pf-info-list').innerHTML = fields.map((r, i) => `
@@ -399,7 +428,7 @@
           ${r.editable ? `
             <button class="pf-edit-btn" id="pf-eb-${i}" data-idx="${i}">Sửa</button>
             <div class="pf-inline-edit" id="pf-ie-${i}">
-              <input type="text" id="pf-ei-${i}" value="${r.val}" data-idx="${i}" data-field="${r.field}" />
+              <input type="text" id="pf-ei-${i}" value="${r.val !== '---' ? r.val : ''}" data-idx="${i}" data-field="${r.field}" placeholder="Nhập ${r.key.toLowerCase()}..."/>
               <button class="pf-save-btn" data-save="${i}">Lưu</button>
               <button class="pf-cancel-btn" data-cancel="${i}">Huỷ</button>
             </div>` : ''}
@@ -409,8 +438,6 @@
 
         _bindEvents() {
             const self = this;
-
-            // Inline edit
             const infoList = document.getElementById('pf-info-list');
             this._infoClick = e => {
                 const eb = e.target.closest('[data-idx].pf-edit-btn');
@@ -430,19 +457,16 @@
             infoList.addEventListener('click',   this._infoClick);
             infoList.addEventListener('keydown', this._infoKey);
 
-            // Toggle password form
             document.getElementById('pf-toggle-pwd').addEventListener('click', () => self._togglePwd());
             document.getElementById('pf-pwd-cancel').addEventListener('click', () => self._closePwd());
             document.getElementById('pf-pwd-submit').addEventListener('click', () => self._changePassword());
 
-            // Enter trong các field mật khẩu
             ['pf-pwd-cur','pf-pwd-new','pf-pwd-cfm'].forEach(id => {
                 document.getElementById(id).addEventListener('keydown', e => {
                     if (e.key === 'Enter') self._changePassword();
                 });
             });
 
-            // Avatar upload
             document.getElementById('pf-avatar-wrap').addEventListener('click', () => {
                 document.getElementById('pf-avatar-input').click();
             });
@@ -450,13 +474,11 @@
                 self._handleAvatarChange(e);
             });
 
-            // Logout
             document.getElementById('pf-logout').addEventListener('click', () => self._logout());
         },
 
         _destroyListeners() {},
 
-        // ── Inline edit ──
         _startEdit(i) {
             document.getElementById('pf-eb-' + i).style.opacity      = '0';
             document.getElementById('pf-eb-' + i).style.pointerEvents = 'none';
@@ -464,16 +486,65 @@
             document.getElementById('pf-ie-' + i).classList.add('open');
             setTimeout(() => document.getElementById('pf-ei-' + i).focus(), 50);
         },
-        _saveEdit(i) {
+
+        async _saveEdit(i) {
             const input = document.getElementById('pf-ei-' + i);
             const v = input.value.trim();
-            if (!v) return;
-            this.data[input.dataset.field] = v;
+            const field = input.dataset.field;
+
+            if (!v) {
+                window.toast && window.toast('Không được để trống thông tin!', 'warning');
+                return;
+            }
+
+            const oldValue = this.data[field];
+
+            this.data[field] = v;
             document.getElementById('pf-iv-' + i).textContent = v;
             this._cancelEdit(i);
-            // TODO: PATCH /api/profile/me  { [field]: v }
-            window.toast && window.toast('Đã lưu thông tin.', 'success');
+
+            // GỌI API UPDATE DÀNH RIÊNG CHO NHÂN VIÊN
+            try {
+                const payload = {
+                    hoTen: this.data.hoTen,
+                    soDienThoai: this.data.soDienThoai,
+                    gioiTinh: this.data.gioiTinh,
+                    ngaySinh: this._parseDateForServer(this.data.ngaySinh),
+                    email: this.data.email,
+                    diaChi: this.data.diaChi
+                };
+
+                if (field === 'ngaySinh') {
+                    payload[field] = this._parseDateForServer(v);
+                } else {
+                    payload[field] = v;
+                }
+
+                const res = await fetch('/api/admin/nhan-vien/my-profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    window.toast && window.toast('Đã lưu thông tin.', 'success');
+                    if (field === 'hoTen') {
+                        document.getElementById('pf-name').textContent = v;
+                        if (!this.data.hinhAnh) {
+                            document.getElementById('pf-avatar').textContent = this._initials(v);
+                        }
+                    }
+                } else {
+                    throw new Error("Lưu thất bại");
+                }
+            } catch(e) {
+                this.data[field] = oldValue;
+                document.getElementById('pf-iv-' + i).textContent = oldValue;
+                document.getElementById('pf-ei-' + i).value = oldValue;
+                window.toast && window.toast('Cập nhật thất bại. Vui lòng thử lại!', 'error');
+            }
         },
+
         _cancelEdit(i) {
             document.getElementById('pf-ie-' + i).classList.remove('open');
             document.getElementById('pf-iv-' + i).style.opacity = '1';
@@ -481,9 +552,11 @@
                 const eb = document.getElementById('pf-eb-' + i);
                 if (eb) { eb.style.opacity = '1'; eb.style.pointerEvents = ''; }
             }, 220);
+
+            const input = document.getElementById('pf-ei-' + i);
+            input.value = this.data[input.dataset.field] !== '---' ? this.data[input.dataset.field] : '';
         },
 
-        // ── Password form ──
         _togglePwd() {
             this._pwdOpen ? this._closePwd() : this._openPwd();
         },
@@ -501,26 +574,48 @@
             const msg = document.getElementById('pf-pwd-msg');
             msg.style.display = 'none';
         },
-        _changePassword() {
+
+        async _changePassword() {
             const cur = document.getElementById('pf-pwd-cur').value;
             const nxt = document.getElementById('pf-pwd-new').value;
             const cfm = document.getElementById('pf-pwd-cfm').value;
+
             const showMsg = (text, type) => {
                 const el = document.getElementById('pf-pwd-msg');
                 el.textContent = text; el.className = 'pf-pwd-msg ' + type; el.style.display = 'block';
             };
+
             if (!cur || !nxt || !cfm) { showMsg('Vui lòng điền đầy đủ.', 'error'); return; }
-            if (nxt.length < 6)        { showMsg('Mật khẩu mới tối thiểu 6 ký tự.', 'error'); return; }
-            if (nxt !== cfm)           { showMsg('Mật khẩu xác nhận không khớp.', 'error'); return; }
-            // TODO: POST /api/auth/change-password { matKhauCu: cur, matKhauMoi: nxt }
-            window.toast && window.toast('Đổi mật khẩu thành công!', 'success');
-            setTimeout(() => this._closePwd(), 300);
+            if (nxt.length < 8)       { showMsg('Mật khẩu mới tối thiểu 8 ký tự.', 'error'); return; }
+            if (nxt !== cfm)          { showMsg('Mật khẩu xác nhận không khớp.', 'error'); return; }
+
+            // GỌI API ĐỔI MẬT KHẨU NHÂN VIÊN
+            try {
+                const res = await fetch('/api/admin/nhan-vien/change-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        oldPassword: cur,
+                        newPassword: nxt
+                    })
+                });
+
+                if(res.ok) {
+                    showMsg('Đổi mật khẩu thành công!', 'success');
+                    window.toast && window.toast('Đổi mật khẩu thành công!', 'success');
+                    setTimeout(() => this._closePwd(), 1000);
+                } else {
+                    showMsg('Mật khẩu hiện tại không đúng!', 'error');
+                }
+            } catch(e) {
+                showMsg('Không thể kết nối đến máy chủ!', 'error');
+            }
         },
 
         async _handleAvatarChange(e) {
             const file = e.target.files[0];
             if (!file) return;
-            e.target.value = ''; // reset ngay để có thể chọn lại cùng file
+            e.target.value = '';
 
             if (!file.type.startsWith('image/')) {
                 window.toast && window.toast('Chỉ chấp nhận file ảnh.', 'error'); return;
@@ -534,11 +629,9 @@
             const blobUrl   = URL.createObjectURL(file);
             const oldUrl    = this.data.hinhAnh || null;
 
-            // 1. Preview blob ngay lập tức, làm mờ + spinner
             avatarEl.innerHTML = `<img src="${blobUrl}" alt="avatar" style="opacity:0.45;" />`;
             if (overlay) overlay.innerHTML = '<i class="bi bi-arrow-repeat" style="color:#fff;font-size:16px;animation:pf-spin 0.8s linear infinite;"></i>';
 
-            // Inject spin keyframe nếu chưa có
             if (!document.getElementById('pf-spin-style')) {
                 const s = document.createElement('style');
                 s.id = 'pf-spin-style';
@@ -547,30 +640,45 @@
             }
 
             try {
-                // 2. Upload lên Cloudinary qua /api/upload (đúng pattern ProductApp)
                 const formData = new FormData();
                 formData.append('file', file);
                 const res  = await fetch('/api/upload', { method: 'POST', body: formData });
                 const data = await res.json();
 
                 if (res.ok && data.url) {
-                    // 3. Thay blob bằng URL Cloudinary thật
+
+                    // Gọi API UPDATE ảnh nhân viên
+                    const payload = {
+                        hoTen: this.data.hoTen,
+                        soDienThoai: this.data.soDienThoai,
+                        email: this.data.email,
+                        hinhAnh: data.url
+                    };
+
+                    const updateRes = await fetch('/api/admin/nhan-vien/my-profile', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!updateRes.ok) throw new Error('Không thể lưu ảnh vào hồ sơ');
+
                     avatarEl.innerHTML = `<img src="${data.url}" alt="avatar" />`;
                     this.data.hinhAnh  = data.url;
                     URL.revokeObjectURL(blobUrl);
 
-                    // 4. Xóa ảnh cũ trên Cloudinary nếu có
                     if (oldUrl && oldUrl.includes('res.cloudinary.com')) {
-                        fetch(`/api/upload?url=${encodeURIComponent(oldUrl)}`, { method: 'DELETE' })
-                            .catch(() => {}); // fire-and-forget, không block UI
+                        fetch(`/api/upload?url=${encodeURIComponent(oldUrl)}`, { method: 'DELETE' }).catch(() => {});
                     }
+
+                    const miniAvatar = document.querySelector('.user-mini-avatar');
+                    if(miniAvatar) miniAvatar.src = data.url;
 
                     window.toast && window.toast('Đã cập nhật ảnh đại diện.', 'success');
                 } else {
                     throw new Error(data.message || 'Upload thất bại');
                 }
             } catch (err) {
-                // Rollback về trạng thái cũ
                 if (oldUrl) {
                     avatarEl.innerHTML = `<img src="${oldUrl}" alt="avatar" />`;
                 } else {
@@ -579,81 +687,21 @@
                 URL.revokeObjectURL(blobUrl);
                 window.toast && window.toast('Lỗi tải ảnh: ' + err.message, 'error');
             } finally {
-                // Khôi phục overlay camera
                 if (overlay) overlay.innerHTML = '<i class="bi bi-camera-fill"></i>';
             }
         },
 
-        _initOverlayTransition() {
-            if (document.getElementById('pf-overlay-style')) return;
-            const s = document.createElement('style');
-            s.id = 'pf-overlay-style';
-            s.textContent = `
-      #confirmOverlay {
-        opacity: 0 !important;
-        transition: opacity 0.2s ease !important;
-        pointer-events: none;
-      }
-      #confirmOverlay.pf-visible {
-        opacity: 1 !important;
-        pointer-events: all;
-      }
-      #confirmOverlay .card {
-        transform: translateY(12px) scale(0.97);
-        transition: transform 0.25s cubic-bezier(0.4,0,0.2,1) !important;
-      }
-      #confirmOverlay.pf-visible .card {
-        transform: translateY(0) scale(1);
-      }
-    `;
-            document.head.appendChild(s);
-        },
-
-        _showOverlay(overlay) {
-            overlay.style.display = 'flex';
-            requestAnimationFrame(() => requestAnimationFrame(() => overlay.classList.add('pf-visible')));
-        },
-
-        _hideOverlay(overlay) {
-            overlay.classList.remove('pf-visible');
-            setTimeout(() => { overlay.style.display = 'none'; }, 200);
-        },
-
         _logout() {
-            const overlay = document.getElementById('confirmOverlay');
-            const msg     = document.getElementById('confirmMsg');
-            if (!overlay) {
-                if (confirm('Bạn có chắc muốn đăng xuất không?')) {
-                    const form = document.querySelector('form[action*="/logout"]');
-                    if (form) form.submit();
-                }
-                return;
+            if(typeof window.confirmLogout === 'function') {
+                window.confirmLogout();
+            } else {
+                const form = document.querySelector('form[action*="/logout"]');
+                if (form) form.submit();
             }
-
-            this._initOverlayTransition();
-            if (msg) msg.textContent = 'Bạn có chắc muốn thoát phiên làm việc không?';
-
-            const cancelBtn = overlay.querySelector('.btn:not(.primary)');
-            if (cancelBtn) {
-                const nb = cancelBtn.cloneNode(true);
-                cancelBtn.replaceWith(nb);
-                nb.onclick = () => this._hideOverlay(overlay);
-            }
-
-            const confirmBtn = overlay.querySelector('.btn.primary');
-            if (confirmBtn) {
-                const nb = confirmBtn.cloneNode(true);
-                confirmBtn.replaceWith(nb);
-                nb.onclick = () => {
-                    this._hideOverlay(overlay);
-                    setTimeout(() => {
-                        const form = document.querySelector('form[action*="/logout"]');
-                        if (form) form.submit();
-                    }, 210);
-                };
-            }
-
-            this._showOverlay(overlay);
         },
     };
+
+    setTimeout(() => {
+        ProfileApp.init();
+    }, 100);
 </script>

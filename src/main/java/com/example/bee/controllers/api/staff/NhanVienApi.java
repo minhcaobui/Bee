@@ -1,27 +1,30 @@
 package com.example.bee.controllers.api.staff;
 
+import com.example.bee.entities.account.TaiKhoan;
 import com.example.bee.entities.staff.CV;
 import com.example.bee.entities.staff.NV;
 import com.example.bee.entities.staff.TK;
 import com.example.bee.entities.staff.VT;
+import com.example.bee.entities.user.NhanVien;
+import com.example.bee.repositories.account.TaiKhoanRepository;
+import com.example.bee.repositories.role.NhanVienRepository;
 import com.example.bee.repositories.staff.NVRepository;
 import com.example.bee.repositories.staff.TKRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 @Controller
 @RequestMapping("/api/admin/nhan-vien")
@@ -31,6 +34,8 @@ public class NhanVienApi {
     private static final Map<String, String> otpStorage = new HashMap<>();
     private final NVRepository nvRepo;
     private final TKRepository tkRepo;
+    private final TaiKhoanRepository taiKhoanRepo;
+    private final NhanVienRepository nhanVienRepository;
     private final PasswordEncoder passwordEncoder;
     private final JavaMailSender mailSender;
     @Value("${spring.mail.username}")
@@ -230,5 +235,122 @@ public class NhanVienApi {
         String hashTrongDb = admin.getMatKhau();
         boolean isMatch = passwordEncoder.matches("123456", hashTrongDb);
         return "Mã Hash trong DB: " + hashTrongDb + "<br>Kết quả so sánh với '123456': " + (isMatch ? "KHỚP 100% (Mật khẩu đúng)" : "SAI BÉT (Mật khẩu sai)");
+    }
+
+    @GetMapping("/my-profile")
+    public ResponseEntity<?> getMyProfile(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Chưa đăng nhập"));
+        }
+
+        String username = authentication.getName();
+        Optional<NhanVien> nvOpt = nhanVienRepository.findByTaiKhoan_TenDangNhap(username);
+
+        if (nvOpt.isEmpty()) {
+            // Nếu là Admin tối cao (Không nằm trong bảng Nhân viên)
+            TaiKhoan tk = taiKhoanRepo.findByTenDangNhap(username).orElse(null);
+            if (tk != null) {
+                Map<String, Object> adminData = new HashMap<>();
+                adminData.put("hoTen", "Quản trị viên hệ thống");
+                adminData.put("tenDangNhap", tk.getTenDangNhap());
+                adminData.put("vaiTro", tk.getVaiTro() != null ? tk.getVaiTro().getTen() : "ADMIN");
+                adminData.put("chucVu", "System Admin");
+                return ResponseEntity.ok(adminData);
+            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Không tìm thấy hồ sơ"));
+        }
+
+        NhanVien nv = nvOpt.get();
+        Map<String, Object> data = new HashMap<>();
+        data.put("ma", nv.getMa());
+        data.put("hoTen", nv.getHoTen());
+        data.put("hinhAnh", nv.getHinhAnh());
+        data.put("gioiTinh", nv.getGioiTinh());
+        data.put("ngaySinh", nv.getNgaySinh() != null ? nv.getNgaySinh().toString() : null);
+        data.put("soDienThoai", nv.getSoDienThoai());
+        data.put("email", nv.getEmail());
+        data.put("diaChi", nv.getDiaChi());
+        data.put("tenDangNhap", nv.getTaiKhoan() != null ? nv.getTaiKhoan().getTenDangNhap() : "");
+        data.put("vaiTro", nv.getTaiKhoan() != null && nv.getTaiKhoan().getVaiTro() != null ? nv.getTaiKhoan().getVaiTro().getMa() : "");
+        data.put("chucVu", nv.getChucVu() != null ? nv.getChucVu().getTen() : "Nhân viên");
+        data.put("trangThai", nv.getTrangThai());
+
+        return ResponseEntity.ok(data);
+    }
+
+    // ========================================================
+    // 2. API CẬP NHẬT THÔNG TIN CÁ NHÂN (VÀ ẢNH ĐẠI DIỆN)
+    // ========================================================
+    @PutMapping("/my-profile")
+    @Transactional
+    public ResponseEntity<?> updateProfile(@RequestBody Map<String, String> payload, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Chưa đăng nhập"));
+        }
+
+        String username = authentication.getName();
+        Optional<NhanVien> nvOpt = nhanVienRepository.findByTaiKhoan_TenDangNhap(username);
+
+        if (nvOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Không tìm thấy hồ sơ nhân viên để cập nhật"));
+        }
+
+        NhanVien nv = nvOpt.get();
+
+        // Cập nhật các trường được gửi lên
+        if (payload.containsKey("hoTen")) nv.setHoTen(payload.get("hoTen"));
+        if (payload.containsKey("soDienThoai")) nv.setSoDienThoai(payload.get("soDienThoai"));
+        if (payload.containsKey("email")) nv.setEmail(payload.get("email"));
+        if (payload.containsKey("gioiTinh")) nv.setGioiTinh(payload.get("gioiTinh"));
+        if (payload.containsKey("diaChi")) nv.setDiaChi(payload.get("diaChi"));
+        if (payload.containsKey("hinhAnh")) nv.setHinhAnh(payload.get("hinhAnh")); // Lưu URL ảnh Cloudinary
+
+        // Xử lý ngày sinh
+        if (payload.containsKey("ngaySinh") && payload.get("ngaySinh") != null && !payload.get("ngaySinh").isEmpty()) {
+            try {
+                nv.setNgaySinh(java.sql.Date.valueOf(payload.get("ngaySinh"))); // Format: yyyy-MM-dd
+            } catch (Exception e) {
+                // Bỏ qua nếu lỗi format ngày
+            }
+        }
+
+        nhanVienRepository.save(nv);
+        return ResponseEntity.ok(Map.of("message", "Cập nhật hồ sơ thành công"));
+    }
+
+    // ========================================================
+    // 3. API ĐỔI MẬT KHẨU
+    // ========================================================
+    @PostMapping("/change-password")
+    @Transactional
+    public ResponseEntity<?> changePassword(@RequestBody Map<String, String> payload, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Chưa đăng nhập"));
+        }
+
+        String username = authentication.getName();
+        TaiKhoan tk = taiKhoanRepo.findByTenDangNhap(username).orElse(null);
+
+        if (tk == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Tài khoản không tồn tại"));
+        }
+
+        String oldPw = payload.get("oldPassword");
+        String newPw = payload.get("newPassword");
+
+        if (oldPw == null || newPw == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Dữ liệu không hợp lệ"));
+        }
+
+        // Kiểm tra mật khẩu cũ có khớp trong Database không
+        if (!passwordEncoder.matches(oldPw, tk.getMatKhau())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Mật khẩu hiện tại không đúng"));
+        }
+
+        // Mã hóa mật khẩu mới và lưu
+        tk.setMatKhau(passwordEncoder.encode(newPw));
+        taiKhoanRepo.save(tk);
+
+        return ResponseEntity.ok(Map.of("message", "Đổi mật khẩu thành công"));
     }
 }

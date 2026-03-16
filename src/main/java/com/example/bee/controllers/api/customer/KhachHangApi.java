@@ -43,11 +43,12 @@ public class KhachHangApi {
     private final PasswordEncoder passwordEncoder;
 
     private String generateMa() {
+        long count = khRepo.count();
         String ma;
         do {
-            StringBuilder sb = new StringBuilder("KH");
-            for (int i = 0; i < 6; i++) sb.append(RAND.nextInt(10));
-            ma = sb.toString();
+            count++;
+            ma = String.format("KH%08d", count);
+
         } while (khRepo.existsByMaIgnoreCase(ma));
         return ma;
     }

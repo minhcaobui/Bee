@@ -976,10 +976,27 @@
         },
 
         selectCustomer: function (name, phone, id) {
-            const inv = this.getCurrentInvoice();
-            if (!inv) { toast("VUI LÒNG TẠO HÓA ĐƠN TRƯỚC", "warning"); return; }
-            inv.customer = name; inv.phone = phone; inv.customerId = id;
-            this.saveState(); this.renderTabs(); this.closeModal('customerModal');
+            let inv = this.getCurrentInvoice();
+
+            // NẾU CHƯA CÓ HÓA ĐƠN: Tự động tạo 1 hóa đơn mới thay vì báo lỗi
+            if (!inv) {
+                if (this.invoices.length >= 5) {
+                    toast("ĐÃ ĐẠT TỐI ĐA 5 HÓA ĐƠN CHỜ", "warning");
+                    return;
+                }
+                // Tự động kích hoạt hàm tạo hóa đơn
+                this.createInvoice();
+                // Lấy lại hóa đơn vừa được tạo
+                inv = this.getCurrentInvoice();
+            }
+
+            inv.customer = name;
+            inv.phone = phone;
+            inv.customerId = id;
+
+            this.saveState();
+            this.renderTabs();
+            this.closeModal('customerModal');
         },
 
         // --- MÀN HÌNH THANH TOÁN: XỬ LÝ CHỐT ĐƠN VÀ GỌI IN HÓA ĐƠN MỘT MẠCH ---
@@ -1291,23 +1308,40 @@
             const name  = document.getElementById('newCustName').value.trim();
             const phone = document.getElementById('newCustPhone').value.trim();
             if (!name || !phone) { toast("VUI LÒNG NHẬP ĐỦ THÔNG TIN", "warning"); return; }
+
             try {
+                // Kiểm tra SĐT (Tìm kiếm chính xác bằng cách filter dữ liệu trả về)
                 const checkRes = await fetch(`/api/pos/customers/search?q=${phone}`);
                 const existing = await checkRes.json();
                 const duplicate = existing.find(c => c.soDienThoai === phone);
-                if (duplicate) { toast(`SĐT ĐÃ TỒN TẠI`, "warning"); return; }
-            } catch (e) { toast("LỖI KIỂM TRA SĐT", "error"); return; }
+                if (duplicate) { toast(`SỐ ĐIỆN THOẠI ĐÃ TỒN TẠI`, "warning"); return; }
 
-            const res = await fetch('/api/pos/customers', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ hoTen: name, soDienThoai: phone })
-            });
-            if (res.ok) {
-                const kh = await res.json();
-                this.selectCustomer(kh.hoTen, kh.soDienThoai, kh.id);
-                // NHẮC THU NGÂN MẬT KHẨU TẠO LÀ 123456
-                toast("Đã thêm khách. Hãy báo khách đăng nhập bằng Mật khẩu: 123456", "success");
-            } else { toast("LỖI KHI THÊM KHÁCH", "error"); }
+                // Gọi API tạo khách hàng
+                const res = await fetch('/api/pos/customers', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ hoTen: name, soDienThoai: phone })
+                });
+
+                if (res.ok) {
+                    const kh = await res.json();
+
+                    // Gắn khách hàng vào Hóa đơn (Hoặc tự tạo HĐ mới nếu chưa có)
+                    this.selectCustomer(kh.hoTen, kh.soDienThoai, kh.id);
+
+                    // Xóa rỗng form thêm mới để lần sau mở lên cho sạch sẽ
+                    document.getElementById('newCustName').value = '';
+                    document.getElementById('newCustPhone').value = '';
+
+                    // Hiện thông báo thành công
+                    toast("Đã thêm khách. Mật khẩu đăng nhập mặc định: 123456", "success");
+                } else {
+                    const error = await res.json();
+                    toast(error.message || "LỖI KHI THÊM KHÁCH", "error");
+                }
+            } catch (e) {
+                toast("LỖI HỆ THỐNG", "error");
+            }
         },
 
         selectApp: function(el) {
