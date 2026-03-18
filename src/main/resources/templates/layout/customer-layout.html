@@ -102,7 +102,6 @@
         .footer-socials a { font-size:12px; letter-spacing:.1em; color:rgba(255,255,255,.4); text-decoration:none; text-transform:uppercase; transition:color .2s ease; cursor:none; }
         .footer-socials a:hover { color:var(--accent-light); }
 
-        /* --- HIỆU ỨNG GIỎ HÀNG GIẬT NẢY --- */
         @keyframes cartBounce {
             0% { transform: scale(1); }
             40% { transform: scale(1.3) translateY(-3px); }
@@ -114,7 +113,6 @@
             animation: cartBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        /* --- NÚT CUỘN LÊN ĐẦU TRANG --- */
         #back-to-top {
             position: fixed; bottom: 30px; right: 30px;
             width: 44px; height: 44px; background: var(--text); color: white;
@@ -197,7 +195,6 @@
     <div class="page-selector" id="pageSelector">
         <a href="#home"   class="page-tab" data-tab="home"><i class="fa-solid fa-house"></i> Trang chủ</a>
         <a href="#shop"   class="page-tab" data-tab="shop"><i class="fa-solid fa-shirt"></i> Sản phẩm</a>
-        <a href="#detail" class="page-tab" data-tab="detail"><i class="fa-solid fa-magnifying-glass"></i> Chi tiết SP</a>
     </div>
 </div>
 
@@ -253,31 +250,21 @@
     /* ── TOÀN CỤC: QUẢN LÝ THÔNG BÁO API ── */
     window.NotificationApp = {
         notifications: [],
-
-        init: async function() {
-            await this.fetchData();
-        },
-
+        init: async function() { await this.fetchData(); },
         fetchData: async function() {
             try {
-                // TODO: Đổi URL này khớp với đường dẫn Java Controller của bạn
                 const res = await fetch('/api/thong-bao/my-notifications');
-                if (!res.ok) return; // Bỏ qua nếu khách chưa đăng nhập
-
+                if (!res.ok) return;
                 this.notifications = await res.json();
                 this.render();
-            } catch(e) {
-                console.warn("Chưa gọi được API Thông báo thực tế, bỏ qua lỗi.");
-            }
+            } catch(e) {}
         },
-
         render: function() {
             const list = document.getElementById('notifList');
             const badge = document.getElementById('notifBadge');
             const empty = document.getElementById('notifEmpty');
 
             if (!list) return;
-
             if (!this.notifications || this.notifications.length === 0) {
                 list.innerHTML = '';
                 empty.style.display = 'block';
@@ -291,19 +278,11 @@
 
             this.notifications.forEach(n => {
                 if (!n.daDoc) unreadCount++;
-
-                // Xác định Icon (Tùy biến theo Field loaiThongBao của Backend)
                 let iconClass = 'event'; let iconHtml = '<i class="fa-solid fa-bell"></i>';
                 let typeStr = n.loaiThongBao ? n.loaiThongBao.toLowerCase() : 'event';
-
-                if (typeStr.includes('order') || typeStr.includes('don_hang')) {
-                    iconClass = 'order'; iconHtml = '<i class="fa-solid fa-truck-fast"></i>';
-                } else if (typeStr.includes('voucher') || typeStr.includes('khuyen_mai')) {
-                    iconClass = 'voucher'; iconHtml = '<i class="fa-solid fa-tag"></i>';
-                }
-
+                if (typeStr.includes('order') || typeStr.includes('don_hang')) { iconClass = 'order'; iconHtml = '<i class="fa-solid fa-truck-fast"></i>'; }
+                else if (typeStr.includes('voucher') || typeStr.includes('khuyen_mai')) { iconClass = 'voucher'; iconHtml = '<i class="fa-solid fa-tag"></i>'; }
                 const unreadClass = n.daDoc ? '' : 'unread';
-
                 html += `
                     <div class="notif-item ${unreadClass}" data-notif-type="${iconClass}" onclick="window.NotificationApp.markAsRead(${n.id}, this)">
                         <div class="notif-icon ${iconClass}">${iconHtml}</div>
@@ -315,129 +294,81 @@
                     </div>
                 `;
             });
-
             list.innerHTML = html;
 
-            // Xử lý đếm Badge màu đỏ
             if (badge) {
                 if (unreadCount > 0) {
                     badge.innerText = unreadCount > 99 ? '99+' : unreadCount;
-                    badge.style.display = 'flex';
-                    badge.style.opacity = '1';
-                    badge.style.transform = 'scale(1)';
-                } else {
-                    badge.style.display = 'none';
-                }
-            }
-
-            // Ghi nhớ Tab đang chọn
-            const activeTab = document.querySelector('.notif-tab.active');
-            if(activeTab) {
-                const typeMatch = activeTab.getAttribute('onclick').match(/'([^']+)'/);
-                if(typeMatch) switchNotifTab(activeTab, typeMatch[1]);
+                    badge.style.display = 'flex'; badge.style.opacity = '1'; badge.style.transform = 'scale(1)';
+                } else { badge.style.display = 'none'; }
             }
         },
-
         markAsRead: async function(id, el) {
             try {
-                // Chặn hành vi mở link mặc định nếu có thẻ a bên trong
                 const notif = this.notifications.find(n => n.id === id);
                 if (!notif) return;
-
-                // Nếu chưa đọc thì mới gọi API update
                 if (!notif.daDoc) {
-                    // TODO: Đổi URL API này
                     await fetch(`/api/thong-bao/${id}/read`, { method: 'PUT' });
                     notif.daDoc = true;
                     if (el) el.classList.remove('unread');
                     this.updateBadgeOnly();
                 }
-
-                // Nếu là đơn hàng -> chuyển sang account
                 if (notif.loaiThongBao && (notif.loaiThongBao.toLowerCase().includes('order') || notif.loaiThongBao.toLowerCase().includes('don_hang'))) {
                     window.location.hash = '#account';
                 }
                 closeNotif();
-
-            } catch(e) { console.error(e); }
+            } catch(e) {}
         },
-
         markAllRead: async function() {
             try {
-                // TODO: Đổi URL API này
                 await fetch(`/api/thong-bao/mark-all-read`, { method: 'PUT' });
-
                 this.notifications.forEach(n => n.daDoc = true);
                 document.querySelectorAll('#notifList .notif-item.unread').forEach(item => item.classList.remove('unread'));
                 this.updateBadgeOnly();
-            } catch(e) { console.error(e); }
+            } catch(e) {}
         },
-
         updateBadgeOnly: function() {
             const badge = document.getElementById('notifBadge');
             const unreadCount = this.notifications.filter(n => !n.daDoc).length;
             if (badge) {
-                if (unreadCount > 0) {
-                    badge.innerText = unreadCount > 99 ? '99+' : unreadCount;
-                } else {
-                    badge.style.opacity = '0';
-                    badge.style.transform = 'scale(0)';
-                    setTimeout(() => badge.style.display = 'none', 300);
-                }
+                if (unreadCount > 0) { badge.innerText = unreadCount > 99 ? '99+' : unreadCount; }
+                else { badge.style.opacity = '0'; badge.style.transform = 'scale(0)'; setTimeout(() => badge.style.display = 'none', 300); }
             }
         },
-
         timeAgo: function(dateStr) {
             if(!dateStr) return '';
-            const date = new Date(dateStr);
-            const seconds = Math.floor((new Date() - date) / 1000);
-            let interval = seconds / 31536000;
-            if (interval > 1) return Math.floor(interval) + " năm trước";
-            interval = seconds / 2592000;
-            if (interval > 1) return Math.floor(interval) + " tháng trước";
-            interval = seconds / 86400;
-            if (interval > 1) return Math.floor(interval) + " ngày trước";
-            interval = seconds / 3600;
-            if (interval > 1) return Math.floor(interval) + " giờ trước";
-            interval = seconds / 60;
-            if (interval > 1) return Math.floor(interval) + " phút trước";
+            const date = new Date(dateStr); const seconds = Math.floor((new Date() - date) / 1000);
+            let interval = seconds / 31536000; if (interval > 1) return Math.floor(interval) + " năm trước";
+            interval = seconds / 2592000; if (interval > 1) return Math.floor(interval) + " tháng trước";
+            interval = seconds / 86400; if (interval > 1) return Math.floor(interval) + " ngày trước";
+            interval = seconds / 3600; if (interval > 1) return Math.floor(interval) + " giờ trước";
+            interval = seconds / 60; if (interval > 1) return Math.floor(interval) + " phút trước";
             return "Vừa xong";
         }
     };
 
-    /* ── TOÀN CỤC: CẬP NHẬT & GIẬT NẢY GIỎ HÀNG ── */
     window.updateCartBadge = function() {
         try {
             const cart = JSON.parse(localStorage.getItem('bee_cart') || '[]');
             const totalQty = cart.reduce((sum, item) => sum + (parseInt(item.qty) || 0), 0);
-
             const badge = document.getElementById('cartBadge');
             const iconWrap = document.querySelector('.cart-icon');
-
             if (badge) {
                 if (totalQty > parseInt(badge.textContent || 0)) {
-                    iconWrap.classList.remove('bounce');
-                    void iconWrap.offsetWidth;
-                    iconWrap.classList.add('bounce');
+                    iconWrap.classList.remove('bounce'); void iconWrap.offsetWidth; iconWrap.classList.add('bounce');
                 }
                 badge.textContent = totalQty;
                 badge.style.display = totalQty > 0 ? 'flex' : 'none';
             }
-        } catch (e) { console.error("Lỗi cập nhật badge:", e); }
+        } catch (e) {}
     };
 
-    /* Scroll - Cập nhật để hiện nút Back to Top */
     window.addEventListener('scroll', () => {
         document.getElementById('site-header').classList.toggle('scrolled', window.scrollY > 20);
-
         const btt = document.getElementById('back-to-top');
-        if (btt) {
-            if (window.scrollY > 400) btt.classList.add('show');
-            else btt.classList.remove('show');
-        }
+        if (btt) { if (window.scrollY > 400) btt.classList.add('show'); else btt.classList.remove('show'); }
     });
 
-    /* Cursor */
     const cursor = document.getElementById('cursor');
     const cursorRing = document.getElementById('cursorRing');
     document.addEventListener('mousemove', e => {
@@ -445,7 +376,6 @@
         setTimeout(() => { cursorRing.style.left = e.clientX + 'px'; cursorRing.style.top = e.clientY + 'px'; }, 60);
     });
 
-    /* Cart toast */
     let toastTimeout;
     window.showToast = function(message, type = 'success') {
         const toast = document.getElementById('cartToast');
@@ -462,52 +392,34 @@
             toastIcon.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2" style="width:16px;height:16px;stroke:white;fill:none;"><path d="M5 13l4 4L19 7"/></svg>';
             toastTitle.innerText = 'Đã thêm vào giỏ hàng';
         }
-
         toastDesc.innerText = message;
         toast.classList.add('show');
-
         clearTimeout(window.toastTimeout);
         window.toastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
-
-        if (type === 'success') {
-            if (window.updateCartBadge) window.updateCartBadge();
-        }
+        if (type === 'success') { if (window.updateCartBadge) window.updateCartBadge(); }
     };
 
-    /* Active tab */
     window.addEventListener('hashchange', () => {
         const hash = window.location.hash.slice(1).split('?')[0] || 'home';
         document.querySelectorAll('.page-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === hash));
     });
 
-    /* Khi load trang (F5) */
     document.addEventListener('DOMContentLoaded', () => {
         window.updateCartBadge();
         window.dispatchEvent(new Event('hashchange'));
         adjustContentPadding();
-
-        // Khởi tạo Thông báo
         window.NotificationApp.init();
     });
 
-    /* Padding */
     function adjustContentPadding() {
         const header = document.getElementById('site-header');
-        if (header) {
-            document.getElementById('content-area').style.paddingTop = header.offsetHeight + 'px';
-        }
+        if (header) { document.getElementById('content-area').style.paddingTop = header.offsetHeight + 'px'; }
     }
     window.addEventListener('resize', adjustContentPadding);
 
-    /* ── TAB THÔNG BÁO UI ── */
-    function toggleNotif(e) {
-        e.stopPropagation();
-        document.getElementById('notifDropdown').classList.toggle('open');
-    }
+    function toggleNotif(e) { e.stopPropagation(); document.getElementById('notifDropdown').classList.toggle('open'); }
     function closeNotif() { document.getElementById('notifDropdown').classList.remove('open'); }
-    document.addEventListener('click', e => {
-        if (!document.getElementById('notifWrap').contains(e.target)) closeNotif();
-    });
+    document.addEventListener('click', e => { if (!document.getElementById('notifWrap').contains(e.target)) closeNotif(); });
     function switchNotifTab(btn, type) {
         document.querySelectorAll('.notif-tab').forEach(t => t.classList.remove('active'));
         btn.classList.add('active');
@@ -520,14 +432,7 @@
         document.getElementById('notifEmpty').style.display = visible === 0 ? 'block' : 'none';
     }
 
-    /* ── SEARCH OVERLAY ── */
-    const MOCK_PRODUCTS = [
-        { id: 1, name:'Áo Linen Oversize Dài Tay', price:'490.000 ₫', color:'linear-gradient(160deg,#e8ddd1,#c4b49d)' },
-        { id: 2, name:'Áo Sơ Mi Linen Xanh Rêu',  price:'450.000 ₫', color:'linear-gradient(160deg,#c5cfc7,#3D5A4C)' },
-        { id: 3, name:'Áo Cotton Cổ Tròn Basic',   price:'320.000 ₫', color:'linear-gradient(160deg,#d4cfc9,#b0a99f)' },
-        { id: 4, name:'Áo Thun Bamboo Nhẹ',        price:'280.000 ₫', color:'linear-gradient(160deg,#cfd4cc,#94a091)' },
-        { id: 5, name:'Áo Polo Cotton Wash',       price:'380.000 ₫', color:'linear-gradient(160deg,#d1c9c0,#a89e93)' },
-    ];
+    /* ── 🌟 NÂNG CẤP TÌM KIẾM THẬT TỪ DATABASE 🌟 ── */
     window.openSearch = function() {
         closeNotif();
         const o = document.getElementById('searchOverlay');
@@ -559,6 +464,8 @@
         const input = document.getElementById('searchInput');
         if (input) { input.value=val; input.focus(); handleSearchInput(val); }
     };
+
+    // GỌI API ĐỂ LẤY DỮ LIỆU TÌM KIẾM
     window.handleSearchInput = function(val) {
         const cb = document.getElementById('searchClearBtn');
         const pop = document.getElementById('searchPopular');
@@ -574,23 +481,54 @@
         if (pop) pop.style.display='none';
         if (res) res.style.display='';
 
-        const filtered = MOCK_PRODUCTS.filter(p => p.name.toLowerCase().includes(val.toLowerCase()));
-        if (!lst) return;
+        lst.innerHTML = '<div style="font-size:14px;color:var(--muted);font-weight:300;padding:16px 0">Đang tìm kiếm...</div>';
 
-        if (filtered.length === 0) {
-            lst.innerHTML = '<div style="font-size:14px;color:var(--muted);font-weight:300;padding:16px 0">Không tìm thấy sản phẩm phù hợp.</div>';
-            return;
-        }
+        // Debounce chống spam API
+        clearTimeout(window.searchTimeout);
+        window.searchTimeout = setTimeout(async () => {
+            try {
+                // Gọi API lấy dữ liệu sản phẩm đang kinh doanh
+                const response = await fetch(`/api/products?q=${val}&trangThai=true&page=0&size=5`);
+                const data = await response.json();
 
-        const regex = new RegExp(`(${val})`, "gi");
-        lst.innerHTML = filtered.map(p => {
-            const highlightedName = p.name.replace(regex, '<span style="color: var(--accent); font-weight: 600; background: rgba(61,90,76,0.1); padding: 0 2px; border-radius: 2px;">$1</span>');
-            return `<div style="display:flex;align-items:center;gap:20px;padding:14px 0;border-bottom:1px solid rgba(0,0,0,.06);cursor:pointer" onclick="closeSearch();location.hash='#detail?id=${p.id || 1}'">
-                <div style="width:44px;height:56px;flex-shrink:0;background:${p.color}"></div>
-                <div style="font-family:'Cormorant Garamond',serif;font-size:18px;flex:1">${highlightedName}</div>
-                <div style="font-size:13px;color:var(--muted)">${p.price}</div>
-            </div>`;
-        }).join('');
+                // Lọc bỏ những sản phẩm đang làm nháp (chưa có biến thể)
+                let filtered = data.content || data;
+                filtered = filtered.filter(p => {
+                    const variants = p.chiTietSanPhams || p.chiTietSanPhamList || p.bienThes || p.skus || [];
+                    return variants.length > 0;
+                });
+
+                if (!filtered || filtered.length === 0) {
+                    lst.innerHTML = '<div style="font-size:14px;color:var(--muted);font-weight:300;padding:16px 0">Không tìm thấy sản phẩm phù hợp.</div>';
+                    return;
+                }
+
+                const regex = new RegExp(`(${val})`, "gi");
+                lst.innerHTML = filtered.map(p => {
+                    const highlightedName = p.ten.replace(regex, '<span style="color: var(--accent); font-weight: 600; background: rgba(61,90,76,0.1); padding: 0 2px; border-radius: 2px;">$1</span>');
+
+                    // Lấy ảnh chính
+                    let imgUrl = p.hinhAnhs && p.hinhAnhs.length > 0 ? p.hinhAnhs[0].url : 'https://placehold.co/44x56?text=SP';
+                    if (imgUrl.includes('res.cloudinary.com')) {
+                        imgUrl = imgUrl.replace('/image/upload/', '/image/upload/c_fill,w_44,h_56,f_auto,q_auto/');
+                    }
+
+                    // Lấy giá
+                    const variants = p.chiTietSanPhams || p.chiTietSanPhamList || p.bienThes || p.skus || [];
+                    const minPrice = variants.length > 0 ? Math.min(...variants.map(v => v.giaBan || 0)) : (p.giaBan || 0);
+                    const priceText = minPrice > 0 ? new Intl.NumberFormat('vi-VN').format(minPrice) + ' ₫' : 'Đang cập nhật';
+
+                    return `<div style="display:flex;align-items:center;gap:20px;padding:14px 0;border-bottom:1px solid rgba(0,0,0,.06);cursor:pointer" onclick="closeSearch();location.hash='#detail?id=${p.id}'">
+                        <div style="width:44px;height:56px;flex-shrink:0;background:#f4f4f5"><img src="${imgUrl}" style="width:100%;height:100%;object-fit:cover;"></div>
+                        <div style="font-family:'Cormorant Garamond',serif;font-size:18px;flex:1">${highlightedName}</div>
+                        <div style="font-size:13px;color:var(--muted)">${priceText}</div>
+                    </div>`;
+                }).join('');
+
+            } catch(e) {
+                lst.innerHTML = '<div style="font-size:14px;color:var(--muted);font-weight:300;padding:16px 0">Lỗi trong quá trình tìm kiếm.</div>';
+            }
+        }, 400);
     };
     document.addEventListener('keydown', e => { if (e.key==='Escape') closeSearch(); });
 </script>

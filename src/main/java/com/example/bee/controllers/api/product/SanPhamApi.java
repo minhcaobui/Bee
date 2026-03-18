@@ -20,6 +20,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
+import com.example.bee.entities.promotion.KhuyenMai;
+import com.example.bee.repositories.promotion.KhuyenMaiRepository;
+import java.math.BigDecimal;
 
 import java.net.URI;
 import java.util.*;
@@ -36,6 +39,7 @@ public class SanPhamApi {
     private final SanPhamChiTietRepository variantRepo;
     private final MauSacRepository mauSacRepo;
     private final KichThuocRepository kichThuocRepo;
+    private final KhuyenMaiRepository khuyenMaiRepo;
 
     @GetMapping
     public Page<SanPham> list(
@@ -48,7 +52,50 @@ public class SanPhamApi {
             @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-        return sanPhamrepo.search(q, trangThai, idDanhMuc, idHang, idChatLieu, pageable);
+
+        // 1. Lấy danh sách sản phẩm từ DB
+        Page<SanPham> pageResult = sanPhamrepo.search(q, trangThai, idDanhMuc, idHang, idChatLieu, pageable);
+
+        // 2. 🌟 VÒNG LẶP TÍNH GIÁ SALE CHO TỪNG BIẾN THỂ TRƯỚC KHI TRẢ VỀ FRONTEND
+        for (SanPham sp : pageResult.getContent()) {
+            // Tìm xem SP này có đang được áp dụng đợt Sale nào không
+            List<KhuyenMai> activeSales = khuyenMaiRepo.findActiveKhuyenMaiBySanPhamId(sp.getId());
+
+            // Nếu sản phẩm có biến thể (Màu/Size)
+            if (sp.getChiTietSanPhams() != null) {
+                for (SanPhamChiTiet spct : sp.getChiTietSanPhams()) {
+                    BigDecimal giaGoc = spct.getGiaBan();
+                    if (giaGoc == null) giaGoc = BigDecimal.ZERO;
+
+                    BigDecimal giaSauKM = giaGoc;
+
+                    // Nếu có đợt Sale đang chạy -> Bắt đầu trừ tiền
+                    if (activeSales != null && !activeSales.isEmpty()) {
+                        KhuyenMai km = activeSales.get(0); // Lấy đợt Sale đầu tiên
+                        if ("PERCENT".equals(km.getLoai())) {
+                            BigDecimal tyLe = km.getGiaTri().divide(new BigDecimal("100"), 2, java.math.RoundingMode.HALF_UP);
+                            BigDecimal tienGiam = giaGoc.multiply(tyLe).setScale(0, java.math.RoundingMode.HALF_UP);
+                            giaSauKM = giaGoc.subtract(tienGiam);
+                        } else {
+                            if (km.getGiaTri() != null) {
+                                giaSauKM = giaGoc.subtract(km.getGiaTri());
+                            }
+                        }
+                    }
+
+                    // Không để giá sale bị âm
+                    if (giaSauKM.compareTo(BigDecimal.ZERO) < 0) {
+                        giaSauKM = BigDecimal.ZERO;
+                    }
+
+                    // Gán giá sau Sale vào biến thể để Frontend đọc được
+                    spct.setGiaSauKhuyenMai(giaSauKM);
+                }
+            }
+        }
+
+        // 3. Trả về kết quả đã được tính toán
+        return pageResult;
     }
 
     private String generateMa() {
@@ -61,9 +108,47 @@ public class SanPhamApi {
 
     @GetMapping("/{id}")
     public ResponseEntity<SanPham> getOne(@PathVariable Integer id) {
-        return sanPhamrepo.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Optional<SanPham> spOpt = sanPhamrepo.findById(id);
+        if (spOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        SanPham sp = spOpt.get();
+
+        // 🌟 VÒNG LẶP TÍNH GIÁ KHUYẾN MÃI CHO TỪNG BIẾN THỂ
+        List<KhuyenMai> activeSales = khuyenMaiRepo.findActiveKhuyenMaiBySanPhamId(sp.getId());
+
+        if (sp.getChiTietSanPhams() != null) {
+            for (SanPhamChiTiet spct : sp.getChiTietSanPhams()) {
+                BigDecimal giaGoc = spct.getGiaBan();
+                if (giaGoc == null) giaGoc = BigDecimal.ZERO;
+
+                BigDecimal giaSauKM = giaGoc;
+
+                // Nếu có đợt Sale đang chạy -> Bắt đầu trừ tiền
+                if (activeSales != null && !activeSales.isEmpty()) {
+                    KhuyenMai km = activeSales.get(0);
+                    if ("PERCENT".equals(km.getLoai())) {
+                        BigDecimal tyLe = km.getGiaTri().divide(new BigDecimal("100"), 2, java.math.RoundingMode.HALF_UP);
+                        BigDecimal tienGiam = giaGoc.multiply(tyLe).setScale(0, java.math.RoundingMode.HALF_UP);
+                        giaSauKM = giaGoc.subtract(tienGiam);
+                    } else {
+                        if (km.getGiaTri() != null) {
+                            giaSauKM = giaGoc.subtract(km.getGiaTri());
+                        }
+                    }
+                }
+
+                // Không để giá sale bị âm
+                if (giaSauKM.compareTo(BigDecimal.ZERO) < 0) {
+                    giaSauKM = BigDecimal.ZERO;
+                }
+
+                spct.setGiaSauKhuyenMai(giaSauKM);
+            }
+        }
+
+        return ResponseEntity.ok(sp);
     }
 
     @PostMapping
@@ -134,7 +219,41 @@ public class SanPhamApi {
 
     @GetMapping("/{id}/variants")
     public List<SanPhamChiTiet> getVariants(@PathVariable Integer id) {
-        return variantRepo.findBySanPhamId(id);
+        List<SanPhamChiTiet> variants = variantRepo.findBySanPhamId(id);
+
+        // 🌟 VÒNG LẶP TÍNH GIÁ KHUYẾN MÃI CHO DANH SÁCH BIẾN THỂ
+        List<KhuyenMai> activeSales = khuyenMaiRepo.findActiveKhuyenMaiBySanPhamId(id);
+
+        for (SanPhamChiTiet spct : variants) {
+            BigDecimal giaGoc = spct.getGiaBan();
+            if (giaGoc == null) giaGoc = BigDecimal.ZERO;
+
+            BigDecimal giaSauKM = giaGoc;
+
+            // Nếu có đợt Sale đang chạy -> Bắt đầu trừ tiền
+            if (activeSales != null && !activeSales.isEmpty()) {
+                KhuyenMai km = activeSales.get(0);
+                if ("PERCENT".equals(km.getLoai())) {
+                    BigDecimal tyLe = km.getGiaTri().divide(new BigDecimal("100"), 2, java.math.RoundingMode.HALF_UP);
+                    BigDecimal tienGiam = giaGoc.multiply(tyLe).setScale(0, java.math.RoundingMode.HALF_UP);
+                    giaSauKM = giaGoc.subtract(tienGiam);
+                } else {
+                    if (km.getGiaTri() != null) {
+                        giaSauKM = giaGoc.subtract(km.getGiaTri());
+                    }
+                }
+            }
+
+            // Không để giá sale bị âm
+            if (giaSauKM.compareTo(BigDecimal.ZERO) < 0) {
+                giaSauKM = BigDecimal.ZERO;
+            }
+
+            // Gán giá sau Sale vào biến thể để Frontend đọc được
+            spct.setGiaSauKhuyenMai(giaSauKM);
+        }
+
+        return variants;
     }
 
     @PostMapping("/{productId}/variants")

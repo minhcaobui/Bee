@@ -200,30 +200,43 @@ public class PosApi {
             if (hd.getNhanVien() == null && nvChotDon != null) hd.setNhanVien(nvChotDon);
 
             BigDecimal giaTamTinh = BigDecimal.ZERO;
+            BigDecimal tongTienNguyenGia = BigDecimal.ZERO; // 🌟 THÊM: Lưu tổng tiền của các SP KHÔNG SALE
 
             if (cart != null && hdctRepo.findByHoaDonId(hd.getId()).isEmpty()) {
                 for (Map<String, Object> item : cart) {
                     Integer spctId = Integer.valueOf(item.get("id").toString());
                     Integer qty    = Integer.valueOf(item.get("qty").toString());
-                    BigDecimal price = new BigDecimal(item.get("price").toString());
-                    SanPhamChiTiet spct = variantRepo.findById(spctId)
-                            .orElseThrow(() -> new RuntimeException("Lỗi kho"));
+                    BigDecimal price = new BigDecimal(item.get("price").toString()); // Giá đang bán
+
+                    SanPhamChiTiet spct = variantRepo.findById(spctId).orElseThrow(() -> new RuntimeException("Lỗi kho"));
+
+                    // 🌟 KIỂM TRA HÀNG SALE: So sánh giá bán hiện tại với giá niêm yết
+                    BigDecimal giaGoc = spct.getGiaBan();
+                    BigDecimal thanhTienItem = price.multiply(BigDecimal.valueOf(qty));
+                    giaTamTinh = giaTamTinh.add(thanhTienItem);
+
+                    if (price.compareTo(giaGoc) >= 0) {
+                        // Giá bán >= Giá gốc -> Sản phẩm nguyên giá (Không chạy sale)
+                        tongTienNguyenGia = tongTienNguyenGia.add(thanhTienItem);
+                    }
+
+                    // Trừ kho và lưu chi tiết
                     if (spct.getSoLuong() < qty) throw new RuntimeException("Sản phẩm không đủ số lượng!");
                     spct.setSoLuong(spct.getSoLuong() - qty);
                     if (spct.getSoLuong() <= 0) spct.setTrangThai(false);
                     variantRepo.save(spct);
                     hdctRepo.save(HoaDonChiTiet.builder().hoaDon(hd).sanPhamChiTiet(spct).soLuong(qty).giaTien(price).build());
-                    giaTamTinh = giaTamTinh.add(price.multiply(BigDecimal.valueOf(qty)));
                 }
             }
 
             // --- LOGIC ƯU ĐÃI NHÂN VIÊN 5% ---
             BigDecimal chietKhauNV = BigDecimal.ZERO;
+            String noteKhuyenMai = "";
             if (hd.getKhachHang() != null && hd.getKhachHang().getSoDienThoai() != null) {
                 boolean isEmployee = nvRepo.existsBySoDienThoaiAndTrangThaiTrue(hd.getKhachHang().getSoDienThoai());
                 if (isEmployee) {
                     chietKhauNV = giaTamTinh.multiply(new BigDecimal("0.05")).setScale(0, RoundingMode.HALF_UP);
-                    hd.setGhiChu((hd.getGhiChu() != null ? hd.getGhiChu() + " " : "") + "(Tự động giảm 5% ưu đãi nhân viên)");
+                    noteKhuyenMai += "(Áp dụng giảm 5% NV) ";
                 }
             }
 
@@ -233,15 +246,39 @@ public class PosApi {
                 MaGiamGia voucher = maGiamGiaRepo.findById(voucherId).orElse(null);
                 if (voucher != null) {
                     hd.setMaGiamGia(voucher);
-                    BigDecimal base = giaTamTinh.subtract(chietKhauNV);
-                    if ("percentage".equalsIgnoreCase(voucher.getLoaiGiamGia())) {
-                        giamGiaVoucher = base.multiply(voucher.getGiaTriGiamGia().divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP));
+
+                    // 1. Xét Min Spend: Vẫn lấy tổng giỏ hàng (giaTamTinh) để khách dễ đạt điều kiện
+                    if (giaTamTinh.compareTo(voucher.getDieuKien()) < 0) {
+                        throw new RuntimeException("Chưa đủ điều kiện đơn tối thiểu!");
+                    }
+
+                    // 2. Xác định Số tiền làm gốc để áp Voucher
+                    BigDecimal baseForVoucher = giaTamTinh; // Mặc định là tính trên toàn bộ đơn
+
+                    // Nếu Voucher TẮT "Cho phép cộng dồn" VÀ không phải là mã FREESHIP
+                    if (Boolean.FALSE.equals(voucher.getChoPhepCongDon()) && !"FREESHIP".equalsIgnoreCase(voucher.getLoaiGiamGia())) {
+                        baseForVoucher = tongTienNguyenGia; // 🌟 CHỈ ÁP DỤNG TRÊN TỔNG TIỀN HÀNG NGUYÊN GIÁ
+
+                        if (baseForVoucher.compareTo(BigDecimal.ZERO) == 0) {
+                            throw new RuntimeException("Mã giảm giá này không hỗ trợ áp dụng chung với các sản phẩm đang chạy Sale!");
+                        }
+                    }
+
+                    // 3. Bắt đầu tính tiền giảm dựa trên baseForVoucher đã lọc
+                    if ("PERCENTAGE".equalsIgnoreCase(voucher.getLoaiGiamGia())) {
+                        giamGiaVoucher = baseForVoucher.multiply(voucher.getGiaTriGiamGia().divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP));
                         if (voucher.getGiaTriGiamGiaToiDa() != null && giamGiaVoucher.compareTo(voucher.getGiaTriGiamGiaToiDa()) > 0) {
                             giamGiaVoucher = voucher.getGiaTriGiamGiaToiDa();
                         }
                     } else {
                         giamGiaVoucher = voucher.getGiaTriGiamGia();
+                        // Nếu giảm tiền mặt vượt quá tiền hàng nguyên giá thì chỉ giảm tới 0đ
+                        if (giamGiaVoucher.compareTo(baseForVoucher) > 0) {
+                            giamGiaVoucher = baseForVoucher;
+                        }
                     }
+
+                    // Cập nhật lượt dùng
                     int luotMoi = voucher.getLuotSuDung() + 1;
                     voucher.setLuotSuDung(luotMoi);
                     if (luotMoi >= voucher.getSoLuong()) voucher.setTrangThai(false);
@@ -249,11 +286,29 @@ public class PosApi {
                 }
             }
 
+            // ==========================================================
+            // 🌟 CHỐT CHẶN CHỐNG LỖ (TỔNG GIẢM KHÔNG QUÁ 70% ĐƠN HÀNG)
+            // ==========================================================
+            BigDecimal tongKhuyenMai = chietKhauNV.add(giamGiaVoucher);
+            BigDecimal maxGiamGiaChoPhep = giaTamTinh.multiply(new BigDecimal("0.50")).setScale(0, RoundingMode.HALF_UP);
+
+            // Kiểm tra nếu tổng khuyến mãi vượt quá 70%
+            if (tongKhuyenMai.compareTo(maxGiamGiaChoPhep) > 0) {
+                tongKhuyenMai = maxGiamGiaChoPhep; // Cắt ngọn, ép về mức trần
+                noteKhuyenMai += "(Đã áp dụng trần giới hạn khuyến mãi tối đa 70% để chống bán lỗ).";
+            }
+
+            // Ghi chú vào hóa đơn nếu có can thiệp khuyến mãi
+            if (!noteKhuyenMai.isEmpty()) {
+                hd.setGhiChu((hd.getGhiChu() != null ? hd.getGhiChu() + " " : "") + noteKhuyenMai.trim());
+            }
+
             // Gán dữ liệu cho hóa đơn
             hd.setGiaTamThoi(giaTamTinh);
-            hd.setGiaTriKhuyenMai(chietKhauNV.add(giamGiaVoucher));
+            hd.setGiaTriKhuyenMai(tongKhuyenMai); // Lưu tổng khuyến mãi cuối cùng đã được cắt ngọn
 
-            BigDecimal totalFinal = giaTamTinh.subtract(chietKhauNV).subtract(giamGiaVoucher);
+            // TÍNH TOÁN TIỀN PHẢI TRẢ TỪ TỔNG KHUYẾN MÃI
+            BigDecimal totalFinal = giaTamTinh.subtract(tongKhuyenMai);
             if (totalFinal.compareTo(BigDecimal.ZERO) < 0) totalFinal = BigDecimal.ZERO;
             hd.setGiaTong(totalFinal);
 
@@ -458,18 +513,57 @@ public class PosApi {
         return ResponseEntity.status(org.springframework.http.HttpStatus.FOUND).location(java.net.URI.create(redirectUrl)).build();
     }
 
-    @GetMapping("/vouchers/apply")
-    public ResponseEntity<?> applyVoucher(@RequestParam String code, @RequestParam BigDecimal currentTotal) {
+    // =========================================================================
+    // ĐỔI SANG POST VÀ ĐỌC GIỎ HÀNG ĐỂ CHỐNG CỘNG DỒN NGAY TỪ LÚC ÁP MÃ
+    // =========================================================================
+    @PostMapping("/vouchers/apply")
+    public ResponseEntity<?> applyVoucher(@RequestBody Map<String, Object> payload) {
+        String code = (String) payload.get("code");
+        List<Map<String, Object>> cart = (List<Map<String, Object>>) payload.get("cart");
+
         Optional<MaGiamGia> voucherOpt = maGiamGiaRepo.findByMaCode(code);
-        if (voucherOpt.isEmpty()) return ResponseEntity.badRequest().body("Mã không tồn tại!");
+        if (voucherOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Mã không tồn tại!"));
+        }
 
         MaGiamGia v = voucherOpt.get();
         if (v.getNgayKetThuc().isBefore(LocalDateTime.now()) || v.getSoLuong() <= v.getLuotSuDung()) {
-            return ResponseEntity.badRequest().body("MÃ GIẢM GIÁ ĐÃ HẾT HẠN HOẶC HẾT LƯỢT SỬ DỤNG");
+            return ResponseEntity.badRequest().body(Map.of("message", "MÃ GIẢM GIÁ ĐÃ HẾT HẠN HOẶC HẾT LƯỢT SỬ DỤNG"));
         }
-        if (currentTotal.compareTo(v.getDieuKien()) < 0) {
-            return ResponseEntity.badRequest().body("Chưa đủ điều kiện (Tối thiểu " + v.getDieuKien() + ")");
+
+        // TÍNH TOÁN GIỎ HÀNG ĐỂ KIỂM TRA ĐIỀU KIỆN
+        BigDecimal giaTamTinh = BigDecimal.ZERO;
+        BigDecimal tongTienNguyenGia = BigDecimal.ZERO;
+
+        if (cart != null) {
+            for (Map<String, Object> item : cart) {
+                Integer spctId = Integer.valueOf(item.get("id").toString());
+                Integer qty = Integer.valueOf(item.get("qty").toString());
+                BigDecimal price = new BigDecimal(item.get("price").toString());
+
+                SanPhamChiTiet spct = variantRepo.findById(spctId).orElseThrow(() -> new RuntimeException("Lỗi kho"));
+                BigDecimal giaGoc = spct.getGiaBan();
+                BigDecimal thanhTienItem = price.multiply(BigDecimal.valueOf(qty));
+                giaTamTinh = giaTamTinh.add(thanhTienItem);
+
+                if (price.compareTo(giaGoc) >= 0) {
+                    tongTienNguyenGia = tongTienNguyenGia.add(thanhTienItem);
+                }
+            }
         }
+
+        // 1. Kiểm tra đơn tối thiểu
+        if (giaTamTinh.compareTo(v.getDieuKien()) < 0) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Chưa đủ điều kiện (Tối thiểu " + new java.text.DecimalFormat("#,###").format(v.getDieuKien()) + "đ)"));
+        }
+
+        // 2. Kiểm tra hàng Sale nếu không cho cộng dồn
+        if (Boolean.FALSE.equals(v.getChoPhepCongDon()) && !"FREESHIP".equalsIgnoreCase(v.getLoaiGiamGia())) {
+            if (tongTienNguyenGia.compareTo(BigDecimal.ZERO) == 0) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Mã giảm giá này KHÔNG hỗ trợ áp dụng cho các sản phẩm đang chạy Sale!"));
+            }
+        }
+
         return ResponseEntity.ok(v);
     }
 

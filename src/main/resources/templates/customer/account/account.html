@@ -115,6 +115,7 @@
         .account-form-input { padding: 13px 16px; border: 1px solid rgba(0,0,0,0.1); background: var(--white); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 300; color: var(--text); outline: none; transition: border-color 0.2s; border-radius: 2px; width: 100%;}
         .account-form-input:focus { border-color: var(--accent); }
         .account-form-input:disabled { background: rgba(0,0,0,0.03); color: var(--muted); cursor: not-allowed; border-color: rgba(0,0,0,0.05); }
+        select.account-form-input { appearance: auto; cursor: pointer; }
 
         .account-form-save { padding: 15px 40px; background: var(--accent); color: white; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 400; transition: background 0.2s; border-radius: 2px; }
         .account-form-save:hover { background: var(--accent-light); }
@@ -128,6 +129,30 @@
         .password-strength { height: 3px; background: rgba(0,0,0,0.08); margin-top: 8px; border-radius: 2px; overflow: hidden; }
         .password-strength-bar { height: 100%; width: 0; transition: width 0.3s, background 0.3s; }
         .password-strength-label { font-size: 11px; color: var(--muted); margin-top: 6px; letter-spacing: 0.06em; }
+
+        /* SỔ ĐỊA CHỈ */
+        .address-card { border: 1px solid rgba(0,0,0,0.1); border-radius: 4px; padding: 20px; margin-bottom: 16px; background: var(--white); position: relative; max-width: 640px;}
+        .address-card.default { border-color: var(--accent); background: rgba(61,90,76,0.02); }
+        .addr-name-phone { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+        .addr-detail { font-size: 13px; color: var(--text); margin-bottom: 4px; line-height: 1.5; }
+        .addr-location { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+        .addr-actions { display: flex; gap: 16px; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; }
+        .addr-action-btn { background: none; border: none; cursor: pointer; color: var(--accent); padding: 0; transition: color 0.2s; }
+        .addr-action-btn:hover { color: #2c4238; }
+        .addr-action-btn.delete { color: #c03c3c; }
+        .addr-action-btn.delete:hover { color: #902c2c; }
+        .addr-badge-default { position: absolute; top: 20px; right: 20px; font-size: 10px; background: rgba(61,90,76,0.1); color: var(--accent); padding: 4px 8px; border-radius: 2px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em; }
+
+        /* MODAL ĐỊA CHỈ */
+        .acc-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); animation: fadeIn 0.3s ease; }
+        .acc-modal { width: 100%; max-width: 540px; background: #fff; border-radius: 6px; padding: 32px; box-shadow: 0 15px 50px rgba(0,0,0,0.2); transform: translateY(20px); opacity: 0; transition: all 0.3s ease; max-height: 90vh; overflow-y: auto; }
+        .acc-modal.open { transform: translateY(0); opacity: 1; }
+        .acc-modal-header { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 400; margin-bottom: 24px; display:flex; justify-content:space-between; align-items:center; }
+        .acc-modal-close { background: none; border: none; cursor: pointer; color: var(--muted); padding: 4px; }
+        .acc-modal-close svg { width: 24px; height: 24px; stroke: currentColor; fill: none; }
+        .acc-modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(0,0,0,0.08); }
+        .btn-cancel { padding: 12px 24px; background: none; border: 1px solid rgba(0,0,0,0.2); border-radius: 2px; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: 'DM Sans', sans-serif;}
+        .btn-save { padding: 12px 24px; background: var(--accent); color: white; border: none; border-radius: 2px; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: 'DM Sans', sans-serif;}
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -321,13 +346,17 @@
                             <option value="Khác">Khác</option>
                         </select>
                     </div>
-
-                    <div class="account-form-field full">
-                        <label class="account-form-label">Địa chỉ giao hàng</label>
-                        <input id="inpAddress" class="account-form-input" type="text" placeholder="Ví dụ: Số 12, ngõ 34, đường Lê Lợi, TP. Hà Nội...">
-                    </div>
                 </div>
                 <button class="account-form-save" id="btnSaveProfile" onclick="window.AccountApp.confirmAction('profile')">Lưu thay đổi</button>
+
+                <div class="account-section-divider"></div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; max-width:640px;">
+                    <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;">Sổ địa chỉ</div>
+                    <button class="account-reorder-btn" onclick="window.AccountApp.openAddressModal()">+ Thêm địa chỉ mới</button>
+                </div>
+                <div id="addressBookContainer" style="max-width:640px; margin-bottom:48px;">
+                </div>
 
                 <div class="account-section-divider"></div>
 
@@ -363,13 +392,77 @@
         </div>
     </div>
 
+    <div class="acc-modal-overlay" id="accAddressModalOverlay" onclick="if(event.target === this) window.AccountApp.closeAddressModal()">
+        <div class="acc-modal" id="accAddressModal">
+            <div class="acc-modal-header">
+                <span id="addrModalTitle">Thêm địa chỉ mới</span>
+                <button class="acc-modal-close" onclick="window.AccountApp.closeAddressModal()">
+                    <svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <input type="hidden" id="addrId">
+
+            <div class="account-form-grid" style="max-width:100%; margin-bottom:0;">
+                <div class="account-form-field">
+                    <label class="account-form-label">Họ tên người nhận *</label>
+                    <input id="addrName" class="account-form-input" type="text" placeholder="Nhập họ và tên...">
+                </div>
+                <div class="account-form-field">
+                    <label class="account-form-label">Số điện thoại *</label>
+                    <input id="addrPhone" class="account-form-input" type="tel" placeholder="Nhập số điện thoại...">
+                </div>
+
+                <div class="account-form-field full">
+                    <label class="account-form-label">Tỉnh / Thành phố *</label>
+                    <select id="addrProv" class="account-form-input" onchange="window.AccountApp.loadDistricts()">
+                        <option value="">Đang tải...</option>
+                    </select>
+                </div>
+                <div class="account-form-field full">
+                    <label class="account-form-label">Quận / Huyện *</label>
+                    <select id="addrDist" class="account-form-input" onchange="window.AccountApp.loadWards()">
+                        <option value="">Chọn Quận/Huyện</option>
+                    </select>
+                </div>
+                <div class="account-form-field full">
+                    <label class="account-form-label">Phường / Xã *</label>
+                    <select id="addrWard" class="account-form-input">
+                        <option value="">Chọn Phường/Xã</option>
+                    </select>
+                </div>
+
+                <div class="account-form-field full">
+                    <label class="account-form-label">Địa chỉ chi tiết (Số nhà, đường...) *</label>
+                    <input id="addrDetail" class="account-form-input" type="text" placeholder="Nhập địa chỉ chi tiết...">
+                </div>
+
+                <div class="account-form-field full" style="flex-direction:row; align-items:center; gap:8px; margin-top:8px;">
+                    <input type="checkbox" id="addrDefault" style="width:16px; height:16px; cursor:pointer;">
+                    <label for="addrDefault" style="font-size:13px; cursor:pointer; font-weight:500;">Đặt làm địa chỉ mặc định</label>
+                </div>
+            </div>
+
+            <div class="acc-modal-actions">
+                <button class="btn-cancel" onclick="window.AccountApp.closeAddressModal()">Huỷ bỏ</button>
+                <button class="btn-save" id="btnSaveAddressModal" onclick="window.AccountApp.saveAddress()">Lưu địa chỉ</button>
+            </div>
+        </div>
+    </div>
+
     <script th:inline="javascript">
         /*<![CDATA[*/
         window.AccountApp = {
             state: {
                 user: null,
                 orders: [],
-                stats: { orderCount: 0, wishlistCount: 0, totalSpent: 0 }
+                stats: { orderCount: 0, wishlistCount: 0, totalSpent: 0 },
+                addresses: []
+            },
+
+            ghnConfig: {
+                token: '5c6b4e08-f30a-11f0-9c2d-8ebaf800da9f',
+                apiUrl: 'https://online-gateway.ghn.vn/shiip/public-api'
             },
 
             init: async function() {
@@ -454,6 +547,13 @@
                         this.state.stats.orderCount = this.state.orders.length;
                         this.state.stats.totalSpent = this.state.orders.reduce((sum, ord) => sum + (ord.tongTien || 0), 0);
                     }
+
+                    // Fetch danh sách địa chỉ
+                    const addrRes = await fetch('/api/khach-hang/addresses');
+                    if(addrRes.ok) {
+                        this.state.addresses = await addrRes.json();
+                    }
+
                     this.renderAll();
                 } catch (error) {
                     document.getElementById('guest-view').style.display = 'block';
@@ -567,6 +667,7 @@
                 this.renderOverview();
                 this.renderOrders();
                 this.renderProfileForm();
+                this.renderAddressBook();
             },
 
             renderSidebar: function() {
@@ -633,7 +734,6 @@
                 container.innerHTML = html;
             },
 
-            // HÀM RENDER FORM THÔNG TIN MỚI
             renderProfileForm: function() {
                 const user = this.state.user;
 
@@ -641,7 +741,7 @@
                 document.getElementById('inpPhone').value = user.soDienThoai || '';
                 document.getElementById('inpEmail').value = user.email || '';
                 document.getElementById('inpGender').value = user.gioiTinh || '';
-                document.getElementById('inpAddress').value = user.diaChi || '';
+                // Không còn render inpAddress ở đây nữa
 
                 const inpUser = document.getElementById('inpUsername');
                 inpUser.value = user.tenDangNhap || '';
@@ -650,13 +750,41 @@
                     document.getElementById('inpDob').value = user.ngaySinh.substring(0, 10);
                 }
 
-                // KIỂM TRA KHÓA THÔNG MINH (SMART LOCK):
-                // Nếu tên đăng nhập (tenDangNhap) khác với số điện thoại (soDienThoai)
-                // Hoặc backend trả về cờ daDoiTenDangNhap = true, thì khóa ô nhập liệu lại!
                 if (user.daDoiTenDangNhap || (user.tenDangNhap && user.tenDangNhap !== user.soDienThoai)) {
                     inpUser.disabled = true;
                     document.getElementById('usernameWarning').style.display = 'block';
                 }
+            },
+
+            // Render giao diện Sổ địa chỉ
+            renderAddressBook: function() {
+                const container = document.getElementById('addressBookContainer');
+                if(this.state.addresses.length === 0) {
+                    container.innerHTML = '<div style="text-align:center; padding:30px; border:1px dashed rgba(0,0,0,0.1); border-radius:4px; color:var(--muted); font-size:13px;">Bạn chưa lưu địa chỉ giao hàng nào.</div>';
+                    return;
+                }
+
+                let html = '';
+                // Ưu tiên hiển thị địa chỉ mặc định lên đầu
+                const sortedAddresses = [...this.state.addresses].sort((a,b) => b.laMacDinh - a.laMacDinh);
+
+                sortedAddresses.forEach(addr => {
+                    html += `
+                        <div class="address-card ${addr.laMacDinh ? 'default' : ''}">
+                            ${addr.laMacDinh ? '<div class="addr-badge-default">Mặc định</div>' : ''}
+                            <div class="addr-name-phone">${addr.hoTenNhan} | ${addr.sdtNhan}</div>
+                            <div class="addr-detail">${addr.diaChiChiTiet}</div>
+                            <div class="addr-location">${addr.phuongXa}, ${addr.quanHuyen}, ${addr.tinhThanhPho}</div>
+
+                            <div class="addr-actions">
+                                <button class="addr-action-btn" onclick="window.AccountApp.openAddressModal(${addr.id})">Sửa</button>
+                                ${!addr.laMacDinh ? `<button class="addr-action-btn delete" onclick="window.AccountApp.deleteAddress(${addr.id})">Xóa</button>` : ''}
+                                ${!addr.laMacDinh ? `<button class="addr-action-btn" onclick="window.AccountApp.setDefaultAddress(${addr.id})">Thiết lập mặc định</button>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
             },
 
             formatCurrency: (num) => new Intl.NumberFormat('vi-VN').format(num || 0) + ' ₫',
@@ -696,21 +824,18 @@
                 return html + '</div>';
             },
 
-            // HÀM LƯU THÔNG TIN MỚI
             updateProfile: async function() {
                 const btn = document.getElementById('btnSaveProfile');
                 const oldText = btn.innerText;
                 btn.innerText = "Đang lưu...";
                 btn.disabled = true;
 
-                // Thu thập toàn bộ data bao gồm Tên đăng nhập và Địa chỉ mới
                 const payload = {
                     hoTen: document.getElementById('inpFirstName').value,
                     soDienThoai: document.getElementById('inpPhone').value,
                     gioiTinh: document.getElementById('inpGender').value,
                     ngaySinh: document.getElementById('inpDob').value,
                     email: document.getElementById('inpEmail').value,
-                    diaChi: document.getElementById('inpAddress').value,
                     tenDangNhap: document.getElementById('inpUsername').value
                 };
 
@@ -723,7 +848,7 @@
 
                     if(res.ok) {
                         this.showAccountNotification('Thành công', 'Đã cập nhật hồ sơ cá nhân!');
-                        await this.fetchData(); // Reset form, cờ Smart Lock sẽ tự kiểm tra và khóa ô đổi tên nếu cần
+                        await this.fetchData();
                     } else {
                         const err = await res.json();
                         this.showAccountNotification('Lỗi', err.message || "Tên đăng nhập đã trùng hoặc bị lỗi. Vui lòng thử lại!", true);
@@ -736,6 +861,204 @@
                 }
             },
 
+            // --- CÁC HÀM XỬ LÝ GHN CHO MODAL ĐỊA CHỈ ---
+            loadProvinces: async function() {
+                try {
+                    const res = await fetch(this.ghnConfig.apiUrl + '/master-data/province', { headers: { 'token': this.ghnConfig.token } });
+                    const data = await res.json();
+                    if (data.code === 200 && data.data) {
+                        let html = '<option value="">Chọn Tỉnh/Thành phố</option>';
+                        const provinces = data.data.sort((a,b) => a.ProvinceName.localeCompare(b.ProvinceName));
+                        for(let i=0; i < provinces.length; i++) {
+                            html += `<option value="${provinces[i].ProvinceID}" data-name="${provinces[i].ProvinceName}">${provinces[i].ProvinceName}</option>`;
+                        }
+                        document.getElementById('addrProv').innerHTML = html;
+                    }
+                } catch (e) { document.getElementById('addrProv').innerHTML = '<option value="">Lỗi kết nối API</option>'; }
+            },
+
+            loadDistricts: async function() {
+                const provId = document.getElementById('addrProv').value;
+                document.getElementById('addrDist').innerHTML = '<option value="">Đang tải...</option>';
+                document.getElementById('addrWard').innerHTML = '<option value="">Chọn Phường/Xã</option>';
+
+                if(!provId) { document.getElementById('addrDist').innerHTML = '<option value="">Chọn Quận/Huyện</option>'; return; }
+
+                try {
+                    const res = await fetch(this.ghnConfig.apiUrl + '/master-data/district?province_id=' + provId, { headers: { 'token': this.ghnConfig.token } });
+                    const data = await res.json();
+                    if (data.code === 200 && data.data) {
+                        let html = '<option value="">Chọn Quận/Huyện</option>';
+                        for(let i=0; i < data.data.length; i++) {
+                            html += `<option value="${data.data[i].DistrictID}" data-name="${data.data[i].DistrictName}">${data.data[i].DistrictName}</option>`;
+                        }
+                        document.getElementById('addrDist').innerHTML = html;
+                    }
+                } catch (e) { }
+            },
+
+            loadWards: async function() {
+                const distId = document.getElementById('addrDist').value;
+                document.getElementById('addrWard').innerHTML = '<option value="">Đang tải...</option>';
+
+                if(!distId) { document.getElementById('addrWard').innerHTML = '<option value="">Chọn Phường/Xã</option>'; return; }
+
+                try {
+                    const res = await fetch(this.ghnConfig.apiUrl + '/master-data/ward?district_id=' + distId, { headers: { 'token': this.ghnConfig.token } });
+                    const data = await res.json();
+                    if (data.code === 200 && data.data) {
+                        let html = '<option value="">Chọn Phường/Xã</option>';
+                        for(let i=0; i < data.data.length; i++) {
+                            html += `<option value="${data.data[i].WardCode}" data-name="${data.data[i].WardName}">${data.data[i].WardName}</option>`;
+                        }
+                        document.getElementById('addrWard').innerHTML = html;
+                    }
+                } catch (e) { }
+            },
+
+            // --- API CRUD ĐỊA CHỈ ---
+            openAddressModal: async function(id = null) {
+                document.getElementById('accAddressModalOverlay').style.display = 'flex';
+                setTimeout(() => { document.getElementById('accAddressModal').classList.add('open'); }, 10);
+
+                // Khởi tạo/Clear form
+                document.getElementById('addrId').value = '';
+                document.getElementById('addrName').value = this.state.user ? this.state.user.hoTen || '' : '';
+                document.getElementById('addrPhone').value = this.state.user ? this.state.user.soDienThoai || '' : '';
+                document.getElementById('addrDetail').value = '';
+                document.getElementById('addrDefault').checked = false;
+                document.getElementById('addrModalTitle').innerText = id ? "Cập nhật địa chỉ" : "Thêm địa chỉ mới";
+
+                await this.loadProvinces();
+
+                // Nếu là Edit (có ID), fill data
+                if (id) {
+                    const addr = this.state.addresses.find(a => a.id === id);
+                    if (addr) {
+                        document.getElementById('addrId').value = addr.id;
+                        document.getElementById('addrName').value = addr.hoTenNhan;
+                        document.getElementById('addrPhone').value = addr.sdtNhan;
+                        document.getElementById('addrDetail').value = addr.diaChiChiTiet;
+                        document.getElementById('addrDefault').checked = addr.laMacDinh;
+
+                        // Async load and fill location data
+                        if (addr.maTinh) {
+                            document.getElementById('addrProv').value = addr.maTinh;
+                            await this.loadDistricts();
+                            if (addr.maHuyen) {
+                                document.getElementById('addrDist').value = addr.maHuyen;
+                                await this.loadWards();
+                                if (addr.maXa) {
+                                    document.getElementById('addrWard').value = addr.maXa;
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    document.getElementById('addrDist').innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+                    document.getElementById('addrWard').innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                }
+            },
+
+            closeAddressModal: function() {
+                document.getElementById('accAddressModal').classList.remove('open');
+                setTimeout(() => { document.getElementById('accAddressModalOverlay').style.display = 'none'; }, 300);
+            },
+
+            saveAddress: async function() {
+                const btn = document.getElementById('btnSaveAddressModal');
+                const id = document.getElementById('addrId').value;
+                const name = document.getElementById('addrName').value;
+                const phone = document.getElementById('addrPhone').value;
+                const detail = document.getElementById('addrDetail').value;
+                const isDefault = document.getElementById('addrDefault').checked;
+
+                const selProv = document.getElementById('addrProv');
+                const selDist = document.getElementById('addrDist');
+                const selWard = document.getElementById('addrWard');
+
+                if(!name || !phone || !detail || !selProv.value || !selDist.value || !selWard.value) {
+                    this.showAccountNotification('Lỗi', 'Vui lòng điền đầy đủ các thông tin bắt buộc!', true);
+                    return;
+                }
+
+                btn.innerText = "Đang lưu...";
+                btn.disabled = true;
+
+                const payload = {
+                    hoTenNhan: name,
+                    sdtNhan: phone,
+                    diaChiChiTiet: detail,
+                    maTinh: parseInt(selProv.value),
+                    tinhThanhPho: selProv.options[selProv.selectedIndex].getAttribute('data-name'),
+                    maHuyen: parseInt(selDist.value),
+                    quanHuyen: selDist.options[selDist.selectedIndex].getAttribute('data-name'),
+                    maXa: selWard.value,
+                    phuongXa: selWard.options[selWard.selectedIndex].getAttribute('data-name'),
+                    laMacDinh: isDefault,
+                    loaiDiaChi: 'Nhà riêng'
+                };
+
+                const method = id ? 'PUT' : 'POST';
+                const url = id ? `/api/khach-hang/addresses/${id}` : '/api/khach-hang/addresses';
+
+                try {
+                    const res = await fetch(url, {
+                        method: method,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if(res.ok) {
+                        this.showAccountNotification('Thành công', id ? 'Đã cập nhật địa chỉ!' : 'Đã thêm địa chỉ mới!');
+                        this.closeAddressModal();
+                        // Refresh data
+                        const addrRes = await fetch('/api/khach-hang/addresses');
+                        if(addrRes.ok) this.state.addresses = await addrRes.json();
+                        this.renderAddressBook();
+                    } else {
+                        this.showAccountNotification('Thất bại', 'Không thể lưu địa chỉ, vui lòng thử lại!', true);
+                    }
+                } catch(e) {
+                    this.showAccountNotification('Lỗi', 'Không thể kết nối đến máy chủ!', true);
+                } finally {
+                    btn.innerText = "Lưu địa chỉ";
+                    btn.disabled = false;
+                }
+            },
+
+            deleteAddress: async function(id) {
+                if(!confirm("Bạn có chắc chắn muốn xóa địa chỉ này?")) return;
+
+                try {
+                    const res = await fetch(`/api/khach-hang/addresses/${id}`, { method: 'DELETE' });
+                    if(res.ok) {
+                        this.showAccountNotification('Thành công', 'Đã xóa địa chỉ!');
+                        this.state.addresses = this.state.addresses.filter(a => a.id !== id);
+                        this.renderAddressBook();
+                    } else {
+                        this.showAccountNotification('Thất bại', 'Không thể xóa địa chỉ này!', true);
+                    }
+                } catch(e) {
+                    this.showAccountNotification('Lỗi', 'Không thể kết nối đến máy chủ!', true);
+                }
+            },
+
+            setDefaultAddress: async function(id) {
+                try {
+                    const res = await fetch(`/api/khach-hang/addresses/${id}/default`, { method: 'PUT' });
+                    if(res.ok) {
+                        this.showAccountNotification('Thành công', 'Đã thiết lập địa chỉ mặc định!');
+                        const addrRes = await fetch('/api/khach-hang/addresses');
+                        if(addrRes.ok) this.state.addresses = await addrRes.json();
+                        this.renderAddressBook();
+                    }
+                } catch(e) {
+                    this.showAccountNotification('Lỗi', 'Lỗi thiết lập mặc định!', true);
+                }
+            },
+
+            // --- CÁC HÀM XỬ LÝ PASS/GUEST NHƯ CŨ ---
             togglePassword: function(id, btn) {
                 const input = document.getElementById(id);
                 input.type = input.type === 'password' ? 'text' : 'password';

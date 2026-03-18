@@ -48,6 +48,8 @@ public class KhachHang {
     @Column(name = "trang_thai")
     private Boolean trangThai = true;
 
+    
+
     @OneToMany(mappedBy = "khachHang", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<DiaChiKhachHang> diaChiList = new ArrayList<>();

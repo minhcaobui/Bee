@@ -279,13 +279,22 @@
 
             loadProducts: async function() {
                 try {
+                    // API gốc đã lọc sản phẩm đang bán (trangThai = true)
                     const res = await fetch('/api/products?page=0&size=4&trangThai=true');
                     const contentType = res.headers.get("content-type");
                     if (!res.ok || !contentType || !contentType.includes("application/json")) {
                         throw new Error("Không nhận được JSON");
                     }
                     const data = await res.json();
-                    const list = data.content || data;
+                    let list = data.content || data;
+
+                    // 🌟 BỘ LỌC CỨNG: Bỏ qua sản phẩm chưa có biến thể (Sản phẩm đang thêm dở)
+                    if (list && list.length > 0) {
+                        list = list.filter(p => {
+                            const variants = p.chiTietSanPhams || p.chiTietSanPhamList || p.bienThes || p.skus || [];
+                            return variants.length > 0;
+                        });
+                    }
 
                     if (!list || list.length === 0) {
                         this.renderFallback();
@@ -299,13 +308,13 @@
                 }
             },
 
-            renderProducts: function(list) {
+            renderProducts: function(newList) {
                 const grid = document.getElementById('dynamicProductsGrid');
                 let html = '';
                 const delayClasses = ['', 'reveal-delay-1', 'reveal-delay-2', 'reveal-delay-3'];
 
-                for (let i = 0; i < Math.min(list.length, 4); i++) {
-                    const p = list[i];
+                for (let i = 0; i < Math.min(newList.length, 4); i++) {
+                    const p = newList[i];
                     const delay = delayClasses[i] || '';
 
                     let imgUrl = p.hinhAnhs && p.hinhAnhs.length > 0 ? p.hinhAnhs[0].url : 'https://placehold.co/400x600?text=No+Image';
@@ -322,34 +331,49 @@
                         imgHoverHtml = `<img src="${hoverUrl}" loading="lazy" class="img-hover" alt="${p.ten}">`;
                     }
 
-                    const minPrice = p.chiTietSanPhams && p.chiTietSanPhams.length > 0
-                        ? Math.min.apply(null, p.chiTietSanPhams.map(function(v) { return v.giaBan || 0; }))
-                        : (p.giaBan || 0);
-                    const priceText = minPrice > 0 ? new Intl.NumberFormat('vi-VN').format(minPrice) + ' ₫' : 'Đang cập nhật';
+                    // 🌟 TÍNH TOÁN LẠI GIÁ HIỂN THỊ (QUÉT TẤT CẢ BIẾN THỂ TÌM GIÁ SALE)
+                    const variants = p.chiTietSanPhams || p.chiTietSanPhamList || p.bienThes || p.skus || [];
+                    let minOriginal = p.giaBan || 0;
+                    let minSale = p.giaSauKhuyenMai || minOriginal;
+
+                    if (variants.length > 0) {
+                        minOriginal = Math.min(...variants.map(v => v.giaBan || 0));
+                        minSale = Math.min(...variants.map(v => v.giaSauKhuyenMai || v.giaBan || 0));
+                    }
+
+                    let priceHtml = '';
+                    if (minSale < minOriginal && minSale > 0) {
+                        priceHtml = `<span style="color:#c08060; font-weight: 600;">${new Intl.NumberFormat('vi-VN').format(minSale)} ₫</span><span style="color:var(--muted); text-decoration:line-through; font-size:12px; margin-left: 6px;">${new Intl.NumberFormat('vi-VN').format(minOriginal)} ₫</span>`;
+                    } else {
+                        priceHtml = minOriginal > 0 ? new Intl.NumberFormat('vi-VN').format(minOriginal) + ' ₫' : 'Đang cập nhật';
+                    }
 
                     let badgeHtml = '';
-                    if (i === 0) badgeHtml = '<div class="label-new">Mới</div>';
-                    if (i === 3) badgeHtml = '<div class="label-sale">Sale</div>';
+                    if (minSale < minOriginal) {
+                        badgeHtml = '<div class="label-sale">Sale</div>';
+                    } else if (i === 0) {
+                        badgeHtml = '<div class="label-new">Mới</div>';
+                    }
 
-                    html += '<div class="product-card reveal ' + delay + '" id="home-card-' + p.id + '">' +
+                    html += `<div class="product-card reveal ${delay}" id="home-card-${p.id}">` +
                         badgeHtml +
-                        '<div class="product-img" onclick="window.HomeApp.viewDetail(' + p.id + ')">' +
+                        `<div class="product-img" onclick="window.HomeApp.viewDetail(${p.id})">` +
                         '<div class="img-overlay-pattern"></div>' +
                         `<img src="${imgUrl}" loading="lazy" class="img-placeholder" alt="${p.ten}">` +
                         imgHoverHtml +
                         '<div class="product-overlay">' +
-                        '<button class="quick-add" onclick="window.HomeApp.openSelection(' + p.id + ', event)">+ Thêm nhanh</button>' +
+                        `<button class="quick-add" onclick="window.HomeApp.openSelection(${p.id}, event)">+ Thêm nhanh</button>` +
                         '</div>' +
                         '</div>' +
 
                         '<div class="quick-selection-overlay" onclick="event.stopPropagation()">' +
-                        '<button class="qs-close" onclick="window.HomeApp.closeSelection(' + p.id + ', event)">×</button>' +
-                        '<div class="qs-title">' + p.ten + '</div>' +
-                        '<div class="qs-label">Màu sắc <span id="home-qs-color-name-' + p.id + '" style="color:var(--text); font-weight:600; text-transform:none; margin-left:4px;"></span></div>' +
-                        '<div class="qs-options" id="home-qs-colors-' + p.id + '"></div>' +
+                        `<button class="qs-close" onclick="window.HomeApp.closeSelection(${p.id}, event)">×</button>` +
+                        `<div class="qs-title">${p.ten}</div>` +
+                        `<div class="qs-label">Màu sắc <span id="home-qs-color-name-${p.id}" style="color:var(--text); font-weight:600; text-transform:none; margin-left:4px;"></span></div>` +
+                        `<div class="qs-options" id="home-qs-colors-${p.id}"></div>` +
                         '<div class="qs-label">Kích cỡ</div>' +
-                        '<div class="qs-options" id="home-qs-sizes-' + p.id + '"></div>' +
-                        '<div id="home-qs-price-' + p.id + '" style="font-size:14px; font-weight:500; text-align:center; margin-bottom:10px;">' + priceText + '</div>' +
+                        `<div class="qs-options" id="home-qs-sizes-${p.id}"></div>` +
+                        `<div id="home-qs-price-${p.id}" style="font-size:14px; font-weight:500; text-align:center; margin-bottom:10px;">${priceHtml}</div>` +
 
                         '<div style="display:flex; gap:8px; margin-top:10px;">' +
                         `<button class="qs-confirm-btn" style="margin-top:0; background:transparent; color:var(--text); border:1px solid rgba(0,0,0,0.2);" onclick="window.HomeApp.confirmAdd(${p.id}, event, false)">Thêm giỏ</button>` +
@@ -357,11 +381,11 @@
                         '</div>' +
                         '</div>' +
 
-                        '<div class="product-info" onclick="window.HomeApp.viewDetail(' + p.id + ')">' +
-                        '<div class="product-tag">' + (p.danhMuc ? p.danhMuc.ten : 'BeeMate') + '</div>' +
-                        '<div class="product-name">' + p.ten + '</div>' +
+                        `<div class="product-info" onclick="window.HomeApp.viewDetail(${p.id})">` +
+                        `<div class="product-tag">${p.danhMuc ? p.danhMuc.ten : 'BeeMate'}</div>` +
+                        `<div class="product-name">${p.ten}</div>` +
                         '<div class="product-price-row">' +
-                        '<div class="product-price">' + priceText + '</div>' +
+                        `<div class="product-price">${priceHtml}</div>` +
                         '</div>' +
                         '</div>' +
                         '</div>';
@@ -514,7 +538,15 @@
 
                 if (sku) {
                     this.tempSelection[productId].sku = sku;
-                    document.getElementById('home-qs-price-' + productId).innerText = new Intl.NumberFormat('vi-VN').format(sku.giaBan) + ' ₫';
+                    const currentPrice = sku.giaSauKhuyenMai || sku.giaBan || 0;
+                    const originalPrice = sku.giaBan || 0;
+
+                    const priceEl = document.getElementById('home-qs-price-' + productId);
+                    if (currentPrice < originalPrice && currentPrice > 0) {
+                        priceEl.innerHTML = `<span style="color:#c08060; font-weight: 600;">${new Intl.NumberFormat('vi-VN').format(currentPrice)} ₫</span> <span style="color:var(--muted); text-decoration:line-through; font-size:12px; margin-left: 6px;">${new Intl.NumberFormat('vi-VN').format(originalPrice)} ₫</span>`;
+                    } else {
+                        priceEl.innerText = new Intl.NumberFormat('vi-VN').format(originalPrice) + ' ₫';
+                    }
                 }
 
                 this.renderSelectionOptions(productId);
@@ -543,7 +575,8 @@
                         skuId: sku.id,
                         productId: productId,
                         name: product.ten,
-                        price: sku.giaBan,
+                        price: sku.giaSauKhuyenMai || sku.giaBan || 0, // 🌟 LƯU GIÁ SALE VÀO GIỎ HÀNG
+                        originalPrice: sku.giaBan || 0,
                         qty: 1,
                         img: sku.hinhAnh || (product.hinhAnhs && product.hinhAnhs.length > 0 ? product.hinhAnhs[0].url : ''),
                         colorName: sku.mauSac.ten,

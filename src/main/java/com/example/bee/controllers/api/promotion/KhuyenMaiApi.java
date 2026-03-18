@@ -36,27 +36,34 @@ public class KhuyenMaiApi {
     private final SanPhamRepository sanPhamRepo;
 
     private void validateConflict(Integer currentId, PromotionRequest request) {
+        // 🌟 Bổ sung: Nếu người dùng không chọn sản phẩm nào thì bỏ qua kiểm tra trùng lịch
+        if (request.getIdSanPhams() == null || request.getIdSanPhams().isEmpty()) {
+            return;
+        }
+
         Integer safeId = (currentId == null) ? -1 : currentId;
+        // checkTrungLich trả về các đợt KM trùng thời gian và trùng sản phẩm
         List<KhuyenMai> conflicts = khuyenMaiRepository.checkTrungLich(
                 request.getIdSanPhams(),
                 request.getNgayBatDau(),
                 request.getNgayKetThuc(),
                 safeId
         );
-        for (KhuyenMai km : conflicts) {
-            boolean isBothCumulative = km.getChoPhepCongDon() && request.getChoPhepCongDon();
-            if (!isBothCumulative) {
-                String tenSpTrung = "các sản phẩm đã chọn";
-                if (km.getSanPhams() != null && !km.getSanPhams().isEmpty()) {
-                    tenSpTrung = km.getSanPhams().stream()
-                            .filter(sp -> request.getIdSanPhams().contains(sp.getId()))
-                            .map(SanPham::getTen)
-                            .collect(Collectors.joining(", "));
-                }
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Sản phẩm [" + tenSpTrung + "] đang thuộc đợt KM: '" + km.getTen() +
-                                "'. Yêu cầu cả 2 đợt phải bật 'Cộng dồn' mới được áp dụng!");
+
+        // CHỈ CẦN CÓ TRÙNG LÀ CHẶN NGAY LẬP TỨC
+        if (!conflicts.isEmpty()) {
+            KhuyenMai km = conflicts.get(0); // Lấy đợt trùng đầu tiên để báo lỗi
+            String tenSpTrung = "các sản phẩm đã chọn";
+            if (km.getSanPhams() != null && !km.getSanPhams().isEmpty()) {
+                tenSpTrung = km.getSanPhams().stream()
+                        .filter(sp -> request.getIdSanPhams().contains(sp.getId()))
+                        .map(SanPham::getTen)
+                        .collect(Collectors.joining(", "));
             }
+
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Sản phẩm [" + tenSpTrung + "] đang thuộc đợt Sale: '" + km.getTen() +
+                            "'. Một sản phẩm không được phép tham gia 2 đợt Khuyến mãi giảm giá cùng lúc!");
         }
     }
 

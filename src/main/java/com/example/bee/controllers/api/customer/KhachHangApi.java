@@ -408,4 +408,121 @@ public class KhachHangApi {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "Lỗi hệ thống: " + e.getMessage()));
         }
     }
+
+    // 1. Lấy danh sách địa chỉ của chính khách hàng đang đăng nhập
+    @GetMapping("/addresses")
+    public ResponseEntity<?> getMyAddresses(Authentication authentication) {
+        String username = authentication.getName();
+        KhachHang kh = khRepo.findByTaiKhoan_TenDangNhap(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy khách hàng"));
+
+        return ResponseEntity.ok(dcRepo.findByKhachHangId(kh.getId()));
+    }
+
+    // 2. Lấy địa chỉ mặc định của khách hàng đang đăng nhập
+    @GetMapping("/addresses/default")
+    public ResponseEntity<?> getDefaultAddress(Authentication authentication) {
+        String username = authentication.getName();
+        KhachHang kh = khRepo.findByTaiKhoan_TenDangNhap(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        return ResponseEntity.ok(dcRepo.findByKhachHangIdAndLaMacDinhTrue(kh.getId()).orElse(null));
+    }
+
+    // 3. Thêm mới địa chỉ (Có hỗ trợ mã GHN)
+    @PostMapping("/addresses")
+    @Transactional
+    public ResponseEntity<?> addMyAddress(@RequestBody DiaChiRequest req, Authentication authentication) {
+        String username = authentication.getName();
+        KhachHang kh = khRepo.findByTaiKhoan_TenDangNhap(username).orElseThrow();
+
+        // Nếu đặt là mặc định, bỏ mặc định cũ
+        if (req.getLaMacDinh() != null && req.getLaMacDinh()) {
+            dcRepo.findByKhachHangIdAndLaMacDinhTrue(kh.getId()).ifPresent(old -> {
+                old.setLaMacDinh(false);
+                dcRepo.save(old);
+            });
+        }
+
+        DiaChiKhachHang dc = new DiaChiKhachHang();
+        dc.setKhachHang(kh);
+        mapRequestToEntity(req, dc);
+        return ResponseEntity.ok(dcRepo.save(dc));
+    }
+
+    // 4. Cập nhật địa chỉ (Có hỗ trợ mã GHN)
+    @PutMapping("/addresses/{id}")
+    @Transactional
+    public ResponseEntity<?> updateMyAddress(@PathVariable Integer id, @RequestBody DiaChiRequest req, Authentication authentication) {
+        DiaChiKhachHang dc = dcRepo.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        // Kiểm tra bảo mật: địa chỉ này phải thuộc về user đang login
+        if (!dc.getKhachHang().getTaiKhoan().getTenDangNhap().equals(authentication.getName())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        if (req.getLaMacDinh() != null && req.getLaMacDinh()) {
+            dcRepo.findByKhachHangIdAndLaMacDinhTrue(dc.getKhachHang().getId()).ifPresent(old -> {
+                if (!old.getId().equals(id)) {
+                    old.setLaMacDinh(false);
+                    dcRepo.save(old);
+                }
+            });
+        }
+
+        mapRequestToEntity(req, dc);
+        return ResponseEntity.ok(dcRepo.save(dc));
+    }
+
+    // 5. API thiết lập mặc định (Dùng cho nút bấm ngoài danh sách)
+    @PutMapping("/addresses/{id}/default")
+    @Transactional
+    public ResponseEntity<?> setMyDefaultAddress(@PathVariable Integer id, Authentication authentication) {
+        DiaChiKhachHang newDef = dcRepo.findById(id).orElseThrow();
+        if (!newDef.getKhachHang().getTaiKhoan().getTenDangNhap().equals(authentication.getName())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        dcRepo.findByKhachHangIdAndLaMacDinhTrue(newDef.getKhachHang().getId()).ifPresent(old -> {
+            old.setLaMacDinh(false);
+            dcRepo.save(old);
+        });
+
+        newDef.setLaMacDinh(true);
+        return ResponseEntity.ok(dcRepo.save(newDef));
+    }
+
+    @DeleteMapping("/addresses/{idDiaChi}")
+    public ResponseEntity<?> deleteMyAddress(@PathVariable Integer idDiaChi, Authentication authentication) {
+        DiaChiKhachHang dc = dcRepo.findById(idDiaChi)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        // Kiểm tra sở hữu
+        if (!dc.getKhachHang().getTaiKhoan().getTenDangNhap().equals(authentication.getName())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        if (dc.getLaMacDinh()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Không thể xóa địa chỉ mặc định");
+        }
+        dcRepo.delete(dc);
+        return ResponseEntity.ok().build();
+    }
+
+    // Hàm phụ để map dữ liệu
+    private void mapRequestToEntity(DiaChiRequest req, DiaChiKhachHang dc) {
+        dc.setHoTenNhan(req.getHoTenNhan());
+        dc.setSdtNhan(req.getSdtNhan());
+        dc.setDiaChiChiTiet(req.getDiaChiChiTiet());
+        dc.setTinhThanhPho(req.getTinhThanhPho());
+        dc.setMaTinh(req.getMaTinh());
+        dc.setQuanHuyen(req.getQuanHuyen());
+        dc.setMaHuyen(req.getMaHuyen());
+        dc.setPhuongXa(req.getPhuongXa());
+        dc.setMaXa(req.getMaXa());
+        dc.setLaMacDinh(req.getLaMacDinh() != null ? req.getLaMacDinh() : false);
+        dc.setTrangThai(true);
+        dc.setLoaiDiaChi("Nhà riêng");
+    }
 }

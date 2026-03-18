@@ -489,19 +489,40 @@
                 const btnAdd = document.getElementById('btnAddToCart');
                 const btnBuyNow = document.getElementById('btnBuyNow');
 
+                // NẾU CHƯA CHỌN ĐỦ MÀU VÀ SIZE
                 if (!this.state.selectedColorId || (this.state.uniqueSizes.length > 0 && !this.state.selectedSizeId)) {
-                    const basePrice = this.state.product.giaSauKhuyenMai || this.state.product.giaBan || 0;
-                    priceEl.innerHTML = `${new Intl.NumberFormat('vi-VN').format(basePrice)} ₫`;
+                    let minOriginal = this.state.product.giaBan || 0;
+                    let minSale = this.state.product.giaSauKhuyenMai || minOriginal;
+
+                    if (this.state.variants && this.state.variants.length > 0) {
+                        minOriginal = Math.min(...this.state.variants.map(v => v.giaBan || 0));
+                        minSale = Math.min(...this.state.variants.map(v => v.giaSauKhuyenMai || v.giaBan || 0));
+                    }
+
+                    if (minSale < minOriginal && minSale > 0) {
+                        priceEl.innerHTML = `<span style="color:#c08060; font-weight: 600;">${new Intl.NumberFormat('vi-VN').format(minSale)} ₫</span> <span style="color:var(--muted); text-decoration:line-through; font-size:16px; margin-left: 12px;">${new Intl.NumberFormat('vi-VN').format(minOriginal)} ₫</span>`;
+                    } else {
+                        priceEl.innerHTML = `${new Intl.NumberFormat('vi-VN').format(minOriginal)} ₫`;
+                    }
+
                     stockEl.innerHTML = 'Vui lòng chọn Kích cỡ';
                     stockEl.className = 'stock-status';
                     btnAdd.disabled = true; if(btnBuyNow) btnBuyNow.disabled = true;
                     return;
                 }
 
+                // NẾU ĐÃ CHỌN ĐỦ BIẾN THỂ (SKU)
                 const sku = this.state.variants.find(v => v.mauSac.id === this.state.selectedColorId && v.kichThuoc.id === this.state.selectedSizeId);
                 if (sku) {
-                    const price = sku.giaBan || 0;
-                    priceEl.innerHTML = `${new Intl.NumberFormat('vi-VN').format(price)} ₫`;
+                    const currentPrice = sku.giaSauKhuyenMai || sku.giaBan || 0;
+                    const originalPrice = sku.giaBan || 0;
+
+                    // 🌟 HIỂN THỊ GIÁ SALE (GẠCH NGANG GIÁ GỐC)
+                    if (currentPrice < originalPrice && currentPrice > 0) {
+                        priceEl.innerHTML = `<span style="color:#c08060; font-weight: 600;">${new Intl.NumberFormat('vi-VN').format(currentPrice)} ₫</span> <span style="color:var(--muted); text-decoration:line-through; font-size:16px; margin-left: 12px;">${new Intl.NumberFormat('vi-VN').format(originalPrice)} ₫</span>`;
+                    } else {
+                        priceEl.innerHTML = `${new Intl.NumberFormat('vi-VN').format(originalPrice)} ₫`;
+                    }
 
                     if (sku.soLuong > 10) {
                         stockEl.innerHTML = `<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;vertical-align:bottom;margin-right:4px"><path d="M5 13l4 4L19 7"/></svg> Còn hàng`;
@@ -536,9 +557,16 @@
                     else if (this.state.product.hinhAnhs && this.state.product.hinhAnhs.length > 0) productImg = this.state.product.hinhAnhs[0].url;
 
                     cart.push({
-                        skuId: sku.id, productId: this.state.product.id, name: this.state.product.ten,
-                        price: sku.giaBan || 0, qty: 1, img: productImg,
-                        colorName: sku.mauSac.ten, sizeName: sku.kichThuoc.ten, maxStock: sku.soLuong
+                        skuId: sku.id,
+                        productId: this.state.product.id,
+                        name: this.state.product.ten,
+                        price: sku.giaSauKhuyenMai || sku.giaBan || 0, // 🌟 ĐẨY GIÁ SALE VÀO GIỎ HÀNG
+                        originalPrice: sku.giaBan || 0,
+                        qty: 1,
+                        img: productImg,
+                        colorName: sku.mauSac.ten,
+                        sizeName: sku.kichThuoc.ten,
+                        maxStock: sku.soLuong
                     });
                 }
                 localStorage.setItem('bee_cart', JSON.stringify(cart));

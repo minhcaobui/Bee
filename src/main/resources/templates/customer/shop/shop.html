@@ -104,19 +104,30 @@
                     <div class="filter-title">Danh mục</div>
                     <ul class="filter-list" id="categoryFilter">
                         <li class="active" onclick="window.ShopApp.applyFilter('categoryId', null, this)">Tất cả</li>
-                        <li onclick="window.ShopApp.applyFilter('categoryId', 1, this)">Áo Thun</li>
-                        <li onclick="window.ShopApp.applyFilter('categoryId', 2, this)">Áo Polo</li>
-                        <li onclick="window.ShopApp.applyFilter('categoryId', 3, this)">Áo Sơ Mi</li>
                     </ul>
                 </div>
                 <div class="filter-widget">
                     <div class="filter-title">Khoảng giá</div>
-                    <ul class="filter-list" id="priceFilter">
-                        <li class="active" onclick="window.ShopApp.applyFilter('price', null, this)">Tất cả mức giá</li>
-                        <li onclick="window.ShopApp.applyFilter('price', '0-300000', this)">Dưới 300,000₫</li>
-                        <li onclick="window.ShopApp.applyFilter('price', '300000-500000', this)">300,000₫ - 500,000₫</li>
-                        <li onclick="window.ShopApp.applyFilter('price', '500000-9999999', this)">Trên 500,000₫</li>
-                    </ul>
+
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                        <input type="text" id="minPriceInput" placeholder="TỪ"
+                               style="width: 100%; padding: 8px 10px; font-size: 12px; border: 1px solid rgba(0,0,0,0.15); outline: none; font-family: 'DM Sans', sans-serif;"
+                               oninput="window.ShopApp.formatPriceInput(this)">
+                        <span style="color: var(--muted);">-</span>
+                        <input type="text" id="maxPriceInput" placeholder="ĐẾN"
+                               style="width: 100%; padding: 8px 10px; font-size: 12px; border: 1px solid rgba(0,0,0,0.15); outline: none; font-family: 'DM Sans', sans-serif;"
+                               oninput="window.ShopApp.formatPriceInput(this)">
+                    </div>
+
+                    <button onclick="window.ShopApp.applyCustomPrice()"
+                            style="width: 100%; padding: 10px; background: var(--text); color: var(--white); border: none; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; transition: 0.2s;">
+                        Áp dụng
+                    </button>
+
+                    <button id="clearPriceBtn" onclick="window.ShopApp.clearPriceFilter()"
+                            style="width: 100%; padding: 10px; background: transparent; color: var(--accent); border: none; font-size: 11px; text-transform: uppercase; cursor: pointer; display: none; margin-top: 5px; text-decoration: underline;">
+                        Xóa bộ lọc giá
+                    </button>
                 </div>
             </aside>
 
@@ -169,8 +180,77 @@
                 }
                 this.setupKeyboardEvents();
                 this.loadProducts();
+                this.loadCategories()
             },
 
+            // 1. Tự động format phẩy phân cách hàng nghìn khi khách gõ (VD: 150000 -> 150,000)
+            formatPriceInput: function(el) {
+                let val = el.value.replace(/[^0-9]/g, '');
+                if (val.length > 1 && val.startsWith('0')) val = val.substring(1);
+                el.value = val ? parseInt(val).toLocaleString('vi-VN') : '';
+            },
+
+            // 2. Nhận dữ liệu từ 2 ô input và áp dụng lọc
+            applyCustomPrice: function() {
+                let minVal = document.getElementById('minPriceInput').value.replace(/[^0-9]/g, '');
+                let maxVal = document.getElementById('maxPriceInput').value.replace(/[^0-9]/g, '');
+
+                if (!minVal && !maxVal) {
+                    window.showToast("Vui lòng nhập khoảng giá cần lọc", "warning");
+                    return;
+                }
+
+                let min = minVal ? parseInt(minVal) : 0;
+                let max = maxVal ? parseInt(maxVal) : 999999999;
+
+                // Tự động đảo ngược nếu khách nhập: Từ 500k Đến 100k
+                if (min > max) {
+                    let temp = min; min = max; max = temp;
+                    document.getElementById('minPriceInput').value = min.toLocaleString('vi-VN');
+                    document.getElementById('maxPriceInput').value = max.toLocaleString('vi-VN');
+                }
+
+                // Đẩy vào state và gọi load lại
+                this.state.filters.minPrice = min;
+                this.state.filters.maxPrice = max;
+
+                document.getElementById('clearPriceBtn').style.display = 'block';
+                this.resetAndLoad();
+            },
+
+            // 3. Nút xóa bộ lọc giá
+            clearPriceFilter: function() {
+                document.getElementById('minPriceInput').value = '';
+                document.getElementById('maxPriceInput').value = '';
+                this.state.filters.minPrice = null;
+                this.state.filters.maxPrice = null;
+                document.getElementById('clearPriceBtn').style.display = 'none';
+                this.resetAndLoad();
+            },
+
+            // 🌟 HÀM MỚI: TẢI DANH MỤC TỪ DATABASE
+            loadCategories: async function() {
+                try {
+                    const res = await fetch('/api/danh-muc/all-active');
+                    if (!res.ok) return;
+
+                    const data = await res.json();
+                    const list = data.content || data; // Xử lý nếu BE trả về Page hoặc List
+
+                    const ul = document.getElementById('categoryFilter');
+                    if (!ul || !list || list.length === 0) return;
+
+                    let html = `<li class="active" onclick="window.ShopApp.applyFilter('categoryId', null, this)">Tất cả</li>`;
+
+                    list.forEach(cat => {
+                        html += `<li onclick="window.ShopApp.applyFilter('categoryId', ${cat.id}, this)">${cat.ten}</li>`;
+                    });
+
+                    ul.innerHTML = html;
+                } catch (error) {
+                    console.error("Lỗi tải danh mục:", error);
+                }
+            },
             // ==========================================
             // THUẬT TOÁN NHẬN DIỆN MÀU THÔNG MINH
             // ==========================================
@@ -297,19 +377,56 @@
                     else if(this.state.sort === 'price_asc') paramStr += '&sort=giaBan,asc';
                     else if(this.state.sort === 'price_desc') paramStr += '&sort=giaBan,desc';
 
-                    if (this.state.filters.categoryId) paramStr += `&danhMucId=${this.state.filters.categoryId}`;
-                    if (this.state.filters.minPrice) paramStr += `&minGia=${this.state.filters.minPrice}`;
-                    if (this.state.filters.maxPrice) paramStr += `&maxGia=${this.state.filters.maxPrice}`;
+                    // 🌟 FIX 1: Đổi thành 'idDanhMuc' cho khớp với cấu trúc Backend
+                    if (this.state.filters.categoryId) paramStr += `&idDanhMuc=${this.state.filters.categoryId}`;
 
                     const url = `/api/products${paramStr}`;
                     const res = await fetch(url);
                     const data = await res.json();
-                    const list = data.content || data;
+                    const rawList = data.content || data;
 
-                    if (!list || list.length < this.state.size) this.state.hasMore = false;
+                    // Đánh dấu hết dữ liệu dựa trên danh sách thô từ Backend trả về
+                    if (!rawList || rawList.length < this.state.size) {
+                        this.state.hasMore = false;
+                    }
+
+                    let list = rawList || [];
+
+                    // 🌟 FIX 2: BỘ LỌC FRONTEND (Lọc SP nháp & Lọc theo Giá thực tế)
+                    if (list.length > 0) {
+                        list = list.filter(p => {
+                            const variants = this.getVariants(p);
+                            if (variants.length === 0) return false; // Loại bỏ sản phẩm chưa có màu/size
+
+                            // Lọc theo Khoảng giá
+                            if (this.state.filters.minPrice !== null) {
+                                // Lấy giá sale thực tế để so sánh với bộ lọc
+                                const pMinPrice = Math.min(...variants.map(v => v.giaSauKhuyenMai || v.giaBan || 0));
+                                const min = parseInt(this.state.filters.minPrice);
+                                const max = parseInt(this.state.filters.maxPrice);
+
+                                if (pMinPrice < min || pMinPrice > max) {
+                                    return false; // Loại bỏ SP không nằm trong khoảng giá
+                                }
+                            }
+                            return true;
+                        });
+                    }
+
                     const startIndex = this.state.products.length;
                     this.state.products = [...this.state.products, ...list];
-                    this.renderProducts(list, startIndex);
+
+                    // Nếu sau khi lọc mà list bị rỗng NHƯNG vẫn còn trang tiếp theo -> Tự động gọi lấy trang tiếp theo
+                    if (list.length === 0 && this.state.hasMore) {
+                        this.state.page++;
+                        this.state.isLoading = false;
+                        return this.loadProducts();
+                    }
+
+                    // Render dữ liệu nếu có
+                    if (list.length > 0) {
+                        this.renderProducts(list, startIndex);
+                    }
                     this.state.page++;
                 } catch (error) {
                     console.error("Lỗi lấy dữ liệu:", error);
@@ -321,8 +438,9 @@
                 }
             },
 
+            // 1. CẬP NHẬT LẠI HÀM RENDER ĐỂ TÌM GIÁ SALE NHỎ NHẤT TRONG CÁC BIẾN THỂ
             renderProducts: function(newList, startIndex) {
-                const grid = document.getElementById('dynamicShopGrid');
+                const grid = document.getElementById('dynamicShopGrid'); // (Với home.html là dynamicProductsGrid)
                 let html = '';
 
                 for (let i = 0; i < newList.length; i++) {
@@ -333,20 +451,34 @@
                     let imgHoverHtml = '';
                     if (p.hinhAnhs && p.hinhAnhs.length > 1) {
                         let hoverUrl = p.hinhAnhs[1].url;
-                        if (hoverUrl.includes('res.cloudinary.com')) {
-                            hoverUrl = hoverUrl.replace('/image/upload/', '/image/upload/c_fill,w_400,h_533,f_auto,q_auto/');
-                        }
+                        if (hoverUrl.includes('res.cloudinary.com')) hoverUrl = hoverUrl.replace('/image/upload/', '/image/upload/c_fill,w_400,h_533,f_auto,q_auto/');
                         imgHoverHtml = `<img src="${hoverUrl}" loading="lazy" class="img-hover" alt="${p.ten}">`;
                     }
 
-                    const variants = this.getVariants(p);
-                    const minPrice = variants.length > 0 ? Math.min.apply(null, variants.map(v => v.giaBan || 0)) : (p.giaBan || 0);
+                    // 🌟 TÍNH TOÁN LẠI GIÁ HIỂN THỊ (QUÉT TẤT CẢ BIẾN THỂ TÌM GIÁ SALE)
+                    const variants = p.chiTietSanPhams || p.chiTietSanPhamList || p.bienThes || p.skus || [];
+                    let minOriginal = p.giaBan || 0;
+                    let minSale = p.giaSauKhuyenMai || minOriginal;
 
-                    let priceHtml = (p.giaSauKhuyenMai && p.giaSauKhuyenMai < minPrice && minPrice > 0)
-                        ? `<span style="color:#c08060; font-weight: 600;">${new Intl.NumberFormat('vi-VN').format(p.giaSauKhuyenMai)} ₫</span><span style="color:var(--muted); text-decoration:line-through; font-size:12px; margin-left: 6px;">${minPrice / 1000}k</span>`
-                        : (minPrice > 0 ? new Intl.NumberFormat('vi-VN').format(minPrice) + ' ₫' : 'Đang cập nhật');
+                    if (variants.length > 0) {
+                        minOriginal = Math.min(...variants.map(v => v.giaBan || 0));
+                        minSale = Math.min(...variants.map(v => v.giaSauKhuyenMai || v.giaBan || 0));
+                    }
 
-                    let badgeHtml = (startIndex + i < 3 && this.state.sort === 'newest') ? '<div class="label-new">Mới</div>' : '';
+                    let priceHtml = '';
+                    if (minSale < minOriginal && minSale > 0) {
+                        priceHtml = `<span style="color:#c08060; font-weight: 600;">${new Intl.NumberFormat('vi-VN').format(minSale)} ₫</span><span style="color:var(--muted); text-decoration:line-through; font-size:12px; margin-left: 6px;">${new Intl.NumberFormat('vi-VN').format(minOriginal)} ₫</span>`;
+                    } else {
+                        priceHtml = minOriginal > 0 ? new Intl.NumberFormat('vi-VN').format(minOriginal) + ' ₫' : 'Đang cập nhật';
+                    }
+
+                    // Gắn tag Sale tự động
+                    let badgeHtml = '';
+                    if (minSale < minOriginal) {
+                        badgeHtml = '<div class="label-sale">Sale</div>';
+                    } else if (startIndex !== undefined && startIndex + i < 3) {
+                        badgeHtml = '<div class="label-new">Mới</div>';
+                    }
 
                     html += `<div class="product-card" id="shop-card-${p.id}">` +
                         badgeHtml +
@@ -377,7 +509,7 @@
                         `<div class="product-price">${priceHtml}</div>` +
                         '</div></div>';
                 }
-                grid.insertAdjacentHTML('beforeend', html);
+                grid.insertAdjacentHTML('beforeend', html); // (Với home.html là grid.innerHTML = html)
             },
 
             openSelection: function(productId, event) {
@@ -437,11 +569,12 @@
                 sizeContainer.innerHTML = sHtml;
             },
 
+            // 2. CẬP NHẬT LẠI GIÁ BÁN KHI BẤM CHỌN MỘT MÀU/SIZE CỤ THỂ
             selectAttr: function(productId, type, attrId, event) {
                 if (event) event.stopPropagation();
 
                 const product = this.state.products.find(p => p.id === productId);
-                const skus = this.getVariants(product);
+                const skus = product.chiTietSanPhams || product.chiTietSanPhamList || product.bienThes || product.skus || [];
 
                 if (type === 'color') {
                     this.tempSelection[productId].colorId = attrId;
@@ -449,12 +582,10 @@
 
                     const colorSku = skus.find(s => s.mauSac.id === attrId && s.hinhAnh);
                     if (colorSku && colorSku.hinhAnh) {
-                        const imgEl = document.querySelector(`#shop-card-${productId} .img-placeholder`);
+                        const imgEl = document.querySelector(`#shop-card-${productId} .img-placeholder`); // Đổi thành #home-card- nếu ở home.html
                         if (imgEl) {
                             let imgUrl = colorSku.hinhAnh;
-                            if (imgUrl.includes('res.cloudinary.com')) {
-                                imgUrl = imgUrl.replace('/image/upload/', '/image/upload/c_fill,w_400,h_533,f_auto,q_auto/');
-                            }
+                            if (imgUrl.includes('res.cloudinary.com')) imgUrl = imgUrl.replace('/image/upload/', '/image/upload/c_fill,w_400,h_533,f_auto,q_auto/');
                             imgEl.style.transition = 'opacity 0.2s ease';
                             imgEl.style.opacity = 0.5;
                             setTimeout(() => { imgEl.src = imgUrl; imgEl.style.opacity = 1; }, 150);
@@ -464,13 +595,24 @@
                 else this.tempSelection[productId].sizeId = attrId;
 
                 const sku = skus.find(s => s.mauSac.id === this.tempSelection[productId].colorId && s.kichThuoc.id === this.tempSelection[productId].sizeId);
+
+                // 🌟 HIỂN THỊ GIÁ SALE LÊN GIAO DIỆN POPUP CHỌN SIZE
                 if (sku) {
                     this.tempSelection[productId].sku = sku;
-                    document.getElementById('shop-qs-price-' + productId).innerText = new Intl.NumberFormat('vi-VN').format(sku.giaBan) + ' ₫';
+                    const currentPrice = sku.giaSauKhuyenMai || sku.giaBan;
+                    const originalPrice = sku.giaBan;
+
+                    const priceEl = document.getElementById('shop-qs-price-' + productId); // Đổi thành home-qs-price nếu ở home.html
+                    if (currentPrice < originalPrice) {
+                        priceEl.innerHTML = `<span style="color:#c08060; font-weight: 600;">${new Intl.NumberFormat('vi-VN').format(currentPrice)} ₫</span> <span style="color:var(--muted); text-decoration:line-through; font-size:12px; margin-left: 6px;">${new Intl.NumberFormat('vi-VN').format(originalPrice)} ₫</span>`;
+                    } else {
+                        priceEl.innerText = new Intl.NumberFormat('vi-VN').format(originalPrice) + ' ₫';
+                    }
                 }
                 this.renderSelectionOptions(productId);
             },
 
+            // 3. ĐẨY GIÁ SALE (NẾU CÓ) VÀO GIỎ HÀNG THAY VÌ GIÁ GỐC
             confirmAdd: function(productId, event, isBuyNow) {
                 if (event) event.stopPropagation();
                 const selection = this.tempSelection[productId];
@@ -489,9 +631,15 @@
                     exist.qty++;
                 } else {
                     cart.push({
-                        skuId: selection.sku.id, productId: productId, name: product.ten,
-                        price: selection.sku.giaBan, qty: 1, colorName: selection.sku.mauSac.ten,
-                        sizeName: selection.sku.kichThuoc.ten, maxStock: selection.sku.soLuong,
+                        skuId: selection.sku.id,
+                        productId: productId,
+                        name: product.ten,
+                        price: selection.sku.giaSauKhuyenMai || selection.sku.giaBan, // 🌟 LƯU GIÁ SALE VÀO GIỎ HÀNG
+                        originalPrice: selection.sku.giaBan, // Lưu thêm giá gốc để BE tính tổng chiết khấu nếu cần
+                        qty: 1,
+                        colorName: selection.sku.mauSac.ten,
+                        sizeName: selection.sku.kichThuoc.ten,
+                        maxStock: selection.sku.soLuong,
                         img: selection.sku.hinhAnh || (product.hinhAnhs?.[0]?.url || '')
                     });
                 }

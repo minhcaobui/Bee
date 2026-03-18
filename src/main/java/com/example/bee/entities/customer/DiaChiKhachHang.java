@@ -39,6 +39,16 @@ public class DiaChiKhachHang {
     @Column(name = "tinh_thanh_pho")
     private String tinhThanhPho;
 
+    // Trong file DiaChiKhachHang.java
+    @Column(name = "ma_tinh")
+    private Integer maTinh;
+
+    @Column(name = "ma_huyen")
+    private Integer maHuyen;
+
+    @Column(name = "ma_xa")
+    private String maXa; // WardCode của GHN là String
+
     @Column(name = "loai_dia_chi")
     private String loaiDiaChi = "Nhà riêng";
 

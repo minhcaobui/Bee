@@ -1,13 +1,13 @@
 <section id="cart-section">
     <style>
-        #cart-section { min-height: 100vh; background: var(--bg); }
+        #cart-section { min-height: 100vh; background: var(--bg); font-family: 'DM Sans', sans-serif; }
 
         /* ── CART HEADER ── */
         .cart-page-header { padding: 64px 60px 48px; border-bottom: 1px solid rgba(0,0,0,0.07); display: flex; align-items: flex-end; justify-content: space-between; }
         .cart-page-eyebrow { font-size: 11px; letter-spacing: 0.22em; color: var(--accent); text-transform: uppercase; font-weight: 500; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
         .cart-page-eyebrow::before { content:''; width:20px; height:1px; background:var(--accent); }
-        .cart-page-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(32px, 4vw, 52px); font-weight: 300; line-height: 1; }
-        .cart-count-badge { font-size: 13px; color: var(--muted); letter-spacing: 0.05em; }
+        .cart-page-title { font-size: clamp(32px, 4vw, 42px); font-weight: 600; line-height: 1; text-transform: uppercase; letter-spacing: 1px; }
+        .cart-count-badge { font-size: 13px; color: var(--muted); letter-spacing: 0.05em; font-weight: 500; margin-top: 8px;}
         .cart-continue-btn { font-size: 12px; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; background: none; border: none; font-family: 'DM Sans', sans-serif; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: color 0.2s; padding-bottom: 2px; border-bottom: 1px solid transparent; }
         .cart-continue-btn:hover { color: var(--accent); border-bottom-color: var(--accent); }
         .cart-continue-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
@@ -17,109 +17,69 @@
 
         /* ── CART ITEMS ── */
         .cart-items { padding: 0 60px 80px; border-right: 1px solid rgba(0,0,0,0.07); }
-        .cart-items-header { display: grid; grid-template-columns: 1fr 120px 120px 48px; gap: 16px; padding: 20px 0; border-bottom: 1px solid rgba(0,0,0,0.07); font-size: 10px; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; font-weight: 400; }
+        .cart-items-header { display: grid; grid-template-columns: 1fr 120px 120px 48px; gap: 16px; padding: 20px 0; border-bottom: 1px solid rgba(0,0,0,0.07); font-size: 10px; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; font-weight: 600; }
 
         .cart-item { display: grid; grid-template-columns: 100px 1fr 120px 120px 48px; gap: 24px; padding: 28px 0; border-bottom: 1px solid rgba(0,0,0,0.06); align-items: center; transition: opacity 0.3s, transform 0.3s; }
-        .cart-item-img { width: 100px; height: 130px; overflow: hidden; flex-shrink: 0; background: #f4f4f5; border-radius: 2px; }
+        .cart-item-img { width: 100px; height: 130px; overflow: hidden; flex-shrink: 0; background: #f4f4f5; border-radius: 4px; cursor: pointer; transition: 0.3s;}
+        .cart-item-img:hover { opacity: 0.8; }
         .cart-item-img-bg { width: 100%; height: 100%; object-fit: cover; }
-        .cart-item-tag { font-size: 10px; letter-spacing: 0.15em; color: var(--accent); text-transform: uppercase; margin-bottom: 6px; font-weight: 500; }
-        .cart-item-name { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; margin-bottom: 8px; line-height: 1.2; }
-        .cart-item-variants { font-size: 12px; color: var(--muted); display: flex; gap: 8px; align-items: center; font-weight: 300; }
+        .cart-item-tag { font-size: 10px; letter-spacing: 0.15em; color: var(--accent); text-transform: uppercase; margin-bottom: 6px; font-weight: 600; }
+        .cart-item-name { font-size: 16px; font-weight: 600; margin-bottom: 8px; line-height: 1.3; cursor: pointer; transition: color 0.2s;}
+        .cart-item-name:hover { color: var(--accent); }
+        .cart-item-variants { font-size: 12px; color: var(--muted); display: flex; gap: 8px; align-items: center; font-weight: 500; }
         .cart-item-variant-dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.12); display: inline-block; vertical-align: middle; }
         .cart-item-price-cell { text-align: center; }
-        .cart-item-price { font-size: 15px; color: var(--text); font-weight: 400; }
+        .cart-item-price { font-size: 15px; color: var(--text); font-weight: 600; }
         .cart-item-qty-cell { text-align: center; }
-        .cart-qty-control { display: inline-flex; align-items: center; gap: 0; border: 1px solid rgba(0,0,0,0.12); border-radius: 2px; }
-        .cart-qty-btn { width: 32px; height: 32px; border: none; background: none; cursor: pointer; font-size: 16px; color: var(--text); display: flex; align-items: center; justify-content: center; transition: background 0.2s; font-family: 'DM Sans', sans-serif; }
+        .cart-qty-control { display: inline-flex; align-items: center; gap: 0; border: 1px solid rgba(0,0,0,0.12); border-radius: 4px; overflow: hidden;}
+        .cart-qty-btn { width: 32px; height: 32px; border: none; background: none; cursor: pointer; font-size: 16px; color: var(--text); display: flex; align-items: center; justify-content: center; transition: background 0.2s; font-family: 'DM Sans', sans-serif; font-weight: 500;}
         .cart-qty-btn:hover { background: rgba(0,0,0,0.04); }
-        .cart-qty-num { width: 36px; text-align: center; font-size: 14px; font-weight: 400; border-left: 1px solid rgba(0,0,0,0.09); border-right: 1px solid rgba(0,0,0,0.09); line-height: 32px; }
+        .cart-qty-num { width: 36px; text-align: center; font-size: 14px; font-weight: 600; border-left: 1px solid rgba(0,0,0,0.09); border-right: 1px solid rgba(0,0,0,0.09); line-height: 32px; }
         .cart-remove-cell { text-align: center; }
         .cart-remove-btn { width: 32px; height: 32px; background: none; border: none; cursor: pointer; color: var(--muted); display: flex; align-items: center; justify-content: center; transition: color 0.2s; }
         .cart-remove-btn:hover { color: #c03c3c; }
-        .cart-remove-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; }
+        .cart-remove-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2;}
 
         /* Cart note */
         .cart-note { margin-top: 32px; }
-        .cart-note-label { font-size: 11px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; font-weight: 400; }
-        .cart-note-input { width: 100%; padding: 14px 16px; border: 1px solid rgba(0,0,0,0.1); background: var(--white); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 300; color: var(--text); resize: none; outline: none; transition: border-color 0.2s; min-height: 80px; border-radius: 2px; }
+        .cart-note-label { font-size: 11px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; font-weight: 600; }
+        .cart-note-input { width: 100%; padding: 14px 16px; border: 1px solid rgba(0,0,0,0.1); background: var(--white); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 400; color: var(--text); resize: none; outline: none; transition: border-color 0.2s; min-height: 80px; border-radius: 4px; }
         .cart-note-input:focus { border-color: var(--accent); }
         .cart-note-input::placeholder { color: var(--muted); }
 
         /* ── ORDER SUMMARY ── */
         .cart-summary { padding: 48px 60px 80px; position: sticky; top: 125px; }
-        .cart-summary-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; margin-bottom: 32px; }
+        .cart-summary-title { font-size: 18px; font-weight: 600; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 1px;}
 
-        /* Nút chọn mã giảm giá mới */
-        .promo-selector-btn { width: 100%; padding: 14px 16px; border: 1px dashed var(--accent); background: rgba(61,90,76,0.04); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 400; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-radius: 2px; transition: all 0.2s; margin-bottom: 16px; }
-        .promo-selector-btn:hover { background: rgba(61,90,76,0.08); }
-        .promo-selector-btn svg { width: 16px; height: 16px; stroke: var(--accent); fill: none; }
-        .promo-selector-btn.applied { border-style: solid; background: var(--text); color: white; }
-        .promo-selector-btn.applied svg { stroke: white; }
-        .promo-selector-btn.applied .promo-remove-icon { cursor: pointer; padding: 4px; }
-        .promo-selector-btn.applied .promo-remove-icon:hover { color: #ffcccc; stroke: #ffcccc; }
-
-        .promo-msg { font-size: 11px; margin-bottom: 20px; display: block; text-align: center; }
-        .promo-msg.error { color: #c03c3c; }
-        .promo-msg.success { color: #10b981; }
-
-        .cart-summary-rows { border-top: 1px solid rgba(0,0,0,0.07); padding-top: 24px; display: flex; flex-direction: column; gap: 16px; margin-bottom: 28px; }
+        .cart-summary-rows { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
         .cart-summary-row { display: flex; justify-content: space-between; align-items: center; }
-        .cart-summary-label { font-size: 13px; color: var(--muted); font-weight: 300; }
-        .cart-summary-val { font-size: 13px; color: var(--text); font-weight: 400; }
-        .cart-summary-val.free { color: var(--accent); font-weight: 400; }
+        .cart-summary-label { font-size: 13px; color: var(--muted); font-weight: 500; }
+        .cart-summary-val { font-size: 14px; color: var(--text); font-weight: 600; }
 
-        .cart-summary-total { border-top: 1px solid rgba(0,0,0,0.1); padding-top: 20px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: baseline; }
-        .cart-total-label { font-size: 13px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; }
-        .cart-total-val { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 300; transition: color 0.3s; }
+        .cart-summary-total { border-top: 1px solid rgba(0,0,0,0.1); padding-top: 20px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center; }
+        .cart-total-label { font-size: 14px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+        .cart-total-val { font-size: 24px; font-weight: 700; color: var(--text); }
 
-        .cart-checkout-btn { width: 100%; padding: 18px; background: var(--accent); color: white; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 400; display: flex; align-items: center; justify-content: center; gap: 12px; position: relative; overflow: hidden; transition: background 0.3s; margin-bottom: 12px; border-radius: 2px; }
-        .cart-checkout-btn::after { content: ''; position: absolute; inset: 0; background: var(--accent-light); transform: scaleX(0); transform-origin: left; transition: transform 0.4s ease; }
-        .cart-checkout-btn:hover::after { transform: scaleX(1); }
-        .cart-checkout-btn span { position: relative; z-index: 1; }
-        .cart-checkout-btn svg { width: 16px; height: 16px; stroke: white; fill: none; position: relative; z-index: 1; }
+        .cart-checkout-btn { width: 100%; padding: 18px; background: var(--accent); color: white; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 12px; position: relative; overflow: hidden; transition: background 0.3s; margin-bottom: 12px; border-radius: 4px; }
+        .cart-checkout-btn:hover { background: #2c4238; }
         .cart-checkout-btn:disabled { background: #ccc; cursor: not-allowed; }
 
         .cart-payment-icons { display: flex; justify-content: center; gap: 12px; margin-top: 20px; }
-        .payment-icon { background: var(--white); border: 1px solid rgba(0,0,0,0.08); padding: 6px 12px; font-size: 10px; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; font-weight: 500; border-radius: 2px;}
+        .payment-icon { background: var(--white); border: 1px solid rgba(0,0,0,0.08); padding: 6px 12px; font-size: 10px; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; font-weight: 600; border-radius: 4px;}
 
-        .cart-guarantee { margin-top: 24px; padding: 16px; background: rgba(61,90,76,0.06); display: flex; gap: 12px; align-items: flex-start; border-radius: 2px; }
-        .cart-guarantee svg { width: 16px; height: 16px; stroke: var(--accent); fill: none; flex-shrink: 0; margin-top: 1px; }
-        .cart-guarantee-text { font-size: 12px; color: var(--muted); line-height: 1.6; font-weight: 300; }
-        .cart-guarantee-text strong { color: var(--text); font-weight: 400; }
+        .cart-guarantee { margin-top: 24px; padding: 16px; background: rgba(61,90,76,0.06); display: flex; gap: 12px; align-items: flex-start; border-radius: 4px; }
+        .cart-guarantee svg { width: 18px; height: 18px; stroke: var(--accent); fill: none; flex-shrink: 0; margin-top: 1px; }
+        .cart-guarantee-text { font-size: 12px; color: var(--muted); line-height: 1.6; font-weight: 500; }
+        .cart-guarantee-text strong { color: var(--text); font-weight: 600; }
 
         /* Empty state */
         .cart-empty { padding: 100px 60px; text-align: center; display: none; grid-column: span 2; }
         .cart-empty-icon { width: 80px; height: 80px; border: 1px solid rgba(0,0,0,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 28px; background: #fff; }
         .cart-empty-icon svg { width: 32px; height: 32px; stroke: var(--muted); fill: none; }
-        .cart-empty-title { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 300; margin-bottom: 12px; }
-        .cart-empty-desc { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 36px; font-weight: 300; }
-        .cart-empty-btn { display: inline-flex; background: var(--text); color: #fff; padding: 14px 32px; text-decoration: none; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 2px; transition: 0.3s; }
+        .cart-empty-title { font-size: 28px; font-weight: 600; margin-bottom: 12px; text-transform: uppercase;}
+        .cart-empty-desc { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 36px; font-weight: 500; }
+        .cart-empty-btn { display: inline-flex; background: var(--text); color: #fff; padding: 14px 32px; text-decoration: none; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 4px; font-weight: 600; transition: 0.3s; }
         .cart-empty-btn:hover { background: var(--accent); }
-
-        /* ── MODAL CHỌN MÃ GIẢM GIÁ ── */
-        .voucher-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: flex-end; justify-content: center; backdrop-filter: blur(2px); animation: fadeIn 0.3s ease; }
-        .voucher-modal { width: 100%; max-width: 450px; background: #fff; border-radius: 12px 12px 0 0; padding: 24px; box-shadow: 0 -10px 40px rgba(0,0,0,0.15); transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); max-height: 80vh; display: flex; flex-direction: column; }
-        .voucher-modal.open { transform: translateY(0); }
-        .voucher-modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.06); padding-bottom: 16px; margin-bottom: 16px; }
-        .voucher-modal-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 400; }
-        .voucher-close-btn { background: none; border: none; cursor: pointer; color: var(--muted); padding: 4px; transition: color 0.2s; }
-        .voucher-close-btn:hover { color: var(--text); }
-        .voucher-close-btn svg { width: 24px; height: 24px; stroke: currentColor; fill: none; }
-        .voucher-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-bottom: 20px; }
-
-        .voucher-card { border: 1px solid rgba(0,0,0,0.1); border-radius: 4px; padding: 16px; display: flex; gap: 16px; align-items: center; position: relative; overflow: hidden; background: #fafafa; transition: border-color 0.2s, background 0.2s; cursor: pointer;}
-        .voucher-card:hover:not(.disabled) { border-color: var(--accent); background: #fff; }
-        .voucher-card.disabled { opacity: 0.5; cursor: not-allowed; }
-        .voucher-icon { width: 48px; height: 48px; background: rgba(61,90,76,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--accent); flex-shrink: 0; }
-        .voucher-icon svg { width: 24px; height: 24px; stroke: currentColor; fill: none; }
-        .voucher-info { flex: 1; }
-        .voucher-code { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 4px; font-family: monospace; letter-spacing: 1px; }
-        .voucher-desc { font-size: 12px; color: var(--muted); line-height: 1.4; margin-bottom: 6px; }
-        .voucher-meta { font-size: 10px; color: #c08060; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; }
-
-        .voucher-apply-btn { padding: 8px 16px; background: var(--text); color: #fff; border: none; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: 2px; }
-        .voucher-card:hover .voucher-apply-btn { background: var(--accent); }
-        .voucher-card.disabled .voucher-apply-btn { display: none; }
 
         @media (max-width: 900px) {
             .cart-page-header { padding: 48px 24px 32px; flex-direction: column; align-items: flex-start; gap: 20px; }
@@ -138,7 +98,7 @@
         <div>
             <div class="cart-page-eyebrow">Mua sắm</div>
             <h1 class="cart-page-title">Giỏ hàng</h1>
-            <div class="cart-count-badge" id="headerCartCount" style="margin-top:8px">Đang tải...</div>
+            <div class="cart-count-badge" id="headerCartCount">Đang tải...</div>
         </div>
         <button class="cart-continue-btn" onclick="window.location.hash='shop'">
             <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -147,7 +107,6 @@
     </div>
 
     <div class="cart-layout" id="cartLayout">
-
         <div class="cart-empty" id="cartEmptyState">
             <div class="cart-empty-icon">
                 <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
@@ -176,30 +135,10 @@
         <div class="cart-summary" id="cartSummarySection">
             <div class="cart-summary-title">Tóm tắt đơn hàng</div>
 
-            <div id="promoSelectorArea">
-                <button class="promo-selector-btn" id="btnOpenPromoModal" onclick="window.CartApp.openPromoModal()">
-                    <span style="display:flex; align-items:center; gap:8px;">
-                        <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M21.44 11.05l-9.19 9.19a2.003 2.003 0 01-2.83 0l-7.07-7.07a2.002 2.002 0 010-2.83l9.19-9.19a2 2 0 011.41-.58h6.58c1.1 0 2 .9 2 2v6.58c0 .53-.21 1.04-.59 1.41z"/><line x1="17" y1="7" x2="17.01" y2="7"/></svg>
-                        <span id="promoBtnText">Chọn mã giảm giá / Ưu đãi</span>
-                    </span>
-                    <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M9 5l7 7-7 7"/></svg>
-                </button>
-            </div>
-
-            <span id="promoMessage" class="promo-msg"></span>
-
             <div class="cart-summary-rows">
                 <div class="cart-summary-row">
                     <span class="cart-summary-label">Tạm tính</span>
                     <span class="cart-summary-val" id="cartSubtotal">0 ₫</span>
-                </div>
-                <div class="cart-summary-row" id="discountRow" style="display: none;">
-                    <span class="cart-summary-label">Mã giảm giá <span id="cartDiscountLabelInfo" style="font-weight:500; color:var(--text); margin-left:4px;"></span></span>
-                    <span class="cart-summary-val" id="cartDiscount" style="color: #10b981;">-0 ₫</span>
-                </div>
-                <div class="cart-summary-row">
-                    <span class="cart-summary-label">Phí vận chuyển</span>
-                    <span class="cart-summary-val free">Chờ tính bước sau</span>
                 </div>
             </div>
 
@@ -210,7 +149,7 @@
 
             <button class="cart-checkout-btn" id="btnCheckout" onclick="window.CartApp.proceedToCheckout()">
                 <span>Tiến hành thanh toán</span>
-                <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                <svg style="width:16px; height:16px; fill:none; stroke:white;" viewBox="0 0 24 24" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </button>
 
             <div class="cart-payment-icons">
@@ -228,34 +167,9 @@
         </div>
     </div>
 
-    <div class="voucher-modal-overlay" id="voucherModalOverlay" onclick="if(event.target === this) window.CartApp.closePromoModal()">
-        <div class="voucher-modal" id="voucherModal">
-            <div class="voucher-modal-header">
-                <div class="voucher-modal-title">Ưu đãi của bạn</div>
-                <button class="voucher-close-btn" onclick="window.CartApp.closePromoModal()">
-                    <svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                </button>
-            </div>
-
-            <div style="font-size:12px; color:var(--muted); margin-bottom:16px;">Vui lòng chọn 1 mã giảm giá phù hợp nhất với đơn hàng của bạn.</div>
-
-            <div class="voucher-list" id="voucherListContainer">
-                <div style="text-align:center; padding:40px; color:var(--muted); font-style:italic;">Đang tải danh sách voucher...</div>
-            </div>
-        </div>
-    </div>
-
     <script>
         window.CartApp = {
-            state: {
-                items: [],
-                isLoggedIn: false,
-                subTotal: 0,
-                discount: 0,
-                appliedPromoCode: null,
-                appliedPromoMaxAmount: 0,
-                availableVouchers: []
-            },
+            state: { items: [], subTotal: 0 },
 
             colorMap: {
                 'trắng': '#ffffff', 'đen': '#1a1a1a', 'xám': '#c5cfc7', 'ghi': '#d4cfc9',
@@ -264,10 +178,8 @@
                 'vàng': '#FBC02D', 'cam': '#f97316', 'xanh lá': '#15803d', 'tím': '#a855f7'
             },
 
-            init: async function() {
-                await this.checkLoginStatus();
+            init: function() {
                 this.loadCartFromStorage();
-
                 const savedNote = localStorage.getItem('bee_cart_note');
                 const noteInput = document.getElementById('cartNoteInput');
                 if (noteInput) {
@@ -276,87 +188,22 @@
                         localStorage.setItem('bee_cart_note', e.target.value);
                     });
                 }
-
                 this.render();
             },
 
-            // THUẬT TOÁN NHẬN DIỆN MÀU THÔNG MINH
             getColorHex: function(name) {
                 if(!name) return '#000';
                 const n = name.toLowerCase().trim();
-
                 if (this.colorMap[n]) return this.colorMap[n];
-
-                if (n.includes('đỏ')) return '#b91c1c';
-                if (n.includes('xanh dương') || n.includes('xanh biển') || n.includes('navy')) return '#1d4ed8';
-                if (n.includes('xanh lá') || n.includes('rêu')) return '#15803d';
-                if (n.includes('vàng')) return '#eab308';
-                if (n.includes('cam')) return '#ea580c';
-                if (n.includes('hồng')) return '#ec4899';
-                if (n.includes('tím')) return '#a855f7';
-                if (n.includes('nâu')) return '#78350f';
-                if (n.includes('xám') || n.includes('ghi')) return '#64748b';
-                if (n.includes('be') || n.includes('kem')) return '#fef3c7';
-                if (n.includes('trắng')) return '#ffffff';
-                if (n.includes('đen')) return '#111827';
-
-                let hash = 0;
-                for (let i = 0; i < n.length; i++) hash = n.charCodeAt(i) + ((hash << 5) - hash);
-                let color = '#';
-                for (let i = 0; i < 3; i++) color += ('00' + ((hash >> (i * 8)) & 0xFF).toString(16)).substr(-2);
-                return color;
-            },
-
-            checkLoginStatus: async function() {
-                try {
-                    const res = await fetch('/api/khach-hang/my-profile');
-                    if (res.ok) {
-                        this.state.isLoggedIn = true;
-                        this.fetchVouchers(); // Nhanh tay tải voucher ngầm nếu đã login
-                    } else {
-                        this.state.isLoggedIn = false;
-                    }
-                } catch (e) {
-                    this.state.isLoggedIn = false;
-                }
-            },
-
-            // GỌI API LẤY DANH SÁCH MÃ GIẢM GIÁ
-            fetchVouchers: async function() {
-                try {
-                    // Thay URL API này bằng URL API thực tế của hệ thống bạn
-                    const res = await fetch('/api/ma-giam-gia/danh-sach');
-                    if (res.ok) {
-                        this.state.availableVouchers = await res.json();
-                    } else {
-                        // Dữ liệu mẫu (MOCK) nếu API chưa chạy
-                        this.state.availableVouchers = [
-                            { id: 1, maCode: 'BEE50K', ten: 'Giảm 50K cho đơn từ 200K', dieuKien: 200000, loaiGiamGia: 'TIEN', giaTriGiamGia: 50000, giaTriGiamGiaToiDa: 50000, soLuong: 100 },
-                            { id: 2, maCode: 'FREESHIP', ten: 'Miễn phí vận chuyển tới 30K', dieuKien: 300000, loaiGiamGia: 'TIEN', giaTriGiamGia: 30000, giaTriGiamGiaToiDa: 30000, soLuong: 50 },
-                            { id: 3, maCode: 'VIP10', ten: 'Giảm 10% tối đa 100K cho đơn từ 500K', dieuKien: 500000, loaiGiamGia: 'PHAN_TRAM', giaTriGiamGia: 10, giaTriGiamGiaToiDa: 100000, soLuong: 10 }
-                        ];
-                    }
-                } catch(e) {
-                    console.log("Dùng MOCK Voucher");
-                    this.state.availableVouchers = [
-                        { id: 1, maCode: 'BEE50K', ten: 'Giảm 50K cho đơn từ 200K', dieuKien: 200000, loaiGiamGia: 'TIEN', giaTriGiamGia: 50000, giaTriGiamGiaToiDa: 50000, soLuong: 100 },
-                        { id: 2, maCode: 'FREESHIP', ten: 'Miễn phí vận chuyển tới 30K', dieuKien: 300000, loaiGiamGia: 'TIEN', giaTriGiamGia: 30000, giaTriGiamGiaToiDa: 30000, soLuong: 50 },
-                        { id: 3, maCode: 'VIP10', ten: 'Giảm 10% tối đa 100K cho đơn từ 500K', dieuKien: 500000, loaiGiamGia: 'PHAN_TRAM', giaTriGiamGia: 10, giaTriGiamGiaToiDa: 100000, soLuong: 10 }
-                    ];
-                }
+                return '#ccc'; // Fallback
             },
 
             loadCartFromStorage: function() {
                 const storedCart = localStorage.getItem('bee_cart');
                 if (storedCart) {
-                    try {
-                        this.state.items = JSON.parse(storedCart);
-                    } catch (e) {
-                        this.state.items = [];
-                    }
-                } else {
-                    this.state.items = [];
-                }
+                    try { this.state.items = JSON.parse(storedCart); }
+                    catch (e) { this.state.items = []; }
+                } else this.state.items = [];
             },
 
             saveCartToStorage: function() {
@@ -387,16 +234,17 @@
                 for (let i = 0; i < this.state.items.length; i++) {
                     const item = this.state.items[i];
                     totalItems += item.qty;
-
                     const hexColor = this.getColorHex(item.colorName);
                     const imgSrc = item.img || 'https://placehold.co/100x130?text=No+Img';
 
                     html += '<div class="cart-item" id="cart-item-' + i + '">' +
-                        '<div class="cart-item-img">' +
+                        // 🌟 THÊM SỰ KIỆN CHUYỂN TRANG CHO ẢNH
+                        '<div class="cart-item-img" onclick="window.location.hash=\'detail?id=' + item.productId + '\'">' +
                         '<img src="' + imgSrc + '" class="cart-item-img-bg" alt="' + item.name + '">' +
                         '</div>' +
                         '<div class="cart-item-info">' +
-                        '<div class="cart-item-name">' + item.name + '</div>' +
+                        // 🌟 THÊM SỰ KIỆN CHUYỂN TRANG CHO TÊN
+                        '<div class="cart-item-name" onclick="window.location.hash=\'detail?id=' + item.productId + '\'">' + item.name + '</div>' +
                         '<div class="cart-item-variants">' +
                         '<div class="cart-item-variant-dot" style="background:' + hexColor + '"></div>' +
                         item.colorName + ' · Size ' + item.sizeName +
@@ -414,7 +262,7 @@
                         '</div>' +
                         '<div class="cart-remove-cell">' +
                         '<button class="cart-remove-btn" onclick="window.CartApp.removeItem(' + i + ')">' +
-                        '<svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M18 6L6 18M6 6l12 12"/></svg>' +
+                        '<svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>' +
                         '</button>' +
                         '</div>' +
                         '</div>';
@@ -433,35 +281,21 @@
                 if (newQty < 1) newQty = 1;
 
                 if (item.maxStock && newQty > item.maxStock) {
-                    alert('Chỉ còn ' + item.maxStock + ' sản phẩm trong kho!');
-                    return;
+                    alert('Chỉ còn ' + item.maxStock + ' sản phẩm trong kho!'); return;
                 }
 
                 item.qty = newQty;
                 this.saveCartToStorage();
 
                 const row = document.getElementById('cart-item-' + index);
-                if (row) {
-                    row.querySelector('.cart-qty-num').textContent = newQty;
-                }
+                if (row) row.querySelector('.cart-qty-num').textContent = newQty;
 
                 let totalItems = 0;
-                for (let i = 0; i < this.state.items.length; i++) {
-                    totalItems += this.state.items[i].qty;
-                }
+                for (let i = 0; i < this.state.items.length; i++) totalItems += this.state.items[i].qty;
+
                 document.getElementById('headerCartCount').textContent = totalItems + ' sản phẩm';
                 window.updateCartBadge();
                 this.calculateTotals();
-
-                // KIỂM TRA LẠI MÃ GIẢM GIÁ NẾU CÓ
-                if (this.state.appliedPromoCode) {
-                    const activeVoucher = this.state.availableVouchers.find(v => v.maCode === this.state.appliedPromoCode);
-                    if (activeVoucher && this.state.subTotal < activeVoucher.dieuKien) {
-                        this.removePromo();
-                        document.getElementById('promoMessage').className = 'promo-msg error';
-                        document.getElementById('promoMessage').textContent = 'Đơn hàng không còn đủ điều kiện áp dụng mã ' + activeVoucher.maCode;
-                    }
-                }
             },
 
             removeItem: function(index) {
@@ -471,19 +305,11 @@
                     row.style.transform = 'translateX(20px)';
                     window.updateCartBadge();
                 }
-
                 setTimeout(() => {
                     this.state.items.splice(index, 1);
                     this.saveCartToStorage();
                     this.render();
                     window.updateCartBadge();
-
-                    if (this.state.appliedPromoCode) {
-                        const activeVoucher = this.state.availableVouchers.find(v => v.maCode === this.state.appliedPromoCode);
-                        if (activeVoucher && this.state.subTotal < activeVoucher.dieuKien) {
-                            this.removePromo();
-                        }
-                    }
                 }, 300);
             },
 
@@ -493,175 +319,12 @@
                     subTotal += (this.state.items[i].price * this.state.items[i].qty);
                 }
                 this.state.subTotal = subTotal;
-
-                // TÍNH TOÁN LẠI TIỀN GIẢM GIÁ (Đặc biệt cho loại Phần Trăm)
-                if (this.state.appliedPromoCode) {
-                    const activeVoucher = this.state.availableVouchers.find(v => v.maCode === this.state.appliedPromoCode);
-                    if (activeVoucher) {
-                        if (activeVoucher.loaiGiamGia === 'PHAN_TRAM') {
-                            let calculatedDiscount = (this.state.subTotal * activeVoucher.giaTriGiamGia) / 100;
-                            // Kiểm tra giảm tối đa
-                            if (calculatedDiscount > activeVoucher.giaTriGiamGiaToiDa) {
-                                calculatedDiscount = activeVoucher.giaTriGiamGiaToiDa;
-                            }
-                            this.state.discount = calculatedDiscount;
-                            document.getElementById('cartDiscount').textContent = '-' + this.formatCurrency(this.state.discount);
-                        }
-                    }
-                }
-
-                this.state.total = Math.max(0, this.state.subTotal - this.state.discount);
-
                 document.getElementById('cartSubtotal').textContent = this.formatCurrency(this.state.subTotal);
-
-                const totalEl = document.getElementById('cartTotal');
-                totalEl.textContent = this.formatCurrency(this.state.total);
-                if (this.state.discount > 0) {
-                    totalEl.style.color = '#c03c3c';
-                } else {
-                    totalEl.style.color = 'var(--text)';
-                }
-            },
-
-            // ── CÁC HÀM XỬ LÝ MÃ GIẢM GIÁ ──
-            openPromoModal: function() {
-                if (!this.state.isLoggedIn) {
-                    const msgEl = document.getElementById('promoMessage');
-                    msgEl.className = 'promo-msg error';
-                    msgEl.textContent = 'Bạn cần đăng nhập tài khoản để sử dụng Mã giảm giá.';
-                    return;
-                }
-
-                document.getElementById('promoMessage').textContent = '';
-                document.getElementById('voucherModalOverlay').style.display = 'flex';
-                // Đợi render xong CSS display flex rồi mới thêm class open để tạo hiệu ứng trượt mượt
-                setTimeout(() => {
-                    document.getElementById('voucherModal').classList.add('open');
-                }, 10);
-
-                this.renderVoucherList();
-            },
-
-            closePromoModal: function() {
-                document.getElementById('voucherModal').classList.remove('open');
-                setTimeout(() => {
-                    document.getElementById('voucherModalOverlay').style.display = 'none';
-                }, 350); // Đợi CSS transition chạy xong (0.4s)
-            },
-
-            renderVoucherList: function() {
-                const listContainer = document.getElementById('voucherListContainer');
-
-                if (this.state.availableVouchers.length === 0) {
-                    listContainer.innerHTML = '<div style="text-align:center; padding:40px; color:var(--muted); font-style:italic;">Hiện không có mã giảm giá nào phù hợp với bạn.</div>';
-                    return;
-                }
-
-                let html = '';
-
-                this.state.availableVouchers.forEach(v => {
-                    const isEligible = this.state.subTotal >= v.dieuKien;
-                    const disabledClass = isEligible ? '' : 'disabled';
-                    const isSelected = this.state.appliedPromoCode === v.maCode;
-                    const selectedStyle = isSelected ? 'border-color: var(--accent); background: rgba(61,90,76,0.04);' : '';
-
-                    let discountText = '';
-                    if (v.loaiGiamGia === 'PHAN_TRAM') {
-                        discountText = `Giảm ${v.giaTriGiamGia}% (Tối đa ${this.formatCurrency(v.giaTriGiamGiaToiDa)})`;
-                    } else {
-                        discountText = `Giảm ${this.formatCurrency(v.giaTriGiamGia)}`;
-                    }
-
-                    html += `
-                        <div class="voucher-card ${disabledClass}" style="${selectedStyle}" onclick="${isEligible ? `window.CartApp.applyVoucher('${v.maCode}')` : ''}">
-                            <div class="voucher-icon">
-                                <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M21.44 11.05l-9.19 9.19a2.003 2.003 0 01-2.83 0l-7.07-7.07a2.002 2.002 0 010-2.83l9.19-9.19a2 2 0 011.41-.58h6.58c1.1 0 2 .9 2 2v6.58c0 .53-.21 1.04-.59 1.41z"/><line x1="17" y1="7" x2="17.01" y2="7"/></svg>
-                            </div>
-                            <div class="voucher-info">
-                                <div class="voucher-code">${v.maCode}</div>
-                                <div class="voucher-desc">${v.ten}</div>
-                                <div class="voucher-meta">
-                                    ${isEligible ? '<span style="color:#10b981">Đủ điều kiện áp dụng</span>' : `Mua thêm ${this.formatCurrency(v.dieuKien - this.state.subTotal)} để dùng`}
-                                </div>
-                            </div>
-                            <button class="voucher-apply-btn">${isSelected ? 'Đang dùng' : 'Dùng ngay'}</button>
-                        </div>
-                    `;
-                });
-
-                listContainer.innerHTML = html;
-            },
-
-            applyVoucher: function(code) {
-                const voucher = this.state.availableVouchers.find(v => v.maCode === code);
-                if (!voucher || this.state.subTotal < voucher.dieuKien) return;
-
-                this.state.appliedPromoCode = voucher.maCode;
-
-                if (voucher.loaiGiamGia === 'TIEN') {
-                    this.state.discount = voucher.giaTriGiamGia;
-                } else {
-                    let calculatedDiscount = (this.state.subTotal * voucher.giaTriGiamGia) / 100;
-                    if (calculatedDiscount > voucher.giaTriGiamGiaToiDa) calculatedDiscount = voucher.giaTriGiamGiaToiDa;
-                    this.state.discount = calculatedDiscount;
-                }
-
-                // Cập nhật Giao diện nút chọn mã
-                const btn = document.getElementById('btnOpenPromoModal');
-                btn.classList.add('applied');
-                btn.innerHTML = `
-                    <span style="display:flex; align-items:center; gap:8px;">
-                        <svg viewBox="0 0 24 24" stroke-width="1.5" style="stroke:white;"><path d="M21.44 11.05l-9.19 9.19a2.003 2.003 0 01-2.83 0l-7.07-7.07a2.002 2.002 0 010-2.83l9.19-9.19a2 2 0 011.41-.58h6.58c1.1 0 2 .9 2 2v6.58c0 .53-.21 1.04-.59 1.41z"/><line x1="17" y1="7" x2="17.01" y2="7"/></svg>
-                        <span>Đã áp dụng mã: <strong>${voucher.maCode}</strong></span>
-                    </span>
-                    <svg class="promo-remove-icon" onclick="event.stopPropagation(); window.CartApp.removePromo()" viewBox="0 0 24 24" stroke-width="2" style="width:20px;height:20px;"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                `;
-
-                // Hiển thị hàng tính tiền giảm giá
-                document.getElementById('discountRow').style.display = 'flex';
-                document.getElementById('cartDiscountLabelInfo').textContent = `(${voucher.maCode})`;
-                document.getElementById('cartDiscount').textContent = '-' + this.formatCurrency(this.state.discount);
-
-                this.calculateTotals();
-                this.closePromoModal();
-
-                const msgEl = document.getElementById('promoMessage');
-                msgEl.className = 'promo-msg success';
-                msgEl.textContent = `Tuyệt vời! Bạn được giảm ${this.formatCurrency(this.state.discount)}.`;
-            },
-
-            removePromo: function() {
-                this.state.appliedPromoCode = null;
-                this.state.discount = 0;
-
-                // Reset Giao diện nút chọn mã
-                const btn = document.getElementById('btnOpenPromoModal');
-                btn.classList.remove('applied');
-                btn.innerHTML = `
-                    <span style="display:flex; align-items:center; gap:8px;">
-                        <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M21.44 11.05l-9.19 9.19a2.003 2.003 0 01-2.83 0l-7.07-7.07a2.002 2.002 0 010-2.83l9.19-9.19a2 2 0 011.41-.58h6.58c1.1 0 2 .9 2 2v6.58c0 .53-.21 1.04-.59 1.41z"/><line x1="17" y1="7" x2="17.01" y2="7"/></svg>
-                        <span>Chọn mã giảm giá / Ưu đãi</span>
-                    </span>
-                    <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M9 5l7 7-7 7"/></svg>
-                `;
-
-                document.getElementById('promoMessage').textContent = '';
-                document.getElementById('discountRow').style.display = 'none';
-
-                this.calculateTotals();
+                document.getElementById('cartTotal').textContent = this.formatCurrency(this.state.subTotal);
             },
 
             proceedToCheckout: function() {
                 if (this.state.items.length === 0) return;
-
-                // Lưu lại mã khuyến mãi và tiền giảm giá để truyền sang trang Thanh Toán
-                localStorage.setItem('bee_checkout_discount', this.state.discount);
-                if (this.state.appliedPromoCode) {
-                    localStorage.setItem('bee_checkout_promo_code', this.state.appliedPromoCode);
-                } else {
-                    localStorage.removeItem('bee_checkout_promo_code');
-                }
-
                 window.location.hash = 'checkout';
             },
 
@@ -670,8 +333,6 @@
             }
         };
 
-        setTimeout(function() {
-            if (window.CartApp) window.CartApp.init();
-        }, 100);
+        setTimeout(function() { if (window.CartApp) window.CartApp.init(); }, 100);
     </script>
 </section>

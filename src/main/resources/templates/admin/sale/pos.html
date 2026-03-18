@@ -79,7 +79,7 @@
         .voucher-card { border: 1px solid var(--gray-200); border-radius: 4px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; background: #fff; }
         .voucher-card:hover { border-color: #000; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .voucher-card .v-code { font-weight: 800; font-size: 13px; color: #000; margin-bottom: 4px; }
-        .voucher-card .v-desc { font-size: 11px; color: #666; }
+        .voucher-card .v-desc { font-size: 11px; color: #666; font-weight: 600; }
 
         /* ==========================================================================
            3. MODAL CUSTOM & TOAST
@@ -278,12 +278,12 @@
 <div id="toast-container"></div>
 
 <div id="voucherModal" class="modal">
-    <div class="modal-dialog" style="width: 420px; background: #f4f4f5;">
+    <div class="modal-dialog" style="width: 440px; background: #f4f4f5;">
         <div class="modal-header" style="background: #fff;">
             <span class="modal-title">CHỌN MÃ GIẢM GIÁ</span>
             <button class="btn-close" onclick="PosApp.closeModal('voucherModal')"></button>
         </div>
-        <div class="modal-body" style="padding: 15px; max-height: 450px; overflow-y: auto;" id="voucherList">
+        <div class="modal-body" style="padding: 15px; max-height: 480px; overflow-y: auto;" id="voucherList">
             <div style="text-align: center; color: #888; padding: 20px;">Đang tải danh sách mã...</div>
         </div>
     </div>
@@ -493,27 +493,37 @@
         openVoucherModal: async function() {
             this.openModal('voucherModal');
             const listEl = document.getElementById('voucherList');
-            listEl.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">Đang tải mã giảm giá...</div>';
+            listEl.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">Đang tải danh sách mã giảm giá...</div>';
 
             try {
-                const res = await fetch('/api/pos/vouchers/active');
-                if(!res.ok) throw new Error("Backend chưa có API lấy list Voucher");
+                // Gọi API lấy dữ liệu thật từ Database của bạn
+                const res = await fetch('/api/vouchers/active');
+                if(!res.ok) throw new Error("Lỗi lấy dữ liệu từ Backend");
+
                 const vouchers = await res.json();
-                this.renderVouchersList(vouchers);
+                this.renderVouchersList(vouchers); // Render thẳng dữ liệu thật
+
             } catch(e) {
-                const mockVouchers = [
-                    { maCode: 'GIAM50K', ten: 'Giảm 50K cho đơn từ 200K', loaiGiamGia: 'fixed', giaTriGiamGia: 50000, dieuKien: 200000 },
-                    { maCode: 'SALE20', ten: 'Giảm 20% tối đa 100K', loaiGiamGia: 'percentage', giaTriGiamGia: 20, dieuKien: 300000, giaTriGiamGiaToiDa: 100000 },
-                    { maCode: 'FREESHIP30', ten: 'Hỗ trợ vận chuyển 30K', loaiGiamGia: 'fixed', giaTriGiamGia: 30000, dieuKien: 150000 }
-                ];
-                this.renderVouchersList(mockVouchers);
+                listEl.innerHTML = '<div style="text-align: center; color: #ef4444; padding: 20px;">Không thể kết nối đến máy chủ để lấy mã giảm giá!</div>';
             }
         },
 
+        // =========================================================================
+        // NÂNG CẤP TÍNH NĂNG RENDER VOUCHER: HIỂN THỊ CHI TIẾT & BÁO CÒN THIẾU
+        // =========================================================================
         renderVouchersList: function(vouchers) {
             const listEl = document.getElementById('voucherList');
-            if(!vouchers || vouchers.length === 0) {
-                listEl.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">Không có mã giảm giá nào khả dụng</div>';
+
+            // Lọc sơ bộ trên Frontend để chắc chắn chỉ hiện các mã đang hoạt động và còn lượt
+            const activeVouchers = vouchers.filter(v => {
+                if (v.trangThai === false) return false;
+                if (v.soLuong !== undefined && v.luotSuDung !== undefined && v.soLuong <= v.luotSuDung) return false;
+                if (v.ngayKetThuc && new Date(v.ngayKetThuc) < new Date()) return false;
+                return true;
+            });
+
+            if(!activeVouchers || activeVouchers.length === 0) {
+                listEl.innerHTML = '<div style="text-align: center; color: #888; padding: 30px;">Hiện tại không có mã giảm giá nào khả dụng</div>';
                 return;
             }
 
@@ -523,26 +533,52 @@
                 inv.cart.forEach(i => { totalAfterSale += (Number(i.price) * i.qty); });
             }
 
-            listEl.innerHTML = vouchers.map(v => {
+            listEl.innerHTML = activeVouchers.map(v => {
                 const isValid = totalAfterSale >= v.dieuKien;
-                const opacity = isValid ? '1' : '0.5';
-                const actionBtn = isValid
-                    ? `<button class="btn btn-primary btn-apply-voucher" onclick="PosApp.selectVoucher('${v.maCode}')">DÙNG MÃ</button>`
-                    : `<span style="font-size:10px; color:#ef4444; font-weight:700;">Chưa đủ điều kiện</span>`;
+                const opacity = isValid ? '1' : '0.6';
+
+                let actionBtn = '';
+                let noteHtml = `<div style="font-size: 10px; color: #10b981; margin-top: 4px; font-weight:600;">Đơn tối thiểu: ${new Intl.NumberFormat('vi-VN').format(v.dieuKien)}đ</div>`;
+
+                // Xử lý nút bấm và nội dung nhắc nhở khi chưa đạt điều kiện
+                if (isValid) {
+                    actionBtn = `<button class="btn btn-primary" style="background:#000; border-color:#000; border-radius:2px;" onclick="PosApp.selectVoucher('${v.maCode || v.code}')">DÙNG MÃ</button>`;
+                } else {
+                    const thieu = v.dieuKien - totalAfterSale;
+                    actionBtn = `<span style="font-size:10px; color:#ef4444; font-weight:800; background:#fee2e2; padding:6px 10px; border-radius:2px; text-transform:uppercase; text-align:center; display:inline-block;">Chưa đủ ĐK</span>`;
+                    noteHtml += `<div style="font-size: 10px; color: #ef4444; margin-top: 2px; font-style:italic;">(Mua thêm ${new Intl.NumberFormat('vi-VN').format(thieu)}đ)</div>`;
+                }
+
+                // TÍNH TOÁN HIỂN THỊ RÕ RÀNG GIÁ TRỊ GIẢM
+                let discountLabel = '';
+                const loai = (v.loaiGiamGia || '').toUpperCase();
+                if (loai === 'PERCENTAGE' || loai === 'PHẦN TRĂM' || loai === '%') {
+                    discountLabel = `Giảm ${v.giaTriGiamGia}%`;
+                    if (v.giaTriGiamGiaToiDa) {
+                        discountLabel += ` (Tối đa ${new Intl.NumberFormat('vi-VN').format(v.giaTriGiamGiaToiDa)}đ)`;
+                    }
+                } else {
+                    discountLabel = `Giảm ${new Intl.NumberFormat('vi-VN').format(v.giaTriGiamGia)}đ`;
+                }
 
                 return `
-                <div class="voucher-card" style="opacity: ${opacity}">
-                    <div style="display:flex; align-items:center; gap: 15px;">
-                        <div style="width: 50px; height: 50px; background: #000; color: #fff; border-radius: 4px; display: flex; align-items:center; justify-content:center; flex-direction:column;">
+                <div class="voucher-card" style="opacity: ${opacity}; display: flex; align-items: stretch;">
+                    <div style="display:flex; align-items:center; gap: 15px; flex: 1;">
+                        <div style="width: 50px; height: 50px; background: #000; color: #fff; border-radius: 4px; display: flex; align-items:center; justify-content:center; flex-direction:column; flex-shrink:0;">
                             <i class="bi bi-ticket-perforated" style="font-size: 18px; margin-bottom: -5px;"></i>
                         </div>
-                        <div>
-                            <div class="v-code">${v.maCode}</div>
-                            <div class="v-desc">${v.ten}</div>
-                            <div style="font-size: 10px; color: #10b981; margin-top: 4px; font-weight:600;">Đơn tối thiểu: ${new Intl.NumberFormat('vi-VN').format(v.dieuKien)}đ</div>
+                        <div style="flex: 1;">
+                            <div class="v-code" style="font-size: 13px; font-weight: 800; color: #000;">${v.maCode || v.code}</div>
+                            <div class="v-desc" style="font-weight:600; font-size: 11px; margin-bottom: 2px; color: #333;">${v.ten}</div>
+
+                            <div style="font-size: 11px; color: #d97706; font-weight: 800;">${discountLabel}</div>
+
+                            ${noteHtml}
                         </div>
                     </div>
-                    <div>${actionBtn}</div>
+                    <div style="display:flex; align-items:center; justify-content:flex-end; min-width: 80px;">
+                        ${actionBtn}
+                    </div>
                 </div>`;
             }).join('');
         },
@@ -566,28 +602,33 @@
         applyVoucher: async function() {
             const code = document.getElementById('voucherInput').value.trim();
             const inv = this.getCurrentInvoice();
+
             if (!inv || inv.cart.length === 0) { toast("GIỎ HÀNG TRỐNG", "warning"); return; }
             if (!code) { toast("Vui lòng nhập mã giảm giá", "warning"); return; }
 
-            const subTotal = inv.cart.reduce((sum, i) => sum + ((i.originalPrice || i.price) * i.qty), 0);
-            const saleDiscount = inv.cart.reduce((sum, i) => sum + (((i.originalPrice || i.price) - i.price) * i.qty), 0);
-            const totalAfterSale = subTotal - saleDiscount;
-
             try {
-                const res = await fetch(`/api/pos/vouchers/apply?code=${code}&currentTotal=${totalAfterSale}`);
+                // ĐỔI SANG PHƯƠNG THỨC POST VÀ GỬI KÈM GIỎ HÀNG ĐỂ SERVER QUÉT
+                const res = await fetch('/api/pos/vouchers/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        code: code,
+                        cart: inv.cart
+                    })
+                });
+
                 if (res.ok) {
                     inv.voucher = await res.json();
                     this.saveState();
                     this.renderCart();
                     toast("Áp dụng mã thành công!", "success");
                 } else {
-                    if(code === 'GIAM50K' && totalAfterSale >= 200000) {
-                        inv.voucher = { maCode: 'GIAM50K', loaiGiamGia: 'fixed', giaTriGiamGia: 50000 };
-                        this.saveState(); this.renderCart(); toast("Áp dụng mã thành công!", "success"); return;
-                    }
-                    toast(await res.text() || "Mã không hợp lệ hoặc chưa đủ điều kiện!", "error");
+                    const errData = await res.json();
+                    toast(errData.message || "Mã không hợp lệ hoặc chưa đủ điều kiện!", "error");
                 }
-            } catch (e) { toast("LỖI KẾT NỐI KIỂM TRA MÃ", "error"); }
+            } catch (e) {
+                toast("LỖI KẾT NỐI KIỂM TRA MÃ", "error");
+            }
         },
 
         updateTotal: function () {
@@ -1009,7 +1050,7 @@
             if (isCash) {
                 const khachDua = parseInt(document.getElementById('inpKhachDua').value.replace(/\D/g, '')) || 0;
                 if (khachDua < total) { toast("Số tiền khách đưa chưa đủ!", "warning"); return; }
-                finalMethod = 'TIỀN MẶT';
+                finalMethod = 'TIEN_MAT';
             } else {
                 const selectedOption = document.querySelector('#transfer-section .payment-option.selected span');
                 finalMethod = selectedOption ? selectedOption.innerText : 'CHUYỂN KHOẢN';

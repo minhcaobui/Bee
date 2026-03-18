@@ -9,6 +9,7 @@ import com.example.bee.entities.order.HoaDonChiTiet;
 import com.example.bee.entities.order.LichSuHoaDon;
 import com.example.bee.entities.order.TrangThaiHoaDon;
 import com.example.bee.entities.product.SanPhamChiTiet;
+import com.example.bee.entities.promotion.MaGiamGia;
 import com.example.bee.repositories.customer.KhachHangRepository;
 import com.example.bee.repositories.notification.ThongBaoRepository;
 import com.example.bee.repositories.order.HoaDonChiTietRepository;
@@ -16,10 +17,14 @@ import com.example.bee.repositories.order.HoaDonRepository;
 import com.example.bee.repositories.order.LichSuHoaDonRepository;
 import com.example.bee.repositories.order.TrangThaiHoaDonRepository;
 import com.example.bee.repositories.products.SanPhamChiTietRepository;
+import com.example.bee.repositories.promotion.MaGiamGiaRepository;
 import com.example.bee.repositories.role.NhanVienRepository;
 import com.example.bee.services.EmailService;
+import com.example.bee.utils.MomoSecurity;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +34,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
@@ -50,6 +56,21 @@ public class OrderApi {
     private final KhachHangRepository khRepo;
     private final EmailService emailService;
     private final ThongBaoRepository thongBaoRepository;
+
+    // 🌟 THÊM REPO ĐỂ XỬ LÝ VOUCHER
+    private final MaGiamGiaRepository maGiamGiaRepo;
+
+    // 🌟 THÊM KHAI BÁO CẤU HÌNH MOMO
+    @Value("${momo.partnerCode}")
+    private String partnerCode;
+    @Value("${momo.accessKey}")
+    private String accessKey;
+    @Value("${momo.secretKey}")
+    private String secretKey;
+    @Value("${momo.endpoint}")
+    private String endpoint;
+    @Value("${momo.notifyUrl}")
+    private String notifyUrl;
 
     @GetMapping("/don-hang")
     public ResponseEntity<?> getDonHangChoXuLy(
@@ -79,9 +100,6 @@ public class OrderApi {
         return ResponseEntity.ok(result);
     }
 
-    // =======================================================
-    // 2. API LẤY LỊCH SỬ HÓA ĐƠN (Chỉ lấy Hoàn thành & Đã hủy)
-    // =======================================================
     @GetMapping("/lich-su")
     public ResponseEntity<?> getLichSu(
             @RequestParam(required = false) String q,
@@ -235,6 +253,21 @@ public class OrderApi {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy hóa đơn"));
         TrangThaiHoaDon ttHuy = ttRepo.findByMa("DA_HUY");
         hd.setTrangThaiHoaDon(ttHuy);
+
+        // 🌟 NẾU ĐƠN HÀNG BỊ HỦY THÌ TRẢ LẠI LƯỢT DÙNG VOUCHER
+        if (hd.getMaGiamGia() != null) {
+            MaGiamGia voucher = hd.getMaGiamGia();
+            int luotMoi = voucher.getLuotSuDung() - 1;
+            if (luotMoi >= 0) {
+                voucher.setLuotSuDung(luotMoi);
+                // Nếu voucher đang bị tắt do hết lượt, bật lại
+                if (!voucher.getTrangThai() && voucher.getNgayKetThuc().isAfter(java.time.LocalDateTime.now())) {
+                    voucher.setTrangThai(true);
+                }
+                maGiamGiaRepo.save(voucher);
+            }
+        }
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         var nhanVienThaoTac = (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser"))
                 ? nvRepo.findByTaiKhoan_TenDangNhap(auth.getName()).orElse(null)
@@ -265,67 +298,73 @@ public class OrderApi {
     @Transactional
     public ResponseEntity<?> checkout(@RequestBody CheckoutRequest req) {
         try {
-            // 1. Tạo mới đối tượng Hóa Đơn
             HoaDon hd = new HoaDon();
             hd.setMa("HD" + System.currentTimeMillis());
-            hd.setLoaiHoaDon(1); // 1 = Đơn Online
+            hd.setLoaiHoaDon(1);
             hd.setNgayTao(new Date());
 
-            // Gán thông tin giao hàng
             hd.setTenNguoiNhan(req.tenNguoiNhan);
             hd.setSdtNhan(req.soDienThoai);
             hd.setDiaChiGiaoHang(req.diaChiGiaoHang);
             hd.setPhuongThucThanhToan(req.phuongThucThanhToan);
 
-            // 2. Xử lý khách hàng (Nếu có đăng nhập)
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
                 String username = auth.getName();
                 KhachHang kh = khRepo.findByTaiKhoan_TenDangNhap(username).orElse(null);
                 hd.setKhachHang(kh);
-            } else {
-                hd.setKhachHang(null); // Khách vãng lai (Guest)
             }
 
-            // =================================================================
-            // 🌟 LOGIC TỰ ĐỘNG GIẢM GIÁ 5% CHO NHÂN VIÊN MUA ONLINE 🌟
-            // =================================================================
             BigDecimal chietKhauNV = BigDecimal.ZERO;
             String ghiChu = req.ghiChu != null ? req.ghiChu : "";
 
             if (req.soDienThoai != null && !req.soDienThoai.isBlank()) {
-                // Quét SĐT người đặt xem có nằm trong bảng nhân viên không
                 boolean isEmployee = nvRepo.existsBySoDienThoaiAndTrangThaiTrue(req.soDienThoai);
                 if (isEmployee) {
-                    // Tính 5% từ tổng tiền hàng (tienHang) gửi lên từ Frontend
                     chietKhauNV = req.tienHang.multiply(new BigDecimal("0.05")).setScale(0, RoundingMode.HALF_UP);
                     ghiChu += " (Tự động giảm 5% ưu đãi nhân viên nội bộ)";
                 }
             }
             hd.setGhiChu(ghiChu);
 
-            // 3. Tính toán lại tổng tiền bảo mật ở Backend
+            if (req.voucherId != null) {
+                MaGiamGia voucher = maGiamGiaRepo.findById(req.voucherId).orElse(null);
+                if (voucher != null) {
+                    hd.setMaGiamGia(voucher);
+                    int luotMoi = voucher.getLuotSuDung() + 1;
+                    voucher.setLuotSuDung(luotMoi);
+                    if (luotMoi >= voucher.getSoLuong()) {
+                        voucher.setTrangThai(false);
+                    }
+                    maGiamGiaRepo.save(voucher);
+                }
+            }
+
             BigDecimal tongTienCuoi = req.tienHang
-                    .subtract(req.tienGiam != null ? req.tienGiam : BigDecimal.ZERO) // Trừ voucher thường
-                    .subtract(chietKhauNV) // Trừ thêm 5% nhân viên
-                    .add(req.phiShip != null ? req.phiShip : BigDecimal.ZERO); // Cộng phí ship
+                    .subtract(req.tienGiam != null ? req.tienGiam : BigDecimal.ZERO)
+                    .subtract(chietKhauNV)
+                    .add(req.phiShip != null ? req.phiShip : BigDecimal.ZERO);
 
             if (tongTienCuoi.compareTo(BigDecimal.ZERO) < 0) {
                 tongTienCuoi = BigDecimal.ZERO;
             }
 
-            // Gán tiền bạc chuẩn xác vào Hóa Đơn
             hd.setGiaTamThoi(req.tienHang);
             hd.setGiaTriKhuyenMai((req.tienGiam != null ? req.tienGiam : BigDecimal.ZERO).add(chietKhauNV));
             hd.setPhiVanChuyen(req.phiShip);
-            hd.setGiaTong(tongTienCuoi); // Lưu tổng tiền đã trừ 5%
+            hd.setGiaTong(tongTienCuoi);
 
-            // 4. Gán trạng thái Mặc định
-            TrangThaiHoaDon ttChoXacNhan = ttRepo.findByMa("CHO_XAC_NHAN");
-            if (ttChoXacNhan == null) throw new RuntimeException("Không tìm thấy trạng thái CHO_XAC_NHAN");
-            hd.setTrangThaiHoaDon(ttChoXacNhan);
+            // 🌟 LOGIC MỚI: PHÂN LOẠI TRẠNG THÁI THEO PHƯƠNG THỨC THANH TOÁN
+            TrangThaiHoaDon ttBanDau;
+            if ("MOMO".equalsIgnoreCase(req.phuongThucThanhToan)) {
+                ttBanDau = ttRepo.findByMa("CHO_THANH_TOAN");
+            } else {
+                ttBanDau = ttRepo.findByMa("CHO_XAC_NHAN");
+            }
 
-            // 5. LƯU HÓA ĐƠN VÀ CHI TIẾT VÀO DB
+            if (ttBanDau == null) throw new RuntimeException("Lỗi cấu hình trạng thái trong DB");
+            hd.setTrangThaiHoaDon(ttBanDau);
+
             HoaDon savedHd = hdRepo.save(hd);
 
             for (CheckoutItemRequest itemReq : req.chiTietDonHangs) {
@@ -347,40 +386,32 @@ public class OrderApi {
                 hdctRepo.save(hdct);
             }
 
-            // Lưu lịch sử hóa đơn
             LichSuHoaDon ls = new LichSuHoaDon();
             ls.setHoaDon(savedHd);
-            ls.setTrangThaiHoaDon(ttChoXacNhan);
-            ls.setGhiChu("Khách hàng đặt đơn Online trên Website");
+            ls.setTrangThaiHoaDon(ttBanDau);
+            ls.setGhiChu(ttBanDau.getMa().equals("CHO_THANH_TOAN") ? "Đang chờ thanh toán qua MoMo" : "Khách hàng đặt đơn Online (COD)");
             ls.setNgayTao(new Date());
             lsRepo.save(ls);
 
-            // =================================================================
-            // 6. THÔNG BÁO & EMAIL
-            // =================================================================
-            try {
-                if (savedHd.getKhachHang() != null && savedHd.getKhachHang().getTaiKhoan() != null) {
-                    ThongBao tb = new ThongBao();
-                    tb.setTaiKhoanId(savedHd.getKhachHang().getTaiKhoan().getId());
-                    tb.setTieuDe("Đặt hàng thành công");
-                    tb.setNoiDung("Đơn hàng #" + savedHd.getMa() + " đã được ghi nhận.");
-                    tb.setLoaiThongBao("ORDER");
-                    tb.setDaDoc(false);
-                    thongBaoRepository.save(tb);
-                }
-            } catch (Exception e) {
-                System.err.println("Lỗi lưu thông báo (vẫn tiếp tục): " + e.getMessage());
+            // Chỉ gửi Mail và Thông báo khi khách chọn COD. Nếu là MoMo thì chờ thanh toán xong mới gửi.
+            if ("COD".equalsIgnoreCase(req.phuongThucThanhToan)) {
+                try {
+                    if (savedHd.getKhachHang() != null && savedHd.getKhachHang().getTaiKhoan() != null) {
+                        ThongBao tb = new ThongBao();
+                        tb.setTaiKhoanId(savedHd.getKhachHang().getTaiKhoan().getId());
+                        tb.setTieuDe("Đặt hàng thành công");
+                        tb.setNoiDung("Đơn hàng #" + savedHd.getMa() + " đã được ghi nhận.");
+                        tb.setLoaiThongBao("ORDER");
+                        tb.setDaDoc(false);
+                        thongBaoRepository.save(tb);
+                    }
+                    if (req.email != null && !req.email.isBlank()) {
+                        emailService.sendOrderConfirmationEmail(savedHd, req.email);
+                    }
+                } catch (Exception e) {}
             }
 
-            try {
-                if (req.email != null && !req.email.isBlank()) {
-                    emailService.sendOrderConfirmationEmail(savedHd, req.email);
-                }
-            } catch (Exception e) {
-                System.err.println("Lỗi gửi email (vẫn tiếp tục): " + e.getMessage());
-            }
-
-            return ResponseEntity.ok(Map.of("message", "Đặt hàng thành công", "maHoaDon", savedHd.getMa(), "tongTienThucTe", tongTienCuoi));
+            return ResponseEntity.ok(Map.of("message", "Đặt hàng thành công", "maHoaDon", savedHd.getMa(), "id", savedHd.getId(), "tongTienThucTe", tongTienCuoi));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -455,7 +486,7 @@ public class OrderApi {
         List<HoaDonChiTiet> listHdct = hdctRepo.findByHoaDonId(id);
         Map<String, Object> storeInfo = new HashMap<>();
         storeInfo.put("tenCuaHang", "BEEMATE STORE");
-        storeInfo.put("diaChi", "13 phố Phan Tây Nhạc, phường Xuân Phương, TP Hà Nội"); // Điền địa chỉ thực tế của cửa hàng bạn
+        storeInfo.put("diaChi", "13 phố Phan Tây Nhạc, phường Xuân Phương, TP Hà Nội");
         storeInfo.put("soDienThoai", "1900 3636");
         Map<String, Object> orderInfo = new HashMap<>();
         orderInfo.put("maHoaDon", hd.getMa());
@@ -502,27 +533,142 @@ public class OrderApi {
         return ResponseEntity.ok(responseData);
     }
 
-    // =================================================================
-    // API KIỂM TRA SĐT NHÂN VIÊN TẠI MÀN HÌNH CHECKOUT ONLINE
-    // =================================================================
     @GetMapping("/check-employee")
     public ResponseEntity<?> checkEmployeeDiscount(@RequestParam String phone) {
         if (phone == null || phone.trim().isEmpty()) {
             return ResponseEntity.ok(Map.of("isEmployee", false));
         }
-
-        // Kiểm tra xem SĐT có tồn tại trong bảng Nhân viên và đang làm việc không
         boolean isEmployee = nvRepo.existsBySoDienThoaiAndTrangThaiTrue(phone.trim());
-
         return ResponseEntity.ok(Map.of("isEmployee", isEmployee));
+    }
+
+    @PostMapping("/momo-payment/{invoiceId}")
+    @Transactional
+    public ResponseEntity<?> getMomoUrlOnline(@PathVariable Integer invoiceId, @RequestBody Map<String, Object> payload) {
+        try {
+            HoaDon hd = hdRepo.findById(invoiceId).orElseThrow(() -> new RuntimeException("Không tìm thấy Hóa đơn"));
+            BigDecimal totalAmount = new BigDecimal(payload.get("amount").toString());
+
+            hd.setPhuongThucThanhToan("MOMO");
+            hdRepo.save(hd);
+
+            String rId = String.valueOf(System.currentTimeMillis());
+            String oId = hd.getMa() + "_" + rId;
+            String amountStr = totalAmount.setScale(0, RoundingMode.HALF_UP).toString();
+
+            String onlineReturnUrl = "http://localhost:8080/api/hoa-don/momo-callback";
+
+            String rawHash = "accessKey=" + accessKey.trim() + "&amount=" + amountStr + "&extraData=&ipnUrl=" + notifyUrl.trim() + "&orderId=" + oId + "&orderInfo=ThanhToan_Online_" + hd.getMa() + "&partnerCode=" + partnerCode.trim() + "&redirectUrl=" + onlineReturnUrl + "&requestId=" + rId + "&requestType=captureWallet";
+            String signature = MomoSecurity.signHmacSHA256(rawHash, secretKey.trim());
+
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("partnerCode", partnerCode.trim());
+            body.put("accessKey", accessKey.trim());
+            body.put("requestId", rId);
+            body.put("amount", Long.valueOf(amountStr));
+            body.put("orderId", oId);
+            body.put("orderInfo", "ThanhToan_Online_" + hd.getMa());
+            body.put("redirectUrl", onlineReturnUrl);
+            body.put("ipnUrl", notifyUrl.trim());
+            body.put("extraData", "");
+            body.put("requestType", "captureWallet");
+            body.put("signature", signature);
+            body.put("lang", "vi");
+
+            RestTemplate restTemplate = new RestTemplate();
+            Map<String, Object> response = restTemplate.postForObject(endpoint.trim(), body, Map.class);
+
+            return ResponseEntity.ok(Map.of("payUrl", response.get("payUrl")));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/momo-callback")
+    @Transactional
+    public ResponseEntity<Void> momoCallbackOnline(HttpServletRequest request) {
+        String resultCode = request.getParameter("resultCode");
+        String orderId = request.getParameter("orderId");
+
+        String redirectUrl = "http://localhost:8080/customer#home"; // Mặc định về trang chủ
+
+        try {
+            if (orderId != null && orderId.contains("_")) {
+                String maHD = orderId.split("_")[0]; // Lấy "HD12345" từ "HD12345_16889..."
+                HoaDon hd = hdRepo.findByMa(maHD);
+
+                // Chỉ xử lý nếu đơn đang ở trạng thái CHỜ THANH TOÁN
+                if (hd != null && "CHO_THANH_TOAN".equals(hd.getTrangThaiHoaDon().getMa())) {
+
+                    if ("0".equals(resultCode)) {
+                        // 🌟 THANH TOÁN THÀNH CÔNG
+                        TrangThaiHoaDon ttChoXacNhan = ttRepo.findByMa("CHO_XAC_NHAN");
+                        hd.setTrangThaiHoaDon(ttChoXacNhan);
+                        hd.setNgayThanhToan(new Date());
+                        hdRepo.save(hd);
+
+                        lsRepo.save(LichSuHoaDon.builder()
+                                .hoaDon(hd).trangThaiHoaDon(ttChoXacNhan)
+                                .ghiChu("Thanh toán MoMo thành công").build());
+
+                        // Lúc này mới gửi thông báo & email
+                        if (hd.getKhachHang() != null && hd.getKhachHang().getTaiKhoan() != null) {
+                            ThongBao tb = new ThongBao();
+                            tb.setTaiKhoanId(hd.getKhachHang().getTaiKhoan().getId());
+                            tb.setTieuDe("Thanh toán thành công");
+                            tb.setNoiDung("Đơn hàng #" + hd.getMa() + " đã được thanh toán qua MoMo.");
+                            tb.setLoaiThongBao("ORDER");
+                            tb.setDaDoc(false);
+                            thongBaoRepository.save(tb);
+                        }
+
+                        redirectUrl = "http://localhost:8080/customer#account"; // Thành công thì dẫn vào trang tài khoản
+
+                    } else {
+                        // 🌟 THANH TOÁN THẤT BẠI HOẶC KHÁCH BẤM HỦY
+                        TrangThaiHoaDon ttHuy = ttRepo.findByMa("DA_HUY");
+                        hd.setTrangThaiHoaDon(ttHuy);
+                        hdRepo.save(hd);
+
+                        // Hoàn lại tồn kho
+                        List<HoaDonChiTiet> hdctList = hdctRepo.findByHoaDonId(hd.getId());
+                        for (HoaDonChiTiet ct : hdctList) {
+                            SanPhamChiTiet spct = ct.getSanPhamChiTiet();
+                            spct.setSoLuong(spct.getSoLuong() + ct.getSoLuong());
+                            spctRepo.save(spct);
+                        }
+
+                        // Hoàn lại voucher
+                        if (hd.getMaGiamGia() != null) {
+                            MaGiamGia voucher = hd.getMaGiamGia();
+                            int luotMoi = voucher.getLuotSuDung() - 1;
+                            if (luotMoi >= 0) {
+                                voucher.setLuotSuDung(luotMoi);
+                                if (!voucher.getTrangThai() && voucher.getNgayKetThuc().isAfter(java.time.LocalDateTime.now())) {
+                                    voucher.setTrangThai(true);
+                                }
+                                maGiamGiaRepo.save(voucher);
+                            }
+                        }
+
+                        lsRepo.save(LichSuHoaDon.builder()
+                                .hoaDon(hd).trangThaiHoaDon(ttHuy)
+                                .ghiChu("Hủy đơn do khách hàng không hoàn tất thanh toán MoMo").build());
+
+                        redirectUrl = "http://localhost:8080/customer#checkout"; // Hủy thì cho quay lại trang checkout
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return ResponseEntity.status(org.springframework.http.HttpStatus.FOUND).location(java.net.URI.create(redirectUrl)).build();
     }
 
     @GetMapping("/thong-bao-moi")
     public ResponseEntity<?> getNewOnlineOrders() {
-        // Tìm 5 đơn Online (loaiHoaDon = 1) đang Chờ xác nhận
         List<HoaDon> list = hdRepo.findTop5ByLoaiHoaDonAndTrangThaiHoaDon_MaOrderByNgayTaoDesc(1, "CHO_XAC_NHAN");
-
-        // Trả về DTO rút gọn cho nhẹ
         List<Map<String, Object>> result = new ArrayList<>();
         for (HoaDon hd : list) {
             Map<String, Object> map = new HashMap<>();
@@ -547,6 +693,8 @@ public class OrderApi {
         public BigDecimal phiShip;
         public BigDecimal tienGiam;
         public BigDecimal tongTien;
+        // 🌟 THÊM TRƯỜNG NÀY ĐỂ HỨNG ID VOUCHER TỪ JS GỬI LÊN
+        public Integer voucherId;
         public List<CheckoutItemRequest> chiTietDonHangs;
     }
 

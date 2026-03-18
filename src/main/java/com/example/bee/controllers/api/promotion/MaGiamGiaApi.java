@@ -175,4 +175,19 @@ public class MaGiamGiaApi {
             System.out.println("Auto-Scheduler: Đã tắt " + expiredVouchers.size() + " voucher hết hạn/hết số lượng.");
         }
     }
+
+    @GetMapping("/active")
+    public ResponseEntity<List<MaGiamGia>> getActiveVouchers() {
+        LocalDateTime now = LocalDateTime.now();
+
+        // Lấy tất cả voucher từ DB và lọc ra những mã CÒN HẠN và CÒN LƯỢT
+        List<MaGiamGia> activeVouchers = voucherRepo.findAll().stream()
+                .filter(v -> Boolean.TRUE.equals(v.getTrangThai())
+                        && v.getNgayBatDau() != null && !now.isBefore(v.getNgayBatDau())
+                        && v.getNgayKetThuc() != null && !now.isAfter(v.getNgayKetThuc())
+                        && v.getLuotSuDung() < v.getSoLuong())
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(activeVouchers);
+    }
 }
