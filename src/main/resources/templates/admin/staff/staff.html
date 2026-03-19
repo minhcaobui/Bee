@@ -284,7 +284,7 @@
         },
 
         async loadData() {
-            const res = await fetch(`/api/admin/nhan-vien/list-json?q=${this.state.q}&status=${this.state.status}`);
+            const res = await fetch(`/api/nhan-vien/list-json?q=${this.state.q}&status=${this.state.status}`);
             const data = await res.json();
             this.renderTable(data);
         },
@@ -314,7 +314,7 @@
         async quickToggle(id, el) {
             const original = !el.checked;
             try {
-                const res = await fetch(`/api/admin/nhan-vien/toggle-status/${id}`, { method: 'PATCH' });
+                const res = await fetch(`/api/nhan-vien/toggle-status/${id}`, { method: 'PATCH' });
                 if(res.ok) window.toast(await res.text(), "success");
                 else { el.checked = original; window.toast("Lỗi cập nhật!", "error"); }
             } catch(e) { el.checked = original; window.toast("Mất kết nối!", "error"); }
@@ -356,7 +356,7 @@
             document.getElementById('nvTrangThaiSwitch').disabled = isView;
 
             this.switchTab('info');
-            const res = await fetch(`/api/admin/nhan-vien/detail/${id}`);
+            const res = await fetch(`/api/nhan-vien/detail/${id}`);
             const d = await res.json();
 
             this.state.originalEmail = d.email;
@@ -510,7 +510,7 @@
 
             const idParam = isNew ? '' : `&id=${this.state.editingId}`;
 
-            const checkPhoneRes = await fetch(`/api/admin/nhan-vien/check-phone?phone=${phone}${idParam}`);
+            const checkPhoneRes = await fetch(`/api/nhan-vien/check-phone?phone=${phone}${idParam}`);
             if (!checkPhoneRes.ok) {
                 this.switchTab('info');
                 window.toast(await checkPhoneRes.text(), "error");
@@ -520,7 +520,7 @@
             const isEmailChanged = (email !== this.state.originalEmail);
 
             if (isNew || isEmailChanged) {
-                const checkEmailRes = await fetch(`/api/admin/nhan-vien/check-email?email=${email}${idParam}`);
+                const checkEmailRes = await fetch(`/api/nhan-vien/check-email?email=${email}${idParam}`);
 
                 if (!checkEmailRes.ok) {
                     this.switchTab('info');
@@ -532,7 +532,7 @@
                 document.getElementById('otpInputGroup').style.display = 'none';
                 document.getElementById('otpMessage').innerText = `Hệ thống đang gửi Email xác thực đến ${email}...`;
 
-                const res = await fetch(`/api/admin/nhan-vien/send-otp?email=${email}`, { method: 'POST' });
+                const res = await fetch(`/api/nhan-vien/send-otp?email=${email}`, { method: 'POST' });
                 if(res.ok) {
                     document.getElementById('otpMessage').innerHTML = `Mã xác nhận 6 số đã được gửi tới hòm thư:<br><b>${email}</b>`;
                     document.getElementById('otpInputGroup').style.display = 'block';
@@ -551,7 +551,7 @@
             const otp = document.getElementById('inpOtpCode').value.trim();
             if(otp.length < 6) { window.toast("Mã OTP phải gồm 6 chữ số!", "error"); return; }
 
-            const res = await fetch(`/api/admin/nhan-vien/verify-otp?email=${email}&otp=${otp}`, { method: 'POST' });
+            const res = await fetch(`/api/nhan-vien/verify-otp?email=${email}&otp=${otp}`, { method: 'POST' });
             if(res.ok) {
                 document.getElementById('otpModal').style.display = 'none';
                 this.executeFinalSave();
@@ -563,7 +563,7 @@
         async executeFinalSave() {
             try {
                 const isNew = !this.state.editingId;
-                const res = await fetch('/api/admin/nhan-vien/save', { method: 'POST', body: this.state.tempFormData });
+                const res = await fetch('/api/nhan-vien/save', { method: 'POST', body: this.state.tempFormData });
                 const msg = await res.text();
 
                 if(res.ok) {

@@ -15,4 +15,6 @@ public class HoaDonChiTietResponse {
     private Integer soLuong;
     private BigDecimal donGia;
     private BigDecimal giaBan;
+    private Integer idSanPhamChiTiet;
+    private Integer idSanPham;
 }

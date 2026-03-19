@@ -189,6 +189,22 @@
         .guest-track-btn { padding: 0 24px; background: var(--accent); color: white; border: none; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: 0.3s; border-radius: 2px; }
         .guest-track-btn:hover { background: #2c4238; }
         .guest-track-result { width: 100%; text-align: left; display: none; background: var(--white); border: 1px solid rgba(0,0,0,0.07); padding: 24px; border-radius: 4px; margin-top: 15px; animation: fadeIn 0.4s ease; box-shadow: 0 5px 15px rgba(0,0,0,0.02);}
+
+        /* ── CSS POPUP ĐÁNH GIÁ SẢN PHẨM ── */
+        .review-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+        .review-modal { background: #fff; width: 450px; max-width: 90%; border-radius: 4px; padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); position: relative; }
+        .review-modal-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; margin-bottom: 20px; text-align: center; }
+        .star-select { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; font-size: 24px; cursor: pointer; color: #ccc; }
+        .star-select i.active { color: #f59e0b; }
+        .review-textarea { width: 100%; height: 100px; border: 1px solid rgba(0,0,0,0.1); border-radius: 4px; padding: 12px; font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; resize: none; margin-bottom: 16px; }
+        .review-textarea:focus { border-color: var(--accent); }
+        .review-img-upload-btn { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text); background: #f4f4f5; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-bottom: 16px; transition: 0.2s; }
+        .review-img-upload-btn:hover { background: #e4e4e7; }
+        .review-img-previews { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+
+        .wishlist-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+        @media (max-width: 900px) { .wishlist-grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .wishlist-grid { grid-template-columns: 1fr; } }
     </style>
 
     <div id="guest-view">
@@ -230,7 +246,9 @@
             <ul class="account-nav">
                 <li><button class="account-nav-btn active" data-panel="overview"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>Tổng quan</button></li>
                 <li><button class="account-nav-btn" data-panel="orders"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M9 12h6M9 16h6M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h5l5 5v11a2 2 0 01-2 2z"/></svg>Đơn hàng của tôi</button></li>
-                <li><button class="account-nav-btn disabled" disabled style="opacity:0.45;cursor:not-allowed;pointer-events:none"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Yêu thích<span style="margin-left:auto;font-size:9px;letter-spacing:0.1em;background:rgba(61,90,76,0.12);color:var(--accent);padding:3px 8px;text-transform:uppercase;font-weight:500; border-radius: 2px;">Sắp có</span></button></li>
+
+                <li><button class="account-nav-btn" data-panel="wishlist"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Sản phẩm Yêu thích</button></li>
+
                 <li><button class="account-nav-btn" data-panel="profile"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg>Thông tin cá nhân</button></li>
             </ul>
             <div class="account-nav-logout">
@@ -269,6 +287,12 @@
                 </div>
 
                 <div id="ordersContainer"></div>
+            </div>
+
+            <div class="account-panel" id="panel-wishlist">
+                <div class="account-panel-title">Sản phẩm yêu thích</div>
+                <div class="account-panel-subtitle">Danh sách các sản phẩm bạn đã lưu.</div>
+                <div class="wishlist-grid" id="wishlistContainer"></div>
             </div>
 
             <div class="account-panel" id="panel-order-detail">
@@ -355,8 +379,7 @@
                     <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;">Sổ địa chỉ</div>
                     <button class="account-reorder-btn" onclick="window.AccountApp.openAddressModal()">+ Thêm địa chỉ mới</button>
                 </div>
-                <div id="addressBookContainer" style="max-width:640px; margin-bottom:48px;">
-                </div>
+                <div id="addressBookContainer" style="max-width:640px; margin-bottom:48px;"></div>
 
                 <div class="account-section-divider"></div>
 
@@ -366,14 +389,14 @@
                         <label class="account-form-label">Mật khẩu hiện tại</label>
                         <div class="input-password-wrap">
                             <input class="account-form-input" type="password" id="pwCurrent" placeholder="Nhập mật khẩu hiện tại">
-                            <button class="toggle-pw-btn" type="button" onclick="window.AccountApp.togglePassword('pwCurrent', this)"><svg viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                            <button class="toggle-pw-btn" type="button" onclick="window.AccountApp.togglePassword('pwCurrent', this)"><svg viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8-11-8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
                         </div>
                     </div>
                     <div class="account-form-field full">
                         <label class="account-form-label">Mật khẩu mới</label>
                         <div class="input-password-wrap">
                             <input class="account-form-input" type="password" id="pwNew" placeholder="Tối thiểu 8 ký tự" oninput="window.AccountApp.checkPasswordStrength(this.value)">
-                            <button class="toggle-pw-btn" type="button" onclick="window.AccountApp.togglePassword('pwNew', this)"><svg viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                            <button class="toggle-pw-btn" type="button" onclick="window.AccountApp.togglePassword('pwNew', this)"><svg viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8-11-8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
                         </div>
                         <div class="password-strength"><div class="password-strength-bar" id="pwStrengthBar"></div></div>
                         <div class="password-strength-label" id="pwStrengthLabel"></div>
@@ -396,57 +419,53 @@
         <div class="acc-modal" id="accAddressModal">
             <div class="acc-modal-header">
                 <span id="addrModalTitle">Thêm địa chỉ mới</span>
-                <button class="acc-modal-close" onclick="window.AccountApp.closeAddressModal()">
-                    <svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                </button>
+                <button class="acc-modal-close" onclick="window.AccountApp.closeAddressModal()"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
             </div>
-
             <input type="hidden" id="addrId">
-
             <div class="account-form-grid" style="max-width:100%; margin-bottom:0;">
-                <div class="account-form-field">
-                    <label class="account-form-label">Họ tên người nhận *</label>
-                    <input id="addrName" class="account-form-input" type="text" placeholder="Nhập họ và tên...">
-                </div>
-                <div class="account-form-field">
-                    <label class="account-form-label">Số điện thoại *</label>
-                    <input id="addrPhone" class="account-form-input" type="tel" placeholder="Nhập số điện thoại...">
-                </div>
-
-                <div class="account-form-field full">
-                    <label class="account-form-label">Tỉnh / Thành phố *</label>
-                    <select id="addrProv" class="account-form-input" onchange="window.AccountApp.loadDistricts()">
-                        <option value="">Đang tải...</option>
-                    </select>
-                </div>
-                <div class="account-form-field full">
-                    <label class="account-form-label">Quận / Huyện *</label>
-                    <select id="addrDist" class="account-form-input" onchange="window.AccountApp.loadWards()">
-                        <option value="">Chọn Quận/Huyện</option>
-                    </select>
-                </div>
-                <div class="account-form-field full">
-                    <label class="account-form-label">Phường / Xã *</label>
-                    <select id="addrWard" class="account-form-input">
-                        <option value="">Chọn Phường/Xã</option>
-                    </select>
-                </div>
-
-                <div class="account-form-field full">
-                    <label class="account-form-label">Địa chỉ chi tiết (Số nhà, đường...) *</label>
-                    <input id="addrDetail" class="account-form-input" type="text" placeholder="Nhập địa chỉ chi tiết...">
-                </div>
-
+                <div class="account-form-field"><label class="account-form-label">Họ tên người nhận *</label><input id="addrName" class="account-form-input" type="text" placeholder="Nhập họ và tên..."></div>
+                <div class="account-form-field"><label class="account-form-label">Số điện thoại *</label><input id="addrPhone" class="account-form-input" type="tel" placeholder="Nhập số điện thoại..."></div>
+                <div class="account-form-field full"><label class="account-form-label">Tỉnh / Thành phố *</label><select id="addrProv" class="account-form-input" onchange="window.AccountApp.loadDistricts()"><option value="">Đang tải...</option></select></div>
+                <div class="account-form-field full"><label class="account-form-label">Quận / Huyện *</label><select id="addrDist" class="account-form-input" onchange="window.AccountApp.loadWards()"><option value="">Chọn Quận/Huyện</option></select></div>
+                <div class="account-form-field full"><label class="account-form-label">Phường / Xã *</label><select id="addrWard" class="account-form-input"><option value="">Chọn Phường/Xã</option></select></div>
+                <div class="account-form-field full"><label class="account-form-label">Địa chỉ chi tiết (Số nhà, đường...) *</label><input id="addrDetail" class="account-form-input" type="text" placeholder="Nhập địa chỉ chi tiết..."></div>
                 <div class="account-form-field full" style="flex-direction:row; align-items:center; gap:8px; margin-top:8px;">
                     <input type="checkbox" id="addrDefault" style="width:16px; height:16px; cursor:pointer;">
                     <label for="addrDefault" style="font-size:13px; cursor:pointer; font-weight:500;">Đặt làm địa chỉ mặc định</label>
                 </div>
             </div>
-
             <div class="acc-modal-actions">
                 <button class="btn-cancel" onclick="window.AccountApp.closeAddressModal()">Huỷ bỏ</button>
                 <button class="btn-save" id="btnSaveAddressModal" onclick="window.AccountApp.saveAddress()">Lưu địa chỉ</button>
             </div>
+        </div>
+    </div>
+
+    <div class="review-modal-overlay" id="accReviewModalOverlay" onclick="if(event.target===this) window.AccountApp.closeReviewModal()">
+        <div class="review-modal">
+            <button class="review-modal-close" onclick="window.AccountApp.closeReviewModal()"><i class="fa-solid fa-xmark"></i></button>
+            <div class="review-modal-title" id="reviewModalTitleText" style="margin-bottom:5px;">Viết đánh giá</div>
+            <div id="reviewModalProductName" style="text-align:center; font-size:14px; font-weight:500; margin-bottom:4px;"></div>
+            <div id="reviewModalProductType" style="text-align:center; font-size:12px; color:var(--muted); margin-bottom:20px;"></div>
+
+            <div class="star-select" id="accStarSelector">
+                <i class="fa-solid fa-star active" onclick="window.AccountApp.setStar(1)"></i>
+                <i class="fa-solid fa-star active" onclick="window.AccountApp.setStar(2)"></i>
+                <i class="fa-solid fa-star active" onclick="window.AccountApp.setStar(3)"></i>
+                <i class="fa-solid fa-star active" onclick="window.AccountApp.setStar(4)"></i>
+                <i class="fa-solid fa-star active" onclick="window.AccountApp.setStar(5)"></i>
+            </div>
+
+            <textarea id="accReviewContentInput" class="review-textarea" placeholder="Chia sẻ cảm nhận của bạn về chất lượng sản phẩm, form dáng, màu sắc..."></textarea>
+
+            <label class="review-img-upload-btn">
+                <i class="fa-solid fa-camera"></i> Thêm hình ảnh mới
+                <input type="file" id="accReviewImageInput" multiple accept="image/*" style="display: none;" onchange="window.AccountApp.handleFileSelect(event)">
+            </label>
+            <div style="font-size:10px; color:#c08060; margin-bottom:10px; display:none;" id="editReviewImgWarning">* Lưu ý: Thêm ảnh mới sẽ ghi đè lên các ảnh cũ trước đó của bạn.</div>
+            <div class="review-img-previews" id="accReviewImagePreviews"></div>
+
+            <button id="btnSubmitAccReview" style="width: 100%; padding: 14px; background: var(--accent); color: white; border: none; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: 2px;" onclick="window.AccountApp.submitReview()">GỬI ĐÁNH GIÁ</button>
         </div>
     </div>
 
@@ -457,8 +476,12 @@
                 user: null,
                 orders: [],
                 stats: { orderCount: 0, wishlistCount: 0, totalSpent: 0 },
-                addresses: []
+                addresses: [],
+                wishlist: [],
+                myReviews: [],
+                currentViewOrderId: null
             },
+            reviewState: { productId: null, productName: '', phanLoai: '', soSao: 5, files: [] },
 
             ghnConfig: {
                 token: '5c6b4e08-f30a-11f0-9c2d-8ebaf800da9f',
@@ -494,6 +517,63 @@
                         });
                     });
                 });
+
+                const avatarInput = document.getElementById('avatarFileInput');
+                if (avatarInput) {
+                    avatarInput.addEventListener('change', async (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+
+                        if (file.size > 2 * 1024 * 1024) {
+                            this.showAccountNotification('Lỗi', 'Kích thước ảnh không được vượt quá 2MB!', true);
+                            e.target.value = '';
+                            return;
+                        }
+
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        this.showAccountNotification('Đang xử lý', 'Đang tải ảnh lên Cloudinary...');
+
+                        try {
+                            const resUpload = await fetch('/api/upload', { method: 'POST', body: formData });
+                            if (!resUpload.ok) throw new Error("Lỗi tải ảnh lên server");
+                            const dataUpload = await resUpload.json();
+                            const imageUrl = dataUpload.url;
+
+                            if(this.state.user) { this.state.user.hinhAnh = imageUrl; }
+
+                            const payload = {
+                                hoTen: document.getElementById('inpFirstName').value || (this.state.user ? this.state.user.hoTen : ''),
+                                soDienThoai: document.getElementById('inpPhone').value || (this.state.user ? this.state.user.soDienThoai : ''),
+                                gioiTinh: document.getElementById('inpGender').value || (this.state.user ? this.state.user.gioiTinh : ''),
+                                ngaySinh: document.getElementById('inpDob').value || (this.state.user ? this.state.user.ngaySinh : ''),
+                                email: document.getElementById('inpEmail').value || (this.state.user ? this.state.user.email : ''),
+                                tenDangNhap: document.getElementById('inpUsername').value || (this.state.user ? this.state.user.tenDangNhap : ''),
+                                hinhAnh: imageUrl
+                            };
+
+                            const resUpdate = await fetch('/api/khach-hang/my-profile', {
+                                method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                            });
+
+                            if (resUpdate.ok) {
+                                this.showAccountNotification('Thành công', 'Cập nhật ảnh đại diện thành công!');
+                                const avatarHtml = '<img src="' + imageUrl + '" style="width:100%; height:100%; object-fit:cover;">';
+                                document.getElementById('sidebarAvatar').innerHTML = avatarHtml;
+                                document.getElementById('profileAvatarBig').innerHTML = avatarHtml;
+                            } else {
+                                const err = await resUpdate.json();
+                                this.showAccountNotification('Thất bại', err.message || 'Không thể lưu ảnh vào hồ sơ!', true);
+                            }
+                        } catch (error) {
+                            console.error(error);
+                            this.showAccountNotification('Lỗi', 'Lỗi kết nối máy chủ!', true);
+                        } finally {
+                            e.target.value = '';
+                        }
+                    });
+                }
             },
 
             switchPanel: function(pId) {
@@ -501,6 +581,8 @@
                 const target = document.getElementById('panel-' + pId);
                 if (target) target.classList.add('active');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                if(pId === 'wishlist') this.renderWishlist();
             },
 
             showAccountNotification: function(title, message, isError = false) {
@@ -541,18 +623,50 @@
                     document.getElementById('guest-view').style.display = 'none';
                     document.getElementById('account-view').style.display = 'grid';
 
+                    // Lấy tất cả đánh giá của user
+                    try {
+                        const revRes = await fetch('/api/khach-hang/my-reviews');
+                        if (revRes.ok) this.state.myReviews = await revRes.json();
+                    } catch(e) {}
+
                     const ordersRes = await fetch('/api/hoa-don/my-orders');
                     if (ordersRes.ok) {
                         this.state.orders = await ordersRes.json();
                         this.state.stats.orderCount = this.state.orders.length;
-                        this.state.stats.totalSpent = this.state.orders.reduce((sum, ord) => sum + (ord.tongTien || 0), 0);
+                        const validOrders = this.state.orders.filter(ord => ord.trangThaiMa === 'HOAN_THANH');
+                        this.state.stats.totalSpent = validOrders.reduce((sum, ord) => sum + (ord.tongTien || ord.giaTong || 0), 0);
                     }
 
-                    // Fetch danh sách địa chỉ
                     const addrRes = await fetch('/api/khach-hang/addresses');
                     if(addrRes.ok) {
                         this.state.addresses = await addrRes.json();
                     }
+
+                    // 🌟 LẤY WISHLIST (LỌC TRÙNG 100% BẰNG MAP)
+                    try {
+                        const wlRes = await fetch('/api/khach-hang/wishlist');
+                        if (wlRes.ok) {
+                            const dbWishlist = await wlRes.json();
+                            this.state.wishlist = [];
+
+                            // 1. Lọc mảng ID không null
+                            const uniqueProductIds = [...new Set(dbWishlist.map(w => w.sanPhamId || w.idSanPham))].filter(id => id != null);
+                            const productsMap = new Map();
+
+                            // 2. Map đảm bảo dù API kẹt 2 ID giống hệt nhau cũng chỉ lưu 1 Key
+                            for (let pId of uniqueProductIds) {
+                                try {
+                                    const pRes = await fetch('/api/products/' + pId);
+                                    if (pRes.ok) {
+                                        const p = await pRes.json();
+                                        productsMap.set(p.id, p);
+                                    }
+                                } catch(e){}
+                            }
+                            this.state.wishlist = Array.from(productsMap.values());
+                            this.state.stats.wishlistCount = this.state.wishlist.length;
+                        }
+                    } catch(error) { console.log(error); }
 
                     this.renderAll();
                 } catch (error) {
@@ -639,8 +753,135 @@
                 this.confirmAction('logout');
             },
 
+            // 🌟 MỞ FORM REVIEW TÍCH HỢP TÍNH NĂNG "SỬA"
+            openReviewModal: function(pId, pName, phanLoai, isEdit = false) {
+                this.reviewState.productId = pId;
+                this.reviewState.productName = pName;
+                this.reviewState.phanLoai = phanLoai;
+
+                document.getElementById('reviewModalProductName').innerText = pName;
+                document.getElementById('reviewModalProductType').innerText = phanLoai;
+                document.getElementById('accReviewModalOverlay').style.display = 'flex';
+
+                if (isEdit) {
+                    document.getElementById('reviewModalTitleText').innerText = "Sửa đánh giá";
+                    document.getElementById('editReviewImgWarning').style.display = 'block';
+                    const existingReview = this.state.myReviews.find(r => r.sanPhamId === pId);
+
+                    this.setStar(existingReview ? (existingReview.soSao || 5) : 5);
+                    document.getElementById('accReviewContentInput').value = existingReview ? (existingReview.noiDung || '') : '';
+                } else {
+                    document.getElementById('reviewModalTitleText').innerText = "Viết đánh giá";
+                    document.getElementById('editReviewImgWarning').style.display = 'none';
+                    this.setStar(5);
+                    document.getElementById('accReviewContentInput').value = '';
+                }
+
+                this.reviewState.files = [];
+                this.renderImagePreviews();
+            },
+            closeReviewModal: function() {
+                document.getElementById('accReviewModalOverlay').style.display = 'none';
+            },
+            setStar: function(star) {
+                this.reviewState.soSao = star;
+                const stars = document.querySelectorAll('#accStarSelector i');
+                stars.forEach((s, index) => {
+                    s.className = index < star ? 'fa-solid fa-star active' : 'fa-solid fa-star';
+                });
+            },
+            handleFileSelect: function(event) {
+                const files = Array.from(event.target.files);
+                if (this.reviewState.files.length + files.length > 5) {
+                    this.showAccountNotification("Lưu ý", "Chỉ được tải lên tối đa 5 ảnh", true);
+                    return;
+                }
+                this.reviewState.files = this.reviewState.files.concat(files);
+                this.renderImagePreviews();
+            },
+            removeFile: function(index) {
+                this.reviewState.files.splice(index, 1);
+                this.renderImagePreviews();
+            },
+            renderImagePreviews: function() {
+                const container = document.getElementById('accReviewImagePreviews');
+                container.innerHTML = '';
+                this.reviewState.files.forEach((file, index) => {
+                    const url = URL.createObjectURL(file);
+                    container.innerHTML += `
+                        <div style="position:relative; width:60px; height:60px;">
+                            <img src="${url}" style="width:100%; height:100%; object-fit:cover; border-radius:4px;">
+                            <button onclick="window.AccountApp.removeFile(${index})" style="position:absolute; top:-5px; right:-5px; background:#ef4444; color:white; border:none; border-radius:50%; width:16px; height:16px; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center;">x</button>
+                        </div>
+                    `;
+                });
+            },
+            submitReview: async function() {
+                const btn = document.getElementById('btnSubmitAccReview');
+                btn.disabled = true;
+                btn.innerText = 'ĐANG TẢI LÊN...';
+
+                try {
+                    let uploadedUrls = [];
+                    // Nếu khách up ảnh mới -> Lấy ảnh mới. Nếu sửa đánh giá nhưng KHÔNG up ảnh mới -> Giữ nguyên ảnh cũ.
+                    if (this.reviewState.files.length > 0) {
+                        for (let file of this.reviewState.files) {
+                            const formData = new FormData();
+                            formData.append('file', file);
+                            const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                            if (res.ok) {
+                                const text = await res.text();
+                                try {
+                                    const json = JSON.parse(text);
+                                    uploadedUrls.push(json.url || json.secure_url || text);
+                                } catch(e) { uploadedUrls.push(text); }
+                            }
+                        }
+                    } else {
+                        // Tìm xem trước đây có ảnh không, nếu có thì giữ lại
+                        const existingReview = this.state.myReviews.find(r => r.sanPhamId === this.reviewState.productId);
+                        if (existingReview && existingReview.danhSachHinhAnh) {
+                            uploadedUrls = existingReview.danhSachHinhAnh.split(',');
+                        }
+                    }
+
+                    const payload = {
+                        soSao: this.reviewState.soSao,
+                        noiDung: document.getElementById('accReviewContentInput').value,
+                        phanLoai: this.reviewState.phanLoai,
+                        danhSachHinhAnh: uploadedUrls.join(',')
+                    };
+
+                    const res = await fetch('/api/khach-hang/reviews/' + this.reviewState.productId, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (res.ok) {
+                        this.showAccountNotification("Thành công", "Đã lưu đánh giá thành công!");
+                        this.closeReviewModal();
+
+                        // Gọi lại API để load đánh giá mới nhất về
+                        const revRes = await fetch('/api/khach-hang/my-reviews');
+                        if (revRes.ok) this.state.myReviews = await revRes.json();
+
+                        // Cập nhật lại màn hình Chi tiết đơn hàng hiện tại
+                        if (this.state.currentViewOrderId) this.viewOrderDetail(this.state.currentViewOrderId);
+                    } else {
+                        this.showAccountNotification("Thất bại", "Có lỗi xảy ra, vui lòng thử lại!", true);
+                    }
+                } catch (e) {
+                    this.showAccountNotification("Lỗi", "Lỗi kết nối máy chủ!", true);
+                } finally {
+                    btn.disabled = false;
+                    btn.innerText = 'GỬI ĐÁNH GIÁ';
+                }
+            },
+
             viewOrderDetail: async function(orderId) {
                 try {
+                    this.state.currentViewOrderId = orderId;
                     this.switchPanel('order-detail');
                     const res = await fetch('/api/hoa-don/' + orderId);
                     const data = await res.json();
@@ -650,14 +891,82 @@
                     document.getElementById('detSdtNhan').innerText = data.sdtNhan;
                     document.getElementById('detDiaChi').innerText = data.diaChiGiaoHang;
                     document.getElementById('detPayment').innerText = data.phuongThucThanhToan;
-                    document.getElementById('detStatus').innerText = data.trangThaiTen;
+
+                    const currentStatus = data.trangThaiMa || (data.trangThaiHoaDon && data.trangThaiHoaDon.ma) || '';
+                    document.getElementById('detStatus').innerText = data.trangThaiTen || this.getStatusConfig(currentStatus).label;
 
                     let html = '';
-                    data.chiTiets.forEach(item => {
-                        html += `<tr><td><div style="display:flex;align-items:center;"><img src="${item.hinhAnh||''}" class="detail-prod-img"><div><div style="font-family:'Cormorant Garamond', serif; font-size: 16px;">${item.tenSanPham}</div><small style="color:var(--muted)">${item.thuocTinh}</small></div></div></td><td style="text-align:center">${item.soLuong}</td><td style="text-align:right">${this.formatCurrency(item.giaBan)}</td></tr>`;
+                    const chiTiets = data.chiTiets || data.hoaDonChiTiets || [];
+
+                    chiTiets.forEach(item => {
+                        let reviewSectionHtml = '';
+
+                        // Định vị chuẩn xác dữ liệu sản phẩm
+                        const pId = item.sanPhamId || item.idSanPham || (item.sanPhamChiTiet && item.sanPhamChiTiet.sanPham ? item.sanPhamChiTiet.sanPham.id : null);
+                        const pName = item.tenSanPham || item.ten || (item.sanPhamChiTiet && item.sanPhamChiTiet.sanPham ? item.sanPhamChiTiet.sanPham.ten : 'Sản phẩm');
+                        const pl = item.thuocTinh || item.phanLoai || (item.sanPhamChiTiet && item.sanPhamChiTiet.mauSac ? `${item.sanPhamChiTiet.mauSac.ten} - ${item.sanPhamChiTiet.kichThuoc.ten}` : '');
+
+                        // Nếu HOÀN THÀNH, kiểm tra xem đã Review chưa
+                        if (currentStatus === 'HOAN_THANH' && pId) {
+                            const existingReview = this.state.myReviews.find(r => r.sanPhamId === pId);
+
+                            if (existingReview) {
+                                // 🌟 IN ĐÁNH GIÁ ĐÃ LÀM Ở NGAY BÊN DƯỚI SẢN PHẨM
+                                let starsHtml = '';
+                                for (let i = 1; i <= 5; i++) {
+                                    starsHtml += i <= existingReview.soSao ? '★' : '☆';
+                                }
+
+                                let imgsHtml = '';
+                                if (existingReview.danhSachHinhAnhList && existingReview.danhSachHinhAnhList.length > 0) {
+                                    existingReview.danhSachHinhAnhList.forEach(url => {
+                                        if (url.trim()) imgsHtml += `<img src="${url.trim()}" style="width:40px;height:40px;object-fit:cover;border-radius:2px;border:1px solid #eee;margin-right:6px;" onclick="event.stopPropagation(); window.open(this.src, '_blank')">`;
+                                    });
+                                }
+
+                                reviewSectionHtml = `
+                                    <div style="margin-top:12px; background:rgba(0,0,0,0.02); padding:12px; border-radius:4px; border:1px solid rgba(0,0,0,0.04); width:100%;" onclick="event.stopPropagation()">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                            <span style="color:#f59e0b; font-size:12px; letter-spacing:2px;">${starsHtml}</span>
+                                            <button onclick="window.AccountApp.openReviewModal(${pId}, '${pName}', '${pl}', true)" style="background:none; border:none; color:var(--accent); font-size:11px; font-weight:500; cursor:pointer; text-decoration:underline; padding:0;">Sửa đánh giá</button>
+                                        </div>
+                                        <div style="font-size:12px; color:var(--text); margin-bottom:8px; line-height:1.4; font-style:italic;">"${existingReview.noiDung || 'Không có bình luận'}"</div>
+                                        <div style="display:flex; flex-wrap:wrap;">${imgsHtml}</div>
+                                    </div>
+                                `;
+                            } else {
+                                // 🌟 NẾU CHƯA CÓ, IN NÚT VIẾT ĐÁNH GIÁ
+                                reviewSectionHtml = `<div style="margin-top:10px;"><button onclick="event.stopPropagation(); window.AccountApp.openReviewModal(${pId}, '${pName}', '${pl}', false)" style="background:none; color:var(--accent); border:1px solid var(--accent); padding:6px 16px; font-size:10px; font-weight: 500; text-transform:uppercase; letter-spacing:0.1em; border-radius:2px; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='var(--accent)'; this.style.color='#fff'" onmouseout="this.style.background='none'; this.style.color='var(--accent)'"><i class="fa-solid fa-pen-nib"></i> Viết đánh giá</button></div>`;
+                            }
+                        }
+
+                        // 🌟 FIX LỖI CLICK NHẢY TRANG (Đã khóa chặt onClick cho thẻ Hình ảnh và Tên)
+                        html += `<tr>
+                            <td>
+                                <div style="display:flex;align-items:flex-start; cursor:pointer;" onclick="window.location.href='/customer#detail?id=${pId}'; window.location.reload();">
+                                    <img src="${item.hinhAnh||''}" class="detail-prod-img" style="margin-top:4px;" onerror="this.src='https://placehold.co/60x80'">
+                                    <div style="flex:1;">
+                                        <div style="font-family:'Cormorant Garamond', serif; font-size: 17px; font-weight:500; transition:color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text)'">${pName}</div>
+                                        <div style="color:var(--muted); font-size: 12px; margin-top:2px;">${pl}</div>
+                                        ${reviewSectionHtml}
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="text-align:center; vertical-align:top; padding-top:24px;">${item.soLuong || 1}</td>
+                            <td style="text-align:right; vertical-align:top; padding-top:24px;">${this.formatCurrency(item.giaBan || item.giaTien)}</td>
+                        </tr>`;
                     });
-                    document.getElementById('detProductList').innerHTML = html;
+
+                    let tongTien = data.tongTien || data.giaTong || 0;
+                    let totalRow = `<tr><td colspan="2" style="text-align:right; font-weight:600; padding-top:30px;">TỔNG TIỀN PHẢI THANH TOÁN:</td><td style="text-align:right; font-weight:700; font-size:18px; color:var(--accent); padding-top:30px;">${this.formatCurrency(tongTien)}</td></tr>`;
+
+                    if (currentStatus === 'CHO_THANH_TOAN') {
+                        totalRow += `<tr><td colspan="3" style="text-align:right; padding-top:15px; border-bottom:none;"><button onclick="window.AccountApp.repayOrder(${data.id}, ${tongTien})" class="account-form-save" style="border-radius:4px; padding:12px 24px;"><i class="bi bi-wallet2"></i> THANH TOÁN NGAY</button></td></tr>`;
+                    }
+
+                    document.getElementById('detProductList').innerHTML = html + totalRow;
                 } catch (e) {
+                    console.error(e);
                     this.switchPanel('orders');
                 }
             },
@@ -668,6 +977,7 @@
                 this.renderOrders();
                 this.renderProfileForm();
                 this.renderAddressBook();
+                this.renderWishlist();
             },
 
             renderSidebar: function() {
@@ -690,6 +1000,7 @@
             renderOverview: function() {
                 document.getElementById('statOrders').innerText = this.state.stats.orderCount;
                 document.getElementById('statTotalSpent').innerText = this.formatCurrency(this.state.stats.totalSpent);
+                document.getElementById('statWishlist').innerText = this.state.stats.wishlistCount;
 
                 const recentContainer = document.getElementById('recentOrdersList');
                 if (!this.state.orders.length) {
@@ -709,6 +1020,61 @@
                 recentContainer.innerHTML = html;
             },
 
+            renderWishlist: function() {
+                const container = document.getElementById('wishlistContainer');
+                const wishlist = this.state.wishlist || [];
+
+                document.getElementById('statWishlist').innerText = wishlist.length;
+
+                if (wishlist.length === 0) {
+                    container.innerHTML = '<div style="grid-column:1/-1; padding:40px; text-align:center; color:var(--muted); border:1px dashed rgba(0,0,0,0.1); border-radius:4px; font-size:13px;">Bạn chưa có sản phẩm yêu thích nào.</div>';
+                    container.style.display = 'block';
+                    return;
+                }
+
+                container.style.display = 'grid';
+                let html = '';
+                wishlist.forEach(p => {
+                    let imgUrl = 'https://placehold.co/400x533';
+                    if (p.hinhAnhs && p.hinhAnhs.length > 0) {
+                        imgUrl = p.hinhAnhs[0].url.replace('/image/upload/', '/image/upload/c_fill,w_400,h_533,f_auto,q_auto/');
+                    }
+
+                    const variants = p.chiTietSanPhams || p.chiTietSanPhamList || p.bienThes || p.skus || [];
+                    let minSale = p.giaBan || 0;
+                    if (variants.length > 0) {
+                        minSale = Math.min(...variants.map(v => v.giaSauKhuyenMai || v.giaBan || 0));
+                    }
+
+                    html += `
+                        <div class="account-order-card" style="margin-bottom:0; padding:16px; cursor:pointer; position:relative; display:flex; flex-direction:column;" onclick="window.location.href='/customer#detail?id=${p.id}'; window.location.reload();">
+                            <img src="${imgUrl}" style="width:100%; aspect-ratio:3/4; object-fit:cover; border-radius:2px; margin-bottom:12px; background:#f4f4f5;">
+                            <div style="font-family:'Cormorant Garamond', serif; font-size:16px; margin-bottom:4px;">${p.ten}</div>
+                            <div style="font-size:14px; font-weight:500; color:var(--text); margin-top:auto;">${this.formatCurrency(minSale)}</div>
+
+                            <button onclick="event.stopPropagation(); window.AccountApp.removeFromWishlist(${p.id})" style="position:absolute; top:24px; right:24px; background:#fff; border:none; width:32px; height:32px; border-radius:50%; box-shadow:0 4px 10px rgba(0,0,0,0.15); color:#ef4444; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:0.2s;"><i class="fa-solid fa-heart"></i></button>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            },
+
+            removeFromWishlist: async function(id) {
+                if(!confirm("Bạn có muốn bỏ yêu thích sản phẩm này?")) return;
+
+                try {
+                    await fetch('/api/khach-hang/wishlist/toggle/' + id, { method: 'POST' });
+                    this.showAccountNotification("Thành công", "Đã xóa khỏi danh sách yêu thích");
+
+                    this.state.wishlist = this.state.wishlist.filter(p => p.id !== id);
+                    this.renderWishlist();
+
+                    let localWl = JSON.parse(localStorage.getItem('bee_wishlist') || '[]');
+                    localWl = localWl.filter(p => p.id !== id);
+                    localStorage.setItem('bee_wishlist', JSON.stringify(localWl));
+                } catch(e) { console.log(e); }
+            },
+
             renderOrders: function() {
                 const container = document.getElementById('ordersContainer');
                 if (!this.state.orders.length) {
@@ -719,6 +1085,17 @@
                 let html = '';
                 this.state.orders.forEach(ord => {
                     const statusObj = this.getStatusConfig(ord.trangThaiMa);
+
+                    let actionButtons = '';
+                    if (ord.trangThaiMa === 'CHO_THANH_TOAN') {
+                        actionButtons += `<button onclick="window.AccountApp.repayOrder(${ord.id}, ${ord.tongTien})" class="account-reorder-btn" style="background:var(--accent); color:white; margin-right:10px; border-color:var(--accent);"><i class="bi bi-wallet2"></i> Thanh toán ngay</button>`;
+                    }
+                    if (ord.trangThaiMa === 'HOAN_THANH' || ord.trangThaiMa === 'DA_HUY') {
+                        actionButtons += `<button onclick="window.AccountApp.reorder(${ord.id})" class="account-reorder-btn" style="margin-right:10px;"><i class="bi bi-cart-plus"></i> Mua lại</button>`;
+                    }
+
+                    actionButtons += `<button onclick="window.AccountApp.viewOrderDetail(${ord.id})" class="account-reorder-btn">Xem Chi Tiết</button>`;
+
                     html += `<div class="account-order-card" data-status="${ord.trangThaiMa}">
                         <div class="account-order-card-header">
                             <div><div class="account-order-id">#${ord.ma}</div><div class="account-order-meta">${ord.ngayTao}</div></div>
@@ -727,28 +1104,94 @@
                         <div class="order-timeline">${this.generateTimelineHTML(ord.trangThaiMa)}</div>
                         <div class="account-order-card-footer">
                             <div class="order-total-text">Tổng: <strong>${this.formatCurrency(ord.tongTien)}</strong></div>
-                            <button onclick="window.AccountApp.viewOrderDetail(${ord.id})" class="account-reorder-btn">Xem Chi Tiết</button>
+                            <div>${actionButtons}</div>
                         </div>
                     </div>`;
                 });
                 container.innerHTML = html;
             },
 
+            repayOrder: async function(orderId, amount) {
+                this.showAccountNotification("Đang xử lý", "Đang kết nối cổng thanh toán MoMo...");
+                try {
+                    const momoRes = await fetch(`/api/hoa-don/momo-payment/${orderId}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ amount: amount })
+                    });
+                    if (!momoRes.ok) throw new Error("Lỗi kết nối API MoMo Online!");
+                    const momoData = await momoRes.json();
+                    if (momoData.payUrl) window.location.href = momoData.payUrl;
+                    else throw new Error(momoData.message || "MoMo không trả về Link thanh toán!");
+                } catch (error) {
+                    console.error(error);
+                    this.showAccountNotification("Thất bại", "Không thể tạo link thanh toán, vui lòng thử lại sau!", true);
+                }
+            },
+
+            reorder: async function(orderId) {
+                this.showAccountNotification("Đang xử lý", "Đang thêm sản phẩm vào giỏ hàng...");
+                try {
+                    const res = await fetch('/api/hoa-don/' + orderId);
+                    if (!res.ok) throw new Error("Không thể lấy thông tin đơn hàng");
+                    const data = await res.json();
+
+                    let cart = JSON.parse(localStorage.getItem('bee_cart')) || [];
+                    let addedCount = 0;
+
+                    data.chiTiets.forEach(item => {
+                        const variantId = item.idSanPhamChiTiet || item.chiTietSanPhamId || item.sanPhamChiTietId || (item.sanPhamChiTiet ? item.sanPhamChiTiet.id : null);
+                        if (!variantId) return;
+
+                        let colorName = '', sizeName = '';
+                        if (item.thuocTinh) {
+                            const parts = item.thuocTinh.split(' - ');
+                            colorName = parts[0] || ''; sizeName = parts[1] || '';
+                        } else if (item.sanPhamChiTiet) {
+                            colorName = item.sanPhamChiTiet.mauSac?.ten || '';
+                            sizeName = item.sanPhamChiTiet.kichThuoc?.ten || '';
+                        }
+
+                        const cartItem = {
+                            skuId: variantId,
+                            productId: item.sanPhamId || item.idSanPham || (item.sanPhamChiTiet?.sanPham?.id) || null,
+                            name: item.tenSanPham || (item.sanPhamChiTiet?.sanPham?.ten) || 'Sản phẩm Beemate',
+                            img: item.hinhAnh || (item.sanPhamChiTiet?.hinhAnh) || 'https://placehold.co/100x100?text=SP',
+                            price: item.giaBan || item.giaTien || 0,
+                            originalPrice: item.giaBan || item.giaTien || 0,
+                            colorName: colorName, sizeName: sizeName,
+                            qty: item.soLuong || 1, maxQty: 999
+                        };
+
+                        const existingIdx = cart.findIndex(c => c.skuId === cartItem.skuId);
+                        if (existingIdx >= 0) cart[existingIdx].qty += cartItem.qty;
+                        else cart.push(cartItem);
+                        addedCount++;
+                    });
+
+                    if (addedCount > 0) {
+                        localStorage.setItem('bee_cart', JSON.stringify(cart));
+                        window.dispatchEvent(new Event('cartUpdated'));
+                        this.showAccountNotification("Thành công", `Đã thêm ${addedCount} sản phẩm vào giỏ hàng!`);
+                        setTimeout(() => { window.location.href = '/customer#cart'; window.location.reload(); }, 1000);
+                    } else {
+                        this.showAccountNotification("Rất tiếc", "Hệ thống không tìm thấy mã sản phẩm để mua lại.", true);
+                    }
+                } catch (error) {
+                    console.error(error);
+                    this.showAccountNotification("Lỗi", "Có lỗi xảy ra khi xử lý mua lại!", true);
+                }
+            },
+
             renderProfileForm: function() {
                 const user = this.state.user;
-
                 document.getElementById('inpFirstName').value = user.hoTen || '';
                 document.getElementById('inpPhone').value = user.soDienThoai || '';
                 document.getElementById('inpEmail').value = user.email || '';
                 document.getElementById('inpGender').value = user.gioiTinh || '';
-                // Không còn render inpAddress ở đây nữa
-
                 const inpUser = document.getElementById('inpUsername');
                 inpUser.value = user.tenDangNhap || '';
-
-                if(user.ngaySinh) {
-                    document.getElementById('inpDob').value = user.ngaySinh.substring(0, 10);
-                }
+                if(user.ngaySinh) { document.getElementById('inpDob').value = user.ngaySinh.substring(0, 10); }
 
                 if (user.daDoiTenDangNhap || (user.tenDangNhap && user.tenDangNhap !== user.soDienThoai)) {
                     inpUser.disabled = true;
@@ -756,7 +1199,6 @@
                 }
             },
 
-            // Render giao diện Sổ địa chỉ
             renderAddressBook: function() {
                 const container = document.getElementById('addressBookContainer');
                 if(this.state.addresses.length === 0) {
@@ -765,7 +1207,6 @@
                 }
 
                 let html = '';
-                // Ưu tiên hiển thị địa chỉ mặc định lên đầu
                 const sortedAddresses = [...this.state.addresses].sort((a,b) => b.laMacDinh - a.laMacDinh);
 
                 sortedAddresses.forEach(addr => {
@@ -791,7 +1232,9 @@
 
             getStatusConfig: function(statusCode) {
                 const map = {
+                    'CHO_THANH_TOAN': { label: 'Chờ thanh toán', cssClass: 'status-processing' },
                     'CHO_XAC_NHAN': { label: 'Chờ duyệt', cssClass: 'status-processing' },
+                    'CHO_GIAO': { label: 'Đang chuẩn bị', cssClass: 'status-processing' },
                     'DANG_GIAO': { label: 'Đang giao', cssClass: 'status-shipping' },
                     'HOAN_THANH': { label: 'Đã nhận', cssClass: 'status-delivered' },
                     'DA_HUY': { label: 'Đã hủy', cssClass: 'status-cancelled' }
@@ -810,6 +1253,7 @@
                 ];
 
                 let curIdx = steps.findIndex(s => s.code === currentStatus);
+                if (currentStatus === 'CHO_THANH_TOAN') curIdx = 0;
                 if(currentStatus === 'HOAN_THANH') curIdx = 3;
 
                 let html = '<div class="order-timeline-steps">';
@@ -861,7 +1305,6 @@
                 }
             },
 
-            // --- CÁC HÀM XỬ LÝ GHN CHO MODAL ĐỊA CHỈ ---
             loadProvinces: async function() {
                 try {
                     const res = await fetch(this.ghnConfig.apiUrl + '/master-data/province', { headers: { 'token': this.ghnConfig.token } });
@@ -916,12 +1359,10 @@
                 } catch (e) { }
             },
 
-            // --- API CRUD ĐỊA CHỈ ---
             openAddressModal: async function(id = null) {
                 document.getElementById('accAddressModalOverlay').style.display = 'flex';
                 setTimeout(() => { document.getElementById('accAddressModal').classList.add('open'); }, 10);
 
-                // Khởi tạo/Clear form
                 document.getElementById('addrId').value = '';
                 document.getElementById('addrName').value = this.state.user ? this.state.user.hoTen || '' : '';
                 document.getElementById('addrPhone').value = this.state.user ? this.state.user.soDienThoai || '' : '';
@@ -931,7 +1372,6 @@
 
                 await this.loadProvinces();
 
-                // Nếu là Edit (có ID), fill data
                 if (id) {
                     const addr = this.state.addresses.find(a => a.id === id);
                     if (addr) {
@@ -941,7 +1381,6 @@
                         document.getElementById('addrDetail').value = addr.diaChiChiTiet;
                         document.getElementById('addrDefault').checked = addr.laMacDinh;
 
-                        // Async load and fill location data
                         if (addr.maTinh) {
                             document.getElementById('addrProv').value = addr.maTinh;
                             await this.loadDistricts();
@@ -1012,7 +1451,6 @@
                     if(res.ok) {
                         this.showAccountNotification('Thành công', id ? 'Đã cập nhật địa chỉ!' : 'Đã thêm địa chỉ mới!');
                         this.closeAddressModal();
-                        // Refresh data
                         const addrRes = await fetch('/api/khach-hang/addresses');
                         if(addrRes.ok) this.state.addresses = await addrRes.json();
                         this.renderAddressBook();
@@ -1058,7 +1496,6 @@
                 }
             },
 
-            // --- CÁC HÀM XỬ LÝ PASS/GUEST NHƯ CŨ ---
             togglePassword: function(id, btn) {
                 const input = document.getElementById(id);
                 input.type = input.type === 'password' ? 'text' : 'password';

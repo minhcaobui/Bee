@@ -5,12 +5,11 @@ import lombok.*;
 
 @Entity
 @Table(name = "tai_khoan")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Getter
-@Setter
 public class TaiKhoan {
 
     @Id

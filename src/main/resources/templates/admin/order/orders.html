@@ -198,6 +198,7 @@
                 </div>
                 <div>
                     <div><span style="color:#666;">Địa chỉ nhận:</span> <span id="viewDiaChi" style="font-weight:600;"></span></div>
+                    <div><span style="color:#666;">Phương thức TT:</span> <span id="viewPTTT" style="font-weight:600;"></span></div>
                     <div><span style="color:#666;">Loại hóa đơn:</span> <span id="viewLoaiDon" style="font-weight:600;"></span></div>
                 </div>
             </div>
@@ -333,6 +334,28 @@
         _nvSelectedId: null,
         _statusList: [],
 
+        // 🌟 HÀM FORMAT PHƯƠNG THỨC THANH TOÁN ĐÃ ĐƯỢC CHUẨN HÓA CẮT KHOẢNG TRẮNG
+        formatPayment: function(method) {
+            if (!method) return '<span style="color:#555;"><i class="bi bi-credit-card"></i> Khác</span>';
+
+            // Lọc sạch khoảng trắng dư thừa và đưa về IN HOA để khớp chính xác 100%
+            const cleanStr = method.trim();
+            const upperStr = cleanStr.toUpperCase();
+
+            const map = {
+                'TIEN_MAT': { icon: 'bi-cash', color: '#10b981', text: 'Tiền mặt' },
+                'TIỀN MẶT': { icon: 'bi-cash', color: '#10b981', text: 'Tiền mặt' }, // Dự phòng tiếng Việt
+                'MOMO': { icon: 'bi-wallet2', color: '#a50064', text: 'Ví MoMo' },
+                'VÍ MOMO': { icon: 'bi-wallet2', color: '#a50064', text: 'Ví MoMo' }, // Dự phòng tiếng Việt
+                'COD': { icon: 'bi-truck', color: '#3b82f6', text: 'COD (Giao hàng)' }
+            };
+
+            // Ưu tiên tìm theo chữ in hoa, nếu không có lấy chữ đã lọc khoảng trắng, không có nữa thì trả về mặc định
+            const config = map[upperStr] || map[cleanStr] || { icon: 'bi-credit-card', color: '#555', text: cleanStr };
+
+            return `<span style="color: ${config.color}; font-weight: 600; display: flex; align-items: center; gap: 4px;"><i class="bi ${config.icon}"></i> ${config.text}</span>`;
+        },
+
         renderFilterSection: function() {
             const section = document.getElementById('filterSection');
             const isHistory = this.state.activeTab === 'lich-su';
@@ -413,10 +436,9 @@
                             <label class="filter-label">Phương thức TT</label>
                             <select id="filterPTTT" onchange="OrderApp.handleFilterChange()">
                                 <option value="">Tất cả</option>
-                                <option value="tien_mat">Tiền mặt</option>
-                                <option value="chuyen_khoan">Chuyển khoản</option>
-                                <option value="momo">MoMo</option>
-                                <option value="vnpay">VNPay</option>
+                                <option value="TIEN_MAT">Tiền mặt</option>
+                                <option value="MOMO">Ví MoMo</option>
+                                <option value="COD">COD</option>
                             </select>
                         </div>
                     </div>
@@ -753,7 +775,11 @@
             tbody.innerHTML = list.map((hd, idx) => {
                 const tenKhach    = hd.khachHang ? hd.khachHang.hoTen : (hd.tenNguoiNhan ? hd.tenNguoiNhan : 'Khách vãng lai');
                 const tenNhanVien = hd.nhanVien  ? hd.nhanVien.hoTen  : '<span style="color:#aaa; font-style:italic;">Hệ thống</span>';
-                const hinhThucTT  = hd.phuongThucThanhToan || (hd.loaiHoaDon === 0 ? 'Tiền mặt' : 'Chuyển khoản');
+
+                // SỬ DỤNG HÀM MỚI ĐỂ HIỂN THỊ PHƯƠNG THỨC THANH TOÁN
+                const rawMethod = hd.phuongThucThanhToan || (hd.loaiHoaDon === 0 ? 'TIEN_MAT' : 'COD');
+                const hinhThucTT = this.formatPayment(rawMethod);
+
                 const ngayTaoVN   = formatVNTime(hd.ngayTao);
                 const isHighlight  = highlightId && Number(highlightId) === Number(hd.id);
 
@@ -769,7 +795,7 @@
 
                 trContent += `<td style="font-weight:700; color:#dc2626;">${(hd.giaTong || 0).toLocaleString('vi-VN')} đ</td>`;
 
-                if (isHistory) trContent += `<td><span class="badge-type" style="background:#e0e7ff; color:#3730a3;">${hinhThucTT}</span></td>`;
+                if (isHistory) trContent += `<td>${hinhThucTT}</td>`;
 
                 trContent += `
                     <td><span class="badge-type ${hd.loaiHoaDon === 0 ? 'type-pos' : 'type-online'}">${hd.loaiHoaDon === 0 ? 'TẠI QUẦY' : 'ONLINE'}</span></td>
@@ -810,6 +836,10 @@
                 document.getElementById('viewTrangThaiText').innerText = (hd.trangThaiTen || '').toUpperCase();
                 document.getElementById('viewDiaChi').innerText       = hd.diaChiGiaoHang || 'Nhận hàng tại cửa hàng';
                 document.getElementById('viewLoaiDon').innerText      = hd.loaiHoaDon === 0 ? 'Hóa đơn Tại quầy' : 'Đơn hàng Online';
+
+                // HIỂN THỊ PHƯƠNG THỨC THANH TOÁN TRONG MODAL CHI TIẾT
+                const rawMethod = hd.phuongThucThanhToan || (hd.loaiHoaDon === 0 ? 'TIEN_MAT' : 'COD');
+                document.getElementById('viewPTTT').innerHTML = this.formatPayment(rawMethod);
 
                 const listSP = hd.chiTiets || [];
                 let productHtml = listSP.length

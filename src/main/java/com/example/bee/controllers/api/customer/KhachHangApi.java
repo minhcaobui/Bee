@@ -5,11 +5,15 @@ import com.example.bee.dto.KhachHangRequest;
 import com.example.bee.entities.account.TaiKhoan;
 import com.example.bee.entities.customer.DiaChiKhachHang;
 import com.example.bee.entities.customer.KhachHang;
+import com.example.bee.entities.product.SanPhamYeuThich;
+import com.example.bee.entities.reviews.DanhGia;
 import com.example.bee.entities.user.NhanVien;
 import com.example.bee.repositories.account.TaiKhoanRepository;
 import com.example.bee.repositories.customer.DiaChiKhachHangRepository;
 import com.example.bee.repositories.customer.KhachHangRepository;
+import com.example.bee.repositories.reviews.DanhGiaRepository;
 import com.example.bee.repositories.role.NhanVienRepository;
+import com.example.bee.repositories.wishlist.SanPhamYeuThichRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,6 +31,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.security.Principal;
 import java.security.SecureRandom;
 import java.sql.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -41,6 +46,8 @@ public class KhachHangApi {
     private final DiaChiKhachHangRepository dcRepo;
     private final TaiKhoanRepository taiKhoanRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SanPhamYeuThichRepository wishlistRepo;
+    private final DanhGiaRepository danhGiaRepo;
 
     private String generateMa() {
         long count = khRepo.count();
@@ -280,6 +287,12 @@ public class KhachHangApi {
             if (payload.get("ngaySinh") != null && !payload.get("ngaySinh").isEmpty()) {
                 nv.setNgaySinh(java.sql.Date.valueOf(payload.get("ngaySinh")));
             }
+
+            // 👉 THÊM ĐOẠN NÀY ĐỂ LƯU LINK ẢNH CLOUDINARY
+            if (payload.get("hinhAnh") != null && !payload.get("hinhAnh").trim().isEmpty()) {
+                nv.setHinhAnh(payload.get("hinhAnh"));
+            }
+
             nvRepo.save(nv);
             return ResponseEntity.ok(Map.of("message", "Cập nhật hồ sơ nhân viên thành công!"));
         }
@@ -289,12 +302,10 @@ public class KhachHangApi {
         // ==========================================
         KhachHang kh = khRepo.findByTaiKhoan_TenDangNhap(username).orElse(null);
 
-        // NẾU KHÔNG TÌM THẤY -> TẠO MỚI HỒ SƠ CHỨ KHÔNG NÉM LỖI
         if (kh == null) {
             kh = new KhachHang();
             kh.setTaiKhoan(taiKhoan);
             kh.setTrangThai(true);
-            // Tạo mã KH ngẫu nhiên hoặc tự tăng tùy logic của bạn
             kh.setMa("KH" + System.currentTimeMillis());
         }
 
@@ -308,6 +319,11 @@ public class KhachHangApi {
             kh.setNgaySinh(Date.valueOf(payload.get("ngaySinh")).toLocalDate());
         }
 
+        // 👉 THÊM ĐOẠN NÀY ĐỂ LƯU LINK ẢNH CLOUDINARY
+        if (payload.get("hinhAnh") != null && !payload.get("hinhAnh").trim().isEmpty()) {
+            kh.setHinhAnh(payload.get("hinhAnh"));
+        }
+
         khRepo.save(kh);
 
         // ==========================================
@@ -315,15 +331,10 @@ public class KhachHangApi {
         // ==========================================
         String newUsername = payload.get("tenDangNhap");
 
-        // Kiểm tra xem user có truyền lên tên đăng nhập mới không
-        // VÀ tài khoản này chưa từng đổi tên (VD: Tên đăng nhập vẫn đang giống Số điện thoại)
         if (newUsername != null && !newUsername.trim().isEmpty() && !newUsername.equals(taiKhoan.getTenDangNhap())) {
-
-            // Check trùng tên đăng nhập trong DB
             if (taiKhoanRepository.existsByTenDangNhap(newUsername)) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Tên đăng nhập này đã có người sử dụng!"));
             }
-
             taiKhoan.setTenDangNhap(newUsername);
             taiKhoanRepository.save(taiKhoan);
         }
@@ -509,6 +520,145 @@ public class KhachHangApi {
         dcRepo.delete(dc);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/wishlist/check/{sanPhamId}")
+    public ResponseEntity<?> checkWishlist(@PathVariable Integer sanPhamId, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+            return ResponseEntity.ok(Map.of("isSaved", false));
+        }
+        KhachHang kh = khRepo.findByTaiKhoan_TenDangNhap(authentication.getName()).orElse(null);
+        if (kh == null || kh.getTaiKhoan() == null) return ResponseEntity.ok(Map.of("isSaved", false));
+
+        boolean isSaved = wishlistRepo.findByTaiKhoanIdAndSanPhamId(kh.getTaiKhoan().getId(), sanPhamId).isPresent();
+        return ResponseEntity.ok(Map.of("isSaved", isSaved));
+    }
+
+    @PostMapping("/wishlist/toggle/{sanPhamId}")
+    @Transactional
+    public ResponseEntity<?> toggleWishlist(@PathVariable Integer sanPhamId, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Vui lòng đăng nhập!"));
+        }
+        KhachHang kh = khRepo.findByTaiKhoan_TenDangNhap(authentication.getName()).orElse(null);
+        if (kh == null || kh.getTaiKhoan() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Vui lòng đăng nhập!"));
+        }
+
+        Integer userId = kh.getTaiKhoan().getId();
+        var exist = wishlistRepo.findByTaiKhoanIdAndSanPhamId(userId, sanPhamId);
+
+        if (exist.isPresent()) {
+            wishlistRepo.delete(exist.get());
+            return ResponseEntity.ok(Map.of("message", "Đã bỏ lưu sản phẩm khỏi danh sách yêu thích", "status", "removed"));
+        } else {
+            SanPhamYeuThich wl = new SanPhamYeuThich();
+            wl.setTaiKhoanId(userId);
+            wl.setSanPhamId(sanPhamId);
+            wishlistRepo.save(wl);
+            return ResponseEntity.ok(Map.of("message", "Đã lưu vào danh sách yêu thích! ❤️", "status", "added"));
+        }
+    }
+
+    @GetMapping("/reviews/{sanPhamId}")
+    public ResponseEntity<?> getReviews(@PathVariable Integer sanPhamId) {
+        // Lấy danh sách đánh giá của sản phẩm
+        List<DanhGia> list = danhGiaRepo.findBySanPhamIdOrderByNgayTaoDesc(sanPhamId);
+
+        // Lấy danh sách khách hàng để map (dịch) tên
+        List<KhachHang> allKhachHang = khRepo.findAll();
+
+        for (DanhGia dg : list) {
+            String tenNguoiDanhGia = "Khách hàng ẩn danh"; // Tên mặc định nếu không tìm thấy
+
+            // Quét tìm Tên của khách hàng khớp với ID người đánh giá
+            for (KhachHang kh : allKhachHang) {
+                if (kh.getTaiKhoan() != null && kh.getTaiKhoan().getId().equals(dg.getTaiKhoanId())) {
+                    if (kh.getHoTen() != null && !kh.getHoTen().trim().isEmpty()) {
+                        tenNguoiDanhGia = kh.getHoTen();
+
+                        /* (TÙY CHỌN BẢO MẬT):
+                           Nếu bạn muốn che bớt tên giống Shopee (VD: Bùi Cao Minh -> B*** Minh)
+                           thì hãy xóa dấu // ở 4 dòng code bên dưới: */
+
+                        // String[] parts = tenNguoiDanhGia.split(" ");
+                        // if (parts.length > 1) {
+                        //     tenNguoiDanhGia = parts[0].charAt(0) + "*** " + parts[parts.length - 1];
+                        // }
+                    }
+                    break;
+                }
+            }
+            dg.setTenKhachHang(tenNguoiDanhGia); // Gắn tên thật vào để gửi về Frontend
+        }
+
+        return ResponseEntity.ok(list);
+    }
+
+    // 2. GHI ĐÈ: CẬP NHẬT LẠI API THÊM ĐÁNH GIÁ ĐỂ HỖ TRỢ "SỬA 1 LẦN"
+    @PostMapping("/reviews/{sanPhamId}")
+    @Transactional
+    public ResponseEntity<?> addReview(@PathVariable Integer sanPhamId, @RequestBody Map<String, Object> payload, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Vui lòng đăng nhập!"));
+        }
+        KhachHang kh = khRepo.findByTaiKhoan_TenDangNhap(authentication.getName()).orElse(null);
+        if (kh == null || kh.getTaiKhoan() == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Vui lòng đăng nhập!"));
+
+        try {
+            Integer userId = kh.getTaiKhoan().getId();
+
+            // 🌟 LOGIC MỚI: Tìm xem đã đánh giá chưa. Nếu có rồi thì SỬA đè lên, nếu chưa thì TẠO MỚI.
+            DanhGia dg = danhGiaRepo.findAll().stream()
+                    .filter(r -> r.getTaiKhoanId().equals(userId) && r.getSanPhamId().equals(sanPhamId))
+                    .findFirst().orElse(new DanhGia());
+
+            dg.setTaiKhoanId(userId);
+            dg.setSanPhamId(sanPhamId);
+            dg.setSoSao(Integer.parseInt(payload.getOrDefault("soSao", "5").toString()));
+            dg.setNoiDung(payload.getOrDefault("noiDung", "").toString());
+            dg.setPhanLoai(payload.getOrDefault("phanLoai", "").toString());
+            dg.setDanhSachHinhAnh(payload.getOrDefault("danhSachHinhAnh", "").toString());
+
+            danhGiaRepo.save(dg);
+            return ResponseEntity.ok(Map.of("message", "Đã lưu đánh giá thành công!", "status", "success"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Dữ liệu không hợp lệ"));
+        }
+    }
+
+    @GetMapping("/wishlist")
+    public ResponseEntity<?> getMyWishlist(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+            return ResponseEntity.ok(java.util.Collections.emptyList());
+        }
+        KhachHang kh = khRepo.findByTaiKhoan_TenDangNhap(authentication.getName()).orElse(null);
+        if (kh == null || kh.getTaiKhoan() == null) {
+            return ResponseEntity.ok(java.util.Collections.emptyList());
+        }
+
+        // Lấy danh sách Sản phẩm yêu thích từ Database
+        List<SanPhamYeuThich> list = wishlistRepo.findAll().stream()
+                .filter(w -> w.getTaiKhoanId().equals(kh.getTaiKhoan().getId()))
+                .collect(java.util.stream.Collectors.toList());
+
+        return ResponseEntity.ok(list);
+    }
+
+    // 1. THÊM MỚI: API LẤY TẤT CẢ ĐÁNH GIÁ CỦA TÀI KHOẢN ĐANG ĐĂNG NHẬP
+    @GetMapping("/my-reviews")
+    public ResponseEntity<?> getMyAllReviews(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) return ResponseEntity.ok(java.util.Collections.emptyList());
+        KhachHang kh = khRepo.findByTaiKhoan_TenDangNhap(authentication.getName()).orElse(null);
+        if (kh == null || kh.getTaiKhoan() == null) return ResponseEntity.ok(java.util.Collections.emptyList());
+
+        // Lọc ra các đánh giá của riêng user này
+        List<DanhGia> myReviews = danhGiaRepo.findAll().stream()
+                .filter(r -> r.getTaiKhoanId().equals(kh.getTaiKhoan().getId()))
+                .collect(java.util.stream.Collectors.toList());
+        return ResponseEntity.ok(myReviews);
+    }
+
+
 
     // Hàm phụ để map dữ liệu
     private void mapRequestToEntity(DiaChiRequest req, DiaChiKhachHang dc) {

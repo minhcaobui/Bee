@@ -3,14 +3,14 @@
         .detail-section { padding: 40px 0 120px; background: var(--white); }
         .detail-label { font-size: 11px; letter-spacing: 0.22em; color: var(--muted); text-transform: uppercase; text-align: center; margin-bottom: 30px; font-weight: 400; }
 
-        /* ==================================================================
-           LAYOUT CHÍNH
-           ================================================================== */
+        /* --- CSS CHO TAG MỚI / SALE TRONG CHI TIẾT --- */
+        .detail-badges { position: absolute; top: 20px; left: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 5; pointer-events: none; }
+        .detail-badge { padding: 6px 12px; font-size: 10px; font-family: 'DM Sans', sans-serif; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 2px; color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .detail-badge.new { background: var(--accent); }
+        .detail-badge.sale { background: #dc2626; }
+
         .product-detail-layout { display: grid; grid-template-columns: 1.1fr 1fr; gap: 60px; align-items: start; max-width: 1100px; margin: 0 auto; padding: 0 40px; }
 
-        /* ==================================================================
-           GALLERY ẢNH CHUẨN LOCAL BRAND
-           ================================================================== */
         .detail-gallery { width: 100%; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
 
         .main-view-container {
@@ -44,11 +44,7 @@
         .thumb-item.active { opacity: 1; border-color: #000; }
         .img-overlay { position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px); z-index: 1;}
 
-        /* ==================================================================
-           THÔNG TIN SẢN PHẨM BÊN PHẢI
-           ================================================================== */
         .detail-info { padding-top: 10px; position: sticky; top: 100px; }
-
         .detail-breadcrumbs { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 16px; color: var(--muted); }
         .detail-breadcrumbs a { color: var(--text); text-decoration: none; cursor: pointer; transition: color 0.3s; font-weight: 500;}
         .detail-breadcrumbs a:hover { color: var(--accent); }
@@ -80,10 +76,11 @@
         .wishlist-btn:hover { border-color: var(--accent); color: var(--accent); }
 
         .color-options { display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
-        .color-dot { width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s ease, border-color 0.2s ease; position: relative; }
-        .color-dot:hover { transform: scale(1.1); }
-        .color-dot.active { border: 2px solid var(--text); padding: 2px; background-clip: content-box; } /* Cải tiến CSS viền màu sáng/tối đều nhìn thấy */
-        .color-dot.unavailable::after { content:''; position:absolute; width:100%; height:1px; background:rgba(0,0,0,0.4); top:50%; left:0; transform:rotate(45deg); }
+
+        .color-ring-wrap { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; transition: transform 0.2s ease;}
+        .color-ring-wrap:hover { transform: scale(1.1); }
+        .color-ring-wrap.active { border: 2px solid var(--text); }
+        .color-dot-inner { width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); }
 
         .size-tooltip { position: absolute; background: var(--text); color: white; padding: 16px 20px; font-size: 12px; line-height: 1.8; white-space: nowrap; display: none; z-index: 10; border-radius: 2px; }
         .stock-status { font-size: 11px; margin-top: 8px; color: #10b981; font-weight: 500; font-family: 'DM Sans', sans-serif; }
@@ -96,8 +93,10 @@
         .accordion-header:hover { opacity: 0.7; }
         .accordion-header span { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 400; }
         .accordion-header svg { width: 16px; height: 16px; stroke: var(--muted); stroke-width: 1.5; transition: transform 0.3s ease; }
+
+        /* 🌟 NÂNG CẤP CSS ACCORDION ĐỂ CHỨA REVIEW */
         .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.4s ease; font-size: 13px; color: var(--muted); line-height: 1.8; font-weight: 300; }
-        .accordion-item.active .accordion-content { max-height: 200px; padding-bottom: 20px; }
+        .accordion-item.active .accordion-content { max-height: 800px; padding-bottom: 20px; } /* Tăng max-height lên 800px */
         .accordion-item.active .accordion-header svg { transform: rotate(180deg); stroke: var(--text); }
 
         #recentViewedSection { max-width: 1100px; margin: 100px auto 0; padding: 0 40px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 80px;}
@@ -117,6 +116,56 @@
             .detail-info { padding-top: 0; position: static; }
             #recentViewedSection { padding: 60px 24px 0; }
         }
+
+        .fly-to-cart-img { position: fixed; z-index: 9999; border-radius: 50%; object-fit: cover; transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); box-shadow: 0 10px 20px rgba(0,0,0,0.2); pointer-events: none; }
+        .wishlist-btn.active { border-color: #ef4444; color: #ef4444; }
+        .wishlist-btn.active svg { fill: #ef4444; stroke: #ef4444; }
+
+        /* 🌟 NÂNG CẤP GIAO DIỆN ĐÁNH GIÁ TRONG ACCORDION */
+        .reviews-container-scroll { max-height: 400px; overflow-y: auto; padding-right: 15px; margin-bottom: 10px; }
+        /* Tùy chỉnh thanh cuộn Review */
+        .reviews-container-scroll::-webkit-scrollbar { width: 5px; }
+        .reviews-container-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.02); border-radius: 4px; }
+        .reviews-container-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 4px; }
+        .reviews-container-scroll::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.3); }
+
+        .review-stats { display: flex; align-items: center; gap: 12px; }
+        .stars { color: #f59e0b; font-size: 14px; }
+        .review-item { padding-bottom: 24px; margin-bottom: 24px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .reviewer-name { font-size: 13px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px; }
+        .verified-badge { font-size: 10px; color: #10b981; font-weight: 500; background: #d1fae5; padding: 2px 6px; border-radius: 2px; }
+        .review-meta { font-size: 11px; color: var(--muted); margin: 6px 0 12px; }
+        .review-content { font-size: 13px; color: var(--text); line-height: 1.6; font-weight: 300; }
+        .review-images { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+        .review-img { width: 70px; height: 70px; border-radius: 4px; object-fit: cover; cursor: zoom-in; border: 1px solid rgba(0,0,0,0.05); transition: opacity 0.2s;}
+        .review-img:hover { opacity: 0.8; }
+
+        /* 🌟 POPUP VIẾT ĐÁNH GIÁ */
+        .review-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+        .review-modal { background: #fff; width: 450px; max-width: 90%; border-radius: 4px; padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); position: relative; }
+        .review-modal-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; margin-bottom: 20px; text-align: center; }
+        .star-select { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; font-size: 24px; cursor: pointer; color: #ccc; }
+        .star-select i.active { color: #f59e0b; }
+        .review-textarea { width: 100%; height: 100px; border: 1px solid rgba(0,0,0,0.1); border-radius: 4px; padding: 12px; font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; resize: none; margin-bottom: 16px; }
+        .review-textarea:focus { border-color: var(--accent); }
+        .review-img-upload-btn { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text); background: #f4f4f5; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-bottom: 16px; transition: 0.2s; }
+        .review-img-upload-btn:hover { background: #e4e4e7; }
+        .review-img-previews { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+        .review-modal-close { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 18px; cursor: pointer; color: var(--muted); }
+
+        /* 🌟 POPUP XEM TOÀN BỘ ĐÁNH GIÁ */
+        .all-reviews-modal { background: #fff; width: 600px; max-width: 95%; max-height: 85vh; border-radius: 4px; display: flex; flex-direction: column; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+        .all-reviews-header { padding: 20px 30px; border-bottom: 1px solid rgba(0,0,0,0.08); display: flex; justify-content: space-between; align-items: center; }
+        .all-reviews-body { padding: 30px; overflow-y: auto; flex: 1; }
+        .all-reviews-body::-webkit-scrollbar { width: 6px; }
+        .all-reviews-body::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 4px; }
+
+        /* 🌟 LIGHTBOX XEM ẢNH TRỰC TIẾP */
+        .lightbox-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;}
+        .lightbox-overlay.show { opacity: 1; }
+        .lightbox-img { max-width: 90%; max-height: 90vh; object-fit: contain; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .lightbox-close { position: absolute; top: 20px; right: 20px; color: rgba(255,255,255,0.7); background: none; border: none; font-size: 40px; cursor: pointer; transition: 0.2s; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; }
+        .lightbox-close:hover { color: white; transform: scale(1.1); }
     </style>
 
     <section class="detail-section">
@@ -125,7 +174,7 @@
         </div>
 
         <div class="product-detail-layout" id="productContent" style="opacity: 0; transition: opacity 0.5s ease;">
-            <div class="detail-gallery" id="dynGallery"></div>
+            <div class="detail-gallery" id="dynGallery" style="position:relative"></div>
 
             <div class="detail-info">
                 <div class="detail-breadcrumbs" id="dynBreadcrumb">Đang tải...</div>
@@ -165,7 +214,10 @@
                     <button class="add-to-cart-btn" id="btnBuyNow" onclick="window.DetailApp.addToCart(true)" style="margin-bottom:0;"><span>Mua ngay</span></button>
                 </div>
 
-                <button class="wishlist-btn"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg> Lưu vào yêu thích</button>
+                <button class="wishlist-btn" id="btnWishlist" onclick="window.DetailApp.toggleWishlist()">
+                    <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                    <span id="wishlistText">Lưu vào yêu thích</span>
+                </button>
 
                 <div class="accordion-wrapper">
                     <div class="accordion-item">
@@ -186,6 +238,28 @@
                             Giao hàng tiêu chuẩn từ 2-4 ngày làm việc trên toàn quốc. Hỗ trợ đổi trả miễn phí trong vòng 30 ngày kể từ khi nhận hàng nếu có lỗi từ nhà sản xuất.
                         </div>
                     </div>
+
+                    <div class="accordion-item" id="reviewAccordionBlock">
+                        <div class="accordion-header" onclick="window.DetailApp.toggleAccordion(this)">
+                            <span style="display:flex; align-items:center; gap:8px;">
+                                ĐÁNH GIÁ KHÁCH HÀNG
+                                <span id="reviewMiniStats" style="font-size:11px; color:var(--muted); text-transform:none; font-weight:normal; letter-spacing:0;"></span>
+                            </span>
+                            <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+                        </div>
+
+                        <div class="accordion-content">
+                            <div style="display:flex; justify-content:flex-end; margin-bottom: 20px;">
+                                <button id="btnOpenReviewModal" onclick="window.DetailApp.openReviewModal()" style="display:none; background:var(--accent); color:#fff; border:none; padding:8px 16px; font-size:10px; text-transform:uppercase; letter-spacing:0.1em; cursor:pointer; border-radius:2px;"><i class="fa-solid fa-pen-nib"></i> Viết đánh giá</button>
+                            </div>
+
+                            <div id="reviewsContainer" class="reviews-container-scroll">
+                                <div style="text-align:center; color:var(--muted); font-style:italic;">Đang tải...</div>
+                            </div>
+
+                            <button id="btnViewAllReviews" onclick="window.DetailApp.openAllReviewsModal()" style="display:none; width:100%; padding:12px; background:rgba(0,0,0,0.02); color:var(--text); border:1px solid rgba(0,0,0,0.1); font-size:11px; text-transform:uppercase; letter-spacing:0.1em; cursor:pointer; margin-top:10px; border-radius:2px; transition:0.2s;" onmouseover="this.style.background='rgba(0,0,0,0.05)'" onmouseout="this.style.background='rgba(0,0,0,0.02)'">Xem tất cả đánh giá</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -197,6 +271,48 @@
             </div>
             <div class="recent-scroll-container" id="recentViewedList"></div>
         </div>
+
+        <div class="review-modal-overlay" id="reviewModalOverlay" onclick="if(event.target===this) window.DetailApp.closeReviewModal()">
+            <div class="review-modal">
+                <button class="review-modal-close" onclick="window.DetailApp.closeReviewModal()"><i class="fa-solid fa-xmark"></i></button>
+                <div class="review-modal-title">Viết đánh giá của bạn</div>
+
+                <div class="star-select" id="starSelector">
+                    <i class="fa-solid fa-star active" onclick="window.DetailApp.setStar(1)"></i>
+                    <i class="fa-solid fa-star active" onclick="window.DetailApp.setStar(2)"></i>
+                    <i class="fa-solid fa-star active" onclick="window.DetailApp.setStar(3)"></i>
+                    <i class="fa-solid fa-star active" onclick="window.DetailApp.setStar(4)"></i>
+                    <i class="fa-solid fa-star active" onclick="window.DetailApp.setStar(5)"></i>
+                </div>
+
+                <textarea id="reviewContentInput" class="review-textarea" placeholder="Chia sẻ cảm nhận của bạn về chất lượng sản phẩm, form dáng, màu sắc..."></textarea>
+
+                <label class="review-img-upload-btn">
+                    <i class="fa-solid fa-camera"></i> Thêm hình ảnh
+                    <input type="file" id="reviewImageInput" multiple accept="image/*" style="display: none;" onchange="window.DetailApp.handleFileSelect(event)">
+                </label>
+                <div class="review-img-previews" id="reviewImagePreviews"></div>
+
+                <button id="btnSubmitReview" class="add-to-cart-btn" style="margin:0;" onclick="window.DetailApp.submitReview()"><span>GỬI ĐÁNH GIÁ</span></button>
+            </div>
+        </div>
+
+        <div class="review-modal-overlay" id="allReviewsModalOverlay" onclick="if(event.target===this) window.DetailApp.closeAllReviewsModal()">
+            <div class="all-reviews-modal">
+                <div class="all-reviews-header">
+                    <div style="font-family:'Cormorant Garamond', serif; font-size:24px; font-weight:400;">Tất cả đánh giá khách hàng</div>
+                    <button class="review-modal-close" style="position:static;" onclick="window.DetailApp.closeAllReviewsModal()"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="all-reviews-body" id="allReviewsContainer">
+                </div>
+            </div>
+        </div>
+
+        <div id="lightboxOverlay" class="lightbox-overlay" onclick="window.DetailApp.closeLightbox()">
+            <button class="lightbox-close" onclick="window.DetailApp.closeLightbox()">&times;</button>
+            <img id="lightboxImg" class="lightbox-img" src="" onclick="event.stopPropagation()">
+        </div>
+
     </section>
 
     <script>
@@ -206,7 +322,6 @@
                 selectedColorId: null, selectedSizeId: null, images: [], currentImageIndex: 0
             },
 
-            // Map cơ bản (dự phòng)
             colorMap: {
                 'trắng': '#ffffff', 'đen': '#1a1a1a', 'xám': '#c5cfc7', 'ghi': '#d4cfc9',
                 'be': '#c4b49d', 'kem': '#fef3c7', 'nâu': '#a89e93', 'rêu': '#3D5A4C',
@@ -226,6 +341,320 @@
                 await this.fetchData();
             },
 
+            checkWishlist: async function() {
+                try {
+                    const res = await fetch('/api/khach-hang/wishlist/check/' + this.state.productId);
+                    if (res.ok) {
+                        const data = await res.json();
+                        const btn = document.getElementById('btnWishlist');
+                        const text = document.getElementById('wishlistText');
+                        if (data.isSaved) {
+                            btn.classList.add('active');
+                            text.innerText = 'Đã lưu yêu thích';
+                        } else {
+                            btn.classList.remove('active');
+                            text.innerText = 'Lưu vào yêu thích';
+                        }
+                    }
+                } catch(e) { console.log(e); }
+            },
+
+            toggleWishlist: async function() {
+                try {
+                    const res = await fetch('/api/khach-hang/wishlist/toggle/' + this.state.productId, { method: 'POST' });
+                    if (res.status === 401) {
+                        if(window.showToast) window.showToast("Vui lòng đăng nhập để lưu sản phẩm!", "warning");
+                        setTimeout(() => { window.location.hash = 'login'; }, 1500);
+                        return;
+                    }
+                    if (res.ok) {
+                        const data = await res.json();
+                        if(window.showToast) window.showToast(data.message, data.status === 'added' ? 'success' : 'warning');
+                        this.checkWishlist();
+                    }
+                } catch(e) { console.log(e); }
+            },
+
+            // 🌟 TẢI VÀ RENDER ĐÁNH GIÁ (CẬP NHẬT ACCORDION & LIGHTBOX)
+            loadReviews: async function() {
+                try {
+                    const res = await fetch('/api/khach-hang/reviews/' + this.state.productId);
+                    if (!res.ok) return;
+                    const reviews = await res.json();
+
+                    const container = document.getElementById('reviewsContainer');
+                    const allContainer = document.getElementById('allReviewsContainer');
+                    const miniStats = document.getElementById('reviewMiniStats');
+                    if (!container) return;
+
+                    if (reviews.length === 0) {
+                        container.innerHTML = '<div style="text-align:center; padding:30px 10px; color:var(--muted); font-style:italic;">Sản phẩm chưa có đánh giá nào. Hãy là người đầu tiên!</div>';
+                        if(allContainer) allContainer.innerHTML = container.innerHTML;
+                        if(miniStats) miniStats.innerText = '(0)';
+                        return;
+                    }
+
+                    let html = '';
+                    let totalStars = 0;
+
+                    reviews.forEach(rv => {
+                        const userStar = rv.soSao || 5;
+                        totalStars += userStar;
+
+                        let starsHtml = '';
+                        for(let i=1; i<=5; i++) {
+                            starsHtml += i <= userStar ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-regular fa-star"></i>';
+                        }
+
+                        // 🌟 TÍCH HỢP LIGHTBOX CHO ẢNH
+                        let hinhAnhHtml = '';
+                        if (rv.danhSachHinhAnhList && rv.danhSachHinhAnhList.length > 0) {
+                            rv.danhSachHinhAnhList.forEach(link => {
+                                if(link.trim() !== '') {
+                                    // Thay thế window.open bằng openLightbox
+                                    hinhAnhHtml += `<img src="${link.trim()}" class="review-img" onclick="window.DetailApp.openLightbox('${link.trim()}')">`;
+                                }
+                            });
+                            if (hinhAnhHtml !== '') {
+                                hinhAnhHtml = `<div class="review-images">${hinhAnhHtml}</div>`;
+                            }
+                        }
+
+                        html += `
+                            <div class="review-item">
+                                <div class="reviewer-name">${rv.tenKhachHang || 'Khách hàng'} <span class="verified-badge"><i class="fa-solid fa-check"></i> Đã mua hàng</span></div>
+                                <div class="review-meta">
+                                    <span class="stars">${starsHtml}</span>
+                                    <span style="margin-left:8px;">${rv.phanLoai || ''}</span>
+                                    <span style="margin-left:8px; color:#ccc">| ${new Date(rv.ngayTao).toLocaleDateString('vi-VN')}</span>
+                                </div>
+                                <div class="review-content">${rv.noiDung || ''}</div>
+                                ${hinhAnhHtml}
+                            </div>
+                        `;
+                    });
+
+                    // In vào phần Accordion nhỏ trên trang
+                    container.innerHTML = html;
+
+                    // In bản sao vào phần Modal "Xem Tất Cả"
+                    if(allContainer) allContainer.innerHTML = html;
+
+                    // Tính trung bình sao và hiển thị lên tiêu đề Accordion
+                    const avg = (totalStars / reviews.length).toFixed(1);
+                    if(miniStats) miniStats.innerText = `(${avg}★ / ${reviews.length})`;
+
+                    // Hiện nút Xem Tất Cả nếu có nhiều hơn 3 bài
+                    const btnViewAll = document.getElementById('btnViewAllReviews');
+                    if (btnViewAll) {
+                        btnViewAll.style.display = reviews.length > 3 ? 'block' : 'none';
+                    }
+
+                } catch(e) { console.log(e); }
+            },
+
+            // 🌟 CÁC HÀM XỬ LÝ LIGHTBOX VÀ XEM TẤT CẢ
+            openLightbox: function(src) {
+                const overlay = document.getElementById('lightboxOverlay');
+                document.getElementById('lightboxImg').src = src;
+                overlay.style.display = 'flex';
+                // Delay nhỏ để animation CSS kịp kích hoạt
+                setTimeout(() => overlay.classList.add('show'), 10);
+            },
+            closeLightbox: function() {
+                const overlay = document.getElementById('lightboxOverlay');
+                overlay.classList.remove('show');
+                setTimeout(() => overlay.style.display = 'none', 300);
+            },
+
+            openAllReviewsModal: function() {
+                document.getElementById('allReviewsModalOverlay').style.display = 'flex';
+            },
+            closeAllReviewsModal: function() {
+                document.getElementById('allReviewsModalOverlay').style.display = 'none';
+            },
+
+            checkCanReview: async function() {
+                const btn = document.getElementById('btnOpenReviewModal');
+                if (!btn) return;
+
+                try {
+                    const res = await fetch('/api/hoa-don/my-orders');
+                    if (!res.ok) return;
+
+                    const orders = await res.json();
+                    const completedOrders = orders.filter(o => o.trangThaiMa === 'HOAN_THANH');
+
+                    let canReview = false;
+
+                    for (let i = 0; i < completedOrders.length; i++) {
+                        const dRes = await fetch('/api/hoa-don/' + completedOrders[i].id);
+                        if (dRes.ok) {
+                            const detail = await dRes.json();
+                            const isBought = detail.chiTiets.some(c => {
+                                const pId = c.sanPhamId || c.idSanPham || (c.sanPhamChiTiet && c.sanPhamChiTiet.sanPham ? c.sanPhamChiTiet.sanPham.id : null);
+                                return pId == this.state.productId;
+                            });
+
+                            if (isBought) {
+                                canReview = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (canReview) {
+                        btn.style.display = 'inline-block';
+                    }
+                } catch(e) { console.log(e); }
+            },
+
+            reviewState: { soSao: 5, files: [] },
+
+            openReviewModal: function() {
+                document.getElementById('reviewModalOverlay').style.display = 'flex';
+                this.setStar(5);
+                document.getElementById('reviewContentInput').value = '';
+                this.reviewState.files = [];
+                this.renderImagePreviews();
+            },
+
+            closeReviewModal: function() {
+                document.getElementById('reviewModalOverlay').style.display = 'none';
+            },
+
+            setStar: function(star) {
+                this.reviewState.soSao = star;
+                const stars = document.querySelectorAll('#starSelector i');
+                stars.forEach((s, index) => {
+                    s.className = index < star ? 'fa-solid fa-star active' : 'fa-solid fa-star';
+                });
+            },
+
+            handleFileSelect: function(event) {
+                const files = Array.from(event.target.files);
+                if (this.reviewState.files.length + files.length > 5) {
+                    if(window.showToast) window.showToast("Chỉ được tải lên tối đa 5 ảnh", "warning");
+                    return;
+                }
+                this.reviewState.files = this.reviewState.files.concat(files);
+                this.renderImagePreviews();
+            },
+
+            removeFile: function(index) {
+                this.reviewState.files.splice(index, 1);
+                this.renderImagePreviews();
+            },
+
+            renderImagePreviews: function() {
+                const container = document.getElementById('reviewImagePreviews');
+                container.innerHTML = '';
+                this.reviewState.files.forEach((file, index) => {
+                    const url = URL.createObjectURL(file);
+                    container.innerHTML += `
+                        <div style="position:relative; width:60px; height:60px;">
+                            <img src="${url}" style="width:100%; height:100%; object-fit:cover; border-radius:4px;">
+                            <button onclick="window.DetailApp.removeFile(${index})" style="position:absolute; top:-5px; right:-5px; background:#ef4444; color:white; border:none; border-radius:50%; width:16px; height:16px; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center;">x</button>
+                        </div>
+                    `;
+                });
+            },
+
+            submitReview: async function() {
+                const btn = document.getElementById('btnSubmitReview');
+                btn.disabled = true;
+                btn.querySelector('span').innerText = 'ĐANG TẢI LÊN...';
+
+                try {
+                    let uploadedUrls = [];
+                    if (this.reviewState.files.length > 0) {
+                        for (let file of this.reviewState.files) {
+                            const formData = new FormData();
+                            formData.append('file', file);
+                            const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                            if (res.ok) {
+                                const text = await res.text();
+                                try {
+                                    const json = JSON.parse(text);
+                                    uploadedUrls.push(json.url || json.secure_url || text);
+                                } catch(e) { uploadedUrls.push(text); }
+                            }
+                        }
+                    }
+
+                    const noiDung = document.getElementById('reviewContentInput').value;
+                    const colorName = document.getElementById('dynColorName').innerText;
+                    let phanLoai = "";
+                    if (colorName) phanLoai += `Màu: ${colorName}`;
+                    const activeSizeBtn = document.querySelector('.size-btn.active');
+                    if (activeSizeBtn) phanLoai += phanLoai ? ` | Size: ${activeSizeBtn.innerText}` : `Size: ${activeSizeBtn.innerText}`;
+
+                    const payload = {
+                        soSao: this.reviewState.soSao,
+                        noiDung: noiDung,
+                        phanLoai: phanLoai,
+                        danhSachHinhAnh: uploadedUrls.join(',')
+                    };
+
+                    const res = await fetch('/api/khach-hang/reviews/' + this.state.productId, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (res.status === 401) {
+                        if(window.showToast) window.showToast("Vui lòng đăng nhập để đánh giá!", "warning");
+                        setTimeout(() => { window.location.hash = 'login'; }, 1500);
+                        return;
+                    }
+
+                    if (res.ok) {
+                        if(window.showToast) window.showToast("Cảm ơn bạn đã gửi đánh giá!", "success");
+                        this.closeReviewModal();
+                        this.loadReviews();
+
+                        // Cố tình mở Accordion Review ra để khách thấy bài họ vừa đăng
+                        const reviewAccordion = document.getElementById('reviewAccordionBlock');
+                        if (reviewAccordion && !reviewAccordion.classList.contains('active')) {
+                            reviewAccordion.classList.add('active');
+                        }
+                    } else {
+                        if(window.showToast) window.showToast("Có lỗi xảy ra, vui lòng thử lại!", "error");
+                    }
+                } catch (e) {
+                    console.error(e);
+                } finally {
+                    btn.disabled = false;
+                    btn.querySelector('span').innerText = 'GỬI ĐÁNH GIÁ';
+                }
+            },
+
+            animateFlyToCart: function(sourceImage) {
+                const cartIcon = document.querySelector('.fa-cart-shopping') || document.querySelector('.bi-cart3') || document.body;
+
+                const clone = sourceImage.cloneNode(true);
+                const rect = sourceImage.getBoundingClientRect();
+                const cartRect = cartIcon.getBoundingClientRect();
+
+                clone.className = 'fly-to-cart-img';
+                clone.style.left = rect.left + 'px';
+                clone.style.top = rect.top + 'px';
+                clone.style.width = rect.width + 'px';
+                clone.style.height = rect.height + 'px';
+                document.body.appendChild(clone);
+
+                setTimeout(() => {
+                    clone.style.left = (cartRect.left + 5) + 'px';
+                    clone.style.top = (cartRect.top + 5) + 'px';
+                    clone.style.width = '20px';
+                    clone.style.height = '20px';
+                    clone.style.opacity = '0.5';
+                    clone.style.transform = 'scale(0.2)';
+                }, 50);
+
+                setTimeout(() => { clone.remove(); }, 850);
+            },
+
             fetchData: async function() {
                 try {
                     const pRes = await fetch(`/api/products/${this.state.productId}`);
@@ -239,16 +668,9 @@
                     this.renderAll();
                 } catch (e) {
                     console.warn("Lỗi gọi API, sử dụng dữ liệu mẫu (Fallback).", e);
-                    this.useFallbackData();
                 }
             },
 
-            // ==========================================
-            // THUẬT TOÁN SẮP XẾP SIZE THÔNG MINH
-            // ==========================================
-            // ==========================================
-            // THUẬT TOÁN SẮP XẾP SIZE THÔNG MINH (ĐÃ FIX CHỮ "SIZE")
-            // ==========================================
             sortSizes: function(sizes) {
                 const orderMap = {
                     'freesize': 0, 'one size': 0, 'os': 0,
@@ -257,22 +679,14 @@
                 };
 
                 return sizes.sort((a, b) => {
-                    // Tự động bóc tách chữ "size " (nếu có) ra khỏi tên để lấy lõi s, m, l
                     const nameA = a.ten.toLowerCase().replace('size', '').trim();
                     const nameB = b.ten.toLowerCase().replace('size', '').trim();
-
-                    // Nếu là size số (giày dép, quần: 38, 39, 40)
                     const numA = parseFloat(nameA);
                     const numB = parseFloat(nameB);
                     if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
-
-                    // Nhận diện theo từ điển chuẩn
                     const weightA = orderMap[nameA] !== undefined ? orderMap[nameA] : 99;
                     const weightB = orderMap[nameB] !== undefined ? orderMap[nameB] : 99;
-
                     if (weightA !== weightB) return weightA - weightB;
-
-                    // Fallback theo Alphabet
                     return nameA.localeCompare(nameB);
                 });
             },
@@ -285,8 +699,6 @@
                 });
 
                 this.state.uniqueColors = Array.from(colorMap.values());
-
-                // Gọi hàm sắp xếp Size
                 let rawSizes = Array.from(sizeMap.values());
                 this.state.uniqueSizes = this.sortSizes(rawSizes);
 
@@ -306,6 +718,9 @@
                 this.renderSizes();
                 this.updatePriceAndStock();
                 this.renderRecentlyViewed();
+                this.checkWishlist();
+                this.loadReviews();
+                this.checkCanReview();
             },
 
             toggleAccordion: function(headerEl) {
@@ -325,8 +740,25 @@
             buildGalleryHTML: function() {
                 const container = document.getElementById('dynGallery');
                 const images = this.state.images;
+                const p = this.state.product;
                 const showNav = images.length > 1;
+
+                let badgesHtml = '';
+                if (p.ngayTao) {
+                    const diffDays = (new Date() - new Date(p.ngayTao)) / (1000 * 60 * 60 * 24);
+                    if (diffDays <= 7) badgesHtml += '<div class="detail-badge new">MỚI</div>';
+                }
+
+                let minOriginal = p.giaBan || 0;
+                let minSale = p.giaSauKhuyenMai || minOriginal;
+                if (this.state.variants.length > 0) {
+                    minOriginal = Math.min(...this.state.variants.map(v => v.giaBan || 0));
+                    minSale = Math.min(...this.state.variants.map(v => v.giaSauKhuyenMai || v.giaBan || 0));
+                }
+                if (minSale < minOriginal) badgesHtml += '<div class="detail-badge sale">SALE</div>';
+
                 let html = `
+                    <div class="detail-badges">${badgesHtml}</div>
                     <div class="main-view-container" id="mainZoomContainer">
                         <div class="img-overlay"></div>
                         <img id="mainImageDisplay" src="${this.optimizeImage(images[0], 600, 800)}" alt="Main Image">
@@ -396,16 +828,20 @@
                 this.updateGalleryUI();
             },
 
-            // ==========================================
-            // THUẬT TOÁN NHẬN DIỆN MÀU THÔNG MINH
-            // ==========================================
+            getContrastBorder: function(hexcolor) {
+                if (!hexcolor) return 'rgba(0,0,0,0.15)';
+                let color = hexcolor.replace('#', '');
+                if (color.length === 3) color = color.split('').map(c => c+c).join('');
+                const r = parseInt(color.substr(0,2),16);
+                const g = parseInt(color.substr(2,2),16);
+                const b = parseInt(color.substr(4,2),16);
+                const yiq = ((r*299) + (g*587) + (b*114)) / 1000;
+                return (yiq > 200) ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.15)';
+            },
+
             getColorHex: function(name) {
                 const n = name.toLowerCase().trim();
-
-                // 1. Tìm trong map có sẵn
                 if (this.colorMap[n]) return this.colorMap[n];
-
-                // 2. Nhận diện tương đối theo từ khóa (Ví dụ Đỏ mận, Đỏ tươi -> Đỏ)
                 if (n.includes('đỏ')) return '#b91c1c';
                 if (n.includes('xanh dương') || n.includes('xanh biển') || n.includes('navy')) return '#1d4ed8';
                 if (n.includes('xanh lá') || n.includes('rêu')) return '#15803d';
@@ -418,8 +854,6 @@
                 if (n.includes('be') || n.includes('kem')) return '#fef3c7';
                 if (n.includes('trắng')) return '#ffffff';
                 if (n.includes('đen')) return '#111827';
-
-                // 3. Dự phòng cuối cùng: Băm chuỗi text thành một mã màu HEX ngẫu nhiên nhưng cố định
                 let hash = 0;
                 for (let i = 0; i < n.length; i++) hash = n.charCodeAt(i) + ((hash << 5) - hash);
                 let color = '#';
@@ -434,15 +868,21 @@
                 let html = '';
 
                 this.state.uniqueColors.forEach(color => {
-                    const isSelected = this.state.selectedColorId === color.id ? 'active' : '';
-
-                    // Gọi hàm nhận diện mã màu thay vì mặc định lấy #000
-                    let hex = this.getColorHex(color.ten);
+                    const isSelected = this.state.selectedColorId === color.id;
+                    const hex = color.maMau || this.getColorHex(color.ten);
+                    const borderColor = this.getContrastBorder(hex);
 
                     const availableVariants = this.state.variants.filter(v => v.mauSac.id === color.id && v.soLuong > 0);
-                    const isUnavailable = availableVariants.length === 0 ? 'unavailable' : '';
+                    const isOut = availableVariants.length === 0 ? 'opacity:0.3; cursor:not-allowed;' : '';
+
                     if (isSelected) nameLabel.innerText = color.ten;
-                    html += `<div class="color-dot ${isSelected} ${isUnavailable}" style="background: ${hex};" title="${color.ten}" onclick="window.DetailApp.selectColor(${color.id}, '${color.ten}')"></div>`;
+
+                    html += `
+                        <div class="color-ring-wrap ${isSelected ? 'active' : ''}"
+                             style="border-color: ${isSelected ? 'var(--text)' : 'transparent'}; ${isOut}"
+                             onclick="window.DetailApp.selectColor(${color.id}, '${color.ten}')">
+                            <div class="color-dot-inner" style="background-color:${hex}; border: 1px solid ${borderColor}" title="${color.ten}"></div>
+                        </div>`;
                 });
                 colorContainer.innerHTML = html;
             },
@@ -489,7 +929,6 @@
                 const btnAdd = document.getElementById('btnAddToCart');
                 const btnBuyNow = document.getElementById('btnBuyNow');
 
-                // NẾU CHƯA CHỌN ĐỦ MÀU VÀ SIZE
                 if (!this.state.selectedColorId || (this.state.uniqueSizes.length > 0 && !this.state.selectedSizeId)) {
                     let minOriginal = this.state.product.giaBan || 0;
                     let minSale = this.state.product.giaSauKhuyenMai || minOriginal;
@@ -511,13 +950,11 @@
                     return;
                 }
 
-                // NẾU ĐÃ CHỌN ĐỦ BIẾN THỂ (SKU)
                 const sku = this.state.variants.find(v => v.mauSac.id === this.state.selectedColorId && v.kichThuoc.id === this.state.selectedSizeId);
                 if (sku) {
                     const currentPrice = sku.giaSauKhuyenMai || sku.giaBan || 0;
                     const originalPrice = sku.giaBan || 0;
 
-                    // 🌟 HIỂN THỊ GIÁ SALE (GẠCH NGANG GIÁ GỐC)
                     if (currentPrice < originalPrice && currentPrice > 0) {
                         priceEl.innerHTML = `<span style="color:#c08060; font-weight: 600;">${new Intl.NumberFormat('vi-VN').format(currentPrice)} ₫</span> <span style="color:var(--muted); text-decoration:line-through; font-size:16px; margin-left: 12px;">${new Intl.NumberFormat('vi-VN').format(originalPrice)} ₫</span>`;
                     } else {
@@ -545,6 +982,8 @@
                 if (!sku) { window.showToast("Vui lòng chọn kích cỡ!", "warning"); return; }
                 if (sku.soLuong <= 0) { window.showToast("Sản phẩm đã hết hàng!", "warning"); return; }
 
+                this.animateFlyToCart(document.getElementById('mainImageDisplay'));
+
                 let cart = JSON.parse(localStorage.getItem('bee_cart')) || [];
                 let existingItem = cart.find(item => item.skuId === sku.id);
 
@@ -560,7 +999,7 @@
                         skuId: sku.id,
                         productId: this.state.product.id,
                         name: this.state.product.ten,
-                        price: sku.giaSauKhuyenMai || sku.giaBan || 0, // 🌟 ĐẨY GIÁ SALE VÀO GIỎ HÀNG
+                        price: sku.giaSauKhuyenMai || sku.giaBan || 0,
                         originalPrice: sku.giaBan || 0,
                         qty: 1,
                         img: productImg,
@@ -570,7 +1009,6 @@
                     });
                 }
                 localStorage.setItem('bee_cart', JSON.stringify(cart));
-
                 if (window.updateCartBadge) window.updateCartBadge();
                 if (isBuyNow) window.location.hash = 'checkout';
                 else window.showToast(`Đã thêm ${this.state.product.ten} vào giỏ!`, 'success');
@@ -604,7 +1042,6 @@
                 const sizeGuideBtn = document.getElementById('sizeGuideBtn');
                 const sizeTooltip = document.getElementById('sizeTooltip');
                 let tooltipVisible = false;
-
                 if (sizeGuideBtn) {
                     sizeGuideBtn.addEventListener('click', (e) => {
                         e.stopPropagation();

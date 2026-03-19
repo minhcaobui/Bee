@@ -10,7 +10,7 @@
         ═══════════════════════════════════════════ */
         :root {
             --g100:#f4f4f5; --g200:#e4e4e7; --g300:#d4d4d8;
-            --green:#10b981; --red:#dc2626; --yellow:#f59e0b; --blue:#3b82f6;
+            --green:#10b981; --red:#dc2626; --yellow:#f59e0b; --blue:#3b82f6; --info:#0ea5e9;
             --br:2px;
         }
 
@@ -35,6 +35,7 @@
         .db-badge.success { background:#d1fae5; color:#065f46; }
         .db-badge.warning { background:#fef3c7; color:#92400e; }
         .db-badge.danger  { background:#fee2e2; color:#991b1b; }
+        .db-badge.info    { background:#e0f2fe; color:#0369a1; }
 
         /* ═══════════════════════════════════════════
            PAGE WRAPPER
@@ -127,10 +128,9 @@
         .db-panel { background:#fff; border:1px solid var(--g200); border-radius:var(--br); display:flex; flex-direction:column; }
         .db-panel-head { padding:10px 14px; border-bottom:1px solid var(--g200); display:flex; justify-content:space-between; align-items:center; flex-shrink:0; gap:8px; }
         .db-panel-title { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.7px; flex-shrink:0; }
-        /* chart area flex:1 → tự lấp đầy chiều cao panel, không còn khoảng trắng thừa */
         .db-chart-area  { padding:12px; flex:1; min-height:220px; position:relative; }
 
-        /* chart legend — no-hover on line indicators */
+        /* chart legend */
         .chart-legend { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
         .leg-item {
             display:flex; align-items:center; gap:5px;
@@ -139,7 +139,6 @@
             background:#fff; transition:opacity .15s;
             user-select:none;
         }
-        /* no hover color change — just opacity when hidden */
         .leg-item.hidden { opacity:.35; text-decoration:line-through; }
         .leg-line   { width:16px; height:2px; display:inline-block; border-radius:1px; flex-shrink:0; }
         .leg-dashed { width:16px; height:0; display:inline-block; flex-shrink:0; }
@@ -165,7 +164,6 @@
         .dd-kpi-val   { font-size:15px; font-weight:800; color:#000; }
 
         /* top products */
-        /* prod list flex:1 → lấp đầy panel, scroll khi quá nhiều item */
         .db-prod-list { flex:1; overflow-y:auto; min-height:0; }
         .prod-item { display:flex; align-items:center; gap:9px; padding:8px 14px; border-bottom:1px solid var(--g200); transition:.12s; cursor:pointer; }
         .prod-item:last-child { border-bottom:none; }
@@ -213,8 +211,7 @@
         .db-foot-val    { font-size:14px; font-weight:800; color:#000; }
 
         /* stock widget */
-        /* stock list flex:1 → cân với heatmap panel */
-        .stock-list { flex:1; overflow-y:auto; min-height:0; }
+        .stock-list { flex:1; overflow-y:auto; max-height: 280px; min-height:0; }
         .stock-item { display:flex; align-items:center; gap:9px; padding:8px 14px; border-bottom:1px solid var(--g200); transition:.12s; cursor:pointer; }
         .stock-item:last-child { border-bottom:none; }
         .stock-item:hover { background:var(--g100); }
@@ -365,12 +362,8 @@
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════
-     PAGE
-═══════════════════════════════════════════ -->
 <div class="db-page" id="dashboardPage">
 
-    <!-- TOPBAR -->
     <div class="db-topbar">
         <div class="db-topbar-left">
             <div class="period-tabs" id="periodTabs">
@@ -380,7 +373,6 @@
                 <button class="period-tab" data-p="year"  onclick="DB.setPeriod(this)">Năm nay</button>
             </div>
 
-            <!-- progressive date filter -->
             <div class="date-from-wrap">
                 <input type="date" class="db-date-input" id="dbDateFrom"
                        placeholder="Từ ngày" onchange="DB.onFromChange()">
@@ -390,14 +382,12 @@
                 <input type="date" class="db-date-input" id="dbDateTo"
                        placeholder="Đến ngày" onchange="DB.onToChange()">
             </div>
-            <!-- active range chip -->
             <span class="range-chip" id="rangeChip" onclick="DB.clearRange()">
                 <i class="bi bi-calendar-range"></i>
                 <span id="rangeChipLabel"></span>
                 <i class="bi bi-x" style="font-size:11px;"></i>
             </span>
 
-            <!-- compare toggle -->
             <label class="compare-toggle" id="compareToggle">
                 <input type="checkbox" id="compareChk" onchange="DB.toggleCompare(this.checked)">
                 <div class="cmp-dot"></div>
@@ -411,7 +401,6 @@
         </div>
     </div>
 
-    <!-- STAT CARDS skeleton -->
     <div class="db-stats" id="statsGrid">
         <div class="sk-card"><div class="skeleton sk-line" style="width:50%;margin-bottom:10px"></div><div class="skeleton sk-line" style="width:65%;height:20px;margin-bottom:12px"></div><div class="skeleton" style="height:30px;margin:0 -15px 10px"></div><div class="skeleton sk-line" style="width:40%"></div></div>
         <div class="sk-card"><div class="skeleton sk-line" style="width:50%;margin-bottom:10px"></div><div class="skeleton sk-line" style="width:65%;height:20px;margin-bottom:12px"></div><div class="skeleton" style="height:30px;margin:0 -15px 10px"></div><div class="skeleton sk-line" style="width:40%"></div></div>
@@ -419,7 +408,6 @@
         <div class="sk-card"><div class="skeleton sk-line" style="width:50%;margin-bottom:10px"></div><div class="skeleton sk-line" style="width:65%;height:20px;margin-bottom:12px"></div><div class="skeleton" style="height:30px;margin:0 -15px 10px"></div><div class="skeleton sk-line" style="width:40%"></div></div>
     </div>
 
-    <!-- MAIN ROW skeleton -->
     <div class="db-row-main" id="rowMain">
         <div class="sk-panel"><div class="sk-ph"><div class="skeleton sk-line" style="width:30%"></div></div><div style="padding:12px;height:248px;"><div class="skeleton" style="width:100%;height:100%;border-radius:2px;"></div></div></div>
         <div class="sk-panel"><div class="sk-ph"><div class="skeleton sk-line" style="width:50%"></div></div>
@@ -429,7 +417,6 @@
         </div>
     </div>
 
-    <!-- BOTTOM ROW skeleton -->
     <div class="db-row-bottom" id="rowBottom">
         <div class="sk-panel"><div class="sk-ph"><div class="skeleton sk-line" style="width:35%"></div></div>
             <div class="sk-row"><div class="sk-block"><div class="skeleton sk-line" style="width:30%"></div></div><div class="skeleton sk-line" style="width:15%;height:9px"></div></div>
@@ -444,7 +431,6 @@
         </div>
     </div>
 
-    <!-- EXTRA ROW skeleton -->
     <div class="db-row-extra" id="rowExtra">
         <div class="sk-panel"><div class="sk-ph"><div class="skeleton sk-line" style="width:40%"></div></div>
             <div class="sk-row"><div class="skeleton sk-circle"></div><div class="sk-block"><div class="skeleton sk-line" style="width:70%"></div><div class="skeleton sk-line" style="width:40%"></div></div></div>
@@ -456,13 +442,7 @@
         </div>
     </div>
 
-</div><!-- /db-page -->
-
-<!-- ═══════════════════════════════════════════
-     DRAWERS
-═══════════════════════════════════════════ -->
-<!-- Products Drawer -->
-<div class="db-drawer-backdrop" id="prodBackdrop" onclick="DB.closeProdDrawer()"></div>
+</div><div class="db-drawer-backdrop" id="prodBackdrop" onclick="DB.closeProdDrawer()"></div>
 <div class="db-drawer" id="prodDrawer">
     <div class="db-drawer-head">
         <span class="db-drawer-title">Sản phẩm bán chạy</span>
@@ -479,7 +459,6 @@
     <div class="db-drawer-body" id="prodDrawerBody"></div>
 </div>
 
-<!-- Orders Drawer -->
 <div class="db-drawer-backdrop" id="ordBackdrop" onclick="DB.closeOrdDrawer()"></div>
 <div class="db-drawer" id="ordDrawer">
     <div class="db-drawer-head">
@@ -516,6 +495,42 @@
             el.innerHTML=`<i class="bi bi-${type==='error'?'x-circle-fill':type==='warning'?'exclamation-triangle-fill':'check-circle-fill'}" style="color:${col};font-size:14px;"></i>${msg}`;
             document.body.appendChild(el);
             setTimeout(()=>{el.style.opacity='0';el.style.transition='.3s';setTimeout(()=>el.remove(),300);},2600);
+        }
+
+        // 🌟 BỘ LỌC TRẠNG THÁI ĐƠN HÀNG CHUẨN XÁC
+        function _getOrderStatus(code) {
+            const map = {
+                'CHO_THANH_TOAN': {lbl:'Chờ thanh toán', cls:'warning', dot:'#f59e0b'},
+                'pending':        {lbl:'Chờ xử lý', cls:'warning', dot:'#f59e0b'},
+                'CHO_XAC_NHAN':   {lbl:'Chờ xác nhận', cls:'warning', dot:'#f59e0b'},
+                'confirming':     {lbl:'Chờ xác nhận', cls:'warning', dot:'#f59e0b'},
+                'CHO_GIAO':       {lbl:'Đang chuẩn bị', cls:'info', dot:'#0ea5e9'},
+                'preparing':      {lbl:'Đang chuẩn bị', cls:'info', dot:'#0ea5e9'},
+                'DANG_GIAO':      {lbl:'Đang giao hàng', cls:'info', dot:'#3b82f6'},
+                'delivering':     {lbl:'Đang giao hàng', cls:'info', dot:'#3b82f6'},
+                'HOAN_THANH':     {lbl:'Hoàn thành', cls:'success', dot:'#10b981'},
+                'completed':      {lbl:'Hoàn thành', cls:'success', dot:'#10b981'},
+                'DA_HUY':         {lbl:'Đã hủy', cls:'danger', dot:'#dc2626'},
+                'cancelled':      {lbl:'Đã hủy', cls:'danger', dot:'#dc2626'}
+            };
+            return map[code] || {lbl: code || 'Không rõ', cls:'warning', dot:'#f59e0b'};
+        }
+
+        // 🌟 HÀM QUÉT TỪ KHÓA BẤT CHẤP LỖI CÚ PHÁP HOẶC KHOẢNG TRẮNG CỦA DATABASE
+        function _formatPayment(method) {
+            if (!method) return { i: 'bi-credit-card', c: '#555', lbl: 'Khác' };
+
+            const str = String(method).toUpperCase().replace(/_/g, ' ').trim();
+
+            if (str.includes('TIEN_MAT') || str.includes('TIEN_MAT')) {
+                return { i: 'bi-cash', c: '#10b981', lbl: 'Tiền mặt' };
+            } else if (str.includes('MOMO')) {
+                return { i: 'bi-wallet2', c: '#a50064', lbl: 'Ví MoMo' };
+            } else if (str.includes('COD') || str.includes('GIAO HANG')) {
+                return { i: 'bi-truck', c: '#3b82f6', lbl: 'COD (Giao hàng)' };
+            }
+
+            return { i: 'bi-credit-card', c: '#555', lbl: String(method).trim() };
         }
 
         /* ═══════════════════════════════════════
@@ -791,9 +806,9 @@
         }
 
         function _injectHTML() {
-            /* stat cards */
+            /* 🌟 Đã thêm chú thích Doanh thu thực tế */
             $('statsGrid').innerHTML = `
-            <div class="db-card"><div class="db-card-top"><div class="db-card-label">Doanh thu</div><div class="db-card-icon"><i class="bi bi-cash-stack"></i></div></div><div class="db-card-value" id="s-rev">—</div><div class="db-sparkline"><canvas id="sp-rev"></canvas></div><div class="db-card-foot"><span class="db-chg" id="s-rev-chg"></span><span class="db-sub">so kỳ trước</span></div></div>
+            <div class="db-card"><div class="db-card-top"><div class="db-card-label">Doanh thu <span style="text-transform:none; font-weight:normal; font-size:9px; color:#aaa;" title="Đã trừ phí vận chuyển">(Thực thu)</span></div><div class="db-card-icon"><i class="bi bi-cash-stack"></i></div></div><div class="db-card-value" id="s-rev">—</div><div class="db-sparkline"><canvas id="sp-rev"></canvas></div><div class="db-card-foot"><span class="db-chg" id="s-rev-chg"></span><span class="db-sub">so kỳ trước</span></div></div>
             <div class="db-card"><div class="db-card-top"><div class="db-card-label">Đơn hàng</div><div class="db-card-icon"><i class="bi bi-receipt-cutoff"></i></div></div><div class="db-card-value" id="s-ord">—</div><div class="db-sparkline"><canvas id="sp-ord"></canvas></div><div class="db-card-foot"><span class="db-chg" id="s-ord-chg"></span><span class="db-sub" id="s-ord-sub">Chờ: 0</span></div></div>
             <div class="db-card"><div class="db-card-top"><div class="db-card-label">Giá trị TB / đơn</div><div class="db-card-icon"><i class="bi bi-calculator"></i></div></div><div class="db-card-value" id="s-avg">—</div><div class="db-sparkline"><canvas id="sp-avg"></canvas></div><div class="db-card-foot"><span class="db-chg" id="s-avg-chg"></span><span class="db-sub">so kỳ trước</span></div></div>
             <div class="db-card"><div class="db-card-top"><div class="db-card-label">Khách hàng mới</div><div class="db-card-icon"><i class="bi bi-person-plus"></i></div></div><div class="db-card-value" id="s-cust">—</div><div class="db-sparkline"><canvas id="sp-cust"></canvas></div><div class="db-card-foot"><span class="db-chg" id="s-cust-chg"></span><span class="db-sub">so kỳ trước</span></div></div>`;
@@ -1041,37 +1056,57 @@
         }
 
         function _ordersRowsHTML(list,short=false) {
-            const sMap={completed:{lbl:'Hoàn thành',cls:'success',dot:'#10b981'},pending:{lbl:'Chờ xử lý',cls:'warning',dot:'#f59e0b'},cancelled:{lbl:'Đã hủy',cls:'danger',dot:'#dc2626'}};
-            const mMap={'Tiền mặt':{i:'bi-cash',c:'#555'},'Chuyển khoản':{i:'bi-bank',c:'#3b82f6'},'MoMo':{i:'bi-wallet2',c:'#ec4899'},'VNPay':{i:'bi-qr-code-scan',c:'#0ea5e9'}};
             return list.map(o=>{
-                const s=sMap[o.status]; const m=mMap[o.method]||{i:'bi-credit-card',c:'#555'};
+                const s = _getOrderStatus(o.status);
+                const m = _formatPayment(o.method);
                 return `<tr onclick="DB._goToOrder(${o.id})" style="cursor:pointer;">
                 <td><code style="font-size:11px;font-weight:700;background:var(--g100);padding:2px 6px;border-radius:var(--br);text-transform:none;">${o.code}</code></td>
                 <td style="font-weight:600;text-transform:none;">${o.name}</td>
                 <td style="text-align:center;"><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;background:var(--g100);border:1px solid var(--g200);border-radius:var(--br);font-size:11px;font-weight:800;">${o.items}</span></td>
                 <td style="text-align:right;font-weight:700;">${fmt(o.total)} ₫</td>
-                <td><span style="display:flex;align-items:center;gap:4px;"><i class="bi ${m.i}" style="color:${m.c};font-size:12px;"></i><span style="font-size:11px;text-transform:none;font-weight:500;">${o.method}</span></span></td>
+                <td><span style="display:flex;align-items:center;gap:4px;"><i class="bi ${m.i}" style="color:${m.c};font-size:12px;"></i><span style="font-size:11px;text-transform:none;font-weight:500;">${m.lbl}</span></span></td>
                 <td><span class="db-badge ${s.cls}"><span style="width:5px;height:5px;border-radius:50%;background:${s.dot};display:inline-block;"></span>${s.lbl}</span></td>
             </tr>`;
             }).join('');
         }
 
-        /* donut */
+        /* 🌟 Tính toán phần trăm biểu đồ Donut trực tiếp ở JS */
         function _renderPayChart() {
             const c=$('payChart'); if(!c)return;
             if(pChart){try{pChart.destroy();}catch(_){}pChart=null;}
+
+            const totalPay = PAY.values.reduce((a, b) => a + b, 0);
+
             pChart=new Chart(c.getContext('2d'),{
                 type:'doughnut',
                 data:{labels:PAY.labels,datasets:[{data:PAY.values,backgroundColor:PAY.colors,borderWidth:2,borderColor:'#fff',hoverOffset:4}]},
-                options:{responsive:false,cutout:'66%',plugins:{legend:{display:false},tooltip:{backgroundColor:'#000',bodyFont:{family:'Inter',size:11},callbacks:{label:c=>` ${c.label}: ${c.raw}%`}}}}
+                options:{
+                    responsive:false, cutout:'66%',
+                    plugins:{
+                        legend:{display:false},
+                        tooltip:{
+                            backgroundColor:'#000', bodyFont:{family:'Inter',size:11},
+                            callbacks:{
+                                label: c => {
+                                    const pct = totalPay > 0 ? ((c.raw / totalPay) * 100).toFixed(1) : 0;
+                                    return ` ${c.label}: ${c.raw} đơn (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
             });
+
             const leg=$('payLegend'); if(!leg)return;
-            leg.innerHTML=PAY.labels.map((l,i)=>`
-            <div class="db-legend-row" onclick="DB.openOrdDrawer()">
-                <div class="db-legend-dot" style="background:${PAY.colors[i]};"></div>
-                <span class="db-legend-name">${l}</span>
-                <span class="db-legend-pct">${PAY.values[i]}%</span>
-            </div>`).join('');
+            leg.innerHTML=PAY.labels.map((l,i) => {
+                const pct = totalPay > 0 ? ((PAY.values[i] / totalPay) * 100).toFixed(1) : 0;
+                return `
+                <div class="db-legend-row" onclick="DB.openOrdDrawer()">
+                    <div class="db-legend-dot" style="background:${PAY.colors[i]};"></div>
+                    <span class="db-legend-name">${l}</span>
+                    <span class="db-legend-pct">${pct}%</span>
+                </div>`;
+            }).join('');
         }
 
         /* stock */
@@ -1215,8 +1250,7 @@
                 body.innerHTML=`<div class="db-empty"><i class="bi bi-receipt"></i><div class="db-empty-txt">Không tìm thấy đơn hàng</div></div>`;
                 return;
             }
-            const sMap={completed:{lbl:'Hoàn thành',cls:'success',dot:'#10b981'},pending:{lbl:'Chờ xử lý',cls:'warning',dot:'#f59e0b'},cancelled:{lbl:'Đã hủy',cls:'danger',dot:'#dc2626'}};
-            const mMap={'Tiền mặt':{i:'bi-cash',c:'#555'},'Chuyển khoản':{i:'bi-bank',c:'#3b82f6'},'MoMo':{i:'bi-wallet2',c:'#ec4899'},'VNPay':{i:'bi-qr-code-scan',c:'#0ea5e9'}};
+
             body.innerHTML=`<table class="drawer-order-table">
             <thead><tr>
                 <th>Mã đơn</th><th>Khách hàng</th>
@@ -1225,13 +1259,14 @@
                 <th>Thanh toán</th><th>Trạng thái</th>
             </tr></thead>
             <tbody>${list.map(o=>{
-                const s=sMap[o.status]; const m=mMap[o.method]||{i:'bi-credit-card',c:'#555'};
+                const s = _getOrderStatus(o.status);
+                const m = _formatPayment(o.method);
                 return `<tr>
                     <td><code style="font-size:11px;font-weight:700;background:var(--g100);padding:2px 6px;border-radius:var(--br);text-transform:none;">${o.code}</code></td>
                     <td style="font-weight:600;text-transform:none;">${o.name}</td>
                     <td style="text-align:center;"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--g100);border:1px solid var(--g200);border-radius:var(--br);font-size:11px;font-weight:800;">${o.items}</span></td>
                     <td style="text-align:right;font-weight:700;">${fmt(o.total)} ₫</td>
-                    <td><span style="display:flex;align-items:center;gap:5px;"><i class="bi ${m.i}" style="color:${m.c};font-size:12px;"></i><span style="font-size:11px;text-transform:none;font-weight:500;">${o.method}</span></span></td>
+                    <td><span style="display:flex;align-items:center;gap:5px;"><i class="bi ${m.i}" style="color:${m.c};font-size:12px;"></i><span style="font-size:11px;text-transform:none;font-weight:500;">${m.lbl}</span></span></td>
                     <td><span class="db-badge ${s.cls}"><span style="width:5px;height:5px;border-radius:50%;background:${s.dot};display:inline-block;"></span>${s.lbl}</span></td>
                 </tr>`;
             }).join('')}</tbody>
@@ -1240,9 +1275,8 @@
 
         /* export CSV từ drawer */
         function exportCSV() {
-            const statusVN={completed:'Hoàn thành',pending:'Chờ xử lý',cancelled:'Đã hủy'};
             const headers=['Mã đơn','Khách hàng','Số SP','Tổng tiền','Thanh toán','Trạng thái'];
-            const rows=ALL_ORDERS.map(o=>[o.code,o.name,o.items,o.total,o.method,statusVN[o.status]||o.status]);
+            const rows=ALL_ORDERS.map(o=>[o.code,o.name,o.items,o.total,o.method,_getOrderStatus(o.status).lbl]);
             const csv=[headers,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
             const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
             const a=document.createElement('a');

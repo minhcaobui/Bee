@@ -40,10 +40,12 @@ public class HoaDon {
     @Column(name = "sdt_nhan")
     private String sdtNhan;
 
-    @Column(name = "dia_chi_giao_hang")
+    @Column(name = "dia_chi_giao_hang", columnDefinition = "LONGTEXT")
     private String diaChiGiaoHang;
 
     private String phuongThucThanhToan;
+
+    @Column(columnDefinition = "LONGTEXT")
     private String ghiChu;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -39,9 +39,6 @@
         .product-overlay { position: absolute; inset: 0; background: rgba(26,26,26,0.0); display: flex; align-items: flex-end; padding: 24px; transition: background 0.4s ease; z-index: 3; }
         .product-card:hover .product-overlay { background: rgba(26,26,26,0.08); }
 
-        .quick-add { background: white; color: var(--text); border: none; padding: 12px 24px; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transform: translateY(8px); opacity: 0; transition: transform 0.3s ease, opacity 0.3s ease; width: 100%; }
-        .product-card:hover .quick-add { transform: translateY(0); opacity: 1; }
-
         .quick-selection-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.98); z-index: 5; display: flex; flex-direction: column; justify-content: center; padding: 20px; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: default; }
         .product-card.show-selection .quick-selection-overlay { transform: translateY(0); }
 
@@ -79,6 +76,51 @@
             .products-grid { grid-template-columns: 1fr 1fr; gap: 24px 16px; }
         }
         @media (max-width: 600px) { .products-grid { grid-template-columns: 1fr; } }
+
+        /* --- CSS FIX GIAO DIỆN SẢN PHẨM --- */
+        .prod-badges { position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 6px; z-index: 2; pointer-events: none; }
+        .prod-badge { padding: 4px 8px; font-size: 10px; font-family: 'DM Sans', sans-serif; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 2px; color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .prod-badge.new { background: var(--accent); }
+        .prod-badge.sale { background: #dc2626; } /* Đỏ chuẩn sale */
+
+        .prod-img-wrap { position: relative; overflow: hidden; border-radius: 4px; }
+
+        /* Nút trượt từ dưới lên cực sang */
+        .prod-quick-actions {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            opacity: 0; z-index: 10;
+        }
+        .prod-card:hover .prod-quick-actions { transform: translateY(0); opacity: 1; }
+
+        .btn-quick-action {
+            width: 100%; padding: 14px 0; border: none; background: rgba(255,255,255,0.95); color: var(--text);
+            font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+            cursor: pointer; transition: 0.2s; box-shadow: 0 -4px 15px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-quick-action:hover { background: var(--accent); color: #fff; }
+
+        /* Hiệu ứng viền kép (Double Ring) cho màu sắc */
+        .color-ring-wrap { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; margin-right: 6px; }
+        .color-dot-inner { width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); }
+
+        /* BỘ LỌC KÍCH CỠ & MÀU SẮC */
+        .filter-color-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+        .filter-color-dot { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(0,0,0,0.1); box-shadow: inset 0 0 0 2px #fff; transition: 0.2s; }
+        .filter-color-dot.active { transform: scale(1.15); border-color: var(--text); }
+
+        .filter-size-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+        .filter-size-btn { padding: 6px 10px; border: 1px solid rgba(0,0,0,0.15); background: none; font-size: 11px; cursor: pointer; border-radius: 2px; transition: 0.2s; min-width: 36px; text-align: center; }
+        .filter-size-btn:hover { border-color: var(--accent); }
+        .filter-size-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
+
+        /* SKELETON CARD (HIỆU ỨNG TẢI TRANG) */
+        .skeleton-card { background: #fff; border-radius: 4px; border: 1px solid rgba(0,0,0,0.05); overflow: hidden; }
+        .skel-img { width: 100%; aspect-ratio: 3/4; }
+        .skel-line { height: 14px; margin: 10px 15px; border-radius: 2px; }
+        .skel-line.short { width: 40%; margin-bottom: 20px; }
+
+        .fly-to-cart-img { position: fixed; z-index: 9999; border-radius: 50%; object-fit: cover; transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); box-shadow: 0 10px 20px rgba(0,0,0,0.2); pointer-events: none; }
     </style>
 
     <section class="products-section">
@@ -106,6 +148,27 @@
                         <li class="active" onclick="window.ShopApp.applyFilter('categoryId', null, this)">Tất cả</li>
                     </ul>
                 </div>
+                <div class="filter-widget">
+                    <div class="filter-title">Màu sắc</div>
+                    <div class="filter-color-grid">
+                        <div class="filter-color-dot" style="background: #1a1a1a" onclick="window.ShopApp.toggleColorFilter('Đen', this)" title="Đen"></div>
+                        <div class="filter-color-dot" style="background: #ffffff" onclick="window.ShopApp.toggleColorFilter('Trắng', this)" title="Trắng"></div>
+                        <div class="filter-color-dot" style="background: #c4b49d" onclick="window.ShopApp.toggleColorFilter('Be', this)" title="Be"></div>
+                        <div class="filter-color-dot" style="background: #4682b4" onclick="window.ShopApp.toggleColorFilter('Xanh dương', this)" title="Xanh dương"></div>
+                        <div class="filter-color-dot" style="background: #3D5A4C" onclick="window.ShopApp.toggleColorFilter('Rêu', this)" title="Rêu"></div>
+                    </div>
+                </div>
+
+                <div class="filter-widget">
+                    <div class="filter-title">Kích cỡ</div>
+                    <div class="filter-size-grid">
+                        <button class="filter-size-btn" onclick="window.ShopApp.toggleSizeFilter('S', this)">S</button>
+                        <button class="filter-size-btn" onclick="window.ShopApp.toggleSizeFilter('M', this)">M</button>
+                        <button class="filter-size-btn" onclick="window.ShopApp.toggleSizeFilter('L', this)">L</button>
+                        <button class="filter-size-btn" onclick="window.ShopApp.toggleSizeFilter('XL', this)">XL</button>
+                    </div>
+                </div>
+
                 <div class="filter-widget">
                     <div class="filter-title">Khoảng giá</div>
 
@@ -158,7 +221,7 @@
                 products: [],
                 isLoading: false,
                 hasMore: true,
-                filters: { categoryId: null, minPrice: null, maxPrice: null }
+                filters: { categoryId: null, minPrice: null, maxPrice: null, colors: [], sizes: [] }
             },
             tempSelection: {},
 
@@ -168,6 +231,48 @@
                 'be': '#c4b49d', 'kem': '#fef3c7', 'nâu': '#a89e93', 'rêu': '#3D5A4C',
                 'đỏ': '#8b0000', 'hồng': '#ffc0cb', 'xanh biển': '#4682b4', 'xanh dương': '#4682b4',
                 'vàng': '#FBC02D', 'cam': '#f97316', 'xanh lá': '#15803d', 'tím': '#a855f7'
+            },
+
+            toggleColorFilter: function(colorName, el) {
+                el.classList.toggle('active');
+                const idx = this.state.filters.colors.indexOf(colorName);
+                if (idx > -1) this.state.filters.colors.splice(idx, 1);
+                else this.state.filters.colors.push(colorName);
+                this.resetAndLoad();
+            },
+            toggleSizeFilter: function(sizeName, el) {
+                el.classList.toggle('active');
+                const idx = this.state.filters.sizes.indexOf(sizeName);
+                if (idx > -1) this.state.filters.sizes.splice(idx, 1);
+                else this.state.filters.sizes.push(sizeName);
+                this.resetAndLoad();
+            },
+
+            // Hàm thuật toán tính độ sáng/tối của màu để viền đối xứng
+            getContrastBorder: function(hexcolor) {
+                if (!hexcolor) return 'rgba(0,0,0,0.15)';
+                let color = hexcolor.replace('#', '');
+                if (color.length === 3) color = color.split('').map(c => c+c).join('');
+                const r = parseInt(color.substr(0,2),16);
+                const g = parseInt(color.substr(2,2),16);
+                const b = parseInt(color.substr(4,2),16);
+                const yiq = ((r*299) + (g*587) + (b*114)) / 1000;
+                // Nếu màu quá sáng (như Trắng, Be), viền đậm hơn một chút để thấy rõ trên nền web trắng.
+                return (yiq > 200) ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.15)';
+            },
+
+            // Hàm xử lý Sắp xếp giá
+            sortProducts: function(type) {
+                if (!this.state.products) return;
+                if (type === 'price_asc') {
+                    this.state.products.sort((a, b) => (a.giaBan || 0) - (b.giaBan || 0));
+                } else if (type === 'price_desc') {
+                    this.state.products.sort((a, b) => (b.giaBan || 0) - (a.giaBan || 0));
+                } else if (type === 'newest') {
+                    this.state.products.sort((a, b) => new Date(b.ngayTao || 0) - new Date(a.ngayTao || 0));
+                }
+                // Gọi lại hàm render để cập nhật giao diện
+                this.renderProducts(this.state.products);
             },
 
             init: function() {
@@ -366,6 +471,16 @@
             loadProducts: async function() {
                 if (this.state.isLoading || !this.state.hasMore) return;
                 this.state.isLoading = true;
+
+                // HIỆN SKELETON LÚC CHỜ API
+                if (this.state.page === 0) {
+                    document.getElementById('dynamicShopGrid').innerHTML = `
+                    <div class="skeleton-card"><div class="skeleton skel-img"></div><div class="skeleton skel-line"></div><div class="skeleton skel-line short"></div></div>
+                    <div class="skeleton-card"><div class="skeleton skel-img"></div><div class="skeleton skel-line"></div><div class="skeleton skel-line short"></div></div>
+                    <div class="skeleton-card"><div class="skeleton skel-img"></div><div class="skeleton skel-line"></div><div class="skeleton skel-line short"></div></div>
+                `;
+                }
+
                 document.getElementById('loadingSkeleton').style.display = 'flex';
                 document.getElementById('btnLoadMore').style.display = 'none';
                 document.getElementById('endOfListMsg').style.display = 'none';
@@ -376,8 +491,6 @@
                     if(this.state.sort === 'newest') paramStr += '&sort=id,desc';
                     else if(this.state.sort === 'price_asc') paramStr += '&sort=giaBan,asc';
                     else if(this.state.sort === 'price_desc') paramStr += '&sort=giaBan,desc';
-
-                    // 🌟 FIX 1: Đổi thành 'idDanhMuc' cho khớp với cấu trúc Backend
                     if (this.state.filters.categoryId) paramStr += `&idDanhMuc=${this.state.filters.categoryId}`;
 
                     const url = `/api/products${paramStr}`;
@@ -385,30 +498,32 @@
                     const data = await res.json();
                     const rawList = data.content || data;
 
-                    // Đánh dấu hết dữ liệu dựa trên danh sách thô từ Backend trả về
                     if (!rawList || rawList.length < this.state.size) {
                         this.state.hasMore = false;
                     }
 
                     let list = rawList || [];
 
-                    // 🌟 FIX 2: BỘ LỌC FRONTEND (Lọc SP nháp & Lọc theo Giá thực tế)
                     if (list.length > 0) {
                         list = list.filter(p => {
                             const variants = this.getVariants(p);
-                            if (variants.length === 0) return false; // Loại bỏ sản phẩm chưa có màu/size
+                            if (variants.length === 0) return false;
 
-                            // Lọc theo Khoảng giá
                             if (this.state.filters.minPrice !== null) {
-                                // Lấy giá sale thực tế để so sánh với bộ lọc
                                 const pMinPrice = Math.min(...variants.map(v => v.giaSauKhuyenMai || v.giaBan || 0));
-                                const min = parseInt(this.state.filters.minPrice);
-                                const max = parseInt(this.state.filters.maxPrice);
-
-                                if (pMinPrice < min || pMinPrice > max) {
-                                    return false; // Loại bỏ SP không nằm trong khoảng giá
-                                }
+                                if (pMinPrice < parseInt(this.state.filters.minPrice) || pMinPrice > parseInt(this.state.filters.maxPrice)) return false;
                             }
+
+                            if (this.state.filters.colors.length > 0) {
+                                const hasColor = variants.some(v => v.mauSac && this.state.filters.colors.includes(v.mauSac.ten));
+                                if (!hasColor) return false;
+                            }
+
+                            if (this.state.filters.sizes.length > 0) {
+                                const hasSize = variants.some(v => v.kichThuoc && this.state.filters.sizes.includes(v.kichThuoc.ten) && v.soLuong > 0);
+                                if (!hasSize) return false;
+                            }
+
                             return true;
                         });
                     }
@@ -416,20 +531,31 @@
                     const startIndex = this.state.products.length;
                     this.state.products = [...this.state.products, ...list];
 
-                    // Nếu sau khi lọc mà list bị rỗng NHƯNG vẫn còn trang tiếp theo -> Tự động gọi lấy trang tiếp theo
                     if (list.length === 0 && this.state.hasMore) {
                         this.state.page++;
                         this.state.isLoading = false;
                         return this.loadProducts();
                     }
 
-                    // Render dữ liệu nếu có
+                    // 🌟 BẢN FIX NẰM Ở ĐÂY: XÓA SKELETON TRƯỚC KHI RENDER SẢN PHẨM THẬT
+                    if (this.state.page === 0) {
+                        document.getElementById('dynamicShopGrid').innerHTML = '';
+                    }
+
                     if (list.length > 0) {
                         this.renderProducts(list, startIndex);
+                    } else if (this.state.products.length === 0) {
+                        // NẾU LỌC XONG KHÔNG CÓ SẢN PHẨM NÀO KHỚP
+                        document.getElementById('dynamicShopGrid').innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:60px 20px; color:var(--muted); font-size:14px; background:#fff; border-radius:4px; border:1px dashed rgba(0,0,0,0.1);">Không tìm thấy sản phẩm nào phù hợp với bộ lọc của bạn.</div>';
                     }
+
                     this.state.page++;
                 } catch (error) {
                     console.error("Lỗi lấy dữ liệu:", error);
+                    // Lỗi mạng cũng phải xóa Skeleton đi để in ra câu thông báo lỗi
+                    if (this.state.page === 0) {
+                        document.getElementById('dynamicShopGrid').innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#ef4444; font-size:14px;">Đã xảy ra lỗi khi tải sản phẩm. Vui lòng thử lại sau.</div>';
+                    }
                 } finally {
                     this.state.isLoading = false;
                     document.getElementById('loadingSkeleton').style.display = 'none';
@@ -438,9 +564,11 @@
                 }
             },
 
-            // 1. CẬP NHẬT LẠI HÀM RENDER ĐỂ TÌM GIÁ SALE NHỎ NHẤT TRONG CÁC BIẾN THỂ
+            // HÀM RENDER SẢN PHẨM HOÀN CHỈNH (MỚI)
             renderProducts: function(newList, startIndex) {
-                const grid = document.getElementById('dynamicShopGrid'); // (Với home.html là dynamicProductsGrid)
+                const grid = document.getElementById('dynamicShopGrid') || document.getElementById('dynamicProductsGrid');
+                if (!grid) return;
+
                 let html = '';
 
                 for (let i = 0; i < newList.length; i++) {
@@ -455,7 +583,7 @@
                         imgHoverHtml = `<img src="${hoverUrl}" loading="lazy" class="img-hover" alt="${p.ten}">`;
                     }
 
-                    // 🌟 TÍNH TOÁN LẠI GIÁ HIỂN THỊ (QUÉT TẤT CẢ BIẾN THỂ TÌM GIÁ SALE)
+                    // TÌM GIÁ SALE TRONG CÁC BIẾN THỂ
                     const variants = p.chiTietSanPhams || p.chiTietSanPhamList || p.bienThes || p.skus || [];
                     let minOriginal = p.giaBan || 0;
                     let minSale = p.giaSauKhuyenMai || minOriginal;
@@ -467,28 +595,54 @@
 
                     let priceHtml = '';
                     if (minSale < minOriginal && minSale > 0) {
-                        priceHtml = `<span style="color:#c08060; font-weight: 600;">${new Intl.NumberFormat('vi-VN').format(minSale)} ₫</span><span style="color:var(--muted); text-decoration:line-through; font-size:12px; margin-left: 6px;">${new Intl.NumberFormat('vi-VN').format(minOriginal)} ₫</span>`;
+                        priceHtml = `<span style="color:#c08060; font-weight: 600; font-size:15px;">${new Intl.NumberFormat('vi-VN').format(minSale)} ₫</span><span style="color:var(--muted); text-decoration:line-through; font-size:12px; margin-left: 8px;">${new Intl.NumberFormat('vi-VN').format(minOriginal)} ₫</span>`;
                     } else {
-                        priceHtml = minOriginal > 0 ? new Intl.NumberFormat('vi-VN').format(minOriginal) + ' ₫' : 'Đang cập nhật';
+                        priceHtml = minOriginal > 0 ? `<span style="font-size:15px; font-weight:600;">${new Intl.NumberFormat('vi-VN').format(minOriginal)} ₫</span>` : 'Đang cập nhật';
                     }
 
-                    // Gắn tag Sale tự động
-                    let badgeHtml = '';
-                    if (minSale < minOriginal) {
-                        badgeHtml = '<div class="label-sale">Sale</div>';
+                    // LOGIC TAG "MỚI" (Trong 7 ngày) VÀ "SALE"
+                    let badgesHtml = '';
+                    let isNew = false;
+                    if (p.ngayTao) {
+                        const diffDays = (new Date() - new Date(p.ngayTao)) / (1000 * 60 * 60 * 24);
+                        if (diffDays <= 7) isNew = true;
                     } else if (startIndex !== undefined && startIndex + i < 3) {
-                        badgeHtml = '<div class="label-new">Mới</div>';
+                        isNew = true;
                     }
+                    if (isNew) badgesHtml += '<div class="prod-badge new">MỚI</div>';
+                    if (minSale < minOriginal) badgesHtml += '<div class="prod-badge sale">SALE</div>';
 
-                    html += `<div class="product-card" id="shop-card-${p.id}">` +
-                        badgeHtml +
-                        `<div class="product-img" onclick="window.ShopApp.viewDetail(${p.id})">` +
+                    // LOGIC VÒNG MÀU KÉP
+                    let colorHtml = '';
+                    const uniqueColors = [];
+                    variants.forEach(ct => {
+                        if(ct.mauSac && !uniqueColors.find(c => c.maMau === ct.mauSac.maMau)) uniqueColors.push(ct.mauSac);
+                    });
+
+                    uniqueColors.forEach(c => {
+                        const borderColor = (window.ShopApp && window.ShopApp.getContrastBorder) ? window.ShopApp.getContrastBorder(c.maMau) : 'rgba(0,0,0,0.15)';
+                        colorHtml += `<div class="color-ring-wrap" style="border: 1px solid ${borderColor};" title="${c.ten}">
+                                    <div class="color-dot-inner" style="background-color:${c.maMau};"></div>
+                                  </div>`;
+                    });
+
+                    // RÁP HTML
+                    html += `<div class="product-card prod-card" id="shop-card-${p.id}">` +
+
+                        `<div class="prod-badges">${badgesHtml}</div>` +
+
+                        `<div class="product-img prod-img-wrap" onclick="window.ShopApp.viewDetail(${p.id})">` +
                         '<div class="img-overlay-pattern"></div>' +
                         `<img src="${imgUrl}" loading="lazy" class="img-placeholder" alt="${p.ten}">` +
                         imgHoverHtml +
-                        '<div class="product-overlay"><button class="quick-add" onclick="window.ShopApp.openSelection(' + p.id + ', event)">+ Thêm nhanh</button></div>' +
+
+                        // NÚT TÙY CHỌN MUA (Gọn gàng 1 nút)
+                        `<div class="prod-quick-actions">
+                        <button class="btn-quick-action" onclick="event.stopPropagation(); window.ShopApp.openSelection(${p.id}, event)"><i class="fa-solid fa-cart-plus"></i> TÙY CHỌN MUA</button>
+                    </div>` +
                         '</div>' +
 
+                        // POPUP MUA HÀNG GIỮ NGUYÊN (TRONG NÀY MỚI CÓ 2 NÚT)
                         '<div class="quick-selection-overlay" onclick="event.stopPropagation()">' +
                         `<button class="qs-close" onclick="window.ShopApp.closeSelection(${p.id}, event)">×</button>` +
                         `<div class="qs-title">${p.ten}</div>` +
@@ -503,13 +657,17 @@
                         '</div>' +
                         '</div>' +
 
+                        // THÔNG TIN BÊN DƯỚI
                         `<div class="product-info" onclick="window.ShopApp.viewDetail(${p.id})">` +
+                        `<div style="margin-bottom:8px; display:flex;">${colorHtml}</div>` +
                         `<div class="product-tag">${p.danhMuc ? p.danhMuc.ten : 'Bee Collection'}</div>` +
                         `<div class="product-name">${p.ten}</div>` +
                         `<div class="product-price">${priceHtml}</div>` +
                         '</div></div>';
                 }
-                grid.insertAdjacentHTML('beforeend', html); // (Với home.html là grid.innerHTML = html)
+
+                if (grid.id === 'dynamicShopGrid') grid.insertAdjacentHTML('beforeend', html);
+                else grid.innerHTML = html;
             },
 
             openSelection: function(productId, event) {
@@ -616,7 +774,7 @@
             confirmAdd: function(productId, event, isBuyNow) {
                 if (event) event.stopPropagation();
                 const selection = this.tempSelection[productId];
-
+                // this.animateFlyToCart(document.querySelector('#shop-card-'+productId+' .img-placeholder'));
                 if (!selection.colorId && !selection.sizeId) { window.showToast("Vui lòng chọn màu sắc và kích cỡ", "warning"); return; }
                 if (!selection.colorId) { window.showToast("Bạn chưa chọn màu sắc", "warning"); return; }
                 if (!selection.sizeId) { window.showToast("Bạn chưa chọn kích cỡ", "warning"); return; }

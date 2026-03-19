@@ -44,7 +44,7 @@ public class ThanhToan {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private Date ngayThanhToan;
 
-    @Column(columnDefinition = "NVARCHAR(MAX)")
+    @Column(columnDefinition = "LONGTEXT")
     private String ghiChu;
 
     @ManyToOne(fetch = FetchType.LAZY)

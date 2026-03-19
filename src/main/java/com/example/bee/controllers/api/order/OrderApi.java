@@ -141,6 +141,8 @@ public class OrderApi {
             tongTienHangThucTe = tongTienHangThucTe.add(giaBan.multiply(BigDecimal.valueOf(soLuong)));
             chiTietResponses.add(HoaDonChiTietResponse.builder()
                     .id(ct.getId())
+                    .idSanPhamChiTiet(ct.getSanPhamChiTiet().getId())
+                    .idSanPham(ct.getSanPhamChiTiet().getSanPham().getId())
                     .tenSanPham(ct.getSanPhamChiTiet().getSanPham().getTen())
                     .sku(ct.getSanPhamChiTiet().getSku())
                     .thuocTinh("Size " + ct.getSanPhamChiTiet().getKichThuoc().getTen() + " - " + ct.getSanPhamChiTiet().getMauSac().getTen())

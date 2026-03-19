@@ -29,7 +29,7 @@ public class ChatLieu {
     @Size(max = 100, message = "Tên tối đa 100 ký tự")
     private String ten;
 
-    @Column(name = "mo_ta", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "mo_ta", columnDefinition = "LONGTEXT")
     private String moTa;
 
     @Column(name = "ngay_tao", nullable = false, updatable = false)

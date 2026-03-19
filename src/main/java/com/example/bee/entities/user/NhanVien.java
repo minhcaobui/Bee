@@ -35,7 +35,7 @@ public class NhanVien {
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "Asia/Ho_Chi_Minh")
     private Date ngaySinh;
 
-    @Column(name = "dia_chi", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "dia_chi", columnDefinition = "LONGTEXT")
     private String diaChi;
 
     @Column(name = "so_dien_thoai", length = 12)
@@ -44,7 +44,7 @@ public class NhanVien {
     @Column(name = "email", length = 150)
     private String email;
 
-    @Column(name = "hinh_anh", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "hinh_anh", columnDefinition = "LONGTEXT")
     private String hinhAnh;
 
     @ManyToOne(fetch = FetchType.LAZY)

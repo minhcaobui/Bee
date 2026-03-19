@@ -4,6 +4,8 @@ import com.example.bee.dto.PromotionRequest;
 import com.example.bee.entities.product.SanPham;
 import com.example.bee.entities.promotion.KhuyenMai;
 import com.example.bee.entities.promotion.KhuyenMaiSanPham;
+import com.example.bee.repositories.account.TaiKhoanRepository;
+import com.example.bee.repositories.notification.ThongBaoRepository;
 import com.example.bee.repositories.products.SanPhamRepository;
 import com.example.bee.repositories.promotion.KhuyenMaiRepository;
 import com.example.bee.repositories.promotion.KhuyenMaiSanPhamRepository;
@@ -34,6 +36,8 @@ public class KhuyenMaiApi {
     private final KhuyenMaiRepository khuyenMaiRepository;
     private final KhuyenMaiSanPhamRepository khuyenMaiSanPhamRepository;
     private final SanPhamRepository sanPhamRepo;
+    private final ThongBaoRepository thongBaoRepository;
+    private final TaiKhoanRepository taiKhoanRepository;
 
     private void validateConflict(Integer currentId, PromotionRequest request) {
         // 🌟 Bổ sung: Nếu người dùng không chọn sản phẩm nào thì bỏ qua kiểm tra trùng lịch
@@ -139,6 +143,28 @@ public class KhuyenMaiApi {
         mapToEntity(body, entity);
         KhuyenMai saved = khuyenMaiRepository.save(entity);
         saveProducts(saved.getId(), body.getIdSanPhams());
+
+        // 🌟 LOGIC GỬI THÔNG BÁO CHO TẤT CẢ KHÁCH HÀNG KHI CÓ SALE
+        try {
+            java.util.List<com.example.bee.entities.account.TaiKhoan> khachHangs = taiKhoanRepository.findByVaiTro_Ma("ROLE_CUSTOMER");
+            if (khachHangs != null && !khachHangs.isEmpty()) {
+                java.util.List<com.example.bee.entities.notification.ThongBao> thongBaos = new java.util.ArrayList<>();
+                for (com.example.bee.entities.account.TaiKhoan tk : khachHangs) {
+                    com.example.bee.entities.notification.ThongBao tb = new com.example.bee.entities.notification.ThongBao();
+                    tb.setTaiKhoanId(tk.getId());
+                    tb.setTieuDe("Đợt Sale mới: " + saved.getTen());
+                    tb.setNoiDung("Chương trình khuyến mãi giảm giá các mặt hàng đã bắt đầu. Nhanh tay săn sale kẻo lỡ!");
+                    tb.setLoaiThongBao("VOUCHER"); // Vẫn để VOUCHER để nó hiện chung tab khuyến mãi
+                    tb.setDaDoc(false);
+                    tb.setDaXoa(false);
+                    thongBaos.add(tb);
+                }
+                thongBaoRepository.saveAll(thongBaos);
+            }
+        } catch (Exception e) {
+            System.out.println("Lỗi gửi thông báo Sale: " + e.getMessage());
+        }
+
         return ResponseEntity.ok(saved);
     }
 

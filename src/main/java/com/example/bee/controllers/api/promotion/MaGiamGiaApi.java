@@ -1,6 +1,8 @@
 package com.example.bee.controllers.api.promotion;
 
 import com.example.bee.entities.promotion.MaGiamGia;
+import com.example.bee.repositories.account.TaiKhoanRepository;
+import com.example.bee.repositories.notification.ThongBaoRepository;
 import com.example.bee.repositories.promotion.MaGiamGiaRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,8 @@ import java.util.stream.Collectors;
 public class MaGiamGiaApi {
 
     private final MaGiamGiaRepository voucherRepo;
+    private final ThongBaoRepository thongBaoRepository;
+    private final TaiKhoanRepository taiKhoanRepository;
 
     @GetMapping
     public Page<MaGiamGia> getAll(
@@ -64,7 +68,31 @@ public class MaGiamGiaApi {
         body.setLuotSuDung(0);
         if (body.getTrangThai() == null) body.setTrangThai(true);
         if (body.getChoPhepCongDon() == null) body.setChoPhepCongDon(false);
-        return ResponseEntity.ok(voucherRepo.save(body));
+
+        MaGiamGia savedVoucher = voucherRepo.save(body);
+
+        // 🌟 LOGIC GỬI THÔNG BÁO CHO TẤT CẢ KHÁCH HÀNG
+        try {
+            java.util.List<com.example.bee.entities.account.TaiKhoan> khachHangs = taiKhoanRepository.findByVaiTro_Ma("ROLE_CUSTOMER");
+            if (khachHangs != null && !khachHangs.isEmpty()) {
+                java.util.List<com.example.bee.entities.notification.ThongBao> thongBaos = new java.util.ArrayList<>();
+                for (com.example.bee.entities.account.TaiKhoan tk : khachHangs) {
+                    com.example.bee.entities.notification.ThongBao tb = new com.example.bee.entities.notification.ThongBao();
+                    tb.setTaiKhoanId(tk.getId());
+                    tb.setTieuDe("Mã giảm giá mới dành cho bạn!");
+                    tb.setNoiDung("Mã ưu đãi " + savedVoucher.getMaCode() + " đã có sẵn. Nhập mã ngay lúc thanh toán để được giảm giá nhé!");
+                    tb.setLoaiThongBao("VOUCHER");
+                    tb.setDaDoc(false);
+                    tb.setDaXoa(false); // Cờ xóa mềm
+                    thongBaos.add(tb);
+                }
+                thongBaoRepository.saveAll(thongBaos);
+            }
+        } catch (Exception e) {
+            System.out.println("Lỗi gửi thông báo Voucher: " + e.getMessage());
+        }
+
+        return ResponseEntity.ok(savedVoucher);
     }
 
     @PutMapping("/{id}")

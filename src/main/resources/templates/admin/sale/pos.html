@@ -114,6 +114,33 @@
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 2px; }
         ::-webkit-scrollbar-thumb:hover { background: #000; }
+
+        /* VOUCHER ENHANCEMENTS */
+        .voucher-card { position: relative; transition: all 0.2s ease; }
+
+        /* 1. Trạng thái đang chọn */
+        .voucher-card.selected {
+            border: 2px solid #2563eb !important;
+            background-color: #f0f9ff !important;
+        }
+        .voucher-card.selected::before {
+            content: 'ĐANG CHỌN';
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #2563eb;
+            color: #fff;
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 800;
+            box-shadow: 0 2px 5px rgba(37,99,235,0.3);
+        }
+
+        /* 2. Trạng thái vô hiệu hóa (không cho cộng dồn) */
+        .voucher-card.disabled-stack {
+            background: #fafafa;
+        }
     </style>
 </head>
 <body>
@@ -358,7 +385,7 @@
 
             <div class="payment-tabs">
                 <button class="payment-tab active" onclick="PosApp.switchPaymentMethod('cash', this)">Tiền mặt</button>
-                <button class="payment-tab" onclick="PosApp.switchPaymentMethod('transfer', this)">Chuyển khoản</button>
+                <button class="payment-tab" onclick="PosApp.switchPaymentMethod('momo', this)">Ví MoMo</button>
             </div>
 
             <div style="min-height: 100px;">
@@ -378,17 +405,9 @@
                 </div>
 
                 <div id="transfer-section" style="display: none;">
-                    <div style="display: flex; gap: 15px; width: 100%;">
-                        <div class="payment-option selected" onclick="PosApp.selectApp(this)">
-                            <i class="bi bi-bank" style="font-size: 28px; color: #000; margin-bottom: 8px;"></i>
-                            <span style="font-size: 12px; font-weight: 700;">NGÂN HÀNG</span>
-                        </div>
-                        <div class="payment-option" onclick="PosApp.selectApp(this)">
-                            <i class="bi bi-qr-code" style="font-size: 28px; color: #000; margin-bottom: 8px;"></i>
-                            <span style="font-size: 12px; font-weight: 700;">VÍ VNPAY</span>
-                        </div>
-                        <div class="payment-option" onclick="PosApp.selectApp(this)">
-                            <i class="bi bi-wallet2" style="font-size: 28px; color: #000; margin-bottom: 8px;"></i>
+                    <div style="display: flex; gap: 15px; width: 100%; justify-content: center;">
+                        <div class="payment-option selected" style="width: 160px; flex: none;" onclick="PosApp.selectApp(this)">
+                            <i class="bi bi-wallet2" style="font-size: 28px; color: #a50064; margin-bottom: 8px;"></i>
                             <span style="font-size: 12px; font-weight: 700;">VÍ MOMO</span>
                         </div>
                     </div>
@@ -514,7 +533,7 @@
         renderVouchersList: function(vouchers) {
             const listEl = document.getElementById('voucherList');
 
-            // Lọc sơ bộ trên Frontend để chắc chắn chỉ hiện các mã đang hoạt động và còn lượt
+            // Lọc sơ bộ các mã còn hạn, còn lượt và đang hoạt động
             const activeVouchers = vouchers.filter(v => {
                 if (v.trangThai === false) return false;
                 if (v.soLuong !== undefined && v.luotSuDung !== undefined && v.soLuong <= v.luotSuDung) return false;
@@ -529,27 +548,62 @@
 
             const inv = this.getCurrentInvoice();
             let totalAfterSale = 0;
+            let hasFullPriceItem = false;
+
             if (inv && inv.cart) {
-                inv.cart.forEach(i => { totalAfterSale += (Number(i.price) * i.qty); });
+                inv.cart.forEach(i => {
+                    totalAfterSale += (Number(i.price) * i.qty);
+
+                    // YÊU CẦU 3: Kiểm tra giỏ hàng có SP nguyên giá hay không?
+                    // (Nếu giá bán >= giá gốc, hoặc SP không có giá gốc -> Là nguyên giá)
+                    if (!i.originalPrice || Number(i.price) >= Number(i.originalPrice)) {
+                        hasFullPriceItem = true;
+                    }
+                });
             }
 
-            listEl.innerHTML = activeVouchers.map(v => {
-                const isValid = totalAfterSale >= v.dieuKien;
-                const opacity = isValid ? '1' : '0.6';
+            // Lấy mã đang được chọn hiện tại
+            const selectedCode = inv && inv.voucher ? (inv.voucher.maCode || inv.voucher.code) : null;
 
+            listEl.innerHTML = activeVouchers.map(v => {
+                const isEligible = totalAfterSale >= v.dieuKien;
+
+                // Kiểm tra điều kiện cộng dồn
+                const isStackable = v.choPhepCongDon === true || v.choPhepCongDon === 1;
+                const meetsStackCondition = isStackable || hasFullPriceItem;
+
+                // YÊU CẦU 1: Kiểm tra xem mã này có đang được chọn không
+                const isSelected = (selectedCode === (v.maCode || v.code));
+
+                // YÊU CẦU 2: Tính toán thanh năng lượng
+                const tongSL = v.soLuong || 0;
+                const daDung = v.luotSuDung || 0;
+                const phanTram = tongSL > 0 ? Math.min((daDung / tongSL) * 100, 100) : 0;
+                const energyColor = phanTram >= 90 ? '#ef4444' : (phanTram >= 50 ? '#f59e0b' : '#10b981');
+
+                let opacity = '1';
                 let actionBtn = '';
                 let noteHtml = `<div style="font-size: 10px; color: #10b981; margin-top: 4px; font-weight:600;">Đơn tối thiểu: ${new Intl.NumberFormat('vi-VN').format(v.dieuKien)}đ</div>`;
+                let cardClass = 'voucher-card';
 
-                // Xử lý nút bấm và nội dung nhắc nhở khi chưa đạt điều kiện
-                if (isValid) {
+                // LOGIC HIỂN THỊ NÚT & TRẠNG THÁI
+                if (isSelected) {
+                    cardClass += ' selected';
+                    actionBtn = `<button class="btn" style="background:#ef4444; border-color:#ef4444;" onclick="PosApp.removeVoucher()">BỎ CHỌN</button>`;
+                } else if (!meetsStackCondition) {
+                    cardClass += ' disabled-stack';
+                    opacity = '0.6';
+                    actionBtn = `<span style="font-size:10px; color:#ef4444; font-weight:800; background:#fee2e2; padding:6px 10px; border-radius:2px; text-transform:uppercase; text-align:center; display:inline-block;">Chỉ SP Nguyên Giá</span>`;
+                    noteHtml += `<div style="font-size: 10px; color: #ef4444; margin-top: 2px; font-style:italic;">(Cần ít nhất 1 SP không giảm giá)</div>`;
+                } else if (isEligible) {
                     actionBtn = `<button class="btn btn-primary" style="background:#000; border-color:#000; border-radius:2px;" onclick="PosApp.selectVoucher('${v.maCode || v.code}')">DÙNG MÃ</button>`;
                 } else {
                     const thieu = v.dieuKien - totalAfterSale;
+                    opacity = '0.6';
                     actionBtn = `<span style="font-size:10px; color:#ef4444; font-weight:800; background:#fee2e2; padding:6px 10px; border-radius:2px; text-transform:uppercase; text-align:center; display:inline-block;">Chưa đủ ĐK</span>`;
                     noteHtml += `<div style="font-size: 10px; color: #ef4444; margin-top: 2px; font-style:italic;">(Mua thêm ${new Intl.NumberFormat('vi-VN').format(thieu)}đ)</div>`;
                 }
 
-                // TÍNH TOÁN HIỂN THỊ RÕ RÀNG GIÁ TRỊ GIẢM
                 let discountLabel = '';
                 const loai = (v.loaiGiamGia || '').toUpperCase();
                 if (loai === 'PERCENTAGE' || loai === 'PHẦN TRĂM' || loai === '%') {
@@ -562,8 +616,8 @@
                 }
 
                 return `
-                <div class="voucher-card" style="opacity: ${opacity}; display: flex; align-items: stretch;">
-                    <div style="display:flex; align-items:center; gap: 15px; flex: 1;">
+                <div class="${cardClass}" style="opacity: ${opacity}; display: flex; align-items: stretch; border: 1px solid var(--gray-200); border-radius: 4px; padding: 12px; margin-bottom: 10px; transition: 0.2s;">
+                    <div style="display:flex; align-items:center; gap: 15px; flex: 1; padding-right: 15px;">
                         <div style="width: 50px; height: 50px; background: #000; color: #fff; border-radius: 4px; display: flex; align-items:center; justify-content:center; flex-direction:column; flex-shrink:0;">
                             <i class="bi bi-ticket-perforated" style="font-size: 18px; margin-bottom: -5px;"></i>
                         </div>
@@ -572,8 +626,16 @@
                             <div class="v-desc" style="font-weight:600; font-size: 11px; margin-bottom: 2px; color: #333;">${v.ten}</div>
 
                             <div style="font-size: 11px; color: #d97706; font-weight: 800;">${discountLabel}</div>
-
                             ${noteHtml}
+                            ${!isStackable ? `<div style="font-size:10px; color:#f59e0b; margin-top:2px; font-weight:700;"><i class="bi bi-info-circle-fill"></i> Không áp dụng riêng cho SP đang Sale</div>` : ''}
+
+                            <div style="width: 100%; height: 6px; background: #e4e4e7; border-radius: 10px; margin-top: 8px; overflow: hidden;">
+                                <div style="height: 100%; border-radius: 10px; transition: width 0.3s; width: ${phanTram}%; background: ${energyColor}"></div>
+                            </div>
+                            <div style="font-size: 10px; color: #71717a; margin-top: 4px; display: flex; justify-content: space-between; font-weight: 600;">
+                                <span>Đã dùng: ${daDung}/${tongSL}</span>
+                                <span style="color:${energyColor}">${phanTram.toFixed(0)}%</span>
+                            </div>
                         </div>
                     </div>
                     <div style="display:flex; align-items:center; justify-content:flex-end; min-width: 80px;">
@@ -596,39 +658,36 @@
             document.getElementById('voucherInput').value = '';
             this.saveState();
             this.renderCart();
+
+            // Đóng modal tự động nếu người dùng bấm bỏ chọn trong modal
+            this.closeModal('voucherModal');
             toast("Đã gỡ mã giảm giá", "success");
         },
 
-        applyVoucher: async function() {
-            const code = document.getElementById('voucherInput').value.trim();
+        // YÊU CẦU 1: Xử lý chức năng BỎ CHỌN nếu bấm vào voucher đang chọn
+        applyVoucher: function(code, maxVal, val, type, isUnselect = false) {
             const inv = this.getCurrentInvoice();
+            if (!inv) return;
 
-            if (!inv || inv.cart.length === 0) { toast("GIỎ HÀNG TRỐNG", "warning"); return; }
-            if (!code) { toast("Vui lòng nhập mã giảm giá", "warning"); return; }
-
-            try {
-                // ĐỔI SANG PHƯƠNG THỨC POST VÀ GỬI KÈM GIỎ HÀNG ĐỂ SERVER QUÉT
-                const res = await fetch('/api/pos/vouchers/apply', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        code: code,
-                        cart: inv.cart
-                    })
-                });
-
-                if (res.ok) {
-                    inv.voucher = await res.json();
-                    this.saveState();
-                    this.renderCart();
-                    toast("Áp dụng mã thành công!", "success");
-                } else {
-                    const errData = await res.json();
-                    toast(errData.message || "Mã không hợp lệ hoặc chưa đủ điều kiện!", "error");
-                }
-            } catch (e) {
-                toast("LỖI KẾT NỐI KIỂM TRA MÃ", "error");
+            if (isUnselect) {
+                // Xóa Voucher khỏi hóa đơn
+                inv.voucherCode = null;
+                inv.voucherMax = 0;
+                inv.voucherValue = 0;
+                inv.voucherType = null;
+                toast("Đã bỏ mã giảm giá", "info");
+            } else {
+                // Áp dụng Voucher mới
+                inv.voucherCode = code;
+                inv.voucherMax = maxVal || 0;
+                inv.voucherValue = val || 0;
+                inv.voucherType = type || 'fixed';
+                toast("Đã áp dụng mã: " + code, "success");
             }
+
+            this.saveState();
+            this.renderTabs();
+            document.getElementById('voucherModal').style.display = 'none';
         },
 
         updateTotal: function () {
@@ -1045,31 +1104,15 @@
             const inv = this.getCurrentInvoice();
             const total = parseInt(document.getElementById('lblTotal').innerText.replace(/\D/g, '')) || 0;
             const isCash = document.getElementById('cash-section').style.display !== 'none';
-            let finalMethod = '';
+
+            let finalMethod = isCash ? 'TIEN_MAT' : 'MOMO';
 
             if (isCash) {
                 const khachDua = parseInt(document.getElementById('inpKhachDua').value.replace(/\D/g, '')) || 0;
                 if (khachDua < total) { toast("Số tiền khách đưa chưa đủ!", "warning"); return; }
-                finalMethod = 'TIEN_MAT';
-            } else {
-                const selectedOption = document.querySelector('#transfer-section .payment-option.selected span');
-                finalMethod = selectedOption ? selectedOption.innerText : 'CHUYỂN KHOẢN';
             }
 
-            if (finalMethod === 'VÍ VNPAY') {
-                try {
-                    const res = await fetch(`/api/pos/vnpay-payment/${inv.dbId}`, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ cart: inv.cart, amount: total, customerId: inv.customerId })
-                    });
-                    const data = await res.json();
-                    if (data.payUrl) { window.location.href = data.payUrl; this.closeModal('payModal'); }
-                    else { toast(data.message || "Lỗi VNPay!", "error"); }
-                } catch (e) { toast("LỖI KẾT NỐI VNPAY", "error"); }
-                return;
-            }
-
-            if (finalMethod === 'VÍ MOMO') {
+            if (finalMethod === 'MOMO') {
                 try {
                     const resMomo = await fetch(`/api/pos/momo-payment/${inv.dbId}`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -1099,9 +1142,7 @@
                 if (res.ok) {
                     toast("Thanh toán thành công! Máy đang in hóa đơn...", "success");
 
-                    // LƯU LẠI ID TRƯỚC KHI XÓA KHỎI RAM
                     const completedInvoiceId = inv.dbId;
-
                     this.invoices = this.invoices.filter(i => i.id !== this.activeInvoiceId);
                     this.invoices.forEach((i, idx) => i.name = `HÓA ĐƠN ${idx + 1}`);
                     this.activeInvoiceId = this.invoices.length > 0 ? this.invoices[0].id : null;
@@ -1111,8 +1152,6 @@
                     else this.renderCart();
 
                     this.closeModal('payModal');
-
-                    // GỌI HÀM IN NGAY LẬP TỨC
                     this.inHoaDon(completedInvoiceId);
 
                 } else {

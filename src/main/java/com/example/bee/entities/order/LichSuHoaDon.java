@@ -32,7 +32,7 @@ public class LichSuHoaDon {
     @JoinColumn(name = "id_nhan_vien")
     private NhanVien nhanVien;
 
-    @Column(columnDefinition = "NVARCHAR(MAX)")
+    @Column(columnDefinition = "LONGTEXT")
     private String ghiChu;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")

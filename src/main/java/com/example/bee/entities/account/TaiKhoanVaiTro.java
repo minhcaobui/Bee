@@ -1,17 +1,15 @@
 package com.example.bee.entities.account;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(
         name = "tai_khoan_vai_tro",
         uniqueConstraints = @UniqueConstraint(name = "uq_tkvt", columnNames = {"id_tai_khoan", "id_vai_tro"})
 )
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

@@ -628,34 +628,61 @@
 
                 let html = '';
                 this.state.availableVouchers.forEach(v => {
-                    const isEligible = this.state.subTotal >= v.dieuKien;
+                    // 1. Lấy an toàn các biến
+                    const code = v.maCode || v.ma || v.code;
+                    const dieuKien = v.dieuKien || v.dieuKienApDung || 0;
+                    const loai = v.loaiGiamGia || v.loai || '';
+                    const giaTri = v.giaTriGiamGia || v.giaTri || 0;
+                    const max = v.giaTriGiamGiaToiDa || v.giamToiDa || null;
+
+                    const isEligible = this.state.subTotal >= dieuKien;
                     const disabledClass = isEligible ? '' : 'disabled';
-                    const isSelected = this.state.appliedPromoCode === (v.maCode || v.code);
-                    const selectedStyle = isSelected ? 'border-color: var(--accent); background: rgba(61,90,76,0.04);' : '';
+
+                    const isSelected = this.state.appliedPromoCode === code;
+
+                    const selectedStyle = isSelected ? 'border-color: var(--accent); background: rgba(61,90,76,0.06); box-shadow: 0 4px 12px rgba(61,90,76,0.1);' : '';
+                    const btnText = isSelected ? 'BỎ CHỌN' : 'DÙNG NGAY';
+                    const btnStyle = isSelected ? 'background: #fff; color: var(--accent); border: 1px solid var(--accent);' : 'background: var(--text); color: #fff; border: 1px solid var(--text);';
 
                     let discountLabel = v.ten;
                     if (!discountLabel) {
-                        if (v.loaiGiamGia === 'PERCENTAGE' || v.loaiGiamGia === 'PERCENT') {
-                            discountLabel = `Giảm ${v.giaTriGiamGia}%`;
-                            if (v.giaTriGiamGiaToiDa) discountLabel += ` (Tối đa ${this.formatMoney(v.giaTriGiamGiaToiDa)})`;
+                        if (loai.toLowerCase().includes('percent')) {
+                            discountLabel = `Giảm ${giaTri}%`;
+                            if (max) discountLabel += ` (Tối đa ${this.formatMoney(max)})`;
                         } else {
-                            discountLabel = `Giảm ${this.formatMoney(v.giaTriGiamGia)}`;
+                            discountLabel = `Giảm ${this.formatMoney(giaTri)}`;
                         }
                     }
 
+                    // 2. TÍNH TOÁN TRƯỚC SỐ TIỀN THỰC TẾ SẼ TIẾT KIỆM ĐƯỢC
+                    let expectedDiscount = 0;
+                    if (isEligible) {
+                        if (loai.toLowerCase().includes('percent')) {
+                            expectedDiscount = (this.state.subTotal * giaTri) / 100;
+                            if (max && expectedDiscount > max) expectedDiscount = max;
+                        } else {
+                            expectedDiscount = giaTri;
+                            if (expectedDiscount > this.state.subTotal) expectedDiscount = this.state.subTotal;
+                        }
+                    }
+
+                    // 3. RENDER GIAO DIỆN (Thêm Badge "Tiết kiệm xx đ" màu xanh lá cây)
                     html += `
-                        <div class="voucher-card ${disabledClass}" style="${selectedStyle}" onclick="${isEligible ? `window.CheckoutApp.applyVoucher('${v.maCode || v.code}')` : ''}">
+                        <div class="voucher-card ${disabledClass}" style="${selectedStyle}" onclick="${isEligible ? `window.CheckoutApp.applyVoucher('${code}')` : ''}">
                             <div class="voucher-icon">
                                 <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M21.44 11.05l-9.19 9.19a2.003 2.003 0 01-2.83 0l-7.07-7.07a2.002 2.002 0 010-2.83l9.19-9.19a2 2 0 011.41-.58h6.58c1.1 0 2 .9 2 2v6.58c0 .53-.21 1.04-.59 1.41z"/><line x1="17" y1="7" x2="17.01" y2="7"/></svg>
                             </div>
                             <div class="voucher-info">
-                                <div class="voucher-code">${v.maCode || v.code}</div>
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap;">
+                                    <div class="voucher-code" style="margin-bottom: 0;">${code}</div>
+                                    ${isEligible && expectedDiscount > 0 ? `<div style="background: #d1fae5; color: #047857; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; border: 1px solid #a7f3d0; letter-spacing: 0.05em;">Tiết kiệm ${this.formatMoney(expectedDiscount)}</div>` : ''}
+                                </div>
                                 <div class="voucher-desc">${discountLabel}</div>
                                 <div class="voucher-meta">
-                                    ${isEligible ? '<span style="color:#10b981">Đủ điều kiện áp dụng</span>' : `Mua thêm ${this.formatMoney(v.dieuKien - this.state.subTotal)} để dùng`}
+                                    ${isEligible ? '<span style="color:#10b981"><i class="fa-solid fa-circle-check"></i> Đủ điều kiện áp dụng</span>' : `Mua thêm ${this.formatMoney(dieuKien - this.state.subTotal)} để dùng`}
                                 </div>
                             </div>
-                            <button class="voucher-apply-btn">${isSelected ? 'Đang dùng' : 'Dùng ngay'}</button>
+                            <button class="voucher-apply-btn" style="${btnStyle}">${btnText}</button>
                         </div>
                     `;
                 });
@@ -663,60 +690,60 @@
                 listContainer.innerHTML = html;
             },
 
-            applyVoucher: async function(code) {
+            // TÍNH TOÁN VOUCHER TRỰC TIẾP Ở FRONTEND, BỎ QUA GỌI API ĐỂ CHỐNG LỖI
+            applyVoucher: function(code) {
                 if (this.state.cart.length === 0) return;
 
-                try {
-                    const res = await fetch('/api/pos/vouchers/apply', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ code: code, cart: this.state.cart })
-                    });
-
-                    if (res.ok) {
-                        const v = await res.json();
-                        this.state.appliedPromoCode = code;
-
-                        let baseForVoucher = this.state.subTotal;
-                        if (v.choPhepCongDon === false && v.loaiGiamGia !== 'FREESHIP') {
-                            baseForVoucher = 0;
-                            this.state.cart.forEach(item => {
-                                if (item.price >= item.originalPrice) {
-                                    baseForVoucher += (item.price * item.qty);
-                                }
-                            });
-                        }
-
-                        if (v.loaiGiamGia === 'PERCENTAGE' || v.loaiGiamGia === 'PERCENT') {
-                            let calc = (baseForVoucher * v.giaTriGiamGia) / 100;
-                            if (v.giaTriGiamGiaToiDa && calc > v.giaTriGiamGiaToiDa) calc = v.giaTriGiamGiaToiDa;
-                            this.state.discount = calc;
-                        } else {
-                            this.state.discount = v.giaTriGiamGia;
-                            if (this.state.discount > baseForVoucher) this.state.discount = baseForVoucher;
-                        }
-
-                        const btn = document.getElementById('btnOpenPromoModal');
-                        btn.classList.add('applied');
-                        btn.innerHTML = `
-                            <span style="display:flex; align-items:center; gap:8px;">
-                                <svg style="width:16px; height:16px; fill:none; stroke:white;" viewBox="0 0 24 24" stroke-width="1.5"><path d="M21.44 11.05l-9.19 9.19a2.003 2.003 0 01-2.83 0l-7.07-7.07a2.002 2.002 0 010-2.83l9.19-9.19a2 2 0 011.41-.58h6.58c1.1 0 2 .9 2 2v6.58c0 .53-.21 1.04-.59 1.41z"/><line x1="17" y1="7" x2="17.01" y2="7"/></svg>
-                                <span>Đã áp dụng: <strong>${code}</strong></span>
-                            </span>
-                            <svg class="promo-remove-icon" onclick="event.stopPropagation(); window.CheckoutApp.removePromo()" style="width:20px; height:20px; fill:none; stroke:currentColor;" viewBox="0 0 24 24" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                        `;
-
-                        this.calculateFinalTotal();
-                        this.closePromoModal();
-                        if(window.showToast) window.showToast(`Đã áp dụng mã ${code}!`, "success");
-
-                    } else {
-                        const errData = await res.json();
-                        if(window.showToast) window.showToast(errData.message || "Mã không hợp lệ!", "error");
-                    }
-                } catch (e) {
-                    if(window.showToast) window.showToast("Lỗi kết nối kiểm tra mã", "error");
+                // Nếu mã đang được chọn, khách bấm lần nữa -> Bỏ chọn
+                if (this.state.appliedPromoCode === code) {
+                    this.removePromo();
+                    return;
                 }
+
+                // Tìm thông tin voucher trong danh sách đã tải
+                const v = this.state.availableVouchers.find(x => (x.maCode || x.ma || x.code) === code);
+                if (!v) {
+                    if(window.showToast) window.showToast("Mã không hợp lệ!", "error");
+                    return;
+                }
+
+                const dieuKien = v.dieuKien || v.dieuKienApDung || 0;
+                if (this.state.subTotal < dieuKien) {
+                    if(window.showToast) window.showToast(`Đơn hàng chưa đạt tối thiểu ${this.formatMoney(dieuKien)}`, "warning");
+                    return;
+                }
+
+                // Tính toán tiền giảm
+                this.state.appliedPromoCode = code;
+                let baseForVoucher = this.state.subTotal;
+                let loai = v.loaiGiamGia || v.loai || '';
+                let giaTri = v.giaTriGiamGia || v.giaTri || 0;
+                let maxGiam = v.giaTriGiamGiaToiDa || v.giamToiDa || null;
+
+                if (loai.toLowerCase().includes('percent')) {
+                    let calc = (baseForVoucher * giaTri) / 100;
+                    if (maxGiam && calc > maxGiam) calc = maxGiam;
+                    this.state.discount = calc;
+                } else {
+                    this.state.discount = giaTri;
+                    if (this.state.discount > baseForVoucher) this.state.discount = baseForVoucher;
+                }
+
+                // Cập nhật lại nút hiển thị ngoài giao diện
+                const btn = document.getElementById('btnOpenPromoModal');
+                btn.classList.add('applied');
+                btn.innerHTML = `
+                    <span style="display:flex; align-items:center; gap:8px;">
+                        <svg style="width:16px; height:16px; fill:none; stroke:white;" viewBox="0 0 24 24" stroke-width="1.5"><path d="M21.44 11.05l-9.19 9.19a2.003 2.003 0 01-2.83 0l-7.07-7.07a2.002 2.002 0 010-2.83l9.19-9.19a2 2 0 011.41-.58h6.58c1.1 0 2 .9 2 2v6.58c0 .53-.21 1.04-.59 1.41z"/><line x1="17" y1="7" x2="17.01" y2="7"/></svg>
+                        <span>Đã áp dụng: <strong>${code}</strong></span>
+                    </span>
+                    <svg class="promo-remove-icon" onclick="event.stopPropagation(); window.CheckoutApp.removePromo()" style="width:20px; height:20px; fill:none; stroke:currentColor;" viewBox="0 0 24 24" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                `;
+
+                this.calculateFinalTotal();
+                this.renderVoucherList(); // Render lại list để làm mờ mã cũ và hiện nút "Bỏ Chọn"
+                this.closePromoModal();
+                if(window.showToast) window.showToast(`Áp dụng thành công mã ưu đãi!`, "success");
             },
 
             removePromo: function() {
@@ -734,6 +761,9 @@
                 `;
 
                 this.calculateFinalTotal();
+                this.renderVoucherList(); // Xóa trạng thái chọn trong Modal
+
+                if(window.showToast) window.showToast(`Đã bỏ áp dụng ưu đãi!`, "warning");
             },
 
             submitOrder: async function() {
@@ -812,9 +842,9 @@
                         }
                     }
 
-                    if (window.showToast) { window.showToast("🎉 Đặt hàng thành công! Vui lòng kiểm tra Email.", "success"); }
-                    else { alert("🎉 Đặt hàng thành công! Chúng tôi đã gửi hóa đơn về Email của bạn."); }
-                    window.location.hash = 'home';
+                    if (window.showToast) { window.showToast("Đặt hàng thành công! Vui lòng kiểm tra Email.", "success"); }
+                    else { alert("Đặt hàng thành công! Chúng tôi đã gửi hóa đơn về Email của bạn."); }
+                    window.location.hash = 'account';
 
                 } catch (error) {
                     console.error("Lỗi đặt hàng:", error);

@@ -13,10 +13,22 @@
             --muted: #8A8A8A; --accent: #3D5A4C; --accent-light: #5a7d6c;
             --card-shadow: 0 2px 20px rgba(0,0,0,0.06);
             --card-shadow-hover: 0 8px 40px rgba(0,0,0,0.12);
+
+            /* 🌟 2. KHAI BÁO BIẾN FONT CHỮ CHUNG TẠI ĐÂY */
+            --main-font: 'DM Sans', sans-serif;
         }
+
+        /* 🌟 3. ÉP TẤT CẢ CÁC TRANG DÙNG CHUNG FONT NÀY */
+        /* Lưu ý: Dùng :not(i) và :not([class*="fa-"]) để không làm lỗi mất các icon FontAwesome */
+        *:not(i):not([class*="fa-"]):not([class*="bi-"]) {
+            font-family: var(--main-font) !important;
+        }
+
         * { margin:0; padding:0; box-sizing:border-box; }
         html { scroll-behavior:smooth; }
-        body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; font-weight:300; overflow-x:hidden; cursor:none; }
+
+        /* Chỉnh lại body (Bỏ phần khai báo font cũ đi) */
+        body { background:var(--bg); color:var(--text); font-weight:400; overflow-x:hidden; cursor:none; }
 
         .cursor { width:10px; height:10px; background:var(--accent); border-radius:50%; position:fixed; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); transition:transform .1s ease,width .3s ease,height .3s ease,background .3s ease; }
         .cursor-ring { width:36px; height:36px; border:1px solid var(--accent); border-radius:50%; position:fixed; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); transition:transform .18s ease,width .3s ease,height .3s ease,opacity .3s ease; opacity:.5; }
@@ -34,41 +46,56 @@
         .cart-icon { position:relative; cursor:none; }
         .cart-badge { position:absolute; top:-6px; right:-6px; width:16px; height:16px; background:var(--accent); border-radius:50%; font-size:9px; color:white; display:none; align-items:center; justify-content:center; font-weight:500; }
 
-        /* NOTIFICATION */
+        /* NOTIFICATION & POPUP */
         .notif-wrap { position:relative; cursor:none; }
         .notif-bell-btn { background:none; border:none; cursor:none; color:var(--text); display:flex; align-items:center; padding:0; line-height:1; }
         .notif-bell-btn i { font-size:17px; }
         .notif-badge { position:absolute; top:-6px; right:-6px; width:16px; height:16px; background:#c08060; border-radius:50%; font-size:9px; color:white; display:flex; align-items:center; justify-content:center; font-weight:500; font-family:'DM Sans',sans-serif; pointer-events:none; transition:opacity .3s,transform .3s; }
-        .notif-dropdown { position:absolute; top:calc(100% + 16px); right:-12px; width:340px; background:var(--white); box-shadow:0 8px 40px rgba(0,0,0,.12); z-index:200; opacity:0; transform:translateY(-8px); pointer-events:none; transition:opacity .25s ease,transform .25s ease; }
+        .notif-dropdown { position:absolute; top:calc(100% + 16px); right:-12px; width:360px; background:var(--white); box-shadow:0 8px 40px rgba(0,0,0,.12); z-index:200; opacity:0; transform:translateY(-8px); pointer-events:none; transition:opacity .25s ease,transform .25s ease; border-radius: 4px; }
         .notif-dropdown.open { opacity:1; transform:translateY(0); pointer-events:all; }
         .notif-dropdown::before { content:''; position:absolute; top:-6px; right:18px; width:12px; height:12px; background:var(--white); transform:rotate(45deg); box-shadow:-2px -2px 5px rgba(0,0,0,.04); }
         .notif-header { padding:18px 20px 14px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(0,0,0,.06); }
-        .notif-header-title { font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--text); font-weight:500; }
-        .notif-mark-all { font-size:11px; color:var(--accent); background:none; border:none; cursor:pointer; letter-spacing:.06em; font-family:'DM Sans',sans-serif; font-weight:400; transition:opacity .2s; }
-        .notif-mark-all:hover { opacity:.7; }
+        .notif-header-title { font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--text); font-weight:600; }
+        .notif-header-actions { display: flex; gap: 12px; }
+        .notif-action-btn { font-size:10px; color:var(--muted); background:none; border:none; cursor:pointer; letter-spacing:.05em; font-family:'DM Sans',sans-serif; text-transform: uppercase; font-weight:500; transition:color .2s; }
+        .notif-action-btn:hover { color:var(--text); }
+        .notif-action-btn.delete-all:hover { color: #dc2626; }
         .notif-tabs { display:flex; border-bottom:1px solid rgba(0,0,0,.06); }
-        .notif-tab { flex:1; padding:10px 0; font-size:11px; letter-spacing:.1em; text-transform:uppercase; background:none; border:none; font-family:'DM Sans',sans-serif; color:var(--muted); font-weight:400; cursor:pointer; border-bottom:2px solid transparent; transition:color .2s,border-color .2s; position:relative; bottom:-1px; }
+        .notif-tab { flex:1; padding:10px 0; font-size:11px; letter-spacing:.1em; text-transform:uppercase; background:none; border:none; font-family:'DM Sans',sans-serif; color:var(--muted); font-weight:500; cursor:pointer; border-bottom:2px solid transparent; transition:color .2s,border-color .2s; position:relative; bottom:-1px; }
         .notif-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
-        .notif-list { max-height:320px; overflow-y:auto; }
-        .notif-list::-webkit-scrollbar { width:3px; }
-        .notif-list::-webkit-scrollbar-thumb { background:rgba(0,0,0,.1); }
+        .notif-list { max-height:360px; overflow-y:auto; }
+        .notif-list::-webkit-scrollbar { width:4px; }
+        .notif-list::-webkit-scrollbar-thumb { background:rgba(0,0,0,.15); border-radius:4px; }
         .notif-item { display:flex; gap:14px; align-items:flex-start; padding:16px 20px; border-bottom:1px solid rgba(0,0,0,.04); cursor:pointer; transition:background .2s; position:relative; }
         .notif-item:hover { background:rgba(0,0,0,.02); }
-        .notif-item.unread { background:rgba(61,90,76,.03); }
-        .notif-item.unread::after { content:''; position:absolute; left:8px; top:50%; transform:translateY(-50%); width:4px; height:4px; border-radius:50%; background:var(--accent); }
-        .notif-icon { width:36px; height:36px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:14px; }
+        .notif-item.unread { background:rgba(61,90,76,.04); }
+        .notif-item.unread::after { content:''; position:absolute; left:8px; top:50%; transform:translateY(-50%); width:6px; height:6px; border-radius:50%; background:var(--accent); }
+        .notif-icon { width:38px; height:38px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:15px; }
         .notif-icon.order   { background:rgba(61,90,76,.1);  color:var(--accent); }
         .notif-icon.voucher { background:rgba(192,128,96,.1); color:#c08060; }
         .notif-icon.event   { background:rgba(26,26,26,.07);  color:var(--text); }
-        .notif-body { flex:1; min-width:0; }
-        .notif-body-title { font-size:13px; font-weight:400; color:var(--text); margin-bottom:3px; line-height:1.35; }
-        .notif-body-desc { font-size:12px; color:var(--muted); font-weight:300; line-height:1.5; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .notif-time { font-size:10px; color:var(--muted); letter-spacing:.04em; white-space:nowrap; margin-top:2px; flex-shrink:0; }
-        .notif-empty { padding:40px 20px; text-align:center; font-size:13px; color:var(--muted); font-weight:300; display:none; }
-        .notif-empty i { font-size:28px; display:block; margin-bottom:12px; opacity:.3; }
-        .notif-footer { padding:12px 20px; border-top:1px solid rgba(0,0,0,.06); text-align:center; }
-        .notif-footer a { font-size:11px; letter-spacing:.12em; color:var(--accent); text-decoration:none; text-transform:uppercase; font-weight:400; transition:opacity .2s; cursor:none; }
-        .notif-footer a:hover { opacity:.7; }
+        .notif-body { flex:1; min-width:0; padding-right: 20px; }
+        .notif-body-title { font-size:13px; font-weight:600; color:var(--text); margin-bottom:4px; line-height:1.35; }
+        .notif-body-desc { font-size:12px; color:var(--muted); font-weight:400; line-height:1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .notif-time { font-size:10px; color:var(--muted); letter-spacing:.04em; margin-top:6px; }
+        .notif-delete-btn { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; border-radius: 50%; background: none; border: none; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: all 0.2s; }
+        .notif-item:hover .notif-delete-btn { opacity: 1; }
+        .notif-delete-btn:hover { background: #fee2e2; color: #dc2626; }
+        .notif-empty { padding:60px 20px; text-align:center; font-size:13px; color:var(--muted); font-weight:400; display:none; }
+        .notif-empty i { font-size:32px; display:block; margin-bottom:12px; opacity:.3; }
+
+        /* MỚI: CSS CHO POPUP CHI TIẾT */
+        .notif-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10500; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); animation: fadeIn 0.2s ease;}
+        .notif-modal { background: #fff; width: 420px; max-width: 90%; border-radius: 6px; padding: 32px 24px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2); transform: scale(0.95); opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; }
+        .notif-modal.open { transform: scale(1); opacity: 1; }
+        .notif-modal-icon { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 20px; }
+        .notif-modal-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 600; color: var(--text); margin-bottom: 12px; }
+        .notif-modal-desc { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; }
+        .notif-modal-time { font-size: 11px; color: #aaa; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .notif-modal-action { display: inline-block; padding: 14px 32px; background: var(--accent); color: #fff; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; border-radius: 4px; text-decoration: none; cursor: pointer; border: none; transition: 0.3s; }
+        .notif-modal-action:hover { background: #2c4238; }
+        .notif-modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 20px; color: var(--muted); cursor: pointer; transition: 0.2s; }
+        .notif-modal-close:hover { color: var(--text); }
 
         .page-selector { display:flex; gap:20px; padding:0 60px; border-top:1px solid rgba(0,0,0,.06); border-bottom:1px solid rgba(0,0,0,.06); background:var(--bg); }
         .page-tab { padding:16px 24px 16px 0; font-size:12px; letter-spacing:.1em; text-transform:uppercase; cursor:none; border:none; background:none; font-family:'DM Sans',sans-serif; color:var(--muted); font-weight:500; border-bottom:2px solid transparent; transition:color .2s ease,border-color .2s ease; display:flex; align-items:center; gap:8px; text-decoration:none; }
@@ -166,22 +193,21 @@
                 <div class="notif-dropdown" id="notifDropdown">
                     <div class="notif-header">
                         <span class="notif-header-title">Thông báo</span>
-                        <button class="notif-mark-all" onclick="window.NotificationApp.markAllRead()">Đánh dấu đã đọc</button>
+                        <div class="notif-header-actions">
+                            <button class="notif-action-btn" onclick="window.NotificationApp.markAllRead()">Đọc tất cả</button>
+                            <button class="notif-action-btn delete-all" onclick="window.NotificationApp.deleteAll()">Xóa tất cả</button>
+                        </div>
                     </div>
                     <div class="notif-tabs">
                         <button class="notif-tab active" onclick="switchNotifTab(this,'all')">Tất cả</button>
                         <button class="notif-tab" onclick="switchNotifTab(this,'order')">Đơn hàng</button>
                         <button class="notif-tab" onclick="switchNotifTab(this,'voucher')">Voucher</button>
-                        <button class="notif-tab" onclick="switchNotifTab(this,'event')">Tin tức</button>
                     </div>
 
                     <div class="notif-list" id="notifList"></div>
 
                     <div class="notif-empty" id="notifEmpty">
-                        <i class="fa-regular fa-bell-slash"></i>Không có thông báo nào
-                    </div>
-                    <div class="notif-footer">
-                        <a href="#account" onclick="closeNotif()">Xem tất cả thông báo</a>
+                        <i class="fa-regular fa-bell-slash"></i>Bạn không có thông báo nào
                     </div>
                 </div>
             </div>
@@ -244,12 +270,24 @@
         <i class="fa-solid fa-arrow-up"></i>
     </button>
 </footer>
-
+<div class="notif-modal-overlay" id="notifDetailOverlay" onclick="if(event.target === this) window.NotificationApp.closePopup()">
+    <div class="notif-modal" id="notifDetailModal">
+        <button class="notif-modal-close" onclick="window.NotificationApp.closePopup()"><i class="fa-solid fa-xmark"></i></button>
+        <div class="notif-modal-icon" id="notifPopIcon"></div>
+        <div class="notif-modal-title" id="notifPopTitle">Tiêu đề</div>
+        <div class="notif-modal-desc" id="notifPopDesc">Nội dung chi tiết...</div>
+        <div class="notif-modal-time" id="notifPopTime">Thời gian</div>
+        <button class="notif-modal-action" id="notifPopBtn" onclick="window.NotificationApp.navigateFromPopup()">XEM CHI TIẾT</button>
+    </div>
+</div>
 <script src="/js/customer-router.js"></script>
 <script>
     /* ── TOÀN CỤC: QUẢN LÝ THÔNG BÁO API ── */
+    /* ── TOÀN CỤC: QUẢN LÝ THÔNG BÁO API ── */
     window.NotificationApp = {
         notifications: [],
+        currentPopNotif: null,
+
         init: async function() { await this.fetchData(); },
         fetchData: async function() {
             try {
@@ -280,45 +318,118 @@
                 if (!n.daDoc) unreadCount++;
                 let iconClass = 'event'; let iconHtml = '<i class="fa-solid fa-bell"></i>';
                 let typeStr = n.loaiThongBao ? n.loaiThongBao.toLowerCase() : 'event';
+
                 if (typeStr.includes('order') || typeStr.includes('don_hang')) { iconClass = 'order'; iconHtml = '<i class="fa-solid fa-truck-fast"></i>'; }
-                else if (typeStr.includes('voucher') || typeStr.includes('khuyen_mai')) { iconClass = 'voucher'; iconHtml = '<i class="fa-solid fa-tag"></i>'; }
+                else if (typeStr.includes('voucher') || typeStr.includes('khuyen_mai')) { iconClass = 'voucher'; iconHtml = '<i class="fa-solid fa-ticket"></i>'; }
+
                 const unreadClass = n.daDoc ? '' : 'unread';
+
                 html += `
-                    <div class="notif-item ${unreadClass}" data-notif-type="${iconClass}" onclick="window.NotificationApp.markAsRead(${n.id}, this)">
+                    <div class="notif-item ${unreadClass}" data-notif-type="${iconClass}" onclick="window.NotificationApp.openPopup(${n.id}, this)">
                         <div class="notif-icon ${iconClass}">${iconHtml}</div>
                         <div class="notif-body">
                             <div class="notif-body-title">${n.tieuDe}</div>
                             <div class="notif-body-desc">${n.noiDung}</div>
+                            <div class="notif-time">${this.timeAgo(n.ngayTao)}</div>
                         </div>
-                        <div class="notif-time">${this.timeAgo(n.ngayTao)}</div>
+                        <button class="notif-delete-btn" onclick="window.NotificationApp.deleteNotif(event, ${n.id})" title="Xóa thông báo">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button>
                     </div>
                 `;
             });
             list.innerHTML = html;
-
-            if (badge) {
-                if (unreadCount > 0) {
-                    badge.innerText = unreadCount > 99 ? '99+' : unreadCount;
-                    badge.style.display = 'flex'; badge.style.opacity = '1'; badge.style.transform = 'scale(1)';
-                } else { badge.style.display = 'none'; }
-            }
+            this.updateBadgeOnly(unreadCount);
         },
-        markAsRead: async function(id, el) {
-            try {
-                const notif = this.notifications.find(n => n.id === id);
-                if (!notif) return;
-                if (!notif.daDoc) {
+
+        /* --- XỬ LÝ CLICK & MỞ POPUP --- */
+        openPopup: async function(id, el) {
+            const notif = this.notifications.find(n => n.id === id);
+            if (!notif) return;
+            this.currentPopNotif = notif;
+
+            // 1. Nếu chưa đọc -> Gọi API cập nhật và trừ số lượng Badge
+            if (!notif.daDoc) {
+                try {
                     await fetch(`/api/thong-bao/${id}/read`, { method: 'PUT' });
                     notif.daDoc = true;
                     if (el) el.classList.remove('unread');
                     this.updateBadgeOnly();
-                }
-                if (notif.loaiThongBao && (notif.loaiThongBao.toLowerCase().includes('order') || notif.loaiThongBao.toLowerCase().includes('don_hang'))) {
-                    window.location.hash = '#account';
-                }
-                closeNotif();
-            } catch(e) {}
+                } catch(e) {}
+            }
+
+            // 2. Đổ dữ liệu vào Popup
+            let typeStr = notif.loaiThongBao ? notif.loaiThongBao.toLowerCase() : '';
+            let iconClass = 'event'; let iconHtml = '<i class="fa-solid fa-bell"></i>';
+            let btnText = 'ĐÓNG';
+
+            if (typeStr.includes('order')) {
+                iconClass = 'order'; iconHtml = '<i class="fa-solid fa-box-open"></i>'; btnText = 'ĐI ĐẾN ĐƠN HÀNG';
+            } else if (typeStr.includes('voucher')) {
+                iconClass = 'voucher'; iconHtml = '<i class="fa-solid fa-tags"></i>'; btnText = 'SĂN SALE NGAY';
+            }
+
+            document.getElementById('notifPopIcon').className = `notif-modal-icon notif-icon ${iconClass}`;
+            document.getElementById('notifPopIcon').innerHTML = iconHtml;
+            document.getElementById('notifPopTitle').innerText = notif.tieuDe;
+            document.getElementById('notifPopDesc').innerText = notif.noiDung;
+            document.getElementById('notifPopTime').innerText = new Date(notif.ngayTao).toLocaleString('vi-VN');
+            document.getElementById('notifPopBtn').innerText = btnText;
+
+            // 3. Hiển thị Popup
+            closeNotif(); // Đóng menu dropdown
+            document.getElementById('notifDetailOverlay').style.display = 'flex';
+            setTimeout(() => document.getElementById('notifDetailModal').classList.add('open'), 10);
         },
+
+        closePopup: function() {
+            document.getElementById('notifDetailModal').classList.remove('open');
+            setTimeout(() => { document.getElementById('notifDetailOverlay').style.display = 'none'; }, 200);
+            this.currentPopNotif = null;
+        },
+
+        /* --- XỬ LÝ CHUYỂN HƯỚNG (ĐÚNG TRANG ĐÍCH) --- */
+        navigateFromPopup: function() {
+            if (!this.currentPopNotif) return;
+            const typeStr = this.currentPopNotif.loaiThongBao ? this.currentPopNotif.loaiThongBao.toLowerCase() : '';
+
+            this.closePopup();
+
+            if (typeStr.includes('order')) {
+                // Nhảy sang trang tài khoản (mục đơn hàng)
+                window.location.hash = '#account';
+                setTimeout(() => {
+                    if(window.AccountApp) window.AccountApp.switchPanel('orders');
+                }, 300);
+            } else if (typeStr.includes('voucher')) {
+                // Nhảy sang trang sản phẩm để mua sắm
+                window.location.hash = '#shop';
+            }
+        },
+
+        /* --- XÓA & ĐÁNH DẤU --- */
+        deleteNotif: async function(e, id) {
+            e.stopPropagation(); // Ngăn click lan ra ngoài gây mở popup
+            try {
+                const res = await fetch(`/api/thong-bao/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    this.notifications = this.notifications.filter(n => n.id !== id);
+                    this.render();
+                }
+            } catch(err) {}
+        },
+
+        deleteAll: async function() {
+            if(!confirm('Bạn có chắc chắn muốn xóa toàn bộ thông báo?')) return;
+            try {
+                const res = await fetch('/api/thong-bao/delete-all', { method: 'DELETE' });
+                if (res.ok) {
+                    this.notifications = [];
+                    this.render();
+                }
+            } catch(err) {}
+        },
+
         markAllRead: async function() {
             try {
                 await fetch(`/api/thong-bao/mark-all-read`, { method: 'PUT' });
@@ -327,14 +438,21 @@
                 this.updateBadgeOnly();
             } catch(e) {}
         },
-        updateBadgeOnly: function() {
+
+        updateBadgeOnly: function(countParam = null) {
             const badge = document.getElementById('notifBadge');
-            const unreadCount = this.notifications.filter(n => !n.daDoc).length;
+            const unreadCount = countParam !== null ? countParam : this.notifications.filter(n => !n.daDoc).length;
             if (badge) {
-                if (unreadCount > 0) { badge.innerText = unreadCount > 99 ? '99+' : unreadCount; }
-                else { badge.style.opacity = '0'; badge.style.transform = 'scale(0)'; setTimeout(() => badge.style.display = 'none', 300); }
+                if (unreadCount > 0) {
+                    badge.innerText = unreadCount > 99 ? '99+' : unreadCount;
+                    badge.style.display = 'flex'; badge.style.opacity = '1'; badge.style.transform = 'scale(1)';
+                } else {
+                    badge.style.opacity = '0'; badge.style.transform = 'scale(0)';
+                    setTimeout(() => badge.style.display = 'none', 300);
+                }
             }
         },
+
         timeAgo: function(dateStr) {
             if(!dateStr) return '';
             const date = new Date(dateStr); const seconds = Math.floor((new Date() - date) / 1000);

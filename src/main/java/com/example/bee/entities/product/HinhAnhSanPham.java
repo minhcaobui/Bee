@@ -22,6 +22,6 @@ public class HinhAnhSanPham {
     @JsonBackReference
     private SanPham sanPham;
 
-    @Column(nullable = false, columnDefinition = "NVARCHAR(MAX)")
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String url;
 }

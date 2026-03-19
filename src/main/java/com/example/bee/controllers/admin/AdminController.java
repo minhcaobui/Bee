@@ -1,7 +1,7 @@
 package com.example.bee.controllers.admin;
 
-import com.example.bee.entities.staff.NV;
-import com.example.bee.repositories.staff.NVRepository;
+import com.example.bee.entities.user.NhanVien;
+import com.example.bee.repositories.role.NhanVienRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,7 +13,7 @@ import java.util.List;
 public class AdminController {
 
     @Autowired
-    private NVRepository nvRepo;
+    private NhanVienRepository nhanVienRepository;
 
     @GetMapping("/admin")
     public String showAdminLayout() {
@@ -62,7 +62,7 @@ public class AdminController {
 
     @GetMapping("/staff")
     public String staffPage(Model model) {
-        List<NV> list = nvRepo.getAllNhanVienCustom();
+        List<NhanVien> list = nhanVienRepository.getAllNhanVienCustom();
         model.addAttribute("list", list);
         return "admin/staff/staff";
     }

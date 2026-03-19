@@ -1,13 +1,16 @@
 package com.example.bee.entities.notification;
 
 import jakarta.persistence.*;
-import lombok.Data;
-
+import lombok.*;
 import java.time.LocalDateTime;
 
-@Data
 @Entity
 @Table(name = "thong_bao")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ThongBao {
 
     @Id
@@ -20,7 +23,7 @@ public class ThongBao {
     @Column(name = "tieu_de")
     private String tieuDe;
 
-    @Column(name = "noi_dung")
+    @Column(name = "noi_dung", columnDefinition = "LONGTEXT")
     private String noiDung;
 
     @Column(name = "loai_thong_bao")
@@ -28,6 +31,10 @@ public class ThongBao {
 
     @Column(name = "da_doc")
     private Boolean daDoc = false;
+
+    // Thêm trường này để làm tính năng Xóa mềm (Soft Delete)
+    @Column(name = "da_xoa")
+    private Boolean daXoa = false;
 
     @Column(name = "ngay_tao")
     private LocalDateTime ngayTao = LocalDateTime.now();
