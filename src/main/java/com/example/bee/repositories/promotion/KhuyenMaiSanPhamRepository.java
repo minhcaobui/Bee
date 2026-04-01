@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -17,4 +18,11 @@ public interface KhuyenMaiSanPhamRepository extends JpaRepository<KhuyenMaiSanPh
     @Modifying
     @Query("DELETE FROM KhuyenMaiSanPham k WHERE k.idKhuyenMai = :idKhuyenMai")
     void deleteByIdKhuyenMai(@Param("idKhuyenMai") Integer idKhuyenMai);
+
+    @Query("SELECT kmsp FROM KhuyenMaiSanPham kmsp JOIN KhuyenMai km ON kmsp.idKhuyenMai = km.id " +
+            "WHERE kmsp.idSanPham IN :spIds AND km.trangThai = true " +
+            "AND ((km.ngayBatDau <= :end AND km.ngayKetThuc >= :start))")
+    List<KhuyenMaiSanPham> findKhuyenMaiTrungLap(@Param("spIds") List<Integer> spIds,
+                                                 @Param("start") LocalDateTime start,
+                                                 @Param("end") LocalDateTime end);
 }

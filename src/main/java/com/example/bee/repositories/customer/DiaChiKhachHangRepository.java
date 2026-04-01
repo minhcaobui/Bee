@@ -9,6 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface DiaChiKhachHangRepository extends JpaRepository<DiaChiKhachHang, Integer> {
+
     List<DiaChiKhachHang> findByKhachHangId(Integer khachHangId);
 
     Optional<DiaChiKhachHang> findByKhachHangIdAndLaMacDinhTrue(Integer khachHangId);

@@ -4,6 +4,7 @@ import com.example.bee.entities.order.HoaDon;
 import com.example.bee.entities.order.HoaDonChiTiet;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public interface HoaDonChiTietRepository extends JpaRepository<HoaDonChiTiet, In
             "JOIN FETCH spct.mauSac " +
             "JOIN FETCH spct.kichThuoc " +
             "WHERE ct.hoaDon.id = :idHoaDon")
-    List<HoaDonChiTiet> findByHoaDonId(Integer idHoaDon);
+    List<HoaDonChiTiet> findByHoaDonId(@Param("idHoaDon") Integer idHoaDon);
 
     List<HoaDonChiTiet> findByHoaDon(HoaDon hoaDon);
 }

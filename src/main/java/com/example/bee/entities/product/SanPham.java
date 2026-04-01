@@ -36,7 +36,8 @@ public class SanPham {
     @Column(nullable = false, length = 100)
     private String ten;
 
-    @Column(columnDefinition = "LONGTEXT")
+    // ĐÃ SỬA THÀNH NVARCHAR(MAX) CHO SQL SERVER
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String moTa;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")

@@ -1,16 +1,20 @@
 package com.example.bee.controllers.api.customer;
 
+import com.example.bee.dto.DanhGiaRequest;
 import com.example.bee.dto.DiaChiRequest;
 import com.example.bee.dto.KhachHangRequest;
 import com.example.bee.entities.account.TaiKhoan;
 import com.example.bee.entities.customer.DiaChiKhachHang;
 import com.example.bee.entities.customer.KhachHang;
+import com.example.bee.entities.order.HoaDonChiTiet;
 import com.example.bee.entities.product.SanPhamYeuThich;
 import com.example.bee.entities.reviews.DanhGia;
 import com.example.bee.entities.user.NhanVien;
 import com.example.bee.repositories.account.TaiKhoanRepository;
 import com.example.bee.repositories.customer.DiaChiKhachHangRepository;
 import com.example.bee.repositories.customer.KhachHangRepository;
+import com.example.bee.repositories.order.HoaDonChiTietRepository;
+import com.example.bee.repositories.order.HoaDonRepository;
 import com.example.bee.repositories.reviews.DanhGiaRepository;
 import com.example.bee.repositories.role.NhanVienRepository;
 import com.example.bee.repositories.wishlist.SanPhamYeuThichRepository;
@@ -28,9 +32,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.security.Principal;
 import java.security.SecureRandom;
-import java.sql.Date;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -48,6 +51,8 @@ public class KhachHangApi {
     private final PasswordEncoder passwordEncoder;
     private final SanPhamYeuThichRepository wishlistRepo;
     private final DanhGiaRepository danhGiaRepo;
+    private final HoaDonChiTietRepository hoaDonChiTietRepository;
+    private final HoaDonRepository hoaDonRepository;
 
     private String generateMa() {
         long count = khRepo.count();
@@ -315,8 +320,8 @@ public class KhachHangApi {
         kh.setGioiTinh(payload.get("gioiTinh"));
         kh.setDiaChi(payload.get("diaChi"));
 
-        if (payload.get("ngaySinh") != null && !payload.get("ngaySinh").isEmpty()) {
-            kh.setNgaySinh(Date.valueOf(payload.get("ngaySinh")).toLocalDate());
+        if (payload.get("ngaySinh") != null && !payload.get("ngaySinh").toString().isEmpty()) {
+            kh.setNgaySinh(java.time.LocalDate.parse(payload.get("ngaySinh").toString()));
         }
 
         // 👉 THÊM ĐOẠN NÀY ĐỂ LƯU LINK ẢNH CLOUDINARY
@@ -595,35 +600,57 @@ public class KhachHangApi {
     }
 
     // 2. GHI ĐÈ: CẬP NHẬT LẠI API THÊM ĐÁNH GIÁ ĐỂ HỖ TRỢ "SỬA 1 LẦN"
-    @PostMapping("/reviews/{sanPhamId}")
+    // 🌟 API ĐƯỢC SỬA LẠI: Lấy orderDetailId thay vì productId
+    @PostMapping("/reviews/detail/{orderDetailId}")
     @Transactional
-    public ResponseEntity<?> addReview(@PathVariable Integer sanPhamId, @RequestBody Map<String, Object> payload, Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Vui lòng đăng nhập!"));
+    public ResponseEntity<?> addReview(
+            @PathVariable Integer orderDetailId,
+            @RequestBody DanhGiaRequest req,
+            Authentication auth) {
+
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        KhachHang kh = khRepo.findByTaiKhoan_TenDangNhap(authentication.getName()).orElse(null);
-        if (kh == null || kh.getTaiKhoan() == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Vui lòng đăng nhập!"));
 
-        try {
-            Integer userId = kh.getTaiKhoan().getId();
+        TaiKhoan tk = taiKhoanRepository.findByTenDangNhap(auth.getName()).orElse(null);
+        if (tk == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
-            // 🌟 LOGIC MỚI: Tìm xem đã đánh giá chưa. Nếu có rồi thì SỬA đè lên, nếu chưa thì TẠO MỚI.
-            DanhGia dg = danhGiaRepo.findAll().stream()
-                    .filter(r -> r.getTaiKhoanId().equals(userId) && r.getSanPhamId().equals(sanPhamId))
-                    .findFirst().orElse(new DanhGia());
+        HoaDonChiTiet hdct = hoaDonChiTietRepository.findById(orderDetailId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy chi tiết hóa đơn"));
 
-            dg.setTaiKhoanId(userId);
-            dg.setSanPhamId(sanPhamId);
-            dg.setSoSao(Integer.parseInt(payload.getOrDefault("soSao", "5").toString()));
-            dg.setNoiDung(payload.getOrDefault("noiDung", "").toString());
-            dg.setPhanLoai(payload.getOrDefault("phanLoai", "").toString());
-            dg.setDanhSachHinhAnh(payload.getOrDefault("danhSachHinhAnh", "").toString());
+        Integer sanPhamId = hdct.getSanPhamChiTiet().getSanPham().getId();
 
-            danhGiaRepo.save(dg);
-            return ResponseEntity.ok(Map.of("message", "Đã lưu đánh giá thành công!", "status", "success"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Dữ liệu không hợp lệ"));
+        Optional<DanhGia> existingOpt = danhGiaRepo.findAll().stream()
+                .filter(d -> d.getHoaDonChiTietId() != null && d.getHoaDonChiTietId().equals(orderDetailId))
+                .findFirst();
+
+        DanhGia danhGia;
+        if (existingOpt.isPresent()) {
+            danhGia = existingOpt.get();
+
+            // 🌟 CHỐT CHẶN: Nếu đã sửa 1 lần rồi thì báo lỗi ngay lập tức
+            if (Boolean.TRUE.equals(danhGia.getDaSua())) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Bạn chỉ được phép sửa đánh giá 1 lần duy nhất!"));
+            }
+
+            // Đánh dấu là đã dùng quyền sửa
+            danhGia.setDaSua(true);
+        } else {
+            danhGia = new DanhGia();
+            danhGia.setDaSua(false); // Tạo mới thì chưa bị tính là sửa
+            danhGia.setNgayTao(java.time.LocalDateTime.now());
         }
+
+        danhGia.setHoaDonChiTietId(orderDetailId);
+        danhGia.setSanPhamId(sanPhamId);
+        danhGia.setTaiKhoanId(tk.getId());
+        danhGia.setSoSao(req.getSoSao());
+        danhGia.setNoiDung(req.getNoiDung());
+        danhGia.setPhanLoai(req.getPhanLoai());
+        danhGia.setDanhSachHinhAnh(req.getDanhSachHinhAnh());
+
+        danhGiaRepo.save(danhGia);
+        return ResponseEntity.ok(Map.of("message", "Đánh giá thành công!"));
     }
 
     @GetMapping("/wishlist")
@@ -656,6 +683,68 @@ public class KhachHangApi {
                 .filter(r -> r.getTaiKhoanId().equals(kh.getTaiKhoan().getId()))
                 .collect(java.util.stream.Collectors.toList());
         return ResponseEntity.ok(myReviews);
+    }
+
+    // =================================================================
+    // API DÀNH RIÊNG CHO TRANG CHI TIẾT SẢN PHẨM (detail.html)
+    // =================================================================
+    @GetMapping("/reviews/check-eligibility/{sanPhamId}")
+    public ResponseEntity<?> checkReviewEligibility(@PathVariable Integer sanPhamId, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+            return ResponseEntity.ok(Map.of("eligible", false, "message", "Vui lòng đăng nhập để viết đánh giá!"));
+        }
+        KhachHang kh = khRepo.findByTaiKhoan_TenDangNhap(authentication.getName()).orElse(null);
+        if (kh == null || kh.getTaiKhoan() == null) {
+            return ResponseEntity.ok(Map.of("eligible", false, "message", "Tài khoản không hợp lệ!"));
+        }
+
+        Integer userId = kh.getTaiKhoan().getId();
+
+        // 1. TÌM CÁC LƯỢT MUA THÀNH CÔNG SẢN PHẨM NÀY CỦA KHÁCH HÀNG
+        List<com.example.bee.entities.order.HoaDon> myOrders = hoaDonRepository.findByKhachHangIdOrderByNgayTaoDesc(kh.getId());
+        List<com.example.bee.entities.order.HoaDonChiTiet> purchasedDetails = new java.util.ArrayList<>();
+
+        for (com.example.bee.entities.order.HoaDon hd : myOrders) {
+            if ("HOAN_THANH".equals(hd.getTrangThaiHoaDon().getMa())) {
+                List<com.example.bee.entities.order.HoaDonChiTiet> chiTiets = hoaDonChiTietRepository.findByHoaDonId(hd.getId());
+                for (com.example.bee.entities.order.HoaDonChiTiet ct : chiTiets) {
+                    if (ct.getSanPhamChiTiet().getSanPham().getId().equals(sanPhamId)) {
+                        purchasedDetails.add(ct);
+                    }
+                }
+            }
+        }
+
+        if (purchasedDetails.isEmpty()) {
+            return ResponseEntity.ok(Map.of("eligible", false, "message", "Bạn cần mua và nhận sản phẩm này thành công để có thể đánh giá!"));
+        }
+
+        // 2. TÌM CÁC LƯỢT MUA ĐÃ BỊ ĐÁNH GIÁ (Để loại trừ)
+        List<Integer> reviewedDetailIds = danhGiaRepo.findBySanPhamIdOrderByNgayTaoDesc(sanPhamId).stream()
+                .filter(r -> r.getTaiKhoanId().equals(userId) && r.getHoaDonChiTietId() != null)
+                .map(DanhGia::getHoaDonChiTietId)
+                .collect(java.util.stream.Collectors.toList());
+
+        // 3. TÌM 1 LƯỢT MUA CHƯA ĐƯỢC ĐÁNH GIÁ ĐỂ CẤP QUYỀN
+        com.example.bee.entities.order.HoaDonChiTiet unreviewedDetail = null;
+        for (com.example.bee.entities.order.HoaDonChiTiet ct : purchasedDetails) {
+            if (!reviewedDetailIds.contains(ct.getId())) {
+                unreviewedDetail = ct;
+                break;
+            }
+        }
+
+        if (unreviewedDetail == null) {
+            return ResponseEntity.ok(Map.of("eligible", false, "message", "Bạn đã viết đánh giá cho tất cả các lượt mua của sản phẩm này rồi! Cảm ơn bạn rất nhiều."));
+        }
+
+        // 4. TRẢ VỀ ID CHI TIẾT ĐỂ FRONTEND MỞ MODAL
+        String phanLoai = unreviewedDetail.getSanPhamChiTiet().getMauSac().getTen() + " - " + unreviewedDetail.getSanPhamChiTiet().getKichThuoc().getTen();
+        return ResponseEntity.ok(Map.of(
+                "eligible", true,
+                "orderDetailId", unreviewedDetail.getId(),
+                "phanLoai", phanLoai
+        ));
     }
 
 

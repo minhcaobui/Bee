@@ -132,8 +132,9 @@
             <div class="voucher-list" id="addressListContainer">
                 <div style="text-align:center; padding:40px; color:var(--muted); font-style:italic;">Đang lấy danh sách địa chỉ...</div>
             </div>
-            <div style="margin-top:20px; padding-top:15px; border-top:1px solid #eee; text-align:center;">
-                <a href="/account#profile" style="font-size:13px; color:var(--accent); text-decoration:none; font-weight:600;">+ Thêm địa chỉ mới trong hồ sơ</a>
+
+            <div id="addAddressContainer" style="margin-top:20px; padding-top:15px; border-top:1px solid #eee; text-align:center;">
+                <a href="/customer/#account" style="font-size:13px; color:var(--accent); text-decoration:none; font-weight:600;">+ Thêm địa chỉ mới trong hồ sơ</a>
             </div>
         </div>
     </div>
@@ -142,11 +143,11 @@
         /*<![CDATA[*/
         window.CheckoutApp = {
             state: {
-                cart: [], subTotal: 0, discount: 0, shippingFee: 30000, total: 0, note: '',
+                cart: [], subTotal: 0, discount: 0, employeeDiscount: 0, isEmployee: false, isStaff: false, shippingFee: 30000, total: 0, note: '',
                 isLoggedIn: false,
                 appliedPromoCode: null,
                 availableVouchers: [],
-                savedAddresses: [] // Lưu danh sách địa chỉ
+                savedAddresses: []
             },
 
             ghnConfig: {
@@ -165,12 +166,30 @@
 
             checkLoginStatus: async function() {
                 try {
-                    const res = await fetch('/api/khach-hang/my-profile');
-                    if (res.ok) {
+                    // 🌟 1. KIỂM TRA QUYỀN NHÂN VIÊN TRƯỚC TIÊN
+                    let resNv = await fetch('/api/nhan-vien/my-profile');
+                    if (resNv.ok) {
                         this.state.isLoggedIn = true;
+                        this.state.isStaff = true; // KHÓA CỜ GOD MODE (Tự động 5% mọi SĐT)
                         this.fetchVouchers();
-                    } else this.state.isLoggedIn = false;
-                } catch (e) { this.state.isLoggedIn = false; }
+                        return;
+                    }
+
+                    // 2. Không phải nhân viên thì kiểm tra Khách hàng
+                    let resKh = await fetch('/api/khach-hang/my-profile');
+                    if (resKh.ok) {
+                        this.state.isLoggedIn = true;
+                        this.state.isStaff = false;
+                        this.fetchVouchers();
+                        return;
+                    }
+
+                    this.state.isLoggedIn = false;
+                    this.state.isStaff = false;
+                } catch (e) {
+                    this.state.isLoggedIn = false;
+                    this.state.isStaff = false;
+                }
             },
 
             fetchVouchers: async function() {
@@ -178,6 +197,17 @@
                     const res = await fetch('/api/vouchers/active');
                     if (res.ok) this.state.availableVouchers = await res.json();
                 } catch(e) { console.log("Lỗi lấy voucher", e); }
+            },
+
+            checkEmployeeDiscount: async function(phone) {
+                // Vá lỗi 1: Chỉ cho phép nhân viên ĐÃ ĐĂNG NHẬP (isStaff = true) mới được giảm giá
+                // Không gọi API check số điện thoại nữa để chặn việc khách gõ số nhân viên
+                if (this.state.isStaff) {
+                    this.state.isEmployee = true;
+                } else {
+                    this.state.isEmployee = false;
+                }
+                this.calculateFinalTotal();
             },
 
             loadCartData: function() {
@@ -313,7 +343,10 @@
             },
 
             calculateFinalTotal: function() {
-                this.state.total = Math.max(0, this.state.subTotal - this.state.discount + this.state.shippingFee);
+                const isDiscountEligible = this.state.isStaff || this.state.isEmployee;
+                this.state.employeeDiscount = isDiscountEligible ? Math.round(this.state.subTotal * 0.05) : 0;
+
+                this.state.total = Math.max(0, this.state.subTotal - (this.state.discount + this.state.employeeDiscount) + this.state.shippingFee);
 
                 document.getElementById('display-shipping-fee').innerText = this.state.shippingFee === 0 ? 'Miễn phí' : this.formatMoney(this.state.shippingFee);
 
@@ -325,32 +358,52 @@
                     discountRow.style.display = 'none';
                 }
 
+                const empDiscountRow = document.getElementById('co-emp-discount-row');
+                if (empDiscountRow) {
+                    if (this.state.employeeDiscount > 0) {
+                        empDiscountRow.style.display = 'flex';
+                        document.getElementById('display-emp-discount-fee').innerText = '-' + this.formatMoney(this.state.employeeDiscount);
+                    } else {
+                        empDiscountRow.style.display = 'none';
+                    }
+                }
+
                 document.getElementById('display-total-fee').innerText = this.formatMoney(this.state.total);
             },
 
             autoFillUserData: async function() {
                 if (!this.state.isLoggedIn) return;
                 try {
-                    const res = await fetch('/api/khach-hang/my-profile');
-                    if (res.ok) {
-                        const user = await res.json();
-                        if(user.hoTen) document.getElementById('co-name').value = user.hoTen;
-                        if(user.soDienThoai) document.getElementById('co-phone').value = user.soDienThoai;
-                        if(user.email) document.getElementById('co-email').value = user.email;
+                    let user = null;
 
-                        // Lấy địa chỉ mặc định từ API sổ địa chỉ của bạn (nếu có)
-                        const addrRes = await fetch('/api/khach-hang/addresses/default');
-                        if (addrRes.ok) {
-                            const defAddr = await addrRes.json();
-                            if (defAddr && defAddr.id) {
-                                // Tái sử dụng hàm selectSavedAddress để fill và load GHN tự động
-                                // Cần khởi tạo mảng savedAddresses tạm để hàm chạy đúng
-                                this.state.savedAddresses = [defAddr];
-                                await this.selectSavedAddress(defAddr.id);
-                            }
-                        } else if (user.diaChi) {
-                            document.getElementById('co-address-detail').value = user.diaChi;
+                    if (this.state.isStaff) {
+                        const res = await fetch('/api/nhan-vien/my-profile');
+                        if(res.ok) user = await res.json();
+                    } else {
+                        const res = await fetch('/api/khach-hang/my-profile');
+                        if(res.ok) user = await res.json();
+                    }
+
+                    if (user) {
+                        if(user.hoTen) document.getElementById('co-name').value = user.hoTen;
+                        if(user.email) document.getElementById('co-email').value = user.email;
+                        if(user.soDienThoai) {
+                            document.getElementById('co-phone').value = user.soDienThoai;
+                            this.checkEmployeeDiscount(user.soDienThoai);
                         }
+
+                        try {
+                            const addrRes = await fetch('/api/khach-hang/addresses/default');
+                            if (addrRes.ok) {
+                                const defAddr = await addrRes.json();
+                                if (defAddr && defAddr.id) {
+                                    this.state.savedAddresses = [defAddr];
+                                    await this.selectSavedAddress(defAddr.id);
+                                }
+                            } else if (user.diaChi) {
+                                document.getElementById('co-address-detail').value = user.diaChi;
+                            }
+                        } catch(e) {}
                     }
                 } catch (e) { console.log(e); }
             },
@@ -361,7 +414,7 @@
                 if (this.state.cart.length === 0) {
                     container.innerHTML =
                         '<div class="empty-co">' +
-                        '<h2 style="font-family:\'Cormorant Garamond\',serif; font-size:32px; margin-bottom:12px;">Đơn hàng trống</h2>' +
+                        '<h2 style="font-family:\\\'Cormorant Garamond\\\',serif; font-size:32px; margin-bottom:12px;">Đơn hàng trống</h2>' +
                         '<p style="color:var(--muted);">Vui lòng chọn sản phẩm vào giỏ hàng trước khi thanh toán.</p>' +
                         '<a href="#shop" class="empty-co-btn">Quay lại cửa hàng</a>' +
                         '</div>';
@@ -390,7 +443,8 @@
                 }
 
                 this.state.shippingFee = this.state.subTotal >= 500000 ? 0 : 30000;
-                this.state.total = Math.max(0, this.state.subTotal - this.state.discount + this.state.shippingFee);
+
+                this.state.total = Math.max(0, this.state.subTotal - this.state.discount - this.state.employeeDiscount + this.state.shippingFee);
 
                 container.innerHTML =
                     '<div class="checkout-header">' +
@@ -399,7 +453,6 @@
                     '</div>' +
                     '<div class="checkout-layout">' +
 
-                    // CỘT TRÁI: FORM
                     '<div class="checkout-form-section">' +
                     '<form id="form-checkout" onsubmit="event.preventDefault(); window.CheckoutApp.submitOrder();">' +
                     '<div class="form-section-title">1. Thông tin người nhận</div>' +
@@ -410,7 +463,7 @@
                     '<div class="form-row">' +
                     '<div class="form-group">' +
                     '<label class="form-label">Số điện thoại *</label>' +
-                    '<input type="tel" id="co-phone" class="form-control" required placeholder="Ví dụ: 0912345678">' +
+                    '<input type="tel" id="co-phone" class="form-control" required placeholder="Ví dụ: 0912345678" onblur="window.CheckoutApp.checkEmployeeDiscount(this.value)">' +
                     '</div>' +
                     '<div class="form-group">' +
                     '<label class="form-label">Email (Để nhận hóa đơn) *</label>' +
@@ -418,10 +471,9 @@
                     '</div>' +
                     '</div>' +
 
-                    // ĐIỂM THAY ĐỔI: Bổ sung nút Chọn Địa Chỉ đã lưu
                     '<div class="form-section-title" style="margin-top:30px; display:flex; justify-content:space-between; align-items:center;">' +
                     '<span>2. Địa chỉ giao hàng</span>' +
-                    (this.state.isLoggedIn ? '<button type="button" onclick="window.CheckoutApp.openAddressModal()" style="font-size:11px; background:var(--accent); color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; transition:0.3s;">Chọn địa chỉ đã lưu</button>' : '') +
+                    (this.state.isLoggedIn && !this.state.isStaff ? '<button type="button" onclick="window.CheckoutApp.openAddressModal()" style="font-size:11px; background:var(--accent); color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; transition:0.3s;">Chọn địa chỉ đã lưu</button>' : '') +
                     '</div>' +
                     '<div class="form-row-3">' +
                     '<div class="form-group">' +
@@ -475,7 +527,6 @@
                     '</form>' +
                     '</div>' +
 
-                    // CỘT PHẢI: TỔNG KẾT
                     '<div class="checkout-summary">' +
                     '<div class="co-summary-box">' +
                     '<div class="form-section-title" style="margin-bottom:20px; padding-bottom:12px;">Đơn hàng (' + this.state.cart.length + ' sản phẩm)</div>' +
@@ -483,7 +534,7 @@
 
                     '<button class="promo-selector-btn" id="btnOpenPromoModal" onclick="window.CheckoutApp.openPromoModal()">' +
                     '<span style="display:flex; align-items:center; gap:8px;">' +
-                    '<svg style="width:16px; height:16px; fill:none; stroke:currentColor;" viewBox="0 0 24 24" stroke-width="1.5"><path d="M21.44 11.05l-9.19 9.19a2.003 2.003 0 01-2.83 0l-7.07-7.07a2.002 2.002 0 010-2.83l9.19-9.19a2 2 0 011.41-.58h6.58c1.1 0 2 .9 2 2v6.58c0 .53-.21 1.04-.59 1.41z"/><line x1="17" y1="7" x2="17.01" y2="7"/></svg>' +
+                    '<svg style="width:16px; height:16px; fill:none; stroke:currentColor;" viewBox="0 0 24 24" stroke-width="1.5"><path d="M21.44 11.05l-9.19 9.19a2.003 2.003 0 01-2.83 0l-7.07-7.07a2.002 2.002 0 010-2.83l9.19-9.19a2 2 0 011.41-.58h6.58c1.1 0 2 v6.58c0 .53-.21 1.04-.59 1.41z"/><line x1="17" y1="7" x2="17.01" y2="7"/></svg>' +
                     '<span>Chọn mã giảm giá / Ưu đãi</span>' +
                     '</span>' +
                     '<svg style="width:16px; height:16px; fill:none; stroke:currentColor;" viewBox="0 0 24 24" stroke-width="1.5"><path d="M9 5l7 7-7 7"/></svg>' +
@@ -498,6 +549,12 @@
                     '<span>Mã giảm giá</span>' +
                     '<span id="display-discount-fee">-' + this.formatMoney(this.state.discount) + '</span>' +
                     '</div>' +
+
+                    '<div class="co-calc-row discount" id="co-emp-discount-row" style="display: ' + (this.state.employeeDiscount > 0 ? 'flex' : 'none') + '; color: #3b82f6;">' +
+                    '<span>Ưu đãi nhân viên nội bộ (5%)</span>' +
+                    '<span id="display-emp-discount-fee">-' + this.formatMoney(this.state.employeeDiscount) + '</span>' +
+                    '</div>' +
+
                     '<div class="co-calc-row" style="margin-bottom: 8px;">' +
                     '<span>Phí giao hàng</span>' +
                     '<span id="display-shipping-fee" style="color:var(--text); font-weight: 600;">Đang tính...</span>' +
@@ -519,12 +576,15 @@
                 this.updateShippingFee(this.state.shippingFee);
             },
 
-            // --- CÁC HÀM XỬ LÝ SỔ ĐỊA CHỈ ---
             openAddressModal: async function() {
                 if (!this.state.isLoggedIn) return;
-
                 document.getElementById('addressModalOverlay').style.display = 'flex';
                 setTimeout(() => { document.getElementById('addressModal').classList.add('open'); }, 10);
+
+                const addAddressContainer = document.getElementById('addAddressContainer');
+                if (addAddressContainer) {
+                    addAddressContainer.style.display = this.state.isStaff ? 'none' : 'block';
+                }
 
                 try {
                     const res = await fetch('/api/khach-hang/addresses');
@@ -571,9 +631,9 @@
 
                 document.getElementById('co-name').value = addr.hoTenNhan || '';
                 document.getElementById('co-phone').value = addr.sdtNhan || '';
+                this.checkEmployeeDiscount(addr.sdtNhan || '');
                 document.getElementById('co-address-detail').value = addr.diaChiChiTiet || '';
 
-                // Đồng bộ API GHN từ ID đã lưu
                 if (addr.maTinh && addr.maHuyen && addr.maXa) {
                     const selProv = document.getElementById('co-province');
                     selProv.value = addr.maTinh;
@@ -602,7 +662,6 @@
                 if(type === 'MOMO') document.getElementById('lbl-pm-momo').classList.add('active');
             },
 
-            // --- CÁC HÀM VOUCHER GIỮ NGUYÊN ---
             openPromoModal: function() {
                 if (!this.state.isLoggedIn) {
                     if (window.showToast) window.showToast('Vui lòng đăng nhập để sử dụng Voucher.', 'warning');
@@ -628,7 +687,6 @@
 
                 let html = '';
                 this.state.availableVouchers.forEach(v => {
-                    // 1. Lấy an toàn các biến
                     const code = v.maCode || v.ma || v.code;
                     const dieuKien = v.dieuKien || v.dieuKienApDung || 0;
                     const loai = v.loaiGiamGia || v.loai || '';
@@ -654,7 +712,6 @@
                         }
                     }
 
-                    // 2. TÍNH TOÁN TRƯỚC SỐ TIỀN THỰC TẾ SẼ TIẾT KIỆM ĐƯỢC
                     let expectedDiscount = 0;
                     if (isEligible) {
                         if (loai.toLowerCase().includes('percent')) {
@@ -666,7 +723,6 @@
                         }
                     }
 
-                    // 3. RENDER GIAO DIỆN (Thêm Badge "Tiết kiệm xx đ" màu xanh lá cây)
                     html += `
                         <div class="voucher-card ${disabledClass}" style="${selectedStyle}" onclick="${isEligible ? `window.CheckoutApp.applyVoucher('${code}')` : ''}">
                             <div class="voucher-icon">
@@ -690,17 +746,14 @@
                 listContainer.innerHTML = html;
             },
 
-            // TÍNH TOÁN VOUCHER TRỰC TIẾP Ở FRONTEND, BỎ QUA GỌI API ĐỂ CHỐNG LỖI
             applyVoucher: function(code) {
                 if (this.state.cart.length === 0) return;
 
-                // Nếu mã đang được chọn, khách bấm lần nữa -> Bỏ chọn
                 if (this.state.appliedPromoCode === code) {
                     this.removePromo();
                     return;
                 }
 
-                // Tìm thông tin voucher trong danh sách đã tải
                 const v = this.state.availableVouchers.find(x => (x.maCode || x.ma || x.code) === code);
                 if (!v) {
                     if(window.showToast) window.showToast("Mã không hợp lệ!", "error");
@@ -713,7 +766,6 @@
                     return;
                 }
 
-                // Tính toán tiền giảm
                 this.state.appliedPromoCode = code;
                 let baseForVoucher = this.state.subTotal;
                 let loai = v.loaiGiamGia || v.loai || '';
@@ -729,19 +781,18 @@
                     if (this.state.discount > baseForVoucher) this.state.discount = baseForVoucher;
                 }
 
-                // Cập nhật lại nút hiển thị ngoài giao diện
                 const btn = document.getElementById('btnOpenPromoModal');
                 btn.classList.add('applied');
                 btn.innerHTML = `
                     <span style="display:flex; align-items:center; gap:8px;">
-                        <svg style="width:16px; height:16px; fill:none; stroke:white;" viewBox="0 0 24 24" stroke-width="1.5"><path d="M21.44 11.05l-9.19 9.19a2.003 2.003 0 01-2.83 0l-7.07-7.07a2.002 2.002 0 010-2.83l9.19-9.19a2 2 0 011.41-.58h6.58c1.1 0 2 .9 2 2v6.58c0 .53-.21 1.04-.59 1.41z"/><line x1="17" y1="7" x2="17.01" y2="7"/></svg>
+                        <svg style="width:16px; height:16px; fill:none; stroke:white;" viewBox="0 0 24 24" stroke-width="1.5"><path d="M21.44 11.05l-9.19 9.19a2.003 2.003 0 01-2.83 0l-7.07-7.07a2.002 2.002 0 010-2.83l9.19-9.19a2 2 0 011.41-.58h6.58c1.1 0 2 v6.58c0 .53-.21 1.04-.59 1.41z"/><line x1="17" y1="7" x2="17.01" y2="7"/></svg>
                         <span>Đã áp dụng: <strong>${code}</strong></span>
                     </span>
                     <svg class="promo-remove-icon" onclick="event.stopPropagation(); window.CheckoutApp.removePromo()" style="width:20px; height:20px; fill:none; stroke:currentColor;" viewBox="0 0 24 24" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
                 `;
 
                 this.calculateFinalTotal();
-                this.renderVoucherList(); // Render lại list để làm mờ mã cũ và hiện nút "Bỏ Chọn"
+                this.renderVoucherList();
                 this.closePromoModal();
                 if(window.showToast) window.showToast(`Áp dụng thành công mã ưu đãi!`, "success");
             },
@@ -754,14 +805,14 @@
                 btn.classList.remove('applied');
                 btn.innerHTML = `
                     <span style="display:flex; align-items:center; gap:8px;">
-                        <svg style="width:16px; height:16px; fill:none; stroke:currentColor;" viewBox="0 0 24 24" stroke-width="1.5"><path d="M21.44 11.05l-9.19 9.19a2.003 2.003 0 01-2.83 0l-7.07-7.07a2.002 2.002 0 010-2.83l9.19-9.19a2 2 0 011.41-.58h6.58c1.1 0 2 .9 2 2v6.58c0 .53-.21 1.04-.59 1.41z"/><line x1="17" y1="7" x2="17.01" y2="7"/></svg>
+                        <svg style="width:16px; height:16px; fill:none; stroke:currentColor;" viewBox="0 0 24 24" stroke-width="1.5"><path d="M21.44 11.05l-9.19 9.19a2.003 2.003 0 01-2.83 0l-7.07-7.07a2.002 2.002 0 010-2.83l9.19-9.19a2 2 0 011.41-.58h6.58c1.1 0 2 v6.58c0 .53-.21 1.04-.59 1.41z"/><line x1="17" y1="7" x2="17.01" y2="7"/></svg>
                         <span>Chọn mã giảm giá / Ưu đãi</span>
                     </span>
                     <svg style="width:16px; height:16px; fill:none; stroke:currentColor;" viewBox="0 0 24 24" stroke-width="1.5"><path d="M9 5l7 7-7 7"/></svg>
                 `;
 
                 this.calculateFinalTotal();
-                this.renderVoucherList(); // Xóa trạng thái chọn trong Modal
+                this.renderVoucherList();
 
                 if(window.showToast) window.showToast(`Đã bỏ áp dụng ưu đãi!`, "warning");
             },
@@ -826,6 +877,7 @@
                         btnSubmit.innerText = 'Đang chuyển hướng MoMo...';
 
                         const momoRes = await fetch(`/api/hoa-don/momo-payment/${invoiceId}`, {
+
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ amount: this.state.total })
@@ -859,3 +911,4 @@
         /*]]>*/
     </script>
 </section>
+}

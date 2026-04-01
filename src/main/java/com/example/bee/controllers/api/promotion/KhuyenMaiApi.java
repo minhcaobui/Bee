@@ -39,14 +39,60 @@ public class KhuyenMaiApi {
     private final ThongBaoRepository thongBaoRepository;
     private final TaiKhoanRepository taiKhoanRepository;
 
+    // =======================================================
+    // HÀM VALIDATE CHỐNG LỖ (KIỂM TRA GIÁ BÁN SO VỚI MỨC GIẢM)
+    // =======================================================
+    private void validateChongLo(PromotionRequest req, List<SanPham> danhSachSanPham) {
+        if (req.getTen() == null || req.getTen().trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên chương trình không được để trống.");
+        }
+        if (req.getNgayBatDau() == null || req.getNgayKetThuc() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vui lòng thiết lập đầy đủ thời gian bắt đầu và kết thúc.");
+        }
+        if (req.getNgayKetThuc().isBefore(req.getNgayBatDau().plusMinutes(5))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Thời hạn chương trình phải có độ dài tối thiểu 5 phút.");
+        }
+
+        boolean isPercent = req.getLoai() != null &&
+                (req.getLoai().equalsIgnoreCase("PERCENT") || req.getLoai().contains("%"));
+
+        if (isPercent) {
+            if (req.getGiaTri() == null || req.getGiaTri().compareTo(BigDecimal.ONE) < 0 || req.getGiaTri().compareTo(new BigDecimal("70")) > 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lỗi: Sale sản phẩm theo % chỉ được cấu hình từ 1% đến tối đa 70% (Quy định chống phá giá).");
+            }
+        } else {
+            if (req.getGiaTri() == null || req.getGiaTri().compareTo(new BigDecimal("1000")) < 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mức giảm giá tối thiểu là 1.000 VNĐ.");
+            }
+
+            // CỰC KỲ QUAN TRỌNG: Check chống bán giá âm
+            for (SanPham sp : danhSachSanPham) {
+                BigDecimal minPrice = sp.getChiTietSanPhams().stream()
+                        .map(ct -> ct.getGiaBan())
+                        .min(BigDecimal::compareTo)
+                        .orElse(BigDecimal.ZERO);
+
+                // Giảm giá VNĐ không được quá 70% giá trị nhỏ nhất của sản phẩm đó
+                BigDecimal maxSafeDiscount = minPrice.multiply(new BigDecimal("0.7"));
+
+                if (req.getGiaTri().compareTo(maxSafeDiscount) > 0) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "Lỗi rủi ro lỗ vốn: Mức giảm " + String.format("%,.0f", req.getGiaTri()) + "đ quá lớn so với sản phẩm '" + sp.getTen() +
+                                    "' (Giá bán thấp nhất: " + String.format("%,.0f", minPrice) + "đ). Chỉ được giảm tối đa 70% giá gốc.");
+                }
+            }
+        }
+    }
+
+    // =======================================================
+    // HÀM VALIDATE CHỐNG TRÙNG LỊCH SALE
+    // =======================================================
     private void validateConflict(Integer currentId, PromotionRequest request) {
-        // 🌟 Bổ sung: Nếu người dùng không chọn sản phẩm nào thì bỏ qua kiểm tra trùng lịch
         if (request.getIdSanPhams() == null || request.getIdSanPhams().isEmpty()) {
             return;
         }
 
         Integer safeId = (currentId == null) ? -1 : currentId;
-        // checkTrungLich trả về các đợt KM trùng thời gian và trùng sản phẩm
         List<KhuyenMai> conflicts = khuyenMaiRepository.checkTrungLich(
                 request.getIdSanPhams(),
                 request.getNgayBatDau(),
@@ -54,9 +100,8 @@ public class KhuyenMaiApi {
                 safeId
         );
 
-        // CHỈ CẦN CÓ TRÙNG LÀ CHẶN NGAY LẬP TỨC
         if (!conflicts.isEmpty()) {
-            KhuyenMai km = conflicts.get(0); // Lấy đợt trùng đầu tiên để báo lỗi
+            KhuyenMai km = conflicts.get(0);
             String tenSpTrung = "các sản phẩm đã chọn";
             if (km.getSanPhams() != null && !km.getSanPhams().isEmpty()) {
                 tenSpTrung = km.getSanPhams().stream()
@@ -130,21 +175,29 @@ public class KhuyenMaiApi {
     @PostMapping
     @Transactional
     public ResponseEntity<?> create(@Valid @RequestBody PromotionRequest body) {
-        validate(body);
+        // Lấy danh sách sản phẩm từ DB để soi giá bán
+        List<SanPham> danhSachSanPham = new ArrayList<>();
+        if (body.getIdSanPhams() != null && !body.getIdSanPhams().isEmpty()) {
+            danhSachSanPham = sanPhamRepo.findAllById(body.getIdSanPhams());
+        }
+
+        // Gọi chuỗi kiểm tra logic
+        validateChongLo(body, danhSachSanPham);
         validateConflict(null, body);
+
         String code = (body.getMa() != null && !body.getMa().trim().isEmpty())
                 ? body.getMa().trim().toUpperCase()
                 : generateCode();
         if (khuyenMaiRepository.existsByMa(code)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã khuyến mãi đã tồn tại!");
         }
+
         KhuyenMai entity = new KhuyenMai();
         entity.setMa(code);
         mapToEntity(body, entity);
         KhuyenMai saved = khuyenMaiRepository.save(entity);
         saveProducts(saved.getId(), body.getIdSanPhams());
 
-        // 🌟 LOGIC GỬI THÔNG BÁO CHO TẤT CẢ KHÁCH HÀNG KHI CÓ SALE
         try {
             java.util.List<com.example.bee.entities.account.TaiKhoan> khachHangs = taiKhoanRepository.findByVaiTro_Ma("ROLE_CUSTOMER");
             if (khachHangs != null && !khachHangs.isEmpty()) {
@@ -154,7 +207,7 @@ public class KhuyenMaiApi {
                     tb.setTaiKhoanId(tk.getId());
                     tb.setTieuDe("Đợt Sale mới: " + saved.getTen());
                     tb.setNoiDung("Chương trình khuyến mãi giảm giá các mặt hàng đã bắt đầu. Nhanh tay săn sale kẻo lỡ!");
-                    tb.setLoaiThongBao("VOUCHER"); // Vẫn để VOUCHER để nó hiện chung tab khuyến mãi
+                    tb.setLoaiThongBao("VOUCHER");
                     tb.setDaDoc(false);
                     tb.setDaXoa(false);
                     thongBaos.add(tb);
@@ -173,40 +226,27 @@ public class KhuyenMaiApi {
     public ResponseEntity<?> update(@PathVariable Integer id, @Valid @RequestBody PromotionRequest body) {
         KhuyenMai entity = khuyenMaiRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        validate(body);
+
+        List<SanPham> danhSachSanPham = new ArrayList<>();
+        if (body.getIdSanPhams() != null && !body.getIdSanPhams().isEmpty()) {
+            danhSachSanPham = sanPhamRepo.findAllById(body.getIdSanPhams());
+        }
+
+        validateChongLo(body, danhSachSanPham);
         validateConflict(id, body);
+
         if (entity.getNgayBatDau().isBefore(LocalDateTime.now())) {
             if (!entity.getNgayBatDau().isEqual(body.getNgayBatDau())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Chương trình đã hoặc đang diễn ra, không thể thay đổi Ngày Bắt Đầu!");
             }
         }
+
         mapToEntity(body, entity);
         KhuyenMai saved = khuyenMaiRepository.save(entity);
         khuyenMaiSanPhamRepository.deleteByIdKhuyenMai(id);
         saveProducts(saved.getId(), body.getIdSanPhams());
         return ResponseEntity.ok(saved);
-    }
-
-    private void validate(PromotionRequest body) {
-        if (body.getTen() == null || body.getTen().trim().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên chương trình không được để trống.");
-        }
-        if ("PERCENT".equals(body.getLoai())) {
-            if (body.getGiaTri() == null || body.getGiaTri().doubleValue() <= 0 || body.getGiaTri().doubleValue() > 80) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tỷ lệ chiết khấu không hợp lệ (Yêu cầu từ 1% đến 80%).");
-            }
-        } else {
-            if (body.getGiaTri() == null || body.getGiaTri().compareTo(new BigDecimal("1000")) < 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Giá trị giảm tối thiểu phải từ 1.000đ.");
-            }
-        }
-        if (body.getNgayBatDau() == null || body.getNgayKetThuc() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vui lòng thiết lập đầy đủ thời gian bắt đầu và kết thúc.");
-        }
-        if (body.getNgayKetThuc().isBefore(body.getNgayBatDau().plusMinutes(5))) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Thời hạn chương trình phải có độ dài tối thiểu 5 phút.");
-        }
     }
 
     private void mapToEntity(PromotionRequest dto, KhuyenMai entity) {
@@ -237,6 +277,7 @@ public class KhuyenMaiApi {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy thông tin chương trình yêu cầu."));
         boolean newStatus = !entity.getTrangThai();
         String message;
+
         if (newStatus) {
             if (entity.getNgayKetThuc().isBefore(LocalDateTime.now())) {
                 return ResponseEntity.badRequest().body(Collections.singletonMap("message",
@@ -258,6 +299,7 @@ public class KhuyenMaiApi {
             } else {
                 message = "Chiến dịch khuyến mãi đã được kích hoạt thành công trên toàn bộ danh mục sản phẩm.";
             }
+
             try {
                 PromotionRequest fakeRequest = new PromotionRequest();
                 fakeRequest.setIdSanPhams(entity.getSanPhams().stream().map(SanPham::getId).collect(Collectors.toList()));
@@ -265,6 +307,10 @@ public class KhuyenMaiApi {
                 fakeRequest.setNgayKetThuc(entity.getNgayKetThuc());
                 fakeRequest.setChoPhepCongDon(entity.getChoPhepCongDon());
                 fakeRequest.setTrangThai(true);
+                fakeRequest.setLoai(entity.getLoai());
+                fakeRequest.setGiaTri(entity.getGiaTri());
+
+                validateChongLo(fakeRequest, entity.getSanPhams());
                 validateConflict(id, fakeRequest);
             } catch (ResponseStatusException e) {
                 return ResponseEntity.badRequest().body(Collections.singletonMap("message", e.getReason()));

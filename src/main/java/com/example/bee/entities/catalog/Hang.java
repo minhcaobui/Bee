@@ -29,7 +29,8 @@ public class Hang {
     @Size(max = 100, message = "Tên tối đa 100 ký tự")
     private String ten;
 
-    @Column(name = "mo_ta", columnDefinition = "LONGTEXT")
+    // ĐÃ SỬA THÀNH NVARCHAR(MAX) CHO SQL SERVER
+    @Column(name = "mo_ta", columnDefinition = "NVARCHAR(MAX)")
     private String moTa;
 
     @Column(name = "ngay_tao", nullable = false, updatable = false)

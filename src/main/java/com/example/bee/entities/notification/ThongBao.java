@@ -23,7 +23,8 @@ public class ThongBao {
     @Column(name = "tieu_de")
     private String tieuDe;
 
-    @Column(name = "noi_dung", columnDefinition = "LONGTEXT")
+    // ĐÃ SỬA THÀNH NVARCHAR(MAX) CHO SQL SERVER
+    @Column(name = "noi_dung", columnDefinition = "NVARCHAR(MAX)")
     private String noiDung;
 
     @Column(name = "loai_thong_bao")

@@ -64,6 +64,7 @@
         .status-shipping { background: rgba(192,128,96,0.1); color: #c08060; }
         .status-processing { background: rgba(0,0,0,0.05); color: var(--muted); }
         .status-cancelled { background: rgba(192,60,60,0.08); color: #c03c3c; }
+        .status-payment { background: rgba(245, 158, 11, 0.1); color: #d97706; }
 
         /* Orders */
         .orders-filter-bar { display: flex; gap: 0; margin-bottom: 32px; border-bottom: 1px solid rgba(0,0,0,0.08); }
@@ -205,6 +206,12 @@
         .wishlist-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
         @media (max-width: 900px) { .wishlist-grid { grid-template-columns: 1fr 1fr; } }
         @media (max-width: 600px) { .wishlist-grid { grid-template-columns: 1fr; } }
+
+        /* Cảnh báo dành riêng cho Staff */
+        .staff-banner {
+            background: #fef2f2; border: 1px solid #fca5a5; border-radius: 4px;
+            padding: 15px; margin-bottom: 30px; display: flex; align-items: center; gap: 15px;
+        }
     </style>
 
     <div id="guest-view">
@@ -244,12 +251,18 @@
                 <div class="account-user-since" id="sidebarSince"></div>
             </div>
             <ul class="account-nav">
-                <li><button class="account-nav-btn active" data-panel="overview"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>Tổng quan</button></li>
-                <li><button class="account-nav-btn" data-panel="orders"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M9 12h6M9 16h6M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h5l5 5v11a2 2 0 01-2 2z"/></svg>Đơn hàng của tôi</button></li>
-
-                <li><button class="account-nav-btn" data-panel="wishlist"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Sản phẩm Yêu thích</button></li>
-
-                <li><button class="account-nav-btn" data-panel="profile"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg>Thông tin cá nhân</button></li>
+                <div class="nav-item-wrapper" data-nav="overview">
+                    <li><button class="account-nav-btn active" data-panel="overview"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>Tổng quan</button></li>
+                </div>
+                <div class="nav-item-wrapper" data-nav="orders">
+                    <li><button class="account-nav-btn" data-panel="orders"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M9 12h6M9 16h6M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h5l5 5v11a2 2 0 01-2 2z"/></svg>Đơn hàng của tôi</button></li>
+                </div>
+                <div class="nav-item-wrapper" data-nav="wishlist">
+                    <li><button class="account-nav-btn" data-panel="wishlist"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Sản phẩm Yêu thích</button></li>
+                </div>
+                <div class="nav-item-wrapper" data-nav="profile">
+                    <li><button class="account-nav-btn" data-panel="profile"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg>Thông tin cá nhân</button></li>
+                </div>
             </ul>
             <div class="account-nav-logout">
                 <button class="account-logout-btn" onclick="window.AccountApp.confirmLogout()">
@@ -280,6 +293,7 @@
 
                 <div class="orders-filter-bar" id="ordersFilterBar">
                     <button class="orders-filter-tab active" data-filter="all">Tất cả</button>
+                    <button class="orders-filter-tab" data-filter="CHO_THANH_TOAN">Chờ thanh toán</button>
                     <button class="orders-filter-tab" data-filter="CHO_XAC_NHAN">Chờ xác nhận</button>
                     <button class="orders-filter-tab" data-filter="DANG_GIAO">Đang giao</button>
                     <button class="orders-filter-tab" data-filter="HOAN_THANH">Đã giao</button>
@@ -311,8 +325,17 @@
             </div>
 
             <div class="account-panel" id="panel-profile">
+
+                <div id="staffPortalBanner" class="staff-banner" style="display:none;">
+                    <i class="bi bi-shield-check" style="font-size:32px; color:#ef4444;"></i>
+                    <div>
+                        <div style="font-weight:800; color:#b91c1c; font-size:14px; margin-bottom:4px; text-transform:uppercase;">Cổng Thông Tin Nhân Viên</div>
+                        <div style="font-size:13px; color:#991b1b;">Bạn đang đăng nhập bằng tài khoản quản trị viên. Tính năng giỏ hàng, hóa đơn và sổ địa chỉ giao hàng đã bị vô hiệu hóa trên hệ thống khách hàng.</div>
+                    </div>
+                </div>
+
                 <div class="account-panel-title">Thông tin cá nhân</div>
-                <div class="account-panel-subtitle">Cập nhật hồ sơ và thông tin giao hàng.</div>
+                <div class="account-panel-subtitle">Cập nhật hồ sơ và thông tin bảo mật.</div>
 
                 <div class="profile-avatar-section">
                     <div class="profile-avatar-big" id="profileAvatarBig">
@@ -373,15 +396,15 @@
                 </div>
                 <button class="account-form-save" id="btnSaveProfile" onclick="window.AccountApp.confirmAction('profile')">Lưu thay đổi</button>
 
-                <div class="account-section-divider"></div>
+                <div class="account-section-divider" id="addressDivider1"></div>
 
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; max-width:640px;">
+                <div id="addressBookHeaderWrap" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; max-width:640px;">
                     <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;">Sổ địa chỉ</div>
                     <button class="account-reorder-btn" onclick="window.AccountApp.openAddressModal()">+ Thêm địa chỉ mới</button>
                 </div>
                 <div id="addressBookContainer" style="max-width:640px; margin-bottom:48px;"></div>
 
-                <div class="account-section-divider"></div>
+                <div class="account-section-divider" id="addressDivider2"></div>
 
                 <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;margin-bottom:8px">Đổi mật khẩu</div>
                 <div class="account-form-grid">
@@ -443,7 +466,7 @@
 
     <div class="review-modal-overlay" id="accReviewModalOverlay" onclick="if(event.target===this) window.AccountApp.closeReviewModal()">
         <div class="review-modal">
-            <button class="review-modal-close" onclick="window.AccountApp.closeReviewModal()"><i class="fa-solid fa-xmark"></i></button>
+            <button class="review-modal-close" onclick="window.AccountApp.closeReviewModal()" style="position: absolute; right: 15px; top: 15px; background: none; border: none; font-size: 20px; cursor: pointer; color: #888;"><i class="fa-solid fa-xmark"></i></button>
             <div class="review-modal-title" id="reviewModalTitleText" style="margin-bottom:5px;">Viết đánh giá</div>
             <div id="reviewModalProductName" style="text-align:center; font-size:14px; font-weight:500; margin-bottom:4px;"></div>
             <div id="reviewModalProductType" style="text-align:center; font-size:12px; color:var(--muted); margin-bottom:20px;"></div>
@@ -479,9 +502,10 @@
                 addresses: [],
                 wishlist: [],
                 myReviews: [],
-                currentViewOrderId: null
+                currentViewOrderId: null,
+                isStaff: false
             },
-            reviewState: { productId: null, productName: '', phanLoai: '', soSao: 5, files: [] },
+            reviewState: { orderDetailId: null, productName: '', phanLoai: '', soSao: 5, files: [] },
 
             ghnConfig: {
                 token: '5c6b4e08-f30a-11f0-9c2d-8ebaf800da9f',
@@ -552,7 +576,8 @@
                                 hinhAnh: imageUrl
                             };
 
-                            const resUpdate = await fetch('/api/khach-hang/my-profile', {
+                            const endpoint = this.state.isStaff ? '/api/nhan-vien/my-profile' : '/api/khach-hang/my-profile';
+                            const resUpdate = await fetch(endpoint, {
                                 method: 'PUT', headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify(payload)
                             });
@@ -577,6 +602,10 @@
             },
 
             switchPanel: function(pId) {
+                if (this.state.isStaff && pId !== 'profile') {
+                    return;
+                }
+
                 document.querySelectorAll('.account-panel').forEach(p => p.classList.remove('active'));
                 const target = document.getElementById('panel-' + pId);
                 if (target) target.classList.add('active');
@@ -611,65 +640,89 @@
 
             fetchData: async function() {
                 try {
-                    const userRes = await fetch('/api/khach-hang/my-profile');
+                    let isStaff = false;
+                    let userData = null;
 
-                    if (!userRes.ok) {
+                    const nvRes = await fetch('/api/nhan-vien/my-profile');
+                    if (nvRes.ok) {
+                        const text = await nvRes.text();
+                        if (text && text.includes('{')) {
+                            const data = JSON.parse(text);
+                            if (data && (data.chucVu || (data.ma && data.ma.toUpperCase().startsWith('NV')) || data.canCuocCongDan)) {
+                                userData = data;
+                                isStaff = true;
+                            }
+                        }
+                    }
+
+                    if (!isStaff) {
+                        const khRes = await fetch('/api/khach-hang/my-profile');
+                        if (khRes.ok) {
+                            const text = await khRes.text();
+                            if (text && text.includes('{')) {
+                                userData = JSON.parse(text);
+                            }
+                        }
+                    }
+
+                    if (!userData) {
                         document.getElementById('guest-view').style.display = 'block';
                         document.getElementById('account-view').style.display = 'none';
                         return;
                     }
 
-                    this.state.user = await userRes.json();
+                    this.state.user = userData;
+                    this.state.isStaff = isStaff;
+
                     document.getElementById('guest-view').style.display = 'none';
                     document.getElementById('account-view').style.display = 'grid';
 
-                    // Lấy tất cả đánh giá của user
-                    try {
-                        const revRes = await fetch('/api/khach-hang/my-reviews');
-                        if (revRes.ok) this.state.myReviews = await revRes.json();
-                    } catch(e) {}
+                    if (!this.state.isStaff) {
+                        try {
+                            const revRes = await fetch('/api/khach-hang/my-reviews');
+                            if (revRes.ok) this.state.myReviews = await revRes.json();
+                        } catch(e) {}
 
-                    const ordersRes = await fetch('/api/hoa-don/my-orders');
-                    if (ordersRes.ok) {
-                        this.state.orders = await ordersRes.json();
-                        this.state.stats.orderCount = this.state.orders.length;
-                        const validOrders = this.state.orders.filter(ord => ord.trangThaiMa === 'HOAN_THANH');
-                        this.state.stats.totalSpent = validOrders.reduce((sum, ord) => sum + (ord.tongTien || ord.giaTong || 0), 0);
-                    }
-
-                    const addrRes = await fetch('/api/khach-hang/addresses');
-                    if(addrRes.ok) {
-                        this.state.addresses = await addrRes.json();
-                    }
-
-                    // 🌟 LẤY WISHLIST (LỌC TRÙNG 100% BẰNG MAP)
-                    try {
-                        const wlRes = await fetch('/api/khach-hang/wishlist');
-                        if (wlRes.ok) {
-                            const dbWishlist = await wlRes.json();
-                            this.state.wishlist = [];
-
-                            // 1. Lọc mảng ID không null
-                            const uniqueProductIds = [...new Set(dbWishlist.map(w => w.sanPhamId || w.idSanPham))].filter(id => id != null);
-                            const productsMap = new Map();
-
-                            // 2. Map đảm bảo dù API kẹt 2 ID giống hệt nhau cũng chỉ lưu 1 Key
-                            for (let pId of uniqueProductIds) {
-                                try {
-                                    const pRes = await fetch('/api/products/' + pId);
-                                    if (pRes.ok) {
-                                        const p = await pRes.json();
-                                        productsMap.set(p.id, p);
-                                    }
-                                } catch(e){}
-                            }
-                            this.state.wishlist = Array.from(productsMap.values());
-                            this.state.stats.wishlistCount = this.state.wishlist.length;
+                        const ordersRes = await fetch('/api/hoa-don/my-orders');
+                        if (ordersRes.ok) {
+                            this.state.orders = await ordersRes.json();
+                            this.state.stats.orderCount = this.state.orders.length;
+                            const validOrders = this.state.orders.filter(ord => ord.trangThaiMa === 'HOAN_THANH');
+                            this.state.stats.totalSpent = validOrders.reduce((sum, ord) => sum + (ord.tongTien || ord.giaTong || 0), 0);
                         }
-                    } catch(error) { console.log(error); }
+
+                        const addrRes = await fetch('/api/khach-hang/addresses');
+                        if(addrRes.ok) {
+                            this.state.addresses = await addrRes.json();
+                        }
+
+                        try {
+                            const wlRes = await fetch('/api/khach-hang/wishlist');
+                            if (wlRes.ok) {
+                                const dbWishlist = await wlRes.json();
+                                this.state.wishlist = [];
+
+                                const uniqueProductIds = [...new Set(dbWishlist.map(w => w.sanPhamId || w.idSanPham))].filter(id => id != null);
+                                const productsMap = new Map();
+
+                                for (let pId of uniqueProductIds) {
+                                    try {
+                                        const pRes = await fetch('/api/products/' + pId);
+                                        if (pRes.ok) {
+                                            const p = await pRes.json();
+                                            productsMap.set(p.id, p);
+                                        }
+                                    } catch(e){}
+                                }
+                                this.state.wishlist = Array.from(productsMap.values());
+                                this.state.stats.wishlistCount = this.state.wishlist.length;
+                            }
+                        } catch(error) {}
+                    }
 
                     this.renderAll();
                 } catch (error) {
+                    console.error(error);
                     document.getElementById('guest-view').style.display = 'block';
                     document.getElementById('account-view').style.display = 'none';
                 }
@@ -753,9 +806,8 @@
                 this.confirmAction('logout');
             },
 
-            // 🌟 MỞ FORM REVIEW TÍCH HỢP TÍNH NĂNG "SỬA"
-            openReviewModal: function(pId, pName, phanLoai, isEdit = false) {
-                this.reviewState.productId = pId;
+            openReviewModal: function(detailId, pName, phanLoai, isEdit = false) {
+                this.reviewState.orderDetailId = detailId;
                 this.reviewState.productName = pName;
                 this.reviewState.phanLoai = phanLoai;
 
@@ -763,11 +815,11 @@
                 document.getElementById('reviewModalProductType').innerText = phanLoai;
                 document.getElementById('accReviewModalOverlay').style.display = 'flex';
 
-                if (isEdit) {
+                const existingReview = this.state.myReviews.find(r => r.hoaDonChiTietId === detailId);
+
+                if (isEdit || existingReview) {
                     document.getElementById('reviewModalTitleText').innerText = "Sửa đánh giá";
                     document.getElementById('editReviewImgWarning').style.display = 'block';
-                    const existingReview = this.state.myReviews.find(r => r.sanPhamId === pId);
-
                     this.setStar(existingReview ? (existingReview.soSao || 5) : 5);
                     document.getElementById('accReviewContentInput').value = existingReview ? (existingReview.noiDung || '') : '';
                 } else {
@@ -780,6 +832,7 @@
                 this.reviewState.files = [];
                 this.renderImagePreviews();
             },
+
             closeReviewModal: function() {
                 document.getElementById('accReviewModalOverlay').style.display = 'none';
             },
@@ -816,6 +869,7 @@
                     `;
                 });
             },
+
             submitReview: async function() {
                 const btn = document.getElementById('btnSubmitAccReview');
                 btn.disabled = true;
@@ -823,7 +877,6 @@
 
                 try {
                     let uploadedUrls = [];
-                    // Nếu khách up ảnh mới -> Lấy ảnh mới. Nếu sửa đánh giá nhưng KHÔNG up ảnh mới -> Giữ nguyên ảnh cũ.
                     if (this.reviewState.files.length > 0) {
                         for (let file of this.reviewState.files) {
                             const formData = new FormData();
@@ -838,8 +891,7 @@
                             }
                         }
                     } else {
-                        // Tìm xem trước đây có ảnh không, nếu có thì giữ lại
-                        const existingReview = this.state.myReviews.find(r => r.sanPhamId === this.reviewState.productId);
+                        const existingReview = this.state.myReviews.find(r => r.hoaDonChiTietId === this.reviewState.orderDetailId);
                         if (existingReview && existingReview.danhSachHinhAnh) {
                             uploadedUrls = existingReview.danhSachHinhAnh.split(',');
                         }
@@ -852,7 +904,7 @@
                         danhSachHinhAnh: uploadedUrls.join(',')
                     };
 
-                    const res = await fetch('/api/khach-hang/reviews/' + this.reviewState.productId, {
+                    const res = await fetch('/api/khach-hang/reviews/detail/' + this.reviewState.orderDetailId, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
@@ -862,11 +914,9 @@
                         this.showAccountNotification("Thành công", "Đã lưu đánh giá thành công!");
                         this.closeReviewModal();
 
-                        // Gọi lại API để load đánh giá mới nhất về
                         const revRes = await fetch('/api/khach-hang/my-reviews');
                         if (revRes.ok) this.state.myReviews = await revRes.json();
 
-                        // Cập nhật lại màn hình Chi tiết đơn hàng hiện tại
                         if (this.state.currentViewOrderId) this.viewOrderDetail(this.state.currentViewOrderId);
                     } else {
                         this.showAccountNotification("Thất bại", "Có lỗi xảy ra, vui lòng thử lại!", true);
@@ -879,6 +929,7 @@
                 }
             },
 
+            // ================== CHI TIẾT ĐƠN HÀNG VIEW ==================
             viewOrderDetail: async function(orderId) {
                 try {
                     this.state.currentViewOrderId = orderId;
@@ -900,53 +951,49 @@
 
                     chiTiets.forEach(item => {
                         let reviewSectionHtml = '';
-
-                        // Định vị chuẩn xác dữ liệu sản phẩm
+                        const detailId = item.id;
                         const pId = item.sanPhamId || item.idSanPham || (item.sanPhamChiTiet && item.sanPhamChiTiet.sanPham ? item.sanPhamChiTiet.sanPham.id : null);
                         const pName = item.tenSanPham || item.ten || (item.sanPhamChiTiet && item.sanPhamChiTiet.sanPham ? item.sanPhamChiTiet.sanPham.ten : 'Sản phẩm');
                         const pl = item.thuocTinh || item.phanLoai || (item.sanPhamChiTiet && item.sanPhamChiTiet.mauSac ? `${item.sanPhamChiTiet.mauSac.ten} - ${item.sanPhamChiTiet.kichThuoc.ten}` : '');
+                        const sku = item.sku || (item.sanPhamChiTiet ? item.sanPhamChiTiet.sku : 'N/A');
 
-                        // Nếu HOÀN THÀNH, kiểm tra xem đã Review chưa
-                        if (currentStatus === 'HOAN_THANH' && pId) {
-                            const existingReview = this.state.myReviews.find(r => r.sanPhamId === pId);
+                        if (currentStatus === 'HOAN_THANH' && detailId) {
+                            const existingReview = this.state.myReviews.find(r => r.hoaDonChiTietId === detailId);
 
                             if (existingReview) {
-                                // 🌟 IN ĐÁNH GIÁ ĐÃ LÀM Ở NGAY BÊN DƯỚI SẢN PHẨM
                                 let starsHtml = '';
-                                for (let i = 1; i <= 5; i++) {
-                                    starsHtml += i <= existingReview.soSao ? '★' : '☆';
-                                }
-
+                                for (let i = 1; i <= 5; i++) starsHtml += i <= existingReview.soSao ? '★' : '☆';
                                 let imgsHtml = '';
                                 if (existingReview.danhSachHinhAnhList && existingReview.danhSachHinhAnhList.length > 0) {
                                     existingReview.danhSachHinhAnhList.forEach(url => {
                                         if (url.trim()) imgsHtml += `<img src="${url.trim()}" style="width:40px;height:40px;object-fit:cover;border-radius:2px;border:1px solid #eee;margin-right:6px;" onclick="event.stopPropagation(); window.open(this.src, '_blank')">`;
                                     });
                                 }
+                                let editBtnHtml = existingReview.daSua === true
+                                    ? `<span style="font-size:11px; color:#888; font-style:italic;">(Đã đánh giá)</span>`
+                                    : `<button onclick="window.AccountApp.openReviewModal(${detailId}, '${pName}', '${pl}', true)" style="background:none; border:none; color:var(--accent); font-size:11px; font-weight:500; cursor:pointer; text-decoration:underline; padding:0;">Sửa đánh giá</button>`;
 
                                 reviewSectionHtml = `
                                     <div style="margin-top:12px; background:rgba(0,0,0,0.02); padding:12px; border-radius:4px; border:1px solid rgba(0,0,0,0.04); width:100%;" onclick="event.stopPropagation()">
                                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                                             <span style="color:#f59e0b; font-size:12px; letter-spacing:2px;">${starsHtml}</span>
-                                            <button onclick="window.AccountApp.openReviewModal(${pId}, '${pName}', '${pl}', true)" style="background:none; border:none; color:var(--accent); font-size:11px; font-weight:500; cursor:pointer; text-decoration:underline; padding:0;">Sửa đánh giá</button>
+                                            ${editBtnHtml}
                                         </div>
                                         <div style="font-size:12px; color:var(--text); margin-bottom:8px; line-height:1.4; font-style:italic;">"${existingReview.noiDung || 'Không có bình luận'}"</div>
                                         <div style="display:flex; flex-wrap:wrap;">${imgsHtml}</div>
-                                    </div>
-                                `;
+                                    </div>`;
                             } else {
-                                // 🌟 NẾU CHƯA CÓ, IN NÚT VIẾT ĐÁNH GIÁ
-                                reviewSectionHtml = `<div style="margin-top:10px;"><button onclick="event.stopPropagation(); window.AccountApp.openReviewModal(${pId}, '${pName}', '${pl}', false)" style="background:none; color:var(--accent); border:1px solid var(--accent); padding:6px 16px; font-size:10px; font-weight: 500; text-transform:uppercase; letter-spacing:0.1em; border-radius:2px; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='var(--accent)'; this.style.color='#fff'" onmouseout="this.style.background='none'; this.style.color='var(--accent)'"><i class="fa-solid fa-pen-nib"></i> Viết đánh giá</button></div>`;
+                                reviewSectionHtml = `<div style="margin-top:10px;"><button onclick="event.stopPropagation(); window.AccountApp.openReviewModal(${detailId}, '${pName}', '${pl}', false)" style="background:none; color:var(--accent); border:1px solid var(--accent); padding:6px 16px; font-size:10px; font-weight: 500; text-transform:uppercase; letter-spacing:0.1em; border-radius:2px; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='var(--accent)'; this.style.color='#fff'" onmouseout="this.style.background='none'; this.style.color='var(--accent)'"><i class="fa-solid fa-pen-nib"></i> Viết đánh giá</button></div>`;
                             }
                         }
 
-                        // 🌟 FIX LỖI CLICK NHẢY TRANG (Đã khóa chặt onClick cho thẻ Hình ảnh và Tên)
                         html += `<tr>
                             <td>
                                 <div style="display:flex;align-items:flex-start; cursor:pointer;" onclick="window.location.href='/customer#detail?id=${pId}'; window.location.reload();">
                                     <img src="${item.hinhAnh||''}" class="detail-prod-img" style="margin-top:4px;" onerror="this.src='https://placehold.co/60x80'">
                                     <div style="flex:1;">
                                         <div style="font-family:'Cormorant Garamond', serif; font-size: 17px; font-weight:500; transition:color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text)'">${pName}</div>
+                                        <div style="color:var(--muted); font-size: 12px; margin-top:2px;">SKU: ${sku}</div>
                                         <div style="color:var(--muted); font-size: 12px; margin-top:2px;">${pl}</div>
                                         ${reviewSectionHtml}
                                     </div>
@@ -957,8 +1004,40 @@
                         </tr>`;
                     });
 
-                    let tongTien = data.tongTien || data.giaTong || 0;
-                    let totalRow = `<tr><td colspan="2" style="text-align:right; font-weight:600; padding-top:30px;">TỔNG TIỀN PHẢI THANH TOÁN:</td><td style="text-align:right; font-weight:700; font-size:18px; color:var(--accent); padding-top:30px;">${this.formatCurrency(tongTien)}</td></tr>`;
+                    // 🌟 GIAO DIỆN TỔNG TIỀN KIỂU MỚI BÊN PHẢI (AUTH VIEW)
+                    const phiShip = data.phiVanChuyen || 0;
+                    const giamGia = data.giaTriKhuyenMai || 0;
+                    const giaTamThoi = data.giaTamThoi || 0;
+                    const tongTien = data.tongTien || data.giaTong || 0;
+
+                    let giamGiaText = data.maGiamGia ? `Voucher giảm giá (${data.maGiamGia.maCode || data.maGiamGia.code})` : 'Voucher giảm giá';
+
+                    let totalRow = `
+                        <tr>
+                            <td colspan="3" style="padding-top: 24px; border-bottom: none;">
+                                <div style="display:flex; justify-content:flex-end;">
+                                    <div style="width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 12px;">
+                                        <div style="display:flex; justify-content:space-between; font-size:13px;">
+                                            <span style="color:var(--muted);">Tổng tiền hàng</span>
+                                            <span style="font-weight:500; color:var(--text);">${this.formatCurrency(giaTamThoi)}</span>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between; font-size:13px;">
+                                            <span style="color:var(--muted);">Phí vận chuyển</span>
+                                            <span style="font-weight:500; color:var(--text);">${phiShip > 0 ? this.formatCurrency(phiShip) : 'Miễn phí'}</span>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between; font-size:13px;">
+                                            <span style="color:var(--muted);">${giamGiaText}</span>
+                                            <span style="color:#10b981; font-weight:500;">-${this.formatCurrency(giamGia)}</span>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding-top:16px; border-top:1px dashed rgba(0,0,0,0.1);">
+                                            <span style="font-weight:600; font-size:14px; text-transform:uppercase; color:var(--text);">Thành tiền</span>
+                                            <span style="font-weight:700; font-size:22px; color:var(--accent);">${this.formatCurrency(tongTien)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
 
                     if (currentStatus === 'CHO_THANH_TOAN') {
                         totalRow += `<tr><td colspan="3" style="text-align:right; padding-top:15px; border-bottom:none;"><button onclick="window.AccountApp.repayOrder(${data.id}, ${tongTien})" class="account-form-save" style="border-radius:4px; padding:12px 24px;"><i class="bi bi-wallet2"></i> THANH TOÁN NGAY</button></td></tr>`;
@@ -973,11 +1052,40 @@
 
             renderAll: function() {
                 this.renderSidebar();
-                this.renderOverview();
-                this.renderOrders();
+
+                if (this.state.isStaff) {
+                    const navOverview = document.querySelector('.nav-item-wrapper[data-nav="overview"]');
+                    const navOrders = document.querySelector('.nav-item-wrapper[data-nav="orders"]');
+                    const navWishlist = document.querySelector('.nav-item-wrapper[data-nav="wishlist"]');
+
+                    if (navOverview) navOverview.style.display = 'none';
+                    if (navOrders) navOrders.style.display = 'none';
+                    if (navWishlist) navWishlist.style.display = 'none';
+
+                    const addrWrap = document.getElementById('addressBookHeaderWrap');
+                    const addrCont = document.getElementById('addressBookContainer');
+                    const div1 = document.getElementById('addressDivider1');
+
+                    if(addrWrap) addrWrap.style.display = 'none';
+                    if(addrCont) addrCont.style.display = 'none';
+                    if(div1) div1.style.display = 'none';
+
+                    const banner = document.getElementById('staffPortalBanner');
+                    if (banner) banner.style.display = 'flex';
+
+                    this.switchPanel('profile');
+                    document.querySelectorAll('.account-nav-btn').forEach(b => b.classList.remove('active'));
+                    const profileBtn = document.querySelector('.account-nav-btn[data-panel="profile"]');
+                    if(profileBtn) profileBtn.classList.add('active');
+
+                } else {
+                    this.renderOverview();
+                    this.renderOrders();
+                    this.renderAddressBook();
+                    this.renderWishlist();
+                }
+
                 this.renderProfileForm();
-                this.renderAddressBook();
-                this.renderWishlist();
             },
 
             renderSidebar: function() {
@@ -986,15 +1094,20 @@
                 const year = user.ngayThamGia ? new Date(user.ngayThamGia).getFullYear() : new Date().getFullYear();
                 const initial = user.hoTen ? user.hoTen.charAt(0).toUpperCase() : 'U';
 
-                document.getElementById('sidebarName').innerText = user.hoTen || 'Khách hàng';
+                document.getElementById('sidebarName').innerText = user.hoTen || 'Người dùng';
                 document.getElementById('sidebarEmail').innerText = user.email || user.soDienThoai || 'Chưa cập nhật thông tin';
-                document.getElementById('sidebarSince').innerText = 'Thành viên từ ' + year;
+
+                document.getElementById('sidebarSince').innerText = this.state.isStaff ? '🌟 CỔNG NỘI BỘ' : 'Thành viên từ ' + year;
+                if (this.state.isStaff) {
+                    document.getElementById('sidebarSince').style.color = '#ef4444';
+                    document.getElementById('sidebarSince').style.fontWeight = '800';
+                }
 
                 const avatarHtml = user.hinhAnh ? '<img src="' + user.hinhAnh + '">' : initial;
                 document.getElementById('sidebarAvatar').innerHTML = avatarHtml;
                 document.getElementById('profileAvatarBig').innerHTML = avatarHtml;
                 document.getElementById('overviewGreeting').innerText = 'Xin chào, ' + (user.hoTen || 'bạn');
-                document.getElementById('profileNameBig').innerText = user.hoTen || 'Khách hàng';
+                document.getElementById('profileNameBig').innerText = user.hoTen || (this.state.isStaff ? 'Nhân viên quản trị' : 'Khách hàng');
             },
 
             renderOverview: function() {
@@ -1021,6 +1134,7 @@
             },
 
             renderWishlist: function() {
+                if (this.state.isStaff) return;
                 const container = document.getElementById('wishlistContainer');
                 const wishlist = this.state.wishlist || [];
 
@@ -1076,6 +1190,7 @@
             },
 
             renderOrders: function() {
+                if (this.state.isStaff) return;
                 const container = document.getElementById('ordersContainer');
                 if (!this.state.orders.length) {
                     container.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--muted); border: 1px dashed #ccc;">Bạn chưa có đơn hàng nào.</div>';
@@ -1200,6 +1315,7 @@
             },
 
             renderAddressBook: function() {
+                if (this.state.isStaff) return;
                 const container = document.getElementById('addressBookContainer');
                 if(this.state.addresses.length === 0) {
                     container.innerHTML = '<div style="text-align:center; padding:30px; border:1px dashed rgba(0,0,0,0.1); border-radius:4px; color:var(--muted); font-size:13px;">Bạn chưa lưu địa chỉ giao hàng nào.</div>';
@@ -1284,7 +1400,8 @@
                 };
 
                 try {
-                    const res = await fetch('/api/khach-hang/my-profile', {
+                    const endpoint = this.state.isStaff ? '/api/nhan-vien/my-profile' : '/api/khach-hang/my-profile';
+                    const res = await fetch(endpoint, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
@@ -1527,7 +1644,8 @@
                 };
 
                 try {
-                    const res = await fetch('/api/khach-hang/change-password', {
+                    const endpoint = this.state.isStaff ? '/api/nhan-vien/change-password' : '/api/khach-hang/change-password';
+                    const res = await fetch(endpoint, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
@@ -1550,6 +1668,14 @@
                 }
             },
 
+            // 🌟 NÂNG CẤP TRA CỨU KHÁCH GUEST (GUEST VIEW)
+            openGuestTrack: function() {
+                document.getElementById('guestTrackModal').style.display = 'flex';
+            },
+            closeGuestTrack: function() {
+                document.getElementById('guestTrackModal').style.display = 'none';
+                document.getElementById('guestOrderResult').style.display = 'none';
+            },
             guestTrackOrder: async function() {
                 const ma = document.getElementById('guestOrderCode').value.trim();
                 const resultDiv = document.getElementById('guestOrderResult');
@@ -1576,6 +1702,12 @@
                     const tenKhach = data.tenNguoiNhan || 'Khách hàng';
                     const statusObj = this.getStatusConfig(maTrangThai);
 
+                    // 🌟 NÂNG CẤP: LẤY CHI TIẾT SỐ TIỀN
+                    const giaTamThoi = data.giaTamThoi || 0;
+                    const phiShip = data.phiVanChuyen || 0;
+                    const giamGia = data.giaTriKhuyenMai || 0;
+                    let giamGiaText = data.maGiamGia ? `Voucher giảm giá (${data.maGiamGia.maCode || data.maGiamGia.code})` : 'Voucher giảm giá';
+
                     const dsSanPham = data.chiTiets || data.hoaDonChiTiets || [];
                     let dsSanPhamHtml = '';
 
@@ -1587,18 +1719,20 @@
                             const hinhAnh = item.hinhAnh || (item.sanPhamChiTiet ? item.sanPhamChiTiet.hinhAnh : '');
                             const tenSP = item.tenSanPham || (item.sanPhamChiTiet && item.sanPhamChiTiet.sanPham ? item.sanPhamChiTiet.sanPham.ten : 'Sản phẩm Beemate');
                             const phanLoai = item.thuocTinh || (item.sanPhamChiTiet && item.sanPhamChiTiet.mauSac && item.sanPhamChiTiet.kichThuoc ? `${item.sanPhamChiTiet.mauSac.ten} - ${item.sanPhamChiTiet.kichThuoc.ten}` : 'Mặc định');
+                            const sku = item.sku || (item.sanPhamChiTiet ? item.sanPhamChiTiet.sku : 'N/A');
                             const gia = item.giaBan || item.giaTien || 0;
                             const sl = item.soLuong || 1;
 
                             dsSanPhamHtml += `
-                                <div style="display:flex; align-items:center; margin-bottom: 12px; gap: 12px;">
-                                    <img src="${hinhAnh || 'https://placehold.jp/150x150.png'}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid rgba(0,0,0,0.05);">
+                                <div style="display:flex; align-items:flex-start; margin-bottom: 12px; gap: 12px;">
+                                    <img src="${hinhAnh || 'https://placehold.jp/150x150.png'}" style="width: 50px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid rgba(0,0,0,0.05);">
                                     <div style="flex: 1;">
-                                        <div style="font-size:13px; font-weight:500; color:var(--text);">${tenSP}</div>
-                                        <div style="font-size:11px; color:var(--muted); margin-top: 3px;">Phân loại: ${phanLoai}</div>
+                                        <div style="font-size:13px; font-weight:600; color:var(--text); margin-bottom:2px;">${tenSP}</div>
+                                        <div style="font-size:11px; color:var(--muted); margin-bottom:2px;">Mã SP: ${sku}</div>
+                                        <div style="font-size:11px; color:var(--muted);">Phân loại: ${phanLoai}</div>
                                     </div>
                                     <div style="text-align: right;">
-                                        <div style="font-size:13px; font-weight:500; color:var(--text);">${this.formatCurrency(gia)}</div>
+                                        <div style="font-size:13px; font-weight:600; color:var(--text);">${this.formatCurrency(gia)}</div>
                                         <div style="font-size:11px; color:var(--muted); margin-top: 3px;">x${sl}</div>
                                     </div>
                                 </div>
@@ -1607,6 +1741,7 @@
                         dsSanPhamHtml += '</div>';
                     }
 
+                    // 🌟 NÂNG CẤP: BẢNG TỔNG KẾT TIỀN CHO GUEST
                     let html = `
                         <div style="margin-bottom: 20px;">
                             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 15px;">
@@ -1623,9 +1758,25 @@
 
                         ${dsSanPhamHtml}
 
-                        <div style="border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 15px; display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-size:13px; color:var(--muted);">Người nhận: <strong>${tenKhach}</strong></span>
-                            <span style="font-size:13px; color:var(--muted);">Tổng: <strong style="color:var(--text); font-size:16px;">${this.formatCurrency(tongTien)}</strong></span>
+                        <div style="border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 20px; margin-top: 10px; display:flex; justify-content:flex-end;">
+                            <div style="width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 12px;">
+                                <div style="display:flex; justify-content:space-between; font-size:13px;">
+                                    <span style="color:var(--muted);">Tổng tiền hàng</span>
+                                    <span style="font-weight:500; color:var(--text);">${this.formatCurrency(giaTamThoi)}</span>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; font-size:13px;">
+                                    <span style="color:var(--muted);">Phí vận chuyển</span>
+                                    <span style="font-weight:500; color:var(--text);">${phiShip > 0 ? this.formatCurrency(phiShip) : 'Miễn phí'}</span>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; font-size:13px;">
+                                    <span style="color:var(--muted);">${giamGiaText}</span>
+                                    <span style="color:#10b981; font-weight:500;">-${this.formatCurrency(giamGia)}</span>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding-top:16px; border-top:1px dashed rgba(0,0,0,0.1);">
+                                    <span style="font-weight:600; font-size:14px; text-transform:uppercase; color:var(--text);">Thành tiền</span>
+                                    <span style="font-weight:700; font-size:22px; color:var(--accent);">${this.formatCurrency(tongTien)}</span>
+                                </div>
+                            </div>
                         </div>
                     `;
 

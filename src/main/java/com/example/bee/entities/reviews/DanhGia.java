@@ -29,13 +29,15 @@ public class DanhGia {
     @Column(name = "so_sao")
     private Integer soSao;
 
-    @Column(name = "noi_dung", columnDefinition = "LONGTEXT")
+    // ĐÃ SỬA THÀNH NVARCHAR(MAX) CHO SQL SERVER
+    @Column(name = "noi_dung", columnDefinition = "NVARCHAR(MAX)")
     private String noiDung;
 
     @Column(name = "phan_loai")
     private String phanLoai;
 
-    @Column(name = "danh_sach_hinh_anh", columnDefinition = "LONGTEXT")
+    // ĐÃ SỬA THÀNH NVARCHAR(MAX) CHO SQL SERVER
+    @Column(name = "danh_sach_hinh_anh", columnDefinition = "NVARCHAR(MAX)")
     private String danhSachHinhAnh;
 
     @Column(name = "ngay_tao")
@@ -52,4 +54,11 @@ public class DanhGia {
         }
         return Arrays.asList(this.danhSachHinhAnh.split(","));
     }
+
+    // Trong Entity DanhGia.java
+    @Column(name = "hoa_don_chi_tiet_id")
+    private Integer hoaDonChiTietId;
+
+    @Column(name = "da_sua")
+    private Boolean daSua = false;
 }

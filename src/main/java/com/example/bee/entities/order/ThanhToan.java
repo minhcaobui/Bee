@@ -44,7 +44,8 @@ public class ThanhToan {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private Date ngayThanhToan;
 
-    @Column(columnDefinition = "LONGTEXT")
+    // ĐÃ SỬA THÀNH NVARCHAR(MAX) CHO SQL SERVER
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String ghiChu;
 
     @ManyToOne(fetch = FetchType.LAZY)

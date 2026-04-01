@@ -3,6 +3,7 @@ package com.example.bee.repositories.order;
 import com.example.bee.entities.order.HoaDon;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -27,10 +28,7 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
 
     List<HoaDon> findTop5ByLoaiHoaDonAndTrangThaiHoaDon_MaOrderByNgayTaoDesc(Integer loaiHoaDon, String maTrangThai);
 
-    // =====================================================================
-    // 1. DÀNH CHO TAB "ĐƠN CHỜ XỬ LÝ" (Trừ Hoàn thành & Đã hủy)
-    // Dùng LEFT JOIN để không bị mất Khách vãng lai
-    // =====================================================================
+    @EntityGraph(attributePaths = {"khachHang", "nhanVien", "trangThaiHoaDon"})
     @Query("SELECT h FROM HoaDon h " +
             "LEFT JOIN h.khachHang kh " +
             "LEFT JOIN h.nhanVien nv " +
@@ -50,9 +48,7 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
             Pageable pageable
     );
 
-    // =====================================================================
-    // 2. DÀNH CHO TAB "LỊCH SỬ HÓA ĐƠN" (Chỉ lấy Hoàn thành & Đã hủy)
-    // =====================================================================
+    @EntityGraph(attributePaths = {"khachHang", "nhanVien", "trangThaiHoaDon"})
     @Query("SELECT h FROM HoaDon h " +
             "LEFT JOIN h.khachHang kh " +
             "LEFT JOIN h.nhanVien nv " +

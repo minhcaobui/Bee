@@ -22,6 +22,7 @@ public class HinhAnhSanPham {
     @JsonBackReference
     private SanPham sanPham;
 
-    @Column(nullable = false, columnDefinition = "LONGTEXT")
+    // ĐÃ SỬA THÀNH NVARCHAR(MAX) CHO SQL SERVER
+    @Column(nullable = false, columnDefinition = "NVARCHAR(MAX)")
     private String url;
 }

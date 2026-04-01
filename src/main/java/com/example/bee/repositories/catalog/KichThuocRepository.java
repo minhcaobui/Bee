@@ -15,7 +15,7 @@ public interface KichThuocRepository extends JpaRepository<KichThuoc, Integer> {
 
     boolean existsByMaIgnoreCase(String ma);
 
-    @Query("SELECT k FROM KichThuoc k WHERE " +  // ✅ FIX: KichThuoc
+    @Query("SELECT k FROM KichThuoc k WHERE " +
             "(:q IS NULL OR LOWER(k.ma) LIKE LOWER(CONCAT('%', :q, '%')) " +
             "OR LOWER(k.ten) LIKE LOWER(CONCAT('%', :q, '%'))) " +
             "AND (:trangThai IS NULL OR k.trangThai = :trangThai)")

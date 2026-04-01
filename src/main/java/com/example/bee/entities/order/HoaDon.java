@@ -40,12 +40,14 @@ public class HoaDon {
     @Column(name = "sdt_nhan")
     private String sdtNhan;
 
-    @Column(name = "dia_chi_giao_hang", columnDefinition = "LONGTEXT")
+    // ĐÃ SỬA THÀNH NVARCHAR(MAX) CHO SQL SERVER
+    @Column(name = "dia_chi_giao_hang", columnDefinition = "NVARCHAR(MAX)")
     private String diaChiGiaoHang;
 
     private String phuongThucThanhToan;
 
-    @Column(columnDefinition = "LONGTEXT")
+    // ĐÃ SỬA THÀNH NVARCHAR(MAX) CHO SQL SERVER
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String ghiChu;
 
     @ManyToOne(fetch = FetchType.LAZY)

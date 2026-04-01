@@ -12,7 +12,6 @@ import java.util.List;
 @Repository
 public interface DashboardRepository extends JpaRepository<HoaDon, Integer> {
 
-    // ── STATS: doanh thu, đơn hàng, trạng thái theo khoảng thời gian ──
     @Query(nativeQuery = true, value = """
         SELECT
             ISNULL(SUM(CASE WHEN tthd.ma = 'HOAN_THANH' THEN h.gia_tong ELSE 0 END), 0)  AS rev,
@@ -37,22 +36,6 @@ public interface DashboardRepository extends JpaRepository<HoaDon, Integer> {
         """)
     List<Object[]> getStats(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
-    // ── CHART: doanh thu + đơn theo giờ/ngày/tháng ──
-    @Query(nativeQuery = true, value = """
-        SELECT
-            :labelExpr          AS label,
-            SUM(h.gia_tong)     AS revenue,
-            COUNT(h.id)         AS orders
-        FROM hoa_don h
-        JOIN trang_thai_hoa_don tthd ON h.id_trang_thai_hoa_don = tthd.id
-        WHERE h.ngay_tao BETWEEN :start AND :end
-          AND tthd.ma NOT IN ('DA_HUY')
-        GROUP BY :groupExpr
-        ORDER BY :groupExpr
-        """)
-    // ⚠ Native query không dùng dynamic GROUP BY được → dùng 3 method riêng bên dưới
-    List<Object[]> getChartByHour(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
-
     @Query(nativeQuery = true, value = """
         SELECT DATEPART(HOUR, h.ngay_tao) AS label,
                ISNULL(SUM(h.gia_tong), 0) AS revenue,
@@ -65,6 +48,19 @@ public interface DashboardRepository extends JpaRepository<HoaDon, Integer> {
         ORDER BY DATEPART(HOUR, h.ngay_tao)
         """)
     List<Object[]> getChartHour(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    @Query(nativeQuery = true, value = """
+        SELECT DATEPART(WEEKDAY, h.ngay_tao) AS label,
+               ISNULL(SUM(h.gia_tong), 0) AS revenue,
+               COUNT(h.id)                AS orders
+        FROM hoa_don h
+        JOIN trang_thai_hoa_don tthd ON h.id_trang_thai_hoa_don = tthd.id
+        WHERE h.ngay_tao BETWEEN :start AND :end
+          AND tthd.ma != 'DA_HUY'
+        GROUP BY DATEPART(WEEKDAY, h.ngay_tao)
+        ORDER BY DATEPART(WEEKDAY, h.ngay_tao)
+        """)
+    List<Object[]> getChartWeek(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
     @Query(nativeQuery = true, value = """
         SELECT DAY(h.ngay_tao)            AS label,
@@ -92,13 +88,12 @@ public interface DashboardRepository extends JpaRepository<HoaDon, Integer> {
         """)
     List<Object[]> getChartMonth(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
-    // ── TOP PRODUCTS ──
     @Query(nativeQuery = true, value = """
         SELECT TOP 12
             spct.id                         AS id,
             sp.ten                          AS name,
             spct.sku                        AS sku,
-            ms.ten + N' · ' + kt.ten        AS attr,
+            CONCAT(ms.ten, ' · ', kt.ten)   AS attr,
             SUM(hdct.so_luong)              AS sold,
             SUM(hdct.so_luong * hdct.gia_tien) AS rev
         FROM hoa_don_chi_tiet hdct
@@ -115,7 +110,6 @@ public interface DashboardRepository extends JpaRepository<HoaDon, Integer> {
         """)
     List<Object[]> getTopProducts(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
-    // ── RECENT ORDERS ──
     @Query(nativeQuery = true, value = """
         SELECT TOP 12
             h.id, h.ma,
@@ -131,7 +125,6 @@ public interface DashboardRepository extends JpaRepository<HoaDon, Integer> {
         """)
     List<Object[]> getRecentOrders();
 
-    // ── PAYMENT METHODS ──
     @Query(nativeQuery = true, value = """
         SELECT
             ISNULL(h.phuong_thuc_thanh_toan, N'Tiền mặt') AS method,
@@ -140,15 +133,14 @@ public interface DashboardRepository extends JpaRepository<HoaDon, Integer> {
         JOIN trang_thai_hoa_don tthd ON h.id_trang_thai_hoa_don = tthd.id
         WHERE h.ngay_tao BETWEEN :start AND :end
           AND tthd.ma = 'HOAN_THANH'
-        GROUP BY h.phuong_thuc_thanh_toan
+        GROUP BY ISNULL(h.phuong_thuc_thanh_toan, N'Tiền mặt')
         """)
     List<Object[]> getPaymentMethods(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
-    // ── LOW STOCK ──
     @Query(nativeQuery = true, value = """
         SELECT TOP 10
             spct.id, sp.ten, spct.sku,
-            ms.ten + N' · ' + kt.ten AS attr,
+            CONCAT(ms.ten, ' · ', kt.ten) AS attr,
             spct.so_luong
         FROM san_pham_chi_tiet spct
         JOIN san_pham sp    ON spct.id_san_pham   = sp.id
@@ -168,7 +160,6 @@ public interface DashboardRepository extends JpaRepository<HoaDon, Integer> {
     """)
     Double getAvgOrderValue(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
-    // Thay query getNewCustomers hiện tại
     @Query(nativeQuery = true, value = """
     SELECT COUNT(*) FROM (
         SELECT h.id_khach_hang
@@ -184,7 +175,7 @@ public interface DashboardRepository extends JpaRepository<HoaDon, Integer> {
     @Query(nativeQuery = true, value = """
     SELECT
         DATEPART(WEEKDAY, h.ngay_tao) AS day_of_week,
-        DATEPART(HOUR,    h.ngay_tao) AS hour_of_day,
+        DATEPART(HOUR, h.ngay_tao) AS hour_of_day,
         ISNULL(SUM(h.gia_tong), 0)    AS revenue
     FROM hoa_don h
     JOIN trang_thai_hoa_don t ON h.id_trang_thai_hoa_don = t.id
@@ -193,6 +184,4 @@ public interface DashboardRepository extends JpaRepository<HoaDon, Integer> {
     GROUP BY DATEPART(WEEKDAY, h.ngay_tao), DATEPART(HOUR, h.ngay_tao)
     """)
     List<Object[]> getHeatmap(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
-
 }
-

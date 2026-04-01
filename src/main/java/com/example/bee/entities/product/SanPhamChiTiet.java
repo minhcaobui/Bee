@@ -29,6 +29,10 @@ public class SanPhamChiTiet {
     @Column(name = "so_luong", nullable = false)
     private Integer soLuong = 0;
 
+    @Column(name = "so_luong_tam_giu", nullable = false)
+    @Builder.Default
+    private Integer soLuongTamGiu = 0;
+
     @Column(name = "hinh_anh", length = 2048)
     private String hinhAnh;
 
@@ -47,6 +51,12 @@ public class SanPhamChiTiet {
     @JoinColumn(name = "id_kich_thuoc", nullable = false)
     private KichThuoc kichThuoc;
 
-    @jakarta.persistence.Transient
+    @Transient
     private BigDecimal giaSauKhuyenMai;
+
+    @Transient
+    public Integer getSoLuongKhaDung() {
+        int khaDung = this.soLuong - (this.soLuongTamGiu != null ? this.soLuongTamGiu : 0);
+        return Math.max(0, khaDung);
+    }
 }

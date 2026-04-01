@@ -27,4 +27,3 @@ public interface ChatLieuRepository extends JpaRepository<ChatLieu, Integer> {
 
     List<ChatLieu> findByTrangThaiTrue();
 }
-

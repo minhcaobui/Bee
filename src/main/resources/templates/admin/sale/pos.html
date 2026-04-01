@@ -34,6 +34,11 @@
         input[type="text"]:focus, .filter-select:focus { border-color: #000; }
         .text-end { text-align: right; }
 
+        /* 🌟 CSS ẨN MŨI TÊN CỦA Ô NHẬP SỐ LƯỢNG */
+        .qty-input::-webkit-inner-spin-button,
+        .qty-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        .qty-input { -moz-appearance: textfield; }
+
         /* TABS */
         .tabs { display: flex; gap: 20px; border-bottom: 1px solid var(--gray-200); margin-bottom: 0; }
         .tab { font-size: 12px; font-weight: 700; color: #888; padding: 12px 0; cursor: pointer; text-transform: uppercase; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: 0.2s; }
@@ -212,7 +217,8 @@
                     <thead>
                     <tr>
                         <th style="padding-left: 20px;">Sản phẩm</th>
-                        <th style="text-align: center; width: 60px;">SL</th>
+                        <th style="text-align: right; width: 80px;">Đơn giá</th>
+                        <th style="text-align: center; width: 80px;">SL</th>
                         <th style="text-align: right; padding-right: 20px;">Thành tiền</th>
                         <th style="width: 30px;"></th>
                     </tr>
@@ -515,25 +521,20 @@
             listEl.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">Đang tải danh sách mã giảm giá...</div>';
 
             try {
-                // Gọi API lấy dữ liệu thật từ Database của bạn
                 const res = await fetch('/api/vouchers/active');
                 if(!res.ok) throw new Error("Lỗi lấy dữ liệu từ Backend");
 
                 const vouchers = await res.json();
-                this.renderVouchersList(vouchers); // Render thẳng dữ liệu thật
+                this.renderVouchersList(vouchers);
 
             } catch(e) {
                 listEl.innerHTML = '<div style="text-align: center; color: #ef4444; padding: 20px;">Không thể kết nối đến máy chủ để lấy mã giảm giá!</div>';
             }
         },
 
-        // =========================================================================
-        // NÂNG CẤP TÍNH NĂNG RENDER VOUCHER: HIỂN THỊ CHI TIẾT & BÁO CÒN THIẾU
-        // =========================================================================
         renderVouchersList: function(vouchers) {
             const listEl = document.getElementById('voucherList');
 
-            // Lọc sơ bộ các mã còn hạn, còn lượt và đang hoạt động
             const activeVouchers = vouchers.filter(v => {
                 if (v.trangThai === false) return false;
                 if (v.soLuong !== undefined && v.luotSuDung !== undefined && v.soLuong <= v.luotSuDung) return false;
@@ -554,28 +555,22 @@
                 inv.cart.forEach(i => {
                     totalAfterSale += (Number(i.price) * i.qty);
 
-                    // YÊU CẦU 3: Kiểm tra giỏ hàng có SP nguyên giá hay không?
-                    // (Nếu giá bán >= giá gốc, hoặc SP không có giá gốc -> Là nguyên giá)
                     if (!i.originalPrice || Number(i.price) >= Number(i.originalPrice)) {
                         hasFullPriceItem = true;
                     }
                 });
             }
 
-            // Lấy mã đang được chọn hiện tại
             const selectedCode = inv && inv.voucher ? (inv.voucher.maCode || inv.voucher.code) : null;
 
             listEl.innerHTML = activeVouchers.map(v => {
                 const isEligible = totalAfterSale >= v.dieuKien;
 
-                // Kiểm tra điều kiện cộng dồn
                 const isStackable = v.choPhepCongDon === true || v.choPhepCongDon === 1;
                 const meetsStackCondition = isStackable || hasFullPriceItem;
 
-                // YÊU CẦU 1: Kiểm tra xem mã này có đang được chọn không
                 const isSelected = (selectedCode === (v.maCode || v.code));
 
-                // YÊU CẦU 2: Tính toán thanh năng lượng
                 const tongSL = v.soLuong || 0;
                 const daDung = v.luotSuDung || 0;
                 const phanTram = tongSL > 0 ? Math.min((daDung / tongSL) * 100, 100) : 0;
@@ -586,7 +581,6 @@
                 let noteHtml = `<div style="font-size: 10px; color: #10b981; margin-top: 4px; font-weight:600;">Đơn tối thiểu: ${new Intl.NumberFormat('vi-VN').format(v.dieuKien)}đ</div>`;
                 let cardClass = 'voucher-card';
 
-                // LOGIC HIỂN THỊ NÚT & TRẠNG THÁI
                 if (isSelected) {
                     cardClass += ' selected';
                     actionBtn = `<button class="btn" style="background:#ef4444; border-color:#ef4444;" onclick="PosApp.removeVoucher()">BỎ CHỌN</button>`;
@@ -656,69 +650,123 @@
             if(!inv) return;
             inv.voucher = null;
             document.getElementById('voucherInput').value = '';
+            this.updateTotal();
             this.saveState();
             this.renderCart();
-
-            // Đóng modal tự động nếu người dùng bấm bỏ chọn trong modal
             this.closeModal('voucherModal');
             toast("Đã gỡ mã giảm giá", "success");
         },
 
-        // YÊU CẦU 1: Xử lý chức năng BỎ CHỌN nếu bấm vào voucher đang chọn
-        applyVoucher: function(code, maxVal, val, type, isUnselect = false) {
+        applyVoucher: async function() {
             const inv = this.getCurrentInvoice();
-            if (!inv) return;
+            const code = document.getElementById('voucherInput').value.trim();
+            if (!code || !inv) return;
+            if (inv.cart.length === 0) { toast("GIỎ HÀNG TRỐNG", "warning"); return; }
 
-            if (isUnselect) {
-                // Xóa Voucher khỏi hóa đơn
-                inv.voucherCode = null;
-                inv.voucherMax = 0;
-                inv.voucherValue = 0;
-                inv.voucherType = null;
-                toast("Đã bỏ mã giảm giá", "info");
-            } else {
-                // Áp dụng Voucher mới
-                inv.voucherCode = code;
-                inv.voucherMax = maxVal || 0;
-                inv.voucherValue = val || 0;
-                inv.voucherType = type || 'fixed';
-                toast("Đã áp dụng mã: " + code, "success");
-            }
+            try {
+                const res = await fetch('/api/pos/vouchers/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: code, cart: inv.cart })
+                });
+                const data = await res.json();
+                if(!res.ok) {
+                    toast(data.message || 'MÃ KHÔNG HỢP LỆ', 'error');
+                    this.removeVoucher();
+                    return;
+                }
 
-            this.saveState();
-            this.renderTabs();
-            document.getElementById('voucherModal').style.display = 'none';
+                inv.voucher = data;
+                this.updateTotal();
+                this.saveState();
+                this.renderTabs();
+                this.closeModal('voucherModal');
+                toast("ÁP DỤNG MÃ THÀNH CÔNG", "success");
+            } catch (e) { toast("LỖI KẾT NỐI", "error"); }
         },
 
         updateTotal: function () {
             const inv = this.getCurrentInvoice();
             if (!inv) return;
             let subTotal = 0; let saleDiscount = 0;
+            let tongTienNguyenGia = 0;
+
             inv.cart.forEach(i => {
-                const giaGoc = Number(i.originalPrice) || Number(i.price); const giaBan = Number(i.price);
-                subTotal += (giaGoc * i.qty); saleDiscount += ((giaGoc - giaBan) * i.qty);
+                const giaGoc = Number(i.originalPrice) || Number(i.price);
+                const giaBan = Number(i.price);
+                const qty = Number(i.qty);
+                subTotal += (giaGoc * qty);
+                saleDiscount += ((giaGoc - giaBan) * qty);
+
+                if (giaBan >= giaGoc) {
+                    tongTienNguyenGia += (giaBan * qty);
+                }
             });
-            subTotal = Math.round(subTotal); saleDiscount = Math.round(saleDiscount);
+
+            subTotal = Math.round(subTotal);
+            saleDiscount = Math.round(saleDiscount);
             let totalAfterSale = subTotal - saleDiscount;
 
             let calcVoucher = 0;
             const removeBtn = document.getElementById('removeVoucherBtn');
 
             if (inv.voucher) {
-                removeBtn.style.display = 'inline-block';
-                document.getElementById('voucherInput').value = inv.voucher.maCode || inv.voucher.code || '';
+                const v = inv.voucher;
+                let isValid = true;
 
-                const v = inv.voucher; const giaTriVoucher = Number(v.giaTriGiamGia);
+                if (totalAfterSale < v.dieuKien) {
+                    isValid = false;
+                }
+
+                const choPhepCongDon = (v.choPhepCongDon === true || v.choPhepCongDon === 1 || v.choPhepCongDon === 'true');
                 const type = (v.loaiGiamGia || '').toUpperCase();
-                calcVoucher = type === 'PERCENTAGE' ? (totalAfterSale * giaTriVoucher) / 100 : giaTriVoucher;
-                if (v.giaTriGiamGiaToiDa && calcVoucher > Number(v.giaTriGiamGiaToiDa)) calcVoucher = Number(v.giaTriGiamGiaToiDa);
+                const isFreeship = type === 'FREESHIP';
+
+                if (!choPhepCongDon && !isFreeship && tongTienNguyenGia === 0) {
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    inv.voucher = null;
+                    removeBtn.style.display = 'none';
+                    document.getElementById('voucherInput').value = '';
+                    toast("Mã giảm giá đã bị gỡ do giỏ hàng thay đổi!", "warning");
+                } else {
+                    removeBtn.style.display = 'inline-block';
+                    document.getElementById('voucherInput').value = v.maCode || v.code || '';
+
+                    let baseForVoucher = totalAfterSale;
+                    if (!choPhepCongDon && !isFreeship) {
+                        baseForVoucher = tongTienNguyenGia;
+                    }
+
+                    const giaTriVoucher = Number(v.giaTriGiamGia);
+                    if (type.includes('PERCENT') || type.includes('%')) {
+                        calcVoucher = (baseForVoucher * giaTriVoucher) / 100;
+                        if (v.giaTriGiamGiaToiDa && calcVoucher > Number(v.giaTriGiamGiaToiDa)) {
+                            calcVoucher = Number(v.giaTriGiamGiaToiDa);
+                        }
+                    } else {
+                        calcVoucher = giaTriVoucher;
+                        if (calcVoucher > baseForVoucher) {
+                            calcVoucher = baseForVoucher;
+                        }
+                    }
+                }
             } else {
                 removeBtn.style.display = 'none';
                 document.getElementById('voucherInput').value = '';
             }
 
             let voucherDiscount = Math.round(calcVoucher);
-            const total = Math.round(Math.max(0, totalAfterSale - voucherDiscount));
+
+            let tongKhuyenMai = saleDiscount + voucherDiscount;
+            let maxKhuyenMai = Math.round(subTotal * 0.70);
+            if (tongKhuyenMai > maxKhuyenMai) {
+                voucherDiscount = Math.max(0, maxKhuyenMai - saleDiscount);
+            }
+
+            const total = Math.round(Math.max(0, subTotal - saleDiscount - voucherDiscount));
 
             document.getElementById('lblSubTotal').innerText = new Intl.NumberFormat('vi-VN').format(subTotal) + ' ₫';
             document.getElementById('lblPromoDiscount').innerText = '-' + new Intl.NumberFormat('vi-VN').format(saleDiscount) + ' ₫';
@@ -742,7 +790,7 @@
                         body: JSON.stringify({ maHD: maHDFromUrl })
                     });
                     if (res.ok) {
-                        let completedInvoiceId = null; // 🌟 Lấy ID hóa đơn trực tiếp từ RAM trước khi xóa
+                        let completedInvoiceId = null;
                         const idx = this.invoices.findIndex(inv => inv.maHD === maHDFromUrl);
                         if (idx !== -1) {
                             completedInvoiceId = this.invoices[idx].dbId;
@@ -756,7 +804,6 @@
                         this.renderTabs();
                         this.renderCart();
 
-                        // 🌟 Gọi in hóa đơn bằng ID vừa lấy
                         if(completedInvoiceId) {
                             this.inHoaDon(completedInvoiceId);
                         }
@@ -764,12 +811,11 @@
                 } catch (e) { console.error("Lỗi xác nhận MoMo:", e); }
                 window.history.replaceState({}, document.title, window.location.pathname);
             } else if (resultCode && resultCode !== '0') {
-                // Hủy HĐ trong DB nếu có
                 const maHDFromUrl = orderId?.split('_')[0];
                 const failedInv = this.invoices.find(inv => inv.maHD === maHDFromUrl);
                 if (failedInv?.dbId) {
                     await fetch(`/api/pos/invoices/${failedInv.dbId}`, { method: 'DELETE' });
-                    failedInv.dbId = null; // reset để có thể mở lại thanh toán
+                    failedInv.dbId = null;
                     failedInv.maHD = null;
                     this.saveState();
                 }
@@ -791,7 +837,7 @@
                         body: JSON.stringify({ maHD: maHDFromUrl })
                     });
                     if (res.ok) {
-                        let completedInvoiceId = null; // 🌟 Tương tự như Momo
+                        let completedInvoiceId = null;
                         const idx = this.invoices.findIndex(inv => inv.maHD === maHDFromUrl);
                         if (idx !== -1) {
                             completedInvoiceId = this.invoices[idx].dbId;
@@ -873,14 +919,10 @@
         getAvailableStock: function(spctId) {
             const product = this.products.find(p => p.id === spctId);
             if (!product) return 0;
-            let inCartQty = 0;
-            this.invoices.forEach(inv => {
-                if (inv.cart) {
-                    const item = inv.cart.find(i => i.id === spctId);
-                    if (item) inCartQty += item.qty;
-                }
-            });
-            return product.soLuong - inCartQty;
+
+            // BACKEND ĐÃ TRỪ SẴN SỐ LƯỢNG TẠM GIỮ RỒI
+            // Frontend không cần phải trừ số lượng trong giỏ (inCartQty) nữa!
+            return product.soLuong;
         },
 
         renderProducts: function (list) {
@@ -908,12 +950,12 @@
             if (this.invoices.length >= 5) { toast("TỐI ĐA 5 ĐƠN CHỜ", "warning"); return; }
 
             const orderNum = this.invoices.length + 1;
-            const tempId   = Date.now(); // ID tạm thời, chưa có trong DB
+            const tempId   = Date.now();
             const expiry   = new Date().getTime() + (24 * 60 * 60 * 1000);
 
             this.invoices.push({
                 id: tempId,
-                dbId: null,     // ← chưa có DB id
+                dbId: null,
                 maHD: null,
                 name: `HÓA ĐƠN ${orderNum}`,
                 cart: [],
@@ -936,7 +978,7 @@
             await this.syncCartWithServer();
             this.renderCart();
             const inv = this.getCurrentInvoice();
-            document.getElementById('voucherInput').value = inv && inv.voucher ? (inv.voucher.maCode || '') : '';
+            document.getElementById('voucherInput').value = inv && inv.voucher ? (inv.voucher.maCode || inv.voucher.code || '') : '';
         },
 
         promptDelete: function () {
@@ -947,7 +989,6 @@
         forceDelete: async function (targetId = this.activeInvoiceId) {
             const inv = this.invoices.find(i => i.id === targetId);
 
-            // Chưa vào bước thanh toán → chỉ xóa RAM
             if (!inv || !inv.dbId) {
                 this.invoices = this.invoices.filter(i => i.id !== targetId);
                 this.invoices.forEach((i, idx) => i.name = `HÓA ĐƠN ${idx + 1}`);
@@ -962,7 +1003,6 @@
                 return;
             }
 
-            // Đã vào bước thanh toán → gọi API hủy DB
             try {
                 const res = await fetch(`/api/pos/invoices/${inv.dbId}`, { method: 'DELETE' });
                 if (res.ok) {
@@ -989,7 +1029,6 @@
                 const res = await fetch('/api/pos/invoices/pending');
                 const pendingInvoices = await res.json();
 
-                // Chỉ xóa các đơn đã có dbId nhưng không còn trên server
                 this.invoices = this.invoices.filter(localInv =>
                     !localInv.dbId || pendingInvoices.some(s => s.id === localInv.dbId)
                 );
@@ -1003,24 +1042,22 @@
 
         addToCart: async function (spctId) {
             if (!this.activeInvoiceId) { toast("VUI LÒNG TẠO HÓA ĐƠN TRƯỚC", "warning"); return; }
-            const available = this.getAvailableStock(spctId);
-            if (available <= 0) { toast("Sản phẩm đã hết hàng!", "warning"); return; }
 
-            // ✅ Chỉ check tồn kho qua API, không lưu DB
+            // 1. Gọi API khóa tạm giữ 1 sản phẩm (delta = 1)
             try {
-                const res = await fetch(`/api/pos/invoices/check-stock`, {
+                const res = await fetch(`/api/pos/invoices/update-hold`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ spctId, qty: 1 })
+                    body: JSON.stringify({ spctId: spctId, delta: 1 })
                 });
                 if (!res.ok) {
                     const err = await res.json();
-                    toast(err.message || "Không đủ hàng!", "warning");
+                    toast(err.message || "Sản phẩm đã hết hàng!", "error");
                     return;
                 }
             } catch (e) { toast("Lỗi kết nối!", "error"); return; }
 
-            // Thêm vào RAM
+            // 2. Thêm vào giao diện
             const inv     = this.getCurrentInvoice();
             const product = this.products.find(p => p.id === spctId);
             const item    = inv.cart.find(i => i.id === spctId);
@@ -1034,29 +1071,72 @@
                     attr: `${product.mauSac.ten} - ${product.kichThuoc.ten}`, qty: 1
                 });
             }
-            this.saveState(); this.renderCart(); this.renderProducts(this.products);
-            toast("Đã thêm vào giỏ hàng");
+            this.saveState(); this.renderCart(); this.loadProducts("");
+            toast("Đã thêm vào giỏ hàng và khóa kho!");
         },
 
-        changeQty: function (spctId, delta) {
+        changeQty: async function (spctId, delta) {
             const inv  = this.getCurrentInvoice();
             const item = inv.cart.find(i => i.id === spctId);
             if (!item) return;
 
+            // Nếu người dùng bấm Xóa (delta = -999), thì lượng nhả kho sẽ bằng âm số lượng đang có
+            let actualDelta = (delta === -999) ? -item.qty : delta;
+
+            // 1. Gọi API cộng/trừ số lượng tạm giữ
+            try {
+                const res = await fetch(`/api/pos/invoices/update-hold`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ spctId: spctId, delta: actualDelta })
+                });
+                if (!res.ok) {
+                    toast("Kho không đủ hàng", "warning");
+                    return;
+                }
+            } catch (e) { toast("Lỗi kết nối!", "error"); return; }
+
+            // 2. Xử lý giao diện
             const newQty = item.qty + delta;
-
-            if (delta > 0) {
-                const available = this.getAvailableStock(spctId);
-                if (available < delta) { toast("Kho không đủ hàng", "warning"); return; }
-            }
-
             if (newQty <= 0 || delta === -999) {
                 inv.cart = inv.cart.filter(i => i.id !== spctId);
-                toast("Đã xóa khỏi giỏ");
+                toast("Đã xóa khỏi giỏ và nhả kho");
             } else {
                 item.qty = newQty;
             }
-            this.saveState(); this.renderCart(); this.renderProducts(this.products);
+            this.saveState(); this.renderCart(); this.loadProducts("");
+        },
+
+        setQty: async function (spctId, val) {
+            let newQty = parseInt(val);
+            if (isNaN(newQty) || newQty < 1) newQty = 1;
+
+            const inv = this.getCurrentInvoice();
+            const item = inv.cart.find(i => i.id === spctId);
+            if (!item) return;
+
+            const diff = newQty - item.qty;
+            if (diff === 0) return;
+
+            // 1. Báo Server cập nhật lượng chênh lệch (có thể âm hoặc dương)
+            try {
+                const res = await fetch(`/api/pos/invoices/update-hold`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ spctId: spctId, delta: diff })
+                });
+                if (!res.ok) {
+                    toast("Kho không đủ đáp ứng số lượng này", "warning");
+                    this.renderCart(); // Reset lại ô input về số cũ
+                    return;
+                }
+            } catch (e) { toast("Lỗi kết nối!", "error"); return; }
+
+            // 2. Cập nhật giao diện
+            item.qty = newQty;
+            this.saveState();
+            this.renderCart();
+            this.loadProducts("");
         },
 
         searchCustomer: async function(val) {
@@ -1078,15 +1158,12 @@
         selectCustomer: function (name, phone, id) {
             let inv = this.getCurrentInvoice();
 
-            // NẾU CHƯA CÓ HÓA ĐƠN: Tự động tạo 1 hóa đơn mới thay vì báo lỗi
             if (!inv) {
                 if (this.invoices.length >= 5) {
                     toast("ĐÃ ĐẠT TỐI ĐA 5 HÓA ĐƠN CHỜ", "warning");
                     return;
                 }
-                // Tự động kích hoạt hàm tạo hóa đơn
                 this.createInvoice();
-                // Lấy lại hóa đơn vừa được tạo
                 inv = this.getCurrentInvoice();
             }
 
@@ -1099,12 +1176,10 @@
             this.closeModal('customerModal');
         },
 
-        // --- MÀN HÌNH THANH TOÁN: XỬ LÝ CHỐT ĐƠN VÀ GỌI IN HÓA ĐƠN MỘT MẠCH ---
         finishOrder: async function () {
             const inv = this.getCurrentInvoice();
             const total = parseInt(document.getElementById('lblTotal').innerText.replace(/\D/g, '')) || 0;
             const isCash = document.getElementById('cash-section').style.display !== 'none';
-
             let finalMethod = isCash ? 'TIEN_MAT' : 'MOMO';
 
             if (isCash) {
@@ -1114,19 +1189,24 @@
 
             if (finalMethod === 'MOMO') {
                 try {
-                    const resMomo = await fetch(`/api/pos/momo-payment/${inv.dbId}`, {
+                    const resMomo = await fetch(`/api/pos/momo-payment`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ cart: inv.cart, amount: total, customerId: inv.customerId })
                     });
                     const dataMomo = await resMomo.json();
-                    if (dataMomo.payUrl) { window.location.href = dataMomo.payUrl; this.closeModal('payModal'); }
+                    if (dataMomo.payUrl) {
+                        inv.maHD = dataMomo.maHD; // Gán mã HD ảo vào để check lúc về
+                        this.saveState();
+                        window.location.href = dataMomo.payUrl;
+                        this.closeModal('payModal');
+                    }
                     else { toast(dataMomo.message || "Lỗi MoMo!", "error"); }
                 } catch (e) { toast("LỖI KẾT NỐI", "error"); }
                 return;
             }
 
+            // THANH TOÁN TIỀN MẶT
             const payload = {
-                invoiceId: inv.dbId,
                 customerId: inv.customerId,
                 total: total,
                 method: finalMethod,
@@ -1140,20 +1220,24 @@
                     body: JSON.stringify(payload)
                 });
                 if (res.ok) {
+                    const data = await res.json();
                     toast("Thanh toán thành công! Máy đang in hóa đơn...", "success");
 
-                    const completedInvoiceId = inv.dbId;
+                    const completedInvoiceId = data.id; // Backend giờ sẽ trả về id
+
+                    // Dọn dẹp tab hóa đơn
                     this.invoices = this.invoices.filter(i => i.id !== this.activeInvoiceId);
                     this.invoices.forEach((i, idx) => i.name = `HÓA ĐƠN ${idx + 1}`);
                     this.activeInvoiceId = this.invoices.length > 0 ? this.invoices[0].id : null;
-                    this.saveState(); await this.loadProducts(""); this.renderTabs();
 
-                    if (this.activeInvoiceId) await this.syncCartWithServer();
-                    else this.renderCart();
-
+                    this.saveState();
+                    await this.loadProducts("");
+                    this.renderTabs();
+                    this.renderCart();
                     this.closeModal('payModal');
-                    this.inHoaDon(completedInvoiceId);
 
+                    // In hóa đơn
+                    this.inHoaDon(completedInvoiceId);
                 } else {
                     let errorMsg = "Thanh toán thất bại.";
                     try { const errData = await res.json(); errorMsg = errData.message || errorMsg; } catch (ex) {}
@@ -1162,10 +1246,39 @@
             } catch (e) { toast("Lỗi kết nối đến máy chủ!", "error"); }
         },
 
-        // --- HÀM IN HÓA ĐƠN CHUYÊN NGHIỆP ---
+        forceDelete: async function (targetId = this.activeInvoiceId) {
+            const inv = this.invoices.find(i => i.id === targetId);
+            if (!inv) return;
+
+            // 🌟 NHẢ TỒN KHO: Duyệt giỏ hàng và gọi API nhả hàng
+            if (inv.cart && inv.cart.length > 0) {
+                for (let item of inv.cart) {
+                    try {
+                        await fetch(`/api/pos/invoices/update-hold`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ spctId: item.id, delta: -item.qty })
+                        });
+                    } catch(e){}
+                }
+            }
+
+            // Xóa Local
+            this.invoices = this.invoices.filter(i => i.id !== targetId);
+            this.invoices.forEach((i, idx) => i.name = `HÓA ĐƠN ${idx + 1}`);
+            if (this.activeInvoiceId === targetId) {
+                this.activeInvoiceId = this.invoices.length > 0 ? this.invoices[0].id : null;
+            }
+            this.saveState();
+            await this.loadProducts(""); // Load lại bảng SP
+            this.renderTabs(); this.renderCart();
+            this.closeModal('confirmModal');
+            toast("ĐÃ HỦY HÓA ĐƠN", "success");
+        },
+
         inHoaDon: async function(idHoaDon) {
             try {
-                const res = await fetch('/api/hoa-don/' + idHoaDon + '/print-data');
+                const res = await fetch('/api/pos/' + idHoaDon + '/print-data');
                 if (!res.ok) throw new Error("Không lấy được dữ liệu in");
                 const data = await res.json();
 
@@ -1220,7 +1333,7 @@
 
                     <table>
                         <tr><td>Tổng tiền hàng:</td><td>${formatTien(data.summary.tongTienHang)}</td></tr>
-                        ${data.summary.giamGia > 0 ? `<tr><td>Giảm giá (Voucher):</td><td>- ${formatTien(data.summary.giamGia)}</td></tr>` : ''}
+                        ${data.summary.giamGia > 0 ? `<tr><td>Giảm giá:</td><td>- ${formatTien(data.summary.giamGia)}</td></tr>` : ''}
                         ${data.summary.phiVanChuyen > 0 ? `<tr><td>Phí vận chuyển:</td><td>${formatTien(data.summary.phiVanChuyen)}</td></tr>` : ''}
                         <tr><td class="bold">KHÁCH PHẢI TRẢ:</td><td class="bold" style="font-size:14px;">${formatTien(data.summary.tongThanhToan)}</td></tr>
                     </table>
@@ -1245,7 +1358,6 @@
                     </body></html>
                 `;
 
-                // 🌟 TẠO IFRAME ẨN ĐỂ IN (Tránh 100% bị trình duyệt chặn Pop-up)
                 let printFrame = document.getElementById('hidden-print-frame');
                 if (!printFrame) {
                     printFrame = document.createElement('iframe');
@@ -1264,7 +1376,6 @@
                 frameDoc.write(htmlContent);
                 frameDoc.close();
 
-                // Đợi nội dung load xong rồi tự động in
                 setTimeout(() => {
                     printFrame.contentWindow.focus();
                     printFrame.contentWindow.print();
@@ -1281,33 +1392,7 @@
             if (!inv) { toast("Vui lòng chọn hoặc tạo hóa đơn trước", "warning"); return; }
             if (!inv.cart || inv.cart.length === 0) { toast("Giỏ hàng đang trống", "warning"); return; }
 
-            // ✅ Lưu DB lần đầu tiên khi bước vào thanh toán
-            if (!inv.dbId) {
-                try {
-                    const res = await fetch('/api/pos/invoices/open-payment', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            customerId: inv.customerId,
-                            cart: inv.cart,
-                            voucherId: inv.voucher ? inv.voucher.id : null
-                        })
-                    });
-                    if (!res.ok) {
-                        const err = await res.json();
-                        toast(err.message || "Không thể mở thanh toán!", "error");
-                        return;
-                    }
-                    const data = await res.json();
-                    inv.dbId = data.id;   // ← lưu DB id thật
-                    inv.maHD = data.ma;
-                    this.saveState();
-                } catch (e) {
-                    toast("Lỗi kết nối máy chủ!", "error");
-                    return;
-                }
-            }
-
+            // 🌟 ĐÃ CẮT BỎ API TẠO DB Ở ĐÂY, CHỈ MỞ GIAO DIỆN
             document.getElementById('inpKhachDua').value = '';
             document.getElementById('lblTienThua').innerText = '0 ₫';
             const tabs = document.querySelectorAll('.payment-tab');
@@ -1338,20 +1423,28 @@
             const tbody = document.getElementById('cartBody');
             if (!inv || !inv.cart || inv.cart.length === 0) {
                 tbody.innerHTML = ''; document.getElementById('emptyCart').style.display = 'block';
-                this.updateTotal(0); return;
+                this.updateTotal(); return;
             }
             document.getElementById('emptyCart').style.display = 'none';
+
+            // 🌟 RENDER LẠI BẢNG GIỎ HÀNG: CÓ THÊM CỘT ĐƠN GIÁ VÀ THẺ INPUT CHO SỐ LƯỢNG
             tbody.innerHTML = inv.cart.map(i => `
                 <tr>
                     <td style="padding-left: 20px;"><b>${i.name}</b><br><small>${i.attr}</small></td>
+                    <td style="text-align:right; font-weight: 600;">${new Intl.NumberFormat('vi-VN').format(Number(i.price))} ₫</td>
                     <td style="text-align:center;">
                         <div style="display:flex; justify-content:center; align-items:center; gap:5px;">
                             <button class="btn-icon" style="width:20px; height:20px;" onclick="PosApp.changeQty(${i.id}, -1)">-</button>
-                            <span>${i.qty}</span>
+
+                            <input type="number" class="qty-input" value="${i.qty}"
+                                   style="width: 36px; text-align: center; border: 1px solid #ccc; border-radius: 2px; height: 24px; font-weight: 600; outline: none;"
+                                   onchange="PosApp.setQty(${i.id}, this.value)"
+                                   onfocus="this.select()">
+
                             <button class="btn-icon" style="width:20px; height:20px;" onclick="PosApp.changeQty(${i.id}, 1)">+</button>
                         </div>
                     </td>
-                    <td style="text-align:right; padding-right: 20px;">${new Intl.NumberFormat('vi-VN').format(Number(i.price) * Number(i.qty))} ₫</td>
+                    <td style="text-align:right; padding-right: 20px; font-weight: 700; color: #e11d48;">${new Intl.NumberFormat('vi-VN').format(Number(i.price) * Number(i.qty))} ₫</td>
                     <td><i class="bi bi-trash" style="cursor:pointer; color:#ef4444;" onclick="PosApp.changeQty(${i.id}, -999)"></i></td>
                 </tr>`).join('');
             this.updateTotal();
@@ -1390,13 +1483,11 @@
             if (!name || !phone) { toast("VUI LÒNG NHẬP ĐỦ THÔNG TIN", "warning"); return; }
 
             try {
-                // Kiểm tra SĐT (Tìm kiếm chính xác bằng cách filter dữ liệu trả về)
                 const checkRes = await fetch(`/api/pos/customers/search?q=${phone}`);
                 const existing = await checkRes.json();
                 const duplicate = existing.find(c => c.soDienThoai === phone);
                 if (duplicate) { toast(`SỐ ĐIỆN THOẠI ĐÃ TỒN TẠI`, "warning"); return; }
 
-                // Gọi API tạo khách hàng
                 const res = await fetch('/api/pos/customers', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1405,15 +1496,9 @@
 
                 if (res.ok) {
                     const kh = await res.json();
-
-                    // Gắn khách hàng vào Hóa đơn (Hoặc tự tạo HĐ mới nếu chưa có)
                     this.selectCustomer(kh.hoTen, kh.soDienThoai, kh.id);
-
-                    // Xóa rỗng form thêm mới để lần sau mở lên cho sạch sẽ
                     document.getElementById('newCustName').value = '';
                     document.getElementById('newCustPhone').value = '';
-
-                    // Hiện thông báo thành công
                     toast("Đã thêm khách. Mật khẩu đăng nhập mặc định: 123456", "success");
                 } else {
                     const error = await res.json();

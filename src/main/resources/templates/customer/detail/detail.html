@@ -9,6 +9,12 @@
         .detail-badge.new { background: var(--accent); }
         .detail-badge.sale { background: #dc2626; }
 
+        /* 🌟 CSS CHO COLOR BADGE VÀ STOCK BADGE MỚI */
+        .color-badge { display: inline-block; padding: 2px 8px; background: #000; color: #fff; border-radius: 2px; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .stock-badge { padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; margin-left: 8px; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; transform: translateY(-1px); }
+        .stock-badge.good { background: #d1fae5; color: #059669; }
+        .stock-badge.warning { background: #fee2e2; color: #dc2626; }
+
         .product-detail-layout { display: grid; grid-template-columns: 1.1fr 1fr; gap: 60px; align-items: start; max-width: 1100px; margin: 0 auto; padding: 0 40px; }
 
         .detail-gallery { width: 100%; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
@@ -83,7 +89,7 @@
         .color-dot-inner { width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); }
 
         .size-tooltip { position: absolute; background: var(--text); color: white; padding: 16px 20px; font-size: 12px; line-height: 1.8; white-space: nowrap; display: none; z-index: 10; border-radius: 2px; }
-        .stock-status { font-size: 11px; margin-top: 8px; color: #10b981; font-weight: 500; font-family: 'DM Sans', sans-serif; }
+        .stock-status { font-size: 11px; margin-top: 8px; color: #10b981; font-weight: 500; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; }
         .stock-status.low { color: #f59e0b; }
         .stock-status.out { color: #ef4444; }
 
@@ -94,9 +100,8 @@
         .accordion-header span { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 400; }
         .accordion-header svg { width: 16px; height: 16px; stroke: var(--muted); stroke-width: 1.5; transition: transform 0.3s ease; }
 
-        /* 🌟 NÂNG CẤP CSS ACCORDION ĐỂ CHỨA REVIEW */
         .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.4s ease; font-size: 13px; color: var(--muted); line-height: 1.8; font-weight: 300; }
-        .accordion-item.active .accordion-content { max-height: 800px; padding-bottom: 20px; } /* Tăng max-height lên 800px */
+        .accordion-item.active .accordion-content { max-height: 800px; padding-bottom: 20px; }
         .accordion-item.active .accordion-header svg { transform: rotate(180deg); stroke: var(--text); }
 
         #recentViewedSection { max-width: 1100px; margin: 100px auto 0; padding: 0 40px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 80px;}
@@ -121,9 +126,7 @@
         .wishlist-btn.active { border-color: #ef4444; color: #ef4444; }
         .wishlist-btn.active svg { fill: #ef4444; stroke: #ef4444; }
 
-        /* 🌟 NÂNG CẤP GIAO DIỆN ĐÁNH GIÁ TRONG ACCORDION */
         .reviews-container-scroll { max-height: 400px; overflow-y: auto; padding-right: 15px; margin-bottom: 10px; }
-        /* Tùy chỉnh thanh cuộn Review */
         .reviews-container-scroll::-webkit-scrollbar { width: 5px; }
         .reviews-container-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.02); border-radius: 4px; }
         .reviews-container-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 4px; }
@@ -131,8 +134,8 @@
 
         .review-stats { display: flex; align-items: center; gap: 12px; }
         .stars { color: #f59e0b; font-size: 14px; }
-        .review-item { padding-bottom: 24px; margin-bottom: 24px; border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .reviewer-name { font-size: 13px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px; }
+        .review-item { padding-bottom: 24px; margin-bottom: 24px; border-bottom: 1px solid rgba(0,0,0,0.05); position: relative; }
+        .reviewer-name { font-size: 13px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px; justify-content: space-between; }
         .verified-badge { font-size: 10px; color: #10b981; font-weight: 500; background: #d1fae5; padding: 2px 6px; border-radius: 2px; }
         .review-meta { font-size: 11px; color: var(--muted); margin: 6px 0 12px; }
         .review-content { font-size: 13px; color: var(--text); line-height: 1.6; font-weight: 300; }
@@ -140,7 +143,6 @@
         .review-img { width: 70px; height: 70px; border-radius: 4px; object-fit: cover; cursor: zoom-in; border: 1px solid rgba(0,0,0,0.05); transition: opacity 0.2s;}
         .review-img:hover { opacity: 0.8; }
 
-        /* 🌟 POPUP VIẾT ĐÁNH GIÁ */
         .review-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
         .review-modal { background: #fff; width: 450px; max-width: 90%; border-radius: 4px; padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); position: relative; }
         .review-modal-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; margin-bottom: 20px; text-align: center; }
@@ -153,14 +155,12 @@
         .review-img-previews { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
         .review-modal-close { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 18px; cursor: pointer; color: var(--muted); }
 
-        /* 🌟 POPUP XEM TOÀN BỘ ĐÁNH GIÁ */
         .all-reviews-modal { background: #fff; width: 600px; max-width: 95%; max-height: 85vh; border-radius: 4px; display: flex; flex-direction: column; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
         .all-reviews-header { padding: 20px 30px; border-bottom: 1px solid rgba(0,0,0,0.08); display: flex; justify-content: space-between; align-items: center; }
         .all-reviews-body { padding: 30px; overflow-y: auto; flex: 1; }
         .all-reviews-body::-webkit-scrollbar { width: 6px; }
         .all-reviews-body::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 4px; }
 
-        /* 🌟 LIGHTBOX XEM ẢNH TRỰC TIẾP */
         .lightbox-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;}
         .lightbox-overlay.show { opacity: 1; }
         .lightbox-img { max-width: 90%; max-height: 90vh; object-fit: contain; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
@@ -185,7 +185,9 @@
                 <p class="detail-desc" id="dynDesc">Vui lòng chờ trong giây lát...</p>
 
                 <div style="margin-bottom:28px">
-                    <div class="size-label">Màu sắc <span id="dynColorName" style="color:var(--accent);font-size:12px;font-weight:400"></span></div>
+                    <div class="size-label" style="justify-content: flex-start; gap: 10px;">
+                        Màu sắc <span id="dynColorName" class="color-badge" style="display:none;"></span>
+                    </div>
                     <div class="color-options" id="dynColors"></div>
                 </div>
 
@@ -250,7 +252,7 @@
 
                         <div class="accordion-content">
                             <div style="display:flex; justify-content:flex-end; margin-bottom: 20px;">
-                                <button id="btnOpenReviewModal" onclick="window.DetailApp.openReviewModal()" style="display:none; background:var(--accent); color:#fff; border:none; padding:8px 16px; font-size:10px; text-transform:uppercase; letter-spacing:0.1em; cursor:pointer; border-radius:2px;"><i class="fa-solid fa-pen-nib"></i> Viết đánh giá</button>
+                                <button id="btnOpenReviewModal" onclick="window.DetailApp.checkAndOpenReviewModal()" style="display:none; background:var(--accent); color:#fff; border:none; padding:8px 16px; font-size:10px; text-transform:uppercase; letter-spacing:0.1em; cursor:pointer; border-radius:2px;"><i class="fa-solid fa-pen-nib"></i> Viết đánh giá</button>
                             </div>
 
                             <div id="reviewsContainer" class="reviews-container-scroll">
@@ -291,6 +293,8 @@
                     <i class="fa-solid fa-camera"></i> Thêm hình ảnh
                     <input type="file" id="reviewImageInput" multiple accept="image/*" style="display: none;" onchange="window.DetailApp.handleFileSelect(event)">
                 </label>
+                <div id="reviewEditWarning" style="font-size:10px; color:#c08060; margin-bottom:10px; display:none;">* Lưu ý: Thêm ảnh mới sẽ ghi đè lên các ảnh cũ trước đó của bạn.</div>
+
                 <div class="review-img-previews" id="reviewImagePreviews"></div>
 
                 <button id="btnSubmitReview" class="add-to-cart-btn" style="margin:0;" onclick="window.DetailApp.submitReview()"><span>GỬI ĐÁNH GIÁ</span></button>
@@ -319,8 +323,11 @@
         window.DetailApp = {
             state: {
                 productId: null, product: null, variants: [], uniqueColors: [], uniqueSizes: [],
-                selectedColorId: null, selectedSizeId: null, images: [], currentImageIndex: 0
+                selectedColorId: null, selectedSizeId: null, images: [], currentImageIndex: 0,
+                user: null
             },
+
+            reviewState: { soSao: 5, files: [], orderDetailId: null, phanLoai: '', isEdit: false },
 
             colorMap: {
                 'trắng': '#ffffff', 'đen': '#1a1a1a', 'xám': '#c5cfc7', 'ghi': '#d4cfc9',
@@ -338,7 +345,20 @@
                     if(params.get('id')) id = params.get('id');
                 }
                 this.state.productId = id;
+
+                try {
+                    const userRes = await fetch('/api/khach-hang/my-profile');
+                    if (userRes.ok) this.state.user = await userRes.json();
+                } catch(e) {}
+
                 await this.fetchData();
+            },
+
+            getAvailableStock: function(variant) {
+                if (!variant) return 0;
+                // Ưu tiên lấy soLuongKhaDung nếu Backend trả về, nếu không tự trừ ở Frontend
+                if (variant.soLuongKhaDung !== undefined) return variant.soLuongKhaDung;
+                return Math.max(0, variant.soLuong - (variant.soLuongTamGiu || 0));
             },
 
             checkWishlist: async function() {
@@ -375,7 +395,6 @@
                 } catch(e) { console.log(e); }
             },
 
-            // 🌟 TẢI VÀ RENDER ĐÁNH GIÁ (CẬP NHẬT ACCORDION & LIGHTBOX)
             loadReviews: async function() {
                 try {
                     const res = await fetch('/api/khach-hang/reviews/' + this.state.productId);
@@ -406,12 +425,10 @@
                             starsHtml += i <= userStar ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-regular fa-star"></i>';
                         }
 
-                        // 🌟 TÍCH HỢP LIGHTBOX CHO ẢNH
                         let hinhAnhHtml = '';
                         if (rv.danhSachHinhAnhList && rv.danhSachHinhAnhList.length > 0) {
                             rv.danhSachHinhAnhList.forEach(link => {
                                 if(link.trim() !== '') {
-                                    // Thay thế window.open bằng openLightbox
                                     hinhAnhHtml += `<img src="${link.trim()}" class="review-img" onclick="window.DetailApp.openLightbox('${link.trim()}')">`;
                                 }
                             });
@@ -420,9 +437,26 @@
                             }
                         }
 
+                        let editBtnHtml = '';
+                        if (this.state.user && rv.taiKhoanId === this.state.user.taiKhoanId) {
+                            if (rv.daSua === true) {
+                                editBtnHtml = `<div style="font-size:11px; color:#888; font-style:italic;">(Đã đánh giá)</div>`;
+                            } else {
+                                const escapedNoiDung = (rv.noiDung || '').replace(/'/g, "\\'");
+                                editBtnHtml = `
+                                    <button onclick="window.DetailApp.openReviewModal(${rv.hoaDonChiTietId}, '${rv.phanLoai || ''}', true, ${rv.soSao}, '${escapedNoiDung}')"
+                                           style="background:none; border:none; color:var(--accent); font-size:11px; font-weight:500; cursor:pointer; text-decoration:underline; padding:0;">
+                                           Sửa đánh giá
+                                   </button>`;
+                            }
+                        }
+
                         html += `
                             <div class="review-item">
-                                <div class="reviewer-name">${rv.tenKhachHang || 'Khách hàng'} <span class="verified-badge"><i class="fa-solid fa-check"></i> Đã mua hàng</span></div>
+                                <div class="reviewer-name">
+                                    <span>${rv.tenKhachHang || 'Khách hàng'} <span class="verified-badge"><i class="fa-solid fa-check"></i> Đã mua hàng</span></span>
+                                    ${editBtnHtml}
+                                </div>
                                 <div class="review-meta">
                                     <span class="stars">${starsHtml}</span>
                                     <span style="margin-left:8px;">${rv.phanLoai || ''}</span>
@@ -434,17 +468,12 @@
                         `;
                     });
 
-                    // In vào phần Accordion nhỏ trên trang
                     container.innerHTML = html;
-
-                    // In bản sao vào phần Modal "Xem Tất Cả"
                     if(allContainer) allContainer.innerHTML = html;
 
-                    // Tính trung bình sao và hiển thị lên tiêu đề Accordion
                     const avg = (totalStars / reviews.length).toFixed(1);
                     if(miniStats) miniStats.innerText = `(${avg}★ / ${reviews.length})`;
 
-                    // Hiện nút Xem Tất Cả nếu có nhiều hơn 3 bài
                     const btnViewAll = document.getElementById('btnViewAllReviews');
                     if (btnViewAll) {
                         btnViewAll.style.display = reviews.length > 3 ? 'block' : 'none';
@@ -453,12 +482,10 @@
                 } catch(e) { console.log(e); }
             },
 
-            // 🌟 CÁC HÀM XỬ LÝ LIGHTBOX VÀ XEM TẤT CẢ
             openLightbox: function(src) {
                 const overlay = document.getElementById('lightboxOverlay');
                 document.getElementById('lightboxImg').src = src;
                 overlay.style.display = 'flex';
-                // Delay nhỏ để animation CSS kịp kích hoạt
                 setTimeout(() => overlay.classList.add('show'), 10);
             },
             closeLightbox: function() {
@@ -477,44 +504,49 @@
             checkCanReview: async function() {
                 const btn = document.getElementById('btnOpenReviewModal');
                 if (!btn) return;
-
                 try {
-                    const res = await fetch('/api/hoa-don/my-orders');
-                    if (!res.ok) return;
-
-                    const orders = await res.json();
-                    const completedOrders = orders.filter(o => o.trangThaiMa === 'HOAN_THANH');
-
-                    let canReview = false;
-
-                    for (let i = 0; i < completedOrders.length; i++) {
-                        const dRes = await fetch('/api/hoa-don/' + completedOrders[i].id);
-                        if (dRes.ok) {
-                            const detail = await dRes.json();
-                            const isBought = detail.chiTiets.some(c => {
-                                const pId = c.sanPhamId || c.idSanPham || (c.sanPhamChiTiet && c.sanPhamChiTiet.sanPham ? c.sanPhamChiTiet.sanPham.id : null);
-                                return pId == this.state.productId;
-                            });
-
-                            if (isBought) {
-                                canReview = true;
-                                break;
-                            }
+                    const res = await fetch('/api/khach-hang/reviews/check-eligibility/' + this.state.productId);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.eligible) {
+                            btn.style.display = 'inline-block';
+                        } else {
+                            btn.style.display = 'none';
                         }
-                    }
-
-                    if (canReview) {
-                        btn.style.display = 'inline-block';
                     }
                 } catch(e) { console.log(e); }
             },
 
-            reviewState: { soSao: 5, files: [] },
+            checkAndOpenReviewModal: async function() {
+                try {
+                    const res = await fetch('/api/khach-hang/reviews/check-eligibility/' + this.state.productId);
+                    const data = await res.json();
 
-            openReviewModal: function() {
+                    if (data.eligible) {
+                        this.openReviewModal(data.orderDetailId, data.phanLoai, false);
+                    } else {
+                        if(window.showToast) window.showToast(data.message, "warning");
+                    }
+                } catch(e) {
+                    if(window.showToast) window.showToast("Vui lòng đăng nhập để đánh giá sản phẩm!", "warning");
+                }
+            },
+
+            openReviewModal: function(orderDetailId = null, phanLoai = '', isEdit = false, soSao = 5, noiDung = '') {
+                this.reviewState.orderDetailId = orderDetailId;
+                this.reviewState.phanLoai = phanLoai;
+                this.reviewState.isEdit = isEdit;
+
+                const titleEl = document.querySelector('.review-modal-title');
+                if (titleEl) {
+                    titleEl.innerText = isEdit ? "Sửa đánh giá của bạn" : "Viết đánh giá của bạn";
+                }
+
+                document.getElementById('reviewEditWarning').style.display = isEdit ? 'block' : 'none';
+
                 document.getElementById('reviewModalOverlay').style.display = 'flex';
-                this.setStar(5);
-                document.getElementById('reviewContentInput').value = '';
+                this.setStar(soSao);
+                document.getElementById('reviewContentInput').value = noiDung || '';
                 this.reviewState.files = [];
                 this.renderImagePreviews();
             },
@@ -583,20 +615,19 @@
                     }
 
                     const noiDung = document.getElementById('reviewContentInput').value;
-                    const colorName = document.getElementById('dynColorName').innerText;
-                    let phanLoai = "";
-                    if (colorName) phanLoai += `Màu: ${colorName}`;
-                    const activeSizeBtn = document.querySelector('.size-btn.active');
-                    if (activeSizeBtn) phanLoai += phanLoai ? ` | Size: ${activeSizeBtn.innerText}` : `Size: ${activeSizeBtn.innerText}`;
 
                     const payload = {
                         soSao: this.reviewState.soSao,
                         noiDung: noiDung,
-                        phanLoai: phanLoai,
+                        phanLoai: this.reviewState.phanLoai,
                         danhSachHinhAnh: uploadedUrls.join(',')
                     };
 
-                    const res = await fetch('/api/khach-hang/reviews/' + this.state.productId, {
+                    const url = this.reviewState.orderDetailId
+                        ? '/api/khach-hang/reviews/detail/' + this.reviewState.orderDetailId
+                        : '/api/khach-hang/reviews/' + this.state.productId;
+
+                    const res = await fetch(url, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
@@ -612,14 +643,15 @@
                         if(window.showToast) window.showToast("Cảm ơn bạn đã gửi đánh giá!", "success");
                         this.closeReviewModal();
                         this.loadReviews();
+                        this.checkCanReview();
 
-                        // Cố tình mở Accordion Review ra để khách thấy bài họ vừa đăng
                         const reviewAccordion = document.getElementById('reviewAccordionBlock');
                         if (reviewAccordion && !reviewAccordion.classList.contains('active')) {
                             reviewAccordion.classList.add('active');
                         }
                     } else {
-                        if(window.showToast) window.showToast("Có lỗi xảy ra, vui lòng thử lại!", "error");
+                        const err = await res.json();
+                        if(window.showToast) window.showToast(err.message || "Có lỗi xảy ra, vui lòng thử lại!", "error");
                     }
                 } catch (e) {
                     console.error(e);
@@ -872,10 +904,14 @@
                     const hex = color.maMau || this.getColorHex(color.ten);
                     const borderColor = this.getContrastBorder(hex);
 
-                    const availableVariants = this.state.variants.filter(v => v.mauSac.id === color.id && v.soLuong > 0);
+                    // 🌟 NÂNG CẤP: Dùng hàm tính số lượng thực tế
+                    const availableVariants = this.state.variants.filter(v => v.mauSac.id === color.id && this.getAvailableStock(v) > 0);
                     const isOut = availableVariants.length === 0 ? 'opacity:0.3; cursor:not-allowed;' : '';
 
-                    if (isSelected) nameLabel.innerText = color.ten;
+                    if (isSelected) {
+                        nameLabel.innerText = color.ten;
+                        nameLabel.style.display = 'inline-block';
+                    }
 
                     html += `
                         <div class="color-ring-wrap ${isSelected ? 'active' : ''}"
@@ -889,7 +925,12 @@
 
             selectColor: function(colorId, colorName) {
                 this.state.selectedColorId = colorId;
-                document.getElementById('dynColorName').innerText = colorName;
+
+                // 🌟 HIỂN THỊ TÊN MÀU VÀO TRONG BADGE
+                const nameLabel = document.getElementById('dynColorName');
+                nameLabel.innerText = colorName;
+                nameLabel.style.display = 'inline-block';
+
                 this.state.selectedSizeId = null;
 
                 const variantWithImg = this.state.variants.find(v => v.mauSac.id === colorId && v.hinhAnh);
@@ -910,7 +951,10 @@
                 this.state.uniqueSizes.forEach(size => {
                     const isSelected = this.state.selectedSizeId === size.id ? 'active' : '';
                     const variant = this.state.variants.find(v => v.mauSac.id === this.state.selectedColorId && v.kichThuoc.id === size.id);
-                    const isUnavailable = (!variant || variant.soLuong <= 0) ? 'unavailable' : '';
+
+                    // 🌟 NÂNG CẤP: Dùng hàm tính số lượng thực tế
+                    const isUnavailable = (!variant || this.getAvailableStock(variant) <= 0) ? 'unavailable' : '';
+
                     html += `<button class="size-btn ${isSelected} ${isUnavailable}" onclick="window.DetailApp.selectSize(${size.id}, ${isUnavailable ? 'true' : 'false'})">${size.ten}</button>`;
                 });
                 sizeContainer.innerHTML = html;
@@ -923,6 +967,7 @@
                 this.updatePriceAndStock();
             },
 
+            // 🌟 NÂNG CẤP HÀM UPDATE STOCK VỚI BADGE RÕ RÀNG
             updatePriceAndStock: function() {
                 const priceEl = document.getElementById('dynPrice');
                 const stockEl = document.getElementById('dynStockStatus');
@@ -930,20 +975,18 @@
                 const btnBuyNow = document.getElementById('btnBuyNow');
 
                 if (!this.state.selectedColorId || (this.state.uniqueSizes.length > 0 && !this.state.selectedSizeId)) {
+                    // ... (Giữ nguyên code tính giá min-max ở đoạn này) ...
                     let minOriginal = this.state.product.giaBan || 0;
                     let minSale = this.state.product.giaSauKhuyenMai || minOriginal;
-
                     if (this.state.variants && this.state.variants.length > 0) {
                         minOriginal = Math.min(...this.state.variants.map(v => v.giaBan || 0));
                         minSale = Math.min(...this.state.variants.map(v => v.giaSauKhuyenMai || v.giaBan || 0));
                     }
-
                     if (minSale < minOriginal && minSale > 0) {
                         priceEl.innerHTML = `<span style="color:#c08060; font-weight: 600;">${new Intl.NumberFormat('vi-VN').format(minSale)} ₫</span> <span style="color:var(--muted); text-decoration:line-through; font-size:16px; margin-left: 12px;">${new Intl.NumberFormat('vi-VN').format(minOriginal)} ₫</span>`;
                     } else {
                         priceEl.innerHTML = `${new Intl.NumberFormat('vi-VN').format(minOriginal)} ₫`;
                     }
-
                     stockEl.innerHTML = 'Vui lòng chọn Kích cỡ';
                     stockEl.className = 'stock-status';
                     btnAdd.disabled = true; if(btnBuyNow) btnBuyNow.disabled = true;
@@ -955,22 +998,26 @@
                     const currentPrice = sku.giaSauKhuyenMai || sku.giaBan || 0;
                     const originalPrice = sku.giaBan || 0;
 
+                    // 🌟 NÂNG CẤP: Lấy số lượng thực tế
+                    const availableStock = this.getAvailableStock(sku);
+
                     if (currentPrice < originalPrice && currentPrice > 0) {
                         priceEl.innerHTML = `<span style="color:#c08060; font-weight: 600;">${new Intl.NumberFormat('vi-VN').format(currentPrice)} ₫</span> <span style="color:var(--muted); text-decoration:line-through; font-size:16px; margin-left: 12px;">${new Intl.NumberFormat('vi-VN').format(originalPrice)} ₫</span>`;
                     } else {
                         priceEl.innerHTML = `${new Intl.NumberFormat('vi-VN').format(originalPrice)} ₫`;
                     }
 
-                    if (sku.soLuong > 10) {
-                        stockEl.innerHTML = `<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;vertical-align:bottom;margin-right:4px"><path d="M5 13l4 4L19 7"/></svg> Còn hàng`;
+                    // 🌟 HIỂN THỊ TỒN KHO THỰC TẾ TRÊN BADGE
+                    if (availableStock > 10) {
+                        stockEl.innerHTML = `<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;vertical-align:bottom;margin-right:4px"><path d="M5 13l4 4L19 7"/></svg> Còn hàng <span class="stock-badge good">${availableStock} sản phẩm</span>`;
                         stockEl.className = 'stock-status';
                         btnAdd.disabled = false; btnAdd.querySelector('span').innerText = 'THÊM VÀO GIỎ HÀNG'; if(btnBuyNow) btnBuyNow.disabled = false;
-                    } else if (sku.soLuong > 0 && sku.soLuong <= 10) {
-                        stockEl.innerHTML = `Chỉ còn ${sku.soLuong} sản phẩm`;
+                    } else if (availableStock > 0 && availableStock <= 10) {
+                        stockEl.innerHTML = `⚠️ Sắp hết hàng <span class="stock-badge warning">Chỉ còn ${availableStock} sản phẩm</span>`;
                         stockEl.className = 'stock-status low';
                         btnAdd.disabled = false; btnAdd.querySelector('span').innerText = 'THÊM VÀO GIỎ HÀNG'; if(btnBuyNow) btnBuyNow.disabled = false;
                     } else {
-                        stockEl.innerHTML = `Đã hết hàng`;
+                        stockEl.innerHTML = `❌ Đã hết hàng`;
                         stockEl.className = 'stock-status out';
                         btnAdd.disabled = true; btnAdd.querySelector('span').innerText = 'HẾT HÀNG'; if(btnBuyNow) btnBuyNow.disabled = true;
                     }
@@ -980,7 +1027,10 @@
             addToCart: function(isBuyNow = false) {
                 const sku = this.state.variants.find(v => v.mauSac.id === this.state.selectedColorId && v.kichThuoc.id === this.state.selectedSizeId);
                 if (!sku) { window.showToast("Vui lòng chọn kích cỡ!", "warning"); return; }
-                if (sku.soLuong <= 0) { window.showToast("Sản phẩm đã hết hàng!", "warning"); return; }
+
+                // 🌟 NÂNG CẤP: Chặn dưa trên số lượng thực
+                const availableStock = this.getAvailableStock(sku);
+                if (availableStock <= 0) { window.showToast("Sản phẩm đã hết hàng!", "warning"); return; }
 
                 this.animateFlyToCart(document.getElementById('mainImageDisplay'));
 
@@ -988,7 +1038,7 @@
                 let existingItem = cart.find(item => item.skuId === sku.id);
 
                 if (existingItem) {
-                    if (existingItem.qty + 1 > sku.soLuong) { window.showToast(`Chỉ còn ${sku.soLuong} sản phẩm loại này!`, "warning"); return; }
+                    if (existingItem.qty + 1 > availableStock) { window.showToast(`Chỉ còn ${availableStock} sản phẩm loại này!`, "warning"); return; }
                     existingItem.qty += 1;
                 } else {
                     let productImg = "https://placehold.co/100x130/eee/999?text=No+Img";
@@ -1005,7 +1055,7 @@
                         img: productImg,
                         colorName: sku.mauSac.ten,
                         sizeName: sku.kichThuoc.ten,
-                        maxStock: sku.soLuong
+                        maxStock: availableStock // Lưu maxStock là số lượng khả dụng
                     });
                 }
                 localStorage.setItem('bee_cart', JSON.stringify(cart));

@@ -209,6 +209,7 @@
                 <th>DANH MỤC</th>
                 <th>HÃNG</th>
                 <th>CHẤT LIỆU</th>
+                <th>TỒN KHO</th>
                 <th style="text-align:center;">TRẠNG THÁI</th>
                 <th style="text-align:right;">THAO TÁC</th>
             </tr>
@@ -753,7 +754,7 @@
         renderTable: function(list) {
             const tbody = document.getElementById('tbody');
             if(!list || list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 40px; color:#888;">Không tìm thấy dữ liệu</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 40px; color:#888;">Không tìm thấy dữ liệu</td></tr>`;
                 return;
             }
 
@@ -762,6 +763,10 @@
                 let rawImg = item.hinhAnhs?.[0]?.url || 'https://placehold.co/100x100?text=SP';
                 const img = getOptimizedImg(rawImg, 60, 60);
                 const toggleHtml = `<label class="switch-sm"><input type="checkbox" ${item.trangThai ? 'checked' : ''} onchange="ProductApp.quickToggle(${item.id}, this)"><span class="slider-sm"></span></label>`;
+
+                // 🌟 TÍNH TỔNG TỒN KHO TỪ DANH SÁCH BIẾN THỂ
+                const variants = item.chiTietSanPhams || [];
+                const totalStock = variants.reduce((sum, v) => sum + (parseInt(v.soLuong) || 0), 0);
 
                 return `
                 <tr>
@@ -776,6 +781,9 @@
                     <td>${item.danhMuc?.ten || '---'}</td>
                     <td>${item.hang?.ten || '---'}</td>
                     <td>${item.chatLieu?.ten || '---'}</td>
+
+                    <td style="font-weight: 700; color: ${totalStock > 0 ? '#10b981' : '#dc2626'};">${totalStock}</td>
+
                     <td style="text-align:center;">${toggleHtml}</td>
                     <td style="text-align:right; white-space: nowrap;">
                         <button class="btn-icon" onclick="ProductApp.viewVariants(${item.id}, '${item.ten.replace(/'/g, "\\'")}', '${item.ma}')" title="Xem chi tiết & SKU"><i class="bi bi-eye"></i></button>

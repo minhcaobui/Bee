@@ -33,6 +33,61 @@ public class MaGiamGiaApi {
     private final ThongBaoRepository thongBaoRepository;
     private final TaiKhoanRepository taiKhoanRepository;
 
+    // =======================================================
+    // HÀM VALIDATE VOUCHER (CHỐNG LỖ CHO CỬA HÀNG)
+    // =======================================================
+    private void validateVoucherLogic(MaGiamGia body) {
+        // 1. Kiểm tra thời gian và số lượng cơ bản
+        if (body.getNgayBatDau() != null && body.getNgayKetThuc() != null && body.getNgayBatDau().isAfter(body.getNgayKetThuc())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lỗi: Ngày kết thúc phải sau ngày bắt đầu.");
+        }
+        if (body.getNgayKetThuc() != null && body.getNgayKetThuc().isBefore(LocalDateTime.now())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lỗi: Ngày kết thúc không được nằm trong quá khứ.");
+        }
+        if (body.getSoLuong() == null || body.getSoLuong() <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lỗi: Số lượng mã giảm giá phải lớn hơn 0.");
+        }
+        if (body.getDieuKien() == null || body.getDieuKien().compareTo(BigDecimal.ZERO) < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lỗi: Điều kiện đơn hàng tối thiểu không hợp lệ.");
+        }
+
+        // 2. Validate chống lỗ theo loại giảm giá
+        boolean isPercent = body.getLoaiGiamGia() != null &&
+                (body.getLoaiGiamGia().equalsIgnoreCase("PERCENT") || body.getLoaiGiamGia().contains("%"));
+
+        if (isPercent) {
+            // TRƯỜNG HỢP 1: GIẢM THEO PHẦN TRĂM (%)
+            if (body.getGiaTriGiamGia().compareTo(BigDecimal.ONE) < 0 || body.getGiaTriGiamGia().compareTo(new BigDecimal("50")) > 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lỗi: Mức giảm phần trăm chỉ được phép từ 1% đến 50% để tránh bán dưới giá vốn.");
+            }
+            if (body.getGiaTriGiamGiaToiDa() == null || body.getGiaTriGiamGiaToiDa().compareTo(BigDecimal.ZERO) <= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lỗi rủi ro cực cao: Khuyến mãi theo % BẮT BUỘC phải thiết lập 'Mức giảm tối đa (VNĐ)' để tránh khách mua đơn hàng lớn và trừ âm tiền cửa hàng.");
+            }
+        } else {
+            // TRƯỜNG HỢP 2: GIẢM THEO TIỀN MẶT (VNĐ)
+            if (body.getGiaTriGiamGia().compareTo(new BigDecimal("1000")) < 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lỗi: Mức giảm tiền mặt tối thiểu là 1.000 VNĐ.");
+            }
+
+            // Logic chống lỗ: Số tiền giảm giá KHÔNG BAO GIỜ được vượt quá 50% giá trị đơn hàng tối thiểu
+            if (body.getDieuKien().compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal maxSafeDiscount = body.getDieuKien().multiply(new BigDecimal("0.5"));
+                if (body.getGiaTriGiamGia().compareTo(maxSafeDiscount) > 0) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "Lỗi rủi ro lỗ: Với đơn tối thiểu " + String.format("%,.0f", body.getDieuKien()) + "đ, mức giảm tiền mặt không được vượt quá 50% (Tối đa " + String.format("%,.0f", maxSafeDiscount) + "đ).");
+                }
+            } else {
+                // Nếu đơn tối thiểu là 0đ (Freeship hoặc tặng quà) -> Cực kỳ cẩn thận
+                if (body.getGiaTriGiamGia().compareTo(new BigDecimal("50000")) > 0) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lỗi: Voucher áp dụng cho mọi đơn hàng (0đ) chỉ được phép giảm tối đa 50.000 VNĐ để chống gian lận bào mã.");
+                }
+            }
+
+            // Đồng bộ giá trị tối đa bằng chính mức giảm tiền mặt để tính toán Checkout không bị lỗi
+            body.setGiaTriGiamGiaToiDa(body.getGiaTriGiamGia());
+        }
+    }
+
     @GetMapping
     public Page<MaGiamGia> getAll(
             @RequestParam(required = false) String q,
@@ -56,6 +111,7 @@ public class MaGiamGiaApi {
     @PostMapping
     @Transactional
     public ResponseEntity<?> create(@RequestBody MaGiamGia body) {
+        validateVoucher(body);
         if (body.getMaCode() == null || body.getMaCode().trim().isEmpty()) {
             body.setMaCode(generateCode());
         } else {
@@ -98,6 +154,7 @@ public class MaGiamGiaApi {
     @PutMapping("/{id}")
     @Transactional
     public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody MaGiamGia body) {
+        validateVoucher(body);
         MaGiamGia entity = voucherRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy thông tin mã giảm giá yêu cầu."));
         validateVoucher(body);
@@ -160,8 +217,8 @@ public class MaGiamGiaApi {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Số lượng phát hành tối thiểu phải từ 1 mã trở lên.");
         }
         if ("PERCENTAGE".equals(body.getLoaiGiamGia())) {
-            if (body.getGiaTriGiamGia().compareTo(BigDecimal.valueOf(80)) > 0 || body.getGiaTriGiamGia().compareTo(BigDecimal.ONE) < 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tỷ lệ chiết khấu không hợp lệ (Yêu cầu từ 1% - 80%).");
+            if (body.getGiaTriGiamGia().compareTo(BigDecimal.valueOf(50)) > 0 || body.getGiaTriGiamGia().compareTo(BigDecimal.ONE) < 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tỷ lệ chiết khấu không hợp lệ (Yêu cầu từ 1% - 50%).");
             }
             if (body.getGiaTriGiamGiaToiDa() == null || body.getGiaTriGiamGiaToiDa().compareTo(BigDecimal.ZERO) <= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vui lòng thiết lập hạn mức giảm tối đa cho loại hình chiết khấu theo %.");

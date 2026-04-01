@@ -15,7 +15,7 @@ public interface MauSacRepository extends JpaRepository<MauSac, Integer> {
 
     boolean existsByMaIgnoreCase(String ma);
 
-    @Query("SELECT m FROM MauSac m WHERE " +  // ✅ FIX: MauSac thay vì ChatLieu
+    @Query("SELECT m FROM MauSac m WHERE " +
             "(:q IS NULL OR LOWER(m.ma) LIKE LOWER(CONCAT('%', :q, '%')) " +
             "OR LOWER(m.ten) LIKE LOWER(CONCAT('%', :q, '%'))) " +
             "AND (:trangThai IS NULL OR m.trangThai = :trangThai)")

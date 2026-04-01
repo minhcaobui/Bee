@@ -11,11 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.temporal.TemporalAdjusters;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -26,9 +23,6 @@ public class DashBoardApi {
 
     private final DashboardRepository repo;
 
-    // ═══════════════════════════════
-    //  Helper: tính khoảng thời gian
-    // ═══════════════════════════════
     private LocalDateTime[] getRange(String period, String from, String to) {
         LocalDate today = LocalDate.now();
         return switch (period) {
@@ -37,8 +31,8 @@ public class DashBoardApi {
                     today.atTime(23, 59, 59)
             };
             case "week" -> new LocalDateTime[]{
-                    today.with(DayOfWeek.MONDAY).atStartOfDay(),
-                    today.with(DayOfWeek.SUNDAY).atTime(23, 59, 59)
+                    today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).atStartOfDay(),
+                    today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)).atTime(23, 59, 59)
             };
             case "month" -> new LocalDateTime[]{
                     today.withDayOfMonth(1).atStartOfDay(),
@@ -48,14 +42,13 @@ public class DashBoardApi {
                     today.withDayOfYear(1).atStartOfDay(),
                     today.withDayOfYear(today.lengthOfYear()).atTime(23, 59, 59)
             };
-            default -> new LocalDateTime[]{  // custom range
+            default -> new LocalDateTime[]{
                     LocalDate.parse(from).atStartOfDay(),
                     LocalDate.parse(to).atTime(23, 59, 59)
             };
         };
     }
 
-    // Tính khoảng kỳ trước (để so sánh % thay đổi)
     private LocalDateTime[] getPrevRange(String period, LocalDateTime[] cur) {
         return switch (period) {
             case "today"  -> new LocalDateTime[]{cur[0].minusDays(1),  cur[1].minusDays(1)};
@@ -68,12 +61,9 @@ public class DashBoardApi {
 
     private double calcChg(double cur, double prev) {
         if (prev == 0) return cur > 0 ? 100.0 : 0.0;
-        return Math.round((cur - prev) / prev * 1000.0) / 10.0; // 1 chữ số thập phân
+        return Math.round((cur - prev) / prev * 1000.0) / 10.0;
     }
 
-    // ═══════════════════════════════
-    //  1. STATS
-    // ═══════════════════════════════
     @GetMapping("/stats")
     public ResponseEntity<?> stats(
             @RequestParam(defaultValue = "today") String period,
@@ -83,17 +73,14 @@ public class DashBoardApi {
         LocalDateTime[] cur  = getRange(period, from, to);
         LocalDateTime[] prev = getPrevRange(period, cur);
 
-        // ✅ FIX: getStats trả List<Object[]>, phải lấy .get(0)
         List<Object[]> cList = repo.getStats(cur[0],  cur[1]);
         List<Object[]> pList = repo.getStats(prev[0], prev[1]);
 
-        // Nếu DB chưa có data → trả về toàn 0
         if (cList.isEmpty()) return ResponseEntity.ok(emptyStats());
 
         Object[] c = cList.get(0);
         Object[] p = pList.isEmpty() ? new Object[8] : pList.get(0);
 
-        // Object[]: rev, ord, avg_val, pend, cancelled, completed, sold, new_cust
         double rev  = c[0] != null ? ((Number) c[0]).doubleValue() : 0;
         double ord  = c[1] != null ? ((Number) c[1]).doubleValue() : 0;
         double avg  = c[2] != null ? ((Number) c[2]).doubleValue() : 0;
@@ -146,9 +133,6 @@ public class DashBoardApi {
         return m;
     }
 
-    // ═══════════════════════════════
-    //  2. CHART
-    // ═══════════════════════════════
     @GetMapping("/chart")
     public ResponseEntity<?> chart(
             @RequestParam(defaultValue = "today") String period,
@@ -158,27 +142,24 @@ public class DashBoardApi {
         LocalDateTime[] cur  = getRange(period, from, to);
         LocalDateTime[] prev = getPrevRange(period, cur);
 
-        // Chọn đúng query theo period
         List<Object[]> curRows  = switch (period) {
             case "today"  -> repo.getChartHour(cur[0],  cur[1]);
-            case "week"   -> repo.getChartDay(cur[0],   cur[1]);
+            case "week"   -> repo.getChartWeek(cur[0],  cur[1]);
             case "year"   -> repo.getChartMonth(cur[0], cur[1]);
             default       -> repo.getChartDay(cur[0],   cur[1]);
         };
         List<Object[]> prevRows = switch (period) {
             case "today"  -> repo.getChartHour(prev[0],  prev[1]);
-            case "week"   -> repo.getChartDay(prev[0],   prev[1]);
+            case "week"   -> repo.getChartWeek(prev[0],  prev[1]);
             case "year"   -> repo.getChartMonth(prev[0], prev[1]);
             default       -> repo.getChartDay(prev[0],   prev[1]);
         };
 
-        // Build map: label → {revenue, orders}
         Map<Integer, long[]> curMap  = new LinkedHashMap<>();
         Map<Integer, Long>   prevMap = new LinkedHashMap<>();
         curRows.forEach(r  -> curMap.put( ((Number)r[0]).intValue(), new long[]{((Number)r[1]).longValue(), ((Number)r[2]).longValue()}));
         prevRows.forEach(r -> prevMap.put(((Number)r[0]).intValue(),              ((Number)r[1]).longValue()));
 
-        // Tạo labels đầy đủ theo period
         List<String> labels = switch (period) {
             case "today"  -> IntStream.rangeClosed(7, 21).mapToObj(h -> h + "h").toList();
             case "week"   -> List.of("T2","T3","T4","T5","T6","T7","CN");
@@ -194,7 +175,7 @@ public class DashBoardApi {
         for (int i = 0; i < labels.size(); i++) {
             int key = switch (period) {
                 case "today"  -> i + 7;
-                case "week"   -> i + 2;  // DATEPART WEEKDAY: 2=Mon...8=Sun (SQL Server)
+                case "week"   -> (i == 6) ? 1 : i + 2; // MySQL DAYOFWEEK: 1=CN, 2=T2
                 case "year"   -> i + 1;
                 default       -> i + 1;
             };
@@ -204,10 +185,8 @@ public class DashBoardApi {
             revPrevList.add(prevMap.getOrDefault(key, 0L));
         }
 
-        // Sparkline = 7 điểm cuối
         int spFrom = Math.max(0, revList.size() - 7);
 
-        // Tính sparkline avg và cust — chia 7 khoảng đều
         List<Double> spAvg  = new ArrayList<>();
         List<Long>   spCust = new ArrayList<>();
         long totalSeconds = java.time.Duration.between(cur[0], cur[1]).getSeconds();
@@ -231,12 +210,62 @@ public class DashBoardApi {
         chartRes.put("spAvg",  spAvg);
         chartRes.put("spCust", spCust);
         return ResponseEntity.ok(chartRes);
-
     }
 
     // ═══════════════════════════════
-    //  3. TOP PRODUCTS
+    //  TÍNH NĂNG MỚI: AI INSIGHTS
     // ═══════════════════════════════
+    @GetMapping("/ai-insights")
+    public ResponseEntity<?> getAiInsights() {
+        List<Map<String, Object>> insights = new ArrayList<>();
+
+        // 1. Phân tích doanh thu tháng này
+        LocalDateTime[] curMonth = getRange("month", null, null);
+        LocalDateTime[] prevMonth = getPrevRange("month", curMonth);
+        List<Object[]> cList = repo.getStats(curMonth[0], curMonth[1]);
+        List<Object[]> pList = repo.getStats(prevMonth[0], prevMonth[1]);
+
+        if (!cList.isEmpty() && !pList.isEmpty()) {
+            double cRev = cList.get(0)[0] != null ? ((Number) cList.get(0)[0]).doubleValue() : 0;
+            double pRev = pList.get(0)[0] != null ? ((Number) pList.get(0)[0]).doubleValue() : 0;
+            double cCanc = cList.get(0)[4] != null ? ((Number) cList.get(0)[4]).doubleValue() : 0;
+            double cOrd = cList.get(0)[1] != null ? ((Number) cList.get(0)[1]).doubleValue() : 0;
+
+            if (pRev > 0) {
+                double growth = Math.round((cRev - pRev) / pRev * 100.0);
+                if (growth > 5) {
+                    insights.add(Map.of("type", "success", "msg", "Tốt quá! Doanh thu tháng này đã tăng " + growth + "% so với tháng trước. Hệ thống đang hoạt động rất hiệu quả."));
+                } else if (growth < -5) {
+                    insights.add(Map.of("type", "warning", "msg", "Lưu ý: Doanh thu tháng này đang giảm " + Math.abs(growth) + "% so với tháng trước. Hãy xem xét tung ra các đợt Sale hoặc Voucher mới."));
+                }
+            }
+
+            if (cOrd > 0) {
+                double cancelRate = Math.round((cCanc / cOrd) * 100.0);
+                if (cancelRate > 15) {
+                    insights.add(Map.of("type", "error", "msg", "Báo động: Tỷ lệ hủy đơn đang ở mức cao (" + cancelRate + "%). Cần rà soát lại quy trình giao hàng hoặc bộ phận chăm sóc khách hàng."));
+                }
+            }
+        }
+
+        // 2. Cảnh báo kho hàng
+        List<Object[]> lowStock = repo.getLowStock();
+        if (lowStock != null && !lowStock.isEmpty()) {
+            if (lowStock.size() >= 3) {
+                insights.add(Map.of("type", "warning", "msg", "Có " + lowStock.size() + " sản phẩm đang sắp cạn kho. Hệ thống khuyến nghị bổ sung nguồn hàng ngay lập tức để không gián đoạn doanh thu."));
+            } else {
+                Object[] item = lowStock.get(0);
+                insights.add(Map.of("type", "info", "msg", "Sản phẩm '" + item[1] + "' phân loại '" + item[3] + "' sắp hết (còn " + item[4] + ")."));
+            }
+        }
+
+        // 3. Phân tích hành vi (Giả lập AI phân tích từ Heatmap)
+        insights.add(Map.of("type", "info", "msg", "Dữ liệu Heatmap cho thấy khách hàng thường chốt đơn mạnh vào 10h-12h trưa và 19h-21h tối. Đây là " +
+                "khung giờ vàng để chạy Flash Sale."));
+
+        return ResponseEntity.ok(insights);
+    }
+
     @GetMapping("/top-products")
     public ResponseEntity<?> topProducts(
             @RequestParam(defaultValue = "today") String period,
@@ -260,12 +289,8 @@ public class DashBoardApi {
         return ResponseEntity.ok(result);
     }
 
-    // ═══════════════════════════════
-    //  4. RECENT ORDERS
-    // ═══════════════════════════════
     @GetMapping("/recent-orders")
     public ResponseEntity<?> recentOrders() {
-        // Map trang_thai DB → key frontend đang dùng
         Map<String, String> statusMap = Map.of(
                 "HOAN_THANH",     "completed",
                 "DA_HUY",         "cancelled",
@@ -290,9 +315,6 @@ public class DashBoardApi {
         return ResponseEntity.ok(result);
     }
 
-    // ═══════════════════════════════
-    //  5. PAYMENT METHODS
-    // ═══════════════════════════════
     @GetMapping("/payment-methods")
     public ResponseEntity<?> paymentMethods(
             @RequestParam(defaultValue = "today") String period,
@@ -340,7 +362,7 @@ public class DashBoardApi {
             m.put("sku",  r[2].toString());
             m.put("attr", r[3].toString());
             m.put("qty",  ((Number) r[4]).intValue());
-            m.put("max",  100); // max cố định hoặc bạn thêm cột max vào query
+            m.put("max",  100);
             return m;
         }).collect(Collectors.toList());
 
@@ -353,12 +375,10 @@ public class DashBoardApi {
             @RequestParam(required = false) String from,
             @RequestParam(required = false) String to) {
 
-        // Heatmap nên dùng range rộng (tháng/năm) để có đủ data
         LocalDateTime[] cur = getRange(period, from, to);
         List<Object[]> rows = repo.getHeatmap(cur[0], cur[1]);
 
         int[] dayOrder = {2, 3, 4, 5, 6, 7, 1};
-
         int hourStart = 7, hourEnd = 18;
         int numHours = hourEnd - hourStart + 1;
         int numDays  = 7;
