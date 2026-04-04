@@ -28,4 +28,7 @@ public class TaiKhoan {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_vai_tro")
     private VaiTro vaiTro;
+
+    @Column(name = "da_doi_ten_dang_nhap")
+    private Boolean daDoiTenDangNhap = false;
 }

@@ -1,0 +1,477 @@
+<section id="reviews-section">
+    <style>
+        /* ==========================================================================
+           CORE STYLES (ĐỒNG BỘ 100% VỚI CÁC TRANG ADMIN KHÁC)
+           ========================================================================== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --black: #000; --white: #fff; --gray-100: #f4f4f5; --gray-200: #e4e4e7; --gray-300: #d4d4d8; --success-color: #10b981; --font-size: 13px; }
+        .rv-container { max-width: 100%; padding: 20px 30px; font-family: 'Inter', sans-serif; background: var(--white); color: var(--black); font-size: var(--font-size); line-height: 1.5; }
+
+        /* Actions Bar & Tabs */
+        .actions-bar { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--gray-200); margin-bottom: 20px; padding-bottom: 0; }
+        .tabs { display: flex; gap: 30px; margin-bottom: 0; border: none; }
+        .tab { font-size: 13px; font-weight: 700; color: #888; padding: 0 0 12px 0; cursor: default; text-transform: uppercase; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; display: flex; align-items: center; gap: 6px; }
+        .tab.active { color: #000; border-bottom-color: #000; }
+
+        /* Buttons */
+        .btn { font-size: 11px; font-weight: 800; text-transform: uppercase; height: 34px !important; padding: 0 16px !important; background: #000; color: #fff; border: 1px solid #000; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 4px; transition: 0.2s; }
+        .btn:hover { background: #333; }
+        .btn-secondary { background: #fff; color: #000; border: 1px solid var(--gray-300); }
+        .btn-secondary:hover { background: var(--gray-100); border-color: #000; }
+
+        /* Search Section */
+        .search-section { background: #f8f9fa; padding: 18px 20px; border: 1px solid var(--gray-200); border-radius: 4px; margin-bottom: 20px; }
+        .search-wrapper { display: flex; gap: 12px; align-items: center; width: 100%; flex-wrap: wrap;}
+        .search-box { position: relative; flex: 2; min-width: 250px;}
+        .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 14px; pointer-events: none; }
+        .search-input { width: 100%; padding: 8px 12px 8px 36px !important; font-size: 13px; border: 1px solid var(--gray-300); outline: none; background: #fff; height: 40px; border-radius: 4px; transition: 0.2s; font-family: inherit;}
+        .filter-select { padding: 8px 12px; font-size: 13px; border: 1px solid var(--gray-300); outline: none; background: #fff; height: 40px; border-radius: 4px; min-width: 160px; transition: 0.2s; cursor: pointer; flex: 1; font-family: inherit;}
+        .btn-reset { height: 40px !important; width: 40px !important; padding: 0 !important; justify-content: center; font-size: 16px; background: #fff; border: 1px solid var(--gray-300); color: #555; border-radius: 4px; transition: 0.2s;}
+        .btn-reset:hover { background: #f4f4f5; border-color: #000; color: #000; }
+        .search-input:focus, .filter-select:focus { border-color: #000; }
+
+        /* Pagination Đồng Bộ */
+        .pagination-wrapper { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; }
+        .pagination-info { font-size: 11px; font-weight: 800; color: #888; text-transform: uppercase; }
+        .pagination { display: flex; gap: 5px; }
+        .page-number { min-width: 28px; height: 28px; font-size: 12px; font-weight: 700; background: transparent; border: 1px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 2px; transition: 0.2s;}
+        .page-number:hover:not(:disabled) { background: #eee; }
+        .page-number.active { background: #000; color: #fff; }
+        .page-number:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* DANH SÁCH ĐÁNH GIÁ (CUSTOM CHO TRANG NÀY) */
+        .rv-list { display: flex; flex-direction: column; gap: 16px; }
+        .rv-card { background: #fff; border: 1px solid var(--gray-200); border-radius: 4px; padding: 20px; transition: 0.2s; }
+        .rv-card:hover { border-color: #999; }
+
+        .rv-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .rv-customer { display: flex; align-items: center; gap: 12px; }
+        .rv-avatar { width: 40px; height: 40px; border-radius: 50%; background: #eee; object-fit: cover; border: 1px solid #eee; }
+        .rv-cus-name { font-size: 14px; font-weight: 700; color: #000; display: flex; align-items: center; gap: 6px;}
+        .rv-cus-date { font-size: 11px; color: #888; font-weight: 500; }
+        .rv-badge-buy { background: #d1fae5; color: #059669; font-size: 9px; padding: 2px 6px; border-radius: 2px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;}
+
+        .rv-product-ref { display: flex; align-items: center; gap: 10px; background: #f8f9fa; padding: 8px 12px; border-radius: 4px; font-size: 12px; color: #2563eb; font-weight: 700; text-decoration: none; border: 1px solid #eee; margin-top: -5px; transition: 0.2s;}
+        .rv-product-ref:hover { border-color: #2563eb; background: #eff6ff;}
+        .rv-product-ref i { font-size: 14px;}
+
+        .rv-stars { color: #f59e0b; font-size: 14px; margin-bottom: 10px; letter-spacing: 2px;}
+        .rv-content { font-size: 13.5px; color: #333; line-height: 1.6; margin-bottom: 12px; font-weight: 500; }
+        .rv-images { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+        .rv-img { width: 70px; height: 70px; object-fit: cover; border-radius: 4px; border: 1px solid #eee; cursor: zoom-in; transition: 0.2s; }
+        .rv-img:hover { opacity: 0.8; }
+
+        /* PHẦN PHẢN HỒI CỦA NHÂN VIÊN */
+        .rv-reply-box { background: #f8f9fa; border-left: 3px solid #2563eb; padding: 14px 16px; border-radius: 0 4px 4px 0; margin-top: 10px; }
+        .rv-reply-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .rv-reply-name { font-size: 11px; font-weight: 800; color: #2563eb; text-transform: uppercase;}
+        .rv-reply-date { font-size: 11px; color: #64748b; }
+        .rv-reply-text { font-size: 13px; color: #333; line-height: 1.5; font-weight: 500;}
+
+        /* KHUNG NHẬP TRẢ LỜI */
+        .rv-action-bar { display: flex; justify-content: flex-end; margin-top: 10px; }
+
+        .rv-reply-form { display: none; margin-top: 15px; border-top: 1px dashed #ddd; padding-top: 15px; animation: fadeIn 0.3s ease;}
+        .rv-reply-form.active { display: block; }
+        .rv-textarea { width: 100%; height: 80px; padding: 12px; border: 1px solid var(--gray-300); border-radius: 4px; font-family: inherit; font-size: 13px; outline: none; resize: none; margin-bottom: 10px; }
+        .rv-textarea:focus { border-color: #2563eb; }
+        .rv-form-actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+        /* LIGHTBOX ẢNH */
+        .rv-lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100000; display: none; align-items: center; justify-content: center; opacity: 0; transition: 0.3s; }
+        .rv-lightbox.show { opacity: 1; }
+        .rv-lightbox img { max-width: 90%; max-height: 90vh; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .rv-lb-close { position: absolute; top: 20px; right: 20px; color: #fff; font-size: 40px; cursor: pointer; background: none; border: none; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; }
+
+        /* BEE TOAST CUSTOM */
+        #beeToastHost { position: fixed; top: 30px; right: 30px; z-index: 999999; display: flex; flex-direction: column; gap: 15px; pointer-events: none; }
+        .bee-toast-box { min-width: 320px; max-width: 400px; padding: 18px 24px; border-radius: 8px; background: #fff; color: #000; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2); display: flex; align-items: flex-start; gap: 14px; border-left: 6px solid #000; animation: beeToastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; transition: all 0.3s ease; pointer-events: auto; }
+        .bee-toast-box.success { border-left-color: #10b981; }
+        .bee-toast-box.error { border-left-color: #ef4444; }
+        .bee-toast-box.warning { border-left-color: #f59e0b; }
+        .bee-toast-box.hiding { transform: translateX(120%); opacity: 0; margin-top: -80px; }
+        @keyframes beeToastSlideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+
+    <div class="rv-container">
+        <div class="actions-bar">
+            <nav class="tabs">
+                <div class="tab active">
+                    <i class="bi bi-star-fill"></i> QUẢN LÝ ĐÁNH GIÁ
+                </div>
+            </nav>
+        </div>
+
+        <section class="search-section">
+            <div class="search-wrapper">
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="rvSearch" class="search-input" placeholder="Tìm tên KH, Tên SP, Nội dung..." oninput="ReviewApp.debounceSearch()">
+                </div>
+                <select id="rvStarFilter" class="filter-select" onchange="ReviewApp.filterData()">
+                    <option value="">Tất cả (1-5 Sao)</option>
+                    <option value="5">⭐⭐⭐⭐⭐ Tuyệt vời (5)</option>
+                    <option value="4">⭐⭐⭐⭐ Tốt (4)</option>
+                    <option value="3">⭐⭐⭐ Khá (3)</option>
+                    <option value="2">⭐⭐ Kém (2)</option>
+                    <option value="1">⭐ Tệ (1)</option>
+                </select>
+                <select id="rvStatusFilter" class="filter-select" onchange="ReviewApp.filterData()">
+                    <option value="">Trạng thái phản hồi</option>
+                    <option value="CHUA_TRA_LOI">Chờ phản hồi</option>
+                    <option value="DA_TRA_LOI">Đã phản hồi</option>
+                </select>
+                <select id="rvSortFilter" class="filter-select" onchange="ReviewApp.filterData()">
+                    <option value="NEWEST">Mới nhất trước</option>
+                    <option value="OLDEST">Cũ nhất trước</option>
+                </select>
+                <button class="btn-reset" onclick="ReviewApp.resetFilters()" title="Làm mới bộ lọc">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </button>
+            </div>
+        </section>
+
+        <div class="rv-list" id="rvListContainer">
+            <div style="text-align:center; padding:50px; color:#888;">
+                <i class="bi bi-arrow-repeat" style="font-size:24px; animation: spin 1s infinite linear;"></i>
+                <div style="margin-top:10px;">Đang tải dữ liệu đánh giá...</div>
+            </div>
+        </div>
+
+        <div id="rvPagination" class="pagination-wrapper"></div>
+    </div>
+
+    <div class="rv-lightbox" id="rvLightbox" onclick="ReviewApp.closeLightbox()">
+        <button class="rv-lb-close" onclick="ReviewApp.closeLightbox()">&times;</button>
+        <img id="rvLightboxImg" src="" onclick="event.stopPropagation()">
+    </div>
+
+    <div id="beeToastHost"></div>
+
+    <script>
+        /* ========================================================================
+           TOAST & DIALOG SYSTEM (ĐỒNG BỘ 100%)
+           ======================================================================== */
+        window.toast = function (message, type = 'success') {
+            let container = document.getElementById('beeToastHost');
+            if (!container) { container = document.createElement('div'); container.id = 'beeToastHost'; document.body.appendChild(container); }
+
+            const el = document.createElement('div');
+            el.className = `bee-toast-box ${type}`;
+            const prefix = type === 'success' ? 'THÀNH CÔNG' : (type === 'error' ? 'LỖI' : 'THÔNG BÁO');
+            const color = type === 'success' ? '#10b981' : (type === 'error' ? '#ef4444' : '#f59e0b');
+            const icon = type === 'success' ? 'bi-check-circle-fill' : (type === 'error' ? 'bi-x-circle-fill' : 'bi-exclamation-triangle-fill');
+
+            el.innerHTML = `
+                <i class="bi ${icon}" style="color:${color}; font-size:22px; margin-top:2px;"></i>
+                <div style="display: flex; flex-direction: column; flex: 1;">
+                    <span style="font-weight:800; font-size:12px; text-transform: uppercase; margin-bottom: 4px; color:${color}">${prefix}</span>
+                    <span style="font-weight:500; font-size:13px; color:#333; line-height: 1.4;">${message}</span>
+                </div>
+                <i class="bi bi-x-lg" style="cursor: pointer; margin-left: 10px; font-size: 18px; color:#999; transition: 0.2s;" onmouseover="this.style.color='#000'" onmouseout="this.style.color='#999'" onclick="this.parentElement.remove()"></i>
+            `;
+            container.appendChild(el);
+            setTimeout(() => { if (el.parentNode) { el.classList.add('hiding'); setTimeout(() => el.remove(), 300); } }, 3500);
+        };
+
+        window.toastConfirm = function (title, message, onConfirm, onCancel) {
+            let container = document.getElementById('beeToastHost');
+            if (!container) { container = document.createElement('div'); container.id = 'beeToastHost'; document.body.appendChild(container); }
+
+            const el = document.createElement('div');
+            el.className = `bee-toast-box warning`;
+            el.style.flexDirection = 'column'; el.style.alignItems = 'stretch';
+
+            el.innerHTML = `
+                <div style="display: flex; gap: 12px; align-items: flex-start; width: 100%;">
+                    <i class="bi bi-question-circle-fill" style="color:#f59e0b; font-size:24px; margin-top:2px;"></i>
+                    <div style="display:flex; flex-direction:column; flex:1;">
+                        <span style="font-weight:800; font-size:13px; text-transform:uppercase; margin-bottom:6px; color:#000;">${title}</span>
+                        <span style="font-weight:500; font-size:13px; color:#555; line-height: 1.5;">${message}</span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px; border-top: 1px dashed #eee; padding-top: 12px;">
+                    <button class="btn btn-secondary" id="toastCancel" style="height: 32px; font-size: 11px; padding: 0 16px; border-radius: 4px;">HỦY BỎ</button>
+                    <button class="btn" style="background:#2563eb; border-color:#2563eb;" id="toastOk" style="height: 32px; font-size: 11px; padding: 0 16px; border-radius: 4px;">XÁC NHẬN</button>
+                </div>
+            `;
+            container.appendChild(el);
+
+            el.querySelector('#toastOk').onclick = () => { el.classList.add('hiding'); setTimeout(() => el.remove(), 300); if(onConfirm) onConfirm(); };
+            el.querySelector('#toastCancel').onclick = () => { el.classList.add('hiding'); setTimeout(() => el.remove(), 300); if(onCancel) onCancel(); };
+        };
+
+        // --- REVIEW APP MAIN ---
+        window.ReviewApp = {
+            state: {
+                data: [], page: 0, size: 10, totalPages: 0,
+                search: '', star: '', status: '', sort: 'NEWEST'
+            },
+
+            debounceTimer: null,
+
+            init: function() {
+                this.loadData();
+            },
+
+            debounceSearch: function() {
+                clearTimeout(this.debounceTimer);
+                this.debounceTimer = setTimeout(() => {
+                    this.filterData();
+                }, 500);
+            },
+
+            filterData: function() {
+                this.state.search = document.getElementById('rvSearch').value.trim();
+                this.state.star = document.getElementById('rvStarFilter').value;
+                this.state.status = document.getElementById('rvStatusFilter').value;
+                this.state.sort = document.getElementById('rvSortFilter').value;
+                this.state.page = 0;
+                this.loadData();
+            },
+
+            resetFilters: function() {
+                document.getElementById('rvSearch').value = '';
+                document.getElementById('rvStarFilter').value = '';
+                document.getElementById('rvStatusFilter').value = '';
+                document.getElementById('rvSortFilter').value = 'NEWEST';
+                this.filterData();
+            },
+
+            formatDate: function(dateStr) {
+                if (!dateStr) return '';
+                const d = new Date(dateStr);
+                return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+            },
+
+            renderStars: function(count) {
+                let html = '';
+                for (let i = 1; i <= 5; i++) {
+                    html += i <= count ? '<i class="bi bi-star-fill"></i>' : '<i class="bi bi-star"></i>';
+                }
+                return html;
+            },
+
+            loadData: async function() {
+                const container = document.getElementById('rvListContainer');
+                container.innerHTML = `<div style="text-align:center; padding:50px; color:#888;">Đang tải dữ liệu đánh giá...</div>`;
+
+                try {
+                    const params = new URLSearchParams({
+                        page: this.state.page,
+                        size: this.state.size,
+                        sort: this.state.sort
+                    });
+                    if (this.state.search) params.append('q', this.state.search);
+                    if (this.state.star) params.append('soSao', this.state.star);
+                    if (this.state.status) params.append('trangThai', this.state.status);
+
+                    const res = await fetch(`/api/reviews?${params.toString()}`);
+
+                    if (!res.ok) throw new Error("Lỗi lấy dữ liệu đánh giá");
+
+                    const responseData = await res.json();
+                    this.state.data = responseData.content || [];
+                    this.state.totalPages = responseData.totalPages || 0;
+
+                    this.renderList();
+                    this.renderPagination(responseData);
+
+                } catch (error) {
+                    console.error(error);
+                    container.innerHTML = `<div style="text-align:center; padding:50px; color:#ef4444;"><i class="bi bi-exclamation-triangle" style="font-size:24px;"></i><br>Lỗi tải dữ liệu. Vui lòng kiểm tra lại kết nối.</div>`;
+                }
+            },
+
+            renderList: function() {
+                const container = document.getElementById('rvListContainer');
+                if (this.state.data.length === 0) {
+                    container.innerHTML = `<div style="text-align:center; padding:50px; color:#888; border:1px dashed var(--gray-200); border-radius:4px; background:#fafafa;">Không tìm thấy đánh giá nào phù hợp với bộ lọc.</div>`;
+                    return;
+                }
+
+                let html = '';
+                this.state.data.forEach(rv => {
+                    let imgHtml = '';
+                    if (rv.danhSachHinhAnh) {
+                        const imgs = rv.danhSachHinhAnh.split(',').filter(x => x.trim() !== '');
+                        imgs.forEach(src => {
+                            imgHtml += `<img src="${src.trim()}" class="rv-img" onclick="ReviewApp.openLightbox('${src.trim()}')">`;
+                        });
+                        if(imgHtml) imgHtml = `<div class="rv-images">${imgHtml}</div>`;
+                    }
+
+                    const cusName = rv.tenKhachHang || 'Khách hàng ẩn danh';
+                    const avatar = `https://ui-avatars.com/api/?name=${cusName}&background=f4f4f5&color=000`;
+
+                    let replyHtml = '';
+                    if (rv.noiDungTraLoi) {
+                        replyHtml = `
+                            <div class="rv-reply-box">
+                                <div class="rv-reply-header">
+                                    <span class="rv-reply-name"><i class="bi bi-person-badge"></i> PHẢN HỒI TỪ CỬA HÀNG (${rv.tenNhanVienTraLoi || 'Nhân viên'})</span>
+                                    <span class="rv-reply-date">${this.formatDate(rv.ngayTraLoi)}</span>
+                                </div>
+                                <div class="rv-reply-text">${rv.noiDungTraLoi}</div>
+                            </div>
+                        `;
+                    } else {
+                        replyHtml = `
+                            <div class="rv-action-bar">
+                                <button class="btn btn-secondary" style="height:30px !important; font-size:10px; border-color:#2563eb; color:#2563eb;" onclick="ReviewApp.toggleForm(${rv.id})"><i class="bi bi-reply-fill"></i> Trả lời đánh giá</button>
+                            </div>
+                            <div class="rv-reply-form" id="rv-form-${rv.id}">
+                                <textarea class="rv-textarea" id="rv-input-${rv.id}" placeholder="Nhập nội dung phản hồi của cửa hàng đối với đánh giá này..."></textarea>
+                                <div class="rv-form-actions">
+                                    <button class="btn btn-secondary" onclick="ReviewApp.toggleForm(${rv.id})" style="height:32px!important;">Hủy</button>
+                                    <button class="btn" style="background:#2563eb; border-color:#2563eb; height:32px!important;" onclick="ReviewApp.submitReply(${rv.id})"><i class="bi bi-send"></i> Gửi phản hồi</button>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    html += `
+                        <div class="rv-card">
+                            <div class="rv-card-header">
+                                <div class="rv-customer">
+                                    <img src="${avatar}" class="rv-avatar">
+                                    <div>
+                                        <div class="rv-cus-name">${cusName} <span class="rv-badge-buy"><i class="bi bi-check-circle-fill"></i> Đã mua hàng</span></div>
+                                        <div class="rv-cus-date">${this.formatDate(rv.ngayTao)}</div>
+                                    </div>
+                                </div>
+                                <a href="/customer#detail?id=${rv.sanPhamId}" target="_blank" class="rv-product-ref" title="Xem sản phẩm">
+                                    ${rv.tenSanPham} (${rv.phanLoai}) <i class="bi bi-box-arrow-up-right"></i>
+                                </a>
+                            </div>
+
+                            <div class="rv-stars">${this.renderStars(rv.soSao)}</div>
+                            <div class="rv-content">${rv.noiDung || '<i style="color:#aaa;">Khách hàng không để lại bình luận</i>'}</div>
+                            ${imgHtml}
+                            ${replyHtml}
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+            },
+
+            toggleForm: function(id) {
+                const form = document.getElementById(`rv-form-${id}`);
+                if (form) {
+                    form.classList.toggle('active');
+                    if(form.classList.contains('active')) {
+                        document.getElementById(`rv-input-${id}`).focus();
+                    }
+                }
+            },
+
+            // 🌟 NÂNG CẤP: CÓ HỘP THOẠI XÁC NHẬN KHI GỬI
+            submitReply: async function(id) {
+                const input = document.getElementById(`rv-input-${id}`);
+                const content = input.value.trim();
+
+                if (!content) {
+                    window.toast("Vui lòng nhập nội dung phản hồi!", "warning");
+                    return;
+                }
+
+                window.toastConfirm("Xác nhận phản hồi", "Bạn có chắc chắn muốn gửi câu trả lời này cho khách hàng?", async () => {
+                    try {
+                        const res = await fetch(`/api/reviews/${id}/reply`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ noiDungTraLoi: content })
+                        });
+
+                        if (!res.ok) throw new Error("Gửi phản hồi thất bại");
+
+                        window.toast("Đã gửi phản hồi thành công!", "success");
+                        this.loadData();
+
+                    } catch (error) {
+                        console.error(error);
+                        window.toast(error.message, "error");
+                    }
+                });
+            },
+
+            // 🌟 NÂNG CẤP: THUẬT TOÁN PHÂN TRANG ... ĐỒNG BỘ 100%
+            renderPagination: function(data) {
+                const container = document.getElementById('rvPagination');
+                if (this.state.totalPages <= 0) {
+                    container.innerHTML = '';
+                    return;
+                }
+
+                let html = `<div class="pagination-info">Hiển thị ${data.numberOfElements || 0}/${data.totalElements || 0} bản ghi</div><div class="pagination">`;
+
+                html += `<button class="page-number" ${this.state.page === 0 ? 'disabled' : ''} onclick="ReviewApp.changePage(${this.state.page - 1})"><i class="bi bi-chevron-left"></i></button>`;
+
+                const current = this.state.page + 1;
+                const last = this.state.totalPages;
+                const delta = 1;
+                const left = current - delta;
+                const right = current + delta;
+                const range = [];
+                const rangeWithDots = [];
+                let l;
+
+                for (let i = 1; i <= last; i++) {
+                    if (i === 1 || i === last || (i >= left && i <= right)) range.push(i);
+                }
+
+                for (let i of range) {
+                    if (l) {
+                        if (i - l === 2) { rangeWithDots.push(l + 1); }
+                        else if (i - l !== 1) { rangeWithDots.push('...'); }
+                    }
+                    rangeWithDots.push(i);
+                    l = i;
+                }
+
+                for (let i of rangeWithDots) {
+                    if (i === '...') {
+                        html += `<span class="page-number" style="border:none; background:transparent; pointer-events:none; cursor:default; min-width: 15px;">...</span>`;
+                    } else {
+                        const pageIndex = i - 1;
+                        const activeClass = pageIndex === this.state.page ? 'active' : '';
+                        html += `<button class="page-number ${activeClass}" onclick="ReviewApp.changePage(${pageIndex})">${i}</button>`;
+                    }
+                }
+
+                html += `<button class="page-number" ${this.state.page === this.state.totalPages - 1 ? 'disabled' : ''} onclick="ReviewApp.changePage(${this.state.page + 1})"><i class="bi bi-chevron-right"></i></button></div>`;
+
+                container.innerHTML = html;
+            },
+
+            changePage: function(p) {
+                if (p < 0 || p >= this.state.totalPages) return;
+                this.state.page = p;
+                this.loadData();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            },
+
+            openLightbox: function(src) {
+                const lb = document.getElementById('rvLightbox');
+                document.getElementById('rvLightboxImg').src = src;
+                lb.style.display = 'flex';
+                setTimeout(() => lb.classList.add('show'), 10);
+            },
+
+            closeLightbox: function() {
+                const lb = document.getElementById('rvLightbox');
+                lb.classList.remove('show');
+                setTimeout(() => lb.style.display = 'none', 300);
+            }
+        };
+
+        // Kích hoạt App khi trang load xong
+        if(document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => { window.ReviewApp.init(); });
+        } else {
+            window.ReviewApp.init();
+        }
+    </script>
+</section>

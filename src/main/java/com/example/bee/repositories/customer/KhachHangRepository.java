@@ -34,4 +34,6 @@ public interface KhachHangRepository extends JpaRepository<KhachHang, Integer> {
     List<KhachHang> findBySoDienThoaiContainingOrHoTenContaining(String q, String q1);
 
     Optional<KhachHang> findByTaiKhoan_TenDangNhap(String name);
+
+    Optional<KhachHang> findByTaiKhoan_Id(Integer taiKhoanId);
 }

@@ -39,4 +39,10 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
     boolean existsByHang_IdAndTrangThaiTrue(Integer hangId);
 
     boolean existsByChatLieu_IdAndTrangThaiTrue(Integer chatLieuId);
+
+    // Bắt trùng khi THÊM MỚI
+    boolean existsByTenIgnoreCaseAndDanhMuc_IdAndHang_IdAndChatLieu_Id(String ten, Integer idDanhMuc, Integer idHang, Integer idChatLieu);
+
+    // Bắt trùng khi CẬP NHẬT (Tìm xem có SP nào khác ID hiện tại mà trùng 4 thuộc tính không)
+    boolean existsByTenIgnoreCaseAndDanhMuc_IdAndHang_IdAndChatLieu_IdAndIdNot(String ten, Integer idDanhMuc, Integer idHang, Integer idChatLieu, Integer id);
 }

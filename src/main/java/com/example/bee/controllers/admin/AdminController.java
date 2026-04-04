@@ -60,6 +60,16 @@ public class AdminController {
         return "admin/profile/profiles";
     }
 
+    @GetMapping("/reviews")
+    public String reviews() {
+        return "admin/reviews";
+    }
+
+    @GetMapping("/returns")
+    public String returns() {
+        return "admin/order/doi-tra";
+    }
+
     @GetMapping("/staff")
     public String staffPage(Model model) {
         List<NhanVien> list = nhanVienRepository.getAllNhanVienCustom();

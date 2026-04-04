@@ -17,9 +17,9 @@
 
         /* ── CART ITEMS ── */
         .cart-items { padding: 0 60px 80px; border-right: 1px solid rgba(0,0,0,0.07); }
-        .cart-items-header { display: grid; grid-template-columns: 1fr 120px 120px 48px; gap: 16px; padding: 20px 0; border-bottom: 1px solid rgba(0,0,0,0.07); font-size: 10px; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; font-weight: 600; }
+        .cart-items-header { display: grid; grid-template-columns: 1fr 120px 140px 140px 48px; gap: 16px; padding: 20px 0; border-bottom: 1px solid rgba(0,0,0,0.07); font-size: 10px; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; font-weight: 600; }
 
-        .cart-item { display: grid; grid-template-columns: 100px 1fr 120px 120px 48px; gap: 24px; padding: 28px 0; border-bottom: 1px solid rgba(0,0,0,0.06); align-items: center; transition: opacity 0.3s, transform 0.3s; }
+        .cart-item { display: grid; grid-template-columns: 100px 1fr 120px 140px 140px 48px; gap: 24px; padding: 28px 0; border-bottom: 1px solid rgba(0,0,0,0.06); align-items: center; transition: opacity 0.3s, transform 0.3s; }
         .cart-item-img { width: 100px; height: 130px; overflow: hidden; flex-shrink: 0; background: #f4f4f5; border-radius: 4px; cursor: pointer; transition: 0.3s;}
         .cart-item-img:hover { opacity: 0.8; }
         .cart-item-img-bg { width: 100%; height: 100%; object-fit: cover; }
@@ -30,11 +30,17 @@
         .cart-item-variant-dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.12); display: inline-block; vertical-align: middle; }
         .cart-item-price-cell { text-align: center; }
         .cart-item-price { font-size: 15px; color: var(--text); font-weight: 600; }
-        .cart-item-qty-cell { text-align: center; }
-        .cart-qty-control { display: inline-flex; align-items: center; gap: 0; border: 1px solid rgba(0,0,0,0.12); border-radius: 4px; overflow: hidden;}
+        .cart-item-qty-cell { display: flex; justify-content: center; }
+        .cart-qty-control { display: inline-flex; align-items: center; gap: 0; border: 1px solid rgba(0,0,0,0.12); border-radius: 4px; overflow: hidden; width: 100px;}
         .cart-qty-btn { width: 32px; height: 32px; border: none; background: none; cursor: pointer; font-size: 16px; color: var(--text); display: flex; align-items: center; justify-content: center; transition: background 0.2s; font-family: 'DM Sans', sans-serif; font-weight: 500;}
         .cart-qty-btn:hover { background: rgba(0,0,0,0.04); }
-        .cart-qty-num { width: 36px; text-align: center; font-size: 14px; font-weight: 600; border-left: 1px solid rgba(0,0,0,0.09); border-right: 1px solid rgba(0,0,0,0.09); line-height: 32px; }
+
+        .cart-qty-input { flex: 1; width: 100%; border: none; text-align: center; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; color: var(--text); padding: 0; outline: none; -moz-appearance: textfield; border-left: 1px solid rgba(0,0,0,0.09); border-right: 1px solid rgba(0,0,0,0.09);}
+        .cart-qty-input::-webkit-outer-spin-button, .cart-qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        .cart-item-total-cell { text-align: right; }
+        .cart-item-total { font-size: 16px; font-weight: 700; color: var(--accent); }
+
         .cart-remove-cell { text-align: center; }
         .cart-remove-btn { width: 32px; height: 32px; background: none; border: none; cursor: pointer; color: var(--muted); display: flex; align-items: center; justify-content: center; transition: color 0.2s; }
         .cart-remove-btn:hover { color: #c03c3c; }
@@ -81,14 +87,34 @@
         .cart-empty-btn { display: inline-flex; background: var(--text); color: #fff; padding: 14px 32px; text-decoration: none; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 4px; font-weight: 600; transition: 0.3s; }
         .cart-empty-btn:hover { background: var(--accent); }
 
+        /* 🌟 POPUP CHỌN PHƯƠNG THỨC GIAO HÀNG */
+        .delivery-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); animation: fadeIn 0.3s ease; }
+        .delivery-modal { width: 100%; max-width: 480px; background: #fff; border-radius: 12px; padding: 30px; box-shadow: 0 15px 50px rgba(0,0,0,0.2); transform: scale(0.95); opacity: 0; transition: all 0.3s ease; }
+        .delivery-modal.open { transform: scale(1); opacity: 1; }
+        .dm-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.06); padding-bottom: 16px; margin-bottom: 16px; }
+        .dm-title { font-size: 20px; font-weight: 700; text-transform: uppercase;}
+        .dm-close-btn { background: none; border: none; cursor: pointer; color: var(--muted); padding: 4px; transition: color 0.2s; }
+        .dm-close-btn:hover { color: var(--text); }
+        .dm-close-btn svg { width: 24px; height: 24px; stroke: currentColor; fill: none; }
+        .dm-option { display: flex; align-items: center; gap: 16px; padding: 20px; border: 1px solid rgba(0,0,0,0.1); cursor: pointer; transition: 0.3s; border-radius: 8px; background: #fafafa; margin-bottom: 12px;}
+        .dm-option:hover { border-color: var(--accent); background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);}
+        .dm-label { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px;}
+        .dm-desc { font-size: 13px; color: var(--muted); line-height: 1.5; font-weight: 500;}
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
         @media (max-width: 900px) {
             .cart-page-header { padding: 48px 24px 32px; flex-direction: column; align-items: flex-start; gap: 20px; }
             .cart-layout { grid-template-columns: 1fr; }
             .cart-items { padding: 0 24px 60px; border-right: none; }
             .cart-items-header { display: none; }
-            .cart-item { grid-template-columns: 80px 1fr; grid-template-rows: auto auto auto; gap: 16px; }
-            .cart-item-price-cell, .cart-item-qty-cell, .cart-remove-cell { grid-column: 2; text-align: left; }
-            .cart-qty-control { margin-top: 10px; }
+            .cart-item { grid-template-columns: 80px 1fr; grid-template-rows: auto auto auto auto; gap: 16px; align-items: start;}
+            .cart-item-info { grid-column: 2; grid-row: 1; }
+            .cart-item-price-cell { grid-column: 2; grid-row: 2; text-align: left; }
+            .cart-item-qty-cell { grid-column: 2; grid-row: 3; justify-content: flex-start; }
+            .cart-item-total-cell { grid-column: 2; grid-row: 4; text-align: left; font-size: 18px;}
+            .cart-remove-cell { grid-column: 2; grid-row: 1; justify-self: end; }
+            .cart-qty-control { margin-top: 0px; }
             .cart-summary { padding: 48px 24px 80px; position: static; border-top: 1px solid rgba(0,0,0,0.07); }
             .cart-empty { padding: 60px 24px; }
         }
@@ -121,6 +147,7 @@
                 <div>Sản phẩm</div>
                 <div style="text-align:center">Đơn giá</div>
                 <div style="text-align:center">Số lượng</div>
+                <div style="text-align:right">Thành tiền</div>
                 <div></div>
             </div>
 
@@ -162,6 +189,33 @@
                 <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                 <div class="cart-guarantee-text">
                     <strong>Đổi trả miễn phí trong 30 ngày.</strong> Mua sắm hoàn toàn yên tâm với chính sách của Bee.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="delivery-modal-overlay" id="deliveryModalOverlay" onclick="if(event.target === this) window.CartApp.closeDeliveryModal()">
+        <div class="delivery-modal">
+            <div class="dm-header">
+                <div class="dm-title">Chọn hình thức nhận hàng</div>
+                <button class="dm-close-btn" onclick="window.CartApp.closeDeliveryModal()">
+                    <svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div style="margin-top:20px;">
+                <div class="dm-option" onclick="window.CartApp.selectDeliveryAndCheckout('store')">
+                    <i class="fa-solid fa-store" style="font-size:32px; color:var(--accent); width: 40px; text-align:center;"></i>
+                    <div style="flex:1;">
+                        <div class="dm-label">Nhận tại cửa hàng</div>
+                        <div class="dm-desc">Miễn phí vận chuyển. Nhận hàng tại: 13 Trịnh Văn Bô, Xuân Phương, Nam Từ Liêm, Hà Nội.</div>
+                    </div>
+                </div>
+                <div class="dm-option" onclick="window.CartApp.selectDeliveryAndCheckout('home')">
+                    <i class="fa-solid fa-truck-fast" style="font-size:32px; color:var(--accent); width: 40px; text-align:center;"></i>
+                    <div style="flex:1;">
+                        <div class="dm-label">Giao hàng tận nơi</div>
+                        <div class="dm-desc">Giao hàng đến địa chỉ của bạn. Phí vận chuyển tính toán theo khoảng cách giao hàng.</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -236,29 +290,39 @@
                     totalItems += item.qty;
                     const hexColor = this.getColorHex(item.colorName);
                     const imgSrc = item.img || 'https://placehold.co/100x130?text=No+Img';
+                    const itemTotal = item.price * item.qty;
+
+                    const maxStockAttr = item.maxStock !== undefined && item.maxStock !== null ? `max="${item.maxStock}"` : '';
+
+                    // 🌟 Thêm UI Kho Còn: X
+                    const stockDisplay = item.maxStock !== undefined && item.maxStock !== null
+                        ? `<div style="font-size: 11px; color: var(--muted); margin-top: 6px;">Kho còn: <span style="font-weight: 600; color: var(--text);">${item.maxStock}</span></div>`
+                        : '';
 
                     html += '<div class="cart-item" id="cart-item-' + i + '">' +
-                        // 🌟 THÊM SỰ KIỆN CHUYỂN TRANG CHO ẢNH
                         '<div class="cart-item-img" onclick="window.location.hash=\'detail?id=' + item.productId + '\'">' +
                         '<img src="' + imgSrc + '" class="cart-item-img-bg" alt="' + item.name + '">' +
                         '</div>' +
                         '<div class="cart-item-info">' +
-                        // 🌟 THÊM SỰ KIỆN CHUYỂN TRANG CHO TÊN
                         '<div class="cart-item-name" onclick="window.location.hash=\'detail?id=' + item.productId + '\'">' + item.name + '</div>' +
                         '<div class="cart-item-variants">' +
                         '<div class="cart-item-variant-dot" style="background:' + hexColor + '"></div>' +
-                        item.colorName + ' · Size ' + item.sizeName +
+                        item.colorName + ' · ' + item.sizeName +
                         '</div>' +
+                        stockDisplay + // 🌟 Nơi hiển thị kho còn
                         '</div>' +
                         '<div class="cart-item-price-cell">' +
                         '<div class="cart-item-price">' + this.formatCurrency(item.price) + '</div>' +
                         '</div>' +
                         '<div class="cart-item-qty-cell">' +
                         '<div class="cart-qty-control">' +
-                        '<button class="cart-qty-btn" onclick="window.CartApp.updateQty(' + i + ', -1)">−</button>' +
-                        '<div class="cart-qty-num">' + item.qty + '</div>' +
-                        '<button class="cart-qty-btn" onclick="window.CartApp.updateQty(' + i + ', 1)">+</button>' +
+                        '<button class="cart-qty-btn" onclick="window.CartApp.updateQtyByBtn(' + i + ', -1)">−</button>' +
+                        '<input type="number" class="cart-qty-input" value="' + item.qty + '" min="1" ' + maxStockAttr + ' id="cart-qty-input-' + i + '" oninput="window.CartApp.updateQtyByInput(' + i + ', this.value)">' +
+                        '<button class="cart-qty-btn" onclick="window.CartApp.updateQtyByBtn(' + i + ', 1)">+</button>' +
                         '</div>' +
+                        '</div>' +
+                        '<div class="cart-item-total-cell">' +
+                        '<div class="cart-item-total" id="cart-item-total-' + i + '">' + this.formatCurrency(itemTotal) + '</div>' +
                         '</div>' +
                         '<div class="cart-remove-cell">' +
                         '<button class="cart-remove-btn" onclick="window.CartApp.removeItem(' + i + ')">' +
@@ -273,28 +337,49 @@
                 this.calculateTotals();
             },
 
-            updateQty: function(index, change) {
+            updateQtyByBtn: function(index, change) {
                 const item = this.state.items[index];
                 if (!item) return;
 
                 let newQty = item.qty + change;
+                this.processQtyChange(index, item, newQty);
+            },
+
+            updateQtyByInput: function(index, value) {
+                const item = this.state.items[index];
+                if (!item) return;
+
+                let newQty = parseInt(value);
+                if (isNaN(newQty)) return;
+
+                this.processQtyChange(index, item, newQty);
+            },
+
+            processQtyChange: function(index, item, newQty) {
+                let max = item.maxStock;
+
                 if (newQty < 1) newQty = 1;
 
-                if (item.maxStock && newQty > item.maxStock) {
-                    alert('Chỉ còn ' + item.maxStock + ' sản phẩm trong kho!'); return;
+                if (max !== undefined && newQty > max) {
+                    if(window.showToast) window.showToast(`Kho chỉ còn ${max} sản phẩm!`, 'warning');
+                    else alert(`Kho chỉ còn ${max} sản phẩm!`);
+                    newQty = max;
                 }
 
                 item.qty = newQty;
                 this.saveCartToStorage();
 
-                const row = document.getElementById('cart-item-' + index);
-                if (row) row.querySelector('.cart-qty-num').textContent = newQty;
+                const inputEl = document.getElementById('cart-qty-input-' + index);
+                if (inputEl && inputEl.value != newQty) inputEl.value = newQty;
+
+                const totalEl = document.getElementById('cart-item-total-' + index);
+                if (totalEl) totalEl.textContent = this.formatCurrency(item.price * newQty);
 
                 let totalItems = 0;
                 for (let i = 0; i < this.state.items.length; i++) totalItems += this.state.items[i].qty;
 
                 document.getElementById('headerCartCount').textContent = totalItems + ' sản phẩm';
-                window.updateCartBadge();
+                if(window.updateCartBadge) window.updateCartBadge();
                 this.calculateTotals();
             },
 
@@ -303,13 +388,13 @@
                 if (row) {
                     row.style.opacity = '0';
                     row.style.transform = 'translateX(20px)';
-                    window.updateCartBadge();
+                    if(window.updateCartBadge) window.updateCartBadge();
                 }
                 setTimeout(() => {
                     this.state.items.splice(index, 1);
                     this.saveCartToStorage();
                     this.render();
-                    window.updateCartBadge();
+                    if(window.updateCartBadge) window.updateCartBadge();
                 }, 300);
             },
 
@@ -323,8 +408,23 @@
                 document.getElementById('cartTotal').textContent = this.formatCurrency(this.state.subTotal);
             },
 
+            // 🌟 MỞ POPUP CHỌN PHƯƠNG THỨC GIAO HÀNG
             proceedToCheckout: function() {
                 if (this.state.items.length === 0) return;
+
+                document.getElementById('deliveryModalOverlay').style.display = 'flex';
+                setTimeout(() => { document.querySelector('.delivery-modal').classList.add('open'); }, 10);
+            },
+
+            closeDeliveryModal: function() {
+                document.querySelector('.delivery-modal').classList.remove('open');
+                setTimeout(() => { document.getElementById('deliveryModalOverlay').style.display = 'none'; }, 300);
+            },
+
+            // 🌟 LƯU LỰA CHỌN VÀ CHUYỂN TRANG
+            selectDeliveryAndCheckout: function(method) {
+                localStorage.setItem('bee_delivery_method', method);
+                this.closeDeliveryModal();
                 window.location.hash = 'checkout';
             },
 

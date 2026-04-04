@@ -5,50 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản Lý Khuyến Mãi & Voucher</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS CHUNG --- */
+        /* ==========================================================================
+           CORE STYLES (ĐÃ ĐỒNG BỘ 100% VỚI ORDER & PRODUCT)
+           ========================================================================== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --black: #000; --white: #fff; --gray-100: #f4f4f5; --gray-200: #e4e4e7; --gray-300: #d4d4d8; --font-size: 12.5px; }
-        body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--black); font-size: var(--font-size); line-height: 1.4; }
+        :root { --black: #000; --white: #fff; --gray-100: #f4f4f5; --gray-200: #e4e4e7; --gray-300: #d4d4d8; --font-size: 13px; }
+        body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--black); font-size: var(--font-size); line-height: 1.5; }
         .container { max-width: 100%; padding: 20px 30px; }
 
         /* Tabs */
         .actions-bar { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--gray-200); margin-bottom: 20px; padding-bottom: 0; }
         .tabs { display: flex; gap: 30px; margin-bottom: 0; border: none; }
-        .tab { font-size: 12.5px; font-weight: 700; color: #888; padding: 0 0 12px 0; cursor: pointer; text-transform: uppercase; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
+        .tab { font-size: 13px; font-weight: 700; color: #888; padding: 0 0 12px 0; cursor: pointer; text-transform: uppercase; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
         .tab:hover { color: #000; }
         .tab.active { color: #000; border-bottom-color: #000; }
 
-        /* Buttons & Inputs */
-        .btn { font-size: 11px; font-weight: 800; text-transform: uppercase; height: 30px; padding: 0 14px; background: #000; color: #fff; border: 1px solid #000; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; border-radius: 2px; }
+        /* Buttons */
+        .btn { font-size: 11px; font-weight: 800; text-transform: uppercase; height: 34px !important; padding: 0 16px !important; background: #000; color: #fff; border: 1px solid #000; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 4px; transition: 0.2s; }
         .btn:hover { background: #333; }
-        .btn-secondary { background: #fff; color: #000; border: 1px solid #ccc; }
-        .btn-secondary:hover { background: #f4f4f5; }
+        .btn-secondary { background: #fff; color: #000; border: 1px solid var(--gray-300); }
+        .btn-secondary:hover { background: var(--gray-100); border-color: #000; }
+        .btn-icon { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--gray-200); background: #fff; cursor: pointer; border-radius: 4px; margin-left: 4px; transition: 0.2s; color: #555;}
+        .btn-icon:hover { border-color: #000; background: #000; color: #fff; }
 
-        /* Search */
-        .search-section { margin-bottom: 15px; }
-        .search-wrapper { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-        .search-box { position: relative; width: 100%; }
+        /* Search Section */
+        .search-section { background: #f8f9fa; padding: 18px 20px; border: 1px solid var(--gray-200); border-radius: 4px; margin-bottom: 20px; }
+        .search-wrapper { display: flex; gap: 12px; align-items: center; width: 100%; }
+        .search-box { position: relative; flex: 1; }
         .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 14px; pointer-events: none; }
-        .search-input { width: 300px; padding: 8px 12px 8px 36px !important; font-size: 12.5px; border: 1px solid var(--gray-300); outline: none; background: #fff; height: 34px; border-radius: 2px; }
-        .filter-select { padding: 8px 12px; font-size: 12.5px; border: 1px solid var(--gray-300); outline: none; background: #fff; height: 34px; border-radius: 2px; }
+        .search-input { width: 100%; padding: 8px 12px 8px 36px !important; font-size: 13px; border: 1px solid var(--gray-300); outline: none; background: #fff; height: 40px; border-radius: 4px; transition: 0.2s;}
+        .filter-select { padding: 8px 12px; font-size: 13px; border: 1px solid var(--gray-300); outline: none; background: #fff; height: 40px; border-radius: 4px; min-width: 180px; transition: 0.2s; cursor: pointer;}
+        .btn-reset { height: 40px !important; width: 40px !important; padding: 0 !important; justify-content: center; font-size: 16px; background: #fff; border: 1px solid var(--gray-300); color: #555; border-radius: 4px; transition: 0.2s;}
+        .btn-reset:hover { background: #f4f4f5; border-color: #000; color: #000; }
         .search-input:focus, .filter-select:focus { border-color: #000; }
-        .btn-reset { height: 34px !important; width: 34px !important; padding: 0 !important; justify-content: center; font-size: 15px; }
 
         /* Table */
         .table-wrapper { border: 1px solid var(--gray-200); width: 100%; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 1000px; }
-        thead th { text-align: left; padding: 10px 15px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #666; background: #fafafa; border-bottom: 1px solid var(--gray-200); white-space: nowrap; }
-        tbody td { padding: 8px 15px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; font-size: 12.5px; word-wrap: break-word; }
+        thead th { text-align: left; padding: 12px 15px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #666; background: #fafafa; border-bottom: 1px solid var(--gray-200); white-space: nowrap; }
+        tbody td { padding: 10px 15px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; font-size: 13px; word-wrap: break-word; }
         tbody tr:hover { background: var(--gray-100); }
-        .btn-icon { width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--gray-200); background: #fff; cursor: pointer; border-radius: 2px; margin-left: 4px; }
-        .btn-icon:hover { border-color: #000; background: #000; color: #fff; }
+
+        .badge-status { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; text-transform: uppercase; color: #fff; white-space: nowrap; display: inline-block; }
+        .badge-type { font-size: 10px; padding: 2px 6px; border-radius: 2px; font-weight: 800; text-transform: uppercase; background: #f4f4f5; color: #555;}
 
         /* Pagination Đồng Bộ */
         .pagination-wrapper { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; }
         .pagination-info { font-size: 11px; font-weight: 800; color: #888; text-transform: uppercase; }
         .pagination { display: flex; gap: 5px; }
-        .page-number { min-width: 26px; height: 26px; font-size: 12px; font-weight: 700; background: transparent; border: 1px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 2px; transition: 0.2s; }
+        .page-number { min-width: 28px; height: 28px; font-size: 12px; font-weight: 700; background: transparent; border: 1px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 2px; transition: 0.2s;}
         .page-number:hover:not(:disabled) { background: #eee; }
         .page-number.active { background: #000; color: #fff; }
         .page-number:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -56,55 +63,60 @@
         /* Drawer */
         .overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 999; display: none; }
         .overlay.show { display: block; }
-        .drawer { position: fixed; top: 0; right: -600px; width: 600px; height: 100vh; background: #fff; border-left: 1px solid var(--gray-200); z-index: 1000; transition: 0.3s; display: flex; flex-direction: column; box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1); }
+        .drawer { position: fixed; top: 0; right: -600px; width: 600px; height: 100vh; background: #fff; border-left: 1px solid var(--gray-200); z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1); }
         .drawer.show { right: 0; }
-        .drawer-header { padding: 15px 20px; border-bottom: 1px solid var(--gray-200); }
-        .drawer-title { font-size: 14px; font-weight: 800; text-transform: uppercase; margin: 0; }
+        .drawer-header { padding: 15px 20px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center;}
+        .drawer-title { font-size: 15px; font-weight: 800; text-transform: uppercase; margin: 0; }
         .drawer-body { flex: 1; padding: 20px; overflow-y: auto; }
-        .drawer-footer { padding: 15px 20px; border-top: 1px solid var(--gray-200); display: flex; gap: 10px; }
+        .drawer-footer { padding: 15px 20px; border-top: 1px solid var(--gray-200); display: flex; gap: 10px; background: #fafafa;}
 
         /* Form & Switch */
-        .form-group { margin-bottom: 15px; }
-        .form-label { font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; display: block; }
-        .form-input { width: 100%; padding: 8px; font-size: 12.5px; border: 1px solid var(--gray-300); outline: none; }
+        .form-group { margin-bottom: 18px; }
+        .form-label { font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; display: block; color: #444;}
+        .form-input { width: 100%; padding: 0 12px; font-size: 13px; border: 1px solid var(--gray-300); outline: none; height: 40px; border-radius: 4px; font-family: inherit;}
         .form-input:focus { border-color: #000; }
-        .form-input:disabled { background: #f5f5f5; color: #888; cursor: not-allowed; border-color: #eee; }
-        .switch-wrapper { display: flex; align-items: center; gap: 10px; }
-        .switch { width: 36px; height: 20px; position: relative; appearance: none; background: #ddd; outline: none; cursor: pointer; transition: 0.2s; }
-        .switch::before { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #fff; transition: 0.2s; }
-        .switch:checked { background: #000; }
-        .switch:checked::before { left: 18px; }
+        .form-input:disabled { background: #f9f9f9; color: #555; cursor: not-allowed; border-color: #eee; }
 
-        /* Quick Switch (Table) - Style Vuông */
-        .switch-sm { position: relative; display: inline-block; width: 30px; height: 16px; }
+        .switch-wrapper { display: flex; align-items: center; gap: 10px; }
+        .switch-square { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .switch-square input { opacity: 0; width: 0; height: 0; }
+        .slider-square { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 4px; }
+        .slider-square:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 2px; }
+        input:checked + .slider-square { background-color: #000; }
+        input:checked + .slider-square:before { transform: translateX(20px); }
+
+        /* Quick Switch (Table) */
+        .switch-sm { position: relative; display: inline-block; width: 34px; height: 18px; }
         .switch-sm input { opacity: 0; width: 0; height: 0; }
-        .slider-sm { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 0; }
-        .slider-sm:before { position: absolute; content: ""; height: 12px; width: 12px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 0; }
+        .slider-sm { position: absolute; cursor: pointer; inset: 0; background-color: #ccc; transition: .3s; border-radius: 20px; }
+        .slider-sm:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%; }
         input:checked + .slider-sm { background-color: #000; }
-        input:checked + .slider-sm:before { transform: translateX(14px); }
+        input:checked + .slider-sm:before { transform: translateX(16px); }
         .switch-sm.loading { opacity: 0.5; pointer-events: none; }
 
-        /* Toast Xịn */
-        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 10002; display: flex; flex-direction: column; gap: 10px; }
-        .toast { min-width: 280px; padding: 14px 22px; border-radius: 6px; background: #fff; color: #000; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); display: flex; align-items: center; gap: 12px; border-left: 5px solid #000; animation: toastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; transition: all 0.5s ease; }
-        .toast.success { border-left-color: #10b981; }
-        .toast.error { border-left-color: #ef4444; }
-        .toast.warning { border-left-color: #f59e0b; }
-        .toast.hiding { transform: translateX(130%); opacity: 0; margin-top: -60px; }
-        @keyframes toastSlideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        /* =========================================================
+           BEE TOAST CUSTOM (CHỐNG XUNG ĐỘT BOOTSTRAP 100%)
+        ========================================================== */
+        #beeToastHost { position: fixed; top: 30px; right: 30px; z-index: 999999; display: flex; flex-direction: column; gap: 15px; pointer-events: none; }
+        .bee-toast-box { min-width: 320px; max-width: 400px; padding: 18px 24px; border-radius: 8px; background: #fff; color: #000; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2); display: flex; align-items: flex-start; gap: 14px; border-left: 6px solid #000; animation: beeToastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; transition: all 0.3s ease; pointer-events: auto; }
+        .bee-toast-box.success { border-left-color: #10b981; }
+        .bee-toast-box.error { border-left-color: #ef4444; }
+        .bee-toast-box.warning { border-left-color: #f59e0b; }
+        .bee-toast-box.hiding { transform: translateX(120%); opacity: 0; margin-top: -80px; }
+        @keyframes beeToastSlideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
         /* Product Select Box */
-        .product-select-box { border: 1px solid #eee; border-radius: 4px; height: 250px; overflow-y: auto; }
+        .product-select-box { border: 1px solid var(--gray-200); border-radius: 4px; height: 250px; overflow-y: auto; background: #fff; margin-top: 5px;}
         .product-table { width: 100%; border-collapse: collapse; }
-        .product-table th { position: sticky; top: 0; background: #f9f9f9; padding: 8px; text-align: left; font-size: 11px; font-weight: 700; border-bottom: 1px solid #eee; }
-        .product-table td { padding: 8px; border-bottom: 1px solid #eee; font-size: 12px; }
-        .empty-state { text-align: center; padding: 40px; color: #888; font-size: 12px; }
+        .product-table th { position: sticky; top: 0; background: #fafafa; padding: 10px; text-align: left; font-size: 11px; font-weight: 800; border-bottom: 1px solid var(--gray-200); z-index: 1;}
+        .product-table td { padding: 10px; border-bottom: 1px solid var(--gray-200); font-size: 13px; }
+        .empty-state { text-align: center; padding: 40px; color: #888; font-size: 13px; font-style: italic;}
 
         /* Progress Bar */
         .qty-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: help; min-width: 140px; padding: 5px 0; }
         .qty-text-group { position: relative; width: 100%; height: 18px; margin-bottom: 6px; }
-        .qty-default, .qty-hover-text { position: absolute; width: 100%; text-align: center; left: 0; top: 0; font-size: 11.5px; font-weight: 700; white-space: nowrap; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
-        .qty-default { opacity: 1; transform: translateY(0); color: #374151; }
+        .qty-default, .qty-hover-text { position: absolute; width: 100%; text-align: center; left: 0; top: 0; font-size: 12px; font-weight: 700; white-space: nowrap; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+        .qty-default { opacity: 1; transform: translateY(0); color: #333; }
         .qty-hover-text { opacity: 0; transform: translateY(5px); }
         .qty-wrapper:hover .qty-default { opacity: 0; transform: translateY(-5px); }
         .qty-wrapper:hover .qty-hover-text { opacity: 1; transform: translateY(0); }
@@ -133,20 +145,18 @@
 
     <section class="search-section">
         <div class="search-wrapper">
-            <div style="flex: 2; min-width: 200px;">
-                <div class="search-box">
-                    <i class="bi bi-search"></i>
-                    <input type="text" class="search-input" id="search"
-                           placeholder="Tìm tên hoặc mã..."
-                           oninput="window.PromotionApp.handleSearch(this.value)">
-                </div>
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" class="search-input" id="search"
+                       placeholder="Tìm tên hoặc mã chương trình..."
+                       oninput="window.PromotionApp.handleSearch(this.value)">
             </div>
             <select class="filter-select" id="fTrangThaiFilter" onchange="window.PromotionApp.handleStatus(this.value)">
                 <option value="">-- Trạng thái --</option>
                 <option value="true">Đang hoạt động</option>
                 <option value="false">Ngưng hoạt động</option>
             </select>
-            <button class="btn btn-secondary btn-reset" onclick="window.PromotionApp.resetFilters()" title="Làm mới">
+            <button class="btn-reset" onclick="window.PromotionApp.resetFilters()" title="Làm mới">
                 <i class="bi bi-arrow-counterclockwise"></i>
             </button>
         </div>
@@ -160,36 +170,33 @@
         </table>
     </div>
 
-    <div class="pagination-wrapper">
-        <div class="pagination-info" id="info">Đang tải...</div>
-        <div class="pagination">
-            <button class="page-number" id="prev">←</button>
-            <button class="page-number" id="next">→</button>
-        </div>
-    </div>
+    <div id="paginationContainer" class="pagination-wrapper"></div>
 </div>
 
 <div class="overlay" id="overlay" onclick="window.PromotionApp.closeDrawer()"></div>
 
 <aside class="drawer" id="drawer">
-    <div class="drawer-header"><h3 class="drawer-title" id="drawerTitle">THÊM MỚI</h3></div>
+    <div class="drawer-header">
+        <h3 class="drawer-title" id="drawerTitle">THÊM MỚI</h3>
+        <button class="btn-icon" onclick="window.PromotionApp.closeDrawer()" style="border:none;"><i class="bi bi-x-lg"></i></button>
+    </div>
     <div class="drawer-body">
-        <h5 style="font-weight:700; margin-bottom:10px; font-size:13px; color:#555;">1. Thông tin chung</h5>
+        <h5 style="font-weight:800; margin-bottom:15px; font-size:13px; color:#000;">1. THÔNG TIN CHUNG</h5>
 
         <div class="form-group">
-            <label class="form-label" id="lblMa">Mã chương trình <span style="font-weight:400; color:#888;">(Tự sinh nếu trống)</span></label>
+            <label class="form-label" id="lblMa">Mã chương trình <span style="font-weight:600; color:#888; text-transform:none;">(Tự động sinh nếu để trống)</span></label>
             <input id="kmMa" class="form-input" maxlength="20" placeholder="VD: SALE50..." oninput="this.value = this.value.toUpperCase().replace(/\s/g, '')">
         </div>
 
         <div class="form-group">
             <label class="form-label">Tên hiển thị <span style="color:red">*</span></label>
-            <input id="kmTen" class="form-input" placeholder="Nhập tên...">
+            <input id="kmTen" class="form-input" placeholder="Nhập tên chương trình/voucher...">
         </div>
 
         <div style="display: flex; gap: 15px;">
             <div class="form-group" style="flex: 1;">
                 <label class="form-label">Loại giảm</label>
-                <select id="kmLoai" class="form-input" onchange="window.PromotionApp.handleTypeChange()">
+                <select id="kmLoai" class="form-input" style="cursor: pointer;" onchange="window.PromotionApp.handleTypeChange()">
                 </select>
             </div>
             <div class="form-group" style="flex: 1;">
@@ -217,10 +224,13 @@
 
             <div class="form-group" style="margin-top: 20px; border-top: 1px dashed #ccc; padding-top: 15px;">
                 <div class="switch-wrapper">
-                    <input type="checkbox" id="kmCongDon" class="switch" checked>
-                    <span class="switch-label" style="font-weight:700;">Áp dụng chung với SP đang Sale</span>
+                    <label class="switch-square">
+                        <input type="checkbox" id="kmCongDon" checked>
+                        <span class="slider-square"></span>
+                    </label>
+                    <span style="font-size: 13px; font-weight: 700;">Áp dụng chung với SP đang Sale</span>
                 </div>
-                <div style="margin-top:8px; font-size:11.5px; color:#d97706; background:#fffbeb; padding:10px; border-radius:4px; border:1px solid #fcd34d;">
+                <div style="margin-top:12px; font-size:12px; color:#d97706; background:#fffbeb; padding:12px; border-radius:4px; border:1px solid #fcd34d;">
                     <i class="bi bi-info-circle-fill"></i> Tắt tùy chọn này nếu bạn muốn <b>Voucher chỉ áp dụng giảm thêm cho các sản phẩm Nguyên giá</b> (Tránh khách hàng lách luật giảm giá kép làm lỗ đơn hàng).
                 </div>
             </div>
@@ -237,25 +247,31 @@
             </div>
         </div>
 
-        <div class="form-group">
-            <div class="switch-wrapper" style="margin-top: 10px;">
-                <input type="checkbox" id="kmTrangThai" class="switch" checked>
-                <span class="switch-label">Kích hoạt trạng thái</span>
+        <div class="form-group" style="margin-top: 10px;">
+            <div class="switch-wrapper">
+                <label class="switch-square">
+                    <input type="checkbox" id="kmTrangThai" checked>
+                    <span class="slider-square"></span>
+                </label>
+                <span style="font-size: 13px; font-weight: 700;">Kích hoạt kinh doanh</span>
             </div>
         </div>
 
         <div id="saleFields">
-            <h5 style="font-weight:700; margin: 20px 0 10px 0; font-size:13px; color:#555;">2. Chọn sản phẩm áp dụng Sale</h5>
+            <h5 style="font-weight:800; margin: 25px 0 15px 0; font-size:13px; color:#000;">2. CHỌN SẢN PHẨM ÁP DỤNG SALE</h5>
             <div class="form-group">
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                    <input type="text" id="productSearchDrawer" class="form-input" placeholder="Tìm sản phẩm..." style="width: 60%;" oninput="window.PromotionApp.filterProducts(this.value)">
-                    <span style="color:blue; font-size:11px; line-height: 34px;" id="selectedCount">(Đã chọn: 0)</span>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <div class="search-box" style="width: 60%;">
+                        <i class="bi bi-search"></i>
+                        <input type="text" id="productSearchDrawer" class="form-input" placeholder="Tìm sản phẩm..." style="padding-left: 32px;" oninput="window.PromotionApp.filterProducts(this.value)">
+                    </div>
+                    <span style="color:#2563eb; font-size:12px; font-weight:700;" id="selectedCount">(Đã chọn: 0)</span>
                 </div>
                 <div class="product-select-box">
                     <table class="product-table">
                         <thead>
                         <tr>
-                            <th style="width:40px; text-align: center;"><input type="checkbox" id="checkAll"></th>
+                            <th style="width:40px; text-align: center;"><input type="checkbox" id="checkAll" style="width:14px; height:14px; cursor:pointer;"></th>
                             <th>MÃ SP</th>
                             <th>TÊN SẢN PHẨM</th>
                         </tr>
@@ -267,35 +283,84 @@
         </div>
     </div>
     <div class="drawer-footer">
-        <button class="btn btn-secondary" id="btnClose" onclick="window.PromotionApp.closeDrawer()" style="flex: 1;">Thoát</button>
-        <button class="btn" id="btnSave" onclick="window.PromotionApp.saveItem()" style="flex: 1;">Lưu thiết lập</button>
+        <button class="btn btn-secondary" id="btnClose" onclick="window.PromotionApp.closeDrawer()" style="flex: 1; height: 40px !important;">THOÁT</button>
+        <button class="btn" id="btnSave" onclick="window.PromotionApp.saveItem()" style="flex: 1; height: 40px !important;">LƯU THIẾT LẬP</button>
     </div>
 </aside>
 
-<div class="toast-container" id="toastHost"></div>
+<div id="beeToastHost"></div>
 
 <script>
-    // --- TOAST ---
-    window.toast = function(message, type = 'success') {
-        const container = document.getElementById('toastHost');
-        if (!container) return;
+    // --- TOAST SYSTEM ---
+    window.toast = function (message, type = 'success') {
+        let container = document.getElementById('beeToastHost');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'beeToastHost';
+            document.body.appendChild(container);
+        }
+
         const el = document.createElement('div');
-        el.className = `toast ${type}`;
-        const prefix = type === 'success' ? 'THÀNH CÔNG: ' : (type === 'error' ? 'LỖI: ' : 'THÔNG BÁO: ');
+        el.className = `bee-toast-box ${type}`;
+        const prefix = type === 'success' ? 'THÀNH CÔNG' : (type === 'error' ? 'LỖI' : 'THÔNG BÁO');
+        const color = type === 'success' ? '#10b981' : (type === 'error' ? '#ef4444' : '#f59e0b');
+        const icon = type === 'success' ? 'bi-check-circle-fill' : (type === 'error' ? 'bi-x-circle-fill' : 'bi-exclamation-triangle-fill');
 
         el.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-            <div>
-                <span style="font-weight:700; font-size:12px;">${prefix}</span>
-                <span style="font-weight:500; font-size:12px;">${message}</span>
+            <i class="bi ${icon}" style="color:${color}; font-size:22px; margin-top:2px;"></i>
+            <div style="display: flex; flex-direction: column; flex: 1;">
+                <span style="font-weight:800; font-size:12px; text-transform: uppercase; margin-bottom: 4px; color:${color}">${prefix}</span>
+                <span style="font-weight:500; font-size:13px; color:#333; line-height: 1.4;">${message}</span>
             </div>
-            <i class="bi bi-x-lg" style="cursor: pointer; margin-left: 10px; font-size: 14px;" onclick="this.parentElement.parentElement.remove()"></i>
-        </div>
+            <i class="bi bi-x-lg" style="cursor: pointer; margin-left: 10px; font-size: 18px; color:#999; transition: 0.2s;" onmouseover="this.style.color='#000'" onmouseout="this.style.color='#999'" onclick="this.parentElement.remove()"></i>
         `;
         container.appendChild(el);
+
         setTimeout(() => {
-            if (el.parentNode) { el.classList.add('hiding'); el.addEventListener('transitionend', () => el.remove()); }
+            if (el.parentNode) {
+                el.classList.add('hiding');
+                setTimeout(() => el.remove(), 300);
+            }
         }, 3500);
+    };
+
+    window.toastConfirm = function (title, message, onConfirm) {
+        let container = document.getElementById('beeToastHost');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'beeToastHost';
+            document.body.appendChild(container);
+        }
+
+        const el = document.createElement('div');
+        el.className = `bee-toast-box warning`;
+        el.style.flexDirection = 'column';
+        el.style.alignItems = 'stretch';
+
+        el.innerHTML = `
+            <div style="display: flex; gap: 12px; align-items: flex-start; width: 100%;">
+                <i class="bi bi-question-circle-fill" style="color:#f59e0b; font-size:24px; margin-top:2px;"></i>
+                <div style="display:flex; flex-direction:column; flex:1;">
+                    <span style="font-weight:800; font-size:13px; text-transform:uppercase; margin-bottom:6px; color:#000;">${title}</span>
+                    <span style="font-weight:500; font-size:13px; color:#555; line-height: 1.5;">${message}</span>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px; border-top: 1px dashed #eee; padding-top: 12px;">
+                <button class="btn btn-secondary" id="toastCancel" style="height: 32px; font-size: 11px; padding: 0 16px; border-radius: 4px;">HỦY BỎ</button>
+                <button class="btn" id="toastOk" style="height: 32px; font-size: 11px; padding: 0 16px; border-radius: 4px;">XÁC NHẬN</button>
+            </div>
+        `;
+        container.appendChild(el);
+
+        el.querySelector('#toastOk').onclick = () => {
+            el.classList.add('hiding');
+            setTimeout(() => el.remove(), 300);
+            if(onConfirm) onConfirm();
+        };
+        el.querySelector('#toastCancel').onclick = () => {
+            el.classList.add('hiding');
+            setTimeout(() => el.remove(), 300);
+        };
     };
 
     window.PromotionApp = {
@@ -313,7 +378,6 @@
 
         bindEvents: function () {
             document.getElementById('btnAdd').onclick = () => this.openDrawer('create');
-            document.getElementById('btnSave').onclick = () => this.saveItem();
             document.getElementById('btnClose').onclick = () => this.closeDrawer();
             document.getElementById('overlay').onclick = () => this.closeDrawer();
 
@@ -324,9 +388,6 @@
                     this.toggleProductSelection(parseInt(chk.value), e.target.checked);
                 });
             };
-
-            document.getElementById('prev').onclick = () => { if (this.state.page > 0) { this.state.page--; this.loadData(); } };
-            document.getElementById('next').onclick = () => { if (this.state.page < this.state.totalPages - 1) { this.state.page++; this.loadData(); } };
         },
 
         switchTab: function(tab) {
@@ -391,21 +452,78 @@
             }
         },
 
+        // 🌟 ÁP DỤNG PHÂN TRANG ... ĐỒNG BỘ
+        renderPagination: function(data) {
+            this.state.totalPages = data.totalPages || 0;
+            const container = document.getElementById('paginationContainer');
+
+            if (this.state.totalPages <= 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = `<div class="pagination-info">Hiển thị ${data.numberOfElements}/${data.totalElements} bản ghi</div><div class="pagination">`;
+
+            html += `<button class="page-number" ${this.state.page === 0 ? 'disabled' : ''} onclick="window.PromotionApp.changePage(${this.state.page - 1})"><i class="bi bi-chevron-left"></i></button>`;
+
+            const current = this.state.page + 1;
+            const last = this.state.totalPages;
+            const delta = 1;
+            const left = current - delta;
+            const right = current + delta;
+            const range = [];
+            const rangeWithDots = [];
+            let l;
+
+            for (let i = 1; i <= last; i++) {
+                if (i === 1 || i === last || (i >= left && i <= right)) range.push(i);
+            }
+
+            for (let i of range) {
+                if (l) {
+                    if (i - l === 2) { rangeWithDots.push(l + 1); }
+                    else if (i - l !== 1) { rangeWithDots.push('...'); }
+                }
+                rangeWithDots.push(i);
+                l = i;
+            }
+
+            for (let i of rangeWithDots) {
+                if (i === '...') {
+                    html += `<span class="page-number" style="border:none; background:transparent; pointer-events:none; cursor:default; min-width: 15px;">...</span>`;
+                } else {
+                    const pageIndex = i - 1;
+                    const activeClass = pageIndex === this.state.page ? 'active' : '';
+                    html += `<button class="page-number ${activeClass}" onclick="window.PromotionApp.changePage(${pageIndex})">${i}</button>`;
+                }
+            }
+
+            html += `<button class="page-number" ${this.state.page === this.state.totalPages - 1 ? 'disabled' : ''} onclick="window.PromotionApp.changePage(${this.state.page + 1})"><i class="bi bi-chevron-right"></i></button></div>`;
+
+            container.innerHTML = html;
+        },
+
+        changePage: function(p) {
+            if (p < 0 || p >= this.state.totalPages) return;
+            this.state.page = p;
+            this.loadData();
+        },
+
         renderSaleTable: function (list) {
             const tbody = document.getElementById('tbody');
             if (list.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Chưa có khuyến mãi nào</td></tr>'; return; }
             tbody.innerHTML = list.map((item, index) => {
                 const fm = new Intl.NumberFormat('vi-VN');
-                const val = item.loai === 'PERCENT' ? item.giaTri + '%' : fm.format(item.giaTri) + ' đ';
+                const val = item.loai === 'PERCENT' ? item.giaTri + '%' : fm.format(item.giaTri) + ' ₫';
                 const toggleHtml = `<label class="switch-sm"><input type="checkbox" ${item.trangThai ? 'checked' : ''} onchange="window.PromotionApp.quickToggle(${item.id}, this)"><span class="slider-sm"></span></label>`;
 
                 return `<tr>
                     <td style="text-align:center;">${(this.state.page * this.state.size) + index + 1}</td>
-                    <td style="font-weight:700;">${item.ma}</td>
-                    <td>${item.ten}</td>
-                    <td>${item.loai === 'PERCENT' ? 'Phần trăm' : 'Tiền mặt'}</td>
+                    <td style="font-weight:800; color:#555;">${item.ma}</td>
+                    <td style="font-weight:700;">${item.ten}</td>
+                    <td><span class="badge-type">${item.loai === 'PERCENT' ? 'Phần trăm' : 'Tiền mặt'}</span></td>
                     <td style="font-weight:700; color:#d63384;">${val}</td>
-                    <td style="font-size:11px;">${item.ngayBatDau.replace('T',' ')}<br>${item.ngayKetThuc.replace('T',' ')}</td>
+                    <td style="font-size:12px; color:#666;">${item.ngayBatDau.replace('T',' ')}<br>${item.ngayKetThuc.replace('T',' ')}</td>
                     <td style="text-align:center;">${toggleHtml}</td>
                     <td style="text-align:right; white-space: nowrap;">
                     <button class="btn-icon" title="Chi tiết" onclick="window.PromotionApp.openView(${item.id})"><i class="bi bi-eye"></i></button>
@@ -422,13 +540,12 @@
             tbody.innerHTML = list.map((item, index) => {
                 const fm = new Intl.NumberFormat('vi-VN');
 
-                // Giao diện Loại Giảm
                 let typeLabel = '';
-                if (item.loaiGiamGia === 'PERCENTAGE') typeLabel = 'Phần trăm';
-                else if (item.loaiGiamGia === 'FREESHIP') typeLabel = '<span style="color:#2563eb;font-weight:700;"><i class="bi bi-truck"></i> Freeship</span>';
-                else typeLabel = 'Tiền mặt';
+                if (item.loaiGiamGia === 'PERCENTAGE') typeLabel = '<span class="badge-type">Phần trăm</span>';
+                else if (item.loaiGiamGia === 'FREESHIP') typeLabel = '<span class="badge-type" style="background:#dbeafe; color:#2563eb;"><i class="bi bi-truck"></i> Freeship</span>';
+                else typeLabel = '<span class="badge-type">Tiền mặt</span>';
 
-                const val = item.loaiGiamGia === 'PERCENTAGE' ? item.giaTriGiamGia + '%' : fm.format(item.giaTriGiamGia) + ' đ';
+                const val = item.loaiGiamGia === 'PERCENTAGE' ? item.giaTriGiamGia + '%' : fm.format(item.giaTriGiamGia) + ' ₫';
                 const cond = fm.format(item.dieuKien);
                 const toggleHtml = `<label class="switch-sm"><input type="checkbox" ${item.trangThai ? 'checked' : ''} onchange="window.PromotionApp.quickToggle(${item.id}, this)"><span class="slider-sm"></span></label>`;
 
@@ -457,11 +574,11 @@
 
                 return `<tr>
                     <td style="text-align:center;">${(this.state.page * this.state.size) + index + 1}</td>
-                    <td style="font-weight:800;">${item.maCode}</td>
-                    <td><div style="font-weight:600;">${item.ten}</div><div style="font-size:10px; color:#888; margin-top:2px;">${item.choPhepCongDon ? 'Cộng dồn Sale: Có' : 'Không cộng dồn Sale'}</div></td>
+                    <td style="font-weight:800; color:#555;">${item.maCode}</td>
+                    <td><div style="font-weight:700;">${item.ten}</div><div style="font-size:10px; color:#888; margin-top:2px;">${item.choPhepCongDon ? 'Cộng dồn Sale: Có' : 'Không cộng dồn Sale'}</div></td>
                     <td>${typeLabel}</td>
                     <td style="font-weight:800; color:#d63384;">${val}</td>
-                    <td style="font-size:12px;">Min: ${cond} đ</td>
+                    <td style="font-size:12px; color:#666;">Từ ${cond} ₫</td>
                     <td style="padding: 0;">${qtyHtml}</td>
                     <td style="text-align:center;">${toggleHtml}</td>
                     <td style="text-align:right; white-space: nowrap;">
@@ -472,17 +589,12 @@
             }).join('');
         },
 
-        // --- FORM XỬ LÝ ĐỘNG DỰA VÀO LOẠI ---
-        // 1. SỬA HÀM NÀY: Thêm tham số keepValue để không bị xóa mất dữ liệu khi bấm Sửa
         handleTypeChange: function(keepValue = false) {
             const type = document.getElementById('kmLoai').value;
             const input = document.getElementById('kmGiaTri');
             const isVoucher = this.state.activeTab === 'voucher';
 
-            // Nếu không phải là gọi từ hàm openEdit thì mới reset value
-            if (!keepValue) {
-                input.value = '';
-            }
+            if (!keepValue) { input.value = ''; }
 
             if (type === 'PERCENT') {
                 input.placeholder = "Ví dụ: 10 (%)";
@@ -491,7 +603,7 @@
                 input.placeholder = "Mức hỗ trợ ship (VD: 30,000)";
                 document.getElementById('groupMaxGiam').style.display = 'none';
             } else {
-                input.placeholder = "Ví dụ: 10,000 (VND)";
+                input.placeholder = "Ví dụ: 10,000 (VNĐ)";
                 document.getElementById('groupMaxGiam').style.display = 'none';
             }
         },
@@ -504,12 +616,11 @@
             const isSale = this.state.activeTab === 'sale';
             document.getElementById('drawerTitle').innerText = isSale ? "THÊM ĐỢT SALE (SẢN PHẨM)" : "THÊM VOUCHER MỚI";
 
-            // Đổi danh sách Option tùy Tab (Thêm Freeship cho Voucher)
             const typeSelect = document.getElementById('kmLoai');
             if (isSale) {
-                typeSelect.innerHTML = '<option value="PERCENT">Phần trăm (%)</option><option value="AMOUNT">Giảm trực tiếp (VND)</option>';
+                typeSelect.innerHTML = '<option value="PERCENT">Phần trăm (%)</option><option value="AMOUNT">Giảm trực tiếp (VNĐ)</option>';
             } else {
-                typeSelect.innerHTML = '<option value="PERCENT">Phần trăm (%)</option><option value="AMOUNT">Tiền mặt (VND)</option><option value="FREESHIP">Hỗ trợ vận chuyển (VND)</option>';
+                typeSelect.innerHTML = '<option value="PERCENT">Phần trăm (%)</option><option value="AMOUNT">Tiền mặt (VNĐ)</option><option value="FREESHIP">Hỗ trợ vận chuyển (VNĐ)</option>';
             }
             this.handleTypeChange();
 
@@ -533,9 +644,7 @@
             document.getElementById('overlay').classList.add('show');
         },
 
-        // 2. SỬA HÀM NÀY: Khắc phục lỗi hiển thị số 0 và truyền true vào handleTypeChange
         openEdit: async function (id) {
-            window.toast("Đang lấy thông tin...", "warning");
             this.state.editingId = id;
             this.setFormState(false);
 
@@ -548,9 +657,9 @@
 
                 const typeSelect = document.getElementById('kmLoai');
                 if (isSale) {
-                    typeSelect.innerHTML = '<option value="PERCENT">Phần trăm (%)</option><option value="AMOUNT">Giảm trực tiếp (VND)</option>';
+                    typeSelect.innerHTML = '<option value="PERCENT">Phần trăm (%)</option><option value="AMOUNT">Giảm trực tiếp (VNĐ)</option>';
                 } else {
-                    typeSelect.innerHTML = '<option value="PERCENT">Phần trăm (%)</option><option value="AMOUNT">Tiền mặt (VND)</option><option value="FREESHIP">Hỗ trợ vận chuyển (VND)</option>';
+                    typeSelect.innerHTML = '<option value="PERCENT">Phần trăm (%)</option><option value="AMOUNT">Tiền mặt (VNĐ)</option><option value="FREESHIP">Hỗ trợ vận chuyển (VNĐ)</option>';
                 }
 
                 document.getElementById('kmMa').value = isSale ? item.ma : item.maCode;
@@ -564,11 +673,9 @@
                     else document.getElementById('kmLoai').value = 'AMOUNT';
                 }
 
-                // Sửa lỗi: Chỉ format nếu có giá trị để tránh hiện số 0
                 const giaTri = isSale ? item.giaTri : item.giaTriGiamGia;
                 document.getElementById('kmGiaTri').value = giaTri ? new Intl.NumberFormat('en-US').format(giaTri) : '';
 
-                // Gọi handleTypeChange nhưng báo là KHÔNG XÓA DỮ LIỆU
                 this.handleTypeChange(true);
 
                 const formatTime = (t) => t ? t.substring(0, 16) : '';
@@ -614,21 +721,21 @@
             } catch(e) { window.toast("Truy xuất thông tin thất bại.", "error"); }
         },
 
+        // 🌟 BỔ SUNG TOAST CONFIRM KHI LƯU
         saveItem: async function () {
             const isSale = this.state.activeTab === 'sale';
-            const btnSave = document.getElementById('btnSave');
-            const originalText = btnSave.innerHTML;
+            const actionTitle = this.state.editingId ? "Cập nhật dữ liệu" : "Thêm mới";
+            const nameLabel = isSale ? "đợt Sale" : "Voucher";
+
+            const ten = document.getElementById('kmTen').value.trim();
+            const ngayBatDau = document.getElementById('kmNgayBatDau').value;
+            const ngayKetThuc = document.getElementById('kmNgayKetThuc').value;
 
             const cleanMoney = (id, defaultValue = null) => {
                 const val = document.getElementById(id).value;
                 if (!val || val.trim() === '') return defaultValue;
                 return parseFloat(val.replace(/,/g, ''));
             };
-
-            const ten = document.getElementById('kmTen').value.trim();
-            const ngayBatDau = document.getElementById('kmNgayBatDau').value;
-            const ngayKetThuc = document.getElementById('kmNgayKetThuc').value;
-            const loaiRaw = document.getElementById('kmLoai').value;
             const giaTriRaw = cleanMoney('kmGiaTri', null);
 
             if (!ten) { window.toast('Vui lòng nhập tên chương trình.', 'warning'); return; }
@@ -636,63 +743,71 @@
             if (new Date(ngayKetThuc) <= new Date(ngayBatDau)) { window.toast('Kết thúc phải sau Bắt đầu.', 'warning'); return; }
             if (giaTriRaw === null) { window.toast('Vui lòng nhập định mức chiết khấu.', 'warning'); return; }
 
-            let payload = {
-                ten: ten, ngayBatDau: ngayBatDau, ngayKetThuc: ngayKetThuc,
-                choPhepCongDon: document.getElementById('kmCongDon').checked,
-                trangThai: document.getElementById('kmTrangThai').checked
-            };
-
-            if (isSale) {
-                payload.ma = document.getElementById('kmMa').value.trim();
-                payload.loai = loaiRaw;
-                payload.giaTri = giaTriRaw;
-                payload.idSanPhams = this.state.selectedProductIds;
-                payload.choPhepCongDon = true;
-
-                // ĐÃ XÓA CHẶN DỮ LIỆU RỖNG Ở ĐÂY ĐỂ BẠN TẠO THOẢI MÁI
-
-            } else {
-                payload.maCode = document.getElementById('kmMa').value.trim();
-
-                if (loaiRaw === 'PERCENT') payload.loaiGiamGia = 'PERCENTAGE';
-                else if (loaiRaw === 'FREESHIP') payload.loaiGiamGia = 'FREESHIP';
-                else payload.loaiGiamGia = 'FIXED';
-
-                payload.giaTriGiamGia = giaTriRaw;
-                payload.giaTriGiamGiaToiDa = (loaiRaw === 'PERCENT') ? cleanMoney('vGiaTriToiDa', null) : null;
-                payload.dieuKien = cleanMoney('vDieuKien', 0);
-                payload.soLuong = parseInt(document.getElementById('vSoLuong').value) || 0;
+            if(isSale && this.state.selectedProductIds.length === 0) {
+                window.toast('Bạn chưa chọn sản phẩm nào để áp dụng Sale!', 'warning');
+                return;
             }
 
-            const endpoint = isSale ? '/api/khuyen-mai' : '/api/vouchers';
-            const url = this.state.editingId ? `${endpoint}/${this.state.editingId}` : endpoint;
+            window.toastConfirm(actionTitle, `Bạn chắc chắn muốn lưu thông tin ${nameLabel} này vào hệ thống?`, async () => {
+                const btnSave = document.getElementById('btnSave');
+                const originalText = btnSave.innerHTML;
+                const loaiRaw = document.getElementById('kmLoai').value;
 
-            try {
-                btnSave.disabled = true;
-                btnSave.innerHTML = 'ĐANG XỬ LÝ...';
+                let payload = {
+                    ten: ten, ngayBatDau: ngayBatDau, ngayKetThuc: ngayKetThuc,
+                    choPhepCongDon: document.getElementById('kmCongDon').checked,
+                    trangThai: document.getElementById('kmTrangThai').checked
+                };
 
-                const res = await fetch(url, {
-                    method: this.state.editingId ? 'PUT' : 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(payload)
-                });
-
-                if (res.ok) {
-                    window.toast("Lưu dữ liệu thành công.", "success");
-                    this.closeDrawer(); this.loadData();
+                if (isSale) {
+                    payload.ma = document.getElementById('kmMa').value.trim();
+                    payload.loai = loaiRaw;
+                    payload.giaTri = giaTriRaw;
+                    payload.idSanPhams = this.state.selectedProductIds;
+                    payload.choPhepCongDon = true;
                 } else {
-                    let errorMsg = "Lưu thất bại.";
-                    try {
-                        const err = await res.json();
-                        errorMsg = err.message || errorMsg;
-                    } catch (e) {
-                        const text = await res.text();
-                        if (text) errorMsg = text;
-                    }
-                    window.toast(errorMsg, 'error');
+                    payload.maCode = document.getElementById('kmMa').value.trim();
+
+                    if (loaiRaw === 'PERCENT') payload.loaiGiamGia = 'PERCENTAGE';
+                    else if (loaiRaw === 'FREESHIP') payload.loaiGiamGia = 'FREESHIP';
+                    else payload.loaiGiamGia = 'FIXED';
+
+                    payload.giaTriGiamGia = giaTriRaw;
+                    payload.giaTriGiamGiaToiDa = (loaiRaw === 'PERCENT') ? cleanMoney('vGiaTriToiDa', null) : null;
+                    payload.dieuKien = cleanMoney('vDieuKien', 0);
+                    payload.soLuong = parseInt(document.getElementById('vSoLuong').value) || 0;
                 }
-            } catch (e) { window.toast("Sự cố kết nối máy chủ.", 'error'); }
-            finally { btnSave.disabled = false; btnSave.innerHTML = originalText; }
+
+                const endpoint = isSale ? '/api/khuyen-mai' : '/api/vouchers';
+                const url = this.state.editingId ? `${endpoint}/${this.state.editingId}` : endpoint;
+
+                try {
+                    btnSave.disabled = true;
+                    btnSave.innerHTML = 'ĐANG XỬ LÝ...';
+
+                    const res = await fetch(url, {
+                        method: this.state.editingId ? 'PUT' : 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (res.ok) {
+                        window.toast("Lưu dữ liệu thành công.", "success");
+                        this.closeDrawer(); this.loadData();
+                    } else {
+                        let errorMsg = "Lưu thất bại.";
+                        try {
+                            const err = await res.json();
+                            errorMsg = err.message || errorMsg;
+                        } catch (e) {
+                            const text = await res.text();
+                            if (text) errorMsg = text;
+                        }
+                        window.toast(errorMsg, 'error');
+                    }
+                } catch (e) { window.toast("Sự cố kết nối máy chủ.", 'error'); }
+                finally { btnSave.disabled = false; btnSave.innerHTML = originalText; }
+            });
         },
 
         setFormState: function(disabled) {
@@ -721,7 +836,7 @@
             const originalState = !el.checked;
             const isSale = this.state.activeTab === 'sale';
 
-            this.toastConfirm("Đổi trạng thái chương trình này?", async () => {
+            this.toastConfirm("Đổi trạng thái", "Xác nhận thay đổi trạng thái kích hoạt của chương trình này?", async () => {
                     const endpoint = isSale ? `/api/khuyen-mai/${id}/trang-thai` : `/api/vouchers/${id}/trang-thai`;
                     const parent = el.closest('.switch-sm');
                     try {
@@ -743,27 +858,6 @@
             );
         },
 
-        toastConfirm: function(message, onConfirm, onCancel) {
-            const container = document.getElementById('toastHost');
-            if (!container) return;
-            const el = document.createElement('div');
-            el.className = `toast warning`;
-            el.style.flexDirection = 'column'; el.style.alignItems = 'flex-start'; el.style.gap = '10px';
-            el.innerHTML = `
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <i class="bi bi-exclamation-circle-fill" style="color:#f59e0b; font-size:18px;"></i>
-                    <span style="font-weight:600; font-size:13px;">${message}</span>
-                </div>
-                <div style="display: flex; gap: 8px; width: 100%; justify-content: flex-end;">
-                    <button class="btn btn-secondary" id="toastCancel" style="height: 24px; font-size: 10px; padding: 0 10px;">HỦY</button>
-                    <button class="btn" id="toastOk" style="height: 24px; font-size: 10px; padding: 0 10px;">XÁC NHẬN</button>
-                </div>
-            `;
-            container.appendChild(el);
-            el.querySelector('#toastOk').onclick = () => { el.remove(); onConfirm(); };
-            el.querySelector('#toastCancel').onclick = () => { el.remove(); onCancel(); };
-        },
-
         formatMoneyInput: function(el) {
             let val = el.value.replace(/[^0-9]/g, '');
             if (val.length > 1 && val.startsWith('0')) val = val.substring(1);
@@ -773,7 +867,6 @@
         handleStatus: function(val) { this.state.trangThai = val; this.state.page = 0; this.loadData(); },
         resetFilters: function() { this.state.q=''; this.state.trangThai=''; document.getElementById('search').value=''; document.getElementById('fTrangThaiFilter').value=''; this.loadData(); },
         closeDrawer: function () { document.getElementById('drawer').classList.remove('show'); document.getElementById('overlay').classList.remove('show'); },
-        renderPagination: function(data) { document.getElementById('info').innerText = `Trang ${data.number + 1} / ${data.totalPages}`; },
 
         loadProducts: async function () { try { const res = await fetch('/api/khuyen-mai/san-pham'); this.state.products = await res.json(); } catch(e){} },
         filterProducts: function(key) {
@@ -782,8 +875,9 @@
         },
         renderProductSelectionTable: function (data) {
             document.getElementById('productTableBody').innerHTML = data.map(p => `<tr>
-                <td style="text-align:center;"><input type="checkbox" class="product-check" value="${p.id}" ${this.state.selectedProductIds.includes(p.id)?'checked':''} onchange="window.PromotionApp.toggleProductSelection(${p.id}, this.checked)"></td>
-                <td style="font-weight:700;">${p.ma}</td><td>${p.ten}</td>
+                <td style="text-align:center;"><input type="checkbox" class="product-check" style="width:14px; height:14px; cursor:pointer;" value="${p.id}" ${this.state.selectedProductIds.includes(p.id)?'checked':''} onchange="window.PromotionApp.toggleProductSelection(${p.id}, this.checked)"></td>
+                <td style="font-weight:800; color:#555;">${p.ma}</td>
+                <td style="font-weight:600;">${p.ten}</td>
             </tr>`).join('');
         },
         toggleProductSelection: function (id, checked) {

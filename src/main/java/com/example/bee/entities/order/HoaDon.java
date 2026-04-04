@@ -86,4 +86,17 @@ public class HoaDon {
         if (this.giaTamThoi == null) this.giaTamThoi = BigDecimal.ZERO;
         if (this.giaTong == null) this.giaTong = BigDecimal.ZERO;
     }
+
+    @OneToMany(mappedBy = "hoaDon")
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private java.util.List<com.example.bee.entities.order.YeuCauDoiTra> yeuCauDoiTras;
+
+    @Transient
+    public java.math.BigDecimal getTienHoan() {
+        if (this.yeuCauDoiTras == null) return java.math.BigDecimal.ZERO;
+        return this.yeuCauDoiTras.stream()
+                .filter(yc -> "HOAN_THANH".equals(yc.getTrangThai()) && yc.getSoTienHoan() != null)
+                .map(com.example.bee.entities.order.YeuCauDoiTra::getSoTienHoan)
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+    }
 }

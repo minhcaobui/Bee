@@ -156,11 +156,7 @@ public class PosApi {
                 throw new RuntimeException("Giỏ hàng trống!");
             }
 
-            String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            StringBuilder sb = new StringBuilder("HD");
-            Random random = new Random();
-            for (int i = 0; i < 6; i++) sb.append(characters.charAt(random.nextInt(characters.length())));
-            String maHD = sb.toString();
+            String maHD = ("HD" + System.currentTimeMillis());
 
             NhanVien nvChotDon = getLoggedInNhanVien();
 
@@ -256,7 +252,7 @@ public class PosApi {
             hd.setTrangThaiHoaDon(ttHoanThanh);
             hoaDonRepo.save(hd);
 
-            thanhToanRepo.save(ThanhToan.builder().hoaDon(hd).soTien(hd.getGiaTong()).phuongThuc(method).nhanVien(nvChotDon).build());
+            thanhToanRepo.save(ThanhToan.builder().hoaDon(hd).soTien(hd.getGiaTong()).phuongThuc(method).trangThai("THANH_CONG").nhanVien(nvChotDon).build());
             lichSuRepo.save(LichSuHoaDon.builder().hoaDon(hd).trangThaiHoaDon(ttHoanThanh).ghiChu("Thanh toán trực tiếp").nhanVien(nvChotDon).build());
 
             return ResponseEntity.ok(Map.of("message", "Thành công!", "ma", hd.getMa(), "id", hd.getId()));
@@ -271,11 +267,7 @@ public class PosApi {
         try {
             BigDecimal totalAmount = new BigDecimal(payload.get("amount").toString());
 
-            String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            StringBuilder sb = new StringBuilder("HD");
-            Random random = new Random();
-            for (int i = 0; i < 6; i++) sb.append(characters.charAt(random.nextInt(characters.length())));
-            String maHD = sb.toString();
+            String maHD = ("HD" + System.currentTimeMillis());
 
             payload.put("maHD", maHD);
             pendingCarts.put(maHD, payload);
@@ -283,7 +275,11 @@ public class PosApi {
             String rId = String.valueOf(System.currentTimeMillis());
             String oId = maHD + "_" + rId;
             String amountStr = totalAmount.setScale(0, RoundingMode.HALF_UP).toString();
-            String rawHash = "accessKey=" + accessKey.trim() + "&amount=" + amountStr + "&extraData=&ipnUrl=" + notifyUrl.trim() + "&orderId=" + oId + "&orderInfo=ThanhToan_" + maHD + "&partnerCode=" + partnerCode.trim() + "&redirectUrl=" + returnUrl.trim() + "&requestId=" + rId + "&requestType=captureWallet";
+
+            // 🌟 ĐÃ SỬA: Ép cứng ReturnUrl chạy vào Backend của POS trước
+            String posReturnUrl = "http://localhost:8080/api/pos/momo-callback";
+
+            String rawHash = "accessKey=" + accessKey.trim() + "&amount=" + amountStr + "&extraData=&ipnUrl=" + notifyUrl.trim() + "&orderId=" + oId + "&orderInfo=ThanhToan_" + maHD + "&partnerCode=" + partnerCode.trim() + "&redirectUrl=" + posReturnUrl + "&requestId=" + rId + "&requestType=captureWallet";
             String signature = MomoSecurity.signHmacSHA256(rawHash, secretKey.trim());
             Map<String, Object> body = new LinkedHashMap<>();
             body.put("partnerCode", partnerCode.trim());
@@ -292,7 +288,7 @@ public class PosApi {
             body.put("amount", Long.valueOf(amountStr));
             body.put("orderId", oId);
             body.put("orderInfo", "ThanhToan_" + maHD);
-            body.put("redirectUrl", returnUrl.trim());
+            body.put("redirectUrl", posReturnUrl); // 🌟 BẮT MOMO TRẢ VỀ BACKEND
             body.put("ipnUrl", notifyUrl.trim());
             body.put("extraData", "");
             body.put("requestType", "captureWallet");
@@ -367,80 +363,129 @@ public class PosApi {
     @Transactional
     public ResponseEntity<?> confirmOnlinePayment(@RequestBody Map<String, String> body) {
         String maHD = body.get("maHD");
-        Map<String, Object> payload = pendingCarts.get(maHD);
 
-        if (payload != null) {
-            if (hoaDonRepo.findByMa(maHD) != null) {
-                return ResponseEntity.ok(Map.of("message", "Đã xử lý trước đó"));
+        // 🌟 BƯỚC 1: Xóa ngay lập tức Payload khỏi RAM để chống chạy 2 lần đồng thời
+        Map<String, Object> payload = pendingCarts.remove(maHD);
+
+        if (payload == null) {
+            // Nếu payload = null -> Request này là Request sinh đôi đang chạy chậm hơn, hoặc HĐ đã được xử lý xong
+            HoaDon existing = hoaDonRepo.findByMa(maHD);
+            if (existing != null) {
+                // Trả về lỗi để trình duyệt KHÔNG IN RA HÓA ĐƠN NỮA
+                return ResponseEntity.badRequest().body(Map.of("message", "Đã in hóa đơn trước đó rồi"));
             }
-
-            Integer customerId = (Integer) payload.get("customerId");
-            List<Map<String, Object>> cart = (List<Map<String, Object>>) payload.get("cart");
-
-            HoaDon hd = HoaDon.builder()
-                    .ma(maHD)
-                    .giaTamThoi(BigDecimal.ZERO)
-                    .giaTong(BigDecimal.ZERO)
-                    .loaiHoaDon(0)
-                    .ngayTao(new Date())
-                    .nhanVien(getLoggedInNhanVien())
-                    .build();
-
-            if (customerId != null) hd.setKhachHang(khachHangRepo.findById(customerId).orElse(null));
-            hd = hoaDonRepo.save(hd);
-
-            BigDecimal giaTamTinh = BigDecimal.ZERO;
-
-            for (Map<String, Object> item : cart) {
-                SanPhamChiTiet spct = variantRepo.findById(Integer.valueOf(item.get("id").toString())).get();
-                int qty = Integer.valueOf(item.get("qty").toString());
-                BigDecimal price = new BigDecimal(item.get("price").toString());
-
-                spct.setSoLuong(spct.getSoLuong() - qty);
-                spct.setSoLuongTamGiu(Math.max(0, spct.getSoLuongTamGiu() - qty));
-
-                if (spct.getSoLuong() <= 0) spct.setTrangThai(false);
-                variantRepo.save(spct);
-                hdctRepo.save(HoaDonChiTiet.builder().hoaDon(hd).sanPhamChiTiet(spct).soLuong(qty).giaTien(price).build());
-                giaTamTinh = giaTamTinh.add(price.multiply(BigDecimal.valueOf(qty)));
-            }
-
-            BigDecimal totalAmount = new BigDecimal(payload.get("amount").toString());
-            hd.setGiaTamThoi(giaTamTinh);
-            hd.setGiaTriKhuyenMai(giaTamTinh.subtract(totalAmount));
-            hd.setGiaTong(totalAmount);
-            hd.setNgayThanhToan(new Date());
-
-            // Xử lý xác định phương thức Online (MOMO/VNPAY) dựa trên callback
-            String pMethod = payload.get("method") != null ? payload.get("method").toString() : "ONLINE";
-            hd.setPhuongThucThanhToan(pMethod);
-
-            hd.setTrangThaiHoaDon(trangThaiRepo.findByMa("HOAN_THANH"));
-            hoaDonRepo.save(hd);
-
-            thanhToanRepo.save(ThanhToan.builder().hoaDon(hd).soTien(totalAmount).phuongThuc(pMethod).trangThai("THANH_CONG").nhanVien(getLoggedInNhanVien()).build());
-            lichSuRepo.save(LichSuHoaDon.builder().hoaDon(hd).trangThaiHoaDon(hd.getTrangThaiHoaDon()).ghiChu("Thanh toán " + pMethod + " thành công").nhanVien(getLoggedInNhanVien()).build());
-
-            pendingCarts.remove(maHD);
-            return ResponseEntity.ok(Map.of("message", "Thành công", "id", hd.getId()));
+            return ResponseEntity.badRequest().body(Map.of("message", "Lỗi hoặc hóa đơn đã bị hủy"));
         }
-        return ResponseEntity.ok(Map.of("message", "Lỗi hoặc hóa đơn đã bị hủy"));
+
+        // BƯỚC 2: Request đầu tiên qua được chốt chặn sẽ thực hiện lưu vào DB
+        Integer customerId = (Integer) payload.get("customerId");
+        List<Map<String, Object>> cart = (List<Map<String, Object>>) payload.get("cart");
+        Integer voucherId = (Integer) payload.get("voucherId");
+
+        HoaDon hd = HoaDon.builder()
+                .ma(maHD)
+                .giaTamThoi(BigDecimal.ZERO)
+                .giaTong(BigDecimal.ZERO)
+                .loaiHoaDon(0) // Tại quầy
+                .ngayTao(new Date())
+                .nhanVien(getLoggedInNhanVien())
+                .build();
+
+        if (customerId != null) hd.setKhachHang(khachHangRepo.findById(customerId).orElse(null));
+        hd = hoaDonRepo.save(hd);
+
+        BigDecimal giaTamTinh = BigDecimal.ZERO;
+
+        for (Map<String, Object> item : cart) {
+            SanPhamChiTiet spct = variantRepo.findById(Integer.valueOf(item.get("id").toString())).get();
+            int qty = Integer.valueOf(item.get("qty").toString());
+            BigDecimal price = new BigDecimal(item.get("price").toString());
+
+            spct.setSoLuong(spct.getSoLuong() - qty);
+            spct.setSoLuongTamGiu(Math.max(0, spct.getSoLuongTamGiu() - qty));
+
+            if (spct.getSoLuong() <= 0) spct.setTrangThai(false);
+            variantRepo.save(spct);
+            hdctRepo.save(HoaDonChiTiet.builder().hoaDon(hd).sanPhamChiTiet(spct).soLuong(qty).giaTien(price).build());
+            giaTamTinh = giaTamTinh.add(price.multiply(BigDecimal.valueOf(qty)));
+        }
+
+        BigDecimal totalAmount = new BigDecimal(payload.get("amount").toString());
+        hd.setGiaTamThoi(giaTamTinh);
+        hd.setGiaTriKhuyenMai(giaTamTinh.subtract(totalAmount));
+        hd.setGiaTong(totalAmount);
+        hd.setNgayThanhToan(new Date());
+
+        String pMethod = payload.get("method") != null ? payload.get("method").toString() : "ONLINE";
+        hd.setPhuongThucThanhToan(pMethod);
+
+        if (voucherId != null) {
+            MaGiamGia voucher = maGiamGiaRepo.findById(voucherId).orElse(null);
+            if (voucher != null) {
+                hd.setMaGiamGia(voucher);
+                int luotMoi = voucher.getLuotSuDung() + 1;
+                voucher.setLuotSuDung(luotMoi);
+                if (luotMoi >= voucher.getSoLuong()) voucher.setTrangThai(false);
+                maGiamGiaRepo.save(voucher);
+            }
+        }
+
+        hd.setTrangThaiHoaDon(trangThaiRepo.findByMa("HOAN_THANH"));
+        hoaDonRepo.save(hd);
+
+        thanhToanRepo.save(ThanhToan.builder().hoaDon(hd).soTien(totalAmount).phuongThuc(pMethod).trangThai("THANH_CONG").nhanVien(getLoggedInNhanVien()).build());
+        lichSuRepo.save(LichSuHoaDon.builder().hoaDon(hd).trangThaiHoaDon(hd.getTrangThaiHoaDon()).ghiChu("Thanh toán " + pMethod + " thành công").nhanVien(getLoggedInNhanVien()).build());
+
+        // CHỈ TRẢ VỀ ID CHO REQUEST CHẠY ĐẦU TIÊN NÀY
+        return ResponseEntity.ok(Map.of(
+                "message", "Thành công",
+                "id", hd.getId()
+        ));
     }
 
-    @PostMapping("/momo-callback")
-    @Transactional
-    public ResponseEntity<Void> momoCallback(@RequestBody Map<String, Object> params, HttpServletRequest request) {
+    // 🌟 SỬA LỖI MOMO VÀ VNPAY TRẢ VỀ SAI CÚ PHÁP
+    @RequestMapping(value = "/momo-callback", method = {RequestMethod.GET, RequestMethod.POST})
+    public void momoCallback(HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
         String queryString = request.getQueryString();
-        String redirectUrl = "http://localhost:8080/admin?" + (queryString != null ? queryString : "") + "#pos";
-        return ResponseEntity.status(org.springframework.http.HttpStatus.FOUND).location(java.net.URI.create(redirectUrl)).build();
+        String redirectUrl = "http://localhost:8080/admin";
+
+        // Nếu QueryString rỗng (do MoMo dùng POST), tự động móc dữ liệu từ Body ra để ghép thành URL
+        if (queryString == null || queryString.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
+                if (sb.length() > 0) sb.append("&");
+                sb.append(entry.getKey()).append("=").append(URLEncoder.encode(entry.getValue()[0], StandardCharsets.UTF_8.name()));
+            }
+            queryString = sb.toString();
+        }
+
+        if (queryString != null && !queryString.isEmpty()) {
+            redirectUrl += "?" + queryString;
+        }
+        redirectUrl += "#pos"; // Đẩy về đúng tab POS
+
+        // Dùng sendRedirect nguyên thủy của Servlet để trình duyệt không bao giờ bị lỗi URL
+        response.sendRedirect(redirectUrl);
     }
 
-    @GetMapping("/vnpay-callback")
-    @Transactional
-    public ResponseEntity<Void> vnpayCallback(@RequestParam Map<String, String> params, HttpServletRequest request) {
-        String queryString = request.getQueryString();
-        String redirectUrl = "http://localhost:8080/admin?" + (queryString != null ? queryString : "") + "#pos";
-        return ResponseEntity.status(org.springframework.http.HttpStatus.FOUND).location(java.net.URI.create(redirectUrl)).build();
+    @RequestMapping(value = "/vnpay-callback", method = {RequestMethod.GET, RequestMethod.POST})
+    public ResponseEntity<Void> vnpayCallback(@RequestParam Map<String, String> params) {
+        String redirectUrl = "http://localhost:8080/admin";
+        StringBuilder queryString = new StringBuilder();
+
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            if (queryString.length() > 0) queryString.append("&");
+            try {
+                queryString.append(entry.getKey()).append("=").append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8.name()));
+            } catch (Exception e) {}
+        }
+
+        if (queryString.length() > 0) redirectUrl += "?" + queryString.toString();
+        redirectUrl += "#pos";
+
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.add("Location", redirectUrl);
+        return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
 
     @PostMapping("/vouchers/apply")

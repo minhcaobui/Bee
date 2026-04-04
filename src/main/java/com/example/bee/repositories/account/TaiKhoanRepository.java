@@ -15,15 +15,16 @@ public interface TaiKhoanRepository extends JpaRepository<TaiKhoan, Integer> {
     @Query("SELECT tk FROM TaiKhoan tk " +
             "LEFT JOIN NhanVien nv ON nv.taiKhoan.id = tk.id " +
             "LEFT JOIN KhachHang kh ON kh.taiKhoan.id = tk.id " +
-            "WHERE tk.trangThai = true " +
-            "AND (tk.tenDangNhap = :loginStr " +
-            "OR nv.email = :loginStr OR nv.soDienThoai = :loginStr " +
-            "OR kh.email = :loginStr OR kh.soDienThoai = :loginStr)")
-    Optional<TaiKhoan> findByLoginIdentifier(@Param("loginStr") String loginStr);
+            "WHERE (tk.tenDangNhap = :loginIdentifier " +
+            "OR nv.email = :loginIdentifier OR nv.soDienThoai = :loginIdentifier " +
+            "OR kh.email = :loginIdentifier OR kh.soDienThoai = :loginIdentifier)")
+    Optional<TaiKhoan> findByLoginIdentifier(@Param("loginIdentifier") String loginIdentifier);
 
     boolean existsByTenDangNhap(String tenDangNhap);
 
     Optional<TaiKhoan> findByTenDangNhap(String username);
 
     List<TaiKhoan> findByVaiTro_Ma(String roleCustomer);
+
+
 }

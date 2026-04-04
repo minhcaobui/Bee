@@ -3,11 +3,9 @@ package com.example.bee.controllers.api.dashboard;
 import com.example.bee.repositories.dashboard.DashboardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.text.NumberFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -70,10 +68,10 @@ public class DashBoardApi {
             @RequestParam(required = false) String from,
             @RequestParam(required = false) String to) {
 
-        LocalDateTime[] cur  = getRange(period, from, to);
+        LocalDateTime[] cur = getRange(period, from, to);
         LocalDateTime[] prev = getPrevRange(period, cur);
 
-        List<Object[]> cList = repo.getStats(cur[0],  cur[1]);
+        List<Object[]> cList = repo.getStats(cur[0], cur[1]);
         List<Object[]> pList = repo.getStats(prev[0], prev[1]);
 
         if (cList.isEmpty()) return ResponseEntity.ok(emptyStats());
@@ -81,57 +79,71 @@ public class DashBoardApi {
         Object[] c = cList.get(0);
         Object[] p = pList.isEmpty() ? new Object[8] : pList.get(0);
 
-        double rev  = c[0] != null ? ((Number) c[0]).doubleValue() : 0;
-        double ord  = c[1] != null ? ((Number) c[1]).doubleValue() : 0;
-        double avg  = c[2] != null ? ((Number) c[2]).doubleValue() : 0;
+        double rev = c[0] != null ? ((Number) c[0]).doubleValue() : 0;
+        double ord = c[1] != null ? ((Number) c[1]).doubleValue() : 0;
+        double avg = c[2] != null ? ((Number) c[2]).doubleValue() : 0;
         double pend = c[3] != null ? ((Number) c[3]).doubleValue() : 0;
         double canc = c[4] != null ? ((Number) c[4]).doubleValue() : 0;
         double comp = c[5] != null ? ((Number) c[5]).doubleValue() : 0;
         double sold = c[6] != null ? ((Number) c[6]).doubleValue() : 0;
         double cust = c[7] != null ? ((Number) c[7]).doubleValue() : 0;
 
-        double pRev  = p[0] != null ? ((Number) p[0]).doubleValue() : 0;
-        double pOrd  = p[1] != null ? ((Number) p[1]).doubleValue() : 0;
-        double pAvg  = p[2] != null ? ((Number) p[2]).doubleValue() : 0;
+        // 🌟 Lấy thêm 3 thông số mới đẻ ra
+        double pureComp = c.length > 8 && c[8] != null ? ((Number) c[8]).doubleValue() : 0;
+        double exchanged = c.length > 9 && c[9] != null ? ((Number) c[9]).doubleValue() : 0;
+        double returned = c.length > 10 && c[10] != null ? ((Number) c[10]).doubleValue() : 0;
+
+        double pRev = p[0] != null ? ((Number) p[0]).doubleValue() : 0;
+        double pOrd = p[1] != null ? ((Number) p[1]).doubleValue() : 0;
+        double pAvg = p[2] != null ? ((Number) p[2]).doubleValue() : 0;
         double pCust = p[7] != null ? ((Number) p[7]).doubleValue() : 0;
 
         double rate = (comp + canc) > 0 ? Math.round(comp / (comp + canc) * 100) : 0;
 
-        double revChg  = calcChg(rev,  pRev);
-        double ordChg  = calcChg(ord,  pOrd);
-        double avgChg  = calcChg(avg,  pAvg);
+        double revChg = calcChg(rev, pRev);
+        double ordChg = calcChg(ord, pOrd);
+        double avgChg = calcChg(avg, pAvg);
         double custChg = calcChg(cust, pCust);
 
         Map<String, Object> res = new HashMap<>();
-        res.put("rev",       rev);
-        res.put("revChg",    Math.abs(revChg));
-        res.put("revUp",     revChg >= 0);
-        res.put("ord",       (long) ord);
-        res.put("ordChg",    Math.abs(ordChg));
-        res.put("ordUp",     ordChg >= 0);
-        res.put("pend",      (long) pend);
-        res.put("avg",       avg);
-        res.put("avgChg",    Math.abs(avgChg));
-        res.put("avgUp",     avgChg >= 0);
-        res.put("cust",      (long) cust);
-        res.put("custChg",   Math.abs(custChg));
-        res.put("custUp",    custChg >= 0);
-        res.put("sold",      (long) sold);
-        res.put("rate",      (long) rate);
+        res.put("rev", rev);
+        res.put("revChg", Math.abs(revChg));
+        res.put("revUp", revChg >= 0);
+        res.put("ord", (long) ord);
+        res.put("ordChg", Math.abs(ordChg));
+        res.put("ordUp", ordChg >= 0);
+        res.put("pend", (long) pend);
+        res.put("avg", avg);
+        res.put("avgChg", Math.abs(avgChg));
+        res.put("avgUp", avgChg >= 0);
+        res.put("cust", (long) cust);
+        res.put("custChg", Math.abs(custChg));
+        res.put("custUp", custChg >= 0);
+        res.put("sold", (long) sold);
+        res.put("rate", (long) rate);
         res.put("cancelled", (long) canc);
+
+        // 🌟 Bơm vào JSON trả về Frontend
+        res.put("pureCompleted", (long) pureComp);
+        res.put("exchanged", (long) exchanged);
+        res.put("returned", (long) returned);
+
         return ResponseEntity.ok(res);
     }
-
-    private Map<String, Object> emptyStats() {
-        Map<String, Object> m = new HashMap<>();
-        m.put("rev", 0.0);   m.put("revChg", 0.0);  m.put("revUp", true);
-        m.put("ord", 0L);    m.put("ordChg", 0.0);   m.put("ordUp", true);
-        m.put("pend", 0L);   m.put("avg", 0.0);
-        m.put("avgChg", 0.0); m.put("avgUp", true);
-        m.put("cust", 0L);   m.put("custChg", 0.0);  m.put("custUp", true);
-        m.put("sold", 0L);   m.put("rate", 0L);       m.put("cancelled", 0L);
-        return m;
-    }
+        private Map<String, Object> emptyStats() {
+            Map<String, Object> m = new HashMap<>();
+            m.put("rev", 0.0);   m.put("revChg", 0.0);  m.put("revUp", true);
+            m.put("ord", 0L);    m.put("ordChg", 0.0);   m.put("ordUp", true);
+            m.put("pend", 0L);   m.put("avg", 0.0);
+            m.put("avgChg", 0.0); m.put("avgUp", true);
+            m.put("cust", 0L);   m.put("custChg", 0.0);  m.put("custUp", true);
+            m.put("sold", 0L);   m.put("rate", 0L);       m.put("cancelled", 0L);
+            // 🌟 Bơm vào object rỗng
+            m.put("pureCompleted", 0L);
+            m.put("exchanged", 0L);
+            m.put("returned", 0L);
+            return m;
+        }
 
     @GetMapping("/chart")
     public ResponseEntity<?> chart(
@@ -324,30 +336,27 @@ public class DashBoardApi {
         LocalDateTime[] cur = getRange(period, from, to);
         List<Object[]> rows = repo.getPaymentMethods(cur[0], cur[1]);
 
-        Map<String, String> colorMap = Map.of(
-                "TIEN_MAT",       "#000000",
-                "Tiền mặt",       "#000000",
-                "CHUYEN_KHOAN",   "#3b82f6",
-                "Chuyển khoản",   "#3b82f6",
-                "VNPAY",          "#0ea5e9",
-                "MOMO",           "#ec4899"
-        );
+        Map<String, Long> aggregated = new LinkedHashMap<>();
 
-        List<String> labels = new ArrayList<>();
-        List<Long>   values = new ArrayList<>();
-        List<String> colors = new ArrayList<>();
-
+        // 🌟 Chuẩn hóa tên phương thức về các KEY cố định
         rows.forEach(r -> {
-            String method = r[0].toString();
-            labels.add(method);
-            values.add(((Number) r[1]).longValue());
-            colors.add(colorMap.getOrDefault(method, "#888888"));
+            String rawMethod = r[0] != null ? r[0].toString().toUpperCase() : "TIEN_MAT";
+            String key = "TIEN_MAT";
+
+            if (rawMethod.contains("MOMO")) key = "MOMO";
+            else if (rawMethod.contains("VNPAY")) key = "VNPAY";
+            else if (rawMethod.contains("COD") || rawMethod.contains("GIAO")) key = "COD";
+            else if (rawMethod.contains("CHUYEN_KHOAN") || rawMethod.contains("CHUYỂN KHOẢN")) key = "CHUYEN_KHOAN";
+
+            aggregated.put(key, aggregated.getOrDefault(key, 0L) + ((Number) r[1]).longValue());
         });
 
+        List<String> keys = new ArrayList<>(aggregated.keySet());
+        List<Long> values = new ArrayList<>(aggregated.values());
+
         return ResponseEntity.ok(Map.of(
-                "labels", labels,
-                "values", values,
-                "colors", colors
+                "keys", keys,
+                "values", values
         ));
     }
 
@@ -407,5 +416,55 @@ public class DashBoardApi {
         res.put("hours", List.of("7h","8h","9h","10h","11h","12h","13h","14h","15h","16h","17h","18h"));
         res.put("values", values);
         return ResponseEntity.ok(res);
+    }
+
+    @PostMapping("/chat")
+    public ResponseEntity<?> handleChatbot(@RequestBody Map<String, String> payload) {
+        String userMsg = payload.getOrDefault("message", "").toLowerCase();
+        String reply = "Xin lỗi sếp, em chưa hiểu ý sếp lắm. Sếp có thể hỏi về doanh thu hoặc đơn hàng hôm nay nhé!";
+
+        // Formatter để in tiền đẹp
+        NumberFormat currencyFormat = NumberFormat.getInstance(new Locale("vi", "VN"));
+
+        try {
+            // Thiết lập mốc thời gian là Ngày hôm nay để trả lời
+            LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+            LocalDateTime endOfDay = LocalDate.now().atTime(23, 59, 59);
+
+            if (userMsg.contains("doanh thu") || userMsg.contains("bán được")) {
+                List<Object[]> stats = repo.getStats(startOfDay, endOfDay);
+                if (!stats.isEmpty() && stats.get(0)[0] != null) {
+                    double rev = ((Number) stats.get(0)[0]).doubleValue();
+                    reply = "Báo cáo sếp, doanh thu thực tế hôm nay là: <b>" + currencyFormat.format(rev) + " ₫</b> ạ! 🚀";
+                } else {
+                    reply = "Hôm nay chưa có doanh thu nào sếp ạ 😢";
+                }
+            }
+            else if (userMsg.contains("đơn hàng") || userMsg.contains("bao nhiêu đơn")) {
+                List<Object[]> stats = repo.getStats(startOfDay, endOfDay);
+                if (!stats.isEmpty() && stats.get(0)[1] != null) {
+                    long ord = ((Number) stats.get(0)[1]).longValue();
+                    reply = "Hôm nay hệ thống ghi nhận tổng cộng <b>" + ord + "</b> đơn hàng sếp nhé!";
+                } else {
+                    reply = "Hôm nay chưa có đơn hàng nào cả sếp ơi.";
+                }
+            }
+            else if (userMsg.contains("chào") || userMsg.contains("hello")) {
+                reply = "Dạ em chào sếp! Chúc sếp một ngày làm việc chốt được ngàn đơn nhé! 😎";
+            }
+            else if (userMsg.contains("tồn kho") || userMsg.contains("hết hàng")) {
+                List<Object[]> lowStock = repo.getLowStock();
+                if(lowStock.isEmpty()) {
+                    reply = "Tuyệt vời, hiện tại không có sản phẩm nào sắp hết hàng sếp nhé!";
+                } else {
+                    reply = "Cảnh báo sếp: Đang có <b>" + lowStock.size() + "</b> mã sản phẩm sắp cạn kho. Sếp nhớ nhập thêm hàng nha!";
+                }
+            }
+
+        } catch (Exception e) {
+            reply = "Đang có lỗi lúc tra cứu dữ liệu sếp ạ: " + e.getMessage();
+        }
+
+        return ResponseEntity.ok(Map.of("reply", reply));
     }
 }

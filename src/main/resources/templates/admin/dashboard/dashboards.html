@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <title>Dashboard | Bee Admin</title>
@@ -5,370 +7,341 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <style>
-        /* ═══════════════════════════════════════════
-           VARIABLES & RESET
-        ═══════════════════════════════════════════ */
+        /* ==========================================================================
+           1. CORE SYSTEM STYLE (ĐỒNG BỘ BEEMATE ADMIN)
+           ========================================================================== */
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
         :root {
-            --g100:#f4f4f5; --g200:#e4e4e7; --g300:#d4d4d8;
-            --green:#10b981; --red:#dc2626; --yellow:#f59e0b; --blue:#3b82f6; --info:#0ea5e9;
-            --br:2px;
+            --gray-100: #f4f4f5; --gray-200: #e4e4e7; --gray-300: #d4d4d8;
+            --text: #09090b; --border-radius: 4px;
+            --green: #10b981; --red: #dc2626; --yellow: #f59e0b; --blue: #3b82f6; --info: #0ea5e9;
         }
+        body { font-family: 'Inter', sans-serif; background: #fff; color: var(--text); font-size: 13px; line-height: 1.5; }
+        .container { max-width: 100%; padding: 20px 30px; }
 
-        /* ═══════════════════════════════════════════
-           SHARED COMPONENTS
-        ═══════════════════════════════════════════ */
-        .db-btn {
-            font-size:11px; font-weight:800; text-transform:uppercase;
-            height:30px; padding:0 12px; background:#000; color:#fff;
-            border:1px solid #000; cursor:pointer;
-            display:inline-flex; align-items:center; justify-content:center; gap:5px;
-            border-radius:var(--br); transition:.15s; text-decoration:none; white-space:nowrap;
-        }
-        .db-btn:hover { background:#333; }
-        .db-btn:disabled { opacity:.4; cursor:not-allowed; pointer-events:none; }
-        .db-btn.ghost { background:#fff; color:#000; border-color:var(--g200); }
-        .db-btn.ghost:hover { background:var(--g100); border-color:#000; }
-        .db-btn.green-outline { background:#fff; color:var(--green); border-color:var(--green); }
-        .db-btn.green-outline:hover { background:var(--green); color:#fff; }
+        /* BUTTONS STANDARD */
+        .btn { font-size: 11px; font-weight: 800; text-transform: uppercase; height: 34px !important; padding: 0 16px !important; background: #000; color: #fff; border: 1px solid #000; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: var(--border-radius); transition: 0.2s; letter-spacing: 0.5px;}
+        .btn:hover { background: #333; }
+        .btn:disabled { opacity:.4; cursor:not-allowed; pointer-events:none; }
+        .btn-secondary { background: #fff; color: #000; border: 1px solid var(--gray-300); }
+        .btn-secondary:hover { background: var(--gray-100); border-color: #000; }
+        .btn-outline-green { background: #fff; color: var(--green); border: 1px solid var(--green); }
+        .btn-outline-green:hover { background: var(--green); color: #fff; }
 
-        .db-badge { padding:2px 7px; border-radius:var(--br); font-weight:800; font-size:10px; text-transform:uppercase; letter-spacing:.4px; display:inline-flex; align-items:center; gap:4px; }
+        /* BADGES */
+        .db-badge { padding:4px 8px; border-radius:var(--border-radius); font-weight:800; font-size:10px; text-transform:uppercase; letter-spacing:.4px; display:inline-flex; align-items:center; gap:4px; }
         .db-badge.success { background:#d1fae5; color:#065f46; }
         .db-badge.warning { background:#fef3c7; color:#92400e; }
         .db-badge.danger  { background:#fee2e2; color:#991b1b; }
         .db-badge.info    { background:#e0f2fe; color:#0369a1; }
 
-        /* ═══════════════════════════════════════════
-           PAGE WRAPPER
-        ═══════════════════════════════════════════ */
-        .db-page { display:flex; flex-direction:column; gap:14px; }
+        /* ==========================================================================
+           TOPBAR & FILTERS
+           ========================================================================== */
+        .db-page { display:flex; flex-direction:column; gap:20px; }
 
-        /* ═══════════════════════════════════════════
-           TOPBAR — period tabs + progressive date
-        ═══════════════════════════════════════════ */
-        .db-topbar {
-            display:flex; align-items:center; justify-content:space-between;
-            gap:10px; flex-wrap:wrap;
-            border-bottom:1px solid var(--g200); padding-bottom:12px;
-        }
-        .db-topbar-left  { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-        .db-topbar-right { display:flex; align-items:center; gap:8px; }
+        .db-topbar { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; border-bottom:1px solid var(--gray-200); padding-bottom:15px; }
+        .db-topbar-left  { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
 
-        /* period tabs */
-        .period-tabs { display:flex; border:1px solid var(--g200); border-radius:var(--br); overflow:hidden; background:#fff; }
-        .period-tab  { font-size:11px; font-weight:800; text-transform:uppercase; padding:5px 12px; background:transparent; border:none; cursor:pointer; color:#888; transition:.15s; white-space:nowrap; }
-        .period-tab:not(:last-child) { border-right:1px solid var(--g200); }
-        .period-tab.active { background:#000; color:#fff; }
+        /* Period Tabs */
+        .period-tabs { display:flex; border:1px solid var(--gray-300); border-radius:var(--border-radius); overflow:hidden; background:#fff; }
+        .period-tab  { font-size:12px; font-family: inherit; font-weight:700; padding:6px 16px; background:transparent; border:none; cursor:pointer; color:#666; transition:.2s; white-space:nowrap; }
+        .period-tab:not(:last-child) { border-right:1px solid var(--gray-200); }
+        .period-tab.active { background:#000; color:#fff; font-weight: 800;}
+        .period-tab:hover:not(.active) { background: var(--gray-100); color: #000;}
         .period-tab:disabled { opacity:.4; cursor:not-allowed; }
 
-        /* progressive date */
-        .date-from-wrap { display:flex; align-items:center; gap:6px; }
-        .date-to-wrap   { display:flex; align-items:center; gap:6px;
-            max-width:0; overflow:hidden; opacity:0;
-            transition: max-width .25s ease, opacity .25s ease; }
+        /* Progressive Date Filter */
+        .date-from-wrap, .date-to-wrap { display:flex; align-items:center; gap:6px; }
+        .date-to-wrap { max-width:0; overflow:hidden; opacity:0; transition: max-width .3s ease, opacity .3s ease; }
         .date-to-wrap.visible { max-width:200px; opacity:1; }
-        .db-date-input {
-            height:30px; padding:0 9px; font-size:12px; font-family:inherit;
-            border:1px solid var(--g200); border-radius:var(--br);
-            background:#fff; outline:none; transition:.15s; width:130px;
-        }
+        .db-date-input { height:34px; padding:0 12px; font-size:13px; font-family:inherit; border:1px solid var(--gray-300); border-radius:var(--border-radius); background:#fff; outline:none; transition:.2s; width:140px; }
         .db-date-input:focus { border-color:#000; }
         .db-date-input.error { border-color:var(--red); background:#fff5f5; }
-        .date-sep { font-size:11px; color:#bbb; }
 
-        /* active range chip */
-        .range-chip {
-            display:none; align-items:center; gap:6px;
-            padding:3px 9px; border:1px solid #000; border-radius:var(--br);
-            background:#000; color:#fff; font-size:10px; font-weight:800; cursor:pointer;
-            transition:.15s;
-        }
+        .range-chip { display:none; align-items:center; gap:6px; padding:6px 12px; border:1px solid #000; border-radius:var(--border-radius); background:#000; color:#fff; font-size:11px; font-weight:800; cursor:pointer; transition:.2s; }
         .range-chip.show { display:inline-flex; }
         .range-chip:hover { background:#333; }
 
-        /* compare toggle */
-        .compare-toggle {
-            display:flex; align-items:center; gap:6px; padding:4px 10px;
-            border:1px solid var(--g200); border-radius:var(--br);
-            background:#fff; cursor:pointer; font-size:11px; font-weight:700;
-            color:#888; transition:.15s; user-select:none;
-        }
+        /* Compare Toggle */
+        .compare-toggle { display:flex; align-items:center; gap:8px; padding:6px 12px; border:1px solid var(--gray-300); border-radius:var(--border-radius); background:#fff; cursor:pointer; font-size:12px; font-weight:700; color:#666; transition:.2s; user-select:none; }
         .compare-toggle:hover { border-color:#000; color:#000; }
         .compare-toggle.active { border-color:#000; background:#000; color:#fff; }
         .compare-toggle input { display:none; }
-        .cmp-dot { width:7px; height:7px; border-radius:50%; background:var(--g300); transition:.15s; flex-shrink:0; }
+        .cmp-dot { width:8px; height:8px; border-radius:50%; background:var(--gray-300); transition:.2s; flex-shrink:0; }
         .compare-toggle.active .cmp-dot { background:var(--yellow); }
 
         @keyframes spin { to{transform:rotate(360deg)} }
         .spinning { animation:spin .6s linear infinite; display:inline-block; }
 
-        /* ═══════════════════════════════════════════
+        /* ==========================================================================
            AI INSIGHTS
-        ═══════════════════════════════════════════ */
-        .ai-insights { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1px solid #bbf7d0; border-radius: var(--br); padding: 14px 18px; margin-bottom: 5px; display: none; align-items: flex-start; gap: 14px; }
+           ========================================================================== */
+        .ai-insights { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1px solid #bbf7d0; border-radius: 6px; padding: 16px 20px; display: none; align-items: flex-start; gap: 16px; box-shadow: 0 4px 10px rgba(16,185,129,0.05);}
         .ai-insights.show { display: flex; animation: fadeIn .4s ease; }
-        .ai-icon { width: 36px; height: 36px; background: #10b981; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+        .ai-icon { width: 40px; height: 40px; background: #10b981; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
         .ai-content { flex: 1; }
-        .ai-title { font-size: 12px; font-weight: 800; color: #065f46; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display:flex; align-items:center; gap:6px; }
-        .ai-list { display: flex; flex-direction: column; gap: 6px; }
-        .ai-item { font-size: 12.5px; font-weight: 500; color: #064e3b; display: flex; align-items: flex-start; gap: 8px; line-height: 1.5; }
-        .ai-item i { font-size: 14px; margin-top: 1px; }
+        .ai-title { font-size: 13px; font-weight: 800; color: #065f46; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display:flex; align-items:center; gap:6px; }
+        .ai-list { display: flex; flex-direction: column; gap: 8px; }
+        .ai-item { font-size: 13px; font-weight: 500; color: #064e3b; display: flex; align-items: flex-start; gap: 8px; line-height: 1.5; }
         .ai-item.warning i { color: #d97706; }
         .ai-item.error i { color: #dc2626; }
         .ai-item.success i { color: #059669; }
-        .ai-item.info i { color: #0284c7; }
 
-        /* ═══════════════════════════════════════════
+        /* ==========================================================================
            STAT CARDS
-        ═══════════════════════════════════════════ */
-        .db-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
-        .db-card  { background:#fff; border:1px solid var(--g200); border-radius:var(--br); padding:14px 15px 11px; transition:.2s; }
-        .db-card:hover { border-color:#aaa; box-shadow:0 4px 14px rgba(0,0,0,.06); }
-        .db-card-top   { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:7px; }
-        .db-card-label { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.7px; color:#888; }
-        .db-card-icon  { width:26px; height:26px; border:1px solid var(--g200); border-radius:var(--br); display:flex; align-items:center; justify-content:center; font-size:12px; color:#bbb; flex-shrink:0; }
-        .db-card-value { font-size:19px; font-weight:800; color:#000; line-height:1; margin-bottom:7px; }
-        .db-sparkline  { height:30px; margin:0 -15px 8px; }
+           ========================================================================== */
+        .db-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+        .db-card  { background:#fff; border:1px solid var(--gray-200); border-radius:6px; padding:20px; transition:.2s; box-shadow: 0 4px 20px rgba(0,0,0,0.03);}
+        .db-card:hover { border-color:#aaa; box-shadow:0 6px 24px rgba(0,0,0,.08); transform: translateY(-2px);}
+        .db-card-top   { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:10px; }
+        .db-card-label { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color:#666; }
+        .db-card-icon  { width:32px; height:32px; border:1px solid var(--gray-200); border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:14px; color:#888; flex-shrink:0; background: #fafafa;}
+        .db-card-value { font-size:24px; font-weight:900; color:#000; line-height:1; margin-bottom:10px; white-space: nowrap;}
+        .db-sparkline  { height:40px; margin:0 -20px 10px; }
         .db-card-foot  { display:flex; align-items:center; justify-content:space-between; }
-        .db-chg      { font-size:11px; font-weight:700; display:flex; align-items:center; gap:1px; }
+        .db-chg      { font-size:12px; font-weight:800; display:flex; align-items:center; gap:2px; }
         .db-chg.up   { color:var(--green); }
         .db-chg.down { color:var(--red); }
-        .db-sub { font-size:11px; color:#bbb; font-weight:500; }
+        .db-sub { font-size:12px; color:#aaa; font-weight:600; }
 
-        /* ═══════════════════════════════════════════
+        /* ==========================================================================
            PANELS
-        ═══════════════════════════════════════════ */
-        .db-row-main   { display:grid; grid-template-columns:1fr 290px; gap:12px; align-items:stretch; }
-        .db-row-bottom { display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:stretch; }
-        .db-row-extra  { display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:stretch; }
+           ========================================================================== */
+        .db-row-main   { display:grid; grid-template-columns:1fr 340px; gap:16px; align-items:stretch; }
+        .db-row-bottom { display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:stretch; }
+        .db-row-extra  { display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:stretch; }
 
-        .db-panel { background:#fff; border:1px solid var(--g200); border-radius:var(--br); display:flex; flex-direction:column; }
-        .db-panel-head { padding:10px 14px; border-bottom:1px solid var(--g200); display:flex; justify-content:space-between; align-items:center; flex-shrink:0; gap:8px; }
-        .db-panel-title { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.7px; flex-shrink:0; }
-        .db-chart-area  { padding:12px; flex:1; min-height:220px; position:relative; }
+        .db-panel { background:#fff; border:1px solid var(--gray-200); border-radius:6px; display:flex; flex-direction:column; box-shadow: 0 4px 20px rgba(0,0,0,0.03); overflow: hidden;}
+        .db-panel-head { padding:15px 20px; border-bottom:1px solid var(--gray-200); display:flex; justify-content:space-between; align-items:center; flex-shrink:0; gap:8px; background: #fff;}
+        .db-panel-title { font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; flex-shrink:0; color: #000;}
+        .db-chart-area  { padding:20px; flex:1; min-height:280px; position:relative; }
 
-        /* chart legend */
-        .chart-legend { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-        .leg-item {
-            display:flex; align-items:center; gap:5px;
-            padding:2px 7px; border:1px solid var(--g200); border-radius:var(--br);
-            cursor:pointer; font-size:11px; font-weight:700; color:#555;
-            background:#fff; transition:opacity .15s;
-            user-select:none;
-        }
-        .leg-item.hidden { opacity:.35; text-decoration:line-through; }
-        .leg-line   { width:16px; height:2px; display:inline-block; border-radius:1px; flex-shrink:0; }
+        /* Chart Legend */
+        .chart-legend { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+        .leg-item { display:flex; align-items:center; gap:6px; padding:4px 10px; border:1px solid var(--gray-200); border-radius:var(--border-radius); cursor:pointer; font-size:11px; font-weight:700; color:#555; background:#fafafa; transition:.2s; user-select:none; text-transform: uppercase;}
+        .leg-item.hidden { opacity:.4; text-decoration:line-through; }
+        .leg-line   { width:16px; height:3px; display:inline-block; border-radius:2px; flex-shrink:0; }
         .leg-dashed { width:16px; height:0; display:inline-block; flex-shrink:0; }
 
-        /* chart type toggle */
-        .ctt { display:flex; border:1px solid var(--g200); border-radius:var(--br); overflow:hidden; }
-        .ctt-btn { width:26px; height:24px; display:flex; align-items:center; justify-content:center; border:none; background:#fff; cursor:pointer; color:#bbb; font-size:12px; transition:.15s; }
-        .ctt-btn:not(:last-child) { border-right:1px solid var(--g200); }
-        .ctt-btn:hover  { color:#000; }
+        /* Chart Type Toggle */
+        .ctt { display:flex; border:1px solid var(--gray-300); border-radius:var(--border-radius); overflow:hidden; }
+        .ctt-btn { width:32px; height:30px; display:flex; align-items:center; justify-content:center; border:none; background:#fff; cursor:pointer; color:#888; font-size:14px; transition:.2s; }
+        .ctt-btn:not(:last-child) { border-right:1px solid var(--gray-200); }
+        .ctt-btn:hover  { color:#000; background: var(--gray-100);}
         .ctt-btn.active { background:#000; color:#fff; }
 
-        /* drill-down strip */
-        .drilldown-strip { display:none; border-top:1px solid var(--g200); background:var(--g100); padding:10px 14px; }
+        /* Drill-down Strip */
+        .drilldown-strip { display:none; border-top:1px solid var(--gray-200); background:#fafafa; padding:15px 20px; }
         .drilldown-strip.show { display:block; animation:fadeSlideUp .2s ease; }
-        @keyframes fadeSlideUp { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
-        .drilldown-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
-        .drilldown-title { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.6px; color:#888; }
-        .drilldown-close { width:20px; height:20px; border:1px solid var(--g200); background:#fff; border-radius:var(--br); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:11px; color:#888; transition:.15s; }
+        .drilldown-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+        .drilldown-title { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color:#555; }
+        .drilldown-close { width:24px; height:24px; border:1px solid var(--gray-300); background:#fff; border-radius:var(--border-radius); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; color:#555; transition:.2s; }
         .drilldown-close:hover { background:#000; color:#fff; border-color:#000; }
-        .drilldown-kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
-        .dd-kpi { background:#fff; border:1px solid var(--g200); border-radius:var(--br); padding:7px 10px; }
-        .dd-kpi-label { font-size:9px; font-weight:700; text-transform:uppercase; color:#aaa; margin-bottom:3px; }
-        .dd-kpi-val   { font-size:15px; font-weight:800; color:#000; }
+        .drilldown-kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+        .dd-kpi { background:#fff; border:1px solid var(--gray-200); border-radius:var(--border-radius); padding:10px 15px; }
+        .dd-kpi-label { font-size:10px; font-weight:800; text-transform:uppercase; color:#888; margin-bottom:4px; }
+        .dd-kpi-val   { font-size:16px; font-weight:900; color:#000; white-space: nowrap;}
 
-        /* top products */
+        /* Top Products List */
         .db-prod-list { flex:1; overflow-y:auto; min-height:0; }
-        .prod-item { display:flex; align-items:center; gap:9px; padding:8px 14px; border-bottom:1px solid var(--g200); transition:.12s; cursor:pointer; }
+        .prod-item { display:flex; align-items:center; gap:12px; padding:12px 20px; border-bottom:1px solid var(--gray-200); transition:.2s; cursor:pointer; }
         .prod-item:last-child { border-bottom:none; }
-        .prod-item:hover { background:var(--g100); }
-        .prod-rank { width:18px; height:18px; border-radius:var(--br); border:1px solid var(--g200); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; color:#bbb; flex-shrink:0; }
+        .prod-item:hover { background:var(--gray-100); }
+        .prod-rank { width:24px; height:24px; border-radius:var(--border-radius); border:1px solid var(--gray-200); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; color:#888; flex-shrink:0; background: #fff;}
         .prod-rank.r1 { background:#fef3c7; border-color:#f59e0b; color:#92400e; }
         .prod-rank.r2 { background:#f1f5f9; border-color:#94a3b8; color:#475569; }
         .prod-rank.r3 { background:#fff7ed; border-color:#fb923c; color:#7c2d12; }
-        .prod-thumb { width:34px; height:34px; border:1px solid var(--g200); border-radius:var(--br); background:var(--g100); display:flex; align-items:center; justify-content:center; color:#ccc; font-size:12px; flex-shrink:0; overflow:hidden; }
+        .prod-thumb { width:40px; height:40px; border:1px solid var(--gray-200); border-radius:4px; background:var(--gray-100); display:flex; align-items:center; justify-content:center; color:#ccc; font-size:16px; flex-shrink:0; overflow:hidden; }
         .prod-info  { flex:1; min-width:0; }
-        .prod-name  { font-weight:700; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-transform:none; }
-        .prod-meta  { font-size:10px; color:#aaa; margin-top:1px; font-weight:500; text-transform:none; }
-        .prod-bar-wrap { margin-top:4px; display:flex; align-items:center; gap:5px; }
-        .prod-bar-bg   { flex:1; height:3px; background:var(--g200); border-radius:2px; overflow:hidden; }
-        .prod-bar-fill { height:100%; background:#000; border-radius:2px; transition:.7s ease; width:0; }
-        .prod-sold { font-size:10px; font-weight:800; color:#000; flex-shrink:0; }
-        .prod-rev  { text-align:right; flex-shrink:0; margin-left:5px; }
-        .prod-rev-val { font-size:11px; font-weight:700; color:#000; white-space:nowrap; }
-        .prod-rev-lbl { font-size:10px; color:#aaa; font-weight:500; }
+        .prod-name  { font-weight:800; font-size:13px; color: #000; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-transform:none; margin-bottom: 2px;}
+        .prod-meta  { font-size:11px; color:#666; font-weight:600; text-transform:none; }
+        .prod-bar-wrap { margin-top:6px; display:flex; align-items:center; gap:8px; }
+        .prod-bar-bg   { flex:1; height:4px; background:var(--gray-200); border-radius:2px; overflow:hidden; }
+        .prod-bar-fill { height:100%; background:#2563eb; border-radius:2px; transition:.7s ease; width:0; }
+        .prod-sold { font-size:11px; font-weight:800; color:#000; flex-shrink:0; }
+        .prod-rev  { text-align:right; flex-shrink:0; margin-left:10px; }
+        .prod-rev-val { font-size:13px; font-weight:800; color:#000; white-space:nowrap; }
+        .prod-rev-lbl { font-size:10px; color:#888; font-weight:600; text-transform: uppercase;}
 
-        /* orders table */
+        /* Orders Table */
         .db-table-wrap { flex:1; overflow-y:auto; min-height:0; }
         .db-table { width:100%; border-collapse:collapse; }
-        .db-table thead th { text-align:left; padding:8px 13px; font-size:10px; font-weight:800; text-transform:uppercase; color:#888; background:#fafafa; border-bottom:1px solid var(--g200); white-space:nowrap; }
-        .db-table tbody td { padding:7px 13px; border-bottom:1px solid var(--g200); vertical-align:middle; font-size:12px; font-weight:500; text-transform:none; }
+        .db-table thead th { text-align:left; padding:12px 20px; font-size:11px; font-weight:800; text-transform:uppercase; color:#666; background:#fafafa; border-bottom:1px solid var(--gray-200); white-space:nowrap; position: sticky; top: 0; z-index: 2;}
+        .db-table tbody td { padding:10px 20px; border-bottom:1px solid var(--gray-200); vertical-align:middle; font-size:13px; font-weight:500; text-transform:none; }
         .db-table tbody tr:last-child td { border-bottom:none; }
-        .db-table tbody tr { cursor:pointer; transition:.1s; }
-        .db-table tbody tr:hover { background:var(--g100); }
+        .db-table tbody tr { cursor:pointer; transition:.2s; }
+        .db-table tbody tr:hover { background:var(--gray-100); }
 
-        /* donut */
+        /* Donut & Legend */
         .db-donut-wrap   { position:relative; flex-shrink:0; }
         .db-donut-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; }
-        .db-donut-val { font-size:14px; font-weight:800; line-height:1; }
-        .db-donut-lbl { font-size:9px; color:#aaa; font-weight:700; text-transform:uppercase; letter-spacing:.5px; margin-top:2px; }
-        .db-legend     { flex:1; display:flex; flex-direction:column; gap:7px; }
-        .db-legend-row { display:flex; align-items:center; gap:7px; cursor:pointer; padding:2px 3px; border-radius:2px; transition:.15s; }
-        .db-legend-row:hover { background:var(--g100); }
-        .db-legend-dot  { width:8px; height:8px; border-radius:1px; flex-shrink:0; }
-        .db-legend-name { font-size:11px; font-weight:600; color:#555; flex:1; text-transform:none; }
-        .db-legend-pct  { font-size:11px; font-weight:800; color:#000; }
-        .db-panel-foot  { border-top:1px solid var(--g200); padding:10px 14px; display:flex; flex-direction:column; }
-        .db-foot-row    { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px solid var(--g200); }
-        .db-foot-row:last-child { border-bottom:none; }
-        .db-foot-label  { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color:#aaa; }
-        .db-foot-val    { font-size:14px; font-weight:800; color:#000; }
+        .db-donut-val { font-size:20px; font-weight:900; line-height:1; color: #000;}
+        .db-donut-lbl { font-size:10px; color:#888; font-weight:800; text-transform:uppercase; letter-spacing:.5px; margin-top:2px; }
+        .db-legend     { flex:1; display:flex; flex-direction:column; gap:8px; }
+        .db-legend-row { display:flex; align-items:center; gap:10px; cursor:pointer; padding:6px 10px; border-radius:4px; transition:.2s; border: 1px solid transparent;}
+        .db-legend-row:hover { background:var(--gray-100); border-color: var(--gray-200);}
+        .db-legend-dot  { width:12px; height:12px; border-radius:2px; flex-shrink:0; }
+        .db-legend-name { font-size:12px; font-weight:700; color:#555; flex:1; text-transform:none; }
+        .db-legend-pct  { font-size:13px; font-weight:900; color:#000; }
 
-        /* stock widget */
-        .stock-list { flex:1; overflow-y:auto; max-height: 280px; min-height:0; }
-        .stock-item { display:flex; align-items:center; gap:9px; padding:8px 14px; border-bottom:1px solid var(--g200); transition:.12s; cursor:pointer; }
+        .db-panel-foot  { border-top:1px dashed var(--gray-300); padding:15px 20px; display:flex; flex-direction:column; background: #fafafa;}
+        .db-foot-row    { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--gray-200); }
+        .db-foot-row:last-child { border-bottom:none; padding-bottom: 0;}
+        .db-foot-row:first-child { padding-top: 0;}
+        .db-foot-label  { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color:#666; }
+        .db-foot-val    { font-size:15px; font-weight:900; color:#000; }
+
+        /* Stock Widget */
+        .stock-list { flex:1; overflow-y:auto; max-height: 320px; min-height:0; }
+        .stock-item { display:flex; align-items:center; gap:12px; padding:12px 20px; border-bottom:1px solid var(--gray-200); transition:.2s; cursor:pointer; }
         .stock-item:last-child { border-bottom:none; }
-        .stock-item:hover { background:var(--g100); }
-        .stock-thumb { width:32px; height:32px; border:1px solid var(--g200); border-radius:var(--br); background:var(--g100); display:flex; align-items:center; justify-content:center; color:#ccc; font-size:12px; flex-shrink:0; }
+        .stock-item:hover { background:var(--gray-100); }
+        .stock-thumb { width:40px; height:40px; border:1px solid var(--gray-200); border-radius:4px; background:var(--gray-100); display:flex; align-items:center; justify-content:center; color:#ccc; font-size:16px; flex-shrink:0; }
         .stock-info { flex:1; min-width:0; }
-        .stock-name { font-weight:700; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-transform:none; }
-        .stock-sku  { font-size:10px; color:#aaa; font-weight:500; text-transform:none; margin-top:1px; }
-        .stock-bar-wrap  { margin-top:4px; height:3px; background:var(--g200); border-radius:2px; overflow:hidden; }
-        .stock-bar-fill  { height:100%; border-radius:2px; }
+        .stock-name { font-weight:800; font-size:13px; color: #000; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-transform:none; margin-bottom: 2px;}
+        .stock-sku  { font-size:11px; color:#666; font-weight:600; text-transform:none; }
+        .stock-bar-wrap  { margin-top:6px; height:4px; background:var(--gray-200); border-radius:2px; overflow:hidden; }
+        .stock-bar-fill  { height:100%; border-radius:2px; transition: .5s ease;}
         .stock-bar-fill.critical { background:var(--red); }
         .stock-bar-fill.warning  { background:var(--yellow); }
-        .stock-qty-wrap { flex-shrink:0; text-align:right; }
-        .stock-qty { font-size:14px; font-weight:800; line-height:1; }
+        .stock-qty-wrap { flex-shrink:0; text-align:right; margin-left: 10px;}
+        .stock-qty { font-size:18px; font-weight:900; line-height:1; }
         .stock-qty.critical { color:var(--red); }
         .stock-qty.warning  { color:var(--yellow); }
-        .stock-qty-label { font-size:9px; color:#aaa; font-weight:700; text-transform:uppercase; letter-spacing:.4px; margin-top:2px; }
-        .stock-count { font-size:10px; font-weight:800; padding:2px 6px; border-radius:var(--br); }
-        .stock-count.critical { background:#fee2e2; color:#991b1b; }
-        .stock-count.warning  { background:#fef3c7; color:#92400e; }
+        .stock-qty-label { font-size:10px; color:#888; font-weight:700; text-transform:uppercase; letter-spacing:.5px; margin-top:4px; }
 
-        /* heatmap */
-        .heatmap-grid { display:grid; grid-template-columns:30px repeat(12,1fr); gap:2px; padding:10px 14px 6px; }
-        .hm-label     { font-size:10px; font-weight:700; color:#aaa; display:flex; align-items:center; justify-content:flex-end; padding-right:5px; text-transform:none; }
-        .hm-col-label { font-size:9px; font-weight:700; color:#aaa; text-align:center; }
-        .hm-cell      { height:16px; border-radius:2px; cursor:pointer; transition:.15s; position:relative; }
-        .hm-cell:hover { transform:scale(1.2); z-index:2; outline:2px solid #000; }
+        .stock-count { font-size:11px; font-weight:800; padding:4px 8px; border-radius:4px; border: 1px solid transparent;}
+        .stock-count.critical { background:#fee2e2; color:#991b1b; border-color: #fca5a5;}
+        .stock-count.warning  { background:#fef3c7; color:#92400e; border-color: #fcd34d;}
+
+        /* Heatmap */
+        .heatmap-grid { display:grid; grid-template-columns:30px repeat(12,1fr); gap:4px; padding:15px 20px 10px; }
+        .hm-label     { font-size:11px; font-weight:700; color:#888; display:flex; align-items:center; justify-content:flex-end; padding-right:8px; text-transform:none; }
+        .hm-col-label { font-size:10px; font-weight:800; color:#888; text-align:center; }
+        .hm-cell      { height:24px; border-radius:4px; cursor:pointer; transition:.2s; position:relative; }
+        .hm-cell:hover { transform:scale(1.15); z-index:2; outline:2px solid #000; box-shadow: 0 4px 10px rgba(0,0,0,0.15);}
         .hm-cell:hover::after {
-            content:attr(data-tip); position:absolute; bottom:calc(100% + 4px); left:50%; transform:translateX(-50%);
-            background:#000; color:#fff; font-size:10px; font-weight:700; padding:3px 7px; border-radius:2px;
+            content:attr(data-tip); position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%);
+            background:#000; color:#fff; font-size:11px; font-weight:800; padding:6px 10px; border-radius:4px;
             white-space:nowrap; pointer-events:none; z-index:10;
         }
-        .hm-legend { display:flex; align-items:center; gap:6px; padding:0 14px 10px 44px; }
-        .hm-legend-label { font-size:10px; color:#aaa; font-weight:600; text-transform:none; }
-        .hm-legend-scale { display:flex; gap:2px; }
-        .hm-legend-step  { width:12px; height:9px; border-radius:1px; }
+        .hm-legend { display:flex; align-items:center; gap:8px; padding:10px 20px 20px 50px; }
+        .hm-legend-label { font-size:11px; color:#888; font-weight:700; text-transform:uppercase; }
+        .hm-legend-scale { display:flex; gap:3px; }
+        .hm-legend-step  { width:16px; height:12px; border-radius:2px; }
 
         /* ═══════════════════════════════════════════
            SKELETON
         ═══════════════════════════════════════════ */
         @keyframes shimmer { 0%{background-position:-600px 0} 100%{background-position:600px 0} }
-        .skeleton { background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size:600px 100%; animation:shimmer 1.4s infinite linear; border-radius:2px; }
-        .sk-card  { background:#fff; border:1px solid var(--g200); border-radius:var(--br); padding:14px 15px 11px; }
-        .sk-panel { background:#fff; border:1px solid var(--g200); border-radius:var(--br); }
-        .sk-ph    { padding:10px 14px; border-bottom:1px solid var(--g200); }
-        .sk-row   { padding:10px 14px; border-bottom:1px solid var(--g200); display:flex; gap:10px; align-items:center; }
-        .sk-circle{ width:34px; height:34px; border-radius:50%; flex-shrink:0; }
-        .sk-block { flex:1; display:flex; flex-direction:column; gap:5px; }
-        .sk-line  { height:9px; border-radius:2px; }
+        .skeleton { background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size:600px 100%; animation:shimmer 1.4s infinite linear; border-radius:4px; }
+        .sk-card  { background:#fff; border:1px solid var(--gray-200); border-radius:6px; padding:20px; }
+        .sk-panel { background:#fff; border:1px solid var(--gray-200); border-radius:6px; }
+        .sk-ph    { padding:15px 20px; border-bottom:1px solid var(--gray-200); }
+        .sk-row   { padding:15px 20px; border-bottom:1px solid var(--gray-200); display:flex; gap:12px; align-items:center; }
+        .sk-circle{ width:40px; height:40px; border-radius:50%; flex-shrink:0; }
+        .sk-block { flex:1; display:flex; flex-direction:column; gap:8px; }
+        .sk-line  { height:12px; border-radius:4px; }
 
         /* ═══════════════════════════════════════════
            EMPTY STATE
         ═══════════════════════════════════════════ */
-        .db-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:32px 20px; color:#bbb; gap:8px; }
-        .db-empty i { font-size:28px; opacity:.4; }
-        .db-empty-txt { font-size:12px; font-weight:600; text-transform:none; }
-        .db-empty-sub { font-size:11px; font-weight:400; color:#ccc; text-transform:none; }
+        .db-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:50px 20px; color:#bbb; gap:12px; }
+        .db-empty i { font-size:40px; opacity:.3; }
+        .db-empty-txt { font-size:14px; font-weight:800; color: #888;}
+        .db-empty-sub { font-size:12px; font-weight:500; color:#aaa; }
 
         /* ═══════════════════════════════════════════
            DRAWER (products & orders)
         ═══════════════════════════════════════════ */
-        .db-drawer-backdrop {
-            display:none; position:fixed; inset:0; background:rgba(0,0,0,.45);
-            z-index:1000; backdrop-filter:blur(1px);
-        }
+        .db-drawer-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:1000; backdrop-filter:blur(2px); }
         .db-drawer-backdrop.show { display:block; animation:fadeIn .2s ease; }
         @keyframes fadeIn { from{opacity:0} to{opacity:1} }
 
-        .db-drawer {
-            position:fixed; top:0; right:-680px; width:660px; max-width:95vw;
-            height:100vh; background:#fff; border-left:1px solid var(--g200);
-            box-shadow:-8px 0 32px rgba(0,0,0,.12); z-index:1001;
-            display:flex; flex-direction:column;
-            transition:right .28s cubic-bezier(.4,0,.2,1);
-        }
+        .db-drawer { position:fixed; top:0; right:-800px; width:750px; max-width:95vw; height:100vh; background:#fff; border-left:1px solid var(--gray-200); box-shadow:-10px 0 40px rgba(0,0,0,.15); z-index:1001; display:flex; flex-direction:column; transition:right .3s cubic-bezier(.4,0,.2,1); }
         .db-drawer.show { right:0; }
 
-        .db-drawer-head {
-            padding:14px 18px; border-bottom:1px solid var(--g200);
-            display:flex; align-items:center; justify-content:space-between;
-            flex-shrink:0; background:#fff;
-        }
-        .db-drawer-title { font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; }
-        .db-drawer-close {
-            width:28px; height:28px; border:1px solid var(--g200); background:#fff;
-            border-radius:var(--br); cursor:pointer; display:flex; align-items:center;
-            justify-content:center; font-size:14px; color:#888; transition:.15s;
-        }
+        .db-drawer-head { padding:18px 24px; border-bottom:1px solid var(--gray-200); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; background:#fff; }
+        .db-drawer-title { font-size:15px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color: #000;}
+        .db-drawer-close { width:32px; height:32px; border:1px solid var(--gray-300); background:#fff; border-radius:4px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px; color:#555; transition:.2s; }
         .db-drawer-close:hover { background:#000; color:#fff; border-color:#000; }
         .db-drawer-body { flex:1; overflow-y:auto; }
 
-        /* drawer search/filter bar */
-        .drawer-filter { padding:12px 18px; border-bottom:1px solid var(--g200); display:flex; gap:8px; align-items:center; background:#fafafa; }
+        .drawer-filter { padding:15px 24px; border-bottom:1px solid var(--gray-200); display:flex; gap:12px; align-items:center; background:#fafafa; }
         .drawer-search-wrap { position:relative; flex:1; }
-        .drawer-search-icon { position:absolute; left:9px; top:50%; transform:translateY(-50%); color:#bbb; font-size:12px; }
-        .drawer-search-input {
-            width:100%; height:30px; padding:0 10px 0 28px;
-            border:1px solid var(--g200); border-radius:var(--br);
-            font-size:12px; font-family:inherit; outline:none; background:#fff;
-        }
+        .drawer-search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#888; font-size:14px; }
+        .drawer-search-input { width:100%; height:36px; padding:0 12px 0 36px; border:1px solid var(--gray-300); border-radius:4px; font-size:13px; font-family:inherit; outline:none; background:#fff; transition: 0.2s;}
         .drawer-search-input:focus { border-color:#000; }
-        .drawer-stat-badge { padding:3px 8px; border-radius:var(--br); font-size:10px; font-weight:800; background:var(--g100); border:1px solid var(--g200); color:#555; white-space:nowrap; }
+        .drawer-stat-badge { padding:6px 12px; border-radius:4px; font-size:12px; font-weight:800; background:#fff; border:1px solid var(--gray-300); color:#000; white-space:nowrap; }
 
-        /* drawer product list (full) */
-        .drawer-prod-item {
-            display:flex; align-items:center; gap:12px; padding:11px 18px;
-            border-bottom:1px solid var(--g200); transition:.12s; cursor:pointer;
-        }
-        .drawer-prod-item:hover { background:var(--g100); }
-        .drawer-prod-rank { width:24px; height:24px; border-radius:var(--br); border:1px solid var(--g200); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:#bbb; flex-shrink:0; }
+        /* Drawer Table / List */
+        .drawer-prod-item { display:flex; align-items:center; gap:15px; padding:15px 24px; border-bottom:1px solid var(--gray-200); transition:.2s; cursor:pointer; }
+        .drawer-prod-item:hover { background:var(--gray-100); }
+        .drawer-prod-rank { width:28px; height:28px; border-radius:4px; border:1px solid var(--gray-200); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900; color:#888; flex-shrink:0; background: #fff;}
         .drawer-prod-rank.r1 { background:#fef3c7; border-color:#f59e0b; color:#92400e; }
         .drawer-prod-rank.r2 { background:#f1f5f9; border-color:#94a3b8; color:#475569; }
         .drawer-prod-rank.r3 { background:#fff7ed; border-color:#fb923c; color:#7c2d12; }
-        .drawer-prod-thumb { width:42px; height:42px; border:1px solid var(--g200); border-radius:var(--br); background:var(--g100); display:flex; align-items:center; justify-content:center; color:#ccc; font-size:14px; flex-shrink:0; overflow:hidden; }
+        .drawer-prod-thumb { width:48px; height:48px; border:1px solid var(--gray-200); border-radius:4px; background:var(--gray-100); display:flex; align-items:center; justify-content:center; color:#ccc; font-size:18px; flex-shrink:0; overflow:hidden; }
         .drawer-prod-info  { flex:1; min-width:0; }
-        .drawer-prod-name  { font-weight:700; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-transform:none; }
-        .drawer-prod-meta  { font-size:11px; color:#888; font-weight:500; text-transform:none; margin-top:2px; }
-        .drawer-prod-bar-wrap { margin-top:5px; display:flex; align-items:center; gap:7px; }
-        .drawer-prod-bar-bg   { flex:1; height:4px; background:var(--g200); border-radius:2px; overflow:hidden; }
-        .drawer-prod-bar-fill { height:100%; background:#000; border-radius:2px; transition:.7s; width:0; }
-        .drawer-prod-sold  { font-size:11px; font-weight:800; color:#000; flex-shrink:0; }
-        .drawer-prod-right { text-align:right; flex-shrink:0; min-width:80px; }
-        .drawer-prod-rev   { font-size:12px; font-weight:700; color:#000; }
-        .drawer-prod-rev-lbl { font-size:10px; color:#aaa; font-weight:500; }
+        .drawer-prod-name  { font-weight:800; font-size:14px; color:#000; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom: 2px;}
+        .drawer-prod-meta  { font-size:12px; color:#666; font-weight:600; }
+        .drawer-prod-bar-wrap { margin-top:8px; display:flex; align-items:center; gap:10px; }
+        .drawer-prod-bar-bg   { flex:1; height:6px; background:var(--gray-200); border-radius:3px; overflow:hidden; }
+        .drawer-prod-bar-fill { height:100%; background:#2563eb; border-radius:3px; transition:.7s; width:0; }
+        .drawer-prod-sold  { font-size:12px; font-weight:800; color:#000; flex-shrink:0; }
+        .drawer-prod-right { text-align:right; flex-shrink:0; min-width:100px; }
+        .drawer-prod-rev   { font-size:14px; font-weight:900; color:#000; white-space: nowrap;}
+        .drawer-prod-rev-lbl { font-size:11px; color:#888; font-weight:600; text-transform: uppercase;}
 
-        /* drawer order table */
         .drawer-order-table { width:100%; border-collapse:collapse; }
-        .drawer-order-table thead th { text-align:left; padding:9px 18px; font-size:10px; font-weight:800; text-transform:uppercase; color:#888; background:#fafafa; border-bottom:1px solid var(--g200); white-space:nowrap; position:sticky; top:0; z-index:5; }
-        .drawer-order-table tbody td { padding:9px 18px; border-bottom:1px solid var(--g200); vertical-align:middle; font-size:12px; font-weight:500; text-transform:none; }
-        .drawer-order-table tbody tr:last-child td { border-bottom:none; }
-        .drawer-order-table tbody tr { cursor:pointer; transition:.1s; }
-        .drawer-order-table tbody tr:hover { background:var(--g100); }
+        .drawer-order-table thead th { text-align:left; padding:12px 24px; font-size:11px; font-weight:800; text-transform:uppercase; color:#666; background:#fafafa; border-bottom:1px solid var(--gray-200); white-space:nowrap; position:sticky; top:0; z-index:5; }
+        .drawer-order-table tbody td { padding:12px 24px; border-bottom:1px solid var(--gray-200); vertical-align:middle; font-size:13px; font-weight:500; }
+        .drawer-order-table tbody tr { cursor:pointer; transition:.2s; }
+        .drawer-order-table tbody tr:hover { background:var(--gray-100); }
 
-        /* scrollbar */
-        .db-table-wrap::-webkit-scrollbar,
-        .db-prod-list::-webkit-scrollbar,
-        .stock-list::-webkit-scrollbar,
-        .db-drawer-body::-webkit-scrollbar { width:4px; }
-        .db-table-wrap::-webkit-scrollbar-thumb,
-        .db-prod-list::-webkit-scrollbar-thumb,
-        .stock-list::-webkit-scrollbar-thumb,
-        .db-drawer-body::-webkit-scrollbar-thumb { background:#d4d4d8; border-radius:2px; }
+        /* BEE TOAST CUSTOM */
+        #beeToastHost { position: fixed; top: 30px; right: 30px; z-index: 999999; display: flex; flex-direction: column; gap: 15px; pointer-events: none; }
+        .bee-toast-box { min-width: 320px; max-width: 400px; padding: 18px 24px; border-radius: 8px; background: #fff; color: #000; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2); display: flex; align-items: flex-start; gap: 14px; border-left: 6px solid #000; animation: beeToastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; transition: all 0.3s ease; pointer-events: auto; }
+        .bee-toast-box.success { border-left-color: #10b981; }
+        .bee-toast-box.error { border-left-color: #ef4444; }
+        .bee-toast-box.warning { border-left-color: #f59e0b; }
+        .bee-toast-box.info { border-left-color: #2563eb; }
+        .bee-toast-box.hiding { transform: translateX(120%); opacity: 0; margin-top: -80px; }
+        @keyframes beeToastSlideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* =========================================================
+           BEE AI CHATBOT WIDGET
+           ========================================================= */
+        .bee-chat-widget { position: fixed; bottom: 30px; right: 30px; z-index: 9999; display: flex; flex-direction: column; align-items: flex-end; }
+        .bee-chat-btn { width: 56px; height: 56px; border-radius: 50%; background: #10b981; color: #fff; border: none; font-size: 24px; cursor: pointer; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4); transition: 0.3s; display: flex; align-items: center; justify-content: center; }
+        .bee-chat-btn:hover { transform: scale(1.1); background: #059669; }
+
+        .bee-chat-window { width: 360px; height: 500px; max-height: calc(100vh - 100px); background: #fff; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; margin-bottom: 15px; opacity: 0; pointer-events: none; transform: translateY(20px) scale(0.95); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform-origin: bottom right; border: 1px solid var(--gray-200); }
+        .bee-chat-window.show { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
+
+        .bee-chat-header { background: #000; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+        .bee-chat-title { font-weight: 800; font-size: 14px; display: flex; align-items: center; gap: 8px; letter-spacing: 0.5px;}
+        .bee-chat-title i { color: #10b981; font-size: 18px; }
+        .bee-chat-close { background: none; border: none; color: #aaa; cursor: pointer; font-size: 20px; transition: 0.2s; }
+        .bee-chat-close:hover { color: #fff; }
+
+        .bee-chat-body { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; background: #f9fafb; }
+        .chat-msg { max-width: 85%; padding: 10px 14px; font-size: 13px; line-height: 1.5; position: relative; }
+        .chat-msg.bot { background: #fff; border: 1px solid var(--gray-200); color: #000; border-radius: 2px 12px 12px 12px; align-self: flex-start; box-shadow: 0 2px 5px rgba(0,0,0,0.02);}
+        .chat-msg.user { background: #2563eb; color: #fff; border-radius: 12px 2px 12px 12px; align-self: flex-end; box-shadow: 0 2px 5px rgba(37,99,235,0.2);}
+
+        .bee-chat-footer { padding: 15px; background: #fff; border-top: 1px solid var(--gray-200); display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+        .bee-chat-input { flex: 1; height: 40px; border: 1px solid var(--gray-300); border-radius: 20px; padding: 0 15px; font-size: 13px; outline: none; transition: 0.2s; font-family: inherit;}
+        .bee-chat-input:focus { border-color: #2563eb; }
+        .bee-chat-send { width: 40px; height: 40px; border-radius: 50%; background: #2563eb; color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: 0.2s; flex-shrink: 0;}
+        .bee-chat-send:hover { background: #1d4ed8; }
+
+        .typing-indicator { display: flex; gap: 4px; padding: 5px; align-items: center;}
+        .typing-dot { width: 6px; height: 6px; background: #bbb; border-radius: 50%; animation: typing 1.4s infinite ease-in-out both; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
 
         @media (max-width:1180px) {
             .db-stats { grid-template-columns:repeat(2,1fr); }
@@ -378,7 +351,7 @@
 </head>
 <body>
 
-<div class="db-page" id="dashboardPage">
+<div class="container db-page" id="dashboardPage">
 
     <div class="db-topbar">
         <div class="db-topbar-left">
@@ -398,10 +371,10 @@
                 <input type="date" class="db-date-input" id="dbDateTo"
                        placeholder="Đến ngày" onchange="DB.onToChange()">
             </div>
-            <span class="range-chip" id="rangeChip" onclick="DB.clearRange()">
+            <span class="range-chip" id="rangeChip" onclick="DB.clearRange()" title="Xóa bộ lọc">
                 <i class="bi bi-calendar-range"></i>
                 <span id="rangeChipLabel"></span>
-                <i class="bi bi-x" style="font-size:11px;"></i>
+                <i class="bi bi-x-lg" style="font-size:12px; margin-left: 4px;"></i>
             </span>
 
             <label class="compare-toggle" id="compareToggle">
@@ -411,8 +384,8 @@
             </label>
         </div>
         <div class="db-topbar-right">
-            <button class="db-btn ghost" id="btnRefresh" onclick="DB.refresh()">
-                <i class="bi bi-arrow-clockwise" id="refreshIcon"></i> Làm mới
+            <button class="btn btn-secondary" id="btnRefresh" onclick="DB.refresh()" style="height: 36px !important;">
+                <i class="bi bi-arrow-clockwise" id="refreshIcon" style="font-size: 14px;"></i> LÀM MỚI
             </button>
         </div>
     </div>
@@ -420,21 +393,21 @@
     <div class="ai-insights" id="aiInsightsPanel">
         <div class="ai-icon"><i class="bi bi-robot"></i></div>
         <div class="ai-content">
-            <div class="ai-title">AI PHÂN TÍCH & GỢI Ý <span style="background:#065f46;color:#fff;font-size:8px;padding:2px 6px;border-radius:10px;">BETA</span></div>
+            <div class="ai-title">AI PHÂN TÍCH & GỢI Ý <span style="background:#065f46;color:#fff;font-size:9px;padding:2px 8px;border-radius:12px; font-weight: 800;">BETA</span></div>
             <div class="ai-list" id="aiInsightsList">
             </div>
         </div>
     </div>
 
     <div class="db-stats" id="statsGrid">
-        <div class="sk-card"><div class="skeleton sk-line" style="width:50%;margin-bottom:10px"></div><div class="skeleton sk-line" style="width:65%;height:20px;margin-bottom:12px"></div><div class="skeleton" style="height:30px;margin:0 -15px 10px"></div><div class="skeleton sk-line" style="width:40%"></div></div>
-        <div class="sk-card"><div class="skeleton sk-line" style="width:50%;margin-bottom:10px"></div><div class="skeleton sk-line" style="width:65%;height:20px;margin-bottom:12px"></div><div class="skeleton" style="height:30px;margin:0 -15px 10px"></div><div class="skeleton sk-line" style="width:40%"></div></div>
-        <div class="sk-card"><div class="skeleton sk-line" style="width:50%;margin-bottom:10px"></div><div class="skeleton sk-line" style="width:65%;height:20px;margin-bottom:12px"></div><div class="skeleton" style="height:30px;margin:0 -15px 10px"></div><div class="skeleton sk-line" style="width:40%"></div></div>
-        <div class="sk-card"><div class="skeleton sk-line" style="width:50%;margin-bottom:10px"></div><div class="skeleton sk-line" style="width:65%;height:20px;margin-bottom:12px"></div><div class="skeleton" style="height:30px;margin:0 -15px 10px"></div><div class="skeleton sk-line" style="width:40%"></div></div>
+        <div class="sk-card"><div class="skeleton sk-line" style="width:50%;margin-bottom:12px"></div><div class="skeleton sk-line" style="width:70%;height:24px;margin-bottom:15px"></div><div class="skeleton" style="height:40px;margin:0 -20px 12px"></div><div class="skeleton sk-line" style="width:45%"></div></div>
+        <div class="sk-card"><div class="skeleton sk-line" style="width:50%;margin-bottom:12px"></div><div class="skeleton sk-line" style="width:70%;height:24px;margin-bottom:15px"></div><div class="skeleton" style="height:40px;margin:0 -20px 12px"></div><div class="skeleton sk-line" style="width:45%"></div></div>
+        <div class="sk-card"><div class="skeleton sk-line" style="width:50%;margin-bottom:12px"></div><div class="skeleton sk-line" style="width:70%;height:24px;margin-bottom:15px"></div><div class="skeleton" style="height:40px;margin:0 -20px 12px"></div><div class="skeleton sk-line" style="width:45%"></div></div>
+        <div class="sk-card"><div class="skeleton sk-line" style="width:50%;margin-bottom:12px"></div><div class="skeleton sk-line" style="width:70%;height:24px;margin-bottom:15px"></div><div class="skeleton" style="height:40px;margin:0 -20px 12px"></div><div class="skeleton sk-line" style="width:45%"></div></div>
     </div>
 
     <div class="db-row-main" id="rowMain">
-        <div class="sk-panel"><div class="sk-ph"><div class="skeleton sk-line" style="width:30%"></div></div><div style="padding:12px;height:248px;"><div class="skeleton" style="width:100%;height:100%;border-radius:2px;"></div></div></div>
+        <div class="sk-panel"><div class="sk-ph"><div class="skeleton sk-line" style="width:30%"></div></div><div style="padding:20px;height:280px;"><div class="skeleton" style="width:100%;height:100%;border-radius:4px;"></div></div></div>
         <div class="sk-panel"><div class="sk-ph"><div class="skeleton sk-line" style="width:50%"></div></div>
             <div class="sk-row"><div class="skeleton sk-circle"></div><div class="sk-block"><div class="skeleton sk-line" style="width:80%"></div><div class="skeleton sk-line" style="width:50%"></div></div></div>
             <div class="sk-row"><div class="skeleton sk-circle"></div><div class="sk-block"><div class="skeleton sk-line" style="width:70%"></div><div class="skeleton sk-line" style="width:45%"></div></div></div>
@@ -444,13 +417,13 @@
 
     <div class="db-row-bottom" id="rowBottom">
         <div class="sk-panel"><div class="sk-ph"><div class="skeleton sk-line" style="width:35%"></div></div>
-            <div class="sk-row"><div class="sk-block"><div class="skeleton sk-line" style="width:30%"></div></div><div class="skeleton sk-line" style="width:15%;height:9px"></div></div>
-            <div class="sk-row"><div class="sk-block"><div class="skeleton sk-line" style="width:40%"></div></div><div class="skeleton sk-line" style="width:15%;height:9px"></div></div>
-            <div class="sk-row"><div class="sk-block"><div class="skeleton sk-line" style="width:35%"></div></div><div class="skeleton sk-line" style="width:15%;height:9px"></div></div>
+            <div class="sk-row"><div class="sk-block"><div class="skeleton sk-line" style="width:30%"></div></div><div class="skeleton sk-line" style="width:15%;height:12px"></div></div>
+            <div class="sk-row"><div class="sk-block"><div class="skeleton sk-line" style="width:40%"></div></div><div class="skeleton sk-line" style="width:15%;height:12px"></div></div>
+            <div class="sk-row"><div class="sk-block"><div class="skeleton sk-line" style="width:35%"></div></div><div class="skeleton sk-line" style="width:15%;height:12px"></div></div>
         </div>
         <div class="sk-panel"><div class="sk-ph"><div class="skeleton sk-line" style="width:40%"></div></div>
-            <div style="padding:12px 14px;display:flex;gap:14px;align-items:center;">
-                <div class="skeleton" style="width:100px;height:100px;border-radius:50%;flex-shrink:0;"></div>
+            <div style="padding:20px;display:flex;gap:20px;align-items:center;">
+                <div class="skeleton" style="width:120px;height:120px;border-radius:50%;flex-shrink:0;"></div>
                 <div class="sk-block"><div class="skeleton sk-line" style="width:90%"></div><div class="skeleton sk-line" style="width:80%"></div><div class="skeleton sk-line" style="width:70%"></div><div class="skeleton sk-line" style="width:85%"></div></div>
             </div>
         </div>
@@ -463,14 +436,16 @@
             <div class="sk-row"><div class="skeleton sk-circle"></div><div class="sk-block"><div class="skeleton sk-line" style="width:60%"></div><div class="skeleton sk-line" style="width:50%"></div></div></div>
         </div>
         <div class="sk-panel"><div class="sk-ph"><div class="skeleton sk-line" style="width:45%"></div></div>
-            <div style="padding:10px 14px;"><div class="skeleton" style="height:160px;border-radius:2px;"></div></div>
+            <div style="padding:20px;"><div class="skeleton" style="height:180px;border-radius:4px;"></div></div>
         </div>
     </div>
 
-</div><div class="db-drawer-backdrop" id="prodBackdrop" onclick="DB.closeProdDrawer()"></div>
+</div>
+
+<div class="db-drawer-backdrop" id="prodBackdrop" onclick="DB.closeProdDrawer()"></div>
 <div class="db-drawer" id="prodDrawer">
     <div class="db-drawer-head">
-        <span class="db-drawer-title">Sản phẩm bán chạy</span>
+        <span class="db-drawer-title"><i class="bi bi-star-fill" style="color: #f59e0b; margin-right: 6px;"></i> TOP SẢN PHẨM BÁN CHẠY</span>
         <button class="db-drawer-close" onclick="DB.closeProdDrawer()"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="drawer-filter">
@@ -487,70 +462,104 @@
 <div class="db-drawer-backdrop" id="ordBackdrop" onclick="DB.closeOrdDrawer()"></div>
 <div class="db-drawer" id="ordDrawer">
     <div class="db-drawer-head">
-        <span class="db-drawer-title">Đơn hàng gần đây</span>
+        <span class="db-drawer-title"><i class="bi bi-receipt-cutoff" style="color: #2563eb; margin-right: 6px;"></i> ĐƠN HÀNG GẦN ĐÂY</span>
         <button class="db-drawer-close" onclick="DB.closeOrdDrawer()"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="drawer-filter">
         <div class="drawer-search-wrap">
             <i class="bi bi-search drawer-search-icon"></i>
             <input type="text" class="drawer-search-input" id="ordSearch"
-                   placeholder="Tìm mã đơn hoặc khách hàng..." oninput="DB.filterOrders(this.value)">
+                   placeholder="Tìm mã đơn hoặc tên khách..." oninput="DB.filterOrders(this.value)">
         </div>
         <span class="drawer-stat-badge" id="ordDrawerCount">0 đơn</span>
-        <button class="db-btn green-outline" style="height:28px;font-size:10px;" onclick="DB.exportCSV()">
-            <i class="bi bi-download"></i> CSV
+        <button class="btn btn-outline-green" style="height: 36px !important; margin-left: 5px;" onclick="DB.exportCSV()">
+            <i class="bi bi-download"></i> XUẤT CSV
         </button>
     </div>
     <div class="db-drawer-body" id="ordDrawerBody"></div>
 </div>
 
+<div id="beeToastHost"></div>
+
+<div class="bee-chat-widget">
+    <div class="bee-chat-window" id="beeChatWindow">
+        <div class="bee-chat-header">
+            <div class="bee-chat-title"><i class="bi bi-robot"></i> Trợ lý ảo Bee AI</div>
+            <button class="bee-chat-close" onclick="window.toggleBeeChat()"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="bee-chat-body" id="beeChatBody">
+            <div class="chat-msg bot">Chào sếp! Mình là trợ lý AI của BeeMate. Mình có thể giúp gì cho sếp hôm nay? (Ví dụ: <i>Hôm nay bán được bao nhiêu?</i>)</div>
+        </div>
+        <div class="bee-chat-footer">
+            <input type="text" class="bee-chat-input" id="beeChatInput" placeholder="Nhập câu hỏi tại đây..." onkeypress="if(event.key === 'Enter') window.sendBeeChatMessage()">
+            <button class="bee-chat-send" onclick="window.sendBeeChatMessage()"><i class="bi bi-send-fill"></i></button>
+        </div>
+    </div>
+    <button class="bee-chat-btn" onclick="window.toggleBeeChat()">
+        <i class="bi bi-chat-dots-fill"></i>
+    </button>
+</div>
+
 <script>
+    // --- KHỞI TẠO TOAST ĐỒNG BỘ 100% ---
+    if (typeof window.toast === 'undefined') {
+        window.toast = function (message, type = 'success') {
+            let container = document.getElementById('beeToastHost');
+            if (!container) { container = document.createElement('div'); container.id = 'beeToastHost'; document.body.appendChild(container); }
+            const el = document.createElement('div');
+            el.className = `bee-toast-box ${type}`;
+            const prefix = type === 'success' ? 'THÀNH CÔNG' : (type === 'error' ? 'LỖI' : 'THÔNG BÁO');
+            const color = type === 'success' ? '#10b981' : (type === 'error' ? '#ef4444' : '#f59e0b');
+            const icon = type === 'success' ? 'bi-check-circle-fill' : (type === 'error' ? 'bi-x-circle-fill' : 'bi-exclamation-triangle-fill');
+            el.innerHTML = `
+                <i class="bi ${icon}" style="color:${color}; font-size:22px; margin-top:2px;"></i>
+                <div style="display: flex; flex-direction: column; flex: 1;">
+                    <span style="font-weight:800; font-size:12px; text-transform: uppercase; margin-bottom: 4px; color:${color}">${prefix}</span>
+                    <span style="font-weight:500; font-size:13px; color:#333; line-height: 1.4;">${message}</span>
+                </div>
+                <i class="bi bi-x-lg" style="cursor: pointer; margin-left: 10px; font-size: 18px; color:#999; transition: 0.2s;" onmouseover="this.style.color='#000'" onmouseout="this.style.color='#999'" onclick="this.parentElement.remove()"></i>
+            `;
+            container.appendChild(el);
+            setTimeout(() => { if (el.parentNode) { el.classList.add('hiding'); setTimeout(() => el.remove(), 300); } }, 3500);
+        };
+    }
+
     window.DB = (() => {
         /* ── helpers ── */
         const fmt   = n => new Intl.NumberFormat('vi-VN').format(Math.round(n));
-        const fmtS  = n => n>=1e9?(n/1e9).toFixed(1)+'T':n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(0)+'K':String(n);
+        const fmtS  = n => n>=1e9?(n/1e9).toFixed(1)+' Tỷ':n>=1e6?(n/1e6).toFixed(1)+' Tr':n>=1e3?(n/1e3).toFixed(0)+' K':String(n);
         const $     = id => document.getElementById(id);
         const fmtD  = s => { if (!s) return ''; const [y,m,d]=s.split('-'); return `${d}/${m}/${y}`; };
 
-        function _toast(msg, type='success') {
-            if (typeof window.toast === 'function') { window.toast(msg, type); return; }
-            const col = type==='error'?'#dc2626':type==='warning'?'#f59e0b':'#10b981';
-            const el  = document.createElement('div');
-            el.style.cssText=`position:fixed;top:20px;right:20px;z-index:9999;background:#fff;padding:11px 16px;border-left:3px solid ${col};box-shadow:0 4px 16px rgba(0,0,0,.12);border-radius:2px;font-size:12px;font-weight:700;font-family:Inter,sans-serif;display:flex;align-items:center;gap:8px;min-width:220px;`;
-            el.innerHTML=`<i class="bi bi-${type==='error'?'x-circle-fill':type==='warning'?'exclamation-triangle-fill':'check-circle-fill'}" style="color:${col};font-size:14px;"></i>${msg}`;
-            document.body.appendChild(el);
-            setTimeout(()=>{el.style.opacity='0';el.style.transition='.3s';setTimeout(()=>el.remove(),300);},2600);
-        }
+        function _toast(msg, type='success') { window.toast(msg, type); }
 
         function _getOrderStatus(code) {
             const map = {
                 'CHO_THANH_TOAN': {lbl:'Chờ thanh toán', cls:'warning', dot:'#f59e0b'},
-                'pending':        {lbl:'Chờ xử lý', cls:'warning', dot:'#f59e0b'},
                 'CHO_XAC_NHAN':   {lbl:'Chờ xác nhận', cls:'warning', dot:'#f59e0b'},
-                'confirming':     {lbl:'Chờ xác nhận', cls:'warning', dot:'#f59e0b'},
                 'CHO_GIAO':       {lbl:'Đang chuẩn bị', cls:'info', dot:'#0ea5e9'},
-                'preparing':      {lbl:'Đang chuẩn bị', cls:'info', dot:'#0ea5e9'},
                 'DANG_GIAO':      {lbl:'Đang giao hàng', cls:'info', dot:'#3b82f6'},
-                'delivering':     {lbl:'Đang giao hàng', cls:'info', dot:'#3b82f6'},
                 'HOAN_THANH':     {lbl:'Hoàn thành', cls:'success', dot:'#10b981'},
-                'completed':      {lbl:'Hoàn thành', cls:'success', dot:'#10b981'},
                 'DA_HUY':         {lbl:'Đã hủy', cls:'danger', dot:'#dc2626'},
+                'pending':        {lbl:'Chờ xử lý', cls:'warning', dot:'#f59e0b'},
+                'completed':      {lbl:'Hoàn thành', cls:'success', dot:'#10b981'},
                 'cancelled':      {lbl:'Đã hủy', cls:'danger', dot:'#dc2626'}
             };
             return map[code] || {lbl: code || 'Không rõ', cls:'warning', dot:'#f59e0b'};
         }
 
+        // 🌟 BỘ MAPPING MỚI CHO PAYMENT THEO YÊU CẦU
+        const PAY_MAP = {
+            'TIEN_MAT':     { icon: 'bi-cash',    color: '#10b981', text: 'Tiền mặt' },
+            'MOMO':         { icon: 'bi-wallet2', color: '#a50064', text: 'Ví MoMo' },
+            'VNPAY':        { icon: 'bi-wallet2', color: '#005ba9', text: 'VNPay' },
+            'COD':          { icon: 'bi-truck',   color: '#3b82f6', text: 'COD (Giao hàng)' },
+            'CHUYEN_KHOAN': { icon: 'bi-bank',    color: '#5e5e5e', text: 'Chuyển khoản' }
+        };
+
         function _formatPayment(method) {
-            if (!method) return { i: 'bi-credit-card', c: '#555', lbl: 'Khác' };
-            const str = String(method).toUpperCase().replace(/_/g, ' ').trim();
-            if (str.includes('TIEN_MAT') || str.includes('TIỀN MẶT')) {
-                return { i: 'bi-cash', c: '#10b981', lbl: 'Tiền mặt' };
-            } else if (str.includes('MOMO')) {
-                return { i: 'bi-wallet2', c: '#a50064', lbl: 'Ví MoMo' };
-            } else if (str.includes('COD') || str.includes('GIAO HÀNG')) {
-                return { i: 'bi-truck', c: '#3b82f6', lbl: 'COD (Giao hàng)' };
-            }
-            return { i: 'bi-credit-card', c: '#555', lbl: String(method).trim() };
+            const k = Object.keys(PAY_MAP).find(key => String(method).toUpperCase().includes(key));
+            return k ? PAY_MAP[k] : { icon: 'bi-credit-card', color: '#555', text: method || 'Khác' };
         }
 
         /* ═══════════════════════════════════════
@@ -567,7 +576,7 @@
         const ALL_PRODUCTS = [];
         const ALL_ORDERS   = [];
         const LOW_STOCK    = [];
-        const PAY = { labels:[], values:[], colors:[] };
+        const PAY = { keys:[], values:[] };
         let HEATMAP = { days:[], hours:[], values:[] };
 
         /* ── state ── */
@@ -591,9 +600,6 @@
             _fetchAndRender();
         }
 
-        /* ═══════════════════════════════════════
-           PROGRESSIVE DATE FILTER
-        ═══════════════════════════════════════ */
         function onFromChange() {
             const val = $('dbDateFrom').value;
             $('dbDateFrom').classList.remove('error');
@@ -627,7 +633,7 @@
             if (label) label.textContent = `${fmtD(from)} – ${fmtD(to)}`;
             chip?.classList.add('show');
             _fetchAndRender({ silent:true });
-            _toast(`Đã lọc từ ${fmtD(from)} đến ${fmtD(to)}`);
+            _toast(`Đã lọc từ ${fmtD(from)} đến ${fmtD(to)}`, 'success');
         }
 
         function clearRange() {
@@ -636,7 +642,7 @@
             _clearRangeUI();
             document.querySelectorAll('.period-tab').forEach((t,i)=>t.classList.toggle('active',i===0));
             _fetchAndRender();
-            _toast('Đã xoá bộ lọc ngày');
+            _toast('Đã gỡ bỏ bộ lọc ngày', 'info');
         }
 
         function _clearRangeUI() {
@@ -653,7 +659,7 @@
             const leg2 = $('leg-2');
             if (leg2) leg2.style.display = on ? 'flex' : 'none';
             _renderRevenueChart();
-            _toast(on ? 'Đang so sánh kỳ trước' : 'Đã tắt so sánh');
+            _toast(on ? 'Đã bật chế độ so sánh' : 'Đã tắt so sánh', 'success');
         }
 
         function setChartType(type) {
@@ -698,20 +704,20 @@
             const title = $('ddTitle');
             const kpis  = $('ddKpis');
             if (!panel||!title||!kpis) return;
-            title.textContent = `Chi tiết: ${lbl}`;
+            title.textContent = `Phân tích: ${lbl}`;
             if (det) {
                 kpis.innerHTML = `
-                <div class="dd-kpi"><div class="dd-kpi-label">Doanh thu</div><div class="dd-kpi-val">${fmt(det.rev)} ₫</div></div>
+                <div class="dd-kpi"><div class="dd-kpi-label">Doanh thu</div><div class="dd-kpi-val">${fmt(det.rev)}&nbsp;₫</div></div>
                 <div class="dd-kpi"><div class="dd-kpi-label">Số đơn</div><div class="dd-kpi-val">${det.ord} đơn</div></div>
-                <div class="dd-kpi"><div class="dd-kpi-label">Giá trị TB</div><div class="dd-kpi-val">${fmt(det.avg)} ₫</div></div>
+                <div class="dd-kpi"><div class="dd-kpi-label">Giá trị TB</div><div class="dd-kpi-val">${fmt(det.avg)}&nbsp;₫</div></div>
                 <div class="dd-kpi"><div class="dd-kpi-label">Khách hàng</div><div class="dd-kpi-val">${det.cust} người</div></div>`;
             } else {
                 const diff = d.cRprev ? d.cR[idx]-d.cRprev[idx] : null;
                 kpis.innerHTML = `
-                <div class="dd-kpi"><div class="dd-kpi-label">Kỳ này</div><div class="dd-kpi-val">${fmt(d.cR[idx])} ₫</div></div>
+                <div class="dd-kpi"><div class="dd-kpi-label">Kỳ này</div><div class="dd-kpi-val">${fmt(d.cR[idx])}&nbsp;₫</div></div>
                 <div class="dd-kpi"><div class="dd-kpi-label">Số đơn</div><div class="dd-kpi-val">${d.cO[idx]} đơn</div></div>
-                <div class="dd-kpi"><div class="dd-kpi-label">Kỳ trước</div><div class="dd-kpi-val">${d.cRprev?fmt(d.cRprev[idx])+' ₫':'—'}</div></div>
-                <div class="dd-kpi"><div class="dd-kpi-label">Chênh lệch</div><div class="dd-kpi-val" style="color:${diff>=0?'var(--green)':'var(--red)'};">${diff!==null?(diff>=0?'+':'')+fmt(diff)+' ₫':'—'}</div></div>`;
+                <div class="dd-kpi"><div class="dd-kpi-label">Kỳ trước</div><div class="dd-kpi-val">${d.cRprev?fmt(d.cRprev[idx])+'&nbsp;₫':'—'}</div></div>
+                <div class="dd-kpi"><div class="dd-kpi-label">Chênh lệch</div><div class="dd-kpi-val" style="color:${diff>=0?'var(--green)':'var(--red)'};">${diff!==null?(diff>=0?'+':'')+fmt(diff)+'&nbsp;₫':'—'}</div></div>`;
             }
             panel.classList.add('show');
         }
@@ -728,7 +734,7 @@
         function refresh() {
             if (isLoading) return;
             _fetchAndRender({ silent:true });
-            _toast('Đã làm mới dữ liệu');
+            _toast('Đã cập nhật dữ liệu mới nhất', 'success');
         }
 
         /* ═══════════════════════════════════════
@@ -768,7 +774,6 @@
             const p    = `period=${period}&from=${from}&to=${to}`;
 
             try {
-                // Gọi API AI Insight song song, không làm chậm main flow
                 _fetchAiInsights();
 
                 const [statsRes, chartRes, prodsRes, ordsRes, payRes, stockRes, heatRes] = await Promise.all([
@@ -795,9 +800,9 @@
                 ALL_PRODUCTS.splice(0, ALL_PRODUCTS.length, ...products);
                 ALL_ORDERS.splice(0, ALL_ORDERS.length, ...orders);
                 LOW_STOCK.splice(0, LOW_STOCK.length, ...stock);
-                PAY.labels = payment.labels;
+
+                PAY.keys = payment.keys || payment.labels;
                 PAY.values = payment.values;
-                PAY.colors = payment.colors;
 
                 HEATMAP.days   = heatmap.days;
                 HEATMAP.hours  = heatmap.hours;
@@ -827,40 +832,40 @@
 
         function _showSkeletons() {
             _destroyCharts();
-            $('statsGrid').innerHTML = Array(4).fill(`<div class="sk-card"><div class="skeleton sk-line" style="width:50%;margin-bottom:10px"></div><div class="skeleton sk-line" style="width:65%;height:20px;margin-bottom:12px"></div><div class="skeleton" style="height:30px;margin:0 -15px 10px"></div><div class="skeleton sk-line" style="width:40%"></div></div>`).join('');
-            $('rowMain').innerHTML = `<div class="sk-panel"><div class="sk-ph"><div class="skeleton sk-line" style="width:30%"></div></div><div style="padding:12px;height:248px;"><div class="skeleton" style="width:100%;height:100%;border-radius:2px;"></div></div></div><div class="sk-panel"><div class="sk-ph"><div class="skeleton sk-line" style="width:50%"></div></div>${Array(3).fill(`<div class="sk-row"><div class="skeleton sk-circle"></div><div class="sk-block"><div class="skeleton sk-line" style="width:80%"></div><div class="skeleton sk-line" style="width:50%"></div></div></div>`).join('')}</div>`;
-            $('rowBottom').innerHTML = `<div class="sk-panel"><div class="sk-ph"><div class="skeleton sk-line" style="width:35%"></div></div>${Array(3).fill(`<div class="sk-row"><div class="sk-block"><div class="skeleton sk-line" style="width:35%"></div></div><div class="skeleton sk-line" style="width:15%;height:9px"></div></div>`).join('')}</div><div class="sk-panel"><div class="sk-ph"><div class="skeleton sk-line" style="width:40%"></div></div><div style="padding:12px 14px;display:flex;gap:14px;align-items:center;"><div class="skeleton" style="width:100px;height:100px;border-radius:50%;flex-shrink:0;"></div><div class="sk-block">${Array(4).fill(`<div class="skeleton sk-line" style="width:85%"></div>`).join('')}</div></div></div>`;
-            $('rowExtra').innerHTML = `<div class="sk-panel"><div class="sk-ph"><div class="skeleton sk-line" style="width:40%"></div></div>${Array(3).fill(`<div class="sk-row"><div class="skeleton sk-circle"></div><div class="sk-block"><div class="skeleton sk-line" style="width:70%"></div><div class="skeleton sk-line" style="width:40%"></div></div></div>`).join('')}</div><div class="sk-panel"><div class="sk-ph"><div class="skeleton sk-line" style="width:45%"></div></div><div style="padding:10px 14px;"><div class="skeleton" style="height:160px;border-radius:2px;"></div></div></div>`;
+            $('statsGrid').innerHTML = Array(4).fill(`<div class="sk-card"><div class="skeleton sk-line" style="width:50%;margin-bottom:12px"></div><div class="skeleton sk-line" style="width:70%;height:24px;margin-bottom:15px"></div><div class="skeleton" style="height:40px;margin:0 -20px 12px"></div><div class="skeleton sk-line" style="width:45%"></div></div>`).join('');
+            $('rowMain').innerHTML = `<div class="sk-panel"><div class="sk-ph"><div class="skeleton sk-line" style="width:30%"></div></div><div style="padding:20px;height:280px;"><div class="skeleton" style="width:100%;height:100%;border-radius:4px;"></div></div></div><div class="sk-panel"><div class="sk-ph"><div class="skeleton sk-line" style="width:50%"></div></div>${Array(3).fill(`<div class="sk-row"><div class="skeleton sk-circle"></div><div class="sk-block"><div class="skeleton sk-line" style="width:80%"></div><div class="skeleton sk-line" style="width:50%"></div></div></div>`).join('')}</div>`;
+            $('rowBottom').innerHTML = `<div class="sk-panel"><div class="sk-ph"><div class="skeleton sk-line" style="width:35%"></div></div>${Array(3).fill(`<div class="sk-row"><div class="sk-block"><div class="skeleton sk-line" style="width:35%"></div></div><div class="skeleton sk-line" style="width:15%;height:12px"></div></div>`).join('')}</div><div class="sk-panel"><div class="sk-ph"><div class="skeleton sk-line" style="width:40%"></div></div><div style="padding:20px;display:flex;gap:20px;align-items:center;"><div class="skeleton" style="width:120px;height:120px;border-radius:50%;flex-shrink:0;"></div><div class="sk-block">${Array(4).fill(`<div class="skeleton sk-line" style="width:85%"></div>`).join('')}</div></div></div>`;
+            $('rowExtra').innerHTML = `<div class="sk-panel"><div class="sk-ph"><div class="skeleton sk-line" style="width:40%"></div></div>${Array(3).fill(`<div class="sk-row"><div class="skeleton sk-circle"></div><div class="sk-block"><div class="skeleton sk-line" style="width:70%"></div><div class="skeleton sk-line" style="width:40%"></div></div></div>`).join('')}</div><div class="sk-panel"><div class="sk-ph"><div class="skeleton sk-line" style="width:45%"></div></div><div style="padding:20px;"><div class="skeleton" style="height:180px;border-radius:4px;"></div></div></div>`;
         }
 
         function _injectHTML() {
             $('statsGrid').innerHTML = `
-            <div class="db-card"><div class="db-card-top"><div class="db-card-label">Doanh thu <span style="text-transform:none; font-weight:normal; font-size:9px; color:#aaa;" title="Đã trừ phí vận chuyển">(Thực thu)</span></div><div class="db-card-icon"><i class="bi bi-cash-stack"></i></div></div><div class="db-card-value" id="s-rev">—</div><div class="db-sparkline"><canvas id="sp-rev"></canvas></div><div class="db-card-foot"><span class="db-chg" id="s-rev-chg"></span><span class="db-sub">so kỳ trước</span></div></div>
+            <div class="db-card"><div class="db-card-top"><div class="db-card-label">Doanh thu <span style="text-transform:none; font-weight:600; font-size:10px; color:#888;" title="Đã trừ phí vận chuyển">(Thực thu)</span></div><div class="db-card-icon"><i class="bi bi-cash-stack"></i></div></div><div class="db-card-value" id="s-rev">—</div><div class="db-sparkline"><canvas id="sp-rev"></canvas></div><div class="db-card-foot"><span class="db-chg" id="s-rev-chg"></span><span class="db-sub">so kỳ trước</span></div></div>
             <div class="db-card"><div class="db-card-top"><div class="db-card-label">Đơn hàng</div><div class="db-card-icon"><i class="bi bi-receipt-cutoff"></i></div></div><div class="db-card-value" id="s-ord">—</div><div class="db-sparkline"><canvas id="sp-ord"></canvas></div><div class="db-card-foot"><span class="db-chg" id="s-ord-chg"></span><span class="db-sub" id="s-ord-sub">Chờ: 0</span></div></div>
             <div class="db-card"><div class="db-card-top"><div class="db-card-label">Giá trị TB / đơn</div><div class="db-card-icon"><i class="bi bi-calculator"></i></div></div><div class="db-card-value" id="s-avg">—</div><div class="db-sparkline"><canvas id="sp-avg"></canvas></div><div class="db-card-foot"><span class="db-chg" id="s-avg-chg"></span><span class="db-sub">so kỳ trước</span></div></div>
-            <div class="db-card"><div class="db-card-top"><div class="db-card-label">Khách hàng mới</div><div class="db-card-icon"><i class="bi bi-person-plus"></i></div></div><div class="db-card-value" id="s-cust">—</div><div class="db-sparkline"><canvas id="sp-cust"></canvas></div><div class="db-card-foot"><span class="db-chg" id="s-cust-chg"></span><span class="db-sub">so kỳ trước</span></div></div>`;
+            <div class="db-card"><div class="db-card-top"><div class="db-card-label">Khách hàng mới</div><div class="db-card-icon"><i class="bi bi-person-plus-fill"></i></div></div><div class="db-card-value" id="s-cust">—</div><div class="db-sparkline"><canvas id="sp-cust"></canvas></div><div class="db-card-foot"><span class="db-chg" id="s-cust-chg"></span><span class="db-sub">so kỳ trước</span></div></div>`;
 
             $('rowMain').innerHTML = `
             <div class="db-panel">
                 <div class="db-panel-head">
                     <span class="db-panel-title">Biểu đồ doanh thu</span>
-                    <div style="display:flex;align-items:center;gap:7px;">
+                    <div style="display:flex;align-items:center;gap:12px;">
                         <div class="chart-legend" id="chartLegend">
                             <span class="leg-item" id="leg-0" onclick="DB.toggleDataset(0)">
                                 <span class="leg-line" style="background:#000;"></span>Kỳ này
                             </span>
                             <span class="leg-item" id="leg-1" onclick="DB.toggleDataset(1)">
-                                <span class="leg-dashed" style="border-top:2px dashed #10b981;"></span>Đơn hàng
+                                <span class="leg-dashed" style="border-top:3px dashed #2563eb;"></span>Đơn hàng
                             </span>
                             <span class="leg-item" id="leg-2" onclick="DB.toggleDataset(2)" style="display:none;">
-                                <span class="leg-dashed" style="border-top:2px dashed #f59e0b;"></span>Kỳ trước
+                                <span class="leg-dashed" style="border-top:3px dashed #f59e0b;"></span>Kỳ trước
                             </span>
                         </div>
                         <div class="ctt">
-                            <button class="ctt-btn active" id="ctt-line" onclick="DB.setChartType('line')" title="Đường">
+                            <button class="ctt-btn active" id="ctt-line" onclick="DB.setChartType('line')" title="Đường biểu diễn">
                                 <i class="bi bi-graph-up"></i>
                             </button>
-                            <button class="ctt-btn" id="ctt-bar" onclick="DB.setChartType('bar')" title="Cột">
+                            <button class="ctt-btn" id="ctt-bar" onclick="DB.setChartType('bar')" title="Cột biểu diễn">
                                 <i class="bi bi-bar-chart-fill"></i>
                             </button>
                         </div>
@@ -870,24 +875,25 @@
                 <div class="drilldown-strip" id="drilldownPanel">
                     <div class="drilldown-head">
                         <span class="drilldown-title" id="ddTitle">Chi tiết</span>
-                        <button class="drilldown-close" onclick="DB.closeDrilldown()"><i class="bi bi-x"></i></button>
+                        <button class="drilldown-close" onclick="DB.closeDrilldown()"><i class="bi bi-x-lg"></i></button>
                     </div>
                     <div class="drilldown-kpis" id="ddKpis"></div>
                 </div>
             </div>
             <div class="db-panel">
                 <div class="db-panel-head">
-                    <span class="db-panel-title">Sản phẩm bán chạy</span>
-                    <button class="db-btn ghost" style="height:26px;font-size:10px;" onclick="DB.openProdDrawer()">Xem tất cả</button>
+                    <span class="db-panel-title">Top Bán Chạy</span>
+                    <button class="btn btn-secondary" style="height:28px !important; font-size:10px; padding:0 12px !important;" onclick="DB.openProdDrawer()">TẤT CẢ</button>
                 </div>
                 <div class="db-prod-list" id="topProdList"></div>
             </div>`;
 
+            // 🌟 ĐÃ FIX: CHỈNH LẠI CLASS DB-FOOT-ROW ĐỂ ĐỒNG BỘ 100% GIAO DIỆN
             $('rowBottom').innerHTML = `
             <div class="db-panel">
                 <div class="db-panel-head">
                     <span class="db-panel-title">Đơn hàng gần đây</span>
-                    <button class="db-btn ghost" style="height:26px;font-size:10px;" onclick="DB.openOrdDrawer()">Xem tất cả</button>
+                    <button class="btn btn-secondary" style="height:28px !important; font-size:10px; padding:0 12px !important;" onclick="DB.openOrdDrawer()">TẤT CẢ</button>
                 </div>
                 <div class="db-table-wrap">
                     <table class="db-table">
@@ -902,10 +908,10 @@
                 </div>
             </div>
             <div class="db-panel">
-                <div class="db-panel-head"><span class="db-panel-title">Phương thức thanh toán</span></div>
-                <div style="padding:12px 14px;display:flex;align-items:center;gap:16px;">
+                <div class="db-panel-head"><span class="db-panel-title">Tỷ lệ Phương thức Thanh toán</span></div>
+                <div style="padding:20px;display:flex;align-items:center;gap:25px;">
                     <div class="db-donut-wrap">
-                        <canvas id="payChart" width="100" height="100"></canvas>
+                        <canvas id="payChart" width="130" height="130"></canvas>
                         <div class="db-donut-center"><div class="db-donut-val" id="donut-val">0</div><div class="db-donut-lbl">đơn</div></div>
                     </div>
                     <div class="db-legend" id="payLegend"></div>
@@ -913,7 +919,10 @@
                 <div class="db-panel-foot">
                     <div class="db-foot-row"><span class="db-foot-label">Tổng SP đã bán</span><span class="db-foot-val" id="s-sold">—</span></div>
                     <div class="db-foot-row"><span class="db-foot-label">Tỷ lệ hoàn thành</span><span class="db-foot-val" style="color:var(--green);" id="s-rate">—</span></div>
+                    <div class="db-foot-row"><span class="db-foot-label">Đơn hoàn thành</span><span class="db-foot-val" style="color:#10b981;" id="lblPureCompleted">—</span></div>
                     <div class="db-foot-row"><span class="db-foot-label">Đơn bị hủy</span><span class="db-foot-val" style="color:var(--red);" id="s-cancelled">—</span></div>
+                    <div class="db-foot-row"><span class="db-foot-label">Đơn bị đổi</span><span class="db-foot-val" style="color:#8b5cf6;" id="lblExchanged">—</span></div>
+                    <div class="db-foot-row"><span class="db-foot-label">Đơn bị trả</span><span class="db-foot-val" style="color:#ec4899;" id="lblReturned">—</span></div>
                 </div>
             </div>`;
 
@@ -922,18 +931,18 @@
             $('rowExtra').innerHTML = `
             <div class="db-panel">
                 <div class="db-panel-head">
-                    <span class="db-panel-title"><i class="bi bi-exclamation-triangle-fill" style="color:var(--yellow);margin-right:5px;"></i>Tồn kho cảnh báo</span>
-                    <div style="display:flex;align-items:center;gap:6px;">
-                        ${crit>0?`<span class="stock-count critical">${crit} nguy hiểm</span>`:''}
-                        ${warn>0?`<span class="stock-count warning">${warn} sắp hết</span>`:''}
+                    <span class="db-panel-title"><i class="bi bi-exclamation-triangle-fill" style="color:var(--yellow);margin-right:6px; font-size: 15px;"></i>CẢNH BÁO TỒN KHO</span>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        ${crit>0?`<span class="stock-count critical">${crit} mã sắp cạn</span>`:''}
+                        ${warn>0?`<span class="stock-count warning">${warn} mã ít hàng</span>`:''}
                     </div>
                 </div>
                 <div class="stock-list" id="stockList"></div>
             </div>
             <div class="db-panel">
                 <div class="db-panel-head">
-                    <span class="db-panel-title">Heatmap lịch bán hàng</span>
-                    <span style="font-size:10px;font-weight:600;color:#aaa;text-transform:none;">theo giờ × ngày</span>
+                    <span class="db-panel-title">Heatmap Khung giờ Vàng</span>
+                    <span style="font-size:11px;font-weight:700;color:#888;text-transform:none;">Theo giờ × Ngày trong tuần</span>
                 </div>
                 <div id="heatmapWrap"></div>
             </div>`;
@@ -951,19 +960,27 @@
         function _setChg(id,val,up) {
             const el=$(id); if(!el)return;
             el.className='db-chg '+(up?'up':'down');
-            el.innerHTML=`<i class="bi bi-arrow-${up?'up':'down'}-short"></i>${up?'+':''}${val}%`;
+            el.innerHTML=`<i class="bi bi-arrow-${up?'up':'down'}-short" style="font-size:16px;"></i>${up?'+':''}${val}%`;
         }
+
+        // 🌟 ĐÃ FIX: TRUYỀN DỮ LIỆU TỪ JS VÀO HTML
         function _renderStats() {
             const d=MOCK[period];
-            $('s-rev')       &&($('s-rev').textContent      =fmt(d.rev)+' ₫');
-            $('s-ord')       &&($('s-ord').textContent      =fmt(d.ord));
-            $('s-ord-sub')   &&($('s-ord-sub').textContent  ='Chờ xử lý: '+d.pend);
-            $('s-avg')       &&($('s-avg').textContent      =fmt(d.avg)+' ₫');
-            $('s-cust')      &&($('s-cust').textContent     =fmt(d.cust));
-            $('s-sold')      &&($('s-sold').textContent     =fmt(d.sold)+' SP');
-            $('s-rate')      &&($('s-rate').textContent     =d.rate+'%');
-            $('s-cancelled') &&($('s-cancelled').textContent=fmt(d.cancelled)+' đơn');
-            $('donut-val')   &&($('donut-val').textContent  =fmt(d.ord));
+            $('s-rev')       &&($('s-rev').innerHTML      =fmt(d.rev)+'&nbsp;₫');
+            $('s-ord')       &&($('s-ord').innerHTML      =fmt(d.ord));
+            $('s-ord-sub')   &&($('s-ord-sub').innerHTML  ='Đang chờ xử lý: '+d.pend);
+            $('s-avg')       &&($('s-avg').innerHTML      =fmt(d.avg)+'&nbsp;₫');
+            $('s-cust')      &&($('s-cust').innerHTML     =fmt(d.cust));
+            $('s-sold')      &&($('s-sold').innerHTML     =fmt(d.sold)+' SP');
+            $('s-rate')      &&($('s-rate').innerHTML     =d.rate+'%');
+            $('s-cancelled') &&($('s-cancelled').innerHTML=fmt(d.cancelled)+' đơn');
+            $('donut-val')   &&($('donut-val').innerHTML  =fmt(d.ord));
+
+            // Render dữ liệu 3 cột Đổi Trả
+            $('lblPureCompleted') && ($('lblPureCompleted').innerHTML = fmt(d.pureCompleted || 0) + ' đơn');
+            $('lblExchanged') && ($('lblExchanged').innerHTML = fmt(d.exchanged || 0) + ' đơn');
+            $('lblReturned') && ($('lblReturned').innerHTML = fmt(d.returned || 0) + ' đơn');
+
             _setChg('s-rev-chg',d.revChg,d.revUp);
             _setChg('s-ord-chg',d.ordChg,d.ordUp);
             _setChg('s-avg-chg',d.avgChg,d.avgUp);
@@ -975,11 +992,11 @@
             if(spMap[id])spMap[id].destroy();
             const ctx=c.getContext('2d');
             const rgb=color==='#000'?'0,0,0':color==='#10b981'?'16,185,129':color==='#3b82f6'?'59,130,246':'245,158,11';
-            const g=ctx.createLinearGradient(0,0,0,30);
-            g.addColorStop(0,`rgba(${rgb},.14)`); g.addColorStop(1,`rgba(${rgb},0)`);
+            const g=ctx.createLinearGradient(0,0,0,40);
+            g.addColorStop(0,`rgba(${rgb},.15)`); g.addColorStop(1,`rgba(${rgb},0)`);
             spMap[id]=new Chart(ctx,{
                 type:'line',
-                data:{labels:data.map((_,i)=>i),datasets:[{data,borderColor:color,borderWidth:1.6,fill:true,backgroundColor:g,tension:0.4,pointRadius:0}]},
+                data:{labels:data.map((_,i)=>i),datasets:[{data,borderColor:color,borderWidth:2,fill:true,backgroundColor:g,tension:0.4,pointRadius:0}]},
                 options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}
             });
         }
@@ -995,22 +1012,22 @@
             const gctx=canvas.getContext('2d');
             if(rChart){try{rChart.destroy();}catch(_){}rChart=null;}
             const isBar=chartType==='bar';
-            const grad=gctx.createLinearGradient(0,0,0,220);
-            grad.addColorStop(0,'rgba(0,0,0,.10)'); grad.addColorStop(1,'rgba(0,0,0,.01)');
+            const grad=gctx.createLinearGradient(0,0,0,280);
+            grad.addColorStop(0,'rgba(0,0,0,.12)'); grad.addColorStop(1,'rgba(0,0,0,.0)');
             const datasets=[
                 {label:'Kỳ này',data:d.cR,type:isBar?'bar':'line',borderColor:'#000',
-                    backgroundColor:isBar?'rgba(0,0,0,.80)':grad,fill:!isBar,tension:0.4,
-                    borderWidth:isBar?0:2,borderRadius:isBar?2:0,
-                    pointRadius:isBar?0:2.5,pointBackgroundColor:'#000',pointHoverRadius:5,yAxisID:'y'},
-                {label:'Đơn hàng',data:d.cO,type:'line',borderColor:'#10b981',
-                    backgroundColor:'transparent',fill:false,tension:0.4,borderWidth:2,borderDash:[5,4],
-                    pointRadius:2.5,pointBackgroundColor:'#10b981',pointHoverRadius:5,yAxisID:'y1'},
+                    backgroundColor:isBar?'rgba(0,0,0,.85)':grad,fill:!isBar,tension:0.4,
+                    borderWidth:isBar?0:2,borderRadius:isBar?4:0,
+                    pointRadius:isBar?0:3,pointBackgroundColor:'#000',pointHoverRadius:6,yAxisID:'y'},
+                {label:'Đơn hàng',data:d.cO,type:'line',borderColor:'#2563eb',
+                    backgroundColor:'transparent',fill:false,tension:0.4,borderWidth:2,borderDash:[6,4],
+                    pointRadius:3,pointBackgroundColor:'#2563eb',pointHoverRadius:6,yAxisID:'y1'},
             ];
             if(compareMode&&d.cRprev){
                 datasets.push({label:'Kỳ trước',data:d.cRprev,type:isBar?'bar':'line',
-                    borderColor:'#f59e0b',backgroundColor:isBar?'rgba(245,158,11,.45)':'transparent',
-                    fill:false,tension:0.4,borderWidth:isBar?0:1.5,borderRadius:isBar?2:0,
-                    borderDash:isBar?[]:[4,3],pointRadius:0,pointHoverRadius:4,yAxisID:'y'});
+                    borderColor:'#f59e0b',backgroundColor:isBar?'rgba(245,158,11,.5)':'transparent',
+                    fill:false,tension:0.4,borderWidth:isBar?0:2,borderRadius:isBar?4:0,
+                    borderDash:isBar?[]:[4,4],pointRadius:0,pointHoverRadius:5,yAxisID:'y'});
             }
             $('ctt-line')?.classList.toggle('active',!isBar);
             $('ctt-bar') ?.classList.toggle('active', isBar);
@@ -1023,17 +1040,17 @@
                     interaction:{mode:'index',intersect:false},
                     onClick:onChartClick,
                     plugins:{legend:{display:false},
-                        tooltip:{backgroundColor:'#000',titleFont:{family:'Inter',size:11,weight:'700'},
-                            bodyFont:{family:'Inter',size:11},padding:10,cornerRadius:2,
+                        tooltip:{backgroundColor:'#000',titleFont:{family:'Inter',size:12,weight:'800'},
+                            bodyFont:{family:'Inter',size:12},padding:12,cornerRadius:4,
                             callbacks:{label:c=>{
                                     if(c.datasetIndex===0)return'  Kỳ này: '+fmt(c.raw)+' ₫';
                                     if(c.datasetIndex===1)return'  Đơn hàng: '+c.raw+' đơn';
                                     return'  Kỳ trước: '+fmt(c.raw)+' ₫';
                                 }}}},
                     scales:{
-                        x:{grid:{display:false},border:{display:false},ticks:{font:{family:'Inter',size:10,weight:'600'},color:'#bbb'}},
-                        y:{position:'left',grid:{color:'#f4f4f5'},border:{display:false,dash:[4,4]},ticks:{font:{family:'Inter',size:10},color:'#bbb',callback:v=>fmtS(v)}},
-                        y1:{position:'right',grid:{display:false},border:{display:false},ticks:{font:{family:'Inter',size:10},color:'#10b981',callback:v=>v+' đơn'}},
+                        x:{grid:{display:false},border:{display:false},ticks:{font:{family:'Inter',size:11,weight:'600'},color:'#888'}},
+                        y:{position:'left',grid:{color:'#f4f4f5'},border:{display:false,dash:[4,4]},ticks:{font:{family:'Inter',size:11,weight:'600'},color:'#888',callback:v=>fmtS(v)}},
+                        y1:{position:'right',grid:{display:false},border:{display:false},ticks:{font:{family:'Inter',size:11,weight:'800'},color:'#2563eb',callback:v=>v+' đơn'}},
                     }
                 }
             });
@@ -1048,7 +1065,7 @@
             }
             const max=list[0].sold; const rc=['r1','r2','r3'];
             el.innerHTML=list.map((p,i)=>`
-            <div class="prod-item" onclick="DB.openProdDrawer()">
+            <div class="prod-item" onclick="DB._goToProduct(${p.id})">
                 <div class="prod-rank ${rc[i]||''}">${i+1}</div>
                 <div class="prod-thumb"><i class="bi bi-image"></i></div>
                 <div class="prod-info">
@@ -1059,7 +1076,7 @@
                         <span class="prod-sold">${p.sold} bán</span>
                     </div>
                 </div>
-                <div class="prod-rev"><div class="prod-rev-val">${fmtS(p.rev)}₫</div><div class="prod-rev-lbl">doanh thu</div></div>
+                <div class="prod-rev"><div class="prod-rev-val">${fmtS(p.rev)}&nbsp;₫</div><div class="prod-rev-lbl">doanh thu</div></div>
             </div>`).join('');
             requestAnimationFrame(()=>document.querySelectorAll('.prod-bar-fill').forEach(b=>{b.style.width=b.dataset.w+'%';}));
         }
@@ -1078,13 +1095,13 @@
             return list.map(o=>{
                 const s = _getOrderStatus(o.status);
                 const m = _formatPayment(o.method);
-                return `<tr onclick="DB._goToOrder(${o.id})" style="cursor:pointer;">
-                <td><code style="font-size:11px;font-weight:700;background:var(--g100);padding:2px 6px;border-radius:var(--br);text-transform:none;">${o.code}</code></td>
-                <td style="font-weight:600;text-transform:none;">${o.name}</td>
-                <td style="text-align:center;"><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;background:var(--g100);border:1px solid var(--g200);border-radius:var(--br);font-size:11px;font-weight:800;">${o.items}</span></td>
-                <td style="text-align:right;font-weight:700;">${fmt(o.total)} ₫</td>
-                <td><span style="display:flex;align-items:center;gap:4px;"><i class="bi ${m.i}" style="color:${m.c};font-size:12px;"></i><span style="font-size:11px;text-transform:none;font-weight:500;">${m.lbl}</span></span></td>
-                <td><span class="db-badge ${s.cls}"><span style="width:5px;height:5px;border-radius:50%;background:${s.dot};display:inline-block;"></span>${s.lbl}</span></td>
+                return `<tr onclick="DB._goToOrder(${o.id})">
+                <td><code style="font-size:12px;font-weight:800;color:#000;background:var(--gray-100);padding:4px 8px;border-radius:var(--border-radius); border: 1px solid var(--gray-200); text-transform:none;">${o.code}</code></td>
+                <td style="font-weight:700; color:#000; text-transform:none; font-size:13px;">${o.name}</td>
+                <td style="text-align:center;"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;background:var(--gray-100);border:1px solid var(--gray-200);border-radius:4px;font-size:12px;font-weight:900;color:#2563eb;">${o.items}</span></td>
+                <td style="text-align:right;font-weight:900;font-size:14px;white-space:nowrap;">${fmt(o.total)}&nbsp;₫</td>
+                <td><span style="display:flex;align-items:center;gap:6px;"><i class="bi ${m.icon}" style="color:${m.color};font-size:14px;"></i><span style="font-size:12px;text-transform:none;font-weight:600;">${m.text}</span></span></td>
+                <td><span class="db-badge ${s.cls}"><span style="width:6px;height:6px;border-radius:50%;background:${s.dot};display:inline-block;"></span>${s.lbl}</span></td>
             </tr>`;
             }).join('');
         }
@@ -1095,15 +1112,19 @@
 
             const totalPay = PAY.values.reduce((a, b) => a + b, 0);
 
+            // Sinh dữ liệu màu sắc và label dựa trên bộ MAP
+            const labels = PAY.keys.map(k => PAY_MAP[k] ? PAY_MAP[k].text : k);
+            const colors = PAY.keys.map(k => PAY_MAP[k] ? PAY_MAP[k].color : '#888');
+
             pChart=new Chart(c.getContext('2d'),{
                 type:'doughnut',
-                data:{labels:PAY.labels,datasets:[{data:PAY.values,backgroundColor:PAY.colors,borderWidth:2,borderColor:'#fff',hoverOffset:4}]},
+                data:{labels:labels, datasets:[{data:PAY.values, backgroundColor:colors, borderWidth:3, borderColor:'#fff', hoverOffset:5}]},
                 options:{
-                    responsive:false, cutout:'66%',
+                    responsive:false, cutout:'65%',
                     plugins:{
                         legend:{display:false},
                         tooltip:{
-                            backgroundColor:'#000', bodyFont:{family:'Inter',size:11},
+                            backgroundColor:'#000', bodyFont:{family:'Inter',size:12, weight:'600'}, padding:12, cornerRadius:4,
                             callbacks:{
                                 label: c => {
                                     const pct = totalPay > 0 ? ((c.raw / totalPay) * 100).toFixed(1) : 0;
@@ -1116,12 +1137,15 @@
             });
 
             const leg=$('payLegend'); if(!leg)return;
-            leg.innerHTML=PAY.labels.map((l,i) => {
+            leg.innerHTML = PAY.keys.map((k,i) => {
                 const pct = totalPay > 0 ? ((PAY.values[i] / totalPay) * 100).toFixed(1) : 0;
+                const m = PAY_MAP[k] || { icon: 'bi-credit-card', color: '#888', text: k };
                 return `
                 <div class="db-legend-row" onclick="DB.openOrdDrawer()">
-                    <div class="db-legend-dot" style="background:${PAY.colors[i]};"></div>
-                    <span class="db-legend-name">${l}</span>
+                    <div style="width:28px; height:28px; border-radius:4px; background:${m.color}20; color:${m.color}; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink: 0;">
+                        <i class="bi ${m.icon}"></i>
+                    </div>
+                    <span class="db-legend-name">${m.text}</span>
                     <span class="db-legend-pct">${pct}%</span>
                 </div>`;
             }).join('');
@@ -1130,7 +1154,7 @@
         function _renderStock() {
             const el=$('stockList'); if(!el)return;
             if(!LOW_STOCK?.length){
-                el.innerHTML=`<div class="db-empty"><i class="bi bi-check-circle"></i><div class="db-empty-txt">Tất cả hàng còn đủ</div></div>`;
+                el.innerHTML=`<div class="db-empty"><i class="bi bi-check-circle-fill" style="color:var(--green); opacity: 1;"></i><div class="db-empty-txt">Tất cả hàng còn đủ</div></div>`;
                 return;
             }
             const sorted=[...LOW_STOCK].sort((a,b)=>a.qty-b.qty);
@@ -1159,15 +1183,18 @@
             if(t<.85)return`rgba(245,158,11,${.85+t*.1})`;
             return`rgba(180,83,9,.95)`;
         }
+
         function _renderHeatmap() {
             const wrap=$('heatmapWrap'); if(!wrap)return;
             const hm=HEATMAP;
             const maxV=Math.max(...hm.values.flat());
+            const safeMax = maxV > 0 ? maxV : 1;
+
             let html=`<div class="heatmap-grid"><div></div>${hm.hours.map(h=>`<div class="hm-col-label">${h}</div>`).join('')}`;
             hm.values.forEach((row,ri)=>{
                 html+=`<div class="hm-label">${hm.days[ri]}</div>`;
                 row.forEach((v,ci)=>{
-                    html+=`<div class="hm-cell" style="background:${_hmColor(v/maxV)};" data-tip="${hm.days[ri]} ${hm.hours[ci]}: ${v.toFixed(1)}M ₫"></div>`;
+                    html+=`<div class="hm-cell" style="background:${_hmColor(v/safeMax)};" data-tip="${hm.days[ri]} ${hm.hours[ci]}: ${v.toFixed(1)}Tr ₫"></div>`;
                 });
             });
             html+=`</div><div class="hm-legend"><span class="hm-legend-label">Thấp</span><div class="hm-legend-scale">${[0,.25,.5,.75,1].map(t=>`<div class="hm-legend-step" style="background:${_hmColor(t)};"></div>`).join('')}</div><span class="hm-legend-label">Cao</span></div>`;
@@ -1212,9 +1239,9 @@
             const max=ALL_PRODUCTS[0].sold;
             const rc=['r1','r2','r3'];
             body.innerHTML=list.map((p,i)=>`
-            <div class="drawer-prod-item">
+            <div class="drawer-prod-item" onclick="DB._goToProduct(${p.id})">
                 <div class="drawer-prod-rank ${rc[i]||''}">${i+1}</div>
-                <div class="drawer-prod-thumb"><i class="bi bi-image" style="font-size:16px;"></i></div>
+                <div class="drawer-prod-thumb"><i class="bi bi-image" style="font-size:20px;"></i></div>
                 <div class="drawer-prod-info">
                     <div class="drawer-prod-name">${p.name}</div>
                     <div class="drawer-prod-meta">${p.sku} · ${p.attr}</div>
@@ -1224,7 +1251,7 @@
                     </div>
                 </div>
                 <div class="drawer-prod-right">
-                    <div class="drawer-prod-rev">${fmtS(p.rev)}₫</div>
+                    <div class="drawer-prod-rev">${fmtS(p.rev)}&nbsp;₫</div>
                     <div class="drawer-prod-rev-lbl">doanh thu</div>
                 </div>
             </div>`).join('');
@@ -1277,13 +1304,13 @@
             <tbody>${list.map(o=>{
                 const s = _getOrderStatus(o.status);
                 const m = _formatPayment(o.method);
-                return `<tr>
-                    <td><code style="font-size:11px;font-weight:700;background:var(--g100);padding:2px 6px;border-radius:var(--br);text-transform:none;">${o.code}</code></td>
-                    <td style="font-weight:600;text-transform:none;">${o.name}</td>
-                    <td style="text-align:center;"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--g100);border:1px solid var(--g200);border-radius:var(--br);font-size:11px;font-weight:800;">${o.items}</span></td>
-                    <td style="text-align:right;font-weight:700;">${fmt(o.total)} ₫</td>
-                    <td><span style="display:flex;align-items:center;gap:5px;"><i class="bi ${m.i}" style="color:${m.c};font-size:12px;"></i><span style="font-size:11px;text-transform:none;font-weight:500;">${m.lbl}</span></span></td>
-                    <td><span class="db-badge ${s.cls}"><span style="width:5px;height:5px;border-radius:50%;background:${s.dot};display:inline-block;"></span>${s.lbl}</span></td>
+                return `<tr onclick="DB._goToOrder(${o.id})">
+                    <td><code style="font-size:12px;font-weight:800;color:#000;background:var(--gray-100);padding:4px 8px;border-radius:var(--border-radius); border: 1px solid var(--gray-200); text-transform:none;">${o.code}</code></td>
+                    <td style="font-weight:700; color:#000; text-transform:none; font-size:13px;">${o.name}</td>
+                    <td style="text-align:center;"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;background:var(--gray-100);border:1px solid var(--gray-200);border-radius:4px;font-size:12px;font-weight:900;color:#2563eb;">${o.items}</span></td>
+                    <td style="text-align:right;font-weight:900;font-size:14px;white-space:nowrap;">${fmt(o.total)}&nbsp;₫</td>
+                    <td><span style="display:flex;align-items:center;gap:6px;"><i class="bi ${m.icon}" style="color:${m.color};font-size:14px;"></i><span style="font-size:12px;text-transform:none;font-weight:600;">${m.text}</span></span></td>
+                    <td><span class="db-badge ${s.cls}"><span style="width:6px;height:6px;border-radius:50%;background:${s.dot};display:inline-block;"></span>${s.lbl}</span></td>
                 </tr>`;
             }).join('')}</tbody>
         </table>`;
@@ -1299,23 +1326,18 @@
             a.download=`don-hang-${period}-${new Date().toLocaleDateString('vi-VN').replace(/\//g,'-')}.csv`;
             a.click();
             URL.revokeObjectURL(a.href);
-            _toast(`Đã xuất ${ALL_ORDERS.length} đơn ra CSV`);
+            window.toast(`Đã xuất ${ALL_ORDERS.length} đơn ra file Excel`, 'success');
         }
 
-        function init() {
-            _fetchAndRender();
-        }
-
+        function init() { _fetchAndRender(); }
         function destroy() { }
 
         function _goToOrder(id) {
-            sessionStorage.setItem('highlightOrderId', id);
-            window.location.hash = '#orders';
+            window.location.href = '/admin#orders'; // Chuyển đến trang hóa đơn
         }
 
         function _goToProduct(id) {
-            sessionStorage.setItem('highlightProductId', id);
-            window.location.hash = '#products';
+            window.location.href = '/admin#products'; // Chuyển đến trang sản phẩm
         }
 
         return {
@@ -1338,4 +1360,62 @@
     window.initDashboard    = DB.init;
     window.destroyDashboard = DB.destroy;
 </script>
+
+<script>
+    window.toggleBeeChat = function() {
+        const win = document.getElementById('beeChatWindow');
+        if (win) {
+            win.classList.toggle('show');
+            if (win.classList.contains('show')) {
+                setTimeout(() => document.getElementById('beeChatInput').focus(), 100);
+            }
+        }
+    };
+
+    window.sendBeeChatMessage = async function() {
+        const input = document.getElementById('beeChatInput');
+        const msg = input.value.trim();
+        if (!msg) return;
+
+        const body = document.getElementById('beeChatBody');
+
+        // In tin nhắn của người dùng
+        body.innerHTML += `<div class="chat-msg user">${msg}</div>`;
+        input.value = '';
+        body.scrollTop = body.scrollHeight;
+
+        // Hiện hiệu ứng Đang gõ...
+        const typingId = 'typing-' + Date.now();
+        body.innerHTML += `
+            <div class="chat-msg bot" id="${typingId}">
+                <div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
+            </div>`;
+        body.scrollTop = body.scrollHeight;
+
+        try {
+            const res = await fetch('/api/dashboard/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: msg })
+            });
+            const data = await res.json();
+
+            // Xóa Đang gõ và in câu trả lời
+            const typingEl = document.getElementById(typingId);
+            if (typingEl) typingEl.remove();
+
+            body.innerHTML += `<div class="chat-msg bot">${data.reply}</div>`;
+            body.scrollTop = body.scrollHeight;
+
+        } catch (e) {
+            const typingEl = document.getElementById(typingId);
+            if (typingEl) typingEl.remove();
+
+            body.innerHTML += `<div class="chat-msg bot" style="color:red;">Lỗi kết nối đến máy chủ AI. Xin sếp thử lại!</div>`;
+            body.scrollTop = body.scrollHeight;
+        }
+    };
+</script>
 </body>
+</html>
+</html>

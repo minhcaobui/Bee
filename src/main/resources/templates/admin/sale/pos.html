@@ -10,142 +10,120 @@
 
     <style>
         /* ==========================================================================
-           1. CORE SYSTEM STYLE
+           1. CORE SYSTEM STYLE (ĐỒNG BỘ BEEMATE ADMIN)
            ========================================================================== */
         * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
-        :root { --gray-100: #f4f4f5; --gray-200: #e4e4e7; --gray-300: #d4d4d8; --text: #09090b; --border-radius: 2px; }
-        body { font-family: 'Inter', sans-serif; background: #fff; color: var(--text); font-size: 12.5px; line-height: 1.4; overflow: hidden; }
+        :root { --gray-100: #f4f4f5; --gray-200: #e4e4e7; --gray-300: #d4d4d8; --text: #09090b; --border-radius: 4px; }
+        body { font-family: 'Inter', sans-serif; background: #fff; color: var(--text); font-size: 13px; line-height: 1.5; overflow: hidden; }
 
         /* BUTTONS */
-        .btn { font-size: 11px; font-weight: 700; text-transform: uppercase; height: 30px; padding: 0 14px; background: #000; color: #fff; border: 1px solid #000; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: var(--border-radius); transition: 0.2s; }
+        .btn { font-size: 11px; font-weight: 800; text-transform: uppercase; height: 34px; padding: 0 16px; background: #000; color: #fff; border: 1px solid #000; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: var(--border-radius); transition: 0.2s; letter-spacing: 0.5px;}
         .btn:hover { background: #333; }
         .btn-secondary { background: #fff; color: #000; border: 1px solid var(--gray-300); }
         .btn-secondary:hover { background: var(--gray-100); border-color: #000; }
         .btn-danger { background: #fff; color: #dc2626; border: 1px solid #dc2626; }
         .btn-danger:hover { background: #dc2626; color: #fff; }
+        .btn-primary { background: #2563eb; border-color: #2563eb; color: #fff; }
+        .btn-primary:hover { background: #1d4ed8; border-color: #1d4ed8; }
         .btn.w-100 { width: 100%; }
 
         /* ICON BUTTON STANDARD */
-        .btn-icon { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--gray-200); background: #fff; cursor: pointer; border-radius: var(--border-radius); transition: 0.2s; color: #71717a; }
+        .btn-icon { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--gray-200); background: #fff; cursor: pointer; border-radius: var(--border-radius); transition: 0.2s; color: #555; }
         .btn-icon:hover { border-color: #000; background: #000; color: #fff; }
 
         /* INPUTS */
-        input[type="text"], .filter-select { width: 100%; padding: 0 12px; height: 34px; font-size: 12.5px; font-family: 'Inter', sans-serif; border: 1px solid var(--gray-300); background: #fff; border-radius: var(--border-radius); transition: 0.2s; }
-        input[type="text"]:focus, .filter-select:focus { border-color: #000; }
+        input[type="text"], input[type="number"], .filter-select { width: 100%; padding: 0 12px; height: 34px; font-size: 13px; font-family: 'Inter', sans-serif; border: 1px solid var(--gray-300); background: #fff; border-radius: var(--border-radius); transition: 0.2s; }
+        input[type="text"]:focus, input[type="number"]:focus, .filter-select:focus { border-color: #000; }
         .text-end { text-align: right; }
 
         /* 🌟 CSS ẨN MŨI TÊN CỦA Ô NHẬP SỐ LƯỢNG */
         .qty-input::-webkit-inner-spin-button,
         .qty-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        .qty-input { -moz-appearance: textfield; }
+        .qty-input { -moz-appearance: textfield; text-align: center; font-weight: 700; height: 28px !important; padding: 0 !important; width: 40px !important;}
 
         /* TABS */
         .tabs { display: flex; gap: 20px; border-bottom: 1px solid var(--gray-200); margin-bottom: 0; }
-        .tab { font-size: 12px; font-weight: 700; color: #888; padding: 12px 0; cursor: pointer; text-transform: uppercase; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: 0.2s; }
+        .tab { font-size: 12px; font-weight: 800; color: #888; padding: 12px 0; cursor: pointer; text-transform: uppercase; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: 0.2s; }
         .tab:hover { color: #000; }
         .tab.active { color: #000; border-bottom-color: #000; }
 
         /* TABLE */
-        .table-wrapper { border: 1px solid var(--gray-200); background: #fff; overflow-y: auto; flex: 1; position: relative; }
+        .table-wrapper { border: 1px solid var(--gray-200); background: #fff; overflow-y: auto; flex: 1; position: relative; border-radius: 4px; }
         table { width: 100%; border-collapse: collapse; }
-        thead th { text-align: left; padding: 10px 15px; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #666; background: #fafafa; border-bottom: 1px solid var(--gray-200); position: sticky; top: 0; z-index: 10; white-space: nowrap; }
-        tbody td { padding: 8px 15px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; font-size: 12.5px; font-weight: 500; }
+        thead th { text-align: left; padding: 12px 15px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #666; background: #fafafa; border-bottom: 1px solid var(--gray-200); position: sticky; top: 0; z-index: 10; white-space: nowrap; }
+        tbody td { padding: 10px 15px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; font-size: 13px; font-weight: 500; }
         tbody tr:hover { background: var(--gray-100); cursor: pointer; }
 
         /* ==========================================================================
            2. POS LAYOUT (45% - 55%)
            ========================================================================== */
-        .pos-wrapper { padding: 20px; height: 100vh; display: flex; flex-direction: column; background: #fff; }
-        .pos-layout { display: flex; flex: 1; width: 100%; background: #fff; border: 1px solid var(--gray-200); overflow: hidden; }
+        .pos-wrapper { padding: 15px; height: 100vh; display: flex; flex-direction: column; background: #f4f4f5; }
+        .pos-layout { display: flex; flex: 1; width: 100%; background: #fff; border: 1px solid var(--gray-200); overflow: hidden; border-radius: 6px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);}
 
         .panel-left { width: 45%; display: flex; flex-direction: column; border-right: 1px solid var(--gray-200); background: #fff; z-index: 2; }
         .panel-right { width: 55%; display: flex; flex-direction: column; background: #fafafa; padding: 20px; }
 
-        .panel-header { height: 50px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--gray-200); padding: 0 15px; background: #fff; }
+        .panel-header { height: 54px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--gray-200); padding: 0 15px; background: #fff; }
 
         /* STATUS BAR MỚI */
-        .status-bar { background: #fff8eb; border-bottom: 1px solid var(--gray-200); padding: 8px 15px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; flex-shrink: 0; }
-        .badge { padding: 3px 6px; border-radius: 2px; font-weight: 800; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .status-bar { background: #fff8eb; border-bottom: 1px solid var(--gray-200); padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; flex-shrink: 0; font-weight: 600;}
+        .badge { padding: 4px 8px; border-radius: 4px; font-weight: 800; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
         .bg-warning { background: #f59e0b; color: #fff; }
         .bg-secondary { background: #6b7280; color: #fff; }
 
-        .customer-card { padding: 12px 15px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; background: #fff; }
+        .customer-card { padding: 15px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; background: #fff; }
 
-        .payment-footer { background: #fff; border-top: 2px solid #000; padding: 15px; flex-shrink: 0; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05); }
-        .summary-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12.5px; color: #555; align-items: center; }
+        .payment-footer { background: #fff; border-top: 2px solid #000; padding: 20px 15px; flex-shrink: 0; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05); }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 13px; color: #555; align-items: center; font-weight: 600;}
         .summary-row.main { margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--gray-300); color: #000; }
-        .total-money { font-size: 20px; font-weight: 700; color: #000; }
-        .btn-pay-big { width: 100%; height: 46px; margin-top: 15px; font-size: 14px; background: #000; border: none; font-weight: 700; }
-        .btn-pay-big:hover { background: #222; transform: translateY(-1px); }
+        .total-money { font-size: 22px; font-weight: 900; color: #000; }
+        .btn-pay-big { width: 100%; height: 48px !important; margin-top: 15px; font-size: 14px; background: #000; border: none; font-weight: 800; border-radius: 4px;}
+        .btn-pay-big:hover { background: #222; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.15);}
 
-        .search-bar-wrapper { background: #fff; border: 1px solid var(--gray-200); padding: 10px; margin-bottom: 15px; border-radius: var(--border-radius); display: flex; gap: 10px; align-items: center; }
+        .search-bar-wrapper { background: #fff; border: 1px solid var(--gray-200); padding: 12px; margin-bottom: 15px; border-radius: var(--border-radius); display: flex; gap: 10px; align-items: center; }
 
         /* VOUCHER CARD MỚI */
-        .voucher-card { border: 1px solid var(--gray-200); border-radius: 4px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; background: #fff; }
+        .voucher-card { border: 1px solid var(--gray-200); border-radius: 6px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; background: #fff; }
         .voucher-card:hover { border-color: #000; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .voucher-card .v-code { font-weight: 800; font-size: 13px; color: #000; margin-bottom: 4px; }
-        .voucher-card .v-desc { font-size: 11px; color: #666; font-weight: 600; }
+        .voucher-card .v-code { font-weight: 800; font-size: 14px; color: #000; margin-bottom: 4px; }
+        .voucher-card .v-desc { font-size: 12px; color: #666; font-weight: 600; }
 
         /* ==========================================================================
-           3. MODAL CUSTOM & TOAST
+           3. MODAL CUSTOM & TOAST (ĐỒNG BỘ 100%)
            ========================================================================== */
         .modal { position: fixed; inset: 0; z-index: 9999; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; }
         .modal.show { display: flex; animation: fadeIn 0.2s ease-out; }
-        .modal-dialog { background: #fff; width: 400px; max-width: 90%; border: 1px solid var(--gray-300); box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2); border-radius: 4px; animation: slideUp 0.3s ease-out; }
-        .modal-dialog.modal-sm { width: 320px; text-align: center; padding: 10px; }
-        .modal-header { padding: 15px 20px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; }
-        .modal-title { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-        .btn-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #888; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; }
+        .modal-dialog { background: #fff; width: 440px; max-width: 90%; border: 1px solid var(--gray-300); box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2); border-radius: 6px; animation: slideUp 0.3s ease-out; overflow: hidden;}
+        .modal-dialog.modal-sm { width: 320px; padding: 0; }
+        .modal-header { padding: 18px 24px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; background: #fff;}
+        .modal-title { font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #888; display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; transition: 0.2s;}
         .btn-close:before { content: "\F62A"; font-family: "bootstrap-icons"; }
         .btn-close:hover { color: #000; background: #f4f4f5; border-radius: 4px; }
-        .modal-body { padding: 20px; }
-        .modal-footer { padding: 15px 20px; border-top: 1px solid var(--gray-200); display: flex; justify-content: flex-end; gap: 10px; background: #fafafa; }
+        .modal-body { padding: 24px; }
+        .modal-footer { padding: 18px 24px; border-top: 1px solid var(--gray-200); display: flex; justify-content: flex-end; gap: 12px; background: #fafafa; }
 
-        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 10000; display: flex; flex-direction: column; gap: 10px; }
-        .toast-msg { min-width: 300px; background: #fff; padding: 15px 20px; border-left: 4px solid #000; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15); display: flex; align-items: center; gap: 12px; animation: slideInRight 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); border-radius: 2px; }
-        .toast-msg.warning { border-left-color: #f59e0b; }
-        .toast-msg.success { border-left-color: #10b981; }
-        .toast-msg.error { border-left-color: #ef4444; }
-        .toast-msg i { font-size: 18px; }
-        .toast-msg.warning i { color: #f59e0b; }
-        .toast-msg.success i { color: #10b981; }
-        .toast-msg.error i { color: #ef4444; }
-        .toast-msg span { font-weight: 700; font-size: 13px; color: #333; }
+        /* BEE TOAST CUSTOM */
+        #beeToastHost { position: fixed; top: 30px; right: 30px; z-index: 999999; display: flex; flex-direction: column; gap: 15px; pointer-events: none; }
+        .bee-toast-box { min-width: 320px; max-width: 400px; padding: 18px 24px; border-radius: 8px; background: #fff; color: #000; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2); display: flex; align-items: flex-start; gap: 14px; border-left: 6px solid #000; animation: beeToastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; transition: all 0.3s ease; pointer-events: auto; }
+        .bee-toast-box.success { border-left-color: #10b981; }
+        .bee-toast-box.error { border-left-color: #ef4444; }
+        .bee-toast-box.warning { border-left-color: #f59e0b; }
+        .bee-toast-box.hiding { transform: translateX(120%); opacity: 0; margin-top: -80px; }
 
+        @keyframes beeToastSlideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 2px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #000; }
 
         /* VOUCHER ENHANCEMENTS */
         .voucher-card { position: relative; transition: all 0.2s ease; }
-
-        /* 1. Trạng thái đang chọn */
-        .voucher-card.selected {
-            border: 2px solid #2563eb !important;
-            background-color: #f0f9ff !important;
-        }
-        .voucher-card.selected::before {
-            content: 'ĐANG CHỌN';
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            background: #2563eb;
-            color: #fff;
-            font-size: 10px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: 800;
-            box-shadow: 0 2px 5px rgba(37,99,235,0.3);
-        }
-
-        /* 2. Trạng thái vô hiệu hóa (không cho cộng dồn) */
-        .voucher-card.disabled-stack {
-            background: #fafafa;
-        }
+        .voucher-card.selected { border: 2px solid #2563eb !important; background-color: #eff6ff !important; }
+        .voucher-card.selected::before { content: 'ĐANG CHỌN'; position: absolute; top: -10px; right: -10px; background: #2563eb; color: #fff; font-size: 10px; padding: 4px 8px; border-radius: 4px; font-weight: 800; box-shadow: 0 2px 5px rgba(37,99,235,0.3); }
+        .voucher-card.disabled-stack { background: #fafafa; }
     </style>
 </head>
 <body>
@@ -153,123 +131,121 @@
 <div class="pos-wrapper">
     <div class="pos-layout">
         <aside class="panel-left">
-            <div class="panel-header" style="padding: 0;">
-                <div style="flex:1; overflow-x: auto; padding: 0 10px;" id="invoiceTabsContainerWrapper">
+            <div class="panel-header">
+                <div style="flex:1; overflow-x: auto; padding-right: 10px;" id="invoiceTabsContainerWrapper">
                     <nav class="tabs" id="invoiceTabsContainer" style="border:none; width: max-content;">
                     </nav>
                 </div>
-                <div style="display: flex; gap: 5px; padding-right: 10px; border-left: 1px solid var(--gray-200); height: 100%; align-items: center; padding-left: 10px;">
+                <div style="display: flex; gap: 8px; border-left: 1px solid var(--gray-200); height: 100%; align-items: center; padding-left: 15px;">
                     <button class="btn-icon" title="Thêm hóa đơn mới" onclick="PosApp.createInvoice()"><i class="bi bi-plus-lg"></i></button>
-                    <button class="btn-icon" title="Xóa hóa đơn" onclick="PosApp.promptDelete()"><i class="bi bi-trash"></i></button>
+                    <button class="btn-icon" title="Xóa hóa đơn" onclick="PosApp.promptDelete()" style="color: #dc2626; border-color: #fca5a5; background: #fef2f2;"><i class="bi bi-trash"></i></button>
                 </div>
             </div>
 
             <div class="status-bar">
                 <div>Trạng thái: <span class="badge bg-secondary" id="invoiceStatus">Trống</span></div>
-                <div style="color: #dc2626; font-weight: 600;">
+                <div style="color: #dc2626; font-weight: 700;">
                     <i class="bi bi-stopwatch"></i> Hủy tự động sau: <span id="invoiceCountdown" style="font-weight: 800; font-variant-numeric: tabular-nums;">--:--:--</span>
                 </div>
             </div>
 
             <div class="customer-card">
-                <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:0;">
+                <div style="display:flex; align-items:center; gap:15px; flex:1; min-width:0;">
                     <div style="position:relative; flex-shrink:0;">
-                        <div style="width:36px; height:36px; background:#f4f4f5; border-radius:50%; display:flex; align-items:center; justify-content:center; border:1px solid var(--gray-200);">
-                            <i class="bi bi-person-fill" style="color:#666; font-size:16px;"></i>
+                        <div style="width:40px; height:40px; background:#f4f4f5; border-radius:50%; display:flex; align-items:center; justify-content:center; border:1px solid var(--gray-200);">
+                            <i class="bi bi-person-fill" style="color:#666; font-size:20px;"></i>
                         </div>
                         <button onclick="PosApp.toggleCustomerSearch()" title="Đổi khách hàng"
-                                style="position:absolute; bottom:-4px; right:-4px; width:16px; height:16px; background:#000; border:none; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;">
-                            <i class="bi bi-arrow-repeat" style="color:#fff; font-size:9px;"></i>
+                                style="position:absolute; bottom:-2px; right:-2px; width:18px; height:18px; background:#000; border:none; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                            <i class="bi bi-arrow-repeat" style="color:#fff; font-size:10px;"></i>
                         </button>
                     </div>
 
                     <div style="min-width:0;">
-                        <div style="font-weight:700; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="customerName">KHÁCH VÃNG LAI</div>
-                        <div style="font-size:11px; color:#888; font-weight:500;" id="customerPhone">Khách lẻ</div>
+                        <div style="font-weight:800; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color: #000;" id="customerName">KHÁCH VÃNG LAI</div>
+                        <div style="font-size:12px; color:#888; font-weight:600;" id="customerPhone">Khách lẻ</div>
                     </div>
                 </div>
 
-                <div style="display:flex; gap:4px; flex-shrink:0;">
+                <div style="display:flex; gap:6px; flex-shrink:0;">
                     <button class="btn-icon" title="Sửa thông tin" onclick="PosApp.openModal('customerModal')">
                         <i class="bi bi-pencil-square"></i>
                     </button>
-                    <button class="btn-icon btn-danger" title="Về khách vãng lai" onclick="PosApp.resetCustomer()"
-                            style="color:#dc2626; border-color:#fca5a5;">
+                    <button class="btn-icon btn-danger" title="Về khách vãng lai" onclick="PosApp.resetCustomer()" style="color:#dc2626; border-color:#fca5a5;">
                         <i class="bi bi-person-x"></i>
                     </button>
                 </div>
             </div>
 
-            <div id="inlineCustomerSearch" style="display:none; padding:10px 15px; border-bottom:1px solid var(--gray-200); background:#fafafa;">
+            <div id="inlineCustomerSearch" style="display:none; padding:15px; border-bottom:1px solid var(--gray-200); background:#fafafa;">
                 <div style="position:relative; margin-bottom:8px;">
-                    <i class="bi bi-search" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#666; font-size:11px;"></i>
-                    <input type="text" placeholder="Nhập tên hoặc SĐT..."
-                           style="padding-left:30px; height:30px; font-size:12px; width:100%;"
+                    <i class="bi bi-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#666; font-size:13px;"></i>
+                    <input type="text" placeholder="Nhập tên hoặc SĐT khách hàng..."
+                           style="padding-left:36px; width:100%;"
                            oninput="PosApp.inlineSearchCustomer(this.value)">
                 </div>
-                <div id="inlineSearchResults" style="max-height:120px; overflow-y:auto; border:1px solid var(--gray-200); border-radius:2px; background:#fff;">
-                    <div style="padding:8px 12px; color:#999; font-size:11px;">Nhập để tìm kiếm...</div>
+                <div id="inlineSearchResults" style="max-height:150px; overflow-y:auto; border:1px solid var(--gray-200); border-radius:4px; background:#fff;">
+                    <div style="padding:10px 15px; color:#999; font-size:12px; font-weight: 500;">Nhập để tìm kiếm...</div>
                 </div>
             </div>
 
-            <div class="table-wrapper">
+            <div class="table-wrapper" style="border: none; border-bottom: 1px solid var(--gray-200); border-radius: 0;">
                 <table>
                     <thead>
                     <tr>
                         <th style="padding-left: 20px;">Sản phẩm</th>
-                        <th style="text-align: right; width: 80px;">Đơn giá</th>
-                        <th style="text-align: center; width: 80px;">SL</th>
-                        <th style="text-align: right; padding-right: 20px;">Thành tiền</th>
-                        <th style="width: 30px;"></th>
+                        <th style="text-align: right; width: 90px; white-space: nowrap;">Đơn giá</th>
+                        <th style="text-align: center; width: 90px; white-space: nowrap;">SL</th>
+                        <th style="text-align: right; padding-right: 20px; width: 100px; white-space: nowrap;">Thành tiền</th>
+                        <th style="width: 40px;"></th>
                     </tr>
                     </thead>
                     <tbody id="cartBody"></tbody>
                 </table>
-                <div id="emptyCart" style="text-align: center; padding: 60px 20px; color: #999;">
-                    <i class="bi bi-basket" style="font-size: 32px; margin-bottom: 10px; display: block; opacity: 0.5;"></i>
-                    <span style="font-size: 12px;">Chưa có sản phẩm nào</span>
+                <div id="emptyCart" style="text-align: center; padding: 80px 20px; color: #999;">
+                    <i class="bi bi-basket" style="font-size: 40px; margin-bottom: 15px; display: block; opacity: 0.3;"></i>
+                    <span style="font-size: 13px; font-weight: 600;">Hóa đơn chưa có sản phẩm nào</span>
                 </div>
             </div>
 
             <div class="payment-footer">
-
-                <div style="display: flex; margin-bottom: 15px;">
-                    <input type="text" id="voucherInput" placeholder="Nhập hoặc chọn mã..."
-                           style="border-radius: 2px 0 0 2px; border-right: none; height: 34px; flex: 1; font-weight: 600;">
+                <div style="display: flex; margin-bottom: 20px;">
+                    <input type="text" id="voucherInput" placeholder="Nhập hoặc chọn mã khuyến mãi..."
+                           style="border-radius: 4px 0 0 4px; border-right: none; height: 40px; flex: 1; font-weight: 700; font-size: 14px;">
 
                     <button class="btn btn-secondary" onclick="PosApp.openVoucherModal()" title="Mở danh sách mã"
-                            style="border-radius: 0; height: 34px; border-left: none; border-right: none; background: #fafafa; color: #000; padding: 0 12px;">
-                        <i class="bi bi-ticket-detailed" style="margin-right: 4px;"></i> Chọn
+                            style="border-radius: 0; height: 40px !important; border-left: none; border-right: none; background: #fafafa; color: #000; padding: 0 16px !important;">
+                        <i class="bi bi-ticket-detailed" style="margin-right: 6px; font-size: 14px;"></i> CHỌN
                     </button>
 
                     <button class="btn" onclick="PosApp.applyVoucher()" title="Áp dụng mã"
-                            style="border-radius: 0 2px 2px 0; height: 34px; width: 44px; padding: 0;">
-                        <i class="bi bi-check2" style="font-size: 16px;"></i>
+                            style="border-radius: 0 4px 4px 0; height: 40px !important; width: 50px !important; padding: 0 !important;">
+                        <i class="bi bi-check-lg" style="font-size: 20px;"></i>
                     </button>
                 </div>
 
                 <div class="summary-row">
                     <span>TẠM TÍNH</span>
-                    <span style="font-weight:700" id="lblSubTotal">0 ₫</span>
+                    <span style="font-weight:800; color: #000; white-space: nowrap;" id="lblSubTotal">0&nbsp;₫</span>
                 </div>
                 <div class="summary-row">
                     <span>KHUYẾN MÃI</span>
-                    <span style="font-weight:700; color: #10b981;" id="lblPromoDiscount">-0 ₫</span>
+                    <span style="font-weight:800; color: #10b981; white-space: nowrap;" id="lblPromoDiscount">-0&nbsp;₫</span>
                 </div>
                 <div class="summary-row">
-                    <span style="display: flex; align-items: center; gap: 6px;">
+                    <span style="display: flex; align-items: center; gap: 8px;">
                         VOUCHER
-                        <i id="removeVoucherBtn" class="bi bi-x-circle-fill" style="cursor:pointer; display:none; color: #ef4444; font-size: 14px;" onclick="PosApp.removeVoucher()" title="Gỡ mã giảm giá"></i>
+                        <i id="removeVoucherBtn" class="bi bi-x-circle-fill" style="cursor:pointer; display:none; color: #ef4444; font-size: 16px;" onclick="PosApp.removeVoucher()" title="Gỡ mã giảm giá"></i>
                     </span>
-                    <span style="font-weight:700; color: #10b981;" id="lblVoucherDiscount">-0 ₫</span>
+                    <span style="font-weight:800; color: #10b981; white-space: nowrap;" id="lblVoucherDiscount">-0&nbsp;₫</span>
                 </div>
                 <div class="summary-row main">
-                    <span style="font-weight:700; font-size: 14px;">TỔNG TIỀN</span>
-                    <span class="total-money" id="lblTotal">0 ₫</span>
+                    <span style="font-weight:800; font-size: 15px;">TỔNG TIỀN</span>
+                    <span class="total-money" id="lblTotal" style="white-space: nowrap;">0&nbsp;₫</span>
                 </div>
 
                 <button class="btn btn-pay-big" onclick="PosApp.openPayModal()">
-                    <i class="bi bi-credit-card-2-front-fill" style="margin-right: 6px;"></i> THANH TOÁN [F9]
+                    <i class="bi bi-credit-card-2-front-fill" style="margin-right: 8px; font-size: 18px;"></i> THANH TOÁN [F9]
                 </button>
             </div>
         </aside>
@@ -277,28 +253,28 @@
         <main class="panel-right">
             <div class="search-bar-wrapper">
                 <div style="position: relative; flex: 1;">
-                    <i class="bi bi-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #999;"></i>
+                    <i class="bi bi-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #999; font-size: 15px;"></i>
                     <input type="text" placeholder="Tìm kiếm sản phẩm (Tên, Mã, SKU)..."
-                           style="padding-left: 36px; border: 1px solid var(--gray-200); box-shadow: none;"
+                           style="padding-left: 40px; border: 1px solid var(--gray-200); box-shadow: none; height: 40px; font-size: 14px;"
                            onkeyup="PosApp.loadProducts(this.value)">
                 </div>
-                <select class="filter-select" style="width: 130px;">
+                <select class="filter-select" style="width: 150px; height: 40px;">
                     <option value="">Tất cả Màu Sắc</option>
                 </select>
-                <select class="filter-select" style="width: 130px;">
+                <select class="filter-select" style="width: 150px; height: 40px;">
                     <option value="">Tất cả Kích Thước</option>
                 </select>
             </div>
 
-            <div class="table-wrapper" style="border-radius: 2px; border: 1px solid var(--gray-200);">
+            <div class="table-wrapper" style="border-radius: 4px; border: 1px solid var(--gray-200);">
                 <table>
                     <thead>
                     <tr>
-                        <th style="width: 60px; text-align: center;">Ảnh</th>
-                        <th>Tên sản phẩm / Thuộc tính</th>
-                        <th style="text-align: right;">Giá bán</th>
-                        <th style="text-align: center; width: 60px;">Tồn</th>
-                        <th style="width: 40px;"></th>
+                        <th style="width: 70px; text-align: center;">Ảnh</th>
+                        <th>Sản phẩm & Phân loại</th>
+                        <th style="text-align: right; width: 120px; white-space: nowrap;">Giá bán</th>
+                        <th style="text-align: center; width: 70px;">Tồn</th>
+                        <th style="width: 50px;"></th>
                     </tr>
                     </thead>
                     <tbody id="productBody"></tbody>
@@ -308,57 +284,74 @@
     </div>
 </div>
 
-<div id="toast-container"></div>
+<div id="beeToastHost"></div>
+
+<div id="qtyModal" class="modal">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-header">
+            <span class="modal-title" id="qtyModalTitle">NHẬP SỐ LƯỢNG</span>
+            <button class="btn-close" onclick="PosApp.closeModal('qtyModal')"></button>
+        </div>
+        <div class="modal-body" style="padding: 24px;">
+            <p id="qtyModalDesc" style="font-size: 13px; color: #555; margin-bottom: 20px; font-weight: 600; line-height: 1.5;"></p>
+            <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 20px;">
+                <button class="btn-icon" style="width: 40px; height: 40px; font-size: 20px; background: #f4f4f5;" onclick="document.getElementById('inpCustomQty').value = Math.max(1, parseInt(document.getElementById('inpCustomQty').value || 0) - 1)">-</button>
+                <input type="number" id="inpCustomQty" class="form-input" style="width: 100px; text-align: center; font-size: 24px; font-weight: 900; height: 40px; margin: 0 15px; border-color: #000; color: #2563eb;" value="1" onfocus="this.select()" onkeydown="if(event.key === 'Enter') PosApp.confirmCustomQty()">
+                <button class="btn-icon" style="width: 40px; height: 40px; font-size: 20px; background: #f4f4f5;" onclick="document.getElementById('inpCustomQty').value = parseInt(document.getElementById('inpCustomQty').value || 0) + 1">+</button>
+            </div>
+            <button class="btn btn-primary w-100" style="height: 44px !important; font-size: 13px;" id="btnConfirmQty" onclick="PosApp.confirmCustomQty()">XÁC NHẬN [ENTER]</button>
+        </div>
+    </div>
+</div>
 
 <div id="voucherModal" class="modal">
-    <div class="modal-dialog" style="width: 440px; background: #f4f4f5;">
+    <div class="modal-dialog" style="width: 480px; background: #f4f4f5;">
         <div class="modal-header" style="background: #fff;">
-            <span class="modal-title">CHỌN MÃ GIẢM GIÁ</span>
+            <span class="modal-title"><i class="bi bi-ticket-perforated-fill" style="margin-right: 6px; color: #2563eb;"></i> CHỌN MÃ GIẢM GIÁ</span>
             <button class="btn-close" onclick="PosApp.closeModal('voucherModal')"></button>
         </div>
-        <div class="modal-body" style="padding: 15px; max-height: 480px; overflow-y: auto;" id="voucherList">
-            <div style="text-align: center; color: #888; padding: 20px;">Đang tải danh sách mã...</div>
+        <div class="modal-body" style="padding: 20px; max-height: 550px; overflow-y: auto;" id="voucherList">
+            <div style="text-align: center; color: #888; padding: 30px;">Đang tải danh sách mã...</div>
         </div>
     </div>
 </div>
 
 <div id="customerModal" class="modal">
-    <div class="modal-dialog" style="width:340px;">
+    <div class="modal-dialog" style="width:380px;">
         <div class="modal-header">
-            <span class="modal-title">Khách hàng</span>
+            <span class="modal-title"><i class="bi bi-person-lines-fill" style="margin-right: 6px;"></i> THÔNG TIN KHÁCH</span>
             <button class="btn-close" onclick="PosApp.closeModal('customerModal')"></button>
         </div>
-        <div class="modal-body" style="padding:15px;">
-            <nav class="tabs" style="margin-bottom:12px;">
-                <button class="tab active" onclick="PosApp.switchCustTab('search')" id="tabSearchBtn">Tìm kiếm</button>
-                <button class="tab" onclick="PosApp.switchCustTab('create')" id="tabCreateBtn">Thêm mới</button>
+        <div class="modal-body" style="padding:24px;">
+            <nav class="tabs" style="margin-bottom:16px;">
+                <button class="tab active" onclick="PosApp.switchCustTab('search')" id="tabSearchBtn">TÌM KIẾM</button>
+                <button class="tab" onclick="PosApp.switchCustTab('create')" id="tabCreateBtn">THÊM MỚI</button>
             </nav>
 
-            <div id="paneSearch" style="display:flex; flex-direction:column; height:200px;">
-                <div style="position:relative; margin-bottom:8px; flex-shrink:0;">
-                    <i class="bi bi-search" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#666;"></i>
-                    <input type="text" placeholder="Nhập tên hoặc SĐT..."
-                           style="padding-left:32px; height:32px; font-size:12px; width:100%;"
+            <div id="paneSearch" style="display:flex; flex-direction:column; height:240px;">
+                <div style="position:relative; margin-bottom:12px; flex-shrink:0;">
+                    <i class="bi bi-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#666;"></i>
+                    <input type="text" placeholder="Nhập tên hoặc số điện thoại..."
+                           style="padding-left:36px; height:40px; font-size:13px; width:100%; border: 1px solid var(--gray-300); border-radius: 4px; outline: none;"
                            oninput="PosApp.searchCustomer(this.value)">
                 </div>
-                <div id="customerSearchResults" style="flex:1; border:1px solid var(--gray-200); border-radius:2px; overflow-y:auto;">
-                    <div style="padding:12px; color:#999; font-size:11px; text-align:left;">Nhập tên hoặc SĐT để tìm kiếm...</div>
+                <div id="customerSearchResults" style="flex:1; border:1px solid var(--gray-200); border-radius:4px; overflow-y:auto;">
+                    <div style="padding:15px; color:#999; font-size:12px; text-align:center;">Nhập tên hoặc SĐT để tìm kiếm...</div>
                 </div>
             </div>
 
-            <div id="paneCreate" style="display:none; padding-top:8px;">
-                <fieldset style="border:1px solid var(--gray-300); border-radius:0; padding:8px 12px 10px; margin-bottom:12px; position:relative;">
-                    <legend style="font-size:10px; font-weight:700; color:#666; text-transform:uppercase; letter-spacing:0.5px; padding:0 6px;">Tên khách hàng</legend>
-                    <input type="text" id="newCustName" placeholder="Nguyễn Văn A..." style="width:100%; border:none; padding:0; height:26px; font-size:13px; background:transparent;">
-                </fieldset>
+            <div id="paneCreate" style="display:none; padding-top:10px;">
+                <div style="margin-bottom: 16px;">
+                    <label style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #555; margin-bottom: 6px; display: block;">Tên khách hàng *</label>
+                    <input type="text" id="newCustName" placeholder="Ví dụ: Nguyễn Văn A..." style="width:100%; border: 1px solid var(--gray-300); border-radius: 4px; padding: 0 12px; height: 40px; font-size: 13px; outline: none;">
+                </div>
+                <div style="margin-bottom: 24px;">
+                    <label style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #555; margin-bottom: 6px; display: block;">Số điện thoại *</label>
+                    <input type="text" id="newCustPhone" placeholder="Ví dụ: 0988123456..." style="width:100%; border: 1px solid var(--gray-300); border-radius: 4px; padding: 0 12px; height: 40px; font-size: 13px; outline: none;">
+                </div>
 
-                <fieldset style="border:1px solid var(--gray-300); border-radius:0; padding:8px 12px 10px; margin-bottom:16px; position:relative;">
-                    <legend style="font-size:10px; font-weight:700; color:#666; text-transform:uppercase; letter-spacing:0.5px; padding:0 6px;">Số điện thoại</legend>
-                    <input type="text" id="newCustPhone" placeholder="0912 345 678..." style="width:100%; border:none; padding:0; height:26px; font-size:13px; background:transparent;">
-                </fieldset>
-
-                <button class="btn w-100" onclick="PosApp.createNewCustomer()" style="border-radius:0 !important;">
-                    <i class="bi bi-person-plus-fill"></i> LƯU & CHỌN TÀI KHOẢN
+                <button class="btn w-100" onclick="PosApp.createNewCustomer()" style="height: 44px !important; font-size: 12px;">
+                    <i class="bi bi-person-plus-fill" style="font-size: 16px;"></i> LƯU & CHỌN NGAY
                 </button>
             </div>
         </div>
@@ -366,97 +359,134 @@
 </div>
 
 <div id="payModal" class="modal">
-    <div class="modal-dialog" style="border-radius: 0;">
-        <div class="modal-header" style="border-radius: 0;">
-            <span class="modal-title" style="font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Xác nhận thanh toán</span>
+    <div class="modal-dialog" style="border-radius: 6px; width: 480px;">
+        <div class="modal-header">
+            <span class="modal-title" style="font-weight: 800; text-transform: uppercase; letter-spacing: 1px;"><i class="bi bi-wallet2" style="margin-right: 6px;"></i> XÁC NHẬN THANH TOÁN</span>
             <button class="btn-close" onclick="PosApp.closeModal('payModal')"></button>
         </div>
 
-        <div class="modal-body" style="padding: 20px;">
+        <div class="modal-body" style="padding: 24px;">
             <style>
-                .pos-fieldset { border: 1px solid #ccc; border-radius: 0; padding: 8px 12px 10px; margin-bottom: 16px; position: relative; }
-                .pos-legend { font-size: 10px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 0.5px; padding: 0 6px; width: auto; float: none; margin-bottom: 0; border: none; }
-                .pos-input-money { width: 100%; border: none; padding: 0; height: 32px; font-size: 22px; font-weight: 800; background: transparent; text-align: right; outline: none; }
-                .payment-tabs { display: flex; margin-bottom: 20px; border: 1px solid #ccc; }
-                .payment-tab { flex: 1; padding: 12px; border: none; background: #f4f4f5; font-size: 12px; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+                .pos-fieldset { border: 1px solid var(--gray-300); border-radius: 4px; padding: 10px 15px 12px; margin-bottom: 18px; position: relative; background: #fff;}
+                .pos-legend { font-size: 10px; font-weight: 800; color: #555; text-transform: uppercase; letter-spacing: 0.5px; padding: 0 6px; width: auto; float: none; margin-bottom: 0; border: none; }
+                .pos-input-money { width: 100%; border: none; padding: 0; height: 36px; font-size: 26px; font-weight: 900; background: transparent; text-align: right; outline: none; font-family: inherit;}
+                .payment-tabs { display: flex; margin-bottom: 24px; border: 1px solid var(--gray-300); border-radius: 4px; overflow: hidden;}
+                .payment-tab { flex: 1; padding: 14px; border: none; background: #f4f4f5; font-size: 12px; font-weight: 800; text-transform: uppercase; cursor: pointer; transition: all 0.2s; outline: none;}
                 .payment-tab.active { background: #000; color: #fff; }
-                .payment-option { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90px; border: 1px solid #ccc; border-radius: 0; cursor: pointer; background: #fff; position: relative; }
-                .payment-option.selected { border: 2px solid #000 !important; background: #f8f9fa; }
-                .payment-option.selected::after { content: "\F26B"; font-family: "bootstrap-icons"; position: absolute; top: 5px; right: 5px; color: #10b981; }
+                .payment-option { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100px; border: 1px solid var(--gray-300); border-radius: 4px; cursor: pointer; background: #fff; position: relative; transition: 0.2s;}
+                .payment-option.selected { border: 2px solid #2563eb !important; background: #eff6ff; }
+                .payment-option.selected::after { content: "\F26B"; font-family: "bootstrap-icons"; position: absolute; top: 6px; right: 6px; color: #2563eb; font-size: 18px; }
             </style>
-            <div style="text-align: center; margin-bottom: 20px; background: #f8f9fa; padding: 15px; border: 1px dashed #ccc;">
-                <div style="font-size: 11px; color: #666; font-weight: 700; text-transform: uppercase;">Tổng thanh toán</div>
-                <div id="modalTotal" style="font-size: 36px; font-weight: 900; color: #000;">0 ₫</div>
+
+            <div style="text-align: center; margin-bottom: 24px; background: #fafafa; padding: 20px; border: 1px dashed var(--gray-300); border-radius: 4px;">
+                <div style="font-size: 12px; color: #666; font-weight: 800; text-transform: uppercase; margin-bottom: 5px;">TỔNG CẦN THANH TOÁN</div>
+                <div id="modalTotal" style="font-size: 42px; font-weight: 900; color: #000;">0 ₫</div>
             </div>
 
             <div class="payment-tabs">
                 <button class="payment-tab active" onclick="PosApp.switchPaymentMethod('cash', this)">Tiền mặt</button>
-                <button class="payment-tab" onclick="PosApp.switchPaymentMethod('momo', this)">Ví MoMo</button>
+                <button class="payment-tab" onclick="PosApp.switchPaymentMethod('transfer', this)">Quét mã / C.Khoản</button>
             </div>
 
-            <div style="min-height: 100px;">
+            <div style="min-height: 120px;">
                 <div id="cash-section" style="display: block;">
                     <fieldset class="pos-fieldset">
                         <legend class="pos-legend">Tiền khách đưa</legend>
                         <div style="display: flex; align-items: center;">
                             <input type="text" class="pos-input-money" id="inpKhachDua" oninput="PosApp.calcChange()" placeholder="0">
-                            <span style="font-weight: 700; margin-left: 8px; font-size: 12px; color: #999;">VNĐ</span>
+                            <span style="font-weight: 800; margin-left: 10px; font-size: 14px; color: #888;">VNĐ</span>
                         </div>
                     </fieldset>
 
-                    <fieldset class="pos-fieldset" style="background: #fffef0; border-color: #eab308;">
-                        <legend class="pos-legend" style="color: #854d0e;">Tiền thừa trả khách</legend>
-                        <div id="lblTienThua" style="text-align: right; font-size: 20px; font-weight: 800; color: #000;">0 ₫</div>
+                    <fieldset class="pos-fieldset" style="background: #fefce8; border-color: #fde047;">
+                        <legend class="pos-legend" style="color: #a16207;">Tiền thừa trả lại</legend>
+                        <div id="lblTienThua" style="text-align: right; font-size: 24px; font-weight: 900; color: #000; height: 36px; line-height: 36px; white-space: nowrap;">0&nbsp;₫</div>
                     </fieldset>
                 </div>
 
                 <div id="transfer-section" style="display: none;">
-                    <div style="display: flex; gap: 15px; width: 100%; justify-content: center;">
-                        <div class="payment-option selected" style="width: 160px; flex: none;" onclick="PosApp.selectApp(this)">
-                            <i class="bi bi-wallet2" style="font-size: 28px; color: #a50064; margin-bottom: 8px;"></i>
-                            <span style="font-size: 12px; font-weight: 700;">VÍ MOMO</span>
+                    <div style="display: flex; gap: 12px; width: 100%; justify-content: space-between;">
+                        <div class="payment-option selected" data-method="MOMO" onclick="PosApp.selectApp(this)">
+                            <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-MoMo-Square.png" style="width:32px; height:32px; object-fit:contain; margin-bottom:10px;">
+                            <span style="font-size: 11px; font-weight: 800;">VÍ MOMO</span>
+                        </div>
+                        <div class="payment-option" data-method="VNPAY" onclick="PosApp.selectApp(this)">
+                            <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Icon-VNPAY-QR.png" style="width:32px; height:32px; object-fit:contain; margin-bottom:10px;">
+                            <span style="font-size: 11px; font-weight: 800;">VNPAY</span>
+                        </div>
+                        <div class="payment-option" data-method="CHUYEN_KHOAN" onclick="PosApp.selectApp(this)">
+                            <i class="bi bi-bank" style="font-size: 28px; color: #000; margin-bottom: 8px;"></i>
+                            <span style="font-size: 11px; font-weight: 800; text-align: center;">CHUYỂN KHOẢN</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="modal-footer" style="padding: 15px 20px;">
-            <button class="btn btn-secondary" style="border-radius: 0; font-weight: 700; text-transform: uppercase; font-size: 12px;" onclick="PosApp.closeModal('payModal')">Hủy</button>
-            <button class="btn btn-primary" style="border-radius: 0; min-width: 150px; font-weight: 800; text-transform: uppercase; font-size: 13px; background: #000; border: none;" onclick="PosApp.finishOrder()">
-                Xác nhận & In Hóa Đơn
+        <div class="modal-footer" style="padding: 18px 24px;">
+            <button class="btn btn-secondary" style="height: 44px !important; min-width: 100px; font-size: 12px;" onclick="PosApp.closeModal('payModal')">HỦY BỎ</button>
+            <button class="btn btn-primary" style="height: 44px !important; min-width: 180px; font-size: 13px; background: #000; border: none;" onclick="PosApp.finishOrder()">
+                <i class="bi bi-printer-fill" style="font-size: 16px;"></i> XÁC NHẬN & IN HÓA ĐƠN
             </button>
-        </div>
-    </div>
-</div>
-
-<div id="confirmModal" class="modal">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-body" style="text-align: center; padding: 30px 20px;">
-            <i class="bi bi-exclamation-circle" style="font-size: 40px; color: #f59e0b; margin-bottom: 15px; display: block;"></i>
-            <h5 style="font-weight: 800; font-size: 16px; margin-bottom: 8px;">XÁC NHẬN XÓA?</h5>
-            <p style="font-size: 13px; color: #666; margin-bottom: 25px;">Bạn có chắc chắn muốn xóa hóa đơn này không?</p>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn btn-secondary w-100" onclick="PosApp.closeModal('confirmModal')">HỦY</button>
-                <button class="btn btn-danger w-100" onclick="PosApp.forceDelete()">XÓA NGAY</button>
-            </div>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    function toast(msg, type = 'success') {
-        const icons = { success: 'bi-check-circle-fill', warning: 'bi-exclamation-triangle-fill', error: 'bi-x-circle-fill' };
-        const el = document.createElement('div');
-        el.className = `toast-msg ${type}`;
-        el.innerHTML = `<i class="bi ${icons[type]}"></i> <span>${msg}</span>`;
-        document.getElementById('toast-container').appendChild(el);
-        setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(100%)'; setTimeout(() => el.remove(), 300); }, 3000);
+    // --- KHỞI TẠO TOAST ĐỒNG BỘ 100% ---
+    if (typeof window.toast === 'undefined') {
+        window.toast = function (message, type = 'success') {
+            let container = document.getElementById('beeToastHost');
+            if (!container) { container = document.createElement('div'); container.id = 'beeToastHost'; document.body.appendChild(container); }
+            const el = document.createElement('div');
+            el.className = `bee-toast-box ${type}`;
+            const prefix = type === 'success' ? 'THÀNH CÔNG' : (type === 'error' ? 'LỖI' : 'THÔNG BÁO');
+            const color = type === 'success' ? '#10b981' : (type === 'error' ? '#ef4444' : '#f59e0b');
+            const icon = type === 'success' ? 'bi-check-circle-fill' : (type === 'error' ? 'bi-x-circle-fill' : 'bi-exclamation-triangle-fill');
+            el.innerHTML = `
+                <i class="bi ${icon}" style="color:${color}; font-size:22px; margin-top:2px;"></i>
+                <div style="display: flex; flex-direction: column; flex: 1;">
+                    <span style="font-weight:800; font-size:12px; text-transform: uppercase; margin-bottom: 4px; color:${color}">${prefix}</span>
+                    <span style="font-weight:500; font-size:13px; color:#333; line-height: 1.4;">${message}</span>
+                </div>
+                <i class="bi bi-x-lg" style="cursor: pointer; margin-left: 10px; font-size: 18px; color:#999; transition: 0.2s;" onmouseover="this.style.color='#000'" onmouseout="this.style.color='#999'" onclick="this.parentElement.remove()"></i>
+            `;
+            container.appendChild(el);
+            setTimeout(() => { if (el.parentNode) { el.classList.add('hiding'); setTimeout(() => el.remove(), 300); } }, 3500);
+        };
+    }
+    if (typeof window.toastConfirm === 'undefined') {
+        window.toastConfirm = function (title, message, onConfirm, onCancel) {
+            let container = document.getElementById('beeToastHost');
+            if (!container) { container = document.createElement('div'); container.id = 'beeToastHost'; document.body.appendChild(container); }
+            const el = document.createElement('div');
+            el.className = `bee-toast-box warning`;
+            el.style.flexDirection = 'column'; el.style.alignItems = 'stretch';
+            el.innerHTML = `
+                <div style="display: flex; gap: 12px; align-items: flex-start; width: 100%;">
+                    <i class="bi bi-question-circle-fill" style="color:#f59e0b; font-size:24px; margin-top:2px;"></i>
+                    <div style="display:flex; flex-direction:column; flex:1;">
+                        <span style="font-weight:800; font-size:13px; text-transform:uppercase; margin-bottom:6px; color:#000;">${title}</span>
+                        <span style="font-weight:500; font-size:13px; color:#555; line-height: 1.5;">${message}</span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px; border-top: 1px dashed #eee; padding-top: 12px;">
+                    <button class="btn btn-secondary" id="toastCancel" style="height: 32px !important; font-size: 11px; padding: 0 16px !important; border-radius: 4px;">HỦY BỎ</button>
+                    <button class="btn" id="toastOk" style="height: 32px !important; font-size: 11px; padding: 0 16px !important; border-radius: 4px; background: #ef4444; border-color: #ef4444; color: #fff;">XÁC NHẬN</button>
+                </div>
+            `;
+            container.appendChild(el);
+            el.querySelector('#toastOk').onclick = () => { el.classList.add('hiding'); setTimeout(() => el.remove(), 300); if(onConfirm) onConfirm(); };
+            el.querySelector('#toastCancel').onclick = () => { el.classList.add('hiding'); setTimeout(() => el.remove(), 300); if(onCancel) onCancel(); };
+        };
     }
 
     const PosApp = {
         products: [], invoices: [], activeInvoiceId: null, isCreating: false, countdownTimer: null,
+
+        // 🌟 BIẾN STATE CHO MODAL NHẬP SỐ LƯỢNG MỚI
+        state: { qtyAction: null, qtySpctId: null },
 
         init: async function () {
             this.loadState();
@@ -504,7 +534,7 @@
                 cdEl.innerText = '00:00:00';
                 if (!inv.isExpired) {
                     inv.isExpired = true;
-                    toast(`Hóa đơn ${inv.name} đã quá thời gian 24H và tự động bị hủy!`, "error");
+                    window.toast(`Hóa đơn ${inv.name} đã quá thời gian 24H và tự động bị hủy!`, "error");
                     this.forceDelete(inv.id);
                 }
             } else {
@@ -518,7 +548,7 @@
         openVoucherModal: async function() {
             this.openModal('voucherModal');
             const listEl = document.getElementById('voucherList');
-            listEl.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">Đang tải danh sách mã giảm giá...</div>';
+            listEl.innerHTML = '<div style="text-align: center; color: #888; padding: 30px;"><i class="bi bi-hourglass-split" style="font-size:24px; animation: spin 1s linear infinite;"></i><br><br>Đang tải danh sách mã giảm giá...</div>';
 
             try {
                 const res = await fetch('/api/vouchers/active');
@@ -528,7 +558,7 @@
                 this.renderVouchersList(vouchers);
 
             } catch(e) {
-                listEl.innerHTML = '<div style="text-align: center; color: #ef4444; padding: 20px;">Không thể kết nối đến máy chủ để lấy mã giảm giá!</div>';
+                listEl.innerHTML = '<div style="text-align: center; color: #ef4444; padding: 20px;"><i class="bi bi-x-circle" style="font-size:24px;"></i><br><br>Không thể kết nối đến máy chủ!</div>';
             }
         },
 
@@ -543,7 +573,7 @@
             });
 
             if(!activeVouchers || activeVouchers.length === 0) {
-                listEl.innerHTML = '<div style="text-align: center; color: #888; padding: 30px;">Hiện tại không có mã giảm giá nào khả dụng</div>';
+                listEl.innerHTML = '<div style="text-align: center; color: #888; padding: 40px; border: 1px dashed #ccc; border-radius: 4px;">Hiện tại không có mã giảm giá nào khả dụng</div>';
                 return;
             }
 
@@ -578,24 +608,24 @@
 
                 let opacity = '1';
                 let actionBtn = '';
-                let noteHtml = `<div style="font-size: 10px; color: #10b981; margin-top: 4px; font-weight:600;">Đơn tối thiểu: ${new Intl.NumberFormat('vi-VN').format(v.dieuKien)}đ</div>`;
+                let noteHtml = `<div style="font-size: 11px; color: #10b981; margin-top: 4px; font-weight:700;">Đơn tối thiểu: ${new Intl.NumberFormat('vi-VN').format(v.dieuKien)}&nbsp;₫</div>`;
                 let cardClass = 'voucher-card';
 
                 if (isSelected) {
                     cardClass += ' selected';
-                    actionBtn = `<button class="btn" style="background:#ef4444; border-color:#ef4444;" onclick="PosApp.removeVoucher()">BỎ CHỌN</button>`;
+                    actionBtn = `<button class="btn btn-secondary" style="border-color:#ef4444; color:#ef4444;" onclick="PosApp.removeVoucher()">BỎ CHỌN</button>`;
                 } else if (!meetsStackCondition) {
                     cardClass += ' disabled-stack';
                     opacity = '0.6';
-                    actionBtn = `<span style="font-size:10px; color:#ef4444; font-weight:800; background:#fee2e2; padding:6px 10px; border-radius:2px; text-transform:uppercase; text-align:center; display:inline-block;">Chỉ SP Nguyên Giá</span>`;
-                    noteHtml += `<div style="font-size: 10px; color: #ef4444; margin-top: 2px; font-style:italic;">(Cần ít nhất 1 SP không giảm giá)</div>`;
+                    actionBtn = `<span style="font-size:10px; color:#ef4444; font-weight:800; background:#fee2e2; padding:6px 10px; border-radius:4px; text-transform:uppercase; text-align:center; display:inline-block;">Chỉ SP Nguyên Giá</span>`;
+                    noteHtml += `<div style="font-size: 11px; color: #ef4444; margin-top: 2px; font-style:italic;">(Cần ít nhất 1 SP không giảm giá)</div>`;
                 } else if (isEligible) {
-                    actionBtn = `<button class="btn btn-primary" style="background:#000; border-color:#000; border-radius:2px;" onclick="PosApp.selectVoucher('${v.maCode || v.code}')">DÙNG MÃ</button>`;
+                    actionBtn = `<button class="btn btn-primary" onclick="PosApp.selectVoucher('${v.maCode || v.code}')">DÙNG MÃ</button>`;
                 } else {
                     const thieu = v.dieuKien - totalAfterSale;
                     opacity = '0.6';
-                    actionBtn = `<span style="font-size:10px; color:#ef4444; font-weight:800; background:#fee2e2; padding:6px 10px; border-radius:2px; text-transform:uppercase; text-align:center; display:inline-block;">Chưa đủ ĐK</span>`;
-                    noteHtml += `<div style="font-size: 10px; color: #ef4444; margin-top: 2px; font-style:italic;">(Mua thêm ${new Intl.NumberFormat('vi-VN').format(thieu)}đ)</div>`;
+                    actionBtn = `<span style="font-size:10px; color:#ef4444; font-weight:800; background:#fee2e2; padding:6px 10px; border-radius:4px; text-transform:uppercase; text-align:center; display:inline-block;">Chưa đủ ĐK</span>`;
+                    noteHtml += `<div style="font-size: 11px; color: #ef4444; margin-top: 2px; font-style:italic;">(Mua thêm ${new Intl.NumberFormat('vi-VN').format(thieu)}&nbsp;₫)</div>`;
                 }
 
                 let discountLabel = '';
@@ -603,36 +633,36 @@
                 if (loai === 'PERCENTAGE' || loai === 'PHẦN TRĂM' || loai === '%') {
                     discountLabel = `Giảm ${v.giaTriGiamGia}%`;
                     if (v.giaTriGiamGiaToiDa) {
-                        discountLabel += ` (Tối đa ${new Intl.NumberFormat('vi-VN').format(v.giaTriGiamGiaToiDa)}đ)`;
+                        discountLabel += ` (Tối đa ${new Intl.NumberFormat('vi-VN').format(v.giaTriGiamGiaToiDa)}&nbsp;₫)`;
                     }
                 } else {
-                    discountLabel = `Giảm ${new Intl.NumberFormat('vi-VN').format(v.giaTriGiamGia)}đ`;
+                    discountLabel = `Giảm ${new Intl.NumberFormat('vi-VN').format(v.giaTriGiamGia)}&nbsp;₫`;
                 }
 
                 return `
-                <div class="${cardClass}" style="opacity: ${opacity}; display: flex; align-items: stretch; border: 1px solid var(--gray-200); border-radius: 4px; padding: 12px; margin-bottom: 10px; transition: 0.2s;">
+                <div class="${cardClass}" style="opacity: ${opacity}; display: flex; align-items: stretch; padding: 16px;">
                     <div style="display:flex; align-items:center; gap: 15px; flex: 1; padding-right: 15px;">
-                        <div style="width: 50px; height: 50px; background: #000; color: #fff; border-radius: 4px; display: flex; align-items:center; justify-content:center; flex-direction:column; flex-shrink:0;">
-                            <i class="bi bi-ticket-perforated" style="font-size: 18px; margin-bottom: -5px;"></i>
+                        <div style="width: 56px; height: 56px; background: #000; color: #fff; border-radius: 6px; display: flex; align-items:center; justify-content:center; flex-direction:column; flex-shrink:0;">
+                            <i class="bi bi-ticket-perforated" style="font-size: 24px; margin-bottom: -5px;"></i>
                         </div>
                         <div style="flex: 1;">
-                            <div class="v-code" style="font-size: 13px; font-weight: 800; color: #000;">${v.maCode || v.code}</div>
-                            <div class="v-desc" style="font-weight:600; font-size: 11px; margin-bottom: 2px; color: #333;">${v.ten}</div>
+                            <div class="v-code" style="font-size: 14px; font-weight: 900; color: #000;">${v.maCode || v.code}</div>
+                            <div class="v-desc" style="font-weight:600; font-size: 12px; margin-bottom: 2px; color: #555;">${v.ten}</div>
 
-                            <div style="font-size: 11px; color: #d97706; font-weight: 800;">${discountLabel}</div>
+                            <div style="font-size: 12px; color: #d97706; font-weight: 800;">${discountLabel}</div>
                             ${noteHtml}
-                            ${!isStackable ? `<div style="font-size:10px; color:#f59e0b; margin-top:2px; font-weight:700;"><i class="bi bi-info-circle-fill"></i> Không áp dụng riêng cho SP đang Sale</div>` : ''}
+                            ${!isStackable ? `<div style="font-size:11px; color:#f59e0b; margin-top:2px; font-weight:700;"><i class="bi bi-info-circle-fill"></i> Không áp dụng riêng cho SP đang Sale</div>` : ''}
 
-                            <div style="width: 100%; height: 6px; background: #e4e4e7; border-radius: 10px; margin-top: 8px; overflow: hidden;">
+                            <div style="width: 100%; height: 6px; background: #e4e4e7; border-radius: 10px; margin-top: 10px; overflow: hidden;">
                                 <div style="height: 100%; border-radius: 10px; transition: width 0.3s; width: ${phanTram}%; background: ${energyColor}"></div>
                             </div>
-                            <div style="font-size: 10px; color: #71717a; margin-top: 4px; display: flex; justify-content: space-between; font-weight: 600;">
+                            <div style="font-size: 11px; color: #71717a; margin-top: 4px; display: flex; justify-content: space-between; font-weight: 700;">
                                 <span>Đã dùng: ${daDung}/${tongSL}</span>
                                 <span style="color:${energyColor}">${phanTram.toFixed(0)}%</span>
                             </div>
                         </div>
                     </div>
-                    <div style="display:flex; align-items:center; justify-content:flex-end; min-width: 80px;">
+                    <div style="display:flex; align-items:center; justify-content:flex-end; min-width: 85px;">
                         ${actionBtn}
                     </div>
                 </div>`;
@@ -654,14 +684,14 @@
             this.saveState();
             this.renderCart();
             this.closeModal('voucherModal');
-            toast("Đã gỡ mã giảm giá", "success");
+            window.toast("Đã gỡ mã giảm giá", "success");
         },
 
         applyVoucher: async function() {
             const inv = this.getCurrentInvoice();
             const code = document.getElementById('voucherInput').value.trim();
             if (!code || !inv) return;
-            if (inv.cart.length === 0) { toast("GIỎ HÀNG TRỐNG", "warning"); return; }
+            if (inv.cart.length === 0) { window.toast("GIỎ HÀNG TRỐNG", "warning"); return; }
 
             try {
                 const res = await fetch('/api/pos/vouchers/apply', {
@@ -671,7 +701,7 @@
                 });
                 const data = await res.json();
                 if(!res.ok) {
-                    toast(data.message || 'MÃ KHÔNG HỢP LỆ', 'error');
+                    window.toast(data.message || 'MÃ KHÔNG HỢP LỆ', 'error');
                     this.removeVoucher();
                     return;
                 }
@@ -681,8 +711,8 @@
                 this.saveState();
                 this.renderTabs();
                 this.closeModal('voucherModal');
-                toast("ÁP DỤNG MÃ THÀNH CÔNG", "success");
-            } catch (e) { toast("LỖI KẾT NỐI", "error"); }
+                window.toast("ÁP DỤNG MÃ THÀNH CÔNG", "success");
+            } catch (e) { window.toast("LỖI KẾT NỐI", "error"); }
         },
 
         updateTotal: function () {
@@ -730,7 +760,7 @@
                     inv.voucher = null;
                     removeBtn.style.display = 'none';
                     document.getElementById('voucherInput').value = '';
-                    toast("Mã giảm giá đã bị gỡ do giỏ hàng thay đổi!", "warning");
+                    window.toast("Mã giảm giá đã bị gỡ do giỏ hàng thay đổi!", "warning");
                 } else {
                     removeBtn.style.display = 'inline-block';
                     document.getElementById('voucherInput').value = v.maCode || v.code || '';
@@ -768,13 +798,13 @@
 
             const total = Math.round(Math.max(0, subTotal - saleDiscount - voucherDiscount));
 
-            document.getElementById('lblSubTotal').innerText = new Intl.NumberFormat('vi-VN').format(subTotal) + ' ₫';
-            document.getElementById('lblPromoDiscount').innerText = '-' + new Intl.NumberFormat('vi-VN').format(saleDiscount) + ' ₫';
-            document.getElementById('lblVoucherDiscount').innerText = '-' + new Intl.NumberFormat('vi-VN').format(voucherDiscount) + ' ₫';
-            document.getElementById('lblTotal').innerText = new Intl.NumberFormat('vi-VN').format(total) + ' ₫';
+            document.getElementById('lblSubTotal').innerHTML = new Intl.NumberFormat('vi-VN').format(subTotal) + '&nbsp;₫';
+            document.getElementById('lblPromoDiscount').innerHTML = '-' + new Intl.NumberFormat('vi-VN').format(saleDiscount) + '&nbsp;₫';
+            document.getElementById('lblVoucherDiscount').innerHTML = '-' + new Intl.NumberFormat('vi-VN').format(voucherDiscount) + '&nbsp;₫';
+            document.getElementById('lblTotal').innerHTML = new Intl.NumberFormat('vi-VN').format(total) + '&nbsp;₫';
 
             const modalTotalEl = document.getElementById('modalTotal');
-            if(modalTotalEl) modalTotalEl.innerText = new Intl.NumberFormat('vi-VN').format(total) + ' ₫';
+            if(modalTotalEl) modalTotalEl.innerHTML = new Intl.NumberFormat('vi-VN').format(total) + '&nbsp;₫';
         },
 
         checkMomoReturn: async function() {
@@ -790,22 +820,28 @@
                         body: JSON.stringify({ maHD: maHDFromUrl })
                     });
                     if (res.ok) {
-                        let completedInvoiceId = null;
+                        let data = {};
+                        try { data = await res.json(); } catch(e){}
+                        let completedInvoiceId = data.id || data.hoaDonId || data.idHoaDon;
+
                         const idx = this.invoices.findIndex(inv => inv.maHD === maHDFromUrl);
                         if (idx !== -1) {
-                            completedInvoiceId = this.invoices[idx].dbId;
+                            if (!completedInvoiceId) completedInvoiceId = this.invoices[idx].dbId;
                             this.invoices.splice(idx, 1);
                             this.invoices.forEach((inv, i) => inv.name = `HÓA ĐƠN ${i + 1}`);
                             this.activeInvoiceId = this.invoices.length > 0 ? this.invoices[0].id : null;
                             this.saveState();
                         }
-                        toast("THANH TOÁN MOMO THÀNH CÔNG VÀ ĐÃ LƯU DB!", "success");
+
+                        window.toast("THANH TOÁN MOMO THÀNH CÔNG VÀ ĐÃ LƯU DB!", "success");
                         await this.loadProducts(document.querySelector('input[placeholder*="Tìm kiếm sản phẩm"]').value);
                         this.renderTabs();
                         this.renderCart();
 
-                        if(completedInvoiceId) {
+                        if (completedInvoiceId) {
                             this.inHoaDon(completedInvoiceId);
+                        } else {
+                            window.toast("Thanh toán thành công nhưng không lấy được mã HĐ để tự động in!", "warning");
                         }
                     }
                 } catch (e) { console.error("Lỗi xác nhận MoMo:", e); }
@@ -819,7 +855,7 @@
                     failedInv.maHD = null;
                     this.saveState();
                 }
-                toast("Giao dịch MoMo thất bại hoặc đã hủy", "warning");
+                window.toast("Giao dịch MoMo thất bại hoặc đã hủy", "warning");
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
         },
@@ -837,22 +873,28 @@
                         body: JSON.stringify({ maHD: maHDFromUrl })
                     });
                     if (res.ok) {
-                        let completedInvoiceId = null;
+                        let data = {};
+                        try { data = await res.json(); } catch(e){}
+                        let completedInvoiceId = data.id || data.hoaDonId || data.idHoaDon;
+
                         const idx = this.invoices.findIndex(inv => inv.maHD === maHDFromUrl);
                         if (idx !== -1) {
-                            completedInvoiceId = this.invoices[idx].dbId;
+                            if (!completedInvoiceId) completedInvoiceId = this.invoices[idx].dbId;
                             this.invoices.splice(idx, 1);
                             this.invoices.forEach((inv, i) => inv.name = `HÓA ĐƠN ${i + 1}`);
                             this.activeInvoiceId = this.invoices.length > 0 ? this.invoices[0].id : null;
                             this.saveState();
                         }
-                        toast("THANH TOÁN VNPAY THÀNH CÔNG VÀ ĐÃ LƯU DB!", "success");
+
+                        window.toast("THANH TOÁN VNPAY THÀNH CÔNG VÀ ĐÃ LƯU DB!", "success");
                         await this.loadProducts(document.querySelector('input[placeholder*="Tìm kiếm sản phẩm"]').value);
                         this.renderTabs();
                         this.renderCart();
 
-                        if(completedInvoiceId) {
+                        if (completedInvoiceId) {
                             this.inHoaDon(completedInvoiceId);
+                        } else {
+                            window.toast("Thanh toán thành công nhưng không lấy được mã HĐ để tự động in!", "warning");
                         }
                     }
                 } catch (e) { console.error("Lỗi xác nhận VNPay:", e); }
@@ -866,7 +908,7 @@
                     failedInv.maHD = null;
                     this.saveState();
                 }
-                toast("Thanh toán VNPay thất bại hoặc đã hủy", "warning");
+                window.toast("Thanh toán VNPay thất bại hoặc đã hủy", "warning");
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
         },
@@ -898,8 +940,8 @@
                 const data = await res.json();
                 const colorSel = document.querySelectorAll('.filter-select')[0];
                 const sizeSel = document.querySelectorAll('.filter-select')[1];
-                colorSel.innerHTML = '<option value="">TẤT CẢ MÀU SẮC</option>' + data.colors.map(c => `<option value="${c.id}">${c.ten.toUpperCase()}</option>`).join('');
-                sizeSel.innerHTML = '<option value="">TẤT CẢ KÍCH THƯỚC</option>' + data.sizes.map(s => `<option value="${s.id}">${s.ten.toUpperCase()}</option>`).join('');
+                colorSel.innerHTML = '<option value="">Tất cả Màu Sắc</option>' + data.colors.map(c => `<option value="${c.id}">${c.ten.toUpperCase()}</option>`).join('');
+                sizeSel.innerHTML = '<option value="">Tất cả Kích Thước</option>' + data.sizes.map(s => `<option value="${s.id}">${s.ten.toUpperCase()}</option>`).join('');
                 const searchInp = document.querySelector('input[placeholder*="Tìm kiếm sản phẩm"]');
                 colorSel.onchange = () => this.loadProducts(searchInp.value);
                 sizeSel.onchange = () => this.loadProducts(searchInp.value);
@@ -919,35 +961,90 @@
         getAvailableStock: function(spctId) {
             const product = this.products.find(p => p.id === spctId);
             if (!product) return 0;
-
-            // BACKEND ĐÃ TRỪ SẴN SỐ LƯỢNG TẠM GIỮ RỒI
-            // Frontend không cần phải trừ số lượng trong giỏ (inCartQty) nữa!
             return product.soLuong;
         },
 
         renderProducts: function (list) {
-            document.getElementById('productBody').innerHTML = list.map(p => {
+            const tbody = document.getElementById('productBody');
+            if(!list || list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 40px; color:#888;">Không tìm thấy sản phẩm phù hợp</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = list.map(p => {
                 const realStock = this.getAvailableStock(p.id);
                 if (realStock <= 0) return '';
 
                 const hasPromo = p.giaSauKhuyenMai && p.giaSauKhuyenMai < p.giaBan;
                 const displayPrice = hasPromo
-                    ? `<span style="text-decoration:line-through; color:#999; font-size:10px;">${new Intl.NumberFormat('vi-VN').format(p.giaBan)}</span>
-                       <span style="color:#dc2626; margin-left:5px;">${new Intl.NumberFormat('vi-VN').format(p.giaSauKhuyenMai)} ₫</span>`
-                    : `<span>${new Intl.NumberFormat('vi-VN').format(p.giaBan)} ₫</span>`;
+                    ? `<span style="text-decoration:line-through; color:#999; font-size:11px; display:block; margin-bottom:2px; white-space:nowrap;">${new Intl.NumberFormat('vi-VN').format(p.giaBan)}&nbsp;₫</span>
+                       <span style="color:#dc2626; font-size: 13px; white-space:nowrap;">${new Intl.NumberFormat('vi-VN').format(p.giaSauKhuyenMai)}&nbsp;₫</span>`
+                    : `<span style="font-size: 13px; white-space:nowrap;">${new Intl.NumberFormat('vi-VN').format(p.giaBan)}&nbsp;₫</span>`;
                 return `
-                <tr onclick="PosApp.addToCart(${p.id})" style="cursor: pointer;">
-                    <td style="text-align:center; padding: 5px;"><img src="${p.hinhAnh || 'https://placehold.co/40'}" style="width: 36px; height: 36px; border-radius: 2px; border: 1px solid #eee;"></td>
-                    <td><div style="font-weight:700;">${p.sanPham.ten}</div><div style="font-size:11px; color:#666;">${p.sku} | ${p.mauSac.ten} - ${p.kichThuoc.ten}</div></td>
-                    <td style="text-align:right; font-weight:700;">${displayPrice}</td>
-                    <td style="text-align:center; font-weight:bold; color:#0d6efd;">${realStock}</td>
-                    <td style="text-align:center;"><button class="btn-icon"><i class="bi bi-plus"></i></button></td>
+                <tr onclick="PosApp.addToCart(${p.id})">
+                    <td style="text-align:center; padding: 8px;"><img src="${p.hinhAnh || 'https://placehold.co/40'}" style="width: 44px; height: 44px; border-radius: 4px; border: 1px solid var(--gray-200); object-fit: cover;"></td>
+                    <td><div style="font-weight:800; color: #000; font-size: 13px; margin-bottom: 2px;">${p.sanPham.ten}</div><div style="font-size:11px; color:#666; font-weight:600;"><span style="color:#1d4ed8;">${p.sku}</span> • ${p.mauSac.ten} - ${p.kichThuoc.ten}</div></td>
+                    <td style="text-align:right; font-weight:800; white-space:nowrap;">${displayPrice}</td>
+                    <td style="text-align:center; font-weight:900; color:#2563eb; font-size:14px;">${realStock}</td>
+                    <td style="text-align:center;" onclick="PosApp.promptAddQty(${p.id}, event)"><button class="btn-icon" style="border-color:#2563eb; color:#2563eb;" title="Nhập số lượng..."><i class="bi bi-cart-plus-fill"></i></button></td>
                 </tr>`;
             }).join('');
         },
 
+        // 🌟 MỞ POPUP NHẬP SỐ LƯỢNG THÊM (ADD)
+        promptAddQty: function(spctId, e) {
+            if (e) e.stopPropagation();
+            if (!this.activeInvoiceId) { window.toast("VUI LÒNG TẠO HÓA ĐƠN TRƯỚC", "warning"); return; }
+
+            const product = this.products.find(p => p.id === spctId);
+            if (!product) return;
+
+            this.state.qtyAction = 'add';
+            this.state.qtySpctId = spctId;
+
+            document.getElementById('qtyModalTitle').innerHTML = '<i class="bi bi-cart-plus-fill" style="margin-right: 6px; color: #2563eb;"></i> THÊM VÀO GIỎ';
+            document.getElementById('qtyModalDesc').innerHTML = `Nhập số lượng cho sản phẩm: <br><strong style="color:#000;">${product.sanPham.ten}</strong>`;
+            document.getElementById('inpCustomQty').value = 1;
+
+            this.openModal('qtyModal');
+            setTimeout(() => document.getElementById('inpCustomQty').select(), 100);
+        },
+
+        // 🌟 MỞ POPUP NHẬP SỐ LƯỢNG XÓA (REMOVE)
+        promptRemoveQty: function(spctId) {
+            const inv = this.getCurrentInvoice();
+            if (!inv) return;
+            const item = inv.cart.find(i => i.id === spctId);
+            if (!item) return;
+
+            this.state.qtyAction = 'remove';
+            this.state.qtySpctId = spctId;
+
+            document.getElementById('qtyModalTitle').innerHTML = '<i class="bi bi-trash3-fill" style="margin-right: 6px; color: #dc2626;"></i> BỎ SẢN PHẨM';
+            document.getElementById('qtyModalDesc').innerHTML = `Sản phẩm: <strong style="color:#000;">${item.name}</strong><br>Đang có trong giỏ: <strong style="color:#dc2626;">${item.qty}</strong> cái.<br>Nhập số lượng muốn bớt:`;
+            document.getElementById('inpCustomQty').value = item.qty; // Mặc định xóa hết
+
+            this.openModal('qtyModal');
+            setTimeout(() => document.getElementById('inpCustomQty').select(), 100);
+        },
+
+        // 🌟 XÁC NHẬN SỐ LƯỢNG TỪ POPUP
+        confirmCustomQty: async function() {
+            const inputVal = document.getElementById('inpCustomQty').value;
+            const qty = parseInt(inputVal);
+
+            if (isNaN(qty) || qty <= 0) { window.toast("Số lượng không hợp lệ!", "warning"); return; }
+
+            this.closeModal('qtyModal');
+
+            if (this.state.qtyAction === 'add') {
+                await this.addToCart(this.state.qtySpctId, qty);
+            } else if (this.state.qtyAction === 'remove') {
+                await this.changeQty(this.state.qtySpctId, -qty);
+            }
+        },
+
         createInvoice: function () {
-            if (this.invoices.length >= 5) { toast("TỐI ĐA 5 ĐƠN CHỜ", "warning"); return; }
+            if (this.invoices.length >= 5) { window.toast("TỐI ĐA 5 ĐƠN CHỜ", "warning"); return; }
 
             const orderNum = this.invoices.length + 1;
             const tempId   = Date.now();
@@ -968,7 +1065,7 @@
             this.saveState();
             this.renderTabs();
             this.renderCart();
-            toast(`ĐÃ TẠO HÓA ĐƠN ${orderNum}`, "success");
+            window.toast(`ĐÃ TẠO HÓA ĐƠN ${orderNum}`, "success");
         },
 
         switchTab: async function (id) {
@@ -981,47 +1078,13 @@
             document.getElementById('voucherInput').value = inv && inv.voucher ? (inv.voucher.maCode || inv.voucher.code || '') : '';
         },
 
+        // 🌟 BỎ QUA POPUP XÁC NHẬN, GỌI THẲNG HÀM forceDelete()
         promptDelete: function () {
-            if (!this.getCurrentInvoice()) { toast("CHƯA CHỌN ĐƠN HOẶC HÓA ĐƠN ĐÃ BỊ XÓA", "warning"); return; }
-            document.getElementById('confirmModal').classList.add('show');
-        },
-
-        forceDelete: async function (targetId = this.activeInvoiceId) {
-            const inv = this.invoices.find(i => i.id === targetId);
-
-            if (!inv || !inv.dbId) {
-                this.invoices = this.invoices.filter(i => i.id !== targetId);
-                this.invoices.forEach((i, idx) => i.name = `HÓA ĐƠN ${idx + 1}`);
-                if (this.activeInvoiceId === targetId) {
-                    this.activeInvoiceId = this.invoices.length > 0 ? this.invoices[0].id : null;
-                }
-                this.saveState();
-                await this.loadProducts(document.querySelector('.search-bar-wrapper input').value);
-                this.renderTabs(); this.renderCart();
-                this.closeModal('confirmModal');
-                toast("ĐÃ HỦY HÓA ĐƠN", "success");
+            if (!this.getCurrentInvoice()) {
+                window.toast("CHƯA CHỌN ĐƠN HOẶC HÓA ĐƠN ĐÃ BỊ XÓA", "warning");
                 return;
             }
-
-            try {
-                const res = await fetch(`/api/pos/invoices/${inv.dbId}`, { method: 'DELETE' });
-                if (res.ok) {
-                    this.invoices = this.invoices.filter(i => i.id !== targetId);
-                    this.invoices.forEach((i, idx) => i.name = `HÓA ĐƠN ${idx + 1}`);
-                    if (this.activeInvoiceId === targetId) {
-                        this.activeInvoiceId = this.invoices.length > 0 ? this.invoices[0].id : null;
-                    }
-                    this.saveState();
-                    await this.loadProducts(document.querySelector('.search-bar-wrapper input').value);
-                    this.renderTabs(); this.renderCart();
-                    this.closeModal('confirmModal');
-                    toast("ĐÃ HỦY HÓA ĐƠN VÀ GHI NHẬN VÀO DB", "success");
-                } else {
-                    const data = await res.json();
-                    toast(data.message || "KHÔNG THỂ XÓA", "error");
-                    this.closeModal('confirmModal');
-                }
-            } catch (e) { toast("LỖI KẾT NỐI", "error"); }
+            this.forceDelete();
         },
 
         syncCartWithServer: async function() {
@@ -1040,39 +1103,38 @@
             } catch (e) {}
         },
 
-        addToCart: async function (spctId) {
-            if (!this.activeInvoiceId) { toast("VUI LÒNG TẠO HÓA ĐƠN TRƯỚC", "warning"); return; }
+        // 🌟 ĐÃ SỬA: Tham số thứ 2 là số lượng cần thêm (mặc định là 1)
+        addToCart: async function (spctId, qtyToAdd = 1) {
+            if (!this.activeInvoiceId) { window.toast("VUI LÒNG TẠO HÓA ĐƠN TRƯỚC", "warning"); return; }
 
-            // 1. Gọi API khóa tạm giữ 1 sản phẩm (delta = 1)
             try {
                 const res = await fetch(`/api/pos/invoices/update-hold`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ spctId: spctId, delta: 1 })
+                    body: JSON.stringify({ spctId: spctId, delta: qtyToAdd })
                 });
                 if (!res.ok) {
                     const err = await res.json();
-                    toast(err.message || "Sản phẩm đã hết hàng!", "error");
+                    window.toast(err.message || `Kho không đủ ${qtyToAdd} sản phẩm!`, "error");
                     return;
                 }
-            } catch (e) { toast("Lỗi kết nối!", "error"); return; }
+            } catch (e) { window.toast("Lỗi kết nối!", "error"); return; }
 
-            // 2. Thêm vào giao diện
             const inv     = this.getCurrentInvoice();
             const product = this.products.find(p => p.id === spctId);
             const item    = inv.cart.find(i => i.id === spctId);
-            if (item) { item.qty += 1; }
+            if (item) { item.qty += qtyToAdd; }
             else {
                 const price = (product.giaSauKhuyenMai && product.giaSauKhuyenMai < product.giaBan)
                     ? product.giaSauKhuyenMai : product.giaBan;
                 inv.cart.push({
                     id: product.id, name: product.sanPham.ten,
                     originalPrice: product.giaBan, price,
-                    attr: `${product.mauSac.ten} - ${product.kichThuoc.ten}`, qty: 1
+                    attr: `${product.mauSac.ten} - ${product.kichThuoc.ten}`, qty: qtyToAdd
                 });
             }
             this.saveState(); this.renderCart(); this.loadProducts("");
-            toast("Đã thêm vào giỏ hàng và khóa kho!");
+            window.toast(`Đã thêm ${qtyToAdd} sản phẩm vào giỏ!`, "success");
         },
 
         changeQty: async function (spctId, delta) {
@@ -1080,10 +1142,12 @@
             const item = inv.cart.find(i => i.id === spctId);
             if (!item) return;
 
-            // Nếu người dùng bấm Xóa (delta = -999), thì lượng nhả kho sẽ bằng âm số lượng đang có
-            let actualDelta = (delta === -999) ? -item.qty : delta;
+            // Nếu người dùng nhập số xóa lớn hơn số đang có thì chỉ trừ đi số đang có
+            let actualDelta = delta;
+            if (delta === -999 || (delta < 0 && Math.abs(delta) >= item.qty)) {
+                actualDelta = -item.qty;
+            }
 
-            // 1. Gọi API cộng/trừ số lượng tạm giữ
             try {
                 const res = await fetch(`/api/pos/invoices/update-hold`, {
                     method: 'POST',
@@ -1091,16 +1155,15 @@
                     body: JSON.stringify({ spctId: spctId, delta: actualDelta })
                 });
                 if (!res.ok) {
-                    toast("Kho không đủ hàng", "warning");
+                    window.toast("Kho không đủ hàng", "warning");
                     return;
                 }
-            } catch (e) { toast("Lỗi kết nối!", "error"); return; }
+            } catch (e) { window.toast("Lỗi kết nối!", "error"); return; }
 
-            // 2. Xử lý giao diện
-            const newQty = item.qty + delta;
-            if (newQty <= 0 || delta === -999) {
+            const newQty = item.qty + actualDelta;
+            if (newQty <= 0) {
                 inv.cart = inv.cart.filter(i => i.id !== spctId);
-                toast("Đã xóa khỏi giỏ và nhả kho");
+                window.toast("Đã bỏ sản phẩm khỏi giỏ!");
             } else {
                 item.qty = newQty;
             }
@@ -1118,7 +1181,6 @@
             const diff = newQty - item.qty;
             if (diff === 0) return;
 
-            // 1. Báo Server cập nhật lượng chênh lệch (có thể âm hoặc dương)
             try {
                 const res = await fetch(`/api/pos/invoices/update-hold`, {
                     method: 'POST',
@@ -1126,13 +1188,12 @@
                     body: JSON.stringify({ spctId: spctId, delta: diff })
                 });
                 if (!res.ok) {
-                    toast("Kho không đủ đáp ứng số lượng này", "warning");
-                    this.renderCart(); // Reset lại ô input về số cũ
+                    window.toast("Kho không đủ đáp ứng số lượng này", "warning");
+                    this.renderCart();
                     return;
                 }
-            } catch (e) { toast("Lỗi kết nối!", "error"); return; }
+            } catch (e) { window.toast("Lỗi kết nối!", "error"); return; }
 
-            // 2. Cập nhật giao diện
             item.qty = newQty;
             this.saveState();
             this.renderCart();
@@ -1147,10 +1208,11 @@
                 const data = await res.json();
                 if (data.length === 0) { resultBox.innerHTML = '<div style="color:#999;font-size:12px;padding:15px;text-align:center;">Không tìm thấy khách hàng</div>'; return; }
                 resultBox.innerHTML = data.map(c => `
-                    <div style="padding:10px 15px;border-bottom:1px solid #eee;cursor:pointer;"
+                    <div style="padding:12px 15px; border-bottom:1px solid var(--gray-200); cursor:pointer; transition: 0.2s;"
+                         onmouseover="this.style.background='#f4f4f5'" onmouseout="this.style.background=''"
                          onclick="PosApp.selectCustomer('${c.hoTen}', '${c.soDienThoai}', ${c.id})">
-                        <div style="font-weight:700;">${c.hoTen.toUpperCase()}</div>
-                        <div style="font-size:11px;color:#666;">${c.soDienThoai}</div>
+                        <div style="font-weight:800; font-size: 13px; color: #000; margin-bottom: 2px;">${c.hoTen.toUpperCase()}</div>
+                        <div style="font-size:12px; color:#666; font-weight: 600;">${c.soDienThoai}</div>
                     </div>`).join('');
             }catch(e){}
         },
@@ -1160,7 +1222,7 @@
 
             if (!inv) {
                 if (this.invoices.length >= 5) {
-                    toast("ĐÃ ĐẠT TỐI ĐA 5 HÓA ĐƠN CHỜ", "warning");
+                    window.toast("ĐÃ ĐẠT TỐI ĐA 5 HÓA ĐƠN CHỜ", "warning");
                     return;
                 }
                 this.createInvoice();
@@ -1174,38 +1236,83 @@
             this.saveState();
             this.renderTabs();
             this.closeModal('customerModal');
+            window.toast(`Đã áp dụng khách hàng: ${name}`, "success");
         },
 
         finishOrder: async function () {
             const inv = this.getCurrentInvoice();
             const total = parseInt(document.getElementById('lblTotal').innerText.replace(/\D/g, '')) || 0;
             const isCash = document.getElementById('cash-section').style.display !== 'none';
-            let finalMethod = isCash ? 'TIEN_MAT' : 'MOMO';
+
+            let finalMethod = 'TIEN_MAT';
+
+            if (!isCash) {
+                const selectedOpt = document.querySelector('#transfer-section .payment-option.selected');
+                if (selectedOpt) {
+                    finalMethod = selectedOpt.getAttribute('data-method');
+                } else {
+                    finalMethod = 'MOMO';
+                }
+            }
 
             if (isCash) {
                 const khachDua = parseInt(document.getElementById('inpKhachDua').value.replace(/\D/g, '')) || 0;
-                if (khachDua < total) { toast("Số tiền khách đưa chưa đủ!", "warning"); return; }
+                if (khachDua < total) { window.toast("Số tiền khách đưa chưa đủ!", "warning"); return; }
             }
 
             if (finalMethod === 'MOMO') {
                 try {
                     const resMomo = await fetch(`/api/pos/momo-payment`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ cart: inv.cart, amount: total, customerId: inv.customerId })
+                        body: JSON.stringify({ cart: inv.cart, amount: total, customerId: inv.customerId, voucherId: inv.voucher ? inv.voucher.id : null, method: finalMethod })
                     });
                     const dataMomo = await resMomo.json();
                     if (dataMomo.payUrl) {
-                        inv.maHD = dataMomo.maHD; // Gán mã HD ảo vào để check lúc về
+                        inv.maHD = dataMomo.maHD;
                         this.saveState();
                         window.location.href = dataMomo.payUrl;
                         this.closeModal('payModal');
                     }
-                    else { toast(dataMomo.message || "Lỗi MoMo!", "error"); }
-                } catch (e) { toast("LỖI KẾT NỐI", "error"); }
+                    else { window.toast(dataMomo.message || "Lỗi MoMo!", "error"); }
+                } catch (e) { window.toast("LỖI KẾT NỐI", "error"); }
                 return;
             }
 
-            // THANH TOÁN TIỀN MẶT
+            if (finalMethod === 'VNPAY') {
+                try {
+                    const resVnpay = await fetch(`/api/pos/vnpay-payment`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ cart: inv.cart, amount: total, customerId: inv.customerId, voucherId: inv.voucher ? inv.voucher.id : null, method: finalMethod })
+                    });
+                    const dataVnpay = await resVnpay.json();
+                    if (dataVnpay.payUrl) {
+                        inv.maHD = dataVnpay.maHD;
+                        this.saveState();
+                        window.location.href = dataVnpay.payUrl;
+                        this.closeModal('payModal');
+                    }
+                    else { window.toast(dataVnpay.message || "Lỗi VNPay!", "error"); }
+                } catch (e) { window.toast("LỖI KẾT NỐI", "error"); }
+                return;
+            }
+
+            if (finalMethod === 'CHUYEN_KHOAN') {
+                const bankId = "MB";
+                const accountNo = "0988123456";
+                const accountName = "NGUYEN VAN HOANG";
+                const addInfo = "ThanhToan_" + inv.id;
+                const qrUrl = `https://img.vietqr.io/image/${bankId}-${accountNo}-compact2.png?amount=${total}&addInfo=${addInfo}&accountName=${encodeURIComponent(accountName)}`;
+                this.showTransferQR(qrUrl, bankId, accountNo, accountName, total, addInfo, finalMethod, inv);
+                return;
+            }
+
+            this.executeFinishOrder(finalMethod, inv, total);
+        },
+
+        executeFinishOrder: async function(finalMethod, total) {
+            const inv = this.getCurrentInvoice();
+            if (!inv) return;
+
             const payload = {
                 customerId: inv.customerId,
                 total: total,
@@ -1215,17 +1322,24 @@
             };
 
             try {
+                const qrBtn = document.getElementById('qrConfirmBtn');
+                if (qrBtn) { qrBtn.disabled = true; qrBtn.innerHTML = "<i class='bi bi-arrow-repeat spin'></i> ĐANG XỬ LÝ..."; }
+
                 const res = await fetch('/api/pos/finish', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
+
                 if (res.ok) {
                     const data = await res.json();
-                    toast("Thanh toán thành công! Máy đang in hóa đơn...", "success");
+                    window.toast("Thanh toán thành công! Máy đang in hóa đơn...", "success");
 
-                    const completedInvoiceId = data.id; // Backend giờ sẽ trả về id
+                    const completedInvoiceId = data.id;
 
-                    // Dọn dẹp tab hóa đơn
+                    const qrOverlay = document.getElementById('qrOverlayWindow');
+                    if (qrOverlay) qrOverlay.remove();
+                    this.closeModal('payModal');
+
                     this.invoices = this.invoices.filter(i => i.id !== this.activeInvoiceId);
                     this.invoices.forEach((i, idx) => i.name = `HÓA ĐƠN ${idx + 1}`);
                     this.activeInvoiceId = this.invoices.length > 0 ? this.invoices[0].id : null;
@@ -1234,23 +1348,54 @@
                     await this.loadProducts("");
                     this.renderTabs();
                     this.renderCart();
-                    this.closeModal('payModal');
 
-                    // In hóa đơn
                     this.inHoaDon(completedInvoiceId);
                 } else {
                     let errorMsg = "Thanh toán thất bại.";
                     try { const errData = await res.json(); errorMsg = errData.message || errorMsg; } catch (ex) {}
-                    toast(errorMsg, "error");
+                    window.toast(errorMsg, "error");
+                    if (qrBtn) { qrBtn.disabled = false; qrBtn.innerHTML = "<i class='bi bi-check-circle-fill'></i> ĐÃ NHẬN TIỀN & IN HÓA ĐƠN"; }
                 }
-            } catch (e) { toast("Lỗi kết nối đến máy chủ!", "error"); }
+            } catch (e) {
+                window.toast("Lỗi kết nối đến máy chủ!", "error");
+                const qrBtn = document.getElementById('qrConfirmBtn');
+                if (qrBtn) { qrBtn.disabled = false; qrBtn.innerHTML = "<i class='bi bi-check-circle-fill'></i> ĐÃ NHẬN TIỀN & IN HÓA ĐƠN"; }
+            }
+        },
+
+        showTransferQR: function(qrUrl, bank, acc, name, amount, info, finalMethod) {
+            const oldOverlay = document.getElementById('qrOverlayWindow');
+            if(oldOverlay) oldOverlay.remove();
+
+            const overlay = document.createElement('div');
+            overlay.id = 'qrOverlayWindow';
+            overlay.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:10000; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px);';
+            overlay.innerHTML = `
+                <div style="background:#fff; width:440px; max-width:90%; border-radius:6px; padding:32px 24px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.2); position: relative;">
+                    <button style="position:absolute; top:15px; right:15px; background:none; border:none; font-size:24px; cursor:pointer; color:#888;" onclick="this.parentElement.parentElement.remove()">&times;</button>
+                    <h3 style="font-size:20px; margin-bottom:8px; font-weight:800; text-transform:uppercase; color: #2563eb;"><i class="bi bi-qr-code-scan" style="margin-right: 6px;"></i> Quét Mã Chuyển Khoản</h3>
+                    <p style="font-size:13px; color:#666; margin-bottom:20px; font-weight: 500;">Vui lòng hướng dẫn khách hàng quét mã QR dưới đây để thanh toán.</p>
+                    <img src="${qrUrl}" style="width:240px; height:240px; margin:15px auto; border:1px solid var(--gray-200); border-radius:6px; padding:10px; display:block; background: #fff;">
+                    <div style="font-size:13px; margin-bottom:24px; text-align:left; background:#fafafa; padding:20px; border-radius:4px; border:1px solid var(--gray-200);">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px dashed var(--gray-200); padding-bottom:8px;"><span>Ngân hàng:</span> <strong>${bank}</strong></div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px dashed var(--gray-200); padding-bottom:8px;"><span>Số tài khoản:</span> <strong>${acc}</strong></div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px dashed var(--gray-200); padding-bottom:8px;"><span>Chủ tài khoản:</span> <strong>${name}</strong></div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px dashed var(--gray-200); padding-bottom:8px;"><span>Số tiền:</span> <strong style="color:#dc2626; font-size:16px; white-space: nowrap;">${new Intl.NumberFormat('vi-VN').format(amount)}&nbsp;₫</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Nội dung CK:</span> <strong style="color:#2563eb;">${info}</strong></div>
+                    </div>
+
+                    <button id="qrConfirmBtn" style="padding:16px 24px; background:#10b981; color:white; border:none; font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; cursor:pointer; border-radius:4px; width:100%; transition:0.2s;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'" onclick="PosApp.executeFinishOrder('${finalMethod}', ${amount})">
+                        <i class="bi bi-check-circle-fill"></i> ĐÃ NHẬN TIỀN & IN HÓA ĐƠN
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
         },
 
         forceDelete: async function (targetId = this.activeInvoiceId) {
             const inv = this.invoices.find(i => i.id === targetId);
             if (!inv) return;
 
-            // 🌟 NHẢ TỒN KHO: Duyệt giỏ hàng và gọi API nhả hàng
             if (inv.cart && inv.cart.length > 0) {
                 for (let item of inv.cart) {
                     try {
@@ -1263,17 +1408,15 @@
                 }
             }
 
-            // Xóa Local
             this.invoices = this.invoices.filter(i => i.id !== targetId);
             this.invoices.forEach((i, idx) => i.name = `HÓA ĐƠN ${idx + 1}`);
             if (this.activeInvoiceId === targetId) {
                 this.activeInvoiceId = this.invoices.length > 0 ? this.invoices[0].id : null;
             }
             this.saveState();
-            await this.loadProducts(""); // Load lại bảng SP
+            await this.loadProducts("");
             this.renderTabs(); this.renderCart();
-            this.closeModal('confirmModal');
-            toast("ĐÃ HỦY HÓA ĐƠN", "success");
+            window.toast("ĐÃ HỦY HÓA ĐƠN", "success");
         },
 
         inHoaDon: async function(idHoaDon) {
@@ -1383,18 +1526,17 @@
 
             } catch (e) {
                 console.error("Lỗi in hóa đơn:", e);
-                toast("Không thể in hóa đơn lúc này!", "error");
+                window.toast("Không thể in hóa đơn lúc này!", "error");
             }
         },
 
         openPayModal: async function () {
             const inv = this.getCurrentInvoice();
-            if (!inv) { toast("Vui lòng chọn hoặc tạo hóa đơn trước", "warning"); return; }
-            if (!inv.cart || inv.cart.length === 0) { toast("Giỏ hàng đang trống", "warning"); return; }
+            if (!inv) { window.toast("Vui lòng chọn hoặc tạo hóa đơn trước", "warning"); return; }
+            if (!inv.cart || inv.cart.length === 0) { window.toast("Giỏ hàng đang trống", "warning"); return; }
 
-            // 🌟 ĐÃ CẮT BỎ API TẠO DB Ở ĐÂY, CHỈ MỞ GIAO DIỆN
             document.getElementById('inpKhachDua').value = '';
-            document.getElementById('lblTienThua').innerText = '0 ₫';
+            document.getElementById('lblTienThua').innerHTML = '0&nbsp;₫';
             const tabs = document.querySelectorAll('.payment-tab');
             if (tabs.length > 0) this.switchPaymentMethod('cash', tabs[0]);
             this.openModal('payModal');
@@ -1405,7 +1547,7 @@
         renderTabs: function () {
             const container = document.getElementById('invoiceTabsContainer');
             if (this.invoices.length === 0) {
-                container.innerHTML = '<span style="color:#999; font-size:11px; padding:10px;">CHƯA CÓ HÓA ĐƠN</span>';
+                container.innerHTML = '<span style="color:#999; font-size:12px; font-weight: 600; padding:10px;">CHƯA CÓ HÓA ĐƠN</span>';
                 return;
             }
             container.innerHTML = this.invoices.map(inv => `
@@ -1427,25 +1569,30 @@
             }
             document.getElementById('emptyCart').style.display = 'none';
 
-            // 🌟 RENDER LẠI BẢNG GIỎ HÀNG: CÓ THÊM CỘT ĐƠN GIÁ VÀ THẺ INPUT CHO SỐ LƯỢNG
+            // 🌟 ĐÃ SỬA: SỬA ĐƠN VỊ TIỀN VÀ THÊM NÚT XÓA BẰNG POPUP
             tbody.innerHTML = inv.cart.map(i => `
                 <tr>
-                    <td style="padding-left: 20px;"><b>${i.name}</b><br><small>${i.attr}</small></td>
-                    <td style="text-align:right; font-weight: 600;">${new Intl.NumberFormat('vi-VN').format(Number(i.price))} ₫</td>
+                    <td style="padding-left: 20px;">
+                        <div style="font-weight: 800; color: #000; font-size: 13px; margin-bottom: 2px;">${i.name}</div>
+                        <div style="font-size: 11px; color: #666; font-weight: 600;">${i.attr}</div>
+                    </td>
+                    <td style="text-align:right; font-weight: 800; font-size: 13px; white-space: nowrap;">${new Intl.NumberFormat('vi-VN').format(Number(i.price))}&nbsp;₫</td>
                     <td style="text-align:center;">
                         <div style="display:flex; justify-content:center; align-items:center; gap:5px;">
-                            <button class="btn-icon" style="width:20px; height:20px;" onclick="PosApp.changeQty(${i.id}, -1)">-</button>
+                            <button class="btn-icon" style="width:24px; height:24px;" onclick="PosApp.changeQty(${i.id}, -1)">-</button>
 
                             <input type="number" class="qty-input" value="${i.qty}"
-                                   style="width: 36px; text-align: center; border: 1px solid #ccc; border-radius: 2px; height: 24px; font-weight: 600; outline: none;"
+                                   style="width: 40px; text-align: center; border: 1px solid var(--gray-300); border-radius: 4px; height: 24px; font-weight: 800; outline: none; background: #fafafa;"
                                    onchange="PosApp.setQty(${i.id}, this.value)"
                                    onfocus="this.select()">
 
-                            <button class="btn-icon" style="width:20px; height:20px;" onclick="PosApp.changeQty(${i.id}, 1)">+</button>
+                            <button class="btn-icon" style="width:24px; height:24px;" onclick="PosApp.changeQty(${i.id}, 1)">+</button>
                         </div>
                     </td>
-                    <td style="text-align:right; padding-right: 20px; font-weight: 700; color: #e11d48;">${new Intl.NumberFormat('vi-VN').format(Number(i.price) * Number(i.qty))} ₫</td>
-                    <td><i class="bi bi-trash" style="cursor:pointer; color:#ef4444;" onclick="PosApp.changeQty(${i.id}, -999)"></i></td>
+                    <td style="text-align:right; padding-right: 20px; font-weight: 800; color: #dc2626; font-size: 14px; white-space: nowrap;">${new Intl.NumberFormat('vi-VN').format(Number(i.price) * Number(i.qty))}&nbsp;₫</td>
+                    <td style="text-align:center; vertical-align: middle;">
+                        <button class="btn-icon" style="border:none; color:#ef4444; background: #fee2e2;" onclick="PosApp.promptRemoveQty(${i.id})" title="Tùy chỉnh xóa"><i class="bi bi-trash3-fill"></i></button>
+                    </td>
                 </tr>`).join('');
             this.updateTotal();
         },
@@ -1467,7 +1614,7 @@
             else inputEl.value = '';
             const total = parseInt(document.getElementById('lblTotal').innerText.replace(/\D/g, '')) || 0;
             const cust = parseInt(rawValue) || 0;
-            document.getElementById('lblTienThua').innerText = new Intl.NumberFormat('vi-VN').format(Math.max(0, cust - total)) + ' ₫';
+            document.getElementById('lblTienThua').innerHTML = new Intl.NumberFormat('vi-VN').format(Math.max(0, cust - total)) + '&nbsp;₫';
         },
 
         switchCustTab: function(tab) {
@@ -1480,33 +1627,53 @@
         createNewCustomer: async function() {
             const name  = document.getElementById('newCustName').value.trim();
             const phone = document.getElementById('newCustPhone').value.trim();
-            if (!name || !phone) { toast("VUI LÒNG NHẬP ĐỦ THÔNG TIN", "warning"); return; }
 
-            try {
-                const checkRes = await fetch(`/api/pos/customers/search?q=${phone}`);
-                const existing = await checkRes.json();
-                const duplicate = existing.find(c => c.soDienThoai === phone);
-                if (duplicate) { toast(`SỐ ĐIỆN THOẠI ĐÃ TỒN TẠI`, "warning"); return; }
+            if (!name || !phone) { window.toast("VUI LÒNG NHẬP ĐỦ THÔNG TIN", "warning"); return; }
 
-                const res = await fetch('/api/pos/customers', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ hoTen: name, soDienThoai: phone })
-                });
-
-                if (res.ok) {
-                    const kh = await res.json();
-                    this.selectCustomer(kh.hoTen, kh.soDienThoai, kh.id);
-                    document.getElementById('newCustName').value = '';
-                    document.getElementById('newCustPhone').value = '';
-                    toast("Đã thêm khách. Mật khẩu đăng nhập mặc định: 123456", "success");
-                } else {
-                    const error = await res.json();
-                    toast(error.message || "LỖI KHI THÊM KHÁCH", "error");
-                }
-            } catch (e) {
-                toast("LỖI HỆ THỐNG", "error");
+            // 🌟 1. KIỂM TRA ĐỊNH DẠNG TÊN (Chỉ chữ cái tiếng Việt và khoảng trắng, không số, không ký tự đặc biệt)
+            const nameRegex = /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸỳỵýỷỹ\s]+$/;
+            if (!nameRegex.test(name)) {
+                window.toast("Tên khách hàng không được chứa số hoặc ký tự đặc biệt!", "error");
+                return;
             }
+
+            // 🌟 2. KIỂM TRA ĐỊNH DẠNG SỐ ĐIỆN THOẠI (Bắt đầu bằng số 0, đủ 10 số)
+            const phoneRegex = /^0\d{9}$/;
+            if (!phoneRegex.test(phone)) {
+                window.toast("Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0!", "error");
+                return;
+            }
+
+            // 🌟 3. BẬT CONFIRM BOX TRƯỚC KHI LƯU
+            window.toastConfirm("TẠO HỒ SƠ KHÁCH HÀNG", `Xác nhận tạo hồ sơ cho khách: <b>${name}</b> - <b>${phone}</b>?`, async () => {
+                try {
+                    // Kiểm tra trùng lặp SĐT trước
+                    const checkRes = await fetch(`/api/pos/customers/search?q=${phone}`);
+                    const existing = await checkRes.json();
+                    const duplicate = existing.find(c => c.soDienThoai === phone);
+                    if (duplicate) { window.toast(`SỐ ĐIỆN THOẠI NÀY ĐÃ TỒN TẠI TRONG HỆ THỐNG!`, "error"); return; }
+
+                    // Gọi API thêm mới
+                    const res = await fetch('/api/pos/customers', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ hoTen: name, soDienThoai: phone })
+                    });
+
+                    if (res.ok) {
+                        const kh = await res.json();
+                        PosApp.selectCustomer(kh.hoTen, kh.soDienThoai, kh.id);
+                        document.getElementById('newCustName').value = '';
+                        document.getElementById('newCustPhone').value = '';
+                        window.toast("Đã thêm khách. Mật khẩu đăng nhập mặc định: 12345678", "success");
+                    } else {
+                        const error = await res.json();
+                        window.toast(error.message || "LỖI KHI THÊM KHÁCH TỪ MÁY CHỦ", "error");
+                    }
+                } catch (e) {
+                    window.toast("MẤT KẾT NỐI VỚI HỆ THỐNG", "error");
+                }
+            });
         },
 
         selectApp: function(el) {
@@ -1521,34 +1688,34 @@
             box.style.display = isHidden ? 'block' : 'none';
             if (isHidden) {
                 box.querySelector('input').focus();
-                document.getElementById('inlineSearchResults').innerHTML = '<div style="padding:8px 12px; color:#999; font-size:11px;">Nhập để tìm kiếm...</div>';
+                document.getElementById('inlineSearchResults').innerHTML = '<div style="padding:15px; color:#999; font-size:12px; font-weight:500; text-align:center;">Nhập để tìm kiếm...</div>';
             }
         },
 
         inlineSearchCustomer: async function(val) {
             const box = document.getElementById('inlineSearchResults');
-            if (val.length < 2) { box.innerHTML = '<div style="padding:8px 12px; color:#999; font-size:11px;">Nhập để tìm kiếm...</div>'; return; }
+            if (val.length < 2) { box.innerHTML = '<div style="padding:15px; color:#999; font-size:12px; font-weight:500; text-align:center;">Nhập để tìm kiếm...</div>'; return; }
             try{
                 const res = await fetch(`/api/pos/customers/search?q=${val}`);
                 const data = await res.json();
-                if (data.length === 0) { box.innerHTML = '<div style="padding:8px 12px; color:#999; font-size:11px;">Không tìm thấy</div>'; return; }
+                if (data.length === 0) { box.innerHTML = '<div style="padding:15px; color:#999; font-size:12px; font-weight:500; text-align:center;">Không tìm thấy</div>'; return; }
                 box.innerHTML = data.map(c => `
-                    <div style="padding:8px 12px; border-bottom:1px solid #eee; cursor:pointer;"
+                    <div style="padding:12px 15px; border-bottom:1px solid var(--gray-200); cursor:pointer; transition: 0.2s;"
                          onmouseover="this.style.background='#f4f4f5'" onmouseout="this.style.background=''"
                          onclick="PosApp.selectCustomerInline('${c.hoTen}', '${c.soDienThoai}', ${c.id})">
-                        <div style="font-weight:700; font-size:12px;">${c.hoTen.toUpperCase()}</div>
-                        <div style="font-size:11px; color:#666;">${c.soDienThoai}</div>
+                        <div style="font-weight:800; font-size:13px; color:#000; margin-bottom: 2px;">${c.hoTen.toUpperCase()}</div>
+                        <div style="font-size:12px; color:#666; font-weight:600;">${c.soDienThoai}</div>
                     </div>`).join('');
             }catch(e){}
         },
 
         selectCustomerInline: function(name, phone, id) {
             const inv = this.getCurrentInvoice();
-            if (!inv) { toast("VUI LÒNG TẠO HÓA ĐƠN TRƯỚC", "warning"); return; }
+            if (!inv) { window.toast("VUI LÒNG TẠO HÓA ĐƠN TRƯỚC", "warning"); return; }
             inv.customer = name; inv.phone = phone; inv.customerId = id;
             this.saveState(); this.renderTabs();
             document.getElementById('inlineCustomerSearch').style.display = 'none';
-            toast(`ĐÃ CHỌN: ${name}`, "success");
+            window.toast(`Đã áp dụng: ${name}`, "success");
         },
 
         resetCustomer: function() {
@@ -1557,13 +1724,12 @@
             inv.customer = 'KHÁCH VÃNG LAI'; inv.phone = ''; inv.customerId = null;
             this.saveState(); this.renderTabs();
             document.getElementById('inlineCustomerSearch').style.display = 'none';
-            toast("ĐÃ CHUYỂN VỀ KHÁCH VÃNG LAI", "success");
+            window.toast("Đã chuyển về KHÁCH VÃNG LAI", "success");
         }
     };
 
     window.PosApp = PosApp;
-    window.onload = () => PosApp.init();
-
+    document.addEventListener("DOMContentLoaded", () => { PosApp.init(); });
 </script>
 </body>
 </html>

@@ -8,240 +8,367 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
     <style>
+        /* ==========================================================================
+           CORE STYLES ĐỒNG BỘ
+           ========================================================================== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --black: #000; --white: #fff; --gray-100: #f4f4f5; --gray-200: #e4e4e7; --gray-300: #d4d4d8; --font-size: 12.5px; }
-        body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--black); font-size: var(--font-size); line-height: 1.4; }
-        .container-bee { max-width: 100%; padding: 25px 35px; }
+        :root { --black: #000; --white: #fff; --gray-100: #f4f4f5; --gray-200: #e4e4e7; --gray-300: #d4d4d8; --success-color: #10b981; --font-size: 13px; }
+        body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--black); font-size: var(--font-size); line-height: 1.5; }
+        .container { max-width: 100%; padding: 20px 30px; }
 
-        .actions-bar { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--gray-200); margin-bottom: 25px; padding-bottom: 12px; }
-        .page-title { font-size: 15px; font-weight: 800; text-transform: uppercase; margin: 0; letter-spacing: 0.5px; }
+        /* Actions Bar & Tabs */
+        .actions-bar { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--gray-200); margin-bottom: 20px; padding-bottom: 0; }
+        .tabs { display: flex; gap: 30px; margin-bottom: 0; border: none; }
+        .tab { font-size: 13px; font-weight: 700; color: #888; padding: 0 0 12px 0; cursor: default; text-transform: uppercase; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; display: flex; align-items: center; gap: 6px; }
+        .tab.active { color: #000; border-bottom-color: #000; }
 
-        .btn-bee { font-size: 11px; font-weight: 800; text-transform: uppercase; height: 32px; padding: 0 16px; background: #000; color: #fff; border: 1px solid #000; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; border-radius: 2px; transition: 0.2s; }
-        .btn-bee:hover { background: #333; }
-        .btn-secondary { background: #fff; color: #000; border: 1px solid #ccc; }
+        /* Buttons */
+        .btn { font-size: 11px; font-weight: 800; text-transform: uppercase; height: 34px !important; padding: 0 16px !important; background: #000; color: #fff; border: 1px solid #000; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 4px; transition: 0.2s; }
+        .btn:hover { background: #333; }
+        .btn-secondary { background: #fff; color: #000; border: 1px solid var(--gray-300); }
+        .btn-secondary:hover { background: var(--gray-100); border-color: #000; }
+        .btn-danger { background: #fff; color: #dc2626; border: 1px solid #dc2626; }
+        .btn-danger:hover { background: #dc2626; color: #fff; }
+        .btn-icon { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--gray-200); background: #fff; cursor: pointer; border-radius: 4px; margin-left: 4px; transition: 0.2s; color: #555;}
+        .btn-icon:hover { border-color: #000; background: #000; color: #fff; }
 
-        .search-wrapper { display: flex; gap: 15px; margin-bottom: 20px; }
-        .input-bee-search { padding: 8px 15px; font-size: 12.5px; border: 1px solid var(--gray-300); outline: none; height: 36px; border-radius: 2px; flex: 1; }
-        .select-bee-filter { padding: 0 12px; font-size: 12.5px; border: 1px solid var(--gray-300); outline: none; height: 36px; border-radius: 2px; width: 220px; }
+        /* Search Section */
+        .search-section { background: #f8f9fa; padding: 18px 20px; border: 1px solid var(--gray-200); border-radius: 4px; margin-bottom: 20px; }
+        .search-wrapper { display: flex; gap: 12px; align-items: center; width: 100%; flex-wrap: wrap;}
+        .search-box { position: relative; flex: 2; min-width: 250px;}
+        .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 14px; pointer-events: none; }
+        .search-input { width: 100%; padding: 8px 12px 8px 36px !important; font-size: 13px; border: 1px solid var(--gray-300); outline: none; background: #fff; height: 40px; border-radius: 4px; transition: 0.2s; font-family: inherit;}
+        .filter-select { padding: 8px 12px; font-size: 13px; border: 1px solid var(--gray-300); outline: none; background: #fff; height: 40px; border-radius: 4px; min-width: 220px; transition: 0.2s; cursor: pointer; flex: 1; font-family: inherit;}
+        .btn-reset { height: 40px !important; width: 40px !important; padding: 0 !important; justify-content: center; font-size: 16px; background: #fff; border: 1px solid var(--gray-300); color: #555; border-radius: 4px; transition: 0.2s;}
+        .btn-reset:hover { background: #f4f4f5; border-color: #000; color: #000; }
+        .search-input:focus, .filter-select:focus { border-color: #000; }
 
-        .table-wrapper { border: 1px solid var(--gray-200); width: 100%; overflow-x: auto; background: #fff; }
-        table { width: 100%; border-collapse: collapse; min-width: 950px; }
-        thead th { padding: 12px 15px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #222; background: #fafafa; border-bottom: 1px solid var(--gray-200); }
-        tbody td { padding: 12px 15px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; }
+        /* Table */
+        .table-wrapper { border: 1px solid var(--gray-200); width: 100%; overflow-x: auto; background: #fff;}
+        table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+        thead th { text-align: left; padding: 12px 15px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #666; background: #fafafa; border-bottom: 1px solid var(--gray-200); white-space: nowrap; }
+        tbody td { padding: 10px 15px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; font-size: 13px; word-wrap: break-word; }
+        tbody tr:hover { background: var(--gray-100); }
 
-        /* SWITCH TOGGLE */
-        .switch-square { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .badge-status { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; text-transform: uppercase; color: #fff; white-space: nowrap; display: inline-block; }
+
+        /* Pagination Đồng Bộ */
+        .pagination-wrapper { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; }
+        .pagination-info { font-size: 11px; font-weight: 800; color: #888; text-transform: uppercase; }
+        .pagination { display: flex; gap: 5px; }
+        .page-number { min-width: 28px; height: 28px; font-size: 12px; font-weight: 700; background: transparent; border: 1px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 2px; transition: 0.2s;}
+        .page-number:hover:not(:disabled) { background: #eee; }
+        .page-number.active { background: #000; color: #fff; }
+        .page-number:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* Switch Toggle Đồng Bộ */
+        .switch-wrapper { display: flex; align-items: center; gap: 10px; }
+        .switch-square { position: relative; display: inline-block; width: 44px; height: 24px; }
         .switch-square input { opacity: 0; width: 0; height: 0; }
-        .slider-square { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; }
-        .slider-square:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; }
+        .slider-square { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 4px; }
+        .slider-square:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 2px; }
         input:checked + .slider-square { background-color: #000; }
         input:checked + .slider-square:before { transform: translateX(20px); }
 
-        .switch-sm { position: relative; display: inline-block; width: 30px; height: 16px; }
+        .switch-sm { position: relative; display: inline-block; width: 34px; height: 18px; }
         .switch-sm input { opacity: 0; width: 0; height: 0; }
-        .slider-sm { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; }
-        .slider-sm:before { position: absolute; content: ""; height: 12px; width: 12px; left: 2px; bottom: 2px; background-color: white; transition: .4s; }
+        .slider-sm { position: absolute; cursor: pointer; inset: 0; background-color: #ccc; transition: .3s; border-radius: 20px; }
+        .slider-sm:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%; }
         input:checked + .slider-sm { background-color: #000; }
-        input:checked + .slider-sm:before { transform: translateX(14px); }
+        input:checked + .slider-sm:before { transform: translateX(16px); }
 
-        /* DRAWER & TOAST */
-        .staff-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 3000; display: none; backdrop-filter: blur(2px); }
-        .staff-overlay.show { display: block; }
-        .drawer-bee { position: fixed; top: 0; right: -650px; width: 650px; height: 100vh; background: #fff; z-index: 3001; transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -15px 0 40px rgba(0,0,0,0.15); }
-        .drawer-bee.show { right: 0; }
-        .drawer-header { padding: 18px 25px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; }
-        .drawer-body { flex: 1; padding: 25px; overflow-y: auto; }
-        .drawer-footer { padding: 20px 25px; border-top: 1px solid var(--gray-200); display: flex; gap: 15px; background: #fff; }
+        /* DRAWER CHÍNH */
+        .overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 999; display: none; }
+        .overlay.show { display: block; }
+        .drawer { position: fixed; top: 0; right: -1000px; width: 600px; height: 100vh; background: #fff; border-left: 1px solid var(--gray-200); z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1); }
+        .drawer.show { right: 0; }
 
-        .form-group { margin-bottom: 15px; }
-        .label-bee { font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; display: block; color: #000; }
-        .input-bee { width: 100%; padding: 10px; font-size: 12.5px; border: 1px solid var(--gray-300); border-radius: 2px; outline: none; }
-        .input-bee:disabled { background-color: #f8fafc; color: #888; border: 1px dashed #cbd5e1; }
+        .drawer-header { padding: 15px 20px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center;}
+        .drawer-title { font-size: 15px; font-weight: 800; text-transform: uppercase; margin: 0; }
+        .drawer-body { flex: 1; padding: 20px; overflow-y: auto; background: #fdfdfd; }
+        .drawer-footer { padding: 15px 20px; border-top: 1px solid var(--gray-200); display: flex; gap: 10px; background: #fff;}
 
-        .upload-area { width: 100px; height: 100px; border-radius: 50%; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; margin: 0 auto 15px; background: #fafafa; }
-        .upload-area img { width: 100%; height: 100%; object-fit: cover; }
+        /* Form Elements Đồng Bộ */
+        .form-group { margin-bottom: 18px; }
+        .form-label { font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; display: block; color: #444; }
+        .form-input, .form-select, .form-textarea { width: 100%; padding: 0 12px; font-size: 13px; border: 1px solid var(--gray-300); outline: none; border-radius: 4px; background: #fff; height: 40px; font-family: inherit;}
+        .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #000; }
+        .form-input:disabled { background: #f9f9f9; color: #555; cursor: not-allowed; border-color: #eee; }
 
-        .drawer-tabs { display: flex; border-bottom: 1px solid #eee; margin-bottom: 20px; gap: 20px; }
-        .drawer-tab { padding-bottom: 10px; font-size: 12px; font-weight: 700; text-transform: uppercase; color: #888; cursor: pointer; border-bottom: 2px solid transparent; }
+        .upload-area { width: 100px; height: 100px; border-radius: 50%; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; margin: 0 auto 10px; transition: 0.2s; background: #fafafa; }
+        .upload-area:hover { border-color: #000; background: #fff; }
+        .upload-area img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .upload-area i { font-size: 24px; color: #ccc; }
+        .upload-area.disabled { cursor: not-allowed; border-color: #eee; background: #f9f9f9; pointer-events: none; }
+
+        .drawer-tabs { display: flex; border-bottom: 1px solid #eee; margin-bottom: 20px; gap: 20px; overflow-x: auto; white-space: nowrap;}
+        .drawer-tab { padding-bottom: 10px; font-size: 12px; font-weight: 800; text-transform: uppercase; color: #888; cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; }
         .drawer-tab.active { color: #000; border-bottom-color: #000; }
-
-        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-        .toast { min-width: 280px; padding: 14px 22px; border-radius: 4px; background: #fff; color: #000; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 12px; border-left: 5px solid #000; animation: toastIn 0.3s forwards; }
-        .toast.success { border-left-color: #10b981; }
-        .toast.error { border-left-color: #ef4444; }
-        @keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-
-        .btn-icon { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--gray-200); background: #fff; cursor: pointer; border-radius: 2px; margin-left: 6px; }
-        .btn-icon:hover { border-color: #000; background: #000; color: #fff; }
+        .drawer-tab:hover { color: #000; }
 
         /* MODAL OTP XỊN XÒ */
         .modal-otp-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
         .modal-otp-box { background: #fff; width: 420px; padding: 30px; border-radius: 6px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: scaleIn 0.2s ease-out; }
-        .modal-otp-box h4 { font-weight: 800; margin-bottom: 10px; text-transform: uppercase; }
+        .modal-otp-box h4 { font-weight: 800; margin-bottom: 10px; text-transform: uppercase; color: #2563eb; }
         .modal-otp-box p { font-size: 13px; color: #666; margin-bottom: 25px; }
-        .modal-otp-box input { width: 100%; text-align: center; letter-spacing: 10px; font-size: 24px; font-weight: bold; margin-bottom: 20px; height: 50px; }
+        .modal-otp-box input { width: 100%; text-align: center; letter-spacing: 15px; font-size: 24px; font-weight: bold; margin-bottom: 20px; height: 50px; background: #fafafa; border: 1px solid var(--gray-300); border-radius: 4px; outline: none; }
+        .modal-otp-box input:focus { border-color: #2563eb; }
         @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        /* CSS cho Bảng (Table) */
-        .table-wrapper { border: 1px solid var(--gray-200); width: 100%; overflow-x: auto; background: #fff; }
-        table { width: 100%; border-collapse: collapse; min-width: 950px; table-layout: fixed; /* Bắt buộc để colgroup hoạt động chuẩn */ }
-        thead th { padding: 12px 15px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #222; background: #fafafa; border-bottom: 1px solid var(--gray-200); text-align: left;}
-        tbody td { padding: 12px 15px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; word-wrap: break-word; /* Chống tràn chữ */ }
+        /* BEE TOAST CUSTOM */
+        #beeToastHost { position: fixed; top: 30px; right: 30px; z-index: 999999; display: flex; flex-direction: column; gap: 15px; pointer-events: none; }
+        .bee-toast-box { min-width: 320px; max-width: 400px; padding: 18px 24px; border-radius: 8px; background: #fff; color: #000; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2); display: flex; align-items: flex-start; gap: 14px; border-left: 6px solid #000; animation: beeToastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; transition: all 0.3s ease; pointer-events: auto; }
+        .bee-toast-box.success { border-left-color: #10b981; }
+        .bee-toast-box.error { border-left-color: #ef4444; }
+        .bee-toast-box.warning { border-left-color: #f59e0b; }
+        .bee-toast-box.hiding { transform: translateX(120%); opacity: 0; margin-top: -80px; }
+        @keyframes beeToastSlideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     </style>
 </head>
 <body>
 
-<div class="container-bee">
+<div class="container">
     <div class="actions-bar">
-        <h5 class="page-title">Hệ Thống Nhân Sự</h5>
-        <button class="btn-bee" onclick="window.StaffApp.openDrawer('add')">
+        <nav class="tabs">
+            <div class="tab active">
+                <i class="bi bi-person-badge-fill"></i> QUẢN LÝ NHÂN VIÊN
+            </div>
+        </nav>
+        <button class="btn" id="btnAdd" onclick="window.StaffApp.openDrawer('add')">
             <i class="bi bi-person-plus-fill"></i> TẠO HỒ SƠ MỚI
         </button>
     </div>
 
     <section class="search-section">
         <div class="search-wrapper">
-            <input type="text" id="liveSearch" class="input-bee-search" placeholder="Tìm theo tên, mã, số điện thoại..." oninput="window.StaffApp.handleSearch(this.value)">
-            <select id="filterStatus" class="select-bee-filter" onchange="window.StaffApp.handleSearch()">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" id="liveSearch" class="search-input" placeholder="Tìm theo tên, mã, số điện thoại..." oninput="window.StaffApp.handleSearch(this.value)">
+            </div>
+            <select id="filterStatus" class="filter-select" onchange="window.StaffApp.handleSearch()">
                 <option value="">TẤT CẢ TRẠNG THÁI</option>
                 <option value="true">ĐANG LÀM VIỆC</option>
-                <option value="false">NGHỈ LÀM</option>
+                <option value="false">NGHỈ VIỆC</option>
             </select>
+            <button class="btn-reset" onclick="window.StaffApp.resetFilters()" title="Làm mới bộ lọc">
+                <i class="bi bi-arrow-counterclockwise"></i>
+            </button>
         </div>
     </section>
 
     <div class="table-wrapper">
         <table>
-            <colgroup>
-                <col style="width: 5%;">  <col style="width: 15%;"> <col style="width: 25%;"> <col style="width: 25%;"> <col style="width: 10%;"> <col style="width: 10%;"> <col style="width: 10%;"> </colgroup>
             <thead>
             <tr>
-                <th style="text-align:center;">STT</th>
-                <th>MÃ KHÁCH HÀNG</th>
-                <th>TÊN KHÁCH HÀNG</th>
+                <th style="width: 50px; text-align: center;">STT</th>
+                <th>MÃ NHÂN VIÊN</th>
+                <th>HỌ VÀ TÊN</th>
                 <th>LIÊN HỆ</th>
                 <th>GIỚI TÍNH</th>
-                <th style="text-align:center;">TRẠNG THÁI</th>
-                <th style="text-align:right;">THAO TÁC</th>
+                <th style="text-align: center;">TRẠNG THÁI</th>
+                <th style="text-align: right;">THAO TÁC</th>
             </tr>
             </thead>
             <tbody id="tableContent">
+            <tr><td colspan="7" style="text-align:center; padding: 20px; color:#888;">Đang tải dữ liệu...</td></tr>
             </tbody>
         </table>
     </div>
+
+    <div id="paginationContainer" class="pagination-wrapper"></div>
 </div>
 
-<div class="staff-overlay" id="staffOverlay" onclick="window.StaffApp.closeDrawer()"></div>
-<aside class="drawer-bee" id="staffDrawer">
+<div class="overlay" id="overlay" onclick="window.StaffApp.closeDrawer()"></div>
+<aside class="drawer" id="drawer">
     <div class="drawer-header">
-        <h3 id="drawerTitle" style="font-weight: 800; font-size: 14px; text-transform: uppercase;">THIẾT LẬP HỒ SƠ</h3>
-        <button class="btn-icon" onclick="window.StaffApp.closeDrawer()" style="border:none; font-size:20px;"><i class="bi bi-x-lg"></i></button>
+        <h3 class="drawer-title" id="drawerTitle">THIẾT LẬP HỒ SƠ</h3>
+        <button class="btn-icon" onclick="window.StaffApp.closeDrawer()" style="border:none;"><i class="bi bi-x-lg"></i></button>
     </div>
 
     <div class="drawer-body">
         <div class="drawer-tabs" id="drawerTabs">
-            <div class="drawer-tab active" onclick="window.StaffApp.switchTab('info')" id="tabInfo">THÔNG TIN HỒ SƠ</div>
-            <div class="drawer-tab" onclick="window.StaffApp.switchTab('address')" id="tabAddr">ĐỊA CHỈ TẠM TRÚ</div>
+            <div class="drawer-tab active" onclick="window.StaffApp.switchTab('info')" id="tabInfo">THÔNG TIN CHUNG</div>
+            <div class="drawer-tab" onclick="window.StaffApp.switchTab('address')" id="tabAddr">ĐỊA CHỈ LIÊN HỆ</div>
         </div>
 
         <div id="contentInfo">
-            <div id="avatarGroup" style="display: none;">
-                <div class="upload-area" onclick="if(!window.StaffApp.state.isViewMode) document.getElementById('fileInput').click()">
-                    <img id="imgPreview" src="https://via.placeholder.com/80">
-                    <input type="file" id="fileInput" hidden accept="image/*" onchange="window.StaffApp.previewImg(this)">
+            <div id="avatarGroup">
+                <div class="upload-area" id="uploadArea" onclick="if(!window.StaffApp.state.isViewMode) document.getElementById('inpFile').click()">
+                    <input type="file" id="inpFile" hidden accept="image/*" onchange="window.StaffApp.previewImage(this)">
+                    <img id="imgPreview" alt="Avatar">
+                    <i class="bi bi-camera" id="iconUpload"></i>
                 </div>
-                <p style="text-align:center; font-size:11px; color:#888; margin-bottom:20px;">Nhấn để cập nhật ảnh đại diện</p>
+                <div id="uploadHint" style="text-align: center; font-size: 11px; color: #888; margin-bottom: 20px;">Nhấn để tải ảnh đại diện</div>
             </div>
 
             <input type="hidden" id="nvId">
-            <div class="form-group"><label class="label-bee">Họ và Tên *</label><input type="text" id="nvHoTen" class="input-bee" placeholder="Nhập họ tên..."></div>
-
-            <div style="display: flex; gap: 15px;">
-                <div class="form-group" style="flex: 1;"><label class="label-bee">Số điện thoại *</label><input type="tel" id="nvSdt" class="input-bee" placeholder="09xxxxxxxx"></div>
-                <div class="form-group" style="flex: 1;"><label class="label-bee">Email *</label><input type="email" id="nvEmail" class="input-bee" placeholder="Ví dụ: hoten@gmail.com"></div>
-            </div>
-
-            <div id="passwordBlock" style="display: none; gap: 15px; background: #fdfdfd; border: 1px dashed #ccc; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
-                <div class="form-group" style="flex: 1; margin:0;"><label class="label-bee">Đổi mật khẩu (Bỏ trống nếu không đổi)</label><input type="password" id="nvPass" class="input-bee" placeholder="Mật khẩu mới..."></div>
-                <div class="form-group" style="flex: 1; margin:0;"><label class="label-bee">Xác nhận mật khẩu</label><input type="password" id="nvConfirmPass" class="input-bee" placeholder="Nhập lại mật khẩu mới..."></div>
+            <div class="form-group">
+                <label class="form-label">Họ và Tên <span style="color:red" class="required-star">*</span></label>
+                <input id="nvHoTen" class="form-input" placeholder="Nhập họ tên...">
             </div>
 
             <div style="display: flex; gap: 15px;">
-                <div class="form-group" style="flex: 1;"><label class="label-bee">Ngày sinh *</label><input type="date" id="nvNgaySinh" class="input-bee"></div>
                 <div class="form-group" style="flex: 1;">
-                    <label class="label-bee">Giới tính</label>
-                    <select id="nvGender" class="input-bee"><option value="Nam">Nam</option><option value="Nữ">Nữ</option></select>
+                    <label class="form-label">Số điện thoại <span style="color:red" class="required-star">*</span></label>
+                    <input id="nvSdt" class="form-input" placeholder="09xxxxxxxx">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label class="form-label">Email <span style="color:red" class="required-star">*</span></label>
+                    <input id="nvEmail" type="email" class="form-input" placeholder="Ví dụ: hoten@gmail.com">
                 </div>
             </div>
 
-            <div class="form-group" id="statusGroup">
-                <div style="display: flex; align-items: center; gap: 12px;">
+            <div id="passwordBlock" style="display: none; background: #f9f9f9; border: 1px dashed #ccc; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
+                <div style="display: flex; gap: 15px; width: 100%;">
+                    <div class="form-group" style="flex: 1; margin:0;">
+                        <label class="form-label">Đổi mật khẩu <span style="text-transform:none; font-weight:500; color:#888;">(Bỏ trống nếu giữ nguyên)</span></label>
+                        <input type="password" id="nvPass" class="form-input" placeholder="Mật khẩu mới...">
+                    </div>
+                    <div class="form-group" style="flex: 1; margin:0;">
+                        <label class="form-label">Xác nhận mật khẩu</label>
+                        <input type="password" id="nvConfirmPass" class="form-input" placeholder="Nhập lại mật khẩu mới...">
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 15px;">
+                <div class="form-group" style="flex: 2;">
+                    <label class="form-label">Ngày sinh <span style="color:red" class="required-star">*</span></label>
+                    <div style="display: flex; gap: 5px;">
+                        <select id="nvDay" class="form-select" style="flex: 1;"><option value="">Ngày</option></select>
+                        <select id="nvMonth" class="form-select" style="flex: 1;"><option value="">Tháng</option></select>
+                        <select id="nvYear" class="form-select" style="flex: 1.5;"><option value="">Năm</option></select>
+                    </div>
+                    <input type="hidden" id="nvNgaySinh"> </div>
+                <div class="form-group" style="flex: 1;">
+                    <label class="form-label">Giới tính</label>
+                    <select id="nvGender" class="form-select">
+                        <option value="Nam">Nam</option>
+                        <option value="Nữ">Nữ</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group" id="statusGroup" style="margin-top: 10px;">
+                <div class="switch-wrapper">
                     <label class="switch-square">
                         <input type="checkbox" id="nvTrangThaiSwitch" checked>
                         <span class="slider-square"></span>
                     </label>
-                    <span style="font-size: 12px; font-weight: 700;" id="statusLabel">ĐANG LÀM VIỆC</span>
+                    <span style="font-size: 13px; font-weight: 700;" id="statusLabel">ĐANG LÀM VIỆC</span>
                 </div>
             </div>
         </div>
 
         <div id="contentAddr" style="display: none;">
-            <div id="addressViewer" style="padding: 15px 20px; background: #fafafa; border: 1px solid #eee; font-size: 13px; border-radius: 2px; display: flex; justify-content: space-between; align-items: center;">
+            <div id="addressViewer" style="padding: 15px 20px; background: #fafafa; border: 1px solid #eee; font-size: 13px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
                 <div><i class="bi bi-geo-alt-fill" style="color: #ef4444; margin-right: 5px;"></i> <span id="txtFullAddr" style="font-weight: 600;">Chưa cập nhật</span></div>
-                <button id="btnEditAddr" class="btn-bee btn-secondary" style="height: 26px; padding: 0 10px;" onclick="window.StaffApp.enableEditAddress()"><i class="bi bi-pencil"></i> SỬA</button>
+                <button id="btnEditAddr" class="btn btn-secondary" style="height: 30px !important; padding: 0 10px !important; border-color: #2563eb; color: #2563eb;" onclick="window.StaffApp.enableEditAddress()"><i class="bi bi-pencil"></i> CẬP NHẬT</button>
             </div>
 
             <div id="editAddrGroup" style="padding-top: 15px;">
-                <label class="label-bee">Thiết lập địa chỉ liên hệ *</label>
-                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                    <select id="inpCity" class="input-bee" style="flex: 1;" onchange="window.StaffApp.Address.loadDistricts(this.value, 'inpDist', 'inpWard')"></select>
-                    <select id="inpDist" class="input-bee" style="flex: 1;" onchange="window.StaffApp.Address.loadWards(this.value, 'inpWard')" disabled></select>
-                    <select id="inpWard" class="input-bee" style="flex: 1;" disabled></select>
+                <label class="form-label">Thiết lập địa chỉ liên hệ <span style="color:red" class="required-star">*</span></label>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <select id="inpCity" class="form-select" onchange="window.StaffApp.Address.loadDistricts(this.value, 'inpDist', 'inpWard')">
+                        <option value="">-- Chọn Tỉnh / TP --</option>
+                    </select>
+                    <select id="inpDist" class="form-select" onchange="window.StaffApp.Address.loadWards(this.value, 'inpWard')" disabled>
+                        <option value="">-- Chọn Quận / Huyện --</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <select id="inpWard" class="form-select" disabled style="flex:1">
+                        <option value="">-- Chọn Phường / Xã --</option>
+                    </select>
+                    <input id="inpDetail" class="form-input" style="flex: 1.5;" placeholder="Số nhà, đường... (Tùy chọn)">
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="drawer-footer" id="drawerFooter">
-        <button class="btn-bee btn-secondary" style="flex: 1;" onclick="window.StaffApp.closeDrawer()">HỦY BỎ</button>
-        <button class="btn-bee" style="flex: 1;" id="btnSave" onclick="window.StaffApp.processSave()">LƯU HỒ SƠ</button>
+    <div class="drawer-footer">
+        <button class="btn btn-secondary" style="flex: 1; height: 40px !important;" onclick="window.StaffApp.closeDrawer()">HỦY BỎ</button>
+        <button class="btn" style="flex: 1; height: 40px !important;" id="btnSave" onclick="window.StaffApp.processSave()">LƯU HỒ SƠ</button>
     </div>
 </aside>
 
 <div class="modal-otp-overlay" id="otpModal">
     <div class="modal-otp-box">
-        <h4>XÁC THỰC EMAIL</h4>
+        <h4 style="color: #2563eb;"><i class="bi bi-envelope-check-fill" style="font-size: 24px; display: block; margin-bottom: 10px;"></i> XÁC THỰC EMAIL</h4>
         <p id="otpMessage">Hệ thống đang gửi mã xác thực đến Email...</p>
         <div id="otpInputGroup" style="display: none;">
-            <input type="text" id="inpOtpCode" class="input-bee" placeholder="------" maxlength="6">
+            <input type="text" id="inpOtpCode" class="form-input" style="text-align: center; letter-spacing: 15px; font-size: 24px; font-weight: bold; margin-bottom: 20px; height: 50px; background: #fafafa; border: 1px solid #ccc; outline: none;" placeholder="------" maxlength="6">
             <div style="display: flex; gap: 10px;">
-                <button class="btn-bee btn-secondary" style="flex: 1;" onclick="document.getElementById('otpModal').style.display='none'">HỦY BỎ</button>
-                <button class="btn-bee" style="flex: 1;" onclick="window.StaffApp.verifyOtpAndSave()">XÁC NHẬN MÃ</button>
+                <button class="btn btn-secondary" style="flex: 1; height: 40px !important;" onclick="document.getElementById('otpModal').style.display='none'">HỦY BỎ</button>
+                <button class="btn" style="flex: 1; height: 40px !important; background: #2563eb; border-color: #2563eb;" onclick="window.StaffApp.verifyOtpAndSave()">XÁC NHẬN MÀ GỬI</button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="toast-container" id="toastHost"></div>
+<div id="beeToastHost"></div>
 
 <script>
-    window.toast = function(msg, type = 'success') {
-        const h = document.getElementById('toastHost');
-        const e = document.createElement('div');
-        e.className = `toast ${type}`;
-        e.innerHTML = `<div><span style="font-weight:800;">${type === 'success' ? 'THÀNH CÔNG: ' : 'LỖI: '}</span>${msg}</div>`;
-        h.appendChild(e);
-        setTimeout(() => e.remove(), 4500);
-    };
+    // --- KHỞI TẠO TOAST VÀ CONFIRM (ĐỒNG BỘ 100%) ---
+    if (typeof window.toast === 'undefined') {
+        window.toast = function (message, type = 'success') {
+            let container = document.getElementById('beeToastHost');
+            if (!container) { container = document.createElement('div'); container.id = 'beeToastHost'; document.body.appendChild(container); }
+            const el = document.createElement('div');
+            el.className = `bee-toast-box ${type}`;
+            const prefix = type === 'success' ? 'THÀNH CÔNG' : (type === 'error' ? 'LỖI' : 'THÔNG BÁO');
+            const color = type === 'success' ? '#10b981' : (type === 'error' ? '#ef4444' : '#f59e0b');
+            const icon = type === 'success' ? 'bi-check-circle-fill' : (type === 'error' ? 'bi-x-circle-fill' : 'bi-exclamation-triangle-fill');
+            el.innerHTML = `
+                <i class="bi ${icon}" style="color:${color}; font-size:22px; margin-top:2px;"></i>
+                <div style="display: flex; flex-direction: column; flex: 1;">
+                    <span style="font-weight:800; font-size:12px; text-transform: uppercase; margin-bottom: 4px; color:${color}">${prefix}</span>
+                    <span style="font-weight:500; font-size:13px; color:#333; line-height: 1.4;">${message}</span>
+                </div>
+                <i class="bi bi-x-lg" style="cursor: pointer; margin-left: 10px; font-size: 18px; color:#999; transition: 0.2s;" onmouseover="this.style.color='#000'" onmouseout="this.style.color='#999'" onclick="this.parentElement.remove()"></i>
+            `;
+            container.appendChild(el);
+            setTimeout(() => { if (el.parentNode) { el.classList.add('hiding'); setTimeout(() => el.remove(), 300); } }, 3500);
+        };
+    }
+    if (typeof window.toastConfirm === 'undefined') {
+        window.toastConfirm = function (title, message, onConfirm, onCancel) {
+            let container = document.getElementById('beeToastHost');
+            if (!container) { container = document.createElement('div'); container.id = 'beeToastHost'; document.body.appendChild(container); }
+            const el = document.createElement('div');
+            el.className = `bee-toast-box warning`;
+            el.style.flexDirection = 'column'; el.style.alignItems = 'stretch';
+            el.innerHTML = `
+                <div style="display: flex; gap: 12px; align-items: flex-start; width: 100%;">
+                    <i class="bi bi-question-circle-fill" style="color:#f59e0b; font-size:24px; margin-top:2px;"></i>
+                    <div style="display:flex; flex-direction:column; flex:1;">
+                        <span style="font-weight:800; font-size:13px; text-transform:uppercase; margin-bottom:6px; color:#000;">${title}</span>
+                        <span style="font-weight:500; font-size:13px; color:#555; line-height: 1.5;">${message}</span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px; border-top: 1px dashed #eee; padding-top: 12px;">
+                    <button class="btn btn-secondary" id="toastCancel" style="height: 32px !important; font-size: 11px; padding: 0 16px !important; border-radius: 4px;">HỦY BỎ</button>
+                    <button class="btn" id="toastOk" style="height: 32px !important; font-size: 11px; padding: 0 16px !important; border-radius: 4px;">XÁC NHẬN</button>
+                </div>
+            `;
+            container.appendChild(el);
+            el.querySelector('#toastOk').onclick = () => { el.classList.add('hiding'); setTimeout(() => el.remove(), 300); if(onConfirm) onConfirm(); };
+            el.querySelector('#toastCancel').onclick = () => { el.classList.add('hiding'); setTimeout(() => el.remove(), 300); if(onCancel) onCancel(); };
+        };
+    }
 
+    // --- MAIN APP ---
     window.StaffApp = {
-        state: { q: '', status: '', editingId: null, isViewMode: false, originalEmail: '', tempFormData: null },
+        state: {
+            page: 0, size: 10, totalPages: 0, q: '', status: '',
+            editingId: null, isViewMode: false, originalEmail: '', tempPayload: null
+        },
 
         Address: {
             async loadProvinces(sid) {
                 const res = await fetch('https://esgoo.net/api-tinhthanh/1/0.htm');
                 const d = await res.json();
-                document.getElementById(sid).innerHTML = '<option value="">-- Tỉnh/Thành --</option>' + d.data.map(p => `<option value="${p.id}" data-name="${p.full_name}">${p.full_name}</option>`).join('');
+                document.getElementById(sid).innerHTML = '<option value="">-- Tỉnh/TP --</option>' + d.data.map(p => `<option value="${p.id}" data-name="${p.full_name}">${p.full_name}</option>`).join('');
             },
             async loadDistricts(pid, did, wid) {
                 const ds = document.getElementById(did); const ws = document.getElementById(wid);
@@ -275,6 +402,7 @@
         },
 
         init() {
+            this.initDateDropdowns();
             this.loadData();
             this.Address.loadProvinces('inpCity');
 
@@ -283,53 +411,153 @@
             };
         },
 
-        async loadData() {
-            const res = await fetch(`/api/nhan-vien/list-json?q=${this.state.q}&status=${this.state.status}`);
-            const data = await res.json();
-            this.renderTable(data);
+        // 🌟 INIT DROPDOWN NGÀY THÁNG NĂM CHỐNG SAI SÓT
+        initDateDropdowns() {
+            const daySel = document.getElementById('nvDay');
+            const monthSel = document.getElementById('nvMonth');
+            const yearSel = document.getElementById('nvYear');
+
+            let dHtml = '<option value="">Ngày</option>';
+            for(let i=1; i<=31; i++) dHtml += `<option value="${i<10?'0'+i:i}">${i}</option>`;
+            daySel.innerHTML = dHtml;
+
+            let mHtml = '<option value="">Tháng</option>';
+            for(let i=1; i<=12; i++) mHtml += `<option value="${i<10?'0'+i:i}">Tháng ${i}</option>`;
+            monthSel.innerHTML = mHtml;
+
+            const currYear = new Date().getFullYear();
+            let yHtml = '<option value="">Năm</option>';
+            for(let i=currYear-15; i>=currYear-80; i--) yHtml += `<option value="${i}">${i}</option>`;
+            yearSel.innerHTML = yHtml;
+
+            const syncDate = () => {
+                const d = daySel.value, m = monthSel.value, y = yearSel.value;
+                document.getElementById('nvNgaySinh').value = (d && m && y) ? `${y}-${m}-${d}` : '';
+            };
+            daySel.onchange = syncDate; monthSel.onchange = syncDate; yearSel.onchange = syncDate;
         },
 
-        renderTable(list) {
-            document.getElementById('tableContent').innerHTML = list.map((item, idx) => `
+        setDateDropdowns(dateStr) {
+            if(!dateStr) {
+                document.getElementById('nvDay').value = '';
+                document.getElementById('nvMonth').value = '';
+                document.getElementById('nvYear').value = '';
+                return;
+            }
+            const parts = dateStr.split('-');
+            if(parts.length === 3) {
+                document.getElementById('nvYear').value = parts[0];
+                document.getElementById('nvMonth').value = parts[1];
+                document.getElementById('nvDay').value = parts[2];
+                document.getElementById('nvNgaySinh').value = dateStr;
+            }
+        },
+
+        // 🌟 LOAD DATA CÓ PHÂN TRANG (API TRẢ VỀ DẠNG PAGE)
+        async loadData() {
+            const tbody = document.getElementById('tableContent');
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px; color:#888;">Đang tải dữ liệu...</td></tr>`;
+            try {
+                // Do API cũ list-json không có phân trang, mình đang móc sang dùng filter ở Client
+                // Nếu Backend sau này sửa thành Pageable thì dùng cách lấy Data giống Khách Hàng nhé
+                const res = await fetch(`/api/nhan-vien/list-json?q=${this.state.q}&status=${this.state.status}`);
+                let list = await res.json();
+
+                // Thuật toán cắt mảng để giả lập phân trang ở Frontend
+                this.state.totalPages = Math.ceil(list.length / this.state.size);
+                if (this.state.page >= this.state.totalPages) this.state.page = 0; // Reset nếu quá trang
+
+                const start = this.state.page * this.state.size;
+                const end = start + this.state.size;
+                const pageContent = list.slice(start, end);
+
+                this.renderTable(pageContent, start);
+                this.renderPagination({ totalPages: this.state.totalPages, totalElements: list.length, numberOfElements: pageContent.length });
+
+            } catch(e) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px; color:red;">Lỗi tải dữ liệu!</td></tr>`;
+            }
+        },
+
+        renderTable(list, startIdx) {
+            const tbody = document.getElementById('tableContent');
+            if(!list || list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 40px; color:#888; font-style:italic;">Không tìm thấy nhân viên nào</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = list.map((item, idx) => `
                 <tr>
-                    <td style="text-align:center; font-weight:800; color:#888;">${idx+1}</td>
-                    <td style="font-weight:800;">${item.ma || '---'}</td>
-                    <td style="font-weight:700;">${item.hoTen || 'Chưa cập nhật'}</td>
+                    <td style="text-align:center;">${startIdx + idx + 1}</td>
+                    <td style="font-weight:800; color:#555;">${item.ma || '---'}</td>
+                    <td><span style="font-weight: 700; color: #000; font-size: 13px;">${item.hoTen || 'Chưa cập nhật'}</span></td>
                     <td>
                         <div style="font-weight:700;">${item.soDienThoai || '---'}</div>
-                        <div style="font-size:11px; color:#666; margin-top:3px;">${item.email || '---'}</div>
+                        <div style="font-size:12px; color:#666;">${item.email || '---'}</div>
                     </td>
-                    <td style="font-weight:600; text-transform: uppercase;">${item.gioiTinh || '---'}</td>
+                    <td>${item.gioiTinh || '---'}</td>
                     <td style="text-align:center;">
                         <label class="switch-sm"><input type="checkbox" ${item.trangThai?'checked':''} onchange="window.StaffApp.quickToggle(${item.id}, this)"><span class="slider-sm"></span></label>
                     </td>
-                    <td style="text-align:right;">
-                        <button class="btn-icon" onclick="window.StaffApp.openEdit(${item.id}, true)"><i class="bi bi-eye"></i></button>
-                        <button class="btn-icon" onclick="window.StaffApp.openEdit(${item.id}, false)"><i class="bi bi-pencil"></i></button>
+                    <td style="text-align:right; white-space: nowrap;">
+                        <button class="btn-icon" title="Xem chi tiết" onclick="window.StaffApp.openEdit(${item.id}, true)"><i class="bi bi-eye"></i></button>
+                        <button class="btn-icon" title="Sửa hồ sơ" onclick="window.StaffApp.openEdit(${item.id}, false)"><i class="bi bi-pencil"></i></button>
                     </td>
                 </tr>
             `).join('');
         },
 
+        renderPagination(data) {
+            const container = document.getElementById('paginationContainer');
+            if (data.totalPages <= 0) { container.innerHTML = ''; return; }
+
+            let html = `<div class="pagination-info">Hiển thị ${data.numberOfElements || 0}/${data.totalElements || 0} bản ghi</div><div class="pagination">`;
+            html += `<button class="page-number" ${this.state.page === 0 ? 'disabled' : ''} onclick="window.StaffApp.changePage(${this.state.page - 1})"><i class="bi bi-chevron-left"></i></button>`;
+
+            const last = data.totalPages; const delta = 1;
+            const left = this.state.page + 1 - delta; const right = this.state.page + 1 + delta;
+            const range = []; const rangeWithDots = []; let l;
+
+            for (let i = 1; i <= last; i++) { if (i === 1 || i === last || (i >= left && i <= right)) range.push(i); }
+            for (let i of range) {
+                if (l) {
+                    if (i - l === 2) { rangeWithDots.push(l + 1); }
+                    else if (i - l !== 1) { rangeWithDots.push('...'); }
+                }
+                rangeWithDots.push(i); l = i;
+            }
+            for (let i of rangeWithDots) {
+                if (i === '...') {
+                    html += `<span class="page-number" style="border:none; background:transparent; pointer-events:none; cursor:default; min-width: 15px;">...</span>`;
+                } else {
+                    const pageIndex = i - 1;
+                    const activeClass = pageIndex === this.state.page ? 'active' : '';
+                    html += `<button class="page-number ${activeClass}" onclick="window.StaffApp.changePage(${pageIndex})">${i}</button>`;
+                }
+            }
+            html += `<button class="page-number" ${this.state.page === data.totalPages - 1 ? 'disabled' : ''} onclick="window.StaffApp.changePage(${this.state.page + 1})"><i class="bi bi-chevron-right"></i></button></div>`;
+            container.innerHTML = html;
+        },
+
+        changePage(p) { this.state.page = p; this.loadData(); window.scrollTo({ top: 0, behavior: 'smooth' }); },
+
         async quickToggle(id, el) {
             const original = !el.checked;
-            try {
-                const res = await fetch(`/api/nhan-vien/toggle-status/${id}`, { method: 'PATCH' });
-                if(res.ok) window.toast(await res.text(), "success");
-                else { el.checked = original; window.toast("Lỗi cập nhật!", "error"); }
-            } catch(e) { el.checked = original; window.toast("Mất kết nối!", "error"); }
+            window.toastConfirm("Xác nhận trạng thái", `Bạn có chắc chắn muốn thay đổi trạng thái làm việc của nhân viên này?`, async () => {
+                try {
+                    const res = await fetch(`/api/nhan-vien/toggle-status/${id}`, { method: 'PATCH' });
+                    if(res.ok) window.toast(await res.text(), "success");
+                    else { el.checked = original; window.toast("Hệ thống từ chối yêu cầu!", "error"); }
+                } catch(e) { el.checked = original; window.toast("Mất kết nối!", "error"); }
+            }, () => { el.checked = original; });
         },
 
         openDrawer(mode) {
             this.state.editingId = null; this.state.isViewMode = false; this.state.originalEmail = '';
 
             document.getElementById('drawerTitle').innerText = 'TẠO HỒ SƠ NHÂN VIÊN';
-
             document.getElementById('drawerTabs').style.display = 'flex';
 
-            document.getElementById('avatarGroup').style.display = 'none';
             document.getElementById('passwordBlock').style.display = 'none';
-
             document.getElementById('addressViewer').style.display = 'none';
             document.getElementById('editAddrGroup').style.display = 'block';
 
@@ -340,8 +568,9 @@
             this.switchTab('info');
             this.resetForm();
             this.toggleInputs(false);
-            document.getElementById('staffDrawer').classList.add('show');
-            document.getElementById('staffOverlay').classList.add('show');
+
+            document.getElementById('drawer').classList.add('show');
+            document.getElementById('overlay').classList.add('show');
         },
 
         async openEdit(id, isView) {
@@ -349,36 +578,46 @@
 
             document.getElementById('drawerTitle').innerText = isView ? 'CHI TIẾT NHÂN VIÊN' : 'CẬP NHẬT HỒ SƠ';
             document.getElementById('drawerTabs').style.display = 'flex';
-            document.getElementById('avatarGroup').style.display = 'block';
 
-            document.getElementById('passwordBlock').style.display = isView ? 'none' : 'flex';
-
+            document.getElementById('passwordBlock').style.display = isView ? 'none' : 'block';
             document.getElementById('nvTrangThaiSwitch').disabled = isView;
 
             this.switchTab('info');
-            const res = await fetch(`/api/nhan-vien/detail/${id}`);
-            const d = await res.json();
+            try {
+                const res = await fetch(`/api/nhan-vien/detail/${id}`);
+                if (!res.ok) throw new Error("Không thể tải thông tin");
+                const d = await res.json();
 
-            this.state.originalEmail = d.email;
+                this.state.originalEmail = d.email;
 
-            document.getElementById('nvId').value = d.id;
-            document.getElementById('nvHoTen').value = d.hoTen;
-            document.getElementById('nvSdt').value = d.soDienThoai;
-            document.getElementById('nvEmail').value = d.email;
-            document.getElementById('nvNgaySinh').value = d.ngaySinh;
-            document.getElementById('nvGender').value = d.gioiTinh;
-            document.getElementById('nvTrangThaiSwitch').checked = d.trangThai;
-            document.getElementById('statusLabel').innerText = d.trangThai ? "ĐANG LÀM VIỆC" : "NGHỈ VIỆC";
-            document.getElementById('imgPreview').src = d.hinhAnh || 'https://via.placeholder.com/80';
+                document.getElementById('nvId').value = d.id;
+                document.getElementById('nvHoTen').value = d.hoTen;
+                document.getElementById('nvSdt').value = d.soDienThoai;
+                document.getElementById('nvEmail').value = d.email;
 
-            document.getElementById('txtFullAddr').innerText = d.diaChi || 'Chưa cập nhật';
-            document.getElementById('addressViewer').style.display = 'flex';
-            document.getElementById('btnEditAddr').style.display = isView ? 'none' : 'block';
-            document.getElementById('editAddrGroup').style.display = 'none';
+                let dob = d.ngaySinh;
+                if (Array.isArray(dob)) dob = `${dob[0]}-${String(dob[1]).padStart(2, '0')}-${String(dob[2]).padStart(2, '0')}`;
+                else if (dob && dob.includes('T')) dob = dob.split('T')[0];
+                this.setDateDropdowns(dob);
 
-            this.toggleInputs(isView);
-            document.getElementById('staffDrawer').classList.add('show');
-            document.getElementById('staffOverlay').classList.add('show');
+                document.getElementById('nvGender').value = d.gioiTinh;
+                document.getElementById('nvTrangThaiSwitch').checked = d.trangThai;
+                document.getElementById('statusLabel').innerText = d.trangThai ? "ĐANG LÀM VIỆC" : "NGHỈ VIỆC";
+
+                const img = document.getElementById('imgPreview');
+                const icon = document.getElementById('iconUpload');
+                if(d.hinhAnh) { img.src = d.hinhAnh; img.style.display = 'block'; icon.style.display = 'none'; }
+                else { img.style.display = 'none'; icon.style.display = 'block'; }
+
+                document.getElementById('txtFullAddr').innerText = d.diaChi || 'Chưa cập nhật';
+                document.getElementById('addressViewer').style.display = 'flex';
+                document.getElementById('btnEditAddr').style.display = isView ? 'none' : 'block';
+                document.getElementById('editAddrGroup').style.display = 'none';
+
+                this.toggleInputs(isView);
+                document.getElementById('drawer').classList.add('show');
+                document.getElementById('overlay').classList.add('show');
+            } catch(e) { window.toast(e.message, 'error'); }
         },
 
         async enableEditAddress() {
@@ -428,122 +667,107 @@
         },
 
         async processSave() {
-            const name = document.getElementById('nvHoTen').value.trim();
-            const phone = document.getElementById('nvSdt').value.trim();
-            const email = document.getElementById('nvEmail').value.trim();
-            const dob = document.getElementById('nvNgaySinh').value;
-            const isNew = !this.state.editingId;
+            window.toastConfirm("Xác nhận lưu hồ sơ", "Bạn có chắc chắn muốn lưu thông tin nhân viên này?", async () => {
+                const btn = document.getElementById('btnSave');
+                btn.innerHTML = 'ĐANG XỬ LÝ...'; btn.disabled = true;
 
-            if (!name || !phone || !email || !dob) {
-                this.switchTab('info');
-                window.toast("Vui lòng điền đầy đủ các trường thông tin có dấu (*)", "error");
-                return;
-            }
+                const name = document.getElementById('nvHoTen').value.trim();
+                const phone = document.getElementById('nvSdt').value.trim();
+                const email = document.getElementById('nvEmail').value.trim();
+                const dob = document.getElementById('nvNgaySinh').value;
+                const isNew = !this.state.editingId;
 
-            const birthDate = new Date(dob);
-            const today = new Date();
-            let age = today.getFullYear() - birthDate.getFullYear();
-            if (age < 15) {
-                this.switchTab('info');
-                window.toast("Nhân viên phải từ 15 tuổi trở lên!", "error");
-                return;
-            }
-
-            const addrDiv = document.getElementById('editAddrGroup');
-            let city = this.Address.getText('inpCity');
-            let dist = this.Address.getText('inpDist');
-            let ward = this.Address.getText('inpWard');
-
-            if (addrDiv.style.display !== 'none') {
-                if (!city || !dist || !ward) {
-                    this.switchTab('address');
-                    window.toast("Vui lòng CHỌN ĐỦ Tỉnh/Thành, Quận/Huyện, Xã/Phường!", "error");
-                    return;
+                if (!name || !phone || !email || !dob) {
+                    this.switchTab('info'); window.toast("Vui lòng điền đầy đủ các trường thông tin có dấu (*)", "warning");
+                    btn.innerHTML = 'LƯU HỒ SƠ'; btn.disabled = false; return;
                 }
-            }
 
-            const fd = new FormData();
-            fd.append('hoTen', name);
-            fd.append('soDienThoai', phone);
-            fd.append('email', email);
-            fd.append('ngaySinh', dob);
-            fd.append('gioiTinh', document.getElementById('nvGender').value);
-            fd.append('trangThai', document.getElementById('nvTrangThaiSwitch').checked);
+                // Chặn không cho sửa admin
+                if (!isNew && email === 'admin@shop.com') {
+                    window.toast("Tài khoản Quản trị tối cao (Admin) không được phép sửa từ bảng này!", "error");
+                    btn.innerHTML = 'LƯU HỒ SƠ'; btn.disabled = false; return;
+                }
 
-            if(addrDiv.style.display !== 'none' && city && dist && ward) {
-                fd.append('diaChi', `${ward}, ${dist}, ${city}`);
-            } else {
-                fd.append('diaChi', document.getElementById('txtFullAddr').innerText);
-            }
+                const addrDiv = document.getElementById('editAddrGroup');
+                let city = this.Address.getText('inpCity');
+                let dist = this.Address.getText('inpDist');
+                let ward = this.Address.getText('inpWard');
 
-            if(!isNew) {
-                fd.append('id', this.state.editingId);
-
-                // ===============================================
-                // TÍCH HỢP CLOUDINARY: GỌI API ĐỂ LẤY URL VỀ
-                // ===============================================
-                const file = document.getElementById('fileInput').files[0];
-                if(file) {
-                    try {
-                        const imgFormData = new FormData();
-                        imgFormData.append('file', file);
-                        const uploadRes = await fetch('/api/upload', { method: 'POST', body: imgFormData });
-                        const uploadData = await uploadRes.json();
-
-                        if (uploadRes.ok && uploadData.url) {
-                            fd.append('hinhAnh', uploadData.url); // Ném link URL vào FormData
-                        } else {
-                            window.toast('Upload ảnh thất bại.', 'error');
-                            return;
-                        }
-                    } catch(e) {
-                        window.toast('Lỗi kết nối khi upload ảnh.', 'error');
-                        return;
+                if (addrDiv.style.display !== 'none') {
+                    if (!city || !dist || !ward) {
+                        this.switchTab('address'); window.toast("Vui lòng CHỌN ĐỦ Tỉnh/Thành, Quận/Huyện, Xã/Phường!", "warning");
+                        btn.innerHTML = 'LƯU HỒ SƠ'; btn.disabled = false; return;
                     }
                 }
-                // ===============================================
 
-                fd.append('password', document.getElementById('nvPass').value);
-                fd.append('confirmPassword', document.getElementById('nvConfirmPass').value);
-            }
-            this.state.tempFormData = fd;
+                const payload = new URLSearchParams();
+                payload.append('hoTen', name);
+                payload.append('soDienThoai', phone);
+                payload.append('email', email);
+                payload.append('ngaySinh', dob);
+                payload.append('gioiTinh', document.getElementById('nvGender').value);
+                payload.append('trangThai', document.getElementById('nvTrangThaiSwitch').checked);
 
-            const idParam = isNew ? '' : `&id=${this.state.editingId}`;
-
-            const checkPhoneRes = await fetch(`/api/nhan-vien/check-phone?phone=${phone}${idParam}`);
-            if (!checkPhoneRes.ok) {
-                this.switchTab('info');
-                window.toast(await checkPhoneRes.text(), "error");
-                return;
-            }
-
-            const isEmailChanged = (email !== this.state.originalEmail);
-
-            if (isNew || isEmailChanged) {
-                const checkEmailRes = await fetch(`/api/nhan-vien/check-email?email=${email}${idParam}`);
-
-                if (!checkEmailRes.ok) {
-                    this.switchTab('info');
-                    window.toast(await checkEmailRes.text(), "error");
-                    return;
-                }
-
-                document.getElementById('otpModal').style.display = 'flex';
-                document.getElementById('otpInputGroup').style.display = 'none';
-                document.getElementById('otpMessage').innerText = `Hệ thống đang gửi Email xác thực đến ${email}...`;
-
-                const res = await fetch(`/api/nhan-vien/send-otp?email=${email}`, { method: 'POST' });
-                if(res.ok) {
-                    document.getElementById('otpMessage').innerHTML = `Mã xác nhận 6 số đã được gửi tới hòm thư:<br><b>${email}</b>`;
-                    document.getElementById('otpInputGroup').style.display = 'block';
-                    document.getElementById('inpOtpCode').value = '';
+                let diaChiChiTiet = document.getElementById('inpDetail').value.trim();
+                if(addrDiv.style.display !== 'none' && city && dist && ward) {
+                    payload.append('diaChi', diaChiChiTiet ? `${diaChiChiTiet}, ${ward}, ${dist}, ${city}` : `${ward}, ${dist}, ${city}`);
                 } else {
-                    document.getElementById('otpModal').style.display = 'none';
-                    window.toast(await res.text(), "error");
+                    payload.append('diaChi', document.getElementById('txtFullAddr').innerText);
                 }
-            } else {
-                this.executeFinalSave();
-            }
+
+                if(!isNew) {
+                    payload.append('id', this.state.editingId);
+                    payload.append('password', document.getElementById('nvPass').value);
+                    payload.append('confirmPassword', document.getElementById('nvConfirmPass').value);
+                }
+
+                // 🌟 TÍCH HỢP UPLOAD ẢNH QUA CLOUDINARY TRƯỚC
+                const fileInput = document.getElementById('inpFile');
+                if (fileInput.files[0]) {
+                    try {
+                        const imgFormData = new FormData();
+                        imgFormData.append('file', fileInput.files[0]);
+                        const uploadRes = await fetch('/api/upload', { method: 'POST', body: imgFormData });
+                        const uploadData = await uploadRes.json();
+                        if (uploadRes.ok && uploadData.url) { payload.append('hinhAnh', uploadData.url); }
+                        else { window.toast('Upload ảnh thất bại.', 'error'); btn.innerHTML = 'LƯU HỒ SƠ'; btn.disabled = false; return; }
+                    } catch(e) { window.toast('Lỗi kết nối khi upload ảnh.', 'error'); btn.innerHTML = 'LƯU HỒ SƠ'; btn.disabled = false; return; }
+                } else if (!isNew) {
+                    const oldSrc = document.getElementById('imgPreview').src;
+                    if(oldSrc && !oldSrc.includes('placeholder')) payload.append('hinhAnh', oldSrc);
+                }
+
+                this.state.tempPayload = payload;
+                const idParam = isNew ? '' : `&id=${this.state.editingId}`;
+
+                const checkPhoneRes = await fetch(`/api/nhan-vien/check-phone?phone=${phone}${idParam}`);
+                if (!checkPhoneRes.ok) { this.switchTab('info'); window.toast(await checkPhoneRes.text(), "error"); btn.innerHTML = 'LƯU HỒ SƠ'; btn.disabled = false; return; }
+
+                const isEmailChanged = (email !== this.state.originalEmail);
+                if (isNew || isEmailChanged) {
+                    const checkEmailRes = await fetch(`/api/nhan-vien/check-email?email=${email}${idParam}`);
+                    if (!checkEmailRes.ok) { this.switchTab('info'); window.toast(await checkEmailRes.text(), "error"); btn.innerHTML = 'LƯU HỒ SƠ'; btn.disabled = false; return; }
+
+                    document.getElementById('otpModal').style.display = 'flex';
+                    document.getElementById('otpInputGroup').style.display = 'none';
+                    document.getElementById('otpMessage').innerText = `Hệ thống đang gửi Email xác thực đến ${email}...`;
+
+                    try {
+                        const res = await fetch(`/api/nhan-vien/send-otp?email=${email}`, { method: 'POST' });
+                        if(res.ok) {
+                            document.getElementById('otpMessage').innerHTML = `Mã xác nhận 6 số đã được gửi tới hòm thư:<br><b style="color:#000;">${email}</b>`;
+                            document.getElementById('otpInputGroup').style.display = 'block';
+                            document.getElementById('inpOtpCode').value = '';
+                        } else {
+                            document.getElementById('otpModal').style.display = 'none';
+                            window.toast(await res.text(), "error");
+                        }
+                    } catch(e) { document.getElementById('otpModal').style.display = 'none'; window.toast("Mất kết nối", "error"); }
+                    finally { btn.innerHTML = 'LƯU HỒ SƠ'; btn.disabled = false; }
+                } else {
+                    this.executeFinalSave();
+                }
+            }, () => {});
         },
 
         async verifyOtpAndSave() {
@@ -563,39 +787,67 @@
         async executeFinalSave() {
             try {
                 const isNew = !this.state.editingId;
-                const res = await fetch('/api/nhan-vien/save', { method: 'POST', body: this.state.tempFormData });
+                const res = await fetch('/api/nhan-vien/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: this.state.tempPayload
+                });
                 const msg = await res.text();
 
                 if(res.ok) {
-                    if(isNew) {
-                        window.toast("THÀNH CÔNG! MẬT KHẨU CỦA TÀI KHOẢN MỚI LÀ: 12345678", "success");
-                    } else {
-                        window.toast("CẬP NHẬT HỒ SƠ THÀNH CÔNG!", "success");
-                    }
-                    setTimeout(() => location.reload(), 2500);
+                    if(isNew) window.toast("THÀNH CÔNG! Mật khẩu Đăng nhập Mặc định là: 12345678", "success");
+                    else window.toast("CẬP NHẬT HỒ SƠ THÀNH CÔNG!", "success");
+                    this.closeDrawer();
+                    this.loadData();
                 } else {
                     window.toast(msg, "error");
                 }
             } catch(e) {
                 window.toast("Lỗi kết nối Server!", "error");
+            } finally {
+                document.getElementById('btnSave').innerHTML = 'LƯU HỒ SƠ';
+                document.getElementById('btnSave').disabled = false;
             }
         },
 
         toggleInputs(v) {
-            document.querySelectorAll('#staffDrawer input, #staffDrawer select').forEach(i => { if(i.id !== 'fileInput') i.disabled = v; });
+            document.querySelectorAll('#drawer .form-input, #drawer .form-select').forEach(i => { i.disabled = v; });
             document.getElementById('btnSave').style.display = v ? 'none' : 'block';
+            const uploadArea = document.getElementById('uploadArea');
+            if(v) {
+                uploadArea.classList.add('disabled'); document.getElementById('uploadHint').style.display = 'none';
+                document.querySelectorAll('.required-star').forEach(s => s.style.display = 'none');
+            } else {
+                uploadArea.classList.remove('disabled'); document.getElementById('uploadHint').style.display = 'block';
+                document.querySelectorAll('.required-star').forEach(s => s.style.display = 'inline');
+            }
         },
 
-        closeDrawer() { document.getElementById('staffDrawer').classList.remove('show'); document.getElementById('staffOverlay').classList.remove('show'); },
+        closeDrawer() { document.getElementById('drawer').classList.remove('show'); document.getElementById('overlay').classList.remove('show'); },
         resetForm() {
-            document.querySelectorAll('#staffDrawer input:not([type="checkbox"])').forEach(i => i.value = '');
-            document.getElementById('imgPreview').src = 'https://via.placeholder.com/80';
+            document.querySelectorAll('#drawer input:not([type="checkbox"]):not([type="hidden"])').forEach(i => i.value = '');
+            document.getElementById('imgPreview').src = ''; document.getElementById('imgPreview').style.display = 'none';
+            document.getElementById('iconUpload').style.display = 'block';
             this.Address.reset('inpCity', 'inpDist', 'inpWard');
-            document.getElementById('nvPass').value = '';
-            document.getElementById('nvConfirmPass').value = '';
+            this.setDateDropdowns('');
         },
-        previewImg(i) { if(i.files[0]) document.getElementById('imgPreview').src = URL.createObjectURL(i.files[0]); },
-        handleSearch(v) { if(v !== undefined) this.state.q = v; this.state.status = document.getElementById('filterStatus').value; this.loadData(); }
+        previewImage(input) {
+            if (input.files && input.files[0]) {
+                document.getElementById('imgPreview').src = URL.createObjectURL(input.files[0]);
+                document.getElementById('imgPreview').style.display = 'block';
+                document.getElementById('iconUpload').style.display = 'none';
+            }
+        },
+        handleSearch(v) {
+            clearTimeout(this.timeout);
+            this.timeout = setTimeout(() => {
+                if(v !== undefined) this.state.q = v;
+                this.state.status = document.getElementById('filterStatus').value;
+                this.state.page = 0;
+                this.loadData();
+            }, 500);
+        },
+        resetFilters() { document.getElementById('liveSearch').value = ''; document.getElementById('filterStatus').value = ''; this.handleSearch(''); }
     };
 
     window.StaffApp.init();

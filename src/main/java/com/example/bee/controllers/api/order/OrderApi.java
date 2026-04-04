@@ -8,6 +8,8 @@ import com.example.bee.entities.order.HoaDon;
 import com.example.bee.entities.order.HoaDonChiTiet;
 import com.example.bee.entities.order.LichSuHoaDon;
 import com.example.bee.entities.order.TrangThaiHoaDon;
+import com.example.bee.entities.order.YeuCauDoiTra;
+import com.example.bee.entities.order.ChiTietDoiTra;
 import com.example.bee.entities.product.SanPhamChiTiet;
 import com.example.bee.entities.promotion.MaGiamGia;
 import com.example.bee.entities.user.NhanVien;
@@ -17,6 +19,8 @@ import com.example.bee.repositories.order.HoaDonChiTietRepository;
 import com.example.bee.repositories.order.HoaDonRepository;
 import com.example.bee.repositories.order.LichSuHoaDonRepository;
 import com.example.bee.repositories.order.TrangThaiHoaDonRepository;
+import com.example.bee.repositories.order.YeuCauDoiTraRepository;
+import com.example.bee.repositories.order.ChiTietDoiTraRepository;
 import com.example.bee.repositories.products.SanPhamChiTietRepository;
 import com.example.bee.repositories.promotion.MaGiamGiaRepository;
 import com.example.bee.repositories.role.NhanVienRepository;
@@ -42,6 +46,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/hoa-don")
@@ -59,6 +64,9 @@ public class OrderApi {
     private final ThongBaoRepository thongBaoRepository;
     private final MaGiamGiaRepository maGiamGiaRepo;
 
+    private final YeuCauDoiTraRepository ycRepo;
+    private final ChiTietDoiTraRepository ctRepo;
+
     @Value("${momo.partnerCode}")
     private String partnerCode;
     @Value("${momo.accessKey}")
@@ -69,6 +77,13 @@ public class OrderApi {
     private String endpoint;
     @Value("${momo.notifyUrl}")
     private String notifyUrl;
+
+    @Value("${vnpay.tmnCode}")
+    private String vnp_TmnCode;
+    @Value("${vnpay.hashSecret}")
+    private String vnp_HashSecret;
+    @Value("${vnpay.payUrl}")
+    private String vnp_PayUrl;
 
     @GetMapping("/don-hang")
     public ResponseEntity<?> getDonHangChoXuLy(
@@ -128,32 +143,62 @@ public class OrderApi {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<HoaDonResponse> getDetail(@PathVariable Integer id) {
+    public ResponseEntity<?> getDetail(@PathVariable Integer id) {
         HoaDon hd = hdRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         List<HoaDonChiTiet> listHdct = hdctRepo.findByHoaDonId(id);
+
+        Map<Integer, Integer> returnedItems = new HashMap<>();
+        Date ngayCapNhatCuoi = hd.getNgayThanhToan();
+
+        // 🌟 LẤY TỔNG TIỀN HOÀN LẠI CHO KHÁCH
+        BigDecimal tongTienHoan = BigDecimal.ZERO;
+
+        List<YeuCauDoiTra> ycs = ycRepo.findAll().stream().filter(y -> y.getHoaDon().getId().equals(id) && "HOAN_THANH".equals(y.getTrangThai())).collect(Collectors.toList());
+        for (YeuCauDoiTra yc : ycs) {
+            if (ngayCapNhatCuoi == null || (yc.getNgayXuLy() != null && yc.getNgayXuLy().after(ngayCapNhatCuoi))) {
+                ngayCapNhatCuoi = yc.getNgayXuLy();
+            }
+            if (yc.getSoTienHoan() != null) {
+                tongTienHoan = tongTienHoan.add(yc.getSoTienHoan());
+            }
+            List<ChiTietDoiTra> cts = ctRepo.findByYeuCauDoiTraId(yc.getId());
+            for (ChiTietDoiTra ct : cts) {
+                Integer hdctId = ct.getHoaDonChiTiet().getId();
+                returnedItems.put(hdctId, returnedItems.getOrDefault(hdctId, 0) + ct.getSoLuong());
+            }
+        }
+
         BigDecimal tongTienHangThucTe = BigDecimal.ZERO;
-        List<HoaDonChiTietResponse> chiTietResponses = new ArrayList<>();
+        List<Map<String, Object>> chiTietResponses = new ArrayList<>();
+
         for (HoaDonChiTiet ct : listHdct) {
             BigDecimal giaBan = ct.getGiaTien();
             Integer soLuong = ct.getSoLuong();
+            Integer soLuongTra = returnedItems.getOrDefault(ct.getId(), 0);
+
             tongTienHangThucTe = tongTienHangThucTe.add(giaBan.multiply(BigDecimal.valueOf(soLuong)));
-            chiTietResponses.add(HoaDonChiTietResponse.builder()
-                    .id(ct.getId())
-                    .idSanPhamChiTiet(ct.getSanPhamChiTiet().getId())
-                    .idSanPham(ct.getSanPhamChiTiet().getSanPham().getId())
-                    .tenSanPham(ct.getSanPhamChiTiet().getSanPham().getTen())
-                    .sku(ct.getSanPhamChiTiet().getSku())
-                    .thuocTinh("Size " + ct.getSanPhamChiTiet().getKichThuoc().getTen() + " - " + ct.getSanPhamChiTiet().getMauSac().getTen())
-                    .hinhAnh(ct.getSanPhamChiTiet().getHinhAnh())
-                    .soLuong(soLuong)
-                    .donGia(ct.getSanPhamChiTiet().getGiaBan())
-                    .giaBan(giaBan)
-                    .build());
+
+            Map<String, Object> itemMap = new HashMap<>();
+            itemMap.put("id", ct.getId());
+            itemMap.put("idSanPhamChiTiet", ct.getSanPhamChiTiet().getId());
+            itemMap.put("idSanPham", ct.getSanPhamChiTiet().getSanPham().getId());
+            itemMap.put("tenSanPham", ct.getSanPhamChiTiet().getSanPham().getTen());
+            itemMap.put("sku", ct.getSanPhamChiTiet().getSku());
+            itemMap.put("thuocTinh", ct.getSanPhamChiTiet().getKichThuoc().getTen() + " - " + ct.getSanPhamChiTiet().getMauSac().getTen());
+            itemMap.put("hinhAnh", ct.getSanPhamChiTiet().getHinhAnh());
+            itemMap.put("soLuong", soLuong);
+            itemMap.put("donGia", ct.getSanPhamChiTiet().getGiaBan());
+            itemMap.put("giaBan", giaBan);
+            itemMap.put("soLuongTra", soLuongTra);
+
+            chiTietResponses.add(itemMap);
         }
+
         BigDecimal phiShip = hd.getPhiVanChuyen() != null ? hd.getPhiVanChuyen() : BigDecimal.ZERO;
         BigDecimal tongPhaiTra = hd.getGiaTong() != null ? hd.getGiaTong() : BigDecimal.ZERO;
         BigDecimal voucherCalculated = tongTienHangThucTe.add(phiShip).subtract(tongPhaiTra);
         if (voucherCalculated.compareTo(BigDecimal.ZERO) < 0) voucherCalculated = BigDecimal.ZERO;
+
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String tenNhanVienHienTai = "Hệ thống";
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -164,25 +209,31 @@ public class OrderApi {
                 tenNhanVienHienTai = nhanVienDangNhap.getHoTen();
             }
         }
-        HoaDonResponse response = HoaDonResponse.builder()
-                .id(hd.getId())
-                .ma(hd.getMa())
-                .tenKhachHang(hd.getKhachHang() != null ? hd.getKhachHang().getHoTen() : "Khách vãng lai")
-                .tenNhanVien(hd.getNhanVien() != null ? hd.getNhanVien().getHoTen() : tenNhanVienHienTai)
-                .sdtNhan(hd.getSdtNhan())
-                .diaChiGiaoHang(hd.getDiaChiGiaoHang())
-                .phuongThucThanhToan(hd.getPhuongThucThanhToan())
-                .trangThaiMa(hd.getTrangThaiHoaDon().getMa())
-                .trangThaiTen(hd.getTrangThaiHoaDon().getTen())
-                .loaiHoaDon(hd.getLoaiHoaDon())
-                .ngayTao(hd.getNgayTao() != null ? sdf.format(hd.getNgayTao()) : null)
-                .tienHang(tongTienHangThucTe)
-                .phiVanChuyen(phiShip)
-                .tienGiamVoucher(voucherCalculated)
-                .tienGiamSale(BigDecimal.ZERO)
-                .tongTien(tongPhaiTra)
-                .chiTiets(chiTietResponses)
-                .build();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", hd.getId());
+        response.put("ma", hd.getMa());
+        response.put("tenKhachHang", hd.getKhachHang() != null ? hd.getKhachHang().getHoTen() : (hd.getTenNguoiNhan() != null ? hd.getTenNguoiNhan() : "Khách vãng lai"));
+
+        response.put("sdtKhachHang", hd.getSdtNhan() != null ? hd.getSdtNhan() : (hd.getKhachHang() != null ? hd.getKhachHang().getSoDienThoai() : ""));
+        response.put("ghiChu", hd.getGhiChu());
+        response.put("ngayThanhToan", hd.getNgayThanhToan() != null ? sdf.format(hd.getNgayThanhToan()) : null);
+        response.put("ngayCapNhat", ngayCapNhatCuoi != null ? sdf.format(ngayCapNhatCuoi) : null);
+
+        response.put("tenNhanVien", hd.getNhanVien() != null ? hd.getNhanVien().getHoTen() : tenNhanVienHienTai);
+        response.put("diaChiGiaoHang", hd.getDiaChiGiaoHang());
+        response.put("phuongThucThanhToan", hd.getPhuongThucThanhToan());
+        response.put("trangThaiMa", hd.getTrangThaiHoaDon().getMa());
+        response.put("trangThaiTen", hd.getTrangThaiHoaDon().getTen());
+        response.put("loaiHoaDon", hd.getLoaiHoaDon());
+        response.put("ngayTao", hd.getNgayTao() != null ? sdf.format(hd.getNgayTao()) : null);
+        response.put("tienHang", tongTienHangThucTe);
+        response.put("phiVanChuyen", phiShip);
+        response.put("tienGiamVoucher", voucherCalculated);
+        response.put("tongTien", tongPhaiTra);
+        response.put("tienHoan", tongTienHoan); // 🌟 Truyền dữ liệu tiền hoàn
+        response.put("chiTiets", chiTietResponses);
+
         return ResponseEntity.ok(response);
     }
 
@@ -244,6 +295,41 @@ public class OrderApi {
                 "nextStatus", nextStatus.getTen(),
                 "nextStatusMa", nextStatus.getMa()
         ));
+    }
+
+    @PostMapping("/{id}/request-payment")
+    @Transactional
+    public ResponseEntity<?> requestPayment(@PathVariable Integer id) {
+        try {
+            HoaDon hd = hdRepo.findById(id)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy hóa đơn"));
+
+            if (!"CHUYEN_KHOAN".equalsIgnoreCase(hd.getPhuongThucThanhToan())) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Chỉ áp dụng cho đơn Chuyển khoản"));
+            }
+
+            TrangThaiHoaDon ttChoThanhToan = ttRepo.findByMa("CHO_THANH_TOAN");
+            if (ttChoThanhToan == null) throw new RuntimeException("Chưa cấu hình trạng thái CHO_THANH_TOAN trong DB");
+
+            hd.setTrangThaiHoaDon(ttChoThanhToan);
+            hdRepo.save(hd);
+
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            var nhanVienThaoTac = (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser"))
+                    ? nvRepo.findByTaiKhoan_TenDangNhap(auth.getName()).orElse(null)
+                    : null;
+
+            lsRepo.save(LichSuHoaDon.builder()
+                    .hoaDon(hd)
+                    .trangThaiHoaDon(ttChoThanhToan)
+                    .nhanVien(nhanVienThaoTac)
+                    .ghiChu("Nhân viên xác nhận chưa nhận được tiền, chuyển về Chờ thanh toán")
+                    .build());
+
+            return ResponseEntity.ok(Map.of("message", "Đã chuyển về Chờ thanh toán"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
     }
 
     @PatchMapping("/{id}/huy")
@@ -325,8 +411,6 @@ public class OrderApi {
                 }
             }
 
-            // 🚨 VÁ LỖI 1 & 2: Chỉ cho phép tài khoản Nhân viên thực sự mới được giảm 5%
-            // XÓA BỎ CHỨC NĂNG TÌM KIẾM THEO SỐ ĐIỆN THOẠI ĐỂ CHỐNG "XÀI KÉ"
             if (isStaffOrAdminLoggedIn) {
                 chietKhauNV = req.tienHang.multiply(new BigDecimal("0.05")).setScale(0, RoundingMode.HALF_UP);
 
@@ -336,7 +420,6 @@ public class OrderApi {
                 if (!ghiChu.isEmpty()) ghiChu += " - ";
                 ghiChu += "[Đơn mua nội bộ bởi: " + tenNv + "]";
 
-                // Gắn nhân viên vào đơn hàng để quản lý kho dễ truy vết
                 hd.setNhanVien(nvMua);
             }
 
@@ -370,7 +453,7 @@ public class OrderApi {
             hd.setGiaTong(tongTienCuoi);
 
             TrangThaiHoaDon ttBanDau;
-            if ("MOMO".equalsIgnoreCase(req.phuongThucThanhToan)) {
+            if ("MOMO".equalsIgnoreCase(req.phuongThucThanhToan) || "VNPAY".equalsIgnoreCase(req.phuongThucThanhToan)) {
                 ttBanDau = ttRepo.findByMa("CHO_THANH_TOAN");
             } else {
                 ttBanDau = ttRepo.findByMa("CHO_XAC_NHAN");
@@ -407,21 +490,22 @@ public class OrderApi {
             ls.setNgayTao(new Date());
             lsRepo.save(ls);
 
-            if ("COD".equalsIgnoreCase(req.phuongThucThanhToan)) {
-                try {
-                    if (savedHd.getKhachHang() != null && savedHd.getKhachHang().getTaiKhoan() != null) {
-                        ThongBao tb = new ThongBao();
-                        tb.setTaiKhoanId(savedHd.getKhachHang().getTaiKhoan().getId());
-                        tb.setTieuDe("Đặt hàng thành công");
-                        tb.setNoiDung("Đơn hàng #" + savedHd.getMa() + " đã được ghi nhận.");
-                        tb.setLoaiThongBao("ORDER");
-                        tb.setDaDoc(false);
-                        thongBaoRepository.save(tb);
-                    }
-                    if (req.email != null && !req.email.isBlank()) {
-                        emailService.sendOrderConfirmationEmail(savedHd, req.email);
-                    }
-                } catch (Exception e) {}
+            try {
+                if (savedHd.getKhachHang() != null && savedHd.getKhachHang().getTaiKhoan() != null) {
+                    ThongBao tb = new ThongBao();
+                    tb.setTaiKhoanId(savedHd.getKhachHang().getTaiKhoan().getId());
+                    tb.setTieuDe("Đặt hàng thành công");
+                    tb.setNoiDung("Đơn hàng #" + savedHd.getMa() + " đã được ghi nhận hệ thống.");
+                    tb.setLoaiThongBao("ORDER");
+                    tb.setDaDoc(false);
+                    thongBaoRepository.save(tb);
+                }
+
+                if (req.email != null && !req.email.isBlank()) {
+                    emailService.sendOrderConfirmationEmail(savedHd, req.email);
+                }
+            } catch (Exception e) {
+                System.out.println("Lỗi gửi Email: " + e.getMessage());
             }
 
             return ResponseEntity.ok(Map.of("message", "Đặt hàng thành công", "maHoaDon", savedHd.getMa(), "id", savedHd.getId(), "tongTienThucTe", tongTienCuoi));
@@ -463,12 +547,29 @@ public class OrderApi {
         if (hoaDon == null) {
             return ResponseEntity.notFound().build();
         }
+
+        Map<Integer, Integer> returnedItems = new HashMap<>();
+        BigDecimal tongTienHoan = BigDecimal.ZERO;
+        List<YeuCauDoiTra> ycs = ycRepo.findAll().stream().filter(y -> y.getHoaDon().getId().equals(hoaDon.getId()) && "HOAN_THANH".equals(y.getTrangThai())).collect(Collectors.toList());
+        for (YeuCauDoiTra yc : ycs) {
+            if (yc.getSoTienHoan() != null) {
+                tongTienHoan = tongTienHoan.add(yc.getSoTienHoan());
+            }
+            List<ChiTietDoiTra> cts = ctRepo.findByYeuCauDoiTraId(yc.getId());
+            for (ChiTietDoiTra ct : cts) {
+                Integer hdctId = ct.getHoaDonChiTiet().getId();
+                returnedItems.put(hdctId, returnedItems.getOrDefault(hdctId, 0) + ct.getSoLuong());
+            }
+        }
+
         java.util.Map<String, Object> result = new java.util.HashMap<>();
         result.put("ma", hoaDon.getMa());
         result.put("ngayTao", hoaDon.getNgayTao());
         result.put("tenNguoiNhan", hoaDon.getTenNguoiNhan());
         result.put("giaTong", hoaDon.getGiaTong());
         result.put("trangThaiHoaDon", hoaDon.getTrangThaiHoaDon());
+        result.put("tienHoan", tongTienHoan); // 🌟 Thêm tiền hoàn
+
         java.util.List<com.example.bee.entities.order.HoaDonChiTiet> danhSachChiTiet = hdctRepo.findByHoaDon(hoaDon);
         java.util.List<java.util.Map<String, Object>> listChiTiet = new java.util.ArrayList<>();
         if (danhSachChiTiet != null && !danhSachChiTiet.isEmpty()) {
@@ -476,6 +577,7 @@ public class OrderApi {
                 java.util.Map<String, Object> item = new java.util.HashMap<>();
                 item.put("soLuong", hdct.getSoLuong());
                 item.put("giaBan", hdct.getGiaTien());
+                item.put("soLuongTra", returnedItems.getOrDefault(hdct.getId(), 0)); // 🌟 Thêm số lượng trả
                 if (hdct.getSanPhamChiTiet() != null) {
                     item.put("hinhAnh", hdct.getSanPhamChiTiet().getHinhAnh());
                     if (hdct.getSanPhamChiTiet().getSanPham() != null) {
@@ -606,7 +708,7 @@ public class OrderApi {
                 if (hd != null && "CHO_THANH_TOAN".equals(hd.getTrangThaiHoaDon().getMa())) {
 
                     if ("0".equals(resultCode)) {
-                        TrangThaiHoaDon ttChoXacNhan = ttRepo.findByMa("CHO_XAC_NHAN");
+                        TrangThaiHoaDon ttChoXacNhan = ttRepo.findByMa("CHO_GIAO");
                         hd.setTrangThaiHoaDon(ttChoXacNhan);
                         hd.setNgayThanhToan(new Date());
                         hdRepo.save(hd);
@@ -666,17 +768,157 @@ public class OrderApi {
         return ResponseEntity.status(org.springframework.http.HttpStatus.FOUND).location(java.net.URI.create(redirectUrl)).build();
     }
 
+    @PostMapping("/vnpay-payment/{invoiceId}")
+    @Transactional
+    public ResponseEntity<?> getVnPayUrlOnline(@PathVariable Integer invoiceId, @RequestBody Map<String, Object> payload, HttpServletRequest request) {
+        try {
+            HoaDon hd = hdRepo.findById(invoiceId).orElseThrow(() -> new RuntimeException("Không tìm thấy Hóa đơn"));
+            BigDecimal totalAmount = hd.getGiaTong();
+
+            hd.setPhuongThucThanhToan("VNPAY");
+            hdRepo.save(hd);
+
+            String vnp_TxnRef = hd.getMa() + "_" + System.currentTimeMillis();
+            Map<String, String> vnp_Params = new HashMap<>();
+            vnp_Params.put("vnp_Version", "2.1.0");
+            vnp_Params.put("vnp_Command", "pay");
+            vnp_Params.put("vnp_TmnCode", vnp_TmnCode.trim());
+            vnp_Params.put("vnp_Amount", String.valueOf(totalAmount.multiply(new BigDecimal("100")).setScale(0, RoundingMode.HALF_UP)));
+            vnp_Params.put("vnp_CurrCode", "VND");
+            vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
+            vnp_Params.put("vnp_OrderInfo", "ThanhToan_Online_" + hd.getMa());
+            vnp_Params.put("vnp_OrderType", "other");
+            vnp_Params.put("vnp_Locale", "vn");
+
+            String onlineReturnUrl = "http://localhost:8080/api/hoa-don/vnpay-callback";
+            vnp_Params.put("vnp_ReturnUrl", onlineReturnUrl);
+            vnp_Params.put("vnp_IpAddr", "127.0.0.1");
+
+            Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+            vnp_Params.put("vnp_CreateDate", formatter.format(cld.getTime()));
+
+            List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
+            Collections.sort(fieldNames);
+            StringBuilder hashData = new StringBuilder();
+            StringBuilder query = new StringBuilder();
+            for (Iterator<String> itr = fieldNames.iterator(); itr.hasNext(); ) {
+                String fieldName = itr.next();
+                String fieldValue = vnp_Params.get(fieldName);
+                if ((fieldValue != null) && (fieldValue.length() > 0)) {
+                    String encodedValue = java.net.URLEncoder.encode(fieldValue, java.nio.charset.StandardCharsets.UTF_8.toString()).replace("+", "%20");
+                    String encodedName = java.net.URLEncoder.encode(fieldName, java.nio.charset.StandardCharsets.UTF_8.toString());
+                    hashData.append(fieldName).append('=').append(encodedValue);
+                    query.append(encodedName).append('=').append(encodedValue);
+                    if (itr.hasNext()) {
+                        query.append('&');
+                        hashData.append('&');
+                    }
+                }
+            }
+
+            String vnp_SecureHash = com.example.bee.utils.VnPayUtil.hmacSHA512(vnp_HashSecret.trim(), hashData.toString());
+            String paymentUrl = vnp_PayUrl.trim() + "?" + query.toString() + "&vnp_SecureHash=" + vnp_SecureHash;
+
+            return ResponseEntity.ok(Map.of("payUrl", paymentUrl));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/vnpay-callback")
+    @Transactional
+    public ResponseEntity<Void> vnpayCallbackOnline(HttpServletRequest request) {
+        String vnp_ResponseCode = request.getParameter("vnp_ResponseCode");
+        String vnp_TxnRef = request.getParameter("vnp_TxnRef");
+
+        String redirectUrl = "http://localhost:8080/customer#home";
+
+        try {
+            if (vnp_TxnRef != null && vnp_TxnRef.contains("_")) {
+                String maHD = vnp_TxnRef.split("_")[0];
+                HoaDon hd = hdRepo.findByMa(maHD);
+
+                if (hd != null && "CHO_THANH_TOAN".equals(hd.getTrangThaiHoaDon().getMa())) {
+
+                    if ("00".equals(vnp_ResponseCode)) {
+                        TrangThaiHoaDon ttChoXacNhan = ttRepo.findByMa("CHO_GIAO");
+                        hd.setTrangThaiHoaDon(ttChoXacNhan);
+                        hd.setNgayThanhToan(new Date());
+                        hdRepo.save(hd);
+
+                        lsRepo.save(LichSuHoaDon.builder()
+                                .hoaDon(hd).trangThaiHoaDon(ttChoXacNhan)
+                                .ghiChu("Thanh toán VNPay thành công").build());
+
+                        if (hd.getKhachHang() != null && hd.getKhachHang().getTaiKhoan() != null) {
+                            ThongBao tb = new ThongBao();
+                            tb.setTaiKhoanId(hd.getKhachHang().getTaiKhoan().getId());
+                            tb.setTieuDe("Thanh toán thành công");
+                            tb.setNoiDung("Đơn hàng #" + hd.getMa() + " đã được thanh toán qua VNPay.");
+                            tb.setLoaiThongBao("ORDER");
+                            tb.setDaDoc(false);
+                            thongBaoRepository.save(tb);
+                        }
+
+                        redirectUrl = "http://localhost:8080/customer#account";
+
+                    } else {
+                        TrangThaiHoaDon ttHuy = ttRepo.findByMa("DA_HUY");
+                        hd.setTrangThaiHoaDon(ttHuy);
+                        hdRepo.save(hd);
+
+                        List<HoaDonChiTiet> hdctList = hdctRepo.findByHoaDonId(hd.getId());
+                        for (HoaDonChiTiet ct : hdctList) {
+                            SanPhamChiTiet spct = ct.getSanPhamChiTiet();
+                            spct.setSoLuong(spct.getSoLuong() + ct.getSoLuong());
+                            spctRepo.save(spct);
+                        }
+
+                        if (hd.getMaGiamGia() != null) {
+                            MaGiamGia voucher = hd.getMaGiamGia();
+                            int luotMoi = voucher.getLuotSuDung() - 1;
+                            if (luotMoi >= 0) {
+                                voucher.setLuotSuDung(luotMoi);
+                                if (!voucher.getTrangThai() && voucher.getNgayKetThuc().isAfter(java.time.LocalDateTime.now())) {
+                                    voucher.setTrangThai(true);
+                                }
+                                maGiamGiaRepo.save(voucher);
+                            }
+                        }
+
+                        lsRepo.save(LichSuHoaDon.builder()
+                                .hoaDon(hd).trangThaiHoaDon(ttHuy)
+                                .ghiChu("Hủy đơn do khách hàng không hoàn tất thanh toán VNPay").build());
+
+                        redirectUrl = "http://localhost:8080/customer#checkout";
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return ResponseEntity.status(org.springframework.http.HttpStatus.FOUND).location(java.net.URI.create(redirectUrl)).build();
+    }
+
     @GetMapping("/thong-bao-moi")
     public ResponseEntity<?> getNewOnlineOrders() {
-        List<HoaDon> list = hdRepo.findTop5ByLoaiHoaDonAndTrangThaiHoaDon_MaOrderByNgayTaoDesc(1, "CHO_XAC_NHAN");
+        List<String> pendingStatuses = Arrays.asList("CHO_XAC_NHAN", "CHO_GIAO", "CHO_THANH_TOAN");
+
+        List<HoaDon> list = hdRepo.findTop5ByLoaiHoaDonAndTrangThaiHoaDon_MaInOrderByNgayTaoDesc(1, pendingStatuses);
         List<Map<String, Object>> result = new ArrayList<>();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
         for (HoaDon hd : list) {
             Map<String, Object> map = new HashMap<>();
             map.put("id", hd.getId());
             map.put("ma", hd.getMa());
             map.put("khachHang", hd.getTenNguoiNhan() != null ? hd.getTenNguoiNhan() : "Khách hàng");
             map.put("tongTien", hd.getGiaTong());
-            map.put("ngayTao", hd.getNgayTao());
+            map.put("ngayTao", hd.getNgayTao() != null ? sdf.format(hd.getNgayTao()) : "");
             result.add(map);
         }
         return ResponseEntity.ok(result);
@@ -701,5 +943,36 @@ public class OrderApi {
         public Integer chiTietSanPhamId;
         public Integer soLuong;
         public BigDecimal donGia;
+    }
+
+    @PostMapping("/{id}/confirm-transfer")
+    @Transactional
+    public ResponseEntity<?> confirmTransferPayment(@PathVariable Integer id) {
+        try {
+            HoaDon hd = hdRepo.findById(id)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy hóa đơn"));
+
+            if (!"CHO_THANH_TOAN".equals(hd.getTrangThaiHoaDon().getMa())) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Đơn hàng không ở trạng thái chờ thanh toán"));
+            }
+
+            TrangThaiHoaDon ttChoXacNhan = ttRepo.findByMa("CHO_XAC_NHAN");
+            if (ttChoXacNhan == null) throw new RuntimeException("Chưa cấu hình trạng thái CHO_XAC_NHAN trong DB");
+
+            hd.setTrangThaiHoaDon(ttChoXacNhan);
+            hd.setNgayThanhToan(new Date());
+            hdRepo.save(hd);
+
+            lsRepo.save(LichSuHoaDon.builder()
+                    .hoaDon(hd)
+                    .trangThaiHoaDon(ttChoXacNhan)
+                    .ghiChu("Khách hàng xác nhận đã chuyển khoản qua QR code")
+                    .ngayTao(new Date())
+                    .build());
+
+            return ResponseEntity.ok(Map.of("message", "Đã cập nhật trạng thái chờ xác nhận"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
     }
 }

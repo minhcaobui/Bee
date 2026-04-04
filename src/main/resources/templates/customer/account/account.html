@@ -59,17 +59,20 @@
         .account-order-id { font-size: 13px; font-weight: 500; margin-bottom: 4px; letter-spacing: 0.05em; }
         .account-order-meta { font-size: 12px; color: var(--muted); font-weight: 300; }
         .account-order-total { font-size: 15px; font-weight: 400; text-align: right; }
-        .account-order-status { padding: 6px 14px; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 500; border-radius: 2px; }
-        .status-delivered { background: rgba(61,90,76,0.1); color: var(--accent); }
-        .status-shipping { background: rgba(192,128,96,0.1); color: #c08060; }
-        .status-processing { background: rgba(0,0,0,0.05); color: var(--muted); }
-        .status-cancelled { background: rgba(192,60,60,0.08); color: #c03c3c; }
-        .status-payment { background: rgba(245, 158, 11, 0.1); color: #d97706; }
+
+        /* 🌟 CSS BADGE TRẠNG THÁI ĐỒNG BỘ */
+        .account-order-status { padding: 6px 14px; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; border-radius: 4px; display: inline-block; text-align: center; }
+        .status-CHO_THANH_TOAN { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
+        .status-CHO_XAC_NHAN { background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; }
+        .status-CHO_GIAO { background: #f3f4f6; color: #4b5563; border: 1px solid #e5e7eb; }
+        .status-DANG_GIAO { background: #dbeafe; color: #2563eb; border: 1px solid #bfdbfe; }
+        .status-HOAN_THANH { background: #d1fae5; color: #059669; border: 1px solid #a7f3d0; }
+        .status-DA_HUY { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
 
         /* Orders */
         .orders-filter-bar { display: flex; gap: 0; margin-bottom: 32px; border-bottom: 1px solid rgba(0,0,0,0.08); }
         .orders-filter-tab { padding: 12px 20px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border: none; background: none; font-family: 'DM Sans', sans-serif; color: var(--muted); font-weight: 400; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; position: relative; bottom: -1px; white-space: nowrap; }
-        .orders-filter-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+        .orders-filter-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
         .orders-filter-tab:hover { color: var(--text); }
 
         .account-order-card { background: var(--white); border: 1px solid rgba(0,0,0,0.07); margin-bottom: 16px; overflow: hidden; border-radius: 4px; }
@@ -88,17 +91,17 @@
         .order-step-dot svg { width: 12px; height: 12px; stroke: var(--muted); fill: none; transition: 0.3s; }
         .order-timeline-step.done .order-step-dot { background: var(--accent); border-color: var(--accent); }
         .order-timeline-step.done .order-step-dot svg { stroke: white; }
-        .order-timeline-step.current .order-step-dot { border-color: #c08060; background: white; }
-        .order-timeline-step.current .order-step-dot svg { stroke: #c08060; }
+        .order-timeline-step.current .order-step-dot { border-color: #4338ca; background: white; }
+        .order-timeline-step.current .order-step-dot svg { stroke: #4338ca; }
         .order-step-label { font-size: 10px; letter-spacing: 0.06em; color: var(--muted); text-transform: uppercase; text-align: center; }
         .order-timeline-step.done .order-step-label { color: var(--accent); font-weight: 500; }
-        .order-timeline-step.current .order-step-label { color: #c08060; font-weight: 500; }
+        .order-timeline-step.current .order-step-label { color: #4338ca; font-weight: 500; }
 
-        .account-order-card-footer { display: flex; justify-content: space-between; align-items: center; padding: 16px 28px; }
-        .order-total-text { font-size: 13px; color: var(--muted); font-weight: 300; }
-        .order-total-text strong { color: var(--text); font-weight: 500; font-size: 15px; }
-        .account-reorder-btn { font-size: 11px; letter-spacing: 0.1em; color: var(--accent); text-transform: uppercase; background: none; border: 1px solid var(--accent); padding: 10px 20px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 400; transition: background 0.2s, color 0.2s; border-radius: 2px; text-decoration:none;}
-        .account-reorder-btn:hover { background: var(--accent); color: white; }
+        .account-order-card-footer { display: flex; justify-content: space-between; align-items: center; padding: 20px 28px; background: #fafafa; }
+        .order-total-text { font-size: 14px; color: var(--text); font-weight: 500; }
+        .order-total-text strong { color: var(--accent); font-weight: 700; font-size: 18px; margin-left: 8px;}
+        .account-reorder-btn { font-size: 11px; letter-spacing: 0.1em; color: var(--text); text-transform: uppercase; background: none; border: 1px solid rgba(0,0,0,0.2); padding: 10px 20px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 600; transition: background 0.2s, color 0.2s, border-color 0.2s; border-radius: 2px; text-decoration:none;}
+        .account-reorder-btn:hover { background: var(--text); color: white; border-color: var(--text); }
 
         /* Profile */
         .profile-avatar-section { display: flex; align-items: center; gap: 28px; padding: 28px 32px; background: var(--white); border: 1px solid rgba(0,0,0,0.07); margin-bottom: 40px; max-width: 640px; border-radius: 4px; }
@@ -214,6 +217,24 @@
         }
     </style>
 
+    <div class="qr-modal-overlay" id="accQrModalOverlay" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 10000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); animation: fadeIn 0.3s ease;">
+        <div class="qr-modal" style="background: #fff; width: 420px; max-width: 90%; border-radius: 8px; padding: 32px 24px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2);">
+            <h3 style="font-family:'Cormorant Garamond',serif; font-size:28px; margin-bottom:8px; font-weight:600;">Thanh toán đơn hàng</h3>
+            <p style="font-size:13px; color:var(--muted); margin-bottom:20px;">Vui lòng mở ứng dụng ngân hàng và quét mã QR dưới đây để hoàn tất thanh toán.</p>
+
+            <img src="" id="accQrImage" style="width: 220px; height: 220px; margin: 15px auto; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; padding: 10px; display: block;" alt="Mã QR Chuyển Khoản">
+
+            <div style="font-size: 14px; margin-bottom: 24px; text-align: left; background: #f9f9fa; padding: 20px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.05);">
+                <div style="margin-bottom: 8px; display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(0,0,0,0.05); padding-bottom: 8px;"><span>Ngân hàng:</span> <strong id="accQrBankName" style="color: var(--text); font-weight: 600;">MB Bank</strong></div>
+                <div style="margin-bottom: 8px; display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(0,0,0,0.05); padding-bottom: 8px;"><span>Số tài khoản:</span> <strong id="accQrAccountNo" style="color: var(--text); font-weight: 600;">0988123456</strong></div>
+                <div style="margin-bottom: 8px; display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(0,0,0,0.05); padding-bottom: 8px;"><span>Chủ tài khoản:</span> <strong id="accQrAccountName" style="color: var(--text); font-weight: 600;">NGUYEN VAN HOANG</strong></div>
+                <div style="margin-bottom: 8px; display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(0,0,0,0.05); padding-bottom: 8px;"><span>Số tiền:</span> <strong id="accQrAmount" style="color:#dc2626; font-size:16px; font-weight: 600;">0 ₫</strong></div>
+                <div style="display: flex; justify-content: space-between;"><span>Nội dung CK:</span> <strong id="accQrContent" style="color:var(--accent); font-weight: 600;"></strong></div>
+            </div>
+            <button id="btnAccQrDone" style="padding: 16px 24px; background: var(--accent); color: white; border: none; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: 4px; width: 100%; transition: 0.3s;">Tôi đã chuyển khoản xong</button>
+        </div>
+    </div>
+
     <div id="guest-view">
         <div class="guest-container">
             <div class="guest-icon">
@@ -295,6 +316,7 @@
                     <button class="orders-filter-tab active" data-filter="all">Tất cả</button>
                     <button class="orders-filter-tab" data-filter="CHO_THANH_TOAN">Chờ thanh toán</button>
                     <button class="orders-filter-tab" data-filter="CHO_XAC_NHAN">Chờ xác nhận</button>
+                    <button class="orders-filter-tab" data-filter="CHO_GIAO">Chờ lấy hàng</button>
                     <button class="orders-filter-tab" data-filter="DANG_GIAO">Đang giao</button>
                     <button class="orders-filter-tab" data-filter="HOAN_THANH">Đã giao</button>
                     <button class="orders-filter-tab" data-filter="DA_HUY">Đã huỷ</button>
@@ -319,7 +341,7 @@
                     <div class="detail-info-item"><label>Thanh toán</label><p id="detPayment"></p><p id="detStatus"></p></div>
                 </div>
                 <table class="detail-product-table">
-                    <thead><tr><th>Sản phẩm</th><th style="text-align:center">SL</th><th style="text-align:right">Giá</th></tr></thead>
+                    <thead><tr><th>Sản phẩm</th><th style="text-align:center">Đơn giá</th><th style="text-align:center">SL</th><th style="text-align:right">Thành tiền</th></tr></thead>
                     <tbody id="detProductList"></tbody>
                 </table>
             </div>
@@ -515,6 +537,18 @@
             init: async function() {
                 this.bindEvents();
                 await this.fetchData();
+            },
+
+            getPaymentMethodDisplay: function(method) {
+                if (!method) return 'Chưa xác định';
+                const map = {
+                    'TIEN_MAT': 'Tiền mặt',
+                    'MOMO': 'Ví MoMo',
+                    'VNPAY': 'VNPay',
+                    'CHUYEN_KHOAN': 'Chuyển khoản QR',
+                    'COD': 'Thanh toán khi nhận hàng (COD)'
+                };
+                return map[method.toUpperCase()] || method;
             },
 
             bindEvents: function() {
@@ -728,16 +762,20 @@
                 }
             },
 
-            confirmAction: function(actionType) {
+            confirmAction: function(actionType, extraData) {
                 let title = "";
                 let message = "";
                 let confirmBtnText = "";
+                let btnColor = "var(--text)";
                 let actionFunc = null;
+                let iconHtml = '';
 
                 if (actionType === 'logout') {
                     title = "Đăng xuất";
                     message = "Bạn có chắc chắn muốn đăng xuất khỏi tài khoản không?";
                     confirmBtnText = "Đăng xuất";
+                    btnColor = "#dc2626";
+                    iconHtml = '<i class="bi bi-box-arrow-right" style="font-size: 32px; color: #dc2626;"></i>';
                     actionFunc = async () => {
                         await fetch('/logout', { method: 'POST' });
                         location.reload();
@@ -746,6 +784,8 @@
                     title = "Lưu thay đổi";
                     message = "Bạn có chắc chắn muốn cập nhật thông tin cá nhân?";
                     confirmBtnText = "Lưu thông tin";
+                    iconHtml = '<i class="bi bi-person-check" style="font-size: 32px; color: var(--accent);"></i>';
+                    btnColor = "var(--accent)";
                     actionFunc = () => this.updateProfile();
                 } else if (actionType === 'password') {
                     const pwC = document.getElementById('pwCurrent').value;
@@ -768,21 +808,48 @@
                     title = "Đổi mật khẩu";
                     message = "Bạn có chắc chắn muốn thay đổi mật khẩu hiện tại?";
                     confirmBtnText = "Xác nhận đổi";
+                    iconHtml = '<i class="bi bi-shield-lock" style="font-size: 32px; color: var(--accent);"></i>';
+                    btnColor = "var(--accent)";
                     actionFunc = () => this.handleChangePassword();
+                } else if (actionType === 'cancel_order') {
+                    title = "Xác nhận hủy đơn";
+                    message = "Bạn có chắc chắn muốn hủy đơn hàng này không? Hành động này không thể hoàn tác.";
+                    confirmBtnText = "Hủy đơn hàng";
+                    btnColor = "#dc2626";
+                    iconHtml = '<i class="fa-solid fa-circle-xmark" style="font-size: 32px; color: #dc2626;"></i>';
+                    actionFunc = async () => {
+                        try {
+                            const res = await fetch(`/api/hoa-don/${extraData}/huy`, {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ ghiChu: "Khách hàng hủy đơn từ Website" })
+                            });
+                            if(res.ok) {
+                                this.showAccountNotification("Thành công", "Đã hủy đơn hàng!");
+                                await this.fetchData(); // Tải lại danh sách đơn
+                            } else {
+                                const err = await res.json();
+                                this.showAccountNotification("Thất bại", err.message || "Không thể hủy đơn hàng này", true);
+                            }
+                        } catch(e) {
+                            this.showAccountNotification("Lỗi", "Lỗi kết nối máy chủ", true);
+                        }
+                    };
                 }
 
                 const overlay = document.createElement('div');
-                overlay.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:10000; display:flex; align-items:center; justify-content:center; animation:fadeIn 0.3s ease; backdrop-filter:blur(2px);';
+                overlay.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:10000; display:flex; align-items:center; justify-content:center; animation:fadeIn 0.3s ease; backdrop-filter:blur(3px);';
 
                 const modal = document.createElement('div');
-                modal.style.cssText = 'background:var(--white); padding:40px 32px; border-radius:4px; max-width:400px; width:90%; text-align:center; box-shadow:0 20px 40px rgba(0,0,0,0.15); transform:translateY(20px); animation:accSlideUp 0.3s ease forwards;';
+                modal.style.cssText = 'background:var(--white); padding:32px 32px 40px; border-radius:8px; max-width:400px; width:90%; text-align:center; box-shadow:0 20px 40px rgba(0,0,0,0.2); transform:translateY(20px); animation:accSlideUp 0.3s ease forwards; position: relative;';
 
                 modal.innerHTML =
-                    `<h3 style="font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:400; margin-bottom:12px; color:var(--text);">${title}</h3>` +
-                    `<p style="font-size:14px; color:var(--muted); margin-bottom:32px;">${message}</p>` +
+                    `<div style="margin-bottom: 20px;">${iconHtml}</div>` +
+                    `<h3 style="font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:600; margin-bottom:12px; color:var(--text);">${title}</h3>` +
+                    `<p style="font-size:14px; color:var(--muted); margin-bottom:32px; line-height: 1.5;">${message}</p>` +
                     `<div style="display:flex; gap:12px; justify-content:center;">` +
-                    `<button id="btn-cancel-action" style="padding:12px 24px; background:none; border:1px solid rgba(0,0,0,0.2); cursor:pointer; flex:1; border-radius:2px; font-family:'DM Sans',sans-serif; font-size:12px; letter-spacing:0.1em; text-transform:uppercase;">Hủy</button>` +
-                    `<button id="btn-execute-action" style="padding:12px 24px; background:var(--text); color:white; border:none; cursor:pointer; flex:1; border-radius:2px; font-family:'DM Sans',sans-serif; font-size:12px; letter-spacing:0.1em; text-transform:uppercase;">${confirmBtnText}</button>` +
+                    `<button id="btn-cancel-action" style="padding:14px 24px; background:#f4f4f5; border:1px solid rgba(0,0,0,0.05); color: var(--text); cursor:pointer; flex:1; border-radius:4px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; transition:0.2s;" onmouseover="this.style.background='#e4e4e7'" onmouseout="this.style.background='#f4f4f5'">Để sau</button>` +
+                    `<button id="btn-execute-action" style="padding:14px 24px; background:${btnColor}; color:white; border:none; cursor:pointer; flex:1; border-radius:4px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; transition:0.2s; box-shadow: 0 4px 12px ${btnColor}40;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">${confirmBtnText}</button>` +
                     `</div>`;
 
                 overlay.appendChild(modal);
@@ -791,7 +858,7 @@
                 if (!document.getElementById('acc-modal-styles')) {
                     const style = document.createElement('style');
                     style.id = 'acc-modal-styles';
-                    style.innerHTML = '@keyframes accSlideUp { to { transform: translateY(0); } }';
+                    style.innerHTML = '@keyframes accSlideUp { to { transform: translateY(0); opacity: 1;} from { transform: translateY(20px); opacity: 0;} }';
                     document.head.appendChild(style);
                 }
 
@@ -804,6 +871,10 @@
 
             confirmLogout: function() {
                 this.confirmAction('logout');
+            },
+
+            cancelOrder: function(id) {
+                this.confirmAction('cancel_order', id);
             },
 
             openReviewModal: function(detailId, pName, phanLoai, isEdit = false) {
@@ -929,7 +1000,7 @@
                 }
             },
 
-            // ================== CHI TIẾT ĐƠN HÀNG VIEW ==================
+            // 🌟 NÂNG CẤP HIỂN THỊ CHI TIẾT ĐƠN HÀNG VIEW
             viewOrderDetail: async function(orderId) {
                 try {
                     this.state.currentViewOrderId = orderId;
@@ -941,13 +1012,15 @@
                     document.getElementById('detTenNhan').innerText = data.tenKhachHang || data.tenNguoiNhan;
                     document.getElementById('detSdtNhan').innerText = data.sdtNhan;
                     document.getElementById('detDiaChi').innerText = data.diaChiGiaoHang;
-                    document.getElementById('detPayment').innerText = data.phuongThucThanhToan;
+                    document.getElementById('detPayment').innerText = this.getPaymentMethodDisplay(data.phuongThucThanhToan);
 
                     const currentStatus = data.trangThaiMa || (data.trangThaiHoaDon && data.trangThaiHoaDon.ma) || '';
                     document.getElementById('detStatus').innerText = data.trangThaiTen || this.getStatusConfig(currentStatus).label;
 
                     let html = '';
                     const chiTiets = data.chiTiets || data.hoaDonChiTiets || [];
+
+                    let calculatedGiaTamThoi = 0;
 
                     chiTiets.forEach(item => {
                         let reviewSectionHtml = '';
@@ -956,6 +1029,10 @@
                         const pName = item.tenSanPham || item.ten || (item.sanPhamChiTiet && item.sanPhamChiTiet.sanPham ? item.sanPhamChiTiet.sanPham.ten : 'Sản phẩm');
                         const pl = item.thuocTinh || item.phanLoai || (item.sanPhamChiTiet && item.sanPhamChiTiet.mauSac ? `${item.sanPhamChiTiet.mauSac.ten} - ${item.sanPhamChiTiet.kichThuoc.ten}` : '');
                         const sku = item.sku || (item.sanPhamChiTiet ? item.sanPhamChiTiet.sku : 'N/A');
+
+                        const itemPrice = item.giaBan || item.giaTien || 0;
+                        const itemQty = item.soLuong || 1;
+                        calculatedGiaTamThoi += (itemPrice * itemQty);
 
                         if (currentStatus === 'HOAN_THANH' && detailId) {
                             const existingReview = this.state.myReviews.find(r => r.hoaDonChiTietId === detailId);
@@ -993,28 +1070,30 @@
                                     <img src="${item.hinhAnh||''}" class="detail-prod-img" style="margin-top:4px;" onerror="this.src='https://placehold.co/60x80'">
                                     <div style="flex:1;">
                                         <div style="font-family:'Cormorant Garamond', serif; font-size: 17px; font-weight:500; transition:color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text)'">${pName}</div>
-                                        <div style="color:var(--muted); font-size: 12px; margin-top:2px;">SKU: ${sku}</div>
-                                        <div style="color:var(--muted); font-size: 12px; margin-top:2px;">${pl}</div>
+                                        <div style="color:var(--muted); font-size: 12px; margin-top:2px;">SKU: <span style="font-weight:500; color:var(--text);">${sku}</span></div>
+                                        <div style="color:var(--muted); font-size: 12px; margin-top:2px;">Phân loại: <span style="font-weight:500; color:var(--text);">${pl}</span></div>
                                         ${reviewSectionHtml}
                                     </div>
                                 </div>
                             </td>
-                            <td style="text-align:center; vertical-align:top; padding-top:24px;">${item.soLuong || 1}</td>
-                            <td style="text-align:right; vertical-align:top; padding-top:24px;">${this.formatCurrency(item.giaBan || item.giaTien)}</td>
+                            <td style="text-align:center; vertical-align:top; padding-top:24px; font-size:13px;">${this.formatCurrency(itemPrice)}</td>
+                            <td style="text-align:center; vertical-align:top; padding-top:24px; font-size:13px;">${itemQty}</td>
+                            <td style="text-align:right; vertical-align:top; padding-top:24px; font-size:13px; font-weight:600; color:var(--accent);">${this.formatCurrency(itemPrice * itemQty)}</td>
                         </tr>`;
                     });
 
-                    // 🌟 GIAO DIỆN TỔNG TIỀN KIỂU MỚI BÊN PHẢI (AUTH VIEW)
                     const phiShip = data.phiVanChuyen || 0;
-                    const giamGia = data.giaTriKhuyenMai || 0;
-                    const giaTamThoi = data.giaTamThoi || 0;
                     const tongTien = data.tongTien || data.giaTong || 0;
+                    const giaTamThoi = calculatedGiaTamThoi;
 
-                    let giamGiaText = data.maGiamGia ? `Voucher giảm giá (${data.maGiamGia.maCode || data.maGiamGia.code})` : 'Voucher giảm giá';
+                    let giamGia = (giaTamThoi + phiShip) - tongTien;
+                    if (giamGia < 0) giamGia = data.giaTriKhuyenMai || data.tienGiam || 0;
+
+                    let giamGiaText = data.maGiamGia ? `Voucher giảm giá (${data.maGiamGia.maCode || data.maGiamGia.code || data.maGiamGia.ma || ''})` : 'Voucher giảm giá';
 
                     let totalRow = `
                         <tr>
-                            <td colspan="3" style="padding-top: 24px; border-bottom: none;">
+                            <td colspan="4" style="padding-top: 24px; border-bottom: none;">
                                 <div style="display:flex; justify-content:flex-end;">
                                     <div style="width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 12px;">
                                         <div style="display:flex; justify-content:space-between; font-size:13px;">
@@ -1039,8 +1118,9 @@
                         </tr>
                     `;
 
-                    if (currentStatus === 'CHO_THANH_TOAN') {
-                        totalRow += `<tr><td colspan="3" style="text-align:right; padding-top:15px; border-bottom:none;"><button onclick="window.AccountApp.repayOrder(${data.id}, ${tongTien})" class="account-form-save" style="border-radius:4px; padding:12px 24px;"><i class="bi bi-wallet2"></i> THANH TOÁN NGAY</button></td></tr>`;
+                    // 🌟 ẨN/HIỆN NÚT THANH TOÁN THEO PHƯƠNG THỨC THANH TOÁN
+                    if (currentStatus === 'CHO_THANH_TOAN' && data.phuongThucThanhToan && data.phuongThucThanhToan.toUpperCase() !== 'COD') {
+                        totalRow += `<tr><td colspan="4" style="text-align:right; padding-top:15px; border-bottom:none;"><button onclick="window.AccountApp.repayOrder(${data.id}, ${tongTien}, '${data.phuongThucThanhToan}', '${data.ma}')" class="account-form-save" style="border-radius:4px; padding:12px 24px;"><i class="bi bi-wallet2"></i> THANH TOÁN NGAY</button></td></tr>`;
                     }
 
                     document.getElementById('detProductList').innerHTML = html + totalRow;
@@ -1202,45 +1282,144 @@
                     const statusObj = this.getStatusConfig(ord.trangThaiMa);
 
                     let actionButtons = '';
-                    if (ord.trangThaiMa === 'CHO_THANH_TOAN') {
-                        actionButtons += `<button onclick="window.AccountApp.repayOrder(${ord.id}, ${ord.tongTien})" class="account-reorder-btn" style="background:var(--accent); color:white; margin-right:10px; border-color:var(--accent);"><i class="bi bi-wallet2"></i> Thanh toán ngay</button>`;
+
+                    if (ord.trangThaiMa === 'CHO_XAC_NHAN' || ord.trangThaiMa === 'CHO_THANH_TOAN') {
+                        actionButtons += `<button onclick="window.AccountApp.cancelOrder(${ord.id})" class="account-reorder-btn" style="color:#dc2626; border-color:rgba(220,38,38,0.2); background:rgba(220,38,38,0.05); margin-right:10px;"><i class="fa-solid fa-xmark"></i> Hủy đơn</button>`;
                     }
-                    if (ord.trangThaiMa === 'HOAN_THANH' || ord.trangThaiMa === 'DA_HUY') {
+
+                    // 🌟 FIX LỖI: Chỉ hiện nút thanh toán nếu không phải COD
+                    if (ord.trangThaiMa === 'CHO_THANH_TOAN' && ord.phuongThucThanhToan && ord.phuongThucThanhToan.toUpperCase() !== 'COD') {
+                        actionButtons += `<button onclick="window.AccountApp.repayOrder(${ord.id}, ${ord.tongTien}, '${ord.phuongThucThanhToan}', '${ord.ma}')" class="account-reorder-btn" style="background:var(--accent); color:white; margin-right:10px; border-color:var(--accent);"><i class="bi bi-wallet2"></i> Thanh toán ngay</button>`;
+                    }
+
+                    if (ord.trangThaiMa === 'HOAN_THANH' || ord.trangThaiMa === 'DA_HUY' || ord.trangThaiMa === 'TU_CHOI_TRA_HANG' || ord.trangThaiMa === 'DA_HOAN_TIEN') {
                         actionButtons += `<button onclick="window.AccountApp.reorder(${ord.id})" class="account-reorder-btn" style="margin-right:10px;"><i class="bi bi-cart-plus"></i> Mua lại</button>`;
                     }
 
                     actionButtons += `<button onclick="window.AccountApp.viewOrderDetail(${ord.id})" class="account-reorder-btn">Xem Chi Tiết</button>`;
+
+                    const tongTien = ord.tongTien || ord.giaTong || 0;
 
                     html += `<div class="account-order-card" data-status="${ord.trangThaiMa}">
                         <div class="account-order-card-header">
                             <div><div class="account-order-id">#${ord.ma}</div><div class="account-order-meta">${ord.ngayTao}</div></div>
                             <span class="account-order-status ${statusObj.cssClass}">${statusObj.label}</span>
                         </div>
+
                         <div class="order-timeline">${this.generateTimelineHTML(ord.trangThaiMa)}</div>
-                        <div class="account-order-card-footer">
-                            <div class="order-total-text">Tổng: <strong>${this.formatCurrency(ord.tongTien)}</strong></div>
-                            <div>${actionButtons}</div>
+
+                        <div class="account-order-card-footer" style="display:flex; justify-content: space-between; align-items: center; padding: 20px 28px; background: #fafafa;">
+                            <div style="font-size:14px; color:var(--text); font-weight: 500; text-transform:uppercase;">
+                                Thành tiền: <span style="font-size:18px; font-weight:700; color:var(--accent); margin-left: 8px;">${this.formatCurrency(tongTien)}</span>
+                            </div>
+                            <div style="display:flex; align-items:center;">
+                                ${actionButtons}
+                            </div>
                         </div>
                     </div>`;
                 });
                 container.innerHTML = html;
             },
 
-            repayOrder: async function(orderId, amount) {
-                this.showAccountNotification("Đang xử lý", "Đang kết nối cổng thanh toán MoMo...");
+            // 🌟 Hàm gọi API xác nhận đã chuyển khoản
+            finishQrPayment: async function(orderId) {
+                const btn = document.getElementById('btnAccQrDone');
+                const oldText = btn.innerText;
+                btn.innerText = 'Đang xử lý...';
+                btn.disabled = true;
+
                 try {
-                    const momoRes = await fetch(`/api/hoa-don/momo-payment/${orderId}`, {
+                    const res = await fetch(`/api/hoa-don/${orderId}/confirm-transfer`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ amount: amount })
+                        headers: { 'Content-Type': 'application/json' }
                     });
-                    if (!momoRes.ok) throw new Error("Lỗi kết nối API MoMo Online!");
-                    const momoData = await momoRes.json();
-                    if (momoData.payUrl) window.location.href = momoData.payUrl;
-                    else throw new Error(momoData.message || "MoMo không trả về Link thanh toán!");
-                } catch (error) {
-                    console.error(error);
-                    this.showAccountNotification("Thất bại", "Không thể tạo link thanh toán, vui lòng thử lại sau!", true);
+
+                    if (res.ok) {
+                        document.getElementById('accQrModalOverlay').style.display = 'none';
+                        this.showAccountNotification("Thành công", "Đã gửi xác nhận. Cửa hàng đang kiểm tra thanh toán của bạn!");
+
+                        // Cập nhật lại dữ liệu đơn hàng mà không cần F5 trang
+                        await this.fetchData();
+                        if (this.state.currentViewOrderId === orderId) {
+                            this.viewOrderDetail(orderId);
+                        }
+                    } else {
+                        const err = await res.json();
+                        this.showAccountNotification("Thất bại", err.message || "Có lỗi xảy ra, vui lòng thử lại!", true);
+                    }
+                } catch(e) {
+                    this.showAccountNotification("Lỗi", "Không thể kết nối đến máy chủ!", true);
+                } finally {
+                    btn.innerText = oldText;
+                    btn.disabled = false;
+                }
+            },
+
+            // 🌟 NÂNG CẤP XỬ LÝ THANH TOÁN LẠI ĐÚNG PHƯƠNG THỨC
+            repayOrder: async function(orderId, amount, paymentMethod, orderCode) {
+                if (!paymentMethod || paymentMethod.toUpperCase() === 'COD') {
+                    this.showAccountNotification("Thông báo", "Đơn hàng thanh toán khi nhận hàng (COD) không cần thanh toán online.");
+                    return;
+                }
+
+                const methodUpper = paymentMethod.toUpperCase();
+
+                if (methodUpper === 'MOMO') {
+                    this.showAccountNotification("Đang xử lý", "Đang kết nối cổng thanh toán MoMo...");
+                    try {
+                        const momoRes = await fetch(`/api/hoa-don/momo-payment/${orderId}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ amount: amount })
+                        });
+                        if (!momoRes.ok) throw new Error("Lỗi kết nối API MoMo Online!");
+                        const momoData = await momoRes.json();
+                        if (momoData.payUrl) window.location.href = momoData.payUrl;
+                        else throw new Error(momoData.message || "MoMo không trả về Link thanh toán!");
+                    } catch (error) {
+                        console.error(error);
+                        this.showAccountNotification("Thất bại", "Không thể tạo link thanh toán MoMo, vui lòng thử lại sau!", true);
+                    }
+                }
+                else if (methodUpper === 'VNPAY') {
+                    this.showAccountNotification("Đang xử lý", "Đang kết nối cổng thanh toán VNPay...");
+                    try {
+                        const vnpayRes = await fetch(`/api/hoa-don/vnpay-payment/${orderId}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ amount: amount })
+                        });
+                        if (!vnpayRes.ok) throw new Error("Lỗi kết nối API VNPay Online!");
+                        const vnpayData = await vnpayRes.json();
+                        if (vnpayData.payUrl) window.location.href = vnpayData.payUrl;
+                        else throw new Error(vnpayData.message || "VNPay không trả về Link thanh toán!");
+                    } catch (error) {
+                        console.error(error);
+                        this.showAccountNotification("Thất bại", "Không thể tạo link thanh toán VNPay, vui lòng thử lại sau!", true);
+                    }
+                }
+                else if (methodUpper === 'CHUYEN_KHOAN') {
+                    const bankId = "MB";
+                    const accountNo = "0988123456";
+                    const accountName = "NGUYEN VAN HOANG";
+                    const addInfo = "ThanhToan_" + orderCode;
+
+                    const qrUrl = `https://img.vietqr.io/image/${bankId}-${accountNo}-compact2.png?amount=${amount}&addInfo=${addInfo}&accountName=${encodeURIComponent(accountName)}`;
+
+                    document.getElementById('accQrImage').src = qrUrl;
+                    document.getElementById('accQrBankName').innerText = bankId;
+                    document.getElementById('accQrAccountNo').innerText = accountNo;
+                    document.getElementById('accQrAccountName').innerText = accountName;
+                    document.getElementById('accQrAmount').innerText = this.formatCurrency(amount);
+                    document.getElementById('accQrContent').innerText = addInfo;
+
+                    // 🌟 Gắn Order ID vào nút bấm để xử lý API
+                    document.getElementById('btnAccQrDone').setAttribute('onclick', `window.AccountApp.finishQrPayment(${orderId})`);
+
+                    document.getElementById('accQrModalOverlay').style.display = 'flex';
+                }
+                else {
+                    this.showAccountNotification("Thất bại", "Hệ thống không hỗ trợ thanh toán lại trực tuyến cho phương thức này.", true);
                 }
             },
 
@@ -1348,18 +1527,32 @@
 
             getStatusConfig: function(statusCode) {
                 const map = {
-                    'CHO_THANH_TOAN': { label: 'Chờ thanh toán', cssClass: 'status-processing' },
-                    'CHO_XAC_NHAN': { label: 'Chờ duyệt', cssClass: 'status-processing' },
-                    'CHO_GIAO': { label: 'Đang chuẩn bị', cssClass: 'status-processing' },
-                    'DANG_GIAO': { label: 'Đang giao', cssClass: 'status-shipping' },
-                    'HOAN_THANH': { label: 'Đã nhận', cssClass: 'status-delivered' },
-                    'DA_HUY': { label: 'Đã hủy', cssClass: 'status-cancelled' }
+                    'CHO_THANH_TOAN': { label: 'Chờ thanh toán', cssClass: 'status-CHO_THANH_TOAN' },
+                    'CHO_XAC_NHAN': { label: 'Chờ xác nhận', cssClass: 'status-CHO_XAC_NHAN' },
+                    'DA_XAC_NHAN': { label: 'Đã xác nhận', cssClass: 'status-CHO_GIAO' },
+                    'CHO_GIAO': { label: 'Chờ giao hàng', cssClass: 'status-CHO_GIAO' },
+                    'DANG_GIAO': { label: 'Đang giao hàng', cssClass: 'status-DANG_GIAO' },
+                    'HOAN_THANH': { label: 'Hoàn thành', cssClass: 'status-HOAN_THANH' },
+                    'DA_HUY': { label: 'Đã hủy', cssClass: 'status-DA_HUY' },
+                    'GIAO_THAT_BAI': { label: 'Giao thất bại / Hoàn hàng', cssClass: 'status-DA_HUY' },
+                    'YEU_CAU_TRA_HANG': { label: 'Yêu cầu trả hàng', cssClass: 'status-CHO_XAC_NHAN' },
+                    'TU_CHOI_TRA_HANG': { label: 'Từ chối trả hàng', cssClass: 'status-DA_HUY' },
+                    'DA_HOAN_TIEN': { label: 'Đã hoàn tiền', cssClass: 'status-HOAN_THANH' }
                 };
-                return map[statusCode] || { label: statusCode, cssClass: 'status-processing' };
+                return map[statusCode] || { label: statusCode || 'Trạng thái', cssClass: 'status-CHO_XAC_NHAN' };
             },
 
             generateTimelineHTML: function(currentStatus) {
-                if (currentStatus === 'DA_HUY') return '<div style="color:#c03c3c; font-size:12px; padding: 10px 0;">Đơn hàng đã bị hủy.</div>';
+                if (currentStatus === 'DA_HUY' || currentStatus === 'GIAO_THAT_BAI' || currentStatus === 'TU_CHOI_TRA_HANG') {
+                    return `<div style="color:#c03c3c; font-size:13px; font-weight:600; padding: 10px 0;"><i class="fa-solid fa-circle-xmark"></i> ${this.getStatusConfig(currentStatus).label}.</div>`;
+                }
+
+                if (currentStatus === 'YEU_CAU_TRA_HANG') {
+                    return `<div style="color:#d97706; font-size:13px; font-weight:600; padding: 10px 0;"><i class="fa-solid fa-rotate-left"></i> Đang yêu cầu trả hàng.</div>`;
+                }
+                if (currentStatus === 'DA_HOAN_TIEN') {
+                    return `<div style="color:#059669; font-size:13px; font-weight:600; padding: 10px 0;"><i class="fa-solid fa-money-bill-transfer"></i> Đã hoàn tiền thành công.</div>`;
+                }
 
                 const steps = [
                     { code: 'CHO_XAC_NHAN', label: 'ĐẶT HÀNG' },
@@ -1370,16 +1563,20 @@
 
                 let curIdx = steps.findIndex(s => s.code === currentStatus);
                 if (currentStatus === 'CHO_THANH_TOAN') curIdx = 0;
-                if(currentStatus === 'HOAN_THANH') curIdx = 3;
+                if (currentStatus === 'DA_XAC_NHAN') curIdx = 1;
+                if (currentStatus === 'HOAN_THANH') curIdx = 3;
 
                 let html = '<div class="order-timeline-steps">';
                 steps.forEach((s, idx) => {
-                    let cls = (idx < curIdx || currentStatus === 'HOAN_THANH') ? 'done' : (idx === curIdx ? 'current' : '');
+                    let cls = '';
+                    if (currentStatus === 'HOAN_THANH' || idx < curIdx) cls = 'done';
+                    else if (idx === curIdx) cls = 'current';
+
                     html += `
-            <div class="order-timeline-step ${cls}">
-                <div class="order-step-dot"><svg viewBox="0 0 24 24" stroke-width="2" fill="none" stroke="currentColor"><path d="M5 13l4 4L19 7"/></svg></div>
-                <div class="order-step-label">${s.label}</div>
-            </div>`;
+                        <div class="order-timeline-step ${cls}">
+                            <div class="order-step-dot"><svg viewBox="0 0 24 24" stroke-width="2" fill="none" stroke="currentColor"><path d="M5 13l4 4L19 7"/></svg></div>
+                            <div class="order-step-label">${s.label}</div>
+                        </div>`;
                 });
                 return html + '</div>';
             },
@@ -1668,7 +1865,6 @@
                 }
             },
 
-            // 🌟 NÂNG CẤP TRA CỨU KHÁCH GUEST (GUEST VIEW)
             openGuestTrack: function() {
                 document.getElementById('guestTrackModal').style.display = 'flex';
             },
@@ -1676,6 +1872,8 @@
                 document.getElementById('guestTrackModal').style.display = 'none';
                 document.getElementById('guestOrderResult').style.display = 'none';
             },
+
+            // 🌟 NÂNG CẤP POPUP GUEST (Tra cứu đơn khách vãng lai)
             guestTrackOrder: async function() {
                 const ma = document.getElementById('guestOrderCode').value.trim();
                 const resultDiv = document.getElementById('guestOrderResult');
@@ -1698,22 +1896,30 @@
 
                     const data = await res.json();
                     const maTrangThai = (data.trangThaiHoaDon && data.trangThaiHoaDon.ma) ? data.trangThaiHoaDon.ma : 'UNDEFINED';
-                    const tongTien = data.giaTong || 0;
+                    const tongTien = data.tongTien || data.giaTong || 0;
                     const tenKhach = data.tenNguoiNhan || 'Khách hàng';
                     const statusObj = this.getStatusConfig(maTrangThai);
-
-                    // 🌟 NÂNG CẤP: LẤY CHI TIẾT SỐ TIỀN
-                    const giaTamThoi = data.giaTamThoi || 0;
-                    const phiShip = data.phiVanChuyen || 0;
-                    const giamGia = data.giaTriKhuyenMai || 0;
-                    let giamGiaText = data.maGiamGia ? `Voucher giảm giá (${data.maGiamGia.maCode || data.maGiamGia.code})` : 'Voucher giảm giá';
 
                     const dsSanPham = data.chiTiets || data.hoaDonChiTiets || [];
                     let dsSanPhamHtml = '';
 
+                    let calculatedGiaTamThoi = 0;
+
                     if (dsSanPham.length > 0) {
-                        dsSanPhamHtml = '<div style="margin-top: 15px; border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 15px;">';
-                        dsSanPhamHtml += '<div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:12px;">Sản phẩm đã đặt</div>';
+                        dsSanPhamHtml = `
+                        <div style="margin-top: 15px; border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 15px;">
+                            <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:12px;">Sản phẩm đã đặt</div>
+                            <table class="detail-product-table" style="margin-bottom:0;">
+                                <thead>
+                                    <tr>
+                                        <th>Sản phẩm</th>
+                                        <th style="text-align:center">Đơn giá</th>
+                                        <th style="text-align:center">SL</th>
+                                        <th style="text-align:right">Thành tiền</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                        `;
 
                         dsSanPham.forEach(item => {
                             const hinhAnh = item.hinhAnh || (item.sanPhamChiTiet ? item.sanPhamChiTiet.hinhAnh : '');
@@ -1723,25 +1929,39 @@
                             const gia = item.giaBan || item.giaTien || 0;
                             const sl = item.soLuong || 1;
 
+                            calculatedGiaTamThoi += (gia * sl);
+
                             dsSanPhamHtml += `
-                                <div style="display:flex; align-items:flex-start; margin-bottom: 12px; gap: 12px;">
-                                    <img src="${hinhAnh || 'https://placehold.jp/150x150.png'}" style="width: 50px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid rgba(0,0,0,0.05);">
-                                    <div style="flex: 1;">
-                                        <div style="font-size:13px; font-weight:600; color:var(--text); margin-bottom:2px;">${tenSP}</div>
-                                        <div style="font-size:11px; color:var(--muted); margin-bottom:2px;">Mã SP: ${sku}</div>
-                                        <div style="font-size:11px; color:var(--muted);">Phân loại: ${phanLoai}</div>
-                                    </div>
-                                    <div style="text-align: right;">
-                                        <div style="font-size:13px; font-weight:600; color:var(--text);">${this.formatCurrency(gia)}</div>
-                                        <div style="font-size:11px; color:var(--muted); margin-top: 3px;">x${sl}</div>
-                                    </div>
-                                </div>
+                                <tr>
+                                    <td>
+                                        <div style="display:flex;align-items:flex-start;">
+                                            <img src="${hinhAnh || 'https://placehold.co/60x80'}" class="detail-prod-img" style="margin-top:4px;">
+                                            <div style="flex:1;">
+                                                <div style="font-family:'Cormorant Garamond', serif; font-size: 15px; font-weight:500;">${tenSP}</div>
+                                                <div style="color:var(--muted); font-size: 11px; margin-top:2px;">SKU: <span style="font-weight:500; color:var(--text);">${sku}</span></div>
+                                                <div style="color:var(--muted); font-size: 11px; margin-top:2px;">Phân loại: <span style="font-weight:500; color:var(--text);">${phanLoai}</span></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align:center; vertical-align:top; padding-top:24px; font-size:12px;">${this.formatCurrency(gia)}</td>
+                                    <td style="text-align:center; vertical-align:top; padding-top:24px; font-size:12px;">${sl}</td>
+                                    <td style="text-align:right; vertical-align:top; padding-top:24px; font-size:12px; font-weight:600; color:var(--accent);">${this.formatCurrency(gia * sl)}</td>
+                                </tr>
                             `;
                         });
-                        dsSanPhamHtml += '</div>';
+                        dsSanPhamHtml += `</tbody></table></div>`;
                     }
 
-                    // 🌟 NÂNG CẤP: BẢNG TỔNG KẾT TIỀN CHO GUEST
+                    const phiShip = data.phiVanChuyen || 0;
+                    const giaTamThoi = calculatedGiaTamThoi;
+
+                    let giamGia = (giaTamThoi + phiShip) - tongTien;
+                    if (giamGia < 0) {
+                        giamGia = data.giaTriKhuyenMai || data.tienGiam || 0;
+                    }
+
+                    let giamGiaText = data.maGiamGia ? `Voucher giảm giá (${data.maGiamGia.maCode || data.maGiamGia.code || data.maGiamGia.ma || ''})` : 'Voucher giảm giá';
+
                     let html = `
                         <div style="margin-bottom: 20px;">
                             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 15px;">

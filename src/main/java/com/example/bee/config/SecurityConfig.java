@@ -28,13 +28,13 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/register", "/login", "/css/**", "/js/**", "/images/**", "/customer/**").permitAll()
-                        .requestMatchers("/api/products/**", "/api/hoa-don/tra-cuu/**", "/api/hoa-don/checkout", "/api/hoa-don/check-employee", "/api/thong-bao/**").permitAll()
+                        .requestMatchers("/api/products/**", "/api/hoa-don/tra-cuu/**", "/api/hoa-don/checkout", "/api/hoa-don/check-employee", "/api/thong-bao/**", "/api/khach-hang/reviews/**").permitAll()
                         .requestMatchers("/api/khach-hang/my-profile", "/api/khach-hang/change-password", "/api/khach-hang/**", "/api/hoa-don/my-orders", "/api/vouchers/**", "/api/hoa-don/**").hasAnyAuthority("ROLE_CUSTOMER", "ROLE_STAFF", "ROLE_ADMIN")
                         .requestMatchers("/api/nhan-vien/my-profile", "/api/nhan-vien/change-password").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
-                        .requestMatchers("/dashboards/**", "/api/thong-ke/**", "/api/nhan-vien/**", "/staff/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/dashboards/**", "/returns/**", "/api/thong-ke/**", "/api/nhan-vien/**", "/staff/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/admin/**", "/products/**", "/pos/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
                         .requestMatchers("/api/khach-hang", "/api/khach-hang/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
-                        .requestMatchers("/api/hoa-don", "/api/hoa-don/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
+                        .requestMatchers("/api/hoa-don", "/api/hoa-don/**", "/api/reviews/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
                         .requestMatchers("/api/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
                         .anyRequest().authenticated()
                 )
@@ -44,7 +44,21 @@ public class SecurityConfig {
                         .usernameParameter("username")
                         .passwordParameter("password")
                         .successHandler(successHandler)
-                        .failureUrl("/login?error=true")
+                        .failureHandler((request, response, exception) -> {
+                            // In ra Console để xem lỗi thực sự là gì
+                            System.out.println("LỖI ĐĂNG NHẬP: " + exception.getClass().getSimpleName() + " - " + exception.getMessage());
+
+                            // 🌟 BẮT TẬN GỐC: Kiểm tra cả vỏ bọc, cả lõi bên trong, và cả nội dung tin nhắn
+                            if (exception instanceof org.springframework.security.authentication.DisabledException ||
+                                    exception.getCause() instanceof org.springframework.security.authentication.DisabledException ||
+                                    (exception.getMessage() != null && exception.getMessage().contains("bị khóa"))) {
+
+                                response.sendRedirect("/login?error=disabled");
+
+                            } else {
+                                response.sendRedirect("/login?error=invalid");
+                            }
+                        })
                         .permitAll()
                 )
                 .logout(logout -> logout

@@ -153,17 +153,32 @@ public class SanPhamApi {
 
     @PostMapping
     @Transactional
-    public ResponseEntity<SanPham> create(@Valid @RequestBody SanPhamRequest body, UriComponentsBuilder uriBuilder) {
+    public ResponseEntity<?> create(@Valid @RequestBody SanPhamRequest body, UriComponentsBuilder uriBuilder) {
         SanPham sp = new SanPham();
+
+        // 1. Kiểm tra trùng MÃ
         if (isBlank(body.getMa())) {
             sp.setMa(generateMa());
         } else {
             String ma = body.getMa().trim().toUpperCase();
             if (sanPhamrepo.existsByMaIgnoreCase(ma)) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã sản phẩm đã tồn tại");
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(Collections.singletonMap("message", "Mã sản phẩm này đã tồn tại!"));
             }
             sp.setMa(ma);
         }
+
+        // 2. Kiểm tra trùng BỘ 4 THUỘC TÍNH (Tên, Danh Mục, Hãng, Chất Liệu)
+        String ten = body.getTen().trim();
+        Integer idDM = body.getIdDanhMuc();
+        Integer idHang = body.getIdHang();
+        Integer idCL = body.getIdChatLieu();
+
+        if (sanPhamrepo.existsByTenIgnoreCaseAndDanhMuc_IdAndHang_IdAndChatLieu_Id(ten, idDM, idHang, idCL)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Collections.singletonMap("message", "Sản phẩm với Tên, Danh mục, Hãng và Chất liệu này đã tồn tại!"));
+        }
+
         mapCommonFields(sp, body);
         SanPham saved = sanPhamrepo.save(sp);
         URI location = uriBuilder.path("/api/products/{id}").buildAndExpand(saved.getId()).toUri();
@@ -172,11 +187,23 @@ public class SanPhamApi {
 
     @PutMapping("/{id}")
     @Transactional
-    public SanPham update(@PathVariable Integer id, @Valid @RequestBody SanPhamRequest body) {
+    public ResponseEntity<?> update(@PathVariable Integer id, @Valid @RequestBody SanPhamRequest body) {
         SanPham sp = sanPhamrepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy sản phẩm"));
+
+        // Kiểm tra trùng BỘ 4 THUỘC TÍNH khi Cập nhật (Loại trừ chính nó)
+        String ten = body.getTen().trim();
+        Integer idDM = body.getIdDanhMuc();
+        Integer idHang = body.getIdHang();
+        Integer idCL = body.getIdChatLieu();
+
+        if (sanPhamrepo.existsByTenIgnoreCaseAndDanhMuc_IdAndHang_IdAndChatLieu_IdAndIdNot(ten, idDM, idHang, idCL, id)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Collections.singletonMap("message", "Sản phẩm với Tên, Danh mục, Hãng và Chất liệu này đã tồn tại!"));
+        }
+
         mapCommonFields(sp, body);
-        return sanPhamrepo.save(sp);
+        return ResponseEntity.ok(sanPhamrepo.save(sp));
     }
 
     private void mapCommonFields(SanPham sp, SanPhamRequest body) {
@@ -290,8 +317,8 @@ public class SanPhamApi {
 
         // 🌟 3. NÂNG CẤP: Logic sinh mã SKU thông minh (Ví dụ: SP0001-DEN-XL)
         String maSanPham = sp.getMa(); // Lấy mã SP gốc
-        String maMau = removeVietnameseTones(mauSac.getTen()); // Hàm chuyển tiếng việt không dấu
-        String maKichThuoc = removeVietnameseTones(kichThuoc.getTen());
+        String maMau = mauSac.getMa(); //removeVietnameseTones(mauSac.getMa()); // Hàm chuyển tiếng việt không dấu
+        String maKichThuoc = kichThuoc.getMa(); //removeVietnameseTones(kichThuoc.getMa());
 
         // Ép chuỗi thành mã (Ví dụ: SP0001-DEN-XL)
         String skuCode = String.format("%s-%s-%s", maSanPham, maMau, maKichThuoc);

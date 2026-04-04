@@ -46,6 +46,12 @@ async function loadModule(moduleName) {
             title = 'QUẢN LÝ HÓA ĐƠN';
             break;
 
+        // 🌟 ROUTE ĐỔI TRẢ MỚI
+        case 'returns':
+            url = '/returns';
+            title = 'QUẢN LÝ ĐỔI TRẢ';
+            break;
+
         case 'catalogs':
             url = '/catalogs';
             title = 'QUẢN LÝ THUỘC TÍNH';
@@ -74,6 +80,11 @@ async function loadModule(moduleName) {
         case 'profiles':
             url = '/profiles';
             title = 'QUẢN LÝ TÀI KHOẢN';
+            break;
+
+        case 'reviews':
+            url = '/reviews';
+            title = 'QUẢN LÝ ĐÁNH GIÁ';
             break;
 
         default:
@@ -129,51 +140,69 @@ function executeScripts(container, moduleName) {
                 console.warn("Chưa tìm thấy CatalogApp");
             }
         }
-        if (moduleName === 'orders') {
+        else if (moduleName === 'orders') {
             if (typeof window.OrderApp !== 'undefined') {
                 window.OrderApp.init();
             } else {
                 console.warn("Chưa tìm thấy OrderApp");
             }
-        } else if (moduleName === 'products') {
+        }
+        else if (moduleName === 'products') {
             if (typeof window.initProducts !== 'undefined') {
                 window.initProducts();
             } else {
                 console.warn("Chưa tìm thấy ProductApp");
             }
-        } else if (moduleName === 'promotions') {
+        }
+        else if (moduleName === 'promotions') {
             if (typeof window.PromotionApp !== 'undefined') {
                 window.PromotionApp.init();
             } else {
                 console.warn("Chưa tìm thấy PromotionApp");
             }
-        } else if (moduleName === 'pos') {
+        }
+        else if (moduleName === 'pos') {
             if (typeof window.PosApp !== 'undefined') {
                 window.PosApp.init();
             } else {
                 console.warn("Chưa tìm thấy PosApp");
             }
-        } else if (moduleName === 'customers') {
+        }
+        else if (moduleName === 'customers') {
             if (typeof window.CustomerApp !== 'undefined') {
                 window.CustomerApp.init();
             } else {
                 console.warn("Chưa tìm thấy CustomerApp");
             }
-        } else if (moduleName === 'profiles') {
+        }
+        else if (moduleName === 'profiles') {
             if (typeof window.ProfileApp !== 'undefined') {
                 window.ProfileApp.init();
             } else {
                 console.warn("Chưa tìm thấy CustomerApp");
             }
-        } else if (moduleName === 'dashboard') {
+        }
+        else if (moduleName === 'dashboard') {
             if (typeof window.DB !== 'undefined') {
                 window.DB.init();
             } else {
                 console.warn("Chưa tìm thấy DB");
             }
-        } else if (moduleName === 'staff') {
+        }
+        else if (moduleName === 'staff') {
             if (typeof window.StaffApp !== 'undefined') {
                 window.StaffApp.init();
+            }
+        }
+        else if (moduleName === 'reviews') {
+            if (typeof window.ReviewApp !== 'undefined') {
+                window.ReviewApp.init();
+            }
+        }
+        // 🌟 INIT CHO MODULE ĐỔI TRẢ (Nếu bạn có bọc hàm khởi tạo)
+        else if (moduleName === 'returns') {
+            if (typeof window.ReturnApp !== 'undefined') {
+                window.ReturnApp.init();
             }
         }
     }, 100);

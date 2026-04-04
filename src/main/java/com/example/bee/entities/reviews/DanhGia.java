@@ -1,11 +1,16 @@
 package com.example.bee.entities.reviews;
 
+import com.example.bee.entities.account.TaiKhoan;
+import com.example.bee.entities.order.HoaDonChiTiet;
+import com.example.bee.entities.product.SanPham;
+import com.example.bee.entities.user.NhanVien;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -16,32 +21,54 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class DanhGia {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "tai_khoan_id")
-    private Integer taiKhoanId;
+    // 🌟 Đã map khóa ngoại TaiKhoan
+    @ManyToOne
+    @JoinColumn(name = "tai_khoan_id")
+    private TaiKhoan taiKhoan;
 
-    @Column(name = "san_pham_id")
-    private Integer sanPhamId;
+    // 🌟 Đã map khóa ngoại SanPham
+    @ManyToOne
+    @JoinColumn(name = "san_pham_id")
+    private SanPham sanPham;
 
     @Column(name = "so_sao")
     private Integer soSao;
 
-    // ĐÃ SỬA THÀNH NVARCHAR(MAX) CHO SQL SERVER
     @Column(name = "noi_dung", columnDefinition = "NVARCHAR(MAX)")
     private String noiDung;
 
     @Column(name = "phan_loai")
     private String phanLoai;
 
-    // ĐÃ SỬA THÀNH NVARCHAR(MAX) CHO SQL SERVER
     @Column(name = "danh_sach_hinh_anh", columnDefinition = "NVARCHAR(MAX)")
     private String danhSachHinhAnh;
 
     @Column(name = "ngay_tao")
     private LocalDateTime ngayTao = LocalDateTime.now();
+
+    // 🌟 Đã map khóa ngoại HoaDonChiTiet
+    @ManyToOne
+    @JoinColumn(name = "hoa_don_chi_tiet_id")
+    private HoaDonChiTiet hoaDonChiTiet;
+
+    @Column(name = "da_sua")
+    private Boolean daSua = false;
+
+    // 🌟 Map khóa ngoại NhanVien
+    @ManyToOne
+    @JoinColumn(name = "nhan_vien_tra_loi_id")
+    private NhanVien nhanVienTraLoi;
+
+    @Column(name = "noi_dung_tra_loi", columnDefinition = "NVARCHAR(MAX)")
+    private String noiDungTraLoi;
+
+    @Column(name = "ngay_tra_loi")
+    private Date ngayTraLoi;
 
     @Transient
     private String tenKhachHang;
@@ -54,11 +81,4 @@ public class DanhGia {
         }
         return Arrays.asList(this.danhSachHinhAnh.split(","));
     }
-
-    // Trong Entity DanhGia.java
-    @Column(name = "hoa_don_chi_tiet_id")
-    private Integer hoaDonChiTietId;
-
-    @Column(name = "da_sua")
-    private Boolean daSua = false;
 }

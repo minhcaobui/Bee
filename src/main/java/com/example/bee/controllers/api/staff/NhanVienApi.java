@@ -119,88 +119,112 @@ public class NhanVienApi {
 
     @PatchMapping("/toggle-status/{id}")
     @ResponseBody
-    @Transactional
+    @Transactional // 🌟 Bắt buộc phải có Transactional
     public ResponseEntity<?> toggleStatus(@PathVariable Integer id) {
         NhanVien nv = nhanVienRepository.findById(id).orElse(null);
         if (nv == null) return ResponseEntity.notFound().build();
+
         nv.setTrangThai(!nv.getTrangThai());
+
+        // 🌟 ĐỒNG BỘ KHÓA LUÔN TÀI KHOẢN ĐĂNG NHẬP
+        if (nv.getTaiKhoan() != null) {
+            TaiKhoan tk = nv.getTaiKhoan();
+            tk.setTrangThai(nv.getTrangThai());
+            taiKhoanRepository.save(tk);
+        }
+
         nhanVienRepository.save(nv);
-        return ResponseEntity.ok(nv.getTrangThai() ? "Hồ sơ đã được kích hoạt!" : "Nhân viên đã tạm nghỉ việc!");
+        return ResponseEntity.ok(nv.getTrangThai() ? "Hồ sơ đã được kích hoạt!" : "Nhân viên đã bị khóa!");
     }
 
     @Transactional
     @PostMapping("/save")
-    public ResponseEntity<?> save(@ModelAttribute NhanVien nv,
-                                  @RequestParam(value = "fileAnh", required = false) MultipartFile file,
-                                  @RequestParam(value = "password", required = false) String pass,
-                                  @RequestParam(value = "confirmPassword", required = false) String confirm) {
+    public ResponseEntity<?> save(
+            @RequestParam(value = "id", required = false) Integer id,
+            @RequestParam(value = "hoTen", required = true) String hoTen,
+            @RequestParam(value = "soDienThoai", required = true) String soDienThoai,
+            @RequestParam(value = "email", required = true) String email,
+            @RequestParam(value = "ngaySinh", required = true) String ngaySinhStr,
+            @RequestParam(value = "gioiTinh", required = false) String gioiTinh,
+            @RequestParam(value = "diaChi", required = false) String diaChi,
+            @RequestParam(value = "trangThai", required = false, defaultValue = "true") Boolean trangThai,
+            @RequestParam(value = "hinhAnh", required = false) String hinhAnh,
+            @RequestParam(value = "password", required = false) String pass,
+            @RequestParam(value = "confirmPassword", required = false) String confirm) {
         try {
-            if (nv.getHoTen() == null || nv.getHoTen().trim().isEmpty())
-                return ResponseEntity.badRequest().body("Họ tên không được để trống!");
-            if (nv.getSoDienThoai() == null || nv.getSoDienThoai().isBlank())
-                return ResponseEntity.badRequest().body("Số điện thoại không được để trống!");
+            if (hoTen == null || hoTen.trim().isEmpty()) return ResponseEntity.badRequest().body("Họ tên không được để trống!");
+            if (soDienThoai == null || soDienThoai.isBlank()) return ResponseEntity.badRequest().body("Số điện thoại không được để trống!");
+            if (!soDienThoai.matches("^0[0-9]{9}$")) return ResponseEntity.badRequest().body("SĐT phải đủ 10 số và bắt đầu bằng 0!");
+            if (email == null || email.isBlank()) return ResponseEntity.badRequest().body("Email không được để trống!");
+            if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$")) return ResponseEntity.badRequest().body("Email không đúng định dạng!");
+            if (ngaySinhStr == null || ngaySinhStr.isBlank()) return ResponseEntity.badRequest().body("Ngày sinh không được để trống!");
 
-            if (!nv.getSoDienThoai().matches("^0[0-9]{9}$"))
-                return ResponseEntity.badRequest().body("SĐT phải đủ 10 số và bắt đầu bằng 0!");
-            if (nv.getEmail() == null || nv.getEmail().isBlank())
-                return ResponseEntity.badRequest().body("Email không được để trống!");
-            if (!nv.getEmail().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"))
-                return ResponseEntity.badRequest().body("Email không đúng định dạng!");
-            if (nv.getNgaySinh() == null) return ResponseEntity.badRequest().body("Ngày sinh không được để trống!");
-            Date ngaySinh = nv.getNgaySinh();
+            java.sql.Date ngaySinh;
+            try {
+                ngaySinh = java.sql.Date.valueOf(ngaySinhStr); // Chuyển chuỗi YYYY-MM-DD thành SQL Date
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body("Ngày sinh không hợp lệ!");
+            }
+
             LocalDate hienTai = LocalDate.now();
-//            int tuoi = Period.between(ngaySinh, hienTai).getYears();
-//            if (tuoi < 15) return ResponseEntity.badRequest().body("Nhân viên phải từ đủ 15 tuổi trở lên!");
+            int tuoi = Period.between(ngaySinh.toLocalDate(), hienTai).getYears();
+            if (tuoi < 15) return ResponseEntity.badRequest().body("Nhân viên phải từ đủ 15 tuổi trở lên!");
+
             NhanVien target;
-            boolean isNew = (nv.getId() == null);
+            boolean isNew = (id == null);
+
             if (!isNew) {
-                target = nhanVienRepository.findByIdWithTaiKhoan(nv.getId()).orElseThrow();
+                target = nhanVienRepository.findByIdWithTaiKhoan(id).orElseThrow(() -> new RuntimeException("Không tìm thấy NV"));
                 if (target.getChucVu() != null && target.getChucVu().getId() == 1)
-                    return ResponseEntity.badRequest().body("Thông পাশ Admin là bảo mật, không thể xem hoặc sửa!");
-                if (nhanVienRepository.existsBySoDienThoaiAndIdNot(nv.getSoDienThoai(), nv.getId()))
+                    return ResponseEntity.badRequest().body("Thông tin Admin là bảo mật, không thể xem hoặc sửa!");
+                if (nhanVienRepository.existsBySoDienThoaiAndIdNot(soDienThoai, id))
                     return ResponseEntity.badRequest().body("Số điện thoại này đã thuộc về nhân viên khác!");
-                if (nhanVienRepository.existsByEmailAndIdNot(nv.getEmail(), nv.getId()))
+                if (nhanVienRepository.existsByEmailAndIdNot(email, id))
                     return ResponseEntity.badRequest().body("Email/Tài khoản này đã tồn tại!");
             } else {
-                if (nhanVienRepository.existsBySoDienThoai(nv.getSoDienThoai()))
-                    return ResponseEntity.badRequest().body("Số điện thoại đã tồn tại!");
-                if (nhanVienRepository.existsByEmail(nv.getEmail())) return ResponseEntity.badRequest().body("Email đã tồn tại!");
+                if (nhanVienRepository.existsBySoDienThoai(soDienThoai)) return ResponseEntity.badRequest().body("Số điện thoại đã tồn tại!");
+                if (nhanVienRepository.existsByEmail(email)) return ResponseEntity.badRequest().body("Email đã tồn tại!");
+
                 target = new NhanVien();
                 target.setMa("TEMP");
-                target.setTrangThai(true);
                 ChucVu cv = new ChucVu();
                 cv.setId(2);
                 target.setChucVu(cv);
             }
+
+            // Gắn tài khoản
             TaiKhoan tk = (target.getTaiKhoan() == null) ? new TaiKhoan() : target.getTaiKhoan();
-            tk.setTenDangNhap(nv.getEmail());
+            tk.setTenDangNhap(email);
+
             if (isNew) {
                 tk.setMatKhau(passwordEncoder.encode("12345678"));
                 tk.setTrangThai(true);
                 VaiTro vt = new VaiTro();
-                vt.setId(2);
+                vt.setId(2); // ROLE_STAFF
                 tk.setVaiTro(vt);
             } else {
                 if (pass != null && !pass.trim().isEmpty()) {
                     if (!pass.equals(confirm)) return ResponseEntity.badRequest().body("Mật khẩu xác nhận không khớp!");
+                    // Kiểm tra độ mạnh của mật khẩu
+                    String passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,}).*$";
+                    if (!pass.matches(passwordRegex)) return ResponseEntity.badRequest().body("Mật khẩu phải từ 8 ký tự, gồm chữ hoa, thường, số và ký tự đặc biệt!");
                     tk.setMatKhau(passwordEncoder.encode(pass));
                 }
             }
+
             TaiKhoan savedTk = taiKhoanRepository.save(tk);
             target.setTaiKhoan(savedTk);
-            target.setHoTen(nv.getHoTen());
-            target.setSoDienThoai(nv.getSoDienThoai());
-            target.setEmail(nv.getEmail());
-            target.setNgaySinh(nv.getNgaySinh());
-            target.setGioiTinh(nv.getGioiTinh());
-            if (nv.getDiaChi() != null) target.setDiaChi(nv.getDiaChi());
-            target.setTrangThai(nv.getTrangThai());
-            if (isNew) {
-                target.setTrangThai(true);
-            }
-            if (nv.getHinhAnh() != null && !nv.getHinhAnh().trim().isEmpty()) {
-                target.setHinhAnh(nv.getHinhAnh());
-            }
+
+            // Cập nhật thông tin NV
+            target.setHoTen(hoTen);
+            target.setSoDienThoai(soDienThoai);
+            target.setEmail(email);
+            target.setNgaySinh(ngaySinh);
+            target.setGioiTinh(gioiTinh);
+            if (diaChi != null) target.setDiaChi(diaChi);
+            target.setTrangThai(trangThai);
+            if (hinhAnh != null && !hinhAnh.trim().isEmpty()) target.setHinhAnh(hinhAnh);
+
             NhanVien saved = nhanVienRepository.save(target);
             if (isNew) {
                 saved.setMa(String.format("NV%03d", saved.getId()));
@@ -234,7 +258,7 @@ public class NhanVienApi {
     }
 
     // ========================================================
-    // 1. API LẤY THÔNG TIN HỒ SƠ (DÙNG CHUNG CHO PROFILE HTML)
+    // 1. API LẤY THÔNG TIN HỒ SƠ
     // ========================================================
     @GetMapping("/my-profile")
     @ResponseBody
@@ -247,13 +271,13 @@ public class NhanVienApi {
         Optional<NhanVien> nvOpt = nhanVienRepository.findByTaiKhoan_TenDangNhap(username);
 
         if (nvOpt.isEmpty()) {
-            // Trường hợp Admin tối cao
             TaiKhoan tk = taiKhoanRepository.findByTenDangNhap(username).orElse(null);
             if (tk != null) {
                 Map<String, Object> adminData = new HashMap<>();
                 adminData.put("hoTen", "Quản trị viên hệ thống");
                 adminData.put("tenDangNhap", tk.getTenDangNhap());
-                adminData.put("daDoiTenDangNhap", true); // Khóa không cho đổi tên đăng nhập
+                // 🌟 Lấy trạng thái đã đổi tên từ DB lên
+                adminData.put("daDoiTenDangNhap", tk.getDaDoiTenDangNhap() != null ? tk.getDaDoiTenDangNhap() : false);
                 adminData.put("vaiTro", tk.getVaiTro() != null ? tk.getVaiTro().getTen() : "ADMIN");
 
                 Map<String, Object> chucVuMap = new HashMap<>();
@@ -276,11 +300,10 @@ public class NhanVienApi {
         data.put("email", nv.getEmail());
         data.put("diaChi", nv.getDiaChi());
 
-        String currentUsername = nv.getTaiKhoan() != null ? nv.getTaiKhoan().getTenDangNhap() : "";
-        data.put("tenDangNhap", currentUsername);
+        data.put("tenDangNhap", nv.getTaiKhoan() != null ? nv.getTaiKhoan().getTenDangNhap() : "");
+        // 🌟 Lấy trạng thái đã đổi tên từ DB lên
+        data.put("daDoiTenDangNhap", nv.getTaiKhoan() != null && Boolean.TRUE.equals(nv.getTaiKhoan().getDaDoiTenDangNhap()));
 
-        boolean daDoi = currentUsername.isEmpty() || !currentUsername.equals(nv.getSoDienThoai());
-        data.put("daDoiTenDangNhap", daDoi);
         data.put("vaiTro", nv.getTaiKhoan() != null && nv.getTaiKhoan().getVaiTro() != null ? nv.getTaiKhoan().getVaiTro().getMa() : "");
 
         Map<String, Object> chucVuMap = new HashMap<>();
@@ -305,59 +328,59 @@ public class NhanVienApi {
 
             String username = authentication.getName();
             Optional<NhanVien> nvOpt = nhanVienRepository.findByTaiKhoan_TenDangNhap(username);
+            TaiKhoan tk;
 
-            // Nếu đăng nhập bằng Admin tối cao -> Báo lỗi thân thiện không bị văng 500
             if (nvOpt.isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("message", "Tài khoản Quản trị viên (Admin) chỉ được phép thay đổi Mật Khẩu ở khu vực bên cạnh, không có hồ sơ cá nhân để sửa tại đây!"));
+                tk = taiKhoanRepository.findByTenDangNhap(username).orElse(null);
+                if(tk == null) return ResponseEntity.badRequest().body(Map.of("message", "Tài khoản không hợp lệ"));
+            } else {
+                tk = nvOpt.get().getTaiKhoan();
             }
 
-            NhanVien nv = nvOpt.get();
-            TaiKhoan tk = nv.getTaiKhoan();
-
-            // 1. Logic khóa Tên Đăng Nhập 1 lần
+            // 🌟 LOGIC KHÓA TÊN ĐĂNG NHẬP DỰA TRÊN CỜ TRONG DB
             if (payload.containsKey("tenDangNhap") && tk != null) {
                 String newUsername = payload.get("tenDangNhap").trim();
                 String oldUsername = tk.getTenDangNhap();
 
                 if (!newUsername.isEmpty() && !newUsername.equals(oldUsername)) {
-                    String currentPhone = nv.getSoDienThoai() != null ? nv.getSoDienThoai() : "";
-                    if (!oldUsername.equals(currentPhone)) {
+                    // Nếu cờ = true -> chặn không cho lưu
+                    if (Boolean.TRUE.equals(tk.getDaDoiTenDangNhap())) {
                         return ResponseEntity.badRequest().body(Map.of("message", "Bạn chỉ được phép thay đổi tên đăng nhập 1 lần duy nhất!"));
                     }
                     if (taiKhoanRepository.findByTenDangNhap(newUsername).isPresent()) {
                         return ResponseEntity.badRequest().body(Map.of("message", "Tên đăng nhập này đã có người sử dụng!"));
                     }
+
                     tk.setTenDangNhap(newUsername);
+                    tk.setDaDoiTenDangNhap(true); // 🌟 BẬT CỜ ĐÃ ĐỔI TÊN
                     taiKhoanRepository.save(tk);
                 }
             }
 
-            // 2. Cập nhật thông tin mượt mà
-            if (payload.containsKey("hoTen") && !payload.get("hoTen").isEmpty()) nv.setHoTen(payload.get("hoTen"));
-            if (payload.containsKey("soDienThoai") && !payload.get("soDienThoai").isEmpty()) nv.setSoDienThoai(payload.get("soDienThoai"));
-            if (payload.containsKey("email") && !payload.get("email").isEmpty()) nv.setEmail(payload.get("email"));
-            if (payload.containsKey("gioiTinh")) nv.setGioiTinh(payload.get("gioiTinh"));
-            if (payload.containsKey("diaChi")) nv.setDiaChi(payload.get("diaChi"));
-            if (payload.containsKey("hinhAnh")) nv.setHinhAnh(payload.get("hinhAnh"));
+            // Chỉ cập nhật hồ sơ nếu là Nhân viên
+            if (nvOpt.isPresent()) {
+                NhanVien nv = nvOpt.get();
+                if (payload.containsKey("hoTen") && !payload.get("hoTen").isEmpty()) nv.setHoTen(payload.get("hoTen"));
+                if (payload.containsKey("soDienThoai") && !payload.get("soDienThoai").isEmpty()) nv.setSoDienThoai(payload.get("soDienThoai"));
+                if (payload.containsKey("email") && !payload.get("email").isEmpty()) nv.setEmail(payload.get("email"));
+                if (payload.containsKey("gioiTinh")) nv.setGioiTinh(payload.get("gioiTinh"));
+                if (payload.containsKey("diaChi")) nv.setDiaChi(payload.get("diaChi"));
+                if (payload.containsKey("hinhAnh")) nv.setHinhAnh(payload.get("hinhAnh"));
 
-            // 3. Xử lý an toàn cho Ngày Sinh
-            if (payload.containsKey("ngaySinh") && payload.get("ngaySinh") != null && !payload.get("ngaySinh").isEmpty()) {
-                try {
-                    nv.setNgaySinh(java.sql.Date.valueOf(payload.get("ngaySinh")));
-                } catch (Exception e) {
-                    // Bỏ qua nếu có lỗi format từ giao diện
+                if (payload.containsKey("ngaySinh") && payload.get("ngaySinh") != null && !payload.get("ngaySinh").isEmpty()) {
+                    try { nv.setNgaySinh(java.sql.Date.valueOf(payload.get("ngaySinh"))); } catch (Exception e) { }
                 }
+                nhanVienRepository.save(nv);
             }
 
-            nhanVienRepository.save(nv);
             return ResponseEntity.ok(Map.of("message", "Cập nhật hồ sơ cá nhân thành công"));
 
         } catch (Exception ex) {
-            // Bắt chặt lỗi trùng SDT / Email từ Database Constraint ném ra
             ex.printStackTrace();
-            return ResponseEntity.badRequest().body(Map.of("message", "Lưu thất bại! Email hoặc Số điện thoại này có thể đã bị trùng lặp trên hệ thống."));
+            return ResponseEntity.badRequest().body(Map.of("message", "Lưu thất bại! Có lỗi xảy ra."));
         }
     }
+
 
     // ========================================================
     // 3. API ĐỔI MẬT KHẨU
@@ -382,6 +405,15 @@ public class NhanVienApi {
 
         if (oldPw == null || newPw == null) {
             return ResponseEntity.badRequest().body(Map.of("message", "Dữ liệu không hợp lệ"));
+        }
+
+        // Kiểm tra độ mạnh của mật khẩu bằng Regex
+        String passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,}).*$";
+
+        if (!newPw.matches(passwordRegex)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "message", "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt!"
+            ));
         }
 
         if (!passwordEncoder.matches(oldPw, tk.getMatKhau())) {
