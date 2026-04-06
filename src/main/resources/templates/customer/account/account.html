@@ -206,6 +206,16 @@
         .review-img-upload-btn:hover { background: #e4e4e7; }
         .review-img-previews { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
 
+
+        /* 🌟 CSS CHO MODAL ĐỔI TRẢ */
+        .return-product-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed #eee; }
+        .return-product-item:last-child { border-bottom: none; }
+        .return-product-info { display: flex; align-items: center; gap: 12px; flex: 1; }
+        .return-product-info input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
+        .return-product-img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #eee; }
+        .return-qty-input { width: 60px; padding: 6px; text-align: center; border: 1px solid #ccc; border-radius: 4px; outline: none; }
+        .return-qty-input:disabled { background: #f9f9f9; color: #999; }
+
         .wishlist-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
         @media (max-width: 900px) { .wishlist-grid { grid-template-columns: 1fr 1fr; } }
         @media (max-width: 600px) { .wishlist-grid { grid-template-columns: 1fr; } }
@@ -232,6 +242,41 @@
                 <div style="display: flex; justify-content: space-between;"><span>Nội dung CK:</span> <strong id="accQrContent" style="color:var(--accent); font-weight: 600;"></strong></div>
             </div>
             <button id="btnAccQrDone" style="padding: 16px 24px; background: var(--accent); color: white; border: none; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: 4px; width: 100%; transition: 0.3s;">Tôi đã chuyển khoản xong</button>
+        </div>
+    </div>
+
+    <div class="acc-modal-overlay" id="accReturnModalOverlay" onclick="if(event.target === this) window.AccountApp.closeReturnModal()">
+        <div class="acc-modal" style="max-width: 600px;">
+            <div class="acc-modal-header">
+                <span style="font-family: 'Cormorant Garamond', serif; font-size: 24px;">Yêu cầu Đổi/Trả Hàng</span>
+                <button class="acc-modal-close" onclick="window.AccountApp.closeReturnModal()"><svg viewBox="0 0 24 24" stroke-width="2" style="width:24px; height:24px; stroke:currentColor; fill:none;"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+            </div>
+            <div style="font-size: 13px; color: var(--text); margin-bottom: 20px;">Đơn hàng: <strong id="returnModalOrderId" style="color: var(--accent);"></strong></div>
+
+            <div class="account-form-grid" style="max-width:100%; margin-bottom:0;">
+                <div class="account-form-field full">
+                    <label class="account-form-label">Loại yêu cầu <span style="color: red;">*</span></label>
+                    <select id="returnType" class="account-form-input">
+                        <option value="TRẢ HÀNG">Trả hàng - Hoàn tiền</option>
+                        <option value="ĐỔI HÀNG">Đổi hàng sang sản phẩm khác</option>
+                    </select>
+                </div>
+                <div class="account-form-field full">
+                    <label class="account-form-label">Lý do đổi trả <span style="color: red;">*</span></label>
+                    <textarea id="returnReason" class="account-form-input" style="height: 80px; resize: none; font-family: inherit; padding: 12px;" placeholder="Vui lòng nhập lý do chi tiết..."></textarea>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <label class="account-form-label" style="display: block; margin-bottom: 10px;">Chọn sản phẩm cần đổi trả <span style="color: red;">*</span></label>
+                <div id="returnProductList" style="max-height: 250px; overflow-y: auto; border: 1px solid rgba(0,0,0,0.1); border-radius: 4px; padding: 10px 15px; background: #fafafa;">
+                </div>
+            </div>
+
+            <div class="acc-modal-actions">
+                <button class="btn-cancel" onclick="window.AccountApp.closeReturnModal()">Huỷ bỏ</button>
+                <button class="btn-save" id="btnSubmitReturn" onclick="window.AccountApp.submitReturn()">Gửi yêu cầu</button>
+            </div>
         </div>
     </div>
 
@@ -673,6 +718,9 @@
             },
 
             fetchData: async function() {
+                // 🌟 BẬT MÀN HÌNH LOADING TRƯỚC KHI GỌI API ĐỂ TRÁNH TRẮNG MÀN HÌNH
+                if (window.showLoading) window.showLoading();
+
                 try {
                     let isStaff = false;
                     let userData = null;
@@ -702,6 +750,8 @@
                     if (!userData) {
                         document.getElementById('guest-view').style.display = 'block';
                         document.getElementById('account-view').style.display = 'none';
+                        // 🌟 TẮT LOADING NẾU KHÁCH CHƯA ĐĂNG NHẬP
+                        if (window.hideLoading) window.hideLoading();
                         return;
                     }
 
@@ -759,6 +809,9 @@
                     console.error(error);
                     document.getElementById('guest-view').style.display = 'block';
                     document.getElementById('account-view').style.display = 'none';
+                } finally {
+                    // 🌟 TẮT MÀN HÌNH LOADING SAU KHI MỌI THỨ ĐÃ XONG HOẶC CÓ LỖI XẢY RA
+                    if (window.hideLoading) window.hideLoading();
                 }
             },
 
@@ -826,7 +879,12 @@
                             });
                             if(res.ok) {
                                 this.showAccountNotification("Thành công", "Đã hủy đơn hàng!");
-                                await this.fetchData(); // Tải lại danh sách đơn
+                                await this.fetchData(); // Tải lại danh sách đơn ngầm bên dưới
+
+                                // 🌟 BỔ SUNG DÒNG NÀY: Gọi lại đúng hàm Xem chi tiết của đơn hàng vừa hủy
+                                // Nó sẽ fetch lại data mới nhất (có trạng thái Đã Hủy) và vẽ lại màn hình chi tiết
+                                this.viewOrderDetail(extraData);
+
                             } else {
                                 const err = await res.json();
                                 this.showAccountNotification("Thất bại", err.message || "Không thể hủy đơn hàng này", true);
@@ -875,6 +933,151 @@
 
             cancelOrder: function(id) {
                 this.confirmAction('cancel_order', id);
+            },
+
+            // 🌟 LOGIC ĐỔI TRẢ HÀNG
+            openReturnModal: function() {
+                const data = this.state.currentOrderData;
+                if (!data) return;
+
+                document.getElementById('returnModalOrderId').innerText = "#" + data.ma;
+                document.getElementById('returnType').value = 'TRẢ HÀNG';
+                document.getElementById('returnReason').value = '';
+
+                let html = '';
+                const chiTiets = data.chiTiets || [];
+
+                chiTiets.forEach(item => {
+                    const slDaTra = item.soLuongTra || 0;
+                    const slConLai = item.soLuong - slDaTra;
+
+                    if (slConLai > 0) {
+                        const hinhAnh = item.hinhAnh || 'https://placehold.co/60x80';
+                        const tenSP = item.tenSanPham || 'Sản phẩm';
+                        const pl = item.thuocTinh || 'Mặc định';
+
+                        html += `
+                            <div class="return-product-item">
+                                <div class="return-product-info">
+                                    <input type="checkbox" class="chk-return-item" data-id="${item.id}" data-max="${slConLai}" onchange="window.AccountApp.toggleReturnItem(this, ${item.id})">
+                                    <img src="${hinhAnh}" class="return-product-img">
+                                    <div>
+                                        <div style="font-weight: 500; font-size: 13px;">${tenSP}</div>
+                                        <div style="font-size: 11px; color: var(--muted);">${pl}</div>
+                                        <div style="font-size: 11px; color: var(--accent); margin-top: 2px;">Có thể trả: ${slConLai}</div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <input type="number" id="return-qty-${item.id}" class="return-qty-input" value="${slConLai}" min="1" max="${slConLai}" disabled>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+
+                if (html === '') {
+                    html = '<div style="text-align: center; color: #888; font-size: 12px; padding: 20px;">Tất cả sản phẩm trong đơn hàng này đã được đổi/trả.</div>';
+                    document.getElementById('btnSubmitReturn').style.display = 'none';
+                } else {
+                    document.getElementById('btnSubmitReturn').style.display = 'inline-block';
+                }
+
+                document.getElementById('returnProductList').innerHTML = html;
+                document.getElementById('accReturnModalOverlay').style.display = 'flex';
+                setTimeout(() => { document.querySelector('#accReturnModalOverlay .acc-modal').classList.add('open'); }, 10);
+            },
+
+            closeReturnModal: function() {
+                document.querySelector('#accReturnModalOverlay .acc-modal').classList.remove('open');
+                setTimeout(() => { document.getElementById('accReturnModalOverlay').style.display = 'none'; }, 300);
+            },
+
+            toggleReturnItem: function(checkbox, id) {
+                const qtyInput = document.getElementById('return-qty-' + id);
+                if (checkbox.checked) {
+                    qtyInput.disabled = false;
+                } else {
+                    qtyInput.disabled = true;
+                    qtyInput.value = qtyInput.getAttribute('max');
+                }
+            },
+
+            submitReturn: async function() {
+                const data = this.state.currentOrderData;
+                if (!data) return;
+
+                const loaiYeuCau = document.getElementById('returnType').value;
+                const lyDo = document.getElementById('returnReason').value.trim();
+
+                if (!lyDo) {
+                    this.showAccountNotification('Lỗi', 'Vui lòng nhập lý do đổi trả!', true);
+                    return;
+                }
+
+                const checkboxes = document.querySelectorAll('.chk-return-item:checked');
+                if (checkboxes.length === 0) {
+                    this.showAccountNotification('Lỗi', 'Vui lòng chọn ít nhất 1 sản phẩm để đổi trả!', true);
+                    return;
+                }
+
+                let items = [];
+                let isValid = true;
+
+                checkboxes.forEach(chk => {
+                    const id = chk.getAttribute('data-id');
+                    const max = parseInt(chk.getAttribute('data-max'));
+                    const qtyInput = document.getElementById('return-qty-' + id);
+                    const qty = parseInt(qtyInput.value);
+
+                    if (isNaN(qty) || qty <= 0 || qty > max) {
+                        isValid = false;
+                    } else {
+                        items.push({
+                            idHoaDonChiTiet: parseInt(id),
+                            soLuong: qty
+                        });
+                    }
+                });
+
+                if (!isValid) {
+                    this.showAccountNotification('Lỗi', 'Số lượng sản phẩm không hợp lệ!', true);
+                    return;
+                }
+
+                const payload = {
+                    maHD: data.ma,
+                    loaiYeuCau: loaiYeuCau,
+                    lyDo: lyDo,
+                    items: items
+                };
+
+                const btn = document.getElementById('btnSubmitReturn');
+                const oldText = btn.innerText;
+                btn.innerText = 'Đang gửi...';
+                btn.disabled = true;
+
+                try {
+                    const res = await fetch('/api/doi-tra/create', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (res.ok) {
+                        this.showAccountNotification('Thành công', 'Đã gửi yêu cầu đổi trả thành công!');
+                        this.closeReturnModal();
+                        await this.fetchData();
+                        this.viewOrderDetail(data.id);
+                    } else {
+                        const err = await res.json();
+                        this.showAccountNotification('Thất bại', err.message || 'Không thể tạo yêu cầu đổi trả!', true);
+                    }
+                } catch(e) {
+                    this.showAccountNotification('Lỗi', 'Lỗi kết nối máy chủ!', true);
+                } finally {
+                    btn.innerText = oldText;
+                    btn.disabled = false;
+                }
             },
 
             openReviewModal: function(detailId, pName, phanLoai, isEdit = false) {
@@ -1000,7 +1203,6 @@
                 }
             },
 
-            // 🌟 NÂNG CẤP HIỂN THỊ CHI TIẾT ĐƠN HÀNG VIEW
             viewOrderDetail: async function(orderId) {
                 try {
                     this.state.currentViewOrderId = orderId;
@@ -1008,30 +1210,73 @@
                     const res = await fetch('/api/hoa-don/' + orderId);
                     const data = await res.json();
 
-                    document.getElementById('detOrderMa').innerText = 'Đơn hàng #' + data.ma;
-                    document.getElementById('detTenNhan').innerText = data.tenKhachHang || data.tenNguoiNhan;
-                    document.getElementById('detSdtNhan').innerText = data.sdtNhan;
-                    document.getElementById('detDiaChi').innerText = data.diaChiGiaoHang;
-                    document.getElementById('detPayment').innerText = this.getPaymentMethodDisplay(data.phuongThucThanhToan);
+                    this.state.currentOrderData = data; // 🌟 LƯU DATA LẠI ĐỂ DÙNG CHO MODAL ĐỔI TRẢ
 
-                    const currentStatus = data.trangThaiMa || (data.trangThaiHoaDon && data.trangThaiHoaDon.ma) || '';
-                    document.getElementById('detStatus').innerText = data.trangThaiTen || this.getStatusConfig(currentStatus).label;
+                    const currentStatus = data.trangThaiMa || '';
+                    const statusObj = this.getStatusConfig(currentStatus);
+
+                    document.getElementById('detOrderMa').innerHTML = `
+                        Chi tiết Đơn hàng #${data.ma}
+                        <span class="account-order-status ${statusObj.cssClass}" style="margin-left: 15px; font-size: 14px; padding: 6px 16px; vertical-align: middle;">${statusObj.label}</span>
+                    `;
+
+                    const formatDateTime = (dateStr) => {
+                        if (!dateStr || String(dateStr).trim() === '' || String(dateStr).toLowerCase() === 'null') return null;
+                        const d = new Date(dateStr);
+                        if (isNaN(d.getTime())) return dateStr;
+                        const pad = n => n < 10 ? '0' + n : n;
+                        return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                    };
+
+                    const tenKhach = data.tenKhachHang || data.tenNguoiNhan || 'Khách hàng';
+                    let rawPhone = data.sdtNhan || data.sdtKhachHang || (data.khachHang ? data.khachHang.soDienThoai : null);
+                    const sdtKhach = (rawPhone && String(rawPhone).toLowerCase() !== 'undefined' && String(rawPhone).toLowerCase() !== 'null') ? rawPhone : '---';
+                    let rawEmail = data.email || data.emailNguoiNhan || data.emailNhan || data.emailKhachHang || (data.khachHang ? data.khachHang.email : null);
+                    const emailKhach = (rawEmail && String(rawEmail).trim() !== '' && String(rawEmail).toLowerCase() !== 'undefined' && String(rawEmail).toLowerCase() !== 'null') ? rawEmail : 'Không có';
+                    let rawAddress = data.diaChiGiaoHang || data.diaChiNhan || data.diaChiNguoiNhan;
+                    const diaChiKhach = (rawAddress && String(rawAddress).toLowerCase() !== 'undefined' && String(rawAddress).toLowerCase() !== 'null') ? rawAddress : '---';
+                    const ghiChu = (data.ghiChu && String(data.ghiChu).trim() !== '' && String(data.ghiChu).toLowerCase() !== 'null') ? data.ghiChu : 'Không có ghi chú';
+
+                    const ngayTaoStr = formatDateTime(data.ngayTao) || '---';
+                    const ngayThanhToanStr = formatDateTime(data.ngayThanhToan) || 'Chưa thanh toán';
+
+                    document.querySelector('.detail-info-grid').innerHTML = `
+                        <div class="detail-info-item">
+                            <label><i class="bi bi-person-lines-fill"></i> Thông tin khách hàng</label>
+                            <p><strong>Họ tên:</strong> ${tenKhach}</p>
+                            <p><strong>SĐT:</strong> ${sdtKhach}</p>
+                            <p><strong>Email:</strong> ${emailKhach}</p>
+                            <p><strong>Địa chỉ:</strong> ${diaChiKhach}</p>
+                        </div>
+                        <div class="detail-info-item">
+                            <label><i class="bi bi-receipt"></i> Thông tin hóa đơn</label>
+                            <p><strong>Ngày đặt:</strong> ${ngayTaoStr}</p>
+                            <p><strong>Ngày TT:</strong> ${ngayThanhToanStr}</p>
+                            <p><strong>Thanh toán:</strong> ${this.getPaymentMethodDisplay(data.phuongThucThanhToan)}</p>
+                            <p><strong>Ghi chú:</strong> <span style="font-style: italic; color: #888;">${ghiChu}</span></p>
+                        </div>
+                    `;
 
                     let html = '';
-                    const chiTiets = data.chiTiets || data.hoaDonChiTiets || [];
-
+                    const chiTiets = data.chiTiets || [];
                     let calculatedGiaTamThoi = 0;
+                    let hasReturnableItems = false; // Biến kiểm tra xem còn SP nào để đổi trả không
 
                     chiTiets.forEach(item => {
                         let reviewSectionHtml = '';
                         const detailId = item.id;
-                        const pId = item.sanPhamId || item.idSanPham || (item.sanPhamChiTiet && item.sanPhamChiTiet.sanPham ? item.sanPhamChiTiet.sanPham.id : null);
-                        const pName = item.tenSanPham || item.ten || (item.sanPhamChiTiet && item.sanPhamChiTiet.sanPham ? item.sanPhamChiTiet.sanPham.ten : 'Sản phẩm');
-                        const pl = item.thuocTinh || item.phanLoai || (item.sanPhamChiTiet && item.sanPhamChiTiet.mauSac ? `${item.sanPhamChiTiet.mauSac.ten} - ${item.sanPhamChiTiet.kichThuoc.ten}` : '');
-                        const sku = item.sku || (item.sanPhamChiTiet ? item.sanPhamChiTiet.sku : 'N/A');
-
-                        const itemPrice = item.giaBan || item.giaTien || 0;
+                        const pId = item.idSanPham;
+                        const pName = item.tenSanPham || 'Sản phẩm';
+                        const pl = item.thuocTinh || 'Mặc định';
+                        const sku = item.sku || 'N/A';
+                        const itemPrice = item.giaBan || 0;
                         const itemQty = item.soLuong || 1;
+                        const itemTra = item.soLuongTra || 0;
+
+                        if (itemQty > itemTra) {
+                            hasReturnableItems = true;
+                        }
+
                         calculatedGiaTamThoi += (itemPrice * itemQty);
 
                         if (currentStatus === 'HOAN_THANH' && detailId) {
@@ -1064,14 +1309,24 @@
                             }
                         }
 
+                        let badgeTraHang = '';
+                        if (itemTra > 0) {
+                            if (itemTra >= itemQty) {
+                                badgeTraHang = `<div style="margin-top:4px; font-size:10px; color:#ef4444; font-weight:600;">[Đã đổi/trả toàn bộ]</div>`;
+                            } else {
+                                badgeTraHang = `<div style="margin-top:4px; font-size:10px; color:#f59e0b; font-weight:600;">[Đã đổi/trả ${itemTra}/${itemQty} SP]</div>`;
+                            }
+                        }
+
                         html += `<tr>
                             <td>
                                 <div style="display:flex;align-items:flex-start; cursor:pointer;" onclick="window.location.href='/customer#detail?id=${pId}'; window.location.reload();">
-                                    <img src="${item.hinhAnh||''}" class="detail-prod-img" style="margin-top:4px;" onerror="this.src='https://placehold.co/60x80'">
+                                    <img src="${item.hinhAnh || 'https://placehold.co/60x80'}" class="detail-prod-img" style="margin-top:4px;">
                                     <div style="flex:1;">
                                         <div style="font-family:'Cormorant Garamond', serif; font-size: 17px; font-weight:500; transition:color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text)'">${pName}</div>
                                         <div style="color:var(--muted); font-size: 12px; margin-top:2px;">SKU: <span style="font-weight:500; color:var(--text);">${sku}</span></div>
                                         <div style="color:var(--muted); font-size: 12px; margin-top:2px;">Phân loại: <span style="font-weight:500; color:var(--text);">${pl}</span></div>
+                                        ${badgeTraHang}
                                         ${reviewSectionHtml}
                                     </div>
                                 </div>
@@ -1083,13 +1338,13 @@
                     });
 
                     const phiShip = data.phiVanChuyen || 0;
-                    const tongTien = data.tongTien || data.giaTong || 0;
-                    const giaTamThoi = calculatedGiaTamThoi;
+                    const tongTien = data.tongTien || 0;
+                    const tienHoan = data.tienHoan || 0; // 🌟 Thêm logic tính Tiền hoàn
 
-                    let giamGia = (giaTamThoi + phiShip) - tongTien;
-                    if (giamGia < 0) giamGia = data.giaTriKhuyenMai || data.tienGiam || 0;
+                    let giamGia = (calculatedGiaTamThoi + phiShip) - tongTien;
+                    if (giamGia < 0) giamGia = data.tienGiamVoucher || 0;
 
-                    let giamGiaText = data.maGiamGia ? `Voucher giảm giá (${data.maGiamGia.maCode || data.maGiamGia.code || data.maGiamGia.ma || ''})` : 'Voucher giảm giá';
+                    let giamGiaText = data.maGiamGia ? `Voucher giảm giá (${data.maGiamGia.maCode || ''})` : 'Voucher giảm giá';
 
                     let totalRow = `
                         <tr>
@@ -1098,7 +1353,7 @@
                                     <div style="width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 12px;">
                                         <div style="display:flex; justify-content:space-between; font-size:13px;">
                                             <span style="color:var(--muted);">Tổng tiền hàng</span>
-                                            <span style="font-weight:500; color:var(--text);">${this.formatCurrency(giaTamThoi)}</span>
+                                            <span style="font-weight:500; color:var(--text);">${this.formatCurrency(calculatedGiaTamThoi)}</span>
                                         </div>
                                         <div style="display:flex; justify-content:space-between; font-size:13px;">
                                             <span style="color:var(--muted);">Phí vận chuyển</span>
@@ -1112,18 +1367,63 @@
                                             <span style="font-weight:600; font-size:14px; text-transform:uppercase; color:var(--text);">Thành tiền</span>
                                             <span style="font-weight:700; font-size:22px; color:var(--accent);">${this.formatCurrency(tongTien)}</span>
                                         </div>
+                    `;
+
+                    // Hiển thị tiền hoàn nếu có
+                    if (tienHoan > 0) {
+                        const tienThucTe = tongTien - tienHoan;
+                        totalRow += `
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding-top:16px; border-top:1px dashed rgba(0,0,0,0.1);">
+                                <span style="font-weight:600; font-size:13px; text-transform:uppercase; color:var(--muted);">Đã hoàn tiền</span>
+                                <span style="font-weight:700; font-size:18px; color:#ef4444;">-${this.formatCurrency(tienHoan)}</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding-top:16px; border-top:2px solid var(--text);">
+                                <span style="font-weight:600; font-size:14px; text-transform:uppercase; color:var(--text);">THỰC TẾ THANH TOÁN</span>
+                                <span style="font-weight:800; font-size:24px; color:var(--text);">${this.formatCurrency(tienThucTe)}</span>
+                            </div>
+                        `;
+                    }
+
+                    totalRow += `
                                     </div>
                                 </div>
                             </td>
                         </tr>
                     `;
 
-                    // 🌟 ẨN/HIỆN NÚT THANH TOÁN THEO PHƯƠNG THỨC THANH TOÁN
-                    if (currentStatus === 'CHO_THANH_TOAN' && data.phuongThucThanhToan && data.phuongThucThanhToan.toUpperCase() !== 'COD') {
-                        totalRow += `<tr><td colspan="4" style="text-align:right; padding-top:15px; border-bottom:none;"><button onclick="window.AccountApp.repayOrder(${data.id}, ${tongTien}, '${data.phuongThucThanhToan}', '${data.ma}')" class="account-form-save" style="border-radius:4px; padding:12px 24px;"><i class="bi bi-wallet2"></i> THANH TOÁN NGAY</button></td></tr>`;
+                    // 5. 🌟 GOM CÁC NÚT THAO TÁC VÀO CHUNG MỘT HÀNG (TRÁNH BỊ CHỒNG HOẶC LỖI HTML)
+                    let actionButtonsHtml = '';
+
+                    if (currentStatus === 'CHO_XAC_NHAN' || currentStatus === 'CHO_THANH_TOAN') {
+                        actionButtonsHtml += `<button onclick="window.AccountApp.cancelOrder(${data.id})" class="account-reorder-btn" style="color:#dc2626; border-color:rgba(220,38,38,0.2); background:rgba(220,38,38,0.05); margin-right:10px;"><i class="fa-solid fa-xmark"></i> Hủy đơn</button>`;
                     }
 
+                    if (['HOAN_THANH', 'DA_HUY', 'TU_CHOI_TRA_HANG', 'DA_HOAN_TIEN', 'DA_DOI', 'DA_TRA', 'GIAO_THAT_BAI'].includes(currentStatus)) {
+                        actionButtonsHtml += `<button onclick="window.AccountApp.reorder(${data.id})" class="account-reorder-btn" style="background:#fff; color:var(--text); border-color:var(--text); margin-right:10px;"><i class="bi bi-cart-plus"></i> Mua lại</button>`;
+                    }
+
+                    // 🌟 KIỂM TRA XEM ĐƠN HÀNG NÀY ĐÃ TỪNG TẠO PHIẾU ĐỔI TRẢ CHƯA
+                    // Dựa vào: Có tiền hoàn > 0, SP có số lượng trả > 0, hoặc trạng thái đơn hàng thuộc nhóm đổi trả
+                    const isDaDoiTra = (tienHoan > 0) ||
+                        chiTiets.some(item => (item.soLuongTra && item.soLuongTra > 0)) ||
+                        ['YEU_CAU_TRA_HANG', 'TU_CHOI_TRA_HANG', 'DA_HOAN_TIEN', 'DA_DOI', 'DA_TRA'].includes(currentStatus);
+
+                    // 🌟 NÚT ĐỔI TRẢ: Chỉ hiện khi trạng thái là HOÀN THÀNH, CÒN SP ĐỂ TRẢ, VÀ CHƯA TỪNG ĐỔI TRẢ
+                    if (currentStatus === 'HOAN_THANH' && hasReturnableItems && !isDaDoiTra) {
+                        actionButtonsHtml += `<button onclick="window.AccountApp.openReturnModal()" class="account-reorder-btn" style="background:#f59e0b; color:white; border-color:#f59e0b; margin-right:10px;"><i class="fa-solid fa-rotate-left"></i> Đổi/Trả Hàng</button>`;
+                    }
+
+                    if (currentStatus === 'CHO_THANH_TOAN' && data.phuongThucThanhToan && data.phuongThucThanhToan.toUpperCase() !== 'COD') {
+                        actionButtonsHtml += `<button onclick="window.AccountApp.repayOrder(${data.id}, ${tongTien}, '${data.phuongThucThanhToan}', '${data.ma}')" class="account-form-save" style="border-radius:4px; padding:10px 24px;"><i class="bi bi-wallet2"></i> THANH TOÁN NGAY</button>`;
+                    }
+
+                    if (actionButtonsHtml !== '') {
+                        totalRow += `<tr><td colspan="4" style="text-align:right; padding-top:20px; border-bottom:none;">${actionButtonsHtml}</td></tr>`;
+                    }
+
+                    // GẮN CHUỖI HTML HOÀN CHỈNH VÀO TABLE
                     document.getElementById('detProductList').innerHTML = html + totalRow;
+
                 } catch (e) {
                     console.error(e);
                     this.switchPanel('orders');
@@ -1483,13 +1783,18 @@
                 document.getElementById('inpPhone').value = user.soDienThoai || '';
                 document.getElementById('inpEmail').value = user.email || '';
                 document.getElementById('inpGender').value = user.gioiTinh || '';
+
                 const inpUser = document.getElementById('inpUsername');
                 inpUser.value = user.tenDangNhap || '';
                 if(user.ngaySinh) { document.getElementById('inpDob').value = user.ngaySinh.substring(0, 10); }
 
+                // 🌟 LOGIC HIỂN THỊ / KHÓA TÊN ĐĂNG NHẬP TỰ ĐỘNG
                 if (user.daDoiTenDangNhap || (user.tenDangNhap && user.tenDangNhap !== user.soDienThoai)) {
                     inpUser.disabled = true;
                     document.getElementById('usernameWarning').style.display = 'block';
+                } else {
+                    inpUser.disabled = false;
+                    document.getElementById('usernameWarning').style.display = 'none';
                 }
             },
 
@@ -1537,7 +1842,8 @@
                     'GIAO_THAT_BAI': { label: 'Giao thất bại / Hoàn hàng', cssClass: 'status-DA_HUY' },
                     'YEU_CAU_TRA_HANG': { label: 'Yêu cầu trả hàng', cssClass: 'status-CHO_XAC_NHAN' },
                     'TU_CHOI_TRA_HANG': { label: 'Từ chối trả hàng', cssClass: 'status-DA_HUY' },
-                    'DA_HOAN_TIEN': { label: 'Đã hoàn tiền', cssClass: 'status-HOAN_THANH' }
+                    'DA_HOAN_TIEN': { label: 'Đã hoàn tiền', cssClass: 'status-HOAN_THANH' },
+                    'DA_TRA': { label: 'Đã trả', cssClass: 'status-DA_TRA' }
                 };
                 return map[statusCode] || { label: statusCode || 'Trạng thái', cssClass: 'status-CHO_XAC_NHAN' };
             },
@@ -1605,8 +1911,21 @@
                     });
 
                     if(res.ok) {
-                        this.showAccountNotification('Thành công', 'Đã cập nhật hồ sơ cá nhân!');
-                        await this.fetchData();
+                        const dataRes = await res.json();
+
+                        // 🌟 LOGIC MỚI: KIỂM TRA TÍN HIỆU TỪ BACKEND
+                        if (dataRes.usernameChanged) {
+                            this.showAccountNotification('Thành công', 'Đổi tên đăng nhập thành công. Vui lòng đăng nhập lại!');
+
+                            // Đợi 1.5 giây cho khách đọc thông báo rồi Log out
+                            setTimeout(async () => {
+                                await fetch('/logout', { method: 'POST' });
+                                window.location.href = '/login';
+                            }, 1500);
+                        } else {
+                            this.showAccountNotification('Thành công', 'Đã cập nhật hồ sơ cá nhân!');
+                            await this.fetchData();
+                        }
                     } else {
                         const err = await res.json();
                         this.showAccountNotification('Lỗi', err.message || "Tên đăng nhập đã trùng hoặc bị lỗi. Vui lòng thử lại!", true);
@@ -1873,7 +2192,6 @@
                 document.getElementById('guestOrderResult').style.display = 'none';
             },
 
-            // 🌟 NÂNG CẤP POPUP GUEST (Tra cứu đơn khách vãng lai)
             guestTrackOrder: async function() {
                 const ma = document.getElementById('guestOrderCode').value.trim();
                 const resultDiv = document.getElementById('guestOrderResult');
@@ -1887,8 +2205,9 @@
 
                 try {
                     const res = await fetch('/api/hoa-don/tra-cuu/' + ma);
+                    const contentType = res.headers.get("content-type");
 
-                    if (!res.ok) {
+                    if (!res.ok || !contentType || !contentType.includes("application/json")) {
                         resultDiv.innerHTML = '<div style="color:#c03c3c; text-align:center; font-size:13px;">Không tìm thấy đơn hàng hoặc mã không hợp lệ!</div>';
                         resultDiv.style.display = 'block';
                         return;
@@ -1897,18 +2216,26 @@
                     const data = await res.json();
                     const maTrangThai = (data.trangThaiHoaDon && data.trangThaiHoaDon.ma) ? data.trangThaiHoaDon.ma : 'UNDEFINED';
                     const tongTien = data.tongTien || data.giaTong || 0;
-                    const tenKhach = data.tenNguoiNhan || 'Khách hàng';
                     const statusObj = this.getStatusConfig(maTrangThai);
 
-                    const dsSanPham = data.chiTiets || data.hoaDonChiTiets || [];
-                    let dsSanPhamHtml = '';
+                    // Xử lý dữ liệu
+                    const tenKhach = data.tenNguoiNhan || data.tenKhachHang || 'Khách hàng';
+                    const sdtKhach = (data.sdtKhachHang && data.sdtKhachHang !== 'null' && data.sdtKhachHang !== '') ? data.sdtKhachHang : '---';
+                    const emailKhach = (data.email && data.email !== 'null' && data.email !== '') ? data.email : 'Không có';
+                    const diaChiKhach = (data.diaChiGiaoHang && data.diaChiGiaoHang !== 'null' && data.diaChiGiaoHang !== '') ? data.diaChiGiaoHang : '---';
+                    const ghiChu = (data.ghiChu && data.ghiChu !== 'null' && data.ghiChu.trim() !== '') ? data.ghiChu : 'Không có ghi chú';
 
+                    const ngayTaoStr = data.ngayTao || '---';
+                    const ngayThanhToanStr = data.ngayThanhToan || 'Chưa thanh toán';
+
+                    const dsSanPham = data.chiTiets || [];
+                    let dsSanPhamHtml = '';
                     let calculatedGiaTamThoi = 0;
 
                     if (dsSanPham.length > 0) {
                         dsSanPhamHtml = `
                         <div style="margin-top: 15px; border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 15px;">
-                            <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:12px;">Sản phẩm đã đặt</div>
+                            <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:12px; font-weight:600;">Sản phẩm đã đặt</div>
                             <table class="detail-product-table" style="margin-bottom:0;">
                                 <thead>
                                     <tr>
@@ -1922,11 +2249,11 @@
                         `;
 
                         dsSanPham.forEach(item => {
-                            const hinhAnh = item.hinhAnh || (item.sanPhamChiTiet ? item.sanPhamChiTiet.hinhAnh : '');
-                            const tenSP = item.tenSanPham || (item.sanPhamChiTiet && item.sanPhamChiTiet.sanPham ? item.sanPhamChiTiet.sanPham.ten : 'Sản phẩm Beemate');
-                            const phanLoai = item.thuocTinh || (item.sanPhamChiTiet && item.sanPhamChiTiet.mauSac && item.sanPhamChiTiet.kichThuoc ? `${item.sanPhamChiTiet.mauSac.ten} - ${item.sanPhamChiTiet.kichThuoc.ten}` : 'Mặc định');
-                            const sku = item.sku || (item.sanPhamChiTiet ? item.sanPhamChiTiet.sku : 'N/A');
-                            const gia = item.giaBan || item.giaTien || 0;
+                            const hinhAnh = item.hinhAnh || 'https://placehold.co/60x80';
+                            const tenSP = item.tenSanPham || 'Sản phẩm Beemate';
+                            const phanLoai = item.thuocTinh || 'Mặc định';
+                            const sku = item.sku || 'N/A';
+                            const gia = item.giaBan || 0;
                             const sl = item.soLuong || 1;
 
                             calculatedGiaTamThoi += (gia * sl);
@@ -1935,7 +2262,7 @@
                                 <tr>
                                     <td>
                                         <div style="display:flex;align-items:flex-start;">
-                                            <img src="${hinhAnh || 'https://placehold.co/60x80'}" class="detail-prod-img" style="margin-top:4px;">
+                                            <img src="${hinhAnh}" class="detail-prod-img" style="margin-top:4px;">
                                             <div style="flex:1;">
                                                 <div style="font-family:'Cormorant Garamond', serif; font-size: 15px; font-weight:500;">${tenSP}</div>
                                                 <div style="color:var(--muted); font-size: 11px; margin-top:2px;">SKU: <span style="font-weight:500; color:var(--text);">${sku}</span></div>
@@ -1953,26 +2280,34 @@
                     }
 
                     const phiShip = data.phiVanChuyen || 0;
-                    const giaTamThoi = calculatedGiaTamThoi;
-
-                    let giamGia = (giaTamThoi + phiShip) - tongTien;
-                    if (giamGia < 0) {
-                        giamGia = data.giaTriKhuyenMai || data.tienGiam || 0;
-                    }
-
-                    let giamGiaText = data.maGiamGia ? `Voucher giảm giá (${data.maGiamGia.maCode || data.maGiamGia.code || data.maGiamGia.ma || ''})` : 'Voucher giảm giá';
+                    let giamGia = (calculatedGiaTamThoi + phiShip) - tongTien;
+                    if (giamGia < 0) giamGia = data.giaTriKhuyenMai || 0;
+                    let giamGiaText = data.maGiamGia ? `Voucher giảm giá (${data.maGiamGia.maCode || ''})` : 'Voucher giảm giá';
 
                     let html = `
-                        <div style="margin-bottom: 20px;">
-                            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 15px;">
-                                <div>
-                                    <div style="font-size:14px; font-weight:500;">Đơn hàng #${data.ma}</div>
-                                    <div style="font-size:12px; color:var(--muted);">${data.ngayTao ? data.ngayTao.substring(0, 10) : ''}</div>
-                                </div>
-                                <span class="account-order-status ${statusObj.cssClass}" style="padding: 4px 10px;">${statusObj.label}</span>
+                        <div style="margin-bottom: 25px; display:flex; align-items:center;">
+                            <span style="font-size:18px; font-weight:600;">Đơn hàng #${data.ma}</span>
+                            <span class="account-order-status ${statusObj.cssClass}" style="margin-left: 15px; font-size: 11px; padding: 4px 12px;">${statusObj.label}</span>
+                        </div>
+
+                        <div class="order-timeline" style="padding: 0 0 20px 0; border: none;">
+                            ${this.generateTimelineHTML(maTrangThai)}
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background: #f9f9fa; padding: 20px; border-radius: 6px; margin-bottom: 20px; border: 1px solid rgba(0,0,0,0.05); font-size: 13px; line-height: 1.6;">
+                            <div>
+                                <div style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; font-weight: 600;"><i class="bi bi-person-lines-fill"></i> Thông tin khách hàng</div>
+                                <div><strong>Họ tên:</strong> ${tenKhach}</div>
+                                <div><strong>SĐT:</strong> ${sdtKhach}</div>
+                                <div><strong>Email:</strong> ${emailKhach}</div>
+                                <div><strong>Địa chỉ:</strong> ${diaChiKhach}</div>
                             </div>
-                            <div class="order-timeline" style="padding: 10px 0; border: none;">
-                                ${this.generateTimelineHTML(maTrangThai)}
+                            <div>
+                                <div style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; font-weight: 600;"><i class="bi bi-receipt"></i> Thông tin hóa đơn</div>
+                                <div><strong>Ngày tạo:</strong> ${ngayTaoStr}</div>
+                                <div><strong>Ngày TT:</strong> ${ngayThanhToanStr}</div>
+                                <div><strong>Thanh toán:</strong> ${this.getPaymentMethodDisplay(data.phuongThucThanhToan)}</div>
+                                <div><strong>Ghi chú:</strong> <span style="font-style: italic; color: #888;">${ghiChu}</span></div>
                             </div>
                         </div>
 
@@ -1982,7 +2317,7 @@
                             <div style="width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 12px;">
                                 <div style="display:flex; justify-content:space-between; font-size:13px;">
                                     <span style="color:var(--muted);">Tổng tiền hàng</span>
-                                    <span style="font-weight:500; color:var(--text);">${this.formatCurrency(giaTamThoi)}</span>
+                                    <span style="font-weight:500; color:var(--text);">${this.formatCurrency(calculatedGiaTamThoi)}</span>
                                 </div>
                                 <div style="display:flex; justify-content:space-between; font-size:13px;">
                                     <span style="color:var(--muted);">Phí vận chuyển</span>
@@ -2007,7 +2342,7 @@
                     resultDiv.innerHTML = '<div style="color:#c03c3c; text-align:center; font-size:13px;">Lỗi kết nối máy chủ!</div>';
                     resultDiv.style.display = 'block';
                 }
-            }
+            },
         };
 
         setTimeout(() => window.AccountApp.init(), 100);

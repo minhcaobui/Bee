@@ -72,4 +72,6 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
     );
 
     List<HoaDon> findTop5ByLoaiHoaDonAndTrangThaiHoaDon_MaInOrderByNgayTaoDesc(Integer loaiHoaDon, List<String> maTrangThais);
+
+    boolean existsByKhachHangIdAndMaGiamGiaIdAndTrangThaiHoaDon_MaNot(Integer khachHangId, Integer maGiamGiaId, String trangThaiMa);
 }

@@ -40,6 +40,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/pos")
@@ -214,6 +215,15 @@ public class PosApi {
             if (voucherId != null) {
                 MaGiamGia voucher = maGiamGiaRepo.findById(voucherId).orElse(null);
                 if (voucher != null) {
+
+                    // 🌟 BỔ SUNG: KIỂM TRA MỖI KHÁCH CHỈ ĐƯỢC DÙNG 1 LẦN KHI CHỐT ĐƠN TẠI POS
+                    if (hd.getKhachHang() != null) {
+                        boolean daSuDung = hoaDonRepo.existsByKhachHangIdAndMaGiamGiaIdAndTrangThaiHoaDon_MaNot(hd.getKhachHang().getId(), voucher.getId(), "DA_HUY");
+                        if (daSuDung) {
+                            throw new RuntimeException("Khách hàng này đã sử dụng mã giảm giá này rồi!"); // Ném lỗi để rollback giao dịch
+                        }
+                    }
+
                     hd.setMaGiamGia(voucher);
                     BigDecimal baseForVoucher = giaTamTinh;
                     if (Boolean.FALSE.equals(voucher.getChoPhepCongDon()) && !"FREESHIP".equalsIgnoreCase(voucher.getLoaiGiamGia())) {
@@ -492,6 +502,8 @@ public class PosApi {
     public ResponseEntity<?> applyVoucher(@RequestBody Map<String, Object> payload) {
         String code = (String) payload.get("code");
         List<Map<String, Object>> cart = (List<Map<String, Object>>) payload.get("cart");
+        // 🌟 Lấy thêm ID Khách hàng từ payload (nếu có chọn khách)
+        Object customerIdObj = payload.get("customerId");
 
         Optional<MaGiamGia> voucherOpt = maGiamGiaRepo.findByMaCode(code);
         if (voucherOpt.isEmpty()) {
@@ -501,6 +513,15 @@ public class PosApi {
         MaGiamGia v = voucherOpt.get();
         if (v.getNgayKetThuc().isBefore(LocalDateTime.now()) || v.getSoLuong() <= v.getLuotSuDung() || !v.getTrangThai()) {
             return ResponseEntity.badRequest().body(Map.of("message", "MÃ GIẢM GIÁ ĐÃ HẾT HẠN HOẶC HẾT LƯỢT SỬ DỤNG"));
+        }
+
+        // 🌟 BỔ SUNG: KIỂM TRA MỖI KHÁCH 1 LẦN NGAY LÚC ÁP MÃ
+        if (customerIdObj != null && !customerIdObj.toString().trim().isEmpty()) {
+            Integer cId = Integer.valueOf(customerIdObj.toString());
+            boolean daSuDung = hoaDonRepo.existsByKhachHangIdAndMaGiamGiaIdAndTrangThaiHoaDon_MaNot(cId, v.getId(), "DA_HUY");
+            if (daSuDung) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Khách hàng này đã sử dụng mã giảm giá này rồi!"));
+            }
         }
 
         BigDecimal giaTamTinh = BigDecimal.ZERO;
@@ -663,5 +684,16 @@ public class PosApi {
         responseData.put("summary", summary);
 
         return ResponseEntity.ok(responseData);
+    }
+
+    // 🌟 API Lấy danh sách ID mã giảm giá của một khách hàng cụ thể (Dành cho POS)
+    @GetMapping("/customers/{id}/used-vouchers")
+    public ResponseEntity<?> getCustomerUsedVouchers(@PathVariable Integer id) {
+        List<Integer> usedIds = hoaDonRepo.findByKhachHangIdOrderByNgayTaoDesc(id).stream()
+                .filter(hd -> !"DA_HUY".equals(hd.getTrangThaiHoaDon().getMa()) && hd.getMaGiamGia() != null)
+                .map(hd -> hd.getMaGiamGia().getId())
+                .distinct()
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(usedIds);
     }
 }

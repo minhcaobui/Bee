@@ -302,6 +302,7 @@ public class KhuyenMaiApi {
 
             try {
                 PromotionRequest fakeRequest = new PromotionRequest();
+                fakeRequest.setTen(entity.getTen());
                 fakeRequest.setIdSanPhams(entity.getSanPhams().stream().map(SanPham::getId).collect(Collectors.toList()));
                 fakeRequest.setNgayBatDau(entity.getNgayBatDau());
                 fakeRequest.setNgayKetThuc(entity.getNgayKetThuc());

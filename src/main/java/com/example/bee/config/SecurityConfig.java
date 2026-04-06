@@ -29,7 +29,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 1. TÀI NGUYÊN CÔNG KHAI & TRANG ĐĂNG NHẬP
                         .requestMatchers("/register", "/login", "/css/**", "/js/**", "/images/**", "/customer/**").permitAll()
-
                         // 2. API CÔNG KHAI (Khách vãng lai dùng để xem hàng, tra đơn)
                         .requestMatchers(
                                 "/api/products/**",
@@ -79,7 +78,6 @@ public class SecurityConfig {
                                 "/api/nhan-vien/**",
                                 "/staff/**"
                         ).hasAuthority("ROLE_ADMIN")
-
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

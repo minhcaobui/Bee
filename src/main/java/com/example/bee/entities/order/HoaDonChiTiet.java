@@ -31,4 +31,7 @@ public class HoaDonChiTiet {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_san_pham_chi_tiet")
     private SanPhamChiTiet sanPhamChiTiet;
+
+    @Column(name = "so_luong_tra")
+    private Integer soLuongTra = 0;
 }

@@ -82,6 +82,7 @@ public class ReturnApi {
             item.put("hinhAnh", spct.getHinhAnh());
             item.put("soLuong", ct.getSoLuong());
             item.put("giaBan", ct.getHoaDonChiTiet().getGiaTien());
+            item.put("sku", spct.getSku());
             return item;
         }).collect(Collectors.toList());
 
@@ -100,7 +101,7 @@ public class ReturnApi {
     }
 
     @PostMapping("/{id}/approve")
-    public ResponseEntity<?> approveRequest(@PathVariable Integer id) {
+    public ResponseEntity<?> approveRequest(@PathVariable Integer id, @RequestBody(required = false) Map<String, Object> payload) {
         YeuCauDoiTra yc = ycRepo.findById(id).orElse(null);
         if (yc == null || !yc.getTrangThai().equals("CHO_XU_LY")) {
             return ResponseEntity.badRequest().body(Map.of("message", "Yêu cầu không tồn tại hoặc đã được xử lý!"));
@@ -112,35 +113,58 @@ public class ReturnApi {
             yc.setNhanVien(nv);
         }
 
+        // 🌟 LẤY TRẠNG THÁI CHECKBOX CỘNG KHO TỪ FRONTEND
+        boolean congKho = payload != null && payload.containsKey("congKho") ? (Boolean) payload.get("congKho") : true;
+
+        if (yc.getLoaiYeuCau().equalsIgnoreCase("ĐỔI HÀNG") && payload != null && payload.containsKey("chiTietMoi")) {
+            List<Map<String, Object>> chiTietMoi = (List<Map<String, Object>>) payload.get("chiTietMoi");
+            for (Map<String, Object> itemMoi : chiTietMoi) {
+                Integer spctId = Integer.parseInt(itemMoi.get("idSanPhamChiTiet").toString());
+                Integer slMoi = Integer.parseInt(itemMoi.get("soLuong").toString());
+
+                SanPhamChiTiet spctMoi = spctRepo.findById(spctId).orElse(null);
+                if (spctMoi != null) {
+                    if (spctMoi.getSoLuong() < slMoi) {
+                        return ResponseEntity.badRequest().body(Map.of("message", "Sản phẩm " + spctMoi.getSanPham().getTen() + " không đủ tồn kho để đổi!"));
+                    }
+                    spctMoi.setSoLuong(spctMoi.getSoLuong() - slMoi);
+                    spctRepo.save(spctMoi);
+                }
+            }
+        }
+
         yc.setTrangThai("HOAN_THANH");
         yc.setNgayXuLy(new Date());
         ycRepo.save(yc);
 
-        // Cộng lại tồn kho hàng cũ khách trả
+        // 🌟 FIX LỖI 3 & 4: TĂNG SỐ LƯỢNG TRẢ CỦA HÓA ĐƠN CHI TIẾT (KHÔNG ĐỔI TRẠNG THÁI HÓA ĐƠN MẸ)
         List<ChiTietDoiTra> ctList = ctRepo.findByYeuCauDoiTraId(id);
         for (ChiTietDoiTra ct : ctList) {
-            SanPhamChiTiet spct = ct.getHoaDonChiTiet().getSanPhamChiTiet();
-            spct.setSoLuong(spct.getSoLuong() + ct.getSoLuong());
-            spctRepo.save(spct);
+            HoaDonChiTiet hdct = ct.getHoaDonChiTiet();
+
+            // Ghi nhận số lượng khách đã trả vào hóa đơn chi tiết gốc
+            int daTra = hdct.getSoLuongTra() != null ? hdct.getSoLuongTra() : 0;
+            hdct.setSoLuongTra(daTra + ct.getSoLuong());
+            hdctRepo.save(hdct);
+
+            // Chỉ cộng lại kho nếu nhân viên tích chọn "Hàng còn nguyên vẹn"
+            if (congKho) {
+                SanPhamChiTiet spct = hdct.getSanPhamChiTiet();
+                spct.setSoLuong(spct.getSoLuong() + ct.getSoLuong());
+                spctRepo.save(spct);
+            }
         }
 
-        // 🌟 LOGIC MỚI: Cập nhật Trạng thái Hóa đơn gốc
+        // 🌟 KHÔNG SET LẠI TRẠNG THÁI hd.setTrangThaiHoaDon() NỮA, CHỈ LƯU LỊCH SỬ
         HoaDon hd = yc.getHoaDon();
         if (hd != null) {
-            String newStatusMa = yc.getLoaiYeuCau().equalsIgnoreCase("ĐỔI HÀNG") ? "DA_DOI" : "DA_TRA";
-            TrangThaiHoaDon ttDoiTra = ttRepo.findByMa(newStatusMa);
-            if (ttDoiTra != null) {
-                hd.setTrangThaiHoaDon(ttDoiTra);
-                hdRepo.save(hd);
-
-                LichSuHoaDon ls = new LichSuHoaDon();
-                ls.setHoaDon(hd);
-                ls.setTrangThaiHoaDon(ttDoiTra);
-                ls.setNhanVien(yc.getNhanVien());
-                ls.setGhiChu("Đơn hàng được cập nhật trạng thái do hoàn tất phiếu " + (newStatusMa.equals("DA_DOI") ? "Đổi" : "Trả") + " hàng: " + yc.getMa());
-                ls.setNgayTao(new Date());
-                lsRepo.save(ls);
-            }
+            LichSuHoaDon ls = new LichSuHoaDon();
+            ls.setHoaDon(hd);
+            ls.setTrangThaiHoaDon(hd.getTrangThaiHoaDon()); // Giữ nguyên trạng thái cũ (HOAN_THANH)
+            ls.setNhanVien(yc.getNhanVien());
+            ls.setGhiChu("Đơn hàng cập nhật số lượng trả do hoàn tất phiếu " + yc.getLoaiYeuCau() + " hàng: " + yc.getMa());
+            ls.setNgayTao(new Date());
+            lsRepo.save(ls);
         }
 
         return ResponseEntity.ok(Map.of("message", "Xử lý thành công!"));
@@ -193,8 +217,21 @@ public class ReturnApi {
 
             HoaDon hd = hdRepo.findByMa(maHD);
             if (hd == null) return ResponseEntity.badRequest().body(Map.of("message", "Hóa đơn không tồn tại"));
+            if (!"HOAN_THANH".equals(hd.getTrangThaiHoaDon().getMa())) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Chỉ được đổi trả hóa đơn đã giao thành công!"));
+            }
 
-            // Tạo phiếu yêu cầu
+            // 🌟 TÍNH TỔNG TIỀN HÀNG VÀ VOUCHER CỦA ĐƠN ĐỂ PHÂN BỔ TỈ LỆ
+            BigDecimal tongTienDon = BigDecimal.ZERO;
+            List<HoaDonChiTiet> allHdct = hdctRepo.findByHoaDonId(hd.getId());
+            for (HoaDonChiTiet ct : allHdct) {
+                tongTienDon = tongTienDon.add(ct.getGiaTien().multiply(BigDecimal.valueOf(ct.getSoLuong())));
+            }
+
+            // 💡 LƯU Ý: Nếu Entity HoaDon của bạn dùng tên khác (VD: getTienGiamVoucher, getGiaTriKhuyenMai), hãy sửa tên 'getTienGiam()' ở dòng dưới cho khớp nhé.
+            // Dòng code đã sửa đúng theo Entity HoaDon của bạn:
+            BigDecimal tienGiam = hd.getGiaTriKhuyenMai() != null ? hd.getGiaTriKhuyenMai() : BigDecimal.ZERO;
+
             YeuCauDoiTra yc = new YeuCauDoiTra();
             yc.setMa("DT" + System.currentTimeMillis());
             yc.setHoaDon(hd);
@@ -207,13 +244,19 @@ public class ReturnApi {
             BigDecimal tienHoan = BigDecimal.ZERO;
             yc = ycRepo.save(yc);
 
-            // Lưu chi tiết các SP khách muốn trả
             for (Map<String, Object> item : items) {
                 Integer idHdct = Integer.parseInt(item.get("idHoaDonChiTiet").toString());
                 Integer sl = Integer.parseInt(item.get("soLuong").toString());
 
                 HoaDonChiTiet hdct = hdctRepo.findById(idHdct).orElse(null);
                 if (hdct != null) {
+                    // 🌟 CHECK VALIDATE SỐ LƯỢNG TRẢ
+                    int daTra = hdct.getSoLuongTra() != null ? hdct.getSoLuongTra() : 0;
+                    int maxCoTheTra = hdct.getSoLuong() - daTra;
+
+                    if (sl <= 0 || sl > maxCoTheTra) {
+                        throw new RuntimeException("Số lượng trả không hợp lệ cho SP: " + hdct.getSanPhamChiTiet().getSanPham().getTen());
+                    }
                     ChiTietDoiTra ct = new ChiTietDoiTra();
                     ct.setYeuCauDoiTra(yc);
                     ct.setHoaDonChiTiet(hdct);
@@ -221,11 +264,19 @@ public class ReturnApi {
                     ct.setTinhTrangSanPham("Bình thường");
                     ctRepo.save(ct);
 
-                    tienHoan = tienHoan.add(hdct.getGiaTien().multiply(BigDecimal.valueOf(sl)));
+                    // 🌟 FIX LỖI 1: TÍNH TIỀN HOÀN CÓ TRỪ ĐI PHẦN TRĂM VOUCHER
+                    BigDecimal giaTriSp = hdct.getGiaTien().multiply(BigDecimal.valueOf(sl));
+                    if (tongTienDon.compareTo(BigDecimal.ZERO) > 0 && tienGiam.compareTo(BigDecimal.ZERO) > 0) {
+                        BigDecimal tyLeGiam = giaTriSp.divide(tongTienDon, 4, java.math.RoundingMode.HALF_UP);
+                        BigDecimal giamGiaCuaSp = tienGiam.multiply(tyLeGiam);
+                        tienHoan = tienHoan.add(giaTriSp.subtract(giamGiaCuaSp));
+                    } else {
+                        tienHoan = tienHoan.add(giaTriSp);
+                    }
                 }
             }
 
-            yc.setSoTienHoan(tienHoan);
+            yc.setSoTienHoan(tienHoan.setScale(0, java.math.RoundingMode.HALF_UP));
             ycRepo.save(yc);
 
             return ResponseEntity.ok(Map.of("message", "Tạo yêu cầu thành công!"));

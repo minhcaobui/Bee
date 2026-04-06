@@ -216,6 +216,7 @@ public class OrderApi {
         response.put("tenKhachHang", hd.getKhachHang() != null ? hd.getKhachHang().getHoTen() : (hd.getTenNguoiNhan() != null ? hd.getTenNguoiNhan() : "Khách vãng lai"));
 
         response.put("sdtKhachHang", hd.getSdtNhan() != null ? hd.getSdtNhan() : (hd.getKhachHang() != null ? hd.getKhachHang().getSoDienThoai() : ""));
+        response.put("email", hd.getKhachHang() != null ? hd.getKhachHang().getEmail() : "");
         response.put("ghiChu", hd.getGhiChu());
         response.put("ngayThanhToan", hd.getNgayThanhToan() != null ? sdf.format(hd.getNgayThanhToan()) : null);
         response.put("ngayCapNhat", ngayCapNhatCuoi != null ? sdf.format(ngayCapNhatCuoi) : null);
@@ -337,9 +338,33 @@ public class OrderApi {
     public ResponseEntity<?> huyDon(@PathVariable Integer id, @RequestBody Map<String, String> req) {
         HoaDon hd = hdRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy hóa đơn"));
+        String currentStatus = hd.getTrangThaiHoaDon().getMa();
+        if ("HOAN_THANH".equals(currentStatus) || "DANG_GIAO".equals(currentStatus) || "DA_TRA".equals(currentStatus) || "DA_DOI".equals(currentStatus)) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Không thể hủy đơn hàng đã giao hoặc đang giao!"));
+        }
+        if (!"CHO_XAC_NHAN".equals(currentStatus) && !"CHO_THANH_TOAN".equals(currentStatus)) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Không thể hủy đơn hàng đang xử lý hoặc đã hoàn thành!"));
+        }
+        // Tránh tình trạng bấm hủy 2 lần làm kho bị cộng dồn sai
+        if ("DA_HUY".equals(hd.getTrangThaiHoaDon().getMa())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Đơn hàng này đã bị hủy từ trước!"));
+        }
+
         TrangThaiHoaDon ttHuy = ttRepo.findByMa("DA_HUY");
         hd.setTrangThaiHoaDon(ttHuy);
 
+        // 🌟 BỔ SUNG LOGIC QUAN TRỌNG: HỒI LẠI SỐ LƯỢNG VÀO KHO
+        List<HoaDonChiTiet> hdctList = hdctRepo.findByHoaDonId(hd.getId());
+        for (HoaDonChiTiet ct : hdctList) {
+            SanPhamChiTiet spct = ct.getSanPhamChiTiet();
+            if (spct != null) {
+                // Cộng trả lại số lượng khách đã mua vào tồn kho
+                spct.setSoLuong(spct.getSoLuong() + ct.getSoLuong());
+                spctRepo.save(spct);
+            }
+        }
+
+        // Hoàn lại lượt sử dụng cho Voucher (nếu có)
         if (hd.getMaGiamGia() != null) {
             MaGiamGia voucher = hd.getMaGiamGia();
             int luotMoi = voucher.getLuotSuDung() - 1;
@@ -352,14 +377,19 @@ public class OrderApi {
             }
         }
 
+        // Lưu thông tin nhân viên thao tác
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         var nhanVienThaoTac = (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser"))
                 ? nvRepo.findByTaiKhoan_TenDangNhap(auth.getName()).orElse(null)
                 : null;
+
         if (hd.getNhanVien() == null && nhanVienThaoTac != null) {
             hd.setNhanVien(nhanVienThaoTac);
         }
+
         hdRepo.save(hd);
+
+        // Bắn thông báo cho khách hàng
         if (hd.getKhachHang() != null && hd.getKhachHang().getTaiKhoan() != null) {
             ThongBao tb = new ThongBao();
             tb.setTaiKhoanId(hd.getKhachHang().getTaiKhoan().getId());
@@ -369,13 +399,16 @@ public class OrderApi {
             tb.setNoiDung("Đơn hàng #" + hd.getMa() + " đã bị hủy. Lý do: " + req.getOrDefault("ghiChu", "Khách hàng / Admin yêu cầu hủy đơn."));
             thongBaoRepository.save(tb);
         }
+
+        // Ghi lại lịch sử
         lsRepo.save(LichSuHoaDon.builder()
                 .hoaDon(hd)
                 .trangThaiHoaDon(ttHuy)
                 .nhanVien(nhanVienThaoTac)
                 .ghiChu(req.getOrDefault("ghiChu", "Khách hàng/Admin yêu cầu hủy đơn"))
                 .build());
-        return ResponseEntity.ok(Map.of("message", "Đơn hàng đã được chuyển sang trạng thái hủy"));
+
+        return ResponseEntity.ok(Map.of("message", "Đơn hàng đã được hủy và hoàn sản phẩm vào kho!"));
     }
 
     @PostMapping("/checkout")
@@ -428,6 +461,21 @@ public class OrderApi {
             if (req.voucherId != null) {
                 MaGiamGia voucher = maGiamGiaRepo.findById(req.voucherId).orElse(null);
                 if (voucher != null) {
+                    // 🌟 VALIDATE VOUCHER
+                    if (!voucher.getTrangThai() ||
+                            voucher.getLuotSuDung() >= voucher.getSoLuong() ||
+                            (voucher.getNgayKetThuc() != null && voucher.getNgayKetThuc().isBefore(java.time.LocalDateTime.now()))) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Mã giảm giá đã hết lượt sử dụng hoặc hết hạn!"));
+                    }
+
+                    // 🌟 BỔ SUNG: KIỂM TRA MỖI KHÁCH CHỈ ĐƯỢC DÙNG 1 LẦN
+                    if (hd.getKhachHang() != null) {
+                        boolean daSuDung = hdRepo.existsByKhachHangIdAndMaGiamGiaIdAndTrangThaiHoaDon_MaNot(hd.getKhachHang().getId(), voucher.getId(), "DA_HUY");
+                        if (daSuDung) {
+                            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Bạn đã sử dụng mã giảm giá này cho một đơn hàng khác rồi!"));
+                        }
+                    }
+
                     hd.setMaGiamGia(voucher);
                     int luotMoi = voucher.getLuotSuDung() + 1;
                     voucher.setLuotSuDung(luotMoi);
@@ -463,7 +511,7 @@ public class OrderApi {
             hd.setTrangThaiHoaDon(ttBanDau);
 
             HoaDon savedHd = hdRepo.save(hd);
-
+            BigDecimal tongTienHangChuan = BigDecimal.ZERO;
             for (CheckoutItemRequest itemReq : req.chiTietDonHangs) {
                 SanPhamChiTiet spct = spctRepo.findById(itemReq.chiTietSanPhamId)
                         .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
@@ -472,6 +520,10 @@ public class OrderApi {
                     throw new RuntimeException("Sản phẩm " + spct.getSanPham().getTen() + " không đủ số lượng!");
                 }
 
+                BigDecimal giaThucTe = (spct.getGiaSauKhuyenMai() != null && spct.getGiaSauKhuyenMai().compareTo(BigDecimal.ZERO) > 0)
+                        ? spct.getGiaSauKhuyenMai() : spct.getGiaBan();
+                tongTienHangChuan = tongTienHangChuan.add(giaThucTe.multiply(BigDecimal.valueOf(itemReq.soLuong)));
+
                 spct.setSoLuong(spct.getSoLuong() - itemReq.soLuong);
                 spctRepo.save(spct);
 
@@ -479,9 +531,17 @@ public class OrderApi {
                 hdct.setHoaDon(savedHd);
                 hdct.setSanPhamChiTiet(spct);
                 hdct.setSoLuong(itemReq.soLuong);
-                hdct.setGiaTien(itemReq.donGia);
+                hdct.setGiaTien(giaThucTe);
                 hdctRepo.save(hdct);
             }
+            BigDecimal tongTienCuoiThucTe = tongTienHangChuan
+                    .subtract(req.tienGiam != null ? req.tienGiam : BigDecimal.ZERO)
+                    .subtract(chietKhauNV)
+                    .add(req.phiShip != null ? req.phiShip : BigDecimal.ZERO);
+            if (tongTienCuoiThucTe.compareTo(BigDecimal.ZERO) < 0) tongTienCuoiThucTe = BigDecimal.ZERO;
+            savedHd.setGiaTamThoi(tongTienHangChuan);
+            savedHd.setGiaTong(tongTienCuoiThucTe);
+            hdRepo.save(savedHd);
 
             LichSuHoaDon ls = new LichSuHoaDon();
             ls.setHoaDon(savedHd);
@@ -561,12 +621,20 @@ public class OrderApi {
                 returnedItems.put(hdctId, returnedItems.getOrDefault(hdctId, 0) + ct.getSoLuong());
             }
         }
-
-        java.util.Map<String, Object> result = new java.util.HashMap<>();
+        SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Map<String, Object> result = new java.util.HashMap<>();
         result.put("ma", hoaDon.getMa());
-        result.put("ngayTao", hoaDon.getNgayTao());
-        result.put("tenNguoiNhan", hoaDon.getTenNguoiNhan());
+        result.put("ngayTao", hoaDon.getNgayTao() != null ? sdf.format(hoaDon.getNgayTao()) : null);
+        result.put("ngayThanhToan", hoaDon.getNgayThanhToan() != null ? sdf.format(hoaDon.getNgayThanhToan()) : null);
+        result.put("tenNguoiNhan", hoaDon.getTenNguoiNhan() != null ? hoaDon.getTenNguoiNhan() : (hoaDon.getKhachHang() != null ? hoaDon.getKhachHang().getHoTen() : "Khách hàng"));
+        result.put("sdtKhachHang", hoaDon.getSdtNhan() != null ? hoaDon.getSdtNhan() : (hoaDon.getKhachHang() != null ? hoaDon.getKhachHang().getSoDienThoai() : ""));
+        result.put("email", hoaDon.getKhachHang() != null ? hoaDon.getKhachHang().getEmail() : "");
+        result.put("diaChiGiaoHang", hoaDon.getDiaChiGiaoHang());
+        result.put("phuongThucThanhToan", hoaDon.getPhuongThucThanhToan());
+        result.put("ghiChu", hoaDon.getGhiChu());
         result.put("giaTong", hoaDon.getGiaTong());
+        result.put("phiVanChuyen", hoaDon.getPhiVanChuyen());
+        result.put("giaTriKhuyenMai", hoaDon.getGiaTriKhuyenMai());
         result.put("trangThaiHoaDon", hoaDon.getTrangThaiHoaDon());
         result.put("tienHoan", tongTienHoan); // 🌟 Thêm tiền hoàn
 
@@ -708,7 +776,7 @@ public class OrderApi {
                 if (hd != null && "CHO_THANH_TOAN".equals(hd.getTrangThaiHoaDon().getMa())) {
 
                     if ("0".equals(resultCode)) {
-                        TrangThaiHoaDon ttChoXacNhan = ttRepo.findByMa("CHO_GIAO");
+                        TrangThaiHoaDon ttChoXacNhan = ttRepo.findByMa("CHO_XAC_NHAN");
                         hd.setTrangThaiHoaDon(ttChoXacNhan);
                         hd.setNgayThanhToan(new Date());
                         hdRepo.save(hd);
@@ -843,7 +911,7 @@ public class OrderApi {
                 if (hd != null && "CHO_THANH_TOAN".equals(hd.getTrangThaiHoaDon().getMa())) {
 
                     if ("00".equals(vnp_ResponseCode)) {
-                        TrangThaiHoaDon ttChoXacNhan = ttRepo.findByMa("CHO_GIAO");
+                        TrangThaiHoaDon ttChoXacNhan = ttRepo.findByMa("CHO_XAC_NHAN");
                         hd.setTrangThaiHoaDon(ttChoXacNhan);
                         hd.setNgayThanhToan(new Date());
                         hdRepo.save(hd);
@@ -974,5 +1042,24 @@ public class OrderApi {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
+    }
+
+    // 🌟 API Lấy danh sách ID mã giảm giá khách hàng đã dùng
+    @GetMapping("/my-used-vouchers")
+    public ResponseEntity<?> getMyUsedVouchers() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
+            return ResponseEntity.ok(Collections.emptyList());
+        }
+        Optional<KhachHang> khOpt = khRepo.findByTaiKhoan_TenDangNhap(auth.getName());
+        if (khOpt.isEmpty()) return ResponseEntity.ok(Collections.emptyList());
+
+        List<Integer> usedIds = hdRepo.findByKhachHangIdOrderByNgayTaoDesc(khOpt.get().getId()).stream()
+                .filter(hd -> !"DA_HUY".equals(hd.getTrangThaiHoaDon().getMa()) && hd.getMaGiamGia() != null)
+                .map(hd -> hd.getMaGiamGia().getId())
+                .distinct()
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(usedIds);
     }
 }

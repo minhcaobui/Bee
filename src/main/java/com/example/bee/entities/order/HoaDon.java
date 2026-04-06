@@ -99,4 +99,11 @@ public class HoaDon {
                 .map(com.example.bee.entities.order.YeuCauDoiTra::getSoTienHoan)
                 .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
     }
+
+    @Transient
+    public boolean isCoDoiTra() {
+        if (this.yeuCauDoiTras == null) return false;
+        return this.yeuCauDoiTras.stream()
+                .anyMatch(yc -> "HOAN_THANH".equals(yc.getTrangThai()));
+    }
 }
