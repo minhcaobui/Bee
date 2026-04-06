@@ -68,7 +68,7 @@ async function loadModule(moduleName) {
         return;
     }
 
-    document.title = `Beemate — ${module.title}`;
+    document.title = `BEEMATE | ${module.title}`;
 
     // Active nav link
     document.querySelectorAll('.nav-links a[data-module]').forEach(link => {
@@ -76,7 +76,7 @@ async function loadModule(moduleName) {
     });
 
     try {
-        // Lấy query string nếu có — vd: #detail?id=5
+        // Lấy query string nếu có vd: #detail?id=5
         const queryStr = window.location.hash.includes('?')
             ? window.location.hash.split('?')[1] : '';
         const fetchUrl = queryStr ? `${module.url}?${queryStr}` : module.url;
@@ -143,7 +143,7 @@ function executeScripts(container, moduleName) {
         oldScript.remove();
     });
 
-    // Kích hoạt init — giống pattern bên admin
+    // Kích hoạt init giống pattern bên admin
     setTimeout(() => {
         console.log(`[Router] 🚀 Init module: ${moduleName}`);
         if      (moduleName === 'home'     && window.HomeApp)      window.HomeApp.init();

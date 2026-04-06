@@ -1,27 +1,53 @@
 <section id="detail-section">
     <style>
-        .detail-section { padding: 40px 0 120px; background: var(--white); }
-        .detail-label { font-size: 11px; letter-spacing: 0.22em; color: var(--muted); text-transform: uppercase; text-align: center; margin-bottom: 30px; font-weight: 400; }
+        /* ==================== COLOR SYSTEM ==================== */
+        #detail-section {
+            --accent: #3D5A4C; --accent-light: #4d7060; --white: #FFFFFF; --text: #1A1A1A;
+            --muted: #8A8A8A; --border: rgba(0,0,0,0.08); --shadow-sm: 0 2px 16px rgba(61,90,76,0.07);
+            --shadow-md: 0 8px 40px rgba(61,90,76,0.13); --btn-h: 42px; --font-display: 'Cormorant Garamond', serif;
+        }
 
-        /* --- CSS CHO TAG MỚI / SALE TRONG CHI TIẾT --- */
+        /* ==================== SWATCHES VÀ PERCENTAGE CHO SẢN PHẨM VỪA XEM ==================== */
+        .prod-swatches { display: flex; align-items: center; gap: 4px; margin-bottom: 8px; min-height: 14px; }
+        .swatch-dot { width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); flex-shrink: 0; }
+        .swatch-more { font-size: 9px; color: var(--muted); font-weight: 500; letter-spacing: 0.05em; padding: 2px 6px; border: 1px solid var(--border); border-radius: 2px; margin-left: 2px; }
+        .price-pct { font-size: 11px; color: #c08060; font-weight: 600; margin-left: 4px; }
+
+        /* ==================== NÚT QUAY LẠI ==================== */
+        .detail-back-wrap { max-width: 1180px; margin: 0 auto; padding: 28px 40px 0; }
+        .detail-back-btn {
+            display: inline-flex; align-items: center; gap: 8px; background: none; border: none;
+            cursor: pointer; color: var(--muted); font-size: 11px; letter-spacing: 0.18em;
+            text-transform: uppercase; font-weight: 600; transition: color 0.25s; padding: 0;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .detail-back-btn:hover { color: var(--accent); }
+        .detail-back-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; transition: transform 0.25s ease; }
+        .detail-back-btn:hover svg { transform: translateX(-4px); }
+
+        /* ==================== LAYOUT TỔNG ==================== */
+        .detail-section { padding: 16px 0 120px; background: var(--white); }
+        .detail-label { font-size: 11px; letter-spacing: 0.22em; color: var(--muted); text-transform: uppercase; text-align: center; margin: 24px 0 32px; font-weight: 400; }
+
+        /* ==================== BADGE ==================== */
         .detail-badges { position: absolute; top: 20px; left: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 5; pointer-events: none; }
-        .detail-badge { padding: 6px 12px; font-size: 10px; font-family: 'DM Sans', sans-serif; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 2px; color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .detail-badge { padding: 5px 11px; font-size: 9px; font-family: 'DM Sans', sans-serif; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #fff; width: fit-content; }
         .detail-badge.new { background: var(--accent); }
-        .detail-badge.sale { background: #dc2626; }
+        .detail-badge.sale { background: #c08060; }
 
-        /* 🌟 CSS CHO COLOR BADGE VÀ STOCK BADGE MỚI */
-        .color-badge { display: inline-block; padding: 2px 8px; background: #000; color: #fff; border-radius: 2px; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
-        .stock-badge { padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; margin-left: 8px; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; transform: translateY(-1px); }
+        .color-badge { display: inline-block; padding: 2px 8px; background: var(--text); color: #fff; border-radius: 2px; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .stock-badge { padding: 2px 8px; border-radius: 2px; font-size: 10px; font-weight: 800; margin-left: 8px; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; transform: translateY(-1px); }
         .stock-badge.good { background: #d1fae5; color: #059669; }
-        .stock-badge.warning { background: #fee2e2; color: #dc2626; }
+        .stock-badge.warning { background: #fef3c7; color: #b45309; }
 
-        .product-detail-layout { display: grid; grid-template-columns: 1.1fr 1fr; gap: 60px; align-items: start; max-width: 1100px; margin: 0 auto; padding: 0 40px; }
+        /* ==================== MAIN LAYOUT ==================== */
+        .product-detail-layout { display: grid; grid-template-columns: 1.1fr 1fr; gap: 60px; align-items: start; max-width: 1180px; margin: 0 auto; padding: 0 40px; }
 
-        .detail-gallery { width: 100%; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
-
+        /* ==================== GALLERY ==================== */
+        .detail-gallery { width: 100%; max-width: 540px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
         .main-view-container {
-            width: 100%; aspect-ratio: 3/4; background: #f8f9fa; border-radius: 4px;
-            overflow: hidden; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            width: 100%; aspect-ratio: 3/4; background: #f9f8f6;
+            overflow: hidden; position: relative;
             cursor: zoom-in;
         }
         .main-view-container img {
@@ -35,193 +61,358 @@
             position: absolute; top: 50%; transform: translateY(-50%); width: 40px; height: 40px;
             border-radius: 50%; background: rgba(255,255,255,0.9); border: 1px solid rgba(0,0,0,0.1);
             display: flex; align-items: center; justify-content: center; cursor: pointer;
-            opacity: 0; transition: all 0.3s ease; z-index: 10; color: #000; font-size: 16px;
+            opacity: 0; transition: all 0.3s ease; z-index: 10; color: #000; font-size: 14px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         .main-view-container:hover .bee-nav-btn { opacity: 1; }
-        .bee-nav-btn:hover { background: #000; color: #fff; border-color: #000; }
+        .bee-nav-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
         .bee-nav-btn.prev { left: 16px; } .bee-nav-btn.next { right: 16px; }
 
-        .thumb-list { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; padding: 2px 0; width: 100%; }
+        .thumb-list { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; padding: 2px 0; width: 100%; }
         .thumb-list::-webkit-scrollbar { display: none; }
-        .thumb-item { width: 80px; height: 106px; flex-shrink: 0; cursor: pointer; border: 2px solid transparent; opacity: 0.5; transition: all 0.3s ease; background: #f8f9fa; border-radius: 4px; overflow: hidden; }
+        .thumb-item { width: 76px; height: 102px; flex-shrink: 0; cursor: pointer; border: 2px solid transparent; opacity: 0.5; transition: all 0.3s ease; background: #f9f8f6; overflow: hidden; }
         .thumb-item img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
         .thumb-item:hover { opacity: 0.8; }
-        .thumb-item.active { opacity: 1; border-color: #000; }
-        .img-overlay { position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px); z-index: 1;}
+        .thumb-item.active { opacity: 1; border-color: var(--accent); }
 
+        /* ==================== INFO PANEL ==================== */
         .detail-info { padding-top: 10px; position: sticky; top: 100px; }
-        .detail-breadcrumbs { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 16px; color: var(--muted); }
-        .detail-breadcrumbs a { color: var(--text); text-decoration: none; cursor: pointer; transition: color 0.3s; font-weight: 500;}
+        .detail-breadcrumbs { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 18px; color: var(--muted); }
+        .detail-breadcrumbs a { color: var(--text); text-decoration: none; cursor: pointer; transition: color 0.3s; font-weight: 500; }
         .detail-breadcrumbs a:hover { color: var(--accent); }
         .detail-breadcrumbs span.sep { margin: 0 8px; color: rgba(0,0,0,0.2); }
 
         .detail-name { font-family: 'Cormorant Garamond', serif; font-size: 38px; font-weight: 300; line-height: 1.1; margin-bottom: 12px; }
-        .detail-price { font-size: 22px; color: var(--text); font-weight: 300; margin-bottom: 32px; display: flex; align-items: center; gap: 12px; }
+        .detail-price { font-size: 22px; color: var(--text); font-weight: 300; margin-bottom: 28px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .detail-price-sale { color: var(--accent); font-weight: 600; font-size: 22px; }
         .detail-price-old { font-size: 16px; color: var(--muted); text-decoration: line-through; }
-        .detail-divider { width: 40px; height: 1px; background: var(--accent); margin-bottom: 28px; }
-        .detail-desc { font-size: 14px; color: var(--muted); line-height: 1.9; font-weight: 300; margin-bottom: 36px; white-space: pre-line; }
+        .detail-divider { width: 40px; height: 1px; background: var(--accent); margin-bottom: 24px; }
+        .detail-desc { font-size: 13.5px; color: var(--muted); line-height: 1.9; font-weight: 300; margin-bottom: 32px; white-space: pre-line; }
 
-        .size-label { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 400; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
-        .size-guide-btn { font-size: 11px; color: var(--accent); text-decoration: underline; cursor: pointer; background: none; border: none; font-family: 'DM Sans', sans-serif; font-weight: 300; }
+        /* ==================== SIZE / COLOR ==================== */
+        .size-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; color: var(--text); }
+        .size-guide-btn { font-size: 11px; color: var(--accent); text-decoration: underline; cursor: pointer; background: none; border: none; font-family: 'DM Sans', sans-serif; font-weight: 300; letter-spacing: 0; text-transform: none; }
 
-        .size-options { display: flex; gap: 10px; margin-bottom: 32px; flex-wrap: wrap; }
-        .size-btn { width: 48px; height: 48px; border: 1px solid rgba(0,0,0,0.15); background: none; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.2s ease; color: var(--text); border-radius: 2px; }
-        .size-btn:hover:not(.unavailable) { border-color: var(--accent); color: var(--accent); }
+        .size-options { display: flex; gap: 8px; margin-bottom: 28px; flex-wrap: wrap; }
+        .size-btn { width: 48px; height: 48px; border: 1px solid var(--border); background: none; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.2s ease; color: var(--text); border-radius: 2px; }
+        .size-btn:hover:not(.unavailable) { border-color: var(--accent); color: var(--accent); background: rgba(61,90,76,0.05); }
         .size-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
-        .size-btn.unavailable { color: var(--muted); opacity: 0.4; cursor: not-allowed; background: #f9f9f9; text-decoration: line-through; }
+        .size-btn.unavailable { color: var(--muted); opacity: 0.35; cursor: not-allowed; background: #f9f9f9; text-decoration: line-through; }
 
-        .action-group { display: flex; gap: 12px; margin-top: 24px; margin-bottom: 14px; align-items: stretch; flex-wrap: wrap; }
-
-        .qty-selector { display: flex; border: 1px solid rgba(0,0,0,0.15); border-radius: 2px; overflow: hidden; width: 120px; flex-shrink: 0; background: #fff;}
-        .qty-btn { width: 36px; display: flex; align-items: center; justify-content: center; background: none; border: none; font-size: 16px; cursor: pointer; color: var(--text); transition: 0.2s; }
-        .qty-btn:hover { background: rgba(0,0,0,0.05); }
-        .qty-input { flex: 1; width: 100%; border: none; text-align: center; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; color: var(--text); padding: 0; outline: none; -moz-appearance: textfield;}
-        .qty-input::-webkit-outer-spin-button, .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-
-        .add-to-cart-btn { flex: 1; padding: 0 16px; min-height: 48px; background: var(--accent); color: white; border: none; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; position: relative; overflow: hidden; transition: background 0.3s ease; border-radius: 2px; white-space: nowrap;}
-        .add-to-cart-btn::after { content: ''; position: absolute; inset: 0; background: var(--accent-light); transform: scaleX(0); transform-origin: left; transition: transform 0.4s ease; }
-        .add-to-cart-btn:hover::after { transform: scaleX(1); }
-        .add-to-cart-btn span { position: relative; z-index: 1; }
-        .add-to-cart-btn:disabled { background: #ccc; cursor: not-allowed; border-color:#ccc; color:#888;}
-
-        .wishlist-btn { width: 100%; padding: 16px; background: transparent; color: var(--text); border: 1px solid rgba(0,0,0,0.12); font-family: 'DM Sans', sans-serif; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: border-color 0.3s ease, color 0.3s ease; border-radius: 2px; }
-        .wishlist-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; }
-        .wishlist-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-        .color-options { display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
-
-        .color-ring-wrap { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; transition: transform 0.2s ease;}
+        .color-options { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+        .color-ring-wrap { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; transition: transform 0.2s ease; border: 2px solid transparent; }
         .color-ring-wrap:hover { transform: scale(1.1); }
-        .color-ring-wrap.active { border: 2px solid var(--text); }
+        .color-ring-wrap.active { border-color: var(--text); }
         .color-dot-inner { width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); }
 
-        .size-tooltip { position: absolute; background: var(--text); color: white; padding: 16px 20px; font-size: 12px; line-height: 1.8; white-space: nowrap; display: none; z-index: 10; border-radius: 2px; }
-        .stock-status { font-size: 11px; margin-top: 8px; color: #10b981; font-weight: 500; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; }
+        .size-tooltip { position: absolute; background: var(--text); color: white; padding: 16px 20px; font-size: 12px; line-height: 1.8; white-space: nowrap; display: none; z-index: 10; border-radius: 2px; top: 100%; right: 0; margin-top: 8px; }
+        .stock-status { font-size: 11px; margin-top: 8px; color: #10b981; font-weight: 500; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; min-height: 24px; }
         .stock-status.low { color: #f59e0b; }
         .stock-status.out { color: #ef4444; }
 
-        .accordion-wrapper { margin-top: 32px; border-top: 1px solid rgba(0,0,0,0.08); }
-        .accordion-item { border-bottom: 1px solid rgba(0,0,0,0.08); }
-        .accordion-header { padding: 20px 0; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: opacity 0.2s; }
-        .accordion-header:hover { opacity: 0.7; }
-        .accordion-header span { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 400; }
-        .accordion-header svg { width: 16px; height: 16px; stroke: var(--muted); stroke-width: 1.5; transition: transform 0.3s ease; }
+        /* ==================== ACTION GROUP ==================== */
+        .action-group { display: flex; gap: 10px; margin-top: 20px; margin-bottom: 12px; align-items: stretch; flex-wrap: wrap; }
 
+        .qty-selector { display: flex; border: 1px solid var(--border); border-radius: 2px; overflow: hidden; width: 110px; flex-shrink: 0; background: #fff; }
+        .qty-btn { width: 34px; display: flex; align-items: center; justify-content: center; background: none; border: none; font-size: 14px; cursor: pointer; color: var(--text); transition: 0.2s; }
+        .qty-btn:hover { background: rgba(0,0,0,0.04); }
+        .qty-input { flex: 1; width: 100%; border: none; text-align: center; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; color: var(--text); padding: 0; outline: none; -moz-appearance: textfield; }
+        .qty-input::-webkit-outer-spin-button, .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        .add-to-cart-btn { flex: 1; padding: 0 14px; min-height: 48px; background: var(--accent); color: white; border: none; font-family: 'DM Sans', sans-serif; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; position: relative; overflow: hidden; transition: background 0.3s ease; border-radius: 2px; white-space: nowrap; font-weight: 600; }
+        .add-to-cart-btn::after { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.12); transform: scaleX(0); transform-origin: left; transition: transform 0.4s ease; }
+        .add-to-cart-btn:hover::after { transform: scaleX(1); }
+        .add-to-cart-btn span { position: relative; z-index: 1; }
+        .add-to-cart-btn:disabled { background: #ccc; cursor: not-allowed; border-color:#ccc; color:#888; }
+        .add-to-cart-btn.ghost-btn { background: transparent; color: var(--text); border: 1px solid var(--border); }
+        .add-to-cart-btn.ghost-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .add-to-cart-btn.ghost-btn::after { display: none; }
+
+        .wishlist-btn { width: 100%; padding: 14px; background: transparent; color: var(--text); border: 1px solid var(--border); font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: border-color 0.3s ease, color 0.3s ease; border-radius: 2px; font-weight: 500; }
+        .wishlist-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; }
+        .wishlist-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .wishlist-btn.active { border-color: #ef4444; color: #ef4444; }
+        .wishlist-btn.active svg { fill: #ef4444; stroke: #ef4444; }
+
+        /* ==================== TRUST BADGES ==================== */
+        .trust-badges { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 20px 0 4px; }
+        .trust-badge-item { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 8px; border: 1px solid var(--border); border-radius: 2px; text-align: center; }
+        .trust-badge-item svg { width: 18px; height: 18px; stroke: var(--accent); fill: none; }
+        .trust-badge-label { font-size: 9.5px; letter-spacing: 0.06em; color: var(--muted); font-weight: 500; line-height: 1.3; }
+
+        /* ==================== SHARE BUTTON ==================== */
+        .share-btn { display: inline-flex; align-items: center; gap: 6px; background: none; border: none; color: var(--muted); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: color 0.2s; padding: 0; margin-top: 14px; font-family: 'DM Sans', sans-serif; font-weight: 500; }
+        .share-btn:hover { color: var(--accent); }
+        .share-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+
+        /* ==================== ACCORDION ==================== */
+        .accordion-wrapper { margin-top: 28px; border-top: 1px solid var(--border); }
+        .accordion-item { border-bottom: 1px solid var(--border); }
+        .accordion-header { padding: 18px 0; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: opacity 0.2s; }
+        .accordion-header:hover { opacity: 0.7; }
+        .accordion-header span { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; color: var(--text); }
+        .accordion-header svg { width: 16px; height: 16px; stroke: var(--muted); stroke-width: 1.5; transition: transform 0.3s ease; fill: none; }
         .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.4s ease; font-size: 13px; color: var(--muted); line-height: 1.8; font-weight: 300; }
         .accordion-item.active .accordion-content { max-height: 800px; padding-bottom: 20px; }
         .accordion-item.active .accordion-header svg { transform: rotate(180deg); stroke: var(--text); }
 
-        #recentViewedSection { max-width: 1100px; margin: 100px auto 0; padding: 0 40px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 80px;}
-        .recent-scroll-container { display: flex; gap: 24px; overflow-x: auto; padding-bottom: 20px; scrollbar-width: none; }
-        .recent-scroll-container::-webkit-scrollbar { display: none; }
-        .recent-card { width: 200px; flex-shrink: 0; cursor: pointer; text-decoration: none; color: var(--text); transition: transform 0.3s ease; }
-        .recent-card:hover { transform: translateY(-4px); }
-        .recent-img { width: 100%; aspect-ratio: 3/4; background: #f4f4f5; margin-bottom: 16px; overflow: hidden; position: relative;}
-        .recent-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
-        .recent-card:hover .recent-img img { transform: scale(1.05); }
-        .recent-name { font-family: 'Cormorant Garamond', serif; font-size: 18px; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .recent-price { font-size: 13px; color: var(--muted); }
+        /* ==================== SECTION HEADERS (Đồng bộ với shop) ==================== */
+        .detail-section-wrap { max-width: 1180px; margin: 0 auto; padding: 0 40px; }
+        .section-eyebrow { font-size: 11px; letter-spacing: 0.22em; color: var(--accent); text-transform: uppercase; font-weight: 500; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .section-eyebrow::before { content: ''; width: 20px; height: 1px; background: var(--accent); }
+        .section-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(28px, 3.5vw, 36px); font-weight: 300; line-height: 1.1; margin: 0; }
+        .section-title em { font-style: italic; }
+        .detail-section-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; padding-top: 80px; border-top: 1px solid var(--border); }
 
-        @media (max-width: 900px) {
-            .product-detail-layout { grid-template-columns: 1fr; padding: 0 24px; gap: 40px; }
-            .detail-gallery { max-width: 100%; }
-            .detail-info { padding-top: 0; position: static; }
-            #recentViewedSection { padding: 60px 24px 0; }
-            .action-group { flex-direction: column; }
-            .qty-selector { width: 100%; height: 48px; }
+        /* ==================== PRODUCT CARD (Full giống shop) ==================== */
+        .products-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px 24px; }
+        .product-card { background: var(--white); position: relative; overflow: hidden; cursor: pointer; box-shadow: var(--shadow-sm); transition: box-shadow .35s, transform .3s; display: flex; flex-direction: column; }
+        .product-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); z-index: 2; }
+        @keyframes smoothFadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .product-card { animation: smoothFadeIn 0.4s ease-out forwards; }
+
+        .product-img { width: 100%; aspect-ratio: 3/4; position: relative; overflow: hidden; background: #f9f8f6; }
+        .img-placeholder { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .65s ease, opacity .25s; }
+        .product-card:hover .img-placeholder { transform: scale(1.04); }
+        .img-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0); display: flex; align-items: flex-end; padding: 12px; transition: background .35s; z-index: 2; }
+        .product-card:hover .img-overlay { background: rgba(0,0,0,0.04); }
+
+        .btn-quick { width: 100%; height: var(--btn-h); padding: 0 12px; background: var(--accent); color: white; border: none; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; transform: translateY(8px); opacity: 0; transition: transform .28s ease, opacity .28s ease, background .2s; }
+        .btn-quick svg { width: 12px; height: 12px; stroke: white; fill: none; flex-shrink: 0; }
+        .product-card:hover .btn-quick { transform: translateY(0); opacity: 1; }
+        .btn-quick:hover { background: #2c4238; }
+
+        .prod-badges { position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 4px; z-index: 3; pointer-events: none; }
+        .prod-badge { padding: 3px 9px; font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: white; width: fit-content; }
+        .prod-badge.new { background: var(--accent); }
+        .prod-badge.sale { background: #c08060; }
+
+        .product-info { padding: 14px 16px 18px; flex-grow: 1; display: flex; flex-direction: column; }
+        .product-tag { font-size: 9px; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase; font-weight: 600; margin-bottom: 4px; }
+        .product-name { font-family: var(--font-display) !important; font-size: 17px; font-weight: 400; line-height: 1.2; margin-bottom: 10px; }
+        .prod-price { display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
+        .price-sale { font-size: 14px; color: var(--accent); font-weight: 600; }
+        .price-orig { font-size: 12px; color: var(--muted); text-decoration: line-through; font-weight: 300; }
+        .price-normal { font-size: 14px; color: var(--text); font-weight: 500; }
+        .price-tag-discount {
+            background: #c08060;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 2px 8px;
+            margin-left: 10px;
+            display: inline-flex;
+            align-items: center;
+            vertical-align: middle;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
         }
+        .price-tag-discount:hover {
+            filter: brightness(1.1); /* Sáng lên tí khi di chuột vào */
+        }
+        /* ==================== REVIEWS SECTION ==================== */
+        .reviews-section-inner { display: grid; grid-template-columns: 280px 1fr; gap: 48px; align-items: start; }
+        .reviews-stat-panel { position: sticky; top: 120px; }
+        .reviews-avg-score { font-family: 'Cormorant Garamond', serif; font-size: 64px; font-weight: 300; line-height: 1; color: var(--text); margin-bottom: 8px; }
+        .reviews-stars-row { color: #f59e0b; font-size: 18px; margin-bottom: 8px; letter-spacing: 2px; }
+        .reviews-count { font-size: 12px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 28px; }
+        .reviews-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .reviews-bar-label { font-size: 11px; color: var(--muted); width: 40px; text-align: right; flex-shrink: 0; }
+        .reviews-bar-track { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+        .reviews-bar-fill { height: 100%; background: #f59e0b; border-radius: 2px; transition: width 0.6s ease; }
+        .reviews-bar-count { font-size: 11px; color: var(--muted); width: 20px; flex-shrink: 0; }
 
-        .fly-to-cart-img { position: fixed; z-index: 9999; border-radius: 50%; object-fit: cover; transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); box-shadow: 0 10px 20px rgba(0,0,0,0.2); pointer-events: none; }
-        .wishlist-btn.active { border-color: #ef4444; color: #ef4444; }
-        .wishlist-btn.active svg { fill: #ef4444; stroke: #ef4444; }
+        .btn-write-review { width: 100%; padding: 12px; background: var(--accent); color: white; border: none; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; cursor: pointer; border-radius: 2px; transition: background 0.2s; margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-write-review:hover { background: #2c4238; }
+        .btn-write-review svg { width: 13px; height: 13px; stroke: white; fill: none; }
 
-        .reviews-container-scroll { max-height: 400px; overflow-y: auto; padding-right: 15px; margin-bottom: 10px; }
-        .reviews-container-scroll::-webkit-scrollbar { width: 5px; }
-        .reviews-container-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.02); border-radius: 4px; }
-        .reviews-container-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 4px; }
-        .reviews-container-scroll::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.3); }
 
-        .review-stats { display: flex; align-items: center; gap: 12px; }
-        .stars { color: #f59e0b; font-size: 14px; }
-        .review-item { padding-bottom: 24px; margin-bottom: 24px; border-bottom: 1px solid rgba(0,0,0,0.05); position: relative; }
-        .reviewer-name { font-size: 13px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px; justify-content: space-between; }
-        .verified-badge { font-size: 10px; color: #10b981; font-weight: 500; background: #d1fae5; padding: 2px 6px; border-radius: 2px; }
-        .review-meta { font-size: 11px; color: var(--muted); margin: 6px 0 12px; }
-        .review-content { font-size: 13px; color: var(--text); line-height: 1.6; font-weight: 300; }
-        .review-images { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
-        .review-img { width: 70px; height: 70px; border-radius: 4px; object-fit: cover; cursor: zoom-in; border: 1px solid rgba(0,0,0,0.05); transition: opacity 0.2s;}
+        .stars { color: #f59e0b; font-size: 13px; letter-spacing: 1px; }
+        .review-item { padding-bottom: 28px; margin-bottom: 28px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .reviewer-name { font-size: 13px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px; justify-content: space-between; margin-bottom: 4px; }
+        .verified-badge { font-size: 10px; color: #059669; font-weight: 500; background: #d1fae5; padding: 2px 6px; border-radius: 2px; }
+        .review-meta { font-size: 11px; color: var(--muted); margin: 4px 0 10px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+        .review-content { font-size: 13px; color: var(--text); line-height: 1.7; font-weight: 300; }
+        .review-images { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+        .review-img { width: 70px; height: 70px; border-radius: 2px; object-fit: cover; cursor: zoom-in; border: 1px solid rgba(0,0,0,0.05); transition: opacity 0.2s; }
         .review-img:hover { opacity: 0.8; }
 
+        /* Shop reply */
+        .review-reply { background: #f9f8f6; border-left: 3px solid var(--accent); padding: 12px 16px; margin-top: 14px; }
+        .review-reply-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
+        .review-reply-from { font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; }
+        .review-reply-date { font-size: 11px; color: var(--muted); }
+        .review-reply-content { font-size: 13px; color: #333; line-height: 1.5; }
+
+        .btn-view-all-reviews { width: 100%; padding: 14px; background: transparent; color: var(--text); border: 1px solid var(--border); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; cursor: pointer; margin-top: 16px; border-radius: 2px; transition: 0.2s; font-family: 'DM Sans', sans-serif; }
+        .btn-view-all-reviews:hover { border-color: var(--accent); color: var(--accent); background: rgba(61,90,76,0.03); }
+
+        /* ==================== MODALS ==================== */
         .review-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
-        .review-modal { background: #fff; width: 450px; max-width: 90%; border-radius: 4px; padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); position: relative; }
+        .review-modal { background: #fff; width: 450px; max-width: 90%; border-radius: 2px; padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); position: relative; }
         .review-modal-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; margin-bottom: 20px; text-align: center; }
         .star-select { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; font-size: 24px; cursor: pointer; color: #ccc; }
         .star-select i.active { color: #f59e0b; }
-        .review-textarea { width: 100%; height: 100px; border: 1px solid rgba(0,0,0,0.1); border-radius: 4px; padding: 12px; font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; resize: none; margin-bottom: 16px; }
+        .review-textarea { width: 100%; height: 100px; border: 1px solid var(--border); border-radius: 2px; padding: 12px; font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; resize: none; margin-bottom: 16px; box-sizing: border-box; }
         .review-textarea:focus { border-color: var(--accent); }
-        .review-img-upload-btn { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text); background: #f4f4f5; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-bottom: 16px; transition: 0.2s; }
+        .review-img-upload-btn { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text); background: #f4f4f5; padding: 8px 16px; border-radius: 2px; cursor: pointer; margin-bottom: 16px; transition: 0.2s; }
         .review-img-upload-btn:hover { background: #e4e4e7; }
         .review-img-previews { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
         .review-modal-close { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 18px; cursor: pointer; color: var(--muted); }
 
-        .all-reviews-modal { background: #fff; width: 600px; max-width: 95%; max-height: 85vh; border-radius: 4px; display: flex; flex-direction: column; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
-        .all-reviews-header { padding: 20px 30px; border-bottom: 1px solid rgba(0,0,0,0.08); display: flex; justify-content: space-between; align-items: center; }
+        .all-reviews-modal { background: #fff; width: 600px; max-width: 95%; max-height: 85vh; border-radius: 2px; display: flex; flex-direction: column; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+        .all-reviews-header { padding: 20px 30px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
         .all-reviews-body { padding: 30px; overflow-y: auto; flex: 1; }
-        .all-reviews-body::-webkit-scrollbar { width: 6px; }
-        .all-reviews-body::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 4px; }
+        .all-reviews-body::-webkit-scrollbar { width: 4px; }
+        .all-reviews-body::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 4px; }
 
-        .lightbox-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;}
+        .lightbox-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
         .lightbox-overlay.show { opacity: 1; }
-        .lightbox-img { max-width: 90%; max-height: 90vh; object-fit: contain; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .lightbox-img { max-width: 90%; max-height: 90vh; object-fit: contain; border-radius: 2px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .lightbox-close { position: absolute; top: 20px; right: 20px; color: rgba(255,255,255,0.7); background: none; border: none; font-size: 40px; cursor: pointer; transition: 0.2s; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; }
         .lightbox-close:hover { color: white; transform: scale(1.1); }
 
-        /* 🌟 POPUP CHỌN PHƯƠNG THỨC GIAO HÀNG TỪ DETAIL */
         .delivery-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); animation: fadeIn 0.3s ease; }
-        .delivery-modal { width: 100%; max-width: 480px; background: #fff; border-radius: 12px; padding: 30px; box-shadow: 0 15px 50px rgba(0,0,0,0.2); transform: scale(0.95); opacity: 0; transition: all 0.3s ease; }
+        .delivery-modal { width: 100%; max-width: 480px; background: #fff; border-radius: 2px; padding: 30px; box-shadow: 0 15px 50px rgba(0,0,0,0.2); transform: scale(0.95); opacity: 0; transition: all 0.3s ease; }
         .delivery-modal.open { transform: scale(1); opacity: 1; }
-        .dm-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.06); padding-bottom: 16px; margin-bottom: 16px; }
-        .dm-title { font-size: 20px; font-weight: 700; text-transform: uppercase;}
+        .dm-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 20px; }
+        .dm-title { font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
         .dm-close-btn { background: none; border: none; cursor: pointer; color: var(--muted); padding: 4px; transition: color 0.2s; }
         .dm-close-btn:hover { color: var(--text); }
-        .dm-close-btn svg { width: 24px; height: 24px; stroke: currentColor; fill: none; }
-        .dm-option { display: flex; align-items: center; gap: 16px; padding: 20px; border: 1px solid rgba(0,0,0,0.1); cursor: pointer; transition: 0.3s; border-radius: 8px; background: #fafafa; margin-bottom: 12px;}
-        .dm-option:hover { border-color: var(--accent); background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);}
-        .dm-label { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px;}
-        .dm-desc { font-size: 13px; color: var(--muted); line-height: 1.5; font-weight: 500;}
+        .dm-close-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; }
+        .dm-option { display: flex; align-items: center; gap: 16px; padding: 18px; border: 1px solid var(--border); cursor: pointer; transition: 0.3s; border-radius: 2px; background: #fafafa; margin-bottom: 12px; }
+        .dm-option:hover { border-color: var(--accent); background: #fff; box-shadow: var(--shadow-sm); }
+        .dm-label { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+        .dm-desc { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+
+        .fly-to-cart-img { position: fixed; z-index: 9999; border-radius: 50%; object-fit: cover; transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); box-shadow: 0 10px 20px rgba(0,0,0,0.2); pointer-events: none; }
+
+        /* ==================== STICKY MOBILE BUY BAR ==================== */
+        .sticky-buy-bar { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid var(--border); padding: 12px 16px; z-index: 50; gap: 10px; box-shadow: 0 -4px 20px rgba(0,0,0,0.08); }
+        .sticky-buy-bar .sticky-name { font-family: 'Cormorant Garamond', serif; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px; }
+        .sticky-buy-bar .sticky-price { font-size: 13px; color: var(--accent); font-weight: 600; }
+        .sticky-buy-bar .sticky-btn { flex: 1; height: 46px; background: var(--accent); color: white; border: none; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; border-radius: 2px; cursor: pointer; }
+
+        /* ==================== RESPONSIVE ==================== */
+        @media (max-width: 1024px) {
+            .trust-badges { grid-template-columns: repeat(2, 1fr); }
+            .products-grid { grid-template-columns: repeat(3, 1fr); }
+            .reviews-section-inner { grid-template-columns: 1fr; }
+            .reviews-stat-panel { position: static; display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+            .reviews-avg-score { font-size: 48px; }
+        }
+        @media (max-width: 900px) {
+            .product-detail-layout { grid-template-columns: 1fr; padding: 0 24px; gap: 32px; }
+            .detail-gallery { max-width: 100%; }
+            .detail-info { padding-top: 0; position: static; }
+            .detail-back-wrap, .detail-section-wrap { padding: 0 24px; }
+            .detail-back-wrap { padding-top: 20px; }
+            .action-group { flex-direction: column; }
+            .qty-selector { width: 100%; height: 48px; }
+            .products-grid { grid-template-columns: repeat(2, 1fr); gap: 20px 12px; }
+            .reviews-section-inner { gap: 28px; }
+            .detail-section-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .sticky-buy-bar { display: flex; flex-direction: column; }
+        }
+        @media (max-width: 600px) {
+            .detail-section-wrap { padding: 0 16px; }
+            .detail-name { font-size: 30px; }
+            .trust-badges { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+            .trust-badge-item { padding: 10px 6px; }
+        }
+        @media (min-width: 901px) {
+            .sticky-buy-bar { display: none !important; }
+        }
+
+        /* Khung cuộn comment độc lập */
+        /* Khung cuộn comment độc lập - TRƯỢT RIÊNG BIỆT */
+        .reviews-container-scroll {
+            max-height: 500px; /* Độ cao cố định để trượt riêng */
+            overflow-y: auto;
+            padding-right: 10px;
+            margin-bottom: 20px;
+            scroll-behavior: smooth;
+            border: 1px solid rgba(0,0,0,0.03);
+            padding: 15px;
+            background: #fafafa;
+        }
+        /* Thanh cuộn siêu mảnh kiểu Minimalist */
+        .reviews-container-scroll::-webkit-scrollbar { width: 4px; }
+        .reviews-container-scroll::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+
+        /* Nút lọc sao - Chỉ lọc 1 cái 1 lúc */
+        .filter-stars-wrap { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+        .btn-filter-star {
+            padding: 8px 16px; border: 1px solid var(--border); background: #fff;
+            font-size: 11px; cursor: pointer; border-radius: 2px; transition: 0.2s; color: var(--muted);
+            text-transform: uppercase; font-weight: 600; font-family: 'DM Sans', sans-serif;
+        }
+        .btn-filter-star.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .btn-filter-star:hover:not(.active) { border-color: var(--text); color: var(--text); }
+
+
+        /* Hiệu ứng nháy nháy cho trạng thái chờ */
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: 4px;
+            color: transparent !important;
+        }
+
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
 
     </style>
 
     <section class="detail-section">
+
+        <!-- ==================== NÚT QUAY LẠI ==================== -->
+        <div class="detail-back-wrap">
+            <button class="detail-back-btn" onclick="history.back()">
+                <svg viewBox="0 0 24 24" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+                Quay lại
+            </button>
+        </div>
+
+        <!-- Label -->
         <div style="text-align:center;">
             <div class="detail-label">Chi tiết sản phẩm</div>
         </div>
 
+        <!-- ==================== MAIN LAYOUT ==================== -->
         <div class="product-detail-layout" id="productContent" style="opacity: 0; transition: opacity 0.5s ease;">
+
+            <!-- Gallery -->
             <div class="detail-gallery" id="dynGallery" style="position:relative"></div>
 
+            <!-- Info -->
             <div class="detail-info">
                 <div class="detail-breadcrumbs" id="dynBreadcrumb">Đang tải...</div>
-
                 <div class="detail-name" id="dynName">Đang tải...</div>
                 <div class="detail-price" id="dynPrice">0 ₫</div>
                 <div class="detail-divider"></div>
                 <p class="detail-desc" id="dynDesc">Vui lòng chờ trong giây lát...</p>
 
-                <div style="margin-bottom:28px">
+                <!-- Màu sắc -->
+                <div style="margin-bottom:24px">
                     <div class="size-label" style="justify-content: flex-start; gap: 10px;">
                         Màu sắc <span id="dynColorName" class="color-badge" style="display:none;"></span>
                     </div>
                     <div class="color-options" id="dynColors"></div>
                 </div>
 
+                <!-- Kích cỡ -->
                 <div style="position:relative">
                     <div class="size-label">
                         Kích cỡ
                         <button class="size-guide-btn" id="sizeGuideBtn">Hướng dẫn size</button>
                     </div>
-                    <div class="size-tooltip" id="sizeTooltip" style="top:100%; right:0; margin-top:8px;">
+                    <div class="size-tooltip" id="sizeTooltip">
                         <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;color:rgba(255,255,255,0.5)">Bảng quy đổi size</div>
                         <table style="border-collapse:collapse;font-size:12px">
                             <tr><td style="padding-right:24px;color:rgba(255,255,255,0.5)">Size</td><td style="padding-right:24px;color:rgba(255,255,255,0.5)">Ngực (cm)</td><td style="color:rgba(255,255,255,0.5)">Dài (cm)</td></tr>
@@ -236,13 +427,14 @@
 
                 <div id="dynStockStatus" class="stock-status"></div>
 
+                <!-- Nút hành động -->
                 <div class="action-group">
                     <div class="qty-selector">
                         <button class="qty-btn" onclick="window.DetailApp.changeQty(-1)"><i class="fa-solid fa-minus" style="font-size: 10px;"></i></button>
                         <input type="number" id="detailQtyInput" class="qty-input" value="1" min="1" onchange="window.DetailApp.validateQty()">
                         <button class="qty-btn" onclick="window.DetailApp.changeQty(1)"><i class="fa-solid fa-plus" style="font-size: 10px;"></i></button>
                     </div>
-                    <button class="add-to-cart-btn" id="btnAddToCart" onclick="window.DetailApp.addToCart(false)" style="background:transparent; color:var(--text); border:1px solid rgba(0,0,0,0.2);"><span>Thêm vào giỏ</span></button>
+                    <button class="add-to-cart-btn ghost-btn" id="btnAddToCart" onclick="window.DetailApp.addToCart(false)"><span>Thêm vào giỏ</span></button>
                     <button class="add-to-cart-btn" id="btnBuyNow" onclick="window.DetailApp.addToCart(true)"><span>Mua ngay</span></button>
                 </div>
 
@@ -251,10 +443,37 @@
                     <span id="wishlistText">Lưu vào yêu thích</span>
                 </button>
 
+                <!-- Share -->
+                <button class="share-btn" onclick="window.DetailApp.shareProduct()">
+                    <svg viewBox="0 0 24 24" stroke-width="1.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                    Chia sẻ sản phẩm
+                </button>
+
+                <!-- Trust Badges -->
+                <div class="trust-badges">
+                    <div class="trust-badge-item">
+                        <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <div class="trust-badge-label">Đổi trả<br>7 ngày</div>
+                    </div>
+                    <div class="trust-badge-item">
+                        <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        <div class="trust-badge-label">Thanh toán<br>bảo mật</div>
+                    </div>
+                    <div class="trust-badge-item">
+                        <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M12 3v1m0 16v1M4.22 4.22l.7.7m12.16 12.16l.7.7M1 12h1m20 0h1M4.22 19.78l.7-.7M18.36 5.64l.7-.7"/><circle cx="12" cy="12" r="5"/></svg>
+                        <div class="trust-badge-label">Vải thiên<br>nhiên</div>
+                    </div>
+                    <div class="trust-badge-item">
+                        <svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                        <div class="trust-badge-label">Giao toàn<br>quốc</div>
+                    </div>
+                </div>
+
+                <!-- Accordion -->
                 <div class="accordion-wrapper">
                     <div class="accordion-item">
                         <div class="accordion-header" onclick="window.DetailApp.toggleAccordion(this)">
-                            <span>Chất liệu & Chăm sóc</span>
+                            <span>Chất liệu &amp; Chăm sóc</span>
                             <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
                         </div>
                         <div class="accordion-content">
@@ -263,52 +482,80 @@
                     </div>
                     <div class="accordion-item">
                         <div class="accordion-header" onclick="window.DetailApp.toggleAccordion(this)">
-                            <span>Vận chuyển & Đổi trả</span>
+                            <span>Vận chuyển &amp; Đổi trả</span>
                             <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
                         </div>
                         <div class="accordion-content">
-                            Giao hàng tiêu chuẩn từ 2-4 ngày làm việc trên toàn quốc. Hỗ trợ đổi trả miễn phí trong vòng 30 ngày kể từ khi nhận hàng nếu có lỗi từ nhà sản xuất.
-                        </div>
-                    </div>
-
-                    <div class="accordion-item" id="reviewAccordionBlock">
-                        <div class="accordion-header" onclick="window.DetailApp.toggleAccordion(this)">
-                            <span style="display:flex; align-items:center; gap:8px;">
-                                ĐÁNH GIÁ KHÁCH HÀNG
-                                <span id="reviewMiniStats" style="font-size:11px; color:var(--muted); text-transform:none; font-weight:normal; letter-spacing:0;"></span>
-                            </span>
-                            <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
-                        </div>
-
-                        <div class="accordion-content">
-                            <div style="display:flex; justify-content:flex-end; margin-bottom: 20px;">
-                                <button id="btnOpenReviewModal" onclick="window.DetailApp.checkAndOpenReviewModal()" style="display:none; background:var(--accent); color:#fff; border:none; padding:8px 16px; font-size:10px; text-transform:uppercase; letter-spacing:0.1em; cursor:pointer; border-radius:2px;"><i class="fa-solid fa-pen-nib"></i> Viết đánh giá</button>
-                            </div>
-
-                            <div id="reviewsContainer" class="reviews-container-scroll">
-                                <div style="text-align:center; color:var(--muted); font-style:italic;">Đang tải...</div>
-                            </div>
-
-                            <button id="btnViewAllReviews" onclick="window.DetailApp.openAllReviewsModal()" style="display:none; width:100%; padding:12px; background:rgba(0,0,0,0.02); color:var(--text); border:1px solid rgba(0,0,0,0.1); font-size:11px; text-transform:uppercase; letter-spacing:0.1em; cursor:pointer; margin-top:10px; border-radius:2px; transition:0.2s;" onmouseover="this.style.background='rgba(0,0,0,0.05)'" onmouseout="this.style.background='rgba(0,0,0,0.02)'">Xem tất cả đánh giá</button>
+                            Giao hàng tiêu chuẩn từ 2–4 ngày làm việc toàn quốc. Hỗ trợ đổi trả miễn phí trong vòng 30 ngày kể từ khi nhận hàng nếu có lỗi từ nhà sản xuất.
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- ==================== SẢN PHẨM GỢI Ý (Full card giống shop) ==================== -->
         <div id="recentViewedSection" style="display: none;">
-            <div style="margin-bottom: 32px;">
-                <div class="detail-category" style="margin-bottom: 8px;">Gợi ý cho bạn</div>
-                <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 300;">Sản phẩm bạn vừa xem</h3>
+            <div class="detail-section-wrap">
+                <div class="detail-section-header">
+                    <div>
+                        <div class="section-eyebrow">Gợi ý cho bạn</div>
+                        <h2 class="section-title">Sản phẩm <em>vừa xem</em></h2>
+                    </div>
+                </div>
+                <div class="products-grid" id="recentViewedList"></div>
             </div>
-            <div class="recent-scroll-container" id="recentViewedList"></div>
         </div>
 
+        <!-- ==================== ĐÁNH GIÁ KHÁCH HÀNG (Standalone) ==================== -->
+        <div id="reviewsSection">
+            <div class="detail-section-wrap">
+                <div class="detail-section-header">
+                    <div>
+                        <div class="section-eyebrow">Cộng đồng BEEMATE</div>
+                        <h2 class="section-title">Đánh giá từ khách hàng</h2>
+                    </div>
+                    <button id="btnOpenReviewModal" onclick="window.DetailApp.checkAndOpenReviewModal()"
+                            style="display:none; background:var(--accent); color:#fff; border:none; padding:10px 20px; font-size:10px; text-transform:uppercase; letter-spacing:0.12em; font-weight:600; cursor:pointer; border-radius:2px; display:flex; align-items:center; gap:8px;">
+                        <i class="fa-solid fa-pen-nib"></i> Viết đánh giá
+                    </button>
+                </div>
+
+                <div class="reviews-section-inner">
+                    <div class="reviews-stat-panel">
+                        <div class="reviews-avg-score" id="reviewAvgScore">—</div>
+                        <div class="reviews-stars-row" id="reviewStarsDisplay">☆☆☆☆☆</div>
+                        <div class="reviews-count" id="reviewCountDisplay">Đang tải đánh giá...</div>
+
+                        <div class="filter-stars-wrap" id="starFilterArea">
+                            <button class="btn-filter-star active" onclick="window.DetailApp.filterByStar(null, this)">Tất cả</button>
+                            <button class="btn-filter-star" onclick="window.DetailApp.filterByStar(5, this)">5 Sao</button>
+                            <button class="btn-filter-star" onclick="window.DetailApp.filterByStar(4, this)">4 Sao</button>
+                            <button class="btn-filter-star" onclick="window.DetailApp.filterByStar(3, this)">3 Sao</button>
+                            <button class="btn-filter-star" onclick="window.DetailApp.filterByStar(2, this)">2 Sao</button>
+                            <button class="btn-filter-star" onclick="window.DetailApp.filterByStar(1, this)">1 Sao</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div id="reviewsContainer" class="reviews-container-scroll">
+                            <div style="text-align:center; color:var(--muted); padding: 40px 0;">Đang tải dữ liệu...</div>
+                        </div>
+
+                        <div id="loadMoreReviewsArea" style="display:none; text-align:center;">
+                            <button class="btn-view-all-reviews" onclick="window.DetailApp.loadMoreReviews()">
+                                <i class="fa-solid fa-angles-down"></i> Tải thêm đánh giá (+5)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== MODALS ==================== -->
         <div class="review-modal-overlay" id="reviewModalOverlay" onclick="if(event.target===this) window.DetailApp.closeReviewModal()">
             <div class="review-modal">
                 <button class="review-modal-close" onclick="window.DetailApp.closeReviewModal()"><i class="fa-solid fa-xmark"></i></button>
                 <div class="review-modal-title">Viết đánh giá của bạn</div>
-
                 <div class="star-select" id="starSelector">
                     <i class="fa-solid fa-star active" onclick="window.DetailApp.setStar(1)"></i>
                     <i class="fa-solid fa-star active" onclick="window.DetailApp.setStar(2)"></i>
@@ -316,18 +563,14 @@
                     <i class="fa-solid fa-star active" onclick="window.DetailApp.setStar(4)"></i>
                     <i class="fa-solid fa-star active" onclick="window.DetailApp.setStar(5)"></i>
                 </div>
-
                 <textarea id="reviewContentInput" class="review-textarea" placeholder="Chia sẻ cảm nhận của bạn về chất lượng sản phẩm, form dáng, màu sắc..."></textarea>
-
                 <label class="review-img-upload-btn">
                     <i class="fa-solid fa-camera"></i> Thêm hình ảnh
                     <input type="file" id="reviewImageInput" multiple accept="image/*" style="display: none;" onchange="window.DetailApp.handleFileSelect(event)">
                 </label>
                 <div id="reviewEditWarning" style="font-size:10px; color:#c08060; margin-bottom:10px; display:none;">* Lưu ý: Thêm ảnh mới sẽ ghi đè lên các ảnh cũ trước đó của bạn.</div>
-
                 <div class="review-img-previews" id="reviewImagePreviews"></div>
-
-                <button id="btnSubmitReview" class="add-to-cart-btn" style="margin:0;" onclick="window.DetailApp.submitReview()"><span>GỬI ĐÁNH GIÁ</span></button>
+                <button id="btnSubmitReview" class="add-to-cart-btn" style="margin:0; width:100%; min-height:46px;" onclick="window.DetailApp.submitReview()"><span>GỬI ĐÁNH GIÁ</span></button>
             </div>
         </div>
 
@@ -337,8 +580,7 @@
                     <div style="font-family:'Cormorant Garamond', serif; font-size:24px; font-weight:400;">Tất cả đánh giá khách hàng</div>
                     <button class="review-modal-close" style="position:static;" onclick="window.DetailApp.closeAllReviewsModal()"><i class="fa-solid fa-xmark"></i></button>
                 </div>
-                <div class="all-reviews-body" id="allReviewsContainer">
-                </div>
+                <div class="all-reviews-body" id="allReviewsContainer"></div>
             </div>
         </div>
 
@@ -355,23 +597,32 @@
                         <svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
                     </button>
                 </div>
-                <div style="margin-top:20px;">
+                <div style="margin-top:4px;">
                     <div class="dm-option" onclick="window.DetailApp.selectDeliveryAndCheckout('store')">
-                        <i class="fa-solid fa-store" style="font-size:32px; color:var(--accent); width: 40px; text-align:center;"></i>
+                        <i class="fa-solid fa-store" style="font-size:28px; color:var(--accent); width:36px; text-align:center;"></i>
                         <div style="flex:1;">
                             <div class="dm-label">Nhận tại cửa hàng</div>
                             <div class="dm-desc">Miễn phí vận chuyển. Nhận hàng tại: 13 phố Phan Tây Nhạc, Nam Từ Liêm, Hà Nội.</div>
                         </div>
                     </div>
                     <div class="dm-option" onclick="window.DetailApp.selectDeliveryAndCheckout('home')">
-                        <i class="fa-solid fa-truck-fast" style="font-size:32px; color:var(--accent); width: 40px; text-align:center;"></i>
+                        <i class="fa-solid fa-truck-fast" style="font-size:28px; color:var(--accent); width:36px; text-align:center;"></i>
                         <div style="flex:1;">
                             <div class="dm-label">Giao hàng tận nơi</div>
-                            <div class="dm-desc">Giao hàng đến địa chỉ của bạn. Phí vận chuyển tính toán theo khoảng cách giao hàng.</div>
+                            <div class="dm-desc">Giao hàng đến địa chỉ của bạn. Phí vận chuyển tính theo khoảng cách.</div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Sticky mobile bar -->
+        <div class="sticky-buy-bar" id="stickyBuyBar">
+            <div>
+                <div class="sticky-name" id="stickyName">Đang tải...</div>
+                <div class="sticky-price" id="stickyPrice"></div>
+            </div>
+            <button class="sticky-btn" onclick="window.scrollTo({top:0, behavior:'smooth'})">Chọn &amp; Mua ngay</button>
         </div>
 
     </section>
@@ -381,7 +632,11 @@
             state: {
                 productId: null, product: null, variants: [], uniqueColors: [], uniqueSizes: [],
                 selectedColorId: null, selectedSizeId: null, images: [], currentImageIndex: 0,
-                user: null, currentStock: 0
+                user: null, currentStock: 0,allReviews: [],      // Lưu gốc từ API
+                filteredReviews: [], // Lưu sau khi lọc sao
+                displayCount: 5,     // Mặc định hiện 5 cái
+                activeStar: null,
+                cachedAllReviewsHtml: '',
             },
 
             reviewState: { soSao: 5, files: [], orderDetailId: null, phanLoai: '', isEdit: false },
@@ -402,11 +657,16 @@
                     if(params.get('id')) id = params.get('id');
                 }
                 this.state.productId = id;
-
                 try {
                     const userRes = await fetch('/api/khach-hang/my-profile');
-                    if (userRes.ok) this.state.user = await userRes.json();
-                } catch(e) {}
+                    if (userRes.ok) {
+                        this.state.user = await userRes.json();
+                    } else {
+                        localStorage.removeItem('bee_wishlist');
+                    }
+                } catch(e) {
+                    localStorage.removeItem('bee_wishlist');
+                }
 
                 await this.fetchData();
             },
@@ -417,149 +677,270 @@
                 return Math.max(0, variant.soLuong - (variant.soLuongTamGiu || 0));
             },
 
-            checkWishlist: async function() {
+            shareProduct: function() {
+                if (navigator.share) {
+                    navigator.share({
+                        title: this.state.product ? this.state.product.ten : 'Sản phẩm BEEMATE',
+                        url: window.location.href
+                    });
+                } else {
+                    navigator.clipboard.writeText(window.location.href).then(() => {
+                        if(window.showToast) window.showToast('Đã sao chép link sản phẩm!', 'success');
+                    });
+                }
+            },
+
+            checkWishlist: function() {
                 try {
-                    const res = await fetch('/api/khach-hang/wishlist/check/' + this.state.productId);
-                    if (res.ok) {
-                        const data = await res.json();
-                        const btn = document.getElementById('btnWishlist');
-                        const text = document.getElementById('wishlistText');
-                        if (data.isSaved) {
-                            btn.classList.add('active');
-                            text.innerText = 'Đã lưu yêu thích';
-                        } else {
-                            btn.classList.remove('active');
-                            text.innerText = 'Lưu vào yêu thích';
-                        }
+                    // Đọc từ LocalStorage giống hệt bên Home cho mượt
+                    let wishlist = JSON.parse(localStorage.getItem('bee_wishlist') || '[]');
+                    const productId = parseInt(this.state.productId);
+                    const btn = document.getElementById('btnWishlist');
+                    const text = document.getElementById('wishlistText');
+
+                    if (wishlist.includes(productId)) {
+                        btn.classList.add('active');
+                        text.innerText = 'Đã yêu thích';
+                    } else {
+                        btn.classList.remove('active');
+                        text.innerText = 'Lưu vào yêu thích';
                     }
-                } catch(e) { console.log(e); }
+                } catch(e) {}
             },
 
             toggleWishlist: async function() {
                 try {
-                    const res = await fetch('/api/khach-hang/wishlist/toggle/' + this.state.productId, { method: 'POST' });
+                    const productId = parseInt(this.state.productId);
+
+                    // 1. Gọi API hỏi xin phép trước
+                    const res = await fetch('/api/khach-hang/wishlist/toggle/' + productId, { method: 'POST' });
+
+                    // 2. Nếu đéo có tài khoản -> Bắt đăng nhập, chặn đéo cho đổi màu tim
                     if (res.status === 401) {
-                        if(window.showToast) window.showToast("Vui lòng đăng nhập để lưu sản phẩm!", "warning");
+                        if(window.showToast) window.showToast("Vui lòng đăng nhập để thực hiện thao tác này!", "warning");
                         setTimeout(() => { window.location.hash = 'login'; }, 1500);
                         return;
                     }
+
+                    // 3. Nếu API cho phép (Thành công)
                     if (res.ok) {
                         const data = await res.json();
+
+                        // Lấy mảng cũ trong trình duyệt ra để update
+                        let wishlist = JSON.parse(localStorage.getItem('bee_wishlist') || '[]');
+                        const isLiked = wishlist.includes(productId);
+
+                        if (isLiked) {
+                            wishlist = wishlist.filter(id => id !== productId);
+                        } else {
+                            wishlist.push(productId);
+                        }
+
+                        // Cập nhật lại LocalStorage và UI ngay lập tức
+                        localStorage.setItem('bee_wishlist', JSON.stringify(wishlist));
+                        this.checkWishlist(); // Hàm này sẽ check mảng vừa lưu và đổi màu UI
+
                         if(window.showToast) window.showToast(data.message, data.status === 'added' ? 'success' : 'warning');
-                        this.checkWishlist();
                     }
-                } catch(e) { console.log(e); }
+                } catch(e) {
+                    console.error(e);
+                }
             },
 
+            // 1. Tải dữ liệu ban đầu
+            // 1. Tải dữ liệu ban đầu
             loadReviews: async function() {
+                const container = document.getElementById('reviewsContainer');
+                const score = document.getElementById('reviewAvgScore');
+                const stars = document.getElementById('reviewStarsDisplay');
+                const count = document.getElementById('reviewCountDisplay');
+                const filterBtns = document.querySelectorAll('.btn-filter-star');
+
+                // Bật Skeleton Loading
+                score.classList.add('loading-skeleton');
+                count.classList.add('loading-skeleton');
+                container.innerHTML = `
+                    <div style="padding:20px">
+                        <div class="loading-skeleton" style="height:20px; width:40%; margin-bottom:15px;"></div>
+                        <div class="loading-skeleton" style="height:60px; width:100%; margin-bottom:15px;"></div>
+                        <div class="loading-skeleton" style="height:20px; width:70%;"></div>
+                    </div>`.repeat(3);
+
                 try {
                     const res = await fetch('/api/khach-hang/reviews/' + this.state.productId);
                     if (!res.ok) return;
-                    const reviews = await res.json();
+                    let data = await res.json();
 
-                    const container = document.getElementById('reviewsContainer');
-                    const allContainer = document.getElementById('allReviewsContainer');
-                    const miniStats = document.getElementById('reviewMiniStats');
-                    if (!container) return;
+                    // Tắt Loading
+                    score.classList.remove('loading-skeleton');
+                    count.classList.remove('loading-skeleton');
+                    filterBtns.forEach(btn => btn.disabled = false);
 
-                    if (reviews.length === 0) {
-                        container.innerHTML = '<div style="text-align:center; padding:30px 10px; color:var(--muted); font-style:italic;">Sản phẩm chưa có đánh giá nào. Hãy là người đầu tiên!</div>';
-                        if(allContainer) allContainer.innerHTML = container.innerHTML;
-                        if(miniStats) miniStats.innerText = '(0)';
-                        return;
+                    // 🌟 LOGIC GHIM TOP: Lôi đánh giá của chính mình lên đầu tiên
+                    const currentUserId = this.state.user ? (this.state.user.taiKhoanId || this.state.user.id) : null;
+                    if (currentUserId && data.length > 0) {
+                        data.sort((a, b) => {
+                            const aUserId = a.taiKhoan ? a.taiKhoan.id : a.taiKhoanId;
+                            const bUserId = b.taiKhoan ? b.taiKhoan.id : b.taiKhoanId;
+                            if (aUserId === currentUserId) return -1; // Của tao -> Ném lên đầu
+                            if (bUserId === currentUserId) return 1;
+                            return 0; // Của người khác -> Giữ nguyên vị trí
+                        });
                     }
 
-                    let html = '';
-                    let totalStars = 0;
+                    this.state.allReviews = data;
+                    this.state.filteredReviews = data;
+                    this.state.displayCount = 5;
 
-                    reviews.forEach(rv => {
-                        const userStar = rv.soSao || 5;
-                        totalStars += userStar;
+                    if (data.length === 0) {
+                        score.innerText = "—";
+                        stars.innerText = "☆☆☆☆☆";
+                        stars.style.color = "#eee";
+                        count.innerText = "Chưa có đánh giá nào";
+                        container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--muted);">Sản phẩm này chưa có bình luận nào.</div>';
+                    } else {
+                        this.renderReviewStats(data);
+                        this.renderReviewList();
+                    }
+                } catch(e) {
+                    console.error("Lỗi tải review:", e);
+                    container.innerHTML = '<div style="text-align:center; padding:40px; color:#ef4444;">Lỗi kết nối máy chủ.</div>';
+                }
+            },
 
-                        let starsHtml = '';
-                        for(let i=1; i<=5; i++) {
-                            starsHtml += i <= userStar ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-regular fa-star"></i>';
-                        }
 
-                        let hinhAnhHtml = '';
-                        if (rv.danhSachHinhAnhList && rv.danhSachHinhAnhList.length > 0) {
-                            rv.danhSachHinhAnhList.forEach(link => {
-                                if(link.trim() !== '') {
-                                    hinhAnhHtml += `<img src="${link.trim()}" class="review-img" onclick="window.DetailApp.openLightbox('${link.trim()}')">`;
-                                }
-                            });
-                            if (hinhAnhHtml !== '') {
-                                hinhAnhHtml = `<div class="review-images">${hinhAnhHtml}</div>`;
-                            }
-                        }
+            renderReviewStats: function(reviews) {
+                const avgScore = document.getElementById('reviewAvgScore');
+                const starsRow = document.getElementById('reviewStarsDisplay');
+                const countText = document.getElementById('reviewCountDisplay');
 
-                        let editBtnHtml = '';
+                if (!reviews || reviews.length === 0) return;
 
-                        // Trích xuất ID một cách an toàn từ Response của Backend
-                        const rvTaiKhoanId = rv.taiKhoan ? rv.taiKhoan.id : rv.taiKhoanId;
-                        const rvHoaDonChiTietId = rv.hoaDonChiTiet ? rv.hoaDonChiTiet.id : rv.hoaDonChiTietId;
+                const total = reviews.length;
+                const sum = reviews.reduce((s, r) => s + (r.soSao || 0), 0);
+                const avg = (sum / total).toFixed(1);
 
-                        // Chốt chặn kép: Phải có user, user phải có taiKhoanId, và 2 ID phải hoàn toàn khớp nhau
-                        if (this.state.user && this.state.user.taiKhoanId && rvTaiKhoanId && rvTaiKhoanId === this.state.user.taiKhoanId) {
-                            if (rv.daSua === true) {
-                                editBtnHtml = `<div style="font-size:11px; color:#888; font-style:italic;">(Đã đánh giá)</div>`;
-                            } else {
-                                const escapedNoiDung = (rv.noiDung || '').replace(/'/g, "\\'");
-                                editBtnHtml = `
-                                    <button onclick="window.DetailApp.openReviewModal(${rvHoaDonChiTietId}, '${rv.phanLoai || ''}', true, ${rv.soSao}, '${escapedNoiDung}')"
-                                           style="background:none; border:none; color:var(--accent); font-size:11px; font-weight:500; cursor:pointer; text-decoration:underline; padding:0;">
-                                           Sửa đánh giá
-                                   </button>`;
-                            }
-                        }
+                if(avgScore) avgScore.innerText = avg;
+                let sHtml = '';
+                for(let i=1; i<=5; i++) sHtml += i <= Math.round(avg) ? '★' : '☆';
+                if(starsRow) starsRow.innerText = sHtml;
+                if(countText) countText.innerText = `${total} đánh giá từ khách hàng`;
+            },
 
-                        // 🌟 ĐÃ BỔ SUNG PHẦN HIỂN THỊ PHẢN HỒI CỦA CỬA HÀNG
-                        let replyHtml = '';
-                        if (rv.noiDungTraLoi) {
-                            const replyDate = rv.ngayTraLoi ? new Date(rv.ngayTraLoi).toLocaleDateString('vi-VN') : '';
-                            const nvName = rv.nhanVienTraLoi ? rv.nhanVienTraLoi.hoTen : 'Quản trị viên';
-                            replyHtml = `
-                                <div style="background: #f8f9fa; border-left: 3px solid #3b82f6; padding: 12px 16px; margin-top: 12px; border-radius: 0 4px 4px 0;">
-                                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                                        <span style="font-size: 11px; font-weight: 800; color: #1d4ed8; text-transform: uppercase;">
-                                            <i class="bi bi-person-badge"></i> BEEMATE
-                                        </span>
-                                        <span style="font-size: 11px; color: #888;">${replyDate}</span>
-                                    </div>
-                                    <div style="font-size: 13px; color: #333; line-height: 1.5;">${rv.noiDungTraLoi}</div>
-                                </div>
-                            `;
-                        }
+            // 2. Logic Lọc từng sao (Bấm 1 sao lọc đúng 1 sao)
+            filterByStar: function(star, btn) {
+                // Xóa active các nút cũ, thêm active nút mới
+                document.querySelectorAll('.btn-filter-star').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
 
-                        html += `
-                            <div class="review-item">
-                                <div class="reviewer-name">
-                                    <span>${rv.tenKhachHang || 'Khách hàng'} <span class="verified-badge"><i class="fa-solid fa-check"></i> Đã mua hàng</span></span>
+                this.state.activeStar = star;
+                if (star === null) {
+                    this.state.filteredReviews = this.state.allReviews;
+                } else {
+                    // Lọc chính xác số sao
+                    this.state.filteredReviews = this.state.allReviews.filter(r => r.soSao === star);
+                }
+
+                this.state.displayCount = 5; // Reset số lượng hiển thị về 5
+                this.renderReviewList();
+
+                // Cuộn cái khung "trượt riêng" về đầu
+                document.getElementById('reviewsContainer').scrollTop = 0;
+            },
+
+            // 3. Logic Tải thêm +5
+            loadMoreReviews: function() {
+                this.state.displayCount += 5;
+                this.renderReviewList();
+            },
+
+            // 4. Vẽ Review ra màn hình (Có ảnh, có phân loại)
+            renderReviewList: function() {
+                const container = document.getElementById('reviewsContainer');
+                const loadMoreBtn = document.getElementById('loadMoreReviewsArea');
+
+                const list = this.state.filteredReviews.slice(0, this.state.displayCount);
+
+                if (list.length === 0) {
+                    container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--muted); font-style:italic;">Không có đánh giá ${this.state.activeStar ? this.state.activeStar + ' sao' : ''} nào.</div>`;
+                    loadMoreBtn.style.display = 'none';
+                    return;
+                }
+
+                // Lấy ID user hiện tại để check
+                const currentUserId = this.state.user ? (this.state.user.taiKhoanId || this.state.user.id) : null;
+
+                let html = list.map(rv => {
+                    let stars = '';
+                    for(let i=1; i<=5; i++) stars += i <= rv.soSao ? '★' : '☆';
+
+                    let imagesHtml = '';
+                    if (rv.danhSachHinhAnhList && rv.danhSachHinhAnhList.length > 0) {
+                        imagesHtml = '<div class="review-images">' + rv.danhSachHinhAnhList.map(url =>
+                            `<img src="${url.trim()}" class="review-img" onclick="window.DetailApp.openLightbox('${url.trim()}')">`
+                        ).join('') + '</div>';
+                    }
+
+                    // Kiểm tra xem đây có phải review của mình không
+                    const rvUserId = rv.taiKhoan ? rv.taiKhoan.id : rv.taiKhoanId;
+                    const isMyReview = currentUserId && (rvUserId === currentUserId);
+
+                    // Nếu là của mình thì tạo nút sửa và khung nền nổi bật
+                    let editBtnHtml = '';
+                    let highlightStyle = 'border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 28px;';
+                    let nameDisplay = rv.tenKhachHang || 'Khách hàng ẩn danh';
+
+                    if (isMyReview) {
+                        nameDisplay = 'Bạn (Của tôi)';
+                        highlightStyle = 'background: rgba(61,90,76,0.03); border: 1px solid rgba(61,90,76,0.2); border-radius: 4px; padding: 15px;';
+
+                        const escapedContent = (rv.noiDung || '').replace(/'/g, "\\'");
+                        const detailId = rv.hoaDonChiTiet ? rv.hoaDonChiTiet.id : rv.hoaDonChiTietId;
+                        editBtnHtml = `<button onclick="window.DetailApp.openReviewModal(${detailId}, '${rv.phanLoai || ''}', true, ${rv.soSao}, '${escapedContent}')" style="background:none; border:none; color:var(--accent); font-size:11px; text-decoration:underline; cursor:pointer; padding:0 8px;">Sửa đánh giá</button>`;
+                    }
+
+                    return `
+                        <div class="review-item" style="${highlightStyle} margin-bottom: 28px;">
+                            <div class="reviewer-name">
+                                <span>${nameDisplay}</span>
+                                <div>
                                     ${editBtnHtml}
+                                    <span class="verified-badge"><i class="fa-solid fa-circle-check"></i> Đã mua hàng</span>
                                 </div>
-                                <div class="review-meta">
-                                    <span class="stars">${starsHtml}</span>
-                                    <span style="margin-left:8px;">${rv.phanLoai || ''}</span>
-                                    <span style="margin-left:8px; color:#ccc">| ${new Date(rv.ngayTao).toLocaleDateString('vi-VN')}</span>
-                                </div>
-                                <div class="review-content">${rv.noiDung || ''}</div>
-                                ${hinhAnhHtml}
-                                ${replyHtml} </div>
-                        `;
-                    });
+                            </div>
+                            <div class="review-meta">
+                                <span class="stars" style="color:#f59e0b; margin-right:12px; font-size:14px;">${stars}</span>
+                                <span class="color-badge" style="background:#f4f4f5; color:#888; font-weight:400; font-size:11px;">${rv.phanLoai || 'Mặc định'}</span>
+                            </div>
+                            <div class="review-content">${rv.noiDung || 'Khách hàng không để lại nội dung.'}</div>
+                            ${imagesHtml}
+                        </div>
+                    `;
+                }).join('');
 
-                    container.innerHTML = html;
-                    if(allContainer) allContainer.innerHTML = html;
+                container.innerHTML = html;
 
-                    const avg = (totalStars / reviews.length).toFixed(1);
-                    if(miniStats) miniStats.innerText = `(${avg}★ / ${reviews.length})`;
+                if (this.state.displayCount < this.state.filteredReviews.length) {
+                    loadMoreBtn.style.display = 'block';
+                } else {
+                    loadMoreBtn.style.display = 'none';
+                }
+            },
 
-                    const btnViewAll = document.getElementById('btnViewAllReviews');
-                    if (btnViewAll) {
-                        btnViewAll.style.display = reviews.length > 3 ? 'block' : 'none';
+            openAllReviewsModal: function() {
+                const allContainer = document.getElementById('allReviewsContainer');
+                const overlay = document.getElementById('allReviewsModalOverlay');
+                if (allContainer && overlay) {
+                    // Nếu modal đang trống thì mới nhồi cache vào để tránh lag khi mở lại lần 2
+                    if (allContainer.innerHTML === '' || allContainer.innerHTML.includes('Đang tải')) {
+                        allContainer.innerHTML = this.state.cachedAllReviewsHtml;
                     }
+                    overlay.style.display = 'flex';
+                }
+            },
 
-                } catch(e) { console.log(e); }
+            closeAllReviewsModal: function() {
+                document.getElementById('allReviewsModalOverlay').style.display = 'none';
             },
 
             openLightbox: function(src) {
@@ -574,12 +955,8 @@
                 setTimeout(() => overlay.style.display = 'none', 300);
             },
 
-            openAllReviewsModal: function() {
-                document.getElementById('allReviewsModalOverlay').style.display = 'flex';
-            },
-            closeAllReviewsModal: function() {
-                document.getElementById('allReviewsModalOverlay').style.display = 'none';
-            },
+            openAllReviewsModal: function() { document.getElementById('allReviewsModalOverlay').style.display = 'flex'; },
+            closeAllReviewsModal: function() { document.getElementById('allReviewsModalOverlay').style.display = 'none'; },
 
             checkCanReview: async function() {
                 const btn = document.getElementById('btnOpenReviewModal');
@@ -588,42 +965,27 @@
                     const res = await fetch('/api/khach-hang/reviews/check-eligibility/' + this.state.productId);
                     if (res.ok) {
                         const data = await res.json();
-                        if (data.eligible) {
-                            btn.style.display = 'inline-block';
-                        } else {
-                            btn.style.display = 'none';
-                        }
+                        btn.style.display = data.eligible ? 'inline-flex' : 'none';
                     }
-                } catch(e) { console.log(e); }
+                } catch(e) {}
             },
 
             checkAndOpenReviewModal: async function() {
                 try {
                     const res = await fetch('/api/khach-hang/reviews/check-eligibility/' + this.state.productId);
                     const data = await res.json();
-
-                    if (data.eligible) {
-                        this.openReviewModal(data.orderDetailId, data.phanLoai, false);
-                    } else {
-                        if(window.showToast) window.showToast(data.message, "warning");
-                    }
-                } catch(e) {
-                    if(window.showToast) window.showToast("Vui lòng đăng nhập để đánh giá sản phẩm!", "warning");
-                }
+                    if (data.eligible) { this.openReviewModal(data.orderDetailId, data.phanLoai, false); }
+                    else { if(window.showToast) window.showToast(data.message, "warning"); }
+                } catch(e) { if(window.showToast) window.showToast("Vui lòng đăng nhập để thực hiện thao tác này!", "warning"); }
             },
 
             openReviewModal: function(orderDetailId = null, phanLoai = '', isEdit = false, soSao = 5, noiDung = '') {
                 this.reviewState.orderDetailId = orderDetailId;
                 this.reviewState.phanLoai = phanLoai;
                 this.reviewState.isEdit = isEdit;
-
                 const titleEl = document.querySelector('.review-modal-title');
-                if (titleEl) {
-                    titleEl.innerText = isEdit ? "Sửa đánh giá của bạn" : "Viết đánh giá của bạn";
-                }
-
+                if (titleEl) titleEl.innerText = isEdit ? "Sửa đánh giá của bạn" : "Viết đánh giá của bạn";
                 document.getElementById('reviewEditWarning').style.display = isEdit ? 'block' : 'none';
-
                 document.getElementById('reviewModalOverlay').style.display = 'flex';
                 this.setStar(soSao);
                 document.getElementById('reviewContentInput').value = noiDung || '';
@@ -631,44 +993,29 @@
                 this.renderImagePreviews();
             },
 
-            closeReviewModal: function() {
-                document.getElementById('reviewModalOverlay').style.display = 'none';
-            },
+            closeReviewModal: function() { document.getElementById('reviewModalOverlay').style.display = 'none'; },
 
             setStar: function(star) {
                 this.reviewState.soSao = star;
                 const stars = document.querySelectorAll('#starSelector i');
-                stars.forEach((s, index) => {
-                    s.className = index < star ? 'fa-solid fa-star active' : 'fa-solid fa-star';
-                });
+                stars.forEach((s, index) => { s.className = index < star ? 'fa-solid fa-star active' : 'fa-solid fa-star'; });
             },
 
             handleFileSelect: function(event) {
                 const files = Array.from(event.target.files);
-                if (this.reviewState.files.length + files.length > 5) {
-                    if(window.showToast) window.showToast("Chỉ được tải lên tối đa 5 ảnh", "warning");
-                    return;
-                }
+                if (this.reviewState.files.length + files.length > 5) { if(window.showToast) window.showToast("Chỉ được tải lên tối đa 5 ảnh", "warning"); return; }
                 this.reviewState.files = this.reviewState.files.concat(files);
                 this.renderImagePreviews();
             },
 
-            removeFile: function(index) {
-                this.reviewState.files.splice(index, 1);
-                this.renderImagePreviews();
-            },
+            removeFile: function(index) { this.reviewState.files.splice(index, 1); this.renderImagePreviews(); },
 
             renderImagePreviews: function() {
                 const container = document.getElementById('reviewImagePreviews');
                 container.innerHTML = '';
                 this.reviewState.files.forEach((file, index) => {
                     const url = URL.createObjectURL(file);
-                    container.innerHTML += `
-                        <div style="position:relative; width:60px; height:60px;">
-                            <img src="${url}" style="width:100%; height:100%; object-fit:cover; border-radius:4px;">
-                            <button onclick="window.DetailApp.removeFile(${index})" style="position:absolute; top:-5px; right:-5px; background:#ef4444; color:white; border:none; border-radius:50%; width:16px; height:16px; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center;">x</button>
-                        </div>
-                    `;
+                    container.innerHTML += `<div style="position:relative; width:60px; height:60px;"><img src="${url}" style="width:100%; height:100%; object-fit:cover; border-radius:2px;"><button onclick="window.DetailApp.removeFile(${index})" style="position:absolute; top:-5px; right:-5px; background:#ef4444; color:white; border:none; border-radius:50%; width:16px; height:16px; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center;">x</button></div>`;
                 });
             },
 
@@ -676,7 +1023,6 @@
                 const btn = document.getElementById('btnSubmitReview');
                 btn.disabled = true;
                 btn.querySelector('span').innerText = 'ĐANG TẢI LÊN...';
-
                 try {
                     let uploadedUrls = [];
                     if (this.reviewState.files.length > 0) {
@@ -686,84 +1032,30 @@
                             const res = await fetch('/api/upload', { method: 'POST', body: formData });
                             if (res.ok) {
                                 const text = await res.text();
-                                try {
-                                    const json = JSON.parse(text);
-                                    uploadedUrls.push(json.url || json.secure_url || text);
-                                } catch(e) { uploadedUrls.push(text); }
+                                try { const json = JSON.parse(text); uploadedUrls.push(json.url || json.secure_url || text); } catch(e) { uploadedUrls.push(text); }
                             }
                         }
                     }
-
-                    const noiDung = document.getElementById('reviewContentInput').value;
-
-                    const payload = {
-                        soSao: this.reviewState.soSao,
-                        noiDung: noiDung,
-                        phanLoai: this.reviewState.phanLoai,
-                        danhSachHinhAnh: uploadedUrls.join(',')
-                    };
-
-                    const url = this.reviewState.orderDetailId
-                        ? '/api/khach-hang/reviews/detail/' + this.reviewState.orderDetailId
-                        : '/api/khach-hang/reviews/' + this.state.productId;
-
-                    const res = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (res.status === 401) {
-                        if(window.showToast) window.showToast("Vui lòng đăng nhập để đánh giá!", "warning");
-                        setTimeout(() => { window.location.hash = 'login'; }, 1500);
-                        return;
-                    }
-
-                    if (res.ok) {
-                        if(window.showToast) window.showToast("Cảm ơn bạn đã gửi đánh giá!", "success");
-                        this.closeReviewModal();
-                        this.loadReviews();
-                        this.checkCanReview();
-
-                        const reviewAccordion = document.getElementById('reviewAccordionBlock');
-                        if (reviewAccordion && !reviewAccordion.classList.contains('active')) {
-                            reviewAccordion.classList.add('active');
-                        }
-                    } else {
-                        const err = await res.json();
-                        if(window.showToast) window.showToast(err.message || "Có lỗi xảy ra, vui lòng thử lại!", "error");
-                    }
-                } catch (e) {
-                    console.error(e);
-                } finally {
-                    btn.disabled = false;
-                    btn.querySelector('span').innerText = 'GỬI ĐÁNH GIÁ';
-                }
+                    const payload = { soSao: this.reviewState.soSao, noiDung: document.getElementById('reviewContentInput').value, phanLoai: this.reviewState.phanLoai, danhSachHinhAnh: uploadedUrls.join(',') };
+                    const url = this.reviewState.orderDetailId ? '/api/khach-hang/reviews/detail/' + this.reviewState.orderDetailId : '/api/khach-hang/reviews/' + this.state.productId;
+                    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    if (res.status === 401) { if(window.showToast) window.showToast("Vui lòng đăng nhập để đánh giá!", "warning"); setTimeout(() => { window.location.hash = 'login'; }, 1500); return; }
+                    if (res.ok) { if(window.showToast) window.showToast("Cảm ơn bạn đã gửi đánh giá!", "success"); this.closeReviewModal(); this.loadReviews(); this.checkCanReview(); }
+                    else { const err = await res.json(); if(window.showToast) window.showToast(err.message || "Có lỗi xảy ra, vui lòng thử lại!", "error"); }
+                } catch(e) { console.error(e); }
+                finally { btn.disabled = false; btn.querySelector('span').innerText = 'GỬI ĐÁNH GIÁ'; }
             },
 
             animateFlyToCart: function(sourceImage) {
                 const cartIcon = document.querySelector('.fa-cart-shopping') || document.querySelector('.bi-cart3') || document.body;
-
                 const clone = sourceImage.cloneNode(true);
                 const rect = sourceImage.getBoundingClientRect();
                 const cartRect = cartIcon.getBoundingClientRect();
-
                 clone.className = 'fly-to-cart-img';
-                clone.style.left = rect.left + 'px';
-                clone.style.top = rect.top + 'px';
-                clone.style.width = rect.width + 'px';
-                clone.style.height = rect.height + 'px';
+                clone.style.left = rect.left + 'px'; clone.style.top = rect.top + 'px';
+                clone.style.width = rect.width + 'px'; clone.style.height = rect.height + 'px';
                 document.body.appendChild(clone);
-
-                setTimeout(() => {
-                    clone.style.left = (cartRect.left + 5) + 'px';
-                    clone.style.top = (cartRect.top + 5) + 'px';
-                    clone.style.width = '20px';
-                    clone.style.height = '20px';
-                    clone.style.opacity = '0.5';
-                    clone.style.transform = 'scale(0.2)';
-                }, 50);
-
+                setTimeout(() => { clone.style.left = (cartRect.left + 5) + 'px'; clone.style.top = (cartRect.top + 5) + 'px'; clone.style.width = '20px'; clone.style.height = '20px'; clone.style.opacity = '0.5'; clone.style.transform = 'scale(0.2)'; }, 50);
                 setTimeout(() => { clone.remove(); }, 850);
             },
 
@@ -772,29 +1064,19 @@
                     const pRes = await fetch(`/api/products/${this.state.productId}`);
                     if (!pRes.ok) throw new Error("Không tìm thấy sản phẩm");
                     this.state.product = await pRes.json();
-
                     const vRes = await fetch(`/api/products/${this.state.productId}/variants`);
                     if (vRes.ok) this.state.variants = await vRes.json();
-
                     this.processData();
                     this.renderAll();
-                } catch (e) {
-                    console.warn("Lỗi gọi API, sử dụng dữ liệu mẫu (Fallback).", e);
-                }
+                } catch (e) { console.warn("Lỗi gọi API, sử dụng dữ liệu mẫu (Fallback).", e); }
             },
 
             sortSizes: function(sizes) {
-                const orderMap = {
-                    'freesize': 0, 'one size': 0, 'os': 0,
-                    'xxs': 1, 'xs': 2, 's': 3, 'm': 4, 'l': 5, 'xl': 6,
-                    'xxl': 7, '2xl': 7, 'xxxl': 8, '3xl': 8, '4xl': 9
-                };
-
+                const orderMap = { 'freesize': 0, 'one size': 0, 'os': 0, 'xxs': 1, 'xs': 2, 's': 3, 'm': 4, 'l': 5, 'xl': 6, 'xxl': 7, '2xl': 7, 'xxxl': 8, '3xl': 8, '4xl': 9 };
                 return sizes.sort((a, b) => {
                     const nameA = a.ten.toLowerCase().replace('size', '').trim();
                     const nameB = b.ten.toLowerCase().replace('size', '').trim();
-                    const numA = parseFloat(nameA);
-                    const numB = parseFloat(nameB);
+                    const numA = parseFloat(nameA); const numB = parseFloat(nameB);
                     if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
                     const weightA = orderMap[nameA] !== undefined ? orderMap[nameA] : 99;
                     const weightB = orderMap[nameB] !== undefined ? orderMap[nameB] : 99;
@@ -809,15 +1091,24 @@
                     if (v.mauSac) colorMap.set(v.mauSac.id, v.mauSac);
                     if (v.kichThuoc) sizeMap.set(v.kichThuoc.id, v.kichThuoc);
                 });
-
                 this.state.uniqueColors = Array.from(colorMap.values());
-                let rawSizes = Array.from(sizeMap.values());
-                this.state.uniqueSizes = this.sortSizes(rawSizes);
+                this.state.uniqueSizes = this.sortSizes(Array.from(sizeMap.values()));
+                this.state.selectedColorId = null;
+                this.state.selectedSizeId = null;
+                let allImages = (this.state.product.hinhAnhs && this.state.product.hinhAnhs.length > 0)
+                    ? this.state.product.hinhAnhs.map(img => img.url)
+                    : [];
 
-                if (this.state.uniqueColors.length > 0) this.state.selectedColorId = this.state.uniqueColors[0].id;
-                if (this.state.product.hinhAnhs && this.state.product.hinhAnhs.length > 0) {
-                    this.state.images = this.state.product.hinhAnhs.map(img => img.url);
-                } else this.state.images = ['https://placehold.co/600x800?text=No+Image'];
+                // Gom thêm toàn bộ ảnh từ các biến thể (từng màu) vào luôn
+                this.state.variants.forEach(v => {
+                    if (v.hinhAnh && !allImages.some(img => img.includes(v.hinhAnh) || v.hinhAnh.includes(img))) {
+                        allImages.push(v.hinhAnh);
+                    }
+                });
+
+                // Chốt danh sách ảnh
+                this.state.images = allImages.length > 0 ? allImages : ['https://placehold.co/600x800?text=No+Image'];
+
                 this.state.currentImageIndex = 0;
             },
 
@@ -830,21 +1121,137 @@
                 this.renderSizes();
                 this.updatePriceAndStock();
                 this.renderRecentlyViewed();
+                this.saveToRecentlyViewed();
                 this.checkWishlist();
                 this.loadReviews();
                 this.checkCanReview();
+                this.initStickyBar();
             },
 
-            toggleAccordion: function(headerEl) {
-                const item = headerEl.parentElement;
-                item.classList.toggle('active');
+            initStickyBar: function() {
+                const p = this.state.product;
+                if (!p) return;
+                const nameEl = document.getElementById('stickyName');
+                const priceEl = document.getElementById('stickyPrice');
+                if(nameEl) nameEl.innerText = p.ten;
+                if(priceEl) {
+                    const minPrice = Math.min(...(this.state.variants.map(v => v.giaSauKhuyenMai || v.giaBan || 0).filter(x => x > 0)));
+                    if(minPrice > 0) priceEl.innerText = new Intl.NumberFormat('vi-VN').format(minPrice) + ' ₫';
+                }
             },
+
+            saveToRecentlyViewed: function() {
+                const p = this.state.product;
+                if (!p) return;
+                try {
+                    let recent = JSON.parse(localStorage.getItem('bee_recent_viewed') || '[]');
+                    recent = recent.filter(item => parseInt(item.id) !== parseInt(p.id));
+                    const img = (p.hinhAnhs && p.hinhAnhs.length > 0) ? p.hinhAnhs[0].url : '';
+
+                    // Tính toán giá và gom màu sắc
+                    let minOriginal = p.giaBan || 0;
+                    let minSale = p.giaSauKhuyenMai || minOriginal;
+                    let uniqueColors = [];
+
+                    if (this.state.variants && this.state.variants.length > 0) {
+                        minOriginal = Math.min(...this.state.variants.map(v => v.giaBan || 0));
+                        minSale = Math.min(...this.state.variants.map(v => v.giaSauKhuyenMai || v.giaBan || 0));
+
+                        this.state.variants.forEach(ct => {
+                            if (ct.mauSac && !uniqueColors.find(c => c.ten === ct.mauSac.ten)) {
+                                uniqueColors.push({
+                                    ten: ct.mauSac.ten,
+                                    maMau: ct.mauSac.maMau || this.getColorHex(ct.mauSac.ten)
+                                });
+                            }
+                        });
+                    }
+
+                    // Lưu full data
+                    recent.unshift({
+                        id: p.id,
+                        ten: p.ten,
+                        hinhAnh: img,
+                        giaGoc: minOriginal,
+                        giaKhuyenMai: minSale,
+                        colors: uniqueColors
+                    });
+
+                    if(recent.length > 8) recent = recent.slice(0, 8);
+                    localStorage.setItem('bee_recent_viewed', JSON.stringify(recent));
+                } catch(e) {}
+            },
+
+            renderRecentlyViewed: function() {
+                try {
+                    let recent = JSON.parse(localStorage.getItem('bee_recent_viewed') || '[]');
+                    const currentId = parseInt(this.state.productId);
+                    recent = recent.filter(item => parseInt(item.id) !== currentId).slice(0, 4);
+                    const section = document.getElementById('recentViewedSection');
+                    const list = document.getElementById('recentViewedList');
+                    if (!recent || recent.length === 0) { if(section) section.style.display = 'none'; return; }
+                    if(section) section.style.display = 'block';
+
+                    let html = '';
+                    recent.forEach(p => {
+                        const goToDetail = `window.location.hash='detail?id=${p.id}'; window.scrollTo({top:0, behavior:'smooth'}); setTimeout(()=> window.DetailApp.init(), 50);`;
+
+                        // 1. Xử lý logic Giá cả
+                        let minOriginal = p.giaGoc || p.giaBan || 0;
+                        let minSale = p.giaKhuyenMai || p.giaBan || 0;
+                        let priceHtml = '';
+
+                        if (minSale < minOriginal && minSale > 0) {
+                            const pct = Math.round((1 - minSale / minOriginal) * 100);
+                            priceHtml = `<span class="price-sale">${new Intl.NumberFormat('vi-VN').format(minSale)} ₫</span>
+                                         <span class="price-orig">${new Intl.NumberFormat('vi-VN').format(minOriginal)} ₫</span>
+                                         <span class="price-pct">-${pct}%</span>`;
+                        } else {
+                            priceHtml = minOriginal > 0 ? `<span class="price-normal">${new Intl.NumberFormat('vi-VN').format(minOriginal)} ₫</span>` : 'Đang cập nhật';
+                        }
+
+                        // 2. Xử lý HTML cho các chấm màu (Swatches)
+                        let swHtml = '';
+                        if (p.colors && p.colors.length > 0) {
+                            swHtml = p.colors.slice(0, 4).map(c => {
+                                const hex = c.maMau || '#000';
+                                return `<div class="swatch-dot" style="background:${hex};" title="${c.ten}"></div>`;
+                            }).join('');
+                            if (p.colors.length > 4) swHtml += `<span class="swatch-more">+${p.colors.length - 4}</span>`;
+                        }
+
+                        // 3. Render Component
+                        html += `
+                            <div class="product-card" onclick="${goToDetail}">
+                                <div class="product-img">
+                                    <img class="img-placeholder" src="${p.hinhAnh || 'https://placehold.co/400x533/f9f8f6/ccc?text=No+Image'}" alt="${p.ten}" onerror="this.src='https://placehold.co/400x533/f9f8f6/ccc?text=No+Image'">
+                                    <div class="img-overlay">
+                                        <button class="btn-quick" onclick="event.stopPropagation(); ${goToDetail}">
+                                            <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                            Xem chi tiết
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="product-info">
+                                    <div class="prod-swatches" style="${swHtml ? '' : 'display:none;'}">${swHtml}</div>
+                                    <div class="product-tag">BEEMATE</div>
+                                    <div class="product-name">${p.ten}</div>
+                                    <div class="prod-price">
+                                        ${priceHtml}
+                                    </div>
+                                </div>
+                            </div>`;
+                    });
+                    list.innerHTML = html;
+                } catch(e) { console.error("Lỗi render recently viewed:", e); }
+            },
+
+            toggleAccordion: function(headerEl) { headerEl.parentElement.classList.toggle('active'); },
 
             renderInfo: function() {
                 const p = this.state.product;
                 const catName = p.danhMuc ? p.danhMuc.ten : 'Sản phẩm';
-                const breadcrumbHtml = `<a href="#home">Trang chủ</a><span class="sep">/</span><a href="#shop">${catName}</a><span class="sep">/</span><span style="color:var(--muted)">${p.ten}</span>`;
-                document.getElementById('dynBreadcrumb').innerHTML = breadcrumbHtml;
+                document.getElementById('dynBreadcrumb').innerHTML = `<a href="#home">Trang chủ</a><span class="sep">/</span><a href="#shop">${catName}</a><span class="sep">/</span><span style="color:var(--muted)">${p.ten}</span>`;
                 document.getElementById('dynName').innerText = p.ten;
                 document.getElementById('dynDesc').innerText = p.moTa || 'Sản phẩm dệt may thủ công chất lượng cao.';
             },
@@ -860,7 +1267,6 @@
                     const diffDays = (new Date() - new Date(p.ngayTao)) / (1000 * 60 * 60 * 24);
                     if (diffDays <= 7) badgesHtml += '<div class="detail-badge new">MỚI</div>';
                 }
-
                 let minOriginal = p.giaBan || 0;
                 let minSale = p.giaSauKhuyenMai || minOriginal;
                 if (this.state.variants.length > 0) {
@@ -871,26 +1277,19 @@
 
                 let html = `
                     <div class="detail-badges">${badgesHtml}</div>
-                    <div class="main-view-container" id="mainZoomContainer" style="cursor: zoom-in;" onclick="window.DetailApp.openLightbox(window.DetailApp.state.images[window.DetailApp.state.currentImageIndex])">
-                        <div class="img-overlay"></div>
-
-                        <div style="position:absolute; top:16px; right:16px; z-index:9; background:rgba(255,255,255,0.9); width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--text); box-shadow:0 4px 10px rgba(0,0,0,0.1); pointer-events:none;">
-                            <i class="fa-solid fa-expand"></i>
+                    <div class="main-view-container" id="mainZoomContainer" onclick="window.DetailApp.openLightbox(window.DetailApp.state.images[window.DetailApp.state.currentImageIndex])">
+                        <div style="position:absolute; top:14px; right:14px; z-index:9; background:rgba(255,255,255,0.9); width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--text); box-shadow:0 4px 10px rgba(0,0,0,0.1); pointer-events:none;">
+                            <i class="fa-solid fa-expand" style="font-size:12px;"></i>
                         </div>
-
                         <img id="mainImageDisplay" src="${this.optimizeImage(images[0], 600, 800)}" alt="Main Image">
-
                         ${showNav ? `
                             <button class="bee-nav-btn prev" onclick="window.DetailApp.changeSlide(-1, event)"><i class="fa-solid fa-chevron-left"></i></button>
-                            <button class="bee-nav-btn next" onclick="window.DetailApp.changeSlide(1, event)"><i class="fa-solid fa-chevron-right"></i></button>
-                        ` : ''}
-                    </div>
-                `;
+                            <button class="bee-nav-btn next" onclick="window.DetailApp.changeSlide(1, event)"><i class="fa-solid fa-chevron-right"></i></button>` : ''}
+                    </div>`;
                 if (showNav) {
                     html += `<div class="thumb-list" id="thumbListContainer">`;
                     images.forEach((url, idx) => {
-                        const isActive = idx === 0 ? 'active' : '';
-                        html += `<div class="thumb-item ${isActive}" data-index="${idx}" onclick="window.DetailApp.goToSlide(${idx})"><img src="${this.optimizeImage(url, 150, 200)}" alt="Thumb ${idx}"></div>`;
+                        html += `<div class="thumb-item ${idx === 0 ? 'active' : ''}" data-index="${idx}" onclick="window.DetailApp.goToSlide(${idx})"><img src="${this.optimizeImage(url, 150, 200)}" alt="Thumb ${idx}"></div>`;
                     });
                     html += `</div>`;
                 }
@@ -901,35 +1300,20 @@
                 const container = document.getElementById('mainZoomContainer');
                 const img = document.getElementById('mainImageDisplay');
                 if (!container || !img) return;
-
                 container.addEventListener('mousemove', function(e) {
                     const rect = container.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    const xPercent = (x / rect.width) * 100;
-                    const yPercent = (y / rect.height) * 100;
-                    img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+                    img.style.transformOrigin = `${((e.clientX - rect.left) / rect.width) * 100}% ${((e.clientY - rect.top) / rect.height) * 100}%`;
                 });
-
-                container.addEventListener('mouseleave', function() {
-                    img.style.transformOrigin = 'center center';
-                });
+                container.addEventListener('mouseleave', function() { img.style.transformOrigin = 'center center'; });
             },
 
             updateGalleryUI: function() {
                 const idx = this.state.currentImageIndex;
-                const images = this.state.images;
                 const mainImg = document.getElementById('mainImageDisplay');
-                if (mainImg) {
-                    mainImg.style.opacity = '0.6';
-                    setTimeout(() => { mainImg.src = this.optimizeImage(images[idx], 600, 800); mainImg.style.opacity = '1'; }, 150);
-                }
+                if (mainImg) { mainImg.style.opacity = '0.6'; setTimeout(() => { mainImg.src = this.optimizeImage(this.state.images[idx], 600, 800); mainImg.style.opacity = '1'; }, 150); }
                 document.querySelectorAll('.thumb-item').forEach(item => {
                     item.classList.remove('active');
-                    if (parseInt(item.getAttribute('data-index')) === idx) {
-                        item.classList.add('active');
-                        item.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                    }
+                    if (parseInt(item.getAttribute('data-index')) === idx) { item.classList.add('active'); item.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); }
                 });
             },
 
@@ -941,37 +1325,25 @@
                 this.updateGalleryUI();
             },
 
-            goToSlide: function(index) {
-                this.state.currentImageIndex = index;
-                this.updateGalleryUI();
-            },
+            goToSlide: function(index) { this.state.currentImageIndex = index; this.updateGalleryUI(); },
 
             getContrastBorder: function(hexcolor) {
                 if (!hexcolor) return 'rgba(0,0,0,0.15)';
                 let color = hexcolor.replace('#', '');
                 if (color.length === 3) color = color.split('').map(c => c+c).join('');
-                const r = parseInt(color.substr(0,2),16);
-                const g = parseInt(color.substr(2,2),16);
-                const b = parseInt(color.substr(4,2),16);
-                const yiq = ((r*299) + (g*587) + (b*114)) / 1000;
-                return (yiq > 200) ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.15)';
+                const r = parseInt(color.substr(0,2),16), g = parseInt(color.substr(2,2),16), b = parseInt(color.substr(4,2),16);
+                return (((r*299) + (g*587) + (b*114)) / 1000 > 200) ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.15)';
             },
 
             getColorHex: function(name) {
                 const n = name.toLowerCase().trim();
                 if (this.colorMap[n]) return this.colorMap[n];
-                if (n.includes('đỏ')) return '#b91c1c';
-                if (n.includes('xanh dương') || n.includes('xanh biển') || n.includes('navy')) return '#1d4ed8';
-                if (n.includes('xanh lá') || n.includes('rêu')) return '#15803d';
-                if (n.includes('vàng')) return '#eab308';
-                if (n.includes('cam')) return '#ea580c';
-                if (n.includes('hồng')) return '#ec4899';
-                if (n.includes('tím')) return '#a855f7';
-                if (n.includes('nâu')) return '#78350f';
-                if (n.includes('xám') || n.includes('ghi')) return '#64748b';
-                if (n.includes('be') || n.includes('kem')) return '#fef3c7';
-                if (n.includes('trắng')) return '#ffffff';
-                if (n.includes('đen')) return '#111827';
+                if (n.includes('đỏ')) return '#b91c1c'; if (n.includes('xanh dương') || n.includes('xanh biển') || n.includes('navy')) return '#1d4ed8';
+                if (n.includes('xanh lá') || n.includes('rêu')) return '#15803d'; if (n.includes('vàng')) return '#eab308';
+                if (n.includes('cam')) return '#ea580c'; if (n.includes('hồng')) return '#ec4899';
+                if (n.includes('tím')) return '#a855f7'; if (n.includes('nâu')) return '#78350f';
+                if (n.includes('xám') || n.includes('ghi')) return '#64748b'; if (n.includes('be') || n.includes('kem')) return '#fef3c7';
+                if (n.includes('trắng')) return '#ffffff'; if (n.includes('đen')) return '#111827';
                 let hash = 0;
                 for (let i = 0; i < n.length; i++) hash = n.charCodeAt(i) + ((hash << 5) - hash);
                 let color = '#';
@@ -982,21 +1354,18 @@
             renderColors: function() {
                 const colorContainer = document.getElementById('dynColors');
                 const nameLabel = document.getElementById('dynColorName');
-                if (this.state.uniqueColors.length === 0) { colorContainer.innerHTML = '<span style="font-size:12px; color:#888;">Mặc định</span>'; return; }
-                let html = '';
+                if (this.state.uniqueColors.length === 0) {
+                    colorContainer.innerHTML = '<span style="font-size:12px; color:#888;">Mặc định</span>';
+                    return;
+                }
 
+                let html = '';
                 this.state.uniqueColors.forEach(color => {
                     const isSelected = this.state.selectedColorId === color.id;
                     const hex = color.maMau || this.getColorHex(color.ten);
                     const borderColor = this.getContrastBorder(hex);
-
                     const availableVariants = this.state.variants.filter(v => v.mauSac.id === color.id && this.getAvailableStock(v) > 0);
                     const isOut = availableVariants.length === 0 ? 'opacity:0.3; cursor:not-allowed;' : '';
-
-                    if (isSelected) {
-                        nameLabel.innerText = color.ten;
-                        nameLabel.style.display = 'inline-block';
-                    }
 
                     html += `
                         <div class="color-ring-wrap ${isSelected ? 'active' : ''}"
@@ -1006,18 +1375,24 @@
                         </div>`;
                 });
                 colorContainer.innerHTML = html;
+
+                // Nếu chưa chọn màu thì ẩn cái badge tên màu đi
+                if (!this.state.selectedColorId) {
+                    nameLabel.style.display = 'none';
+                } else {
+                    nameLabel.style.display = 'inline-block';
+                }
             },
 
-            // 🌟 CHỌN MÀU -> ĐỔI ẢNH THEO SKU
             selectColor: function(colorId, colorName) {
                 this.state.selectedColorId = colorId;
-
                 const nameLabel = document.getElementById('dynColorName');
                 nameLabel.innerText = colorName;
                 nameLabel.style.display = 'inline-block';
 
-                this.state.selectedSizeId = null;
+                this.state.selectedSizeId = null; // Reset size khi đổi màu
 
+                // --- LOGIC NHẢY ẢNH ---
                 const variantWithImg = this.state.variants.find(v => v.mauSac.id === colorId && v.hinhAnh);
                 if (variantWithImg && variantWithImg.hinhAnh) {
                     const imgUrl = variantWithImg.hinhAnh;
@@ -1029,13 +1404,22 @@
                         this.buildGalleryHTML();
                     }
 
-                    this.goToSlide(idx);
+                    // Tạo hiệu ứng nháy nhẹ cho ảnh chính
+                    const mainImg = document.getElementById('mainImageDisplay');
+                    if (mainImg) {
+                        mainImg.style.opacity = '0.4';
+                        mainImg.style.transform = 'scale(0.98)';
+                        setTimeout(() => {
+                            this.goToSlide(idx);
+                            mainImg.style.opacity = '1';
+                            mainImg.style.transform = 'scale(1)';
+                        }, 100);
+                    }
                 }
 
                 this.renderColors();
                 this.renderSizes();
                 this.updatePriceAndStock();
-
                 document.getElementById('detailQtyInput').value = 1;
             },
 
@@ -1046,9 +1430,7 @@
                 this.state.uniqueSizes.forEach(size => {
                     const isSelected = this.state.selectedSizeId === size.id ? 'active' : '';
                     const variant = this.state.variants.find(v => v.mauSac.id === this.state.selectedColorId && v.kichThuoc.id === size.id);
-
                     const isUnavailable = (!variant || this.getAvailableStock(variant) <= 0) ? 'unavailable' : '';
-
                     html += `<button class="size-btn ${isSelected} ${isUnavailable}" onclick="window.DetailApp.selectSize(${size.id}, ${isUnavailable ? 'true' : 'false'})">${size.ten}</button>`;
                 });
                 sizeContainer.innerHTML = html;
@@ -1057,37 +1439,22 @@
             selectSize: function(sizeId, isUnavailable) {
                 if (isUnavailable) return;
                 this.state.selectedSizeId = sizeId;
-                this.renderSizes();
-                this.updatePriceAndStock();
-
+                this.renderSizes(); this.updatePriceAndStock();
                 document.getElementById('detailQtyInput').value = 1;
             },
 
             changeQty: function(delta) {
                 const input = document.getElementById('detailQtyInput');
-                let currentVal = parseInt(input.value) || 1;
-                let newVal = currentVal + delta;
-
-                if (newVal < 1) newVal = 1;
-
-                if (this.state.currentStock > 0 && newVal > this.state.currentStock) {
-                    if (window.showToast) window.showToast(`Chỉ còn ${this.state.currentStock} sản phẩm loại này!`, "warning");
-                    newVal = this.state.currentStock;
-                }
-
+                let newVal = Math.max(1, (parseInt(input.value) || 1) + delta);
+                if (this.state.currentStock > 0 && newVal > this.state.currentStock) { if(window.showToast) window.showToast(`Chỉ còn ${this.state.currentStock} sản phẩm loại này!`, "warning"); newVal = this.state.currentStock; }
                 input.value = newVal;
             },
 
             validateQty: function() {
                 const input = document.getElementById('detailQtyInput');
                 let val = parseInt(input.value);
-
-                if (isNaN(val) || val < 1) {
-                    input.value = 1;
-                } else if (this.state.currentStock > 0 && val > this.state.currentStock) {
-                    if (window.showToast) window.showToast(`Rất tiếc, kho chỉ còn ${this.state.currentStock} sản phẩm.`, "warning");
-                    input.value = this.state.currentStock;
-                }
+                if (isNaN(val) || val < 1) { input.value = 1; }
+                else if (this.state.currentStock > 0 && val > this.state.currentStock) { if(window.showToast) window.showToast(`Rất tiếc, kho chỉ còn ${this.state.currentStock} sản phẩm.`, "warning"); input.value = this.state.currentStock; }
             },
 
             updatePriceAndStock: function() {
@@ -1096,61 +1463,81 @@
                 const btnAdd = document.getElementById('btnAddToCart');
                 const btnBuyNow = document.getElementById('btnBuyNow');
                 const qtyInput = document.getElementById('detailQtyInput');
+                const fmt = n => new Intl.NumberFormat('vi-VN').format(n);
 
+                // TRƯỜNG HỢP 1: KHI CHƯA CHỌN BIẾN THỂ (Lấy giá thấp nhất của sản phẩm)
                 if (!this.state.selectedColorId || (this.state.uniqueSizes.length > 0 && !this.state.selectedSizeId)) {
                     let minOriginal = this.state.product.giaBan || 0;
                     let minSale = this.state.product.giaSauKhuyenMai || minOriginal;
+
                     if (this.state.variants && this.state.variants.length > 0) {
                         minOriginal = Math.min(...this.state.variants.map(v => v.giaBan || 0));
                         minSale = Math.min(...this.state.variants.map(v => v.giaSauKhuyenMai || v.giaBan || 0));
                     }
+
                     if (minSale < minOriginal && minSale > 0) {
-                        priceEl.innerHTML = `<span style="color:#c08060; font-weight: 600;">${new Intl.NumberFormat('vi-VN').format(minSale)} ₫</span> <span style="color:var(--muted); text-decoration:line-through; font-size:16px; margin-left: 12px;">${new Intl.NumberFormat('vi-VN').format(minOriginal)} ₫</span>`;
+                        const pct = Math.round((1 - minSale / minOriginal) * 100);
+                        const moneySaved = minOriginal - minSale; // Tính số tiền tiết kiệm
+
+                        priceEl.innerHTML = `
+                            <span class="detail-price-sale">${fmt(minSale)} ₫</span>
+                            <span class="detail-price-old">${fmt(minOriginal)} ₫</span>
+                            <span class="price-tag-discount"
+                                  title="Bạn tiết kiệm được ${fmt(moneySaved)} ₫"
+                                  onclick="this.innerText = this.innerText === '-${pct}%' ? '-${fmt(moneySaved)} ₫' : '-${pct}%'">
+                                  -${pct}%
+                            </span>
+                        `;
                     } else {
-                        priceEl.innerHTML = `${new Intl.NumberFormat('vi-VN').format(minOriginal)} ₫`;
+                        priceEl.innerHTML = `${fmt(minOriginal)} ₫`;
                     }
-                    stockEl.innerHTML = 'Vui lòng chọn Kích cỡ';
-                    stockEl.className = 'stock-status';
-                    this.state.currentStock = 0;
-                    qtyInput.disabled = true;
-                    btnAdd.disabled = true; if(btnBuyNow) btnBuyNow.disabled = true;
-                    return;
+
+                    stockEl.innerHTML = 'Vui lòng chọn Kích cỡ'; stockEl.className = 'stock-status';
+                    this.state.currentStock = 0; qtyInput.disabled = true;
+                    btnAdd.disabled = true; if(btnBuyNow) btnBuyNow.disabled = true; return;
                 }
 
+                // TRƯỜNG HỢP 2: KHI ĐÃ CHỌN ĐỦ MÀU + SIZE
                 const sku = this.state.variants.find(v => v.mauSac.id === this.state.selectedColorId && v.kichThuoc.id === this.state.selectedSizeId);
                 if (sku) {
                     const currentPrice = sku.giaSauKhuyenMai || sku.giaBan || 0;
                     const originalPrice = sku.giaBan || 0;
-
                     const availableStock = this.getAvailableStock(sku);
                     this.state.currentStock = availableStock;
 
                     if (currentPrice < originalPrice && currentPrice > 0) {
-                        priceEl.innerHTML = `<span style="color:#c08060; font-weight: 600;">${new Intl.NumberFormat('vi-VN').format(currentPrice)} ₫</span> <span style="color:var(--muted); text-decoration:line-through; font-size:16px; margin-left: 12px;">${new Intl.NumberFormat('vi-VN').format(originalPrice)} ₫</span>`;
+                        const pct = Math.round((1 - currentPrice / originalPrice) * 100);
+                        const moneySaved = originalPrice - currentPrice; // Tính số tiền tiết kiệm
+
+                        priceEl.innerHTML = `
+                            <span class="detail-price-sale">${fmt(currentPrice)} ₫</span>
+                            <span class="detail-price-old">${fmt(originalPrice)} ₫</span>
+                            <span class="price-tag-discount"
+                                  title="Bạn tiết kiệm được ${fmt(moneySaved)} ₫"
+                                  onclick="this.innerText = this.innerText === '-${pct}%' ? '-${fmt(moneySaved)} ₫' : '-${pct}%'">
+                                  -${pct}%
+                            </span>
+                        `;
                     } else {
-                        priceEl.innerHTML = `${new Intl.NumberFormat('vi-VN').format(originalPrice)} ₫`;
+                        priceEl.innerHTML = `${fmt(originalPrice)} ₫`; // MÀY QUÊN DÒNG NÀY Ở CODE CŨ NHÉ
                     }
 
+                    // --- Các đoạn logic StockStatus phía dưới giữ nguyên ---
                     if (availableStock > 10) {
-                        stockEl.innerHTML = `<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;vertical-align:bottom;margin-right:4px"><path d="M5 13l4 4L19 7"/></svg> Còn hàng <span class="stock-badge good">${availableStock} sản phẩm</span>`;
-                        stockEl.className = 'stock-status';
-                        qtyInput.disabled = false;
+                        stockEl.innerHTML = `<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;vertical-align:middle;margin-right:4px;flex-shrink:0"><path d="M5 13l4 4L19 7"/></svg> Còn hàng <span class="stock-badge good">${availableStock} sản phẩm</span>`;
+                        stockEl.className = 'stock-status'; qtyInput.disabled = false;
                         btnAdd.disabled = false; btnAdd.querySelector('span').innerText = 'THÊM VÀO GIỎ'; if(btnBuyNow) btnBuyNow.disabled = false;
-                    } else if (availableStock > 0 && availableStock <= 10) {
+                    } else if (availableStock > 0) {
                         stockEl.innerHTML = `⚠️ Sắp hết hàng <span class="stock-badge warning">Chỉ còn ${availableStock} sản phẩm</span>`;
-                        stockEl.className = 'stock-status low';
-                        qtyInput.disabled = false;
+                        stockEl.className = 'stock-status low'; qtyInput.disabled = false;
                         btnAdd.disabled = false; btnAdd.querySelector('span').innerText = 'THÊM VÀO GIỎ'; if(btnBuyNow) btnBuyNow.disabled = false;
                     } else {
-                        stockEl.innerHTML = `❌ Đã hết hàng`;
-                        stockEl.className = 'stock-status out';
-                        qtyInput.disabled = true;
-                        btnAdd.disabled = true; btnAdd.querySelector('span').innerText = 'HẾT HÀNG'; if(btnBuyNow) btnBuyNow.disabled = true;
+                        stockEl.innerHTML = `❌ Đã hết hàng`; stockEl.className = 'stock-status out';
+                        qtyInput.disabled = true; btnAdd.disabled = true; btnAdd.querySelector('span').innerText = 'HẾT HÀNG'; if(btnBuyNow) btnBuyNow.disabled = true;
                     }
                 }
             },
 
-            // 🌟 LƯU PHƯƠNG THỨC GIAO HÀNG & MỞ CHECKOUT TỪ CHI TIẾT
             closeDeliveryModal: function() {
                 const modal = document.querySelector('.delivery-modal');
                 if (modal) modal.classList.remove('open');
@@ -1166,76 +1553,27 @@
             addToCart: function(isBuyNow = false) {
                 const sku = this.state.variants.find(v => v.mauSac.id === this.state.selectedColorId && v.kichThuoc.id === this.state.selectedSizeId);
                 if (!sku) { window.showToast("Vui lòng chọn kích cỡ!", "warning"); return; }
-
                 const availableStock = this.getAvailableStock(sku);
                 if (availableStock <= 0) { window.showToast("Sản phẩm đã hết hàng!", "warning"); return; }
-
                 const inputQty = parseInt(document.getElementById('detailQtyInput').value) || 1;
-
                 this.animateFlyToCart(document.getElementById('mainImageDisplay'));
-
                 let cart = JSON.parse(localStorage.getItem('bee_cart')) || [];
                 let existingItem = cart.find(item => item.skuId === sku.id);
-
                 if (existingItem) {
-                    if (existingItem.qty + inputQty > availableStock) {
-                        window.showToast(`Kho chỉ còn ${availableStock} sản phẩm. (Giỏ hàng đã có ${existingItem.qty})`, "warning");
-                        return;
-                    }
+                    if (existingItem.qty + inputQty > availableStock) { window.showToast(`Kho chỉ còn ${availableStock} sản phẩm. (Giỏ hàng đã có ${existingItem.qty})`, "warning"); return; }
                     existingItem.qty += inputQty;
                 } else {
                     let productImg = "https://placehold.co/100x130/eee/999?text=No+Img";
                     if (sku.hinhAnh) productImg = sku.hinhAnh;
                     else if (this.state.product.hinhAnhs && this.state.product.hinhAnhs.length > 0) productImg = this.state.product.hinhAnhs[0].url;
-
-                    cart.push({
-                        skuId: sku.id,
-                        productId: this.state.product.id,
-                        name: this.state.product.ten,
-                        price: sku.giaSauKhuyenMai || sku.giaBan || 0,
-                        originalPrice: sku.giaBan || 0,
-                        qty: inputQty,
-                        img: productImg,
-                        colorName: sku.mauSac.ten,
-                        sizeName: sku.kichThuoc.ten,
-                        maxStock: availableStock
-                    });
+                    cart.push({ skuId: sku.id, productId: this.state.product.id, name: this.state.product.ten, price: sku.giaSauKhuyenMai || sku.giaBan || 0, originalPrice: sku.giaBan || 0, qty: inputQty, img: productImg, colorName: sku.mauSac.ten, sizeName: sku.kichThuoc.ten, maxStock: availableStock });
                 }
-
                 localStorage.setItem('bee_cart', JSON.stringify(cart));
                 if (window.updateCartBadge) window.updateCartBadge();
-
-                // 🌟 NẾU LÀ MUA NGAY THÌ MỞ POPUP CHỌN GIAO HÀNG
                 if (isBuyNow) {
                     document.getElementById('deliveryModalOverlay').style.display = 'flex';
                     setTimeout(() => { document.querySelector('.delivery-modal').classList.add('open'); }, 10);
-                } else {
-                    window.showToast(`Đã thêm ${inputQty} sản phẩm vào giỏ!`, 'success');
-                }
-            },
-
-            renderRecentlyViewed: function() {
-                try {
-                    let recent = JSON.parse(localStorage.getItem('bee_recent_viewed') || '[]');
-                    const currentId = parseInt(this.state.productId);
-                    recent = recent.filter(item => parseInt(item.id) !== currentId);
-                    const section = document.getElementById('recentViewedSection');
-                    const list = document.getElementById('recentViewedList');
-
-                    if (!recent || recent.length === 0) { section.style.display = 'none'; return; }
-                    section.style.display = 'block';
-
-                    let html = '';
-                    recent.forEach(p => {
-                        const priceHtml = p.giaBan > 0 ? new Intl.NumberFormat('vi-VN').format(p.giaBan) + ' ₫' : 'Đang cập nhật';
-                        html += `
-                            <div class="recent-card" onclick="window.location.hash='detail?id=${p.id}'; window.scrollTo({top:0, behavior:'smooth'}); setTimeout(()=> window.DetailApp.init(), 50);">
-                                <div class="recent-img"><div class="img-overlay"></div><img src="${p.hinhAnh}" alt="${p.ten}"></div>
-                                <div class="recent-name">${p.ten}</div><div class="recent-price">${priceHtml}</div>
-                            </div>`;
-                    });
-                    list.innerHTML = html;
-                } catch(e) { console.error("Lỗi render recently viewed:", e); }
+                } else { window.showToast(`Đã thêm ${inputQty} sản phẩm vào giỏ!`, 'success'); }
             },
 
             bindTooltip: function() {
@@ -1243,17 +1581,8 @@
                 const sizeTooltip = document.getElementById('sizeTooltip');
                 let tooltipVisible = false;
                 if (sizeGuideBtn) {
-                    sizeGuideBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        tooltipVisible = !tooltipVisible;
-                        sizeTooltip.style.display = tooltipVisible ? 'block' : 'none';
-                    });
-                    document.addEventListener('click', e => {
-                        if (!sizeGuideBtn.contains(e.target) && !sizeTooltip.contains(e.target)) {
-                            sizeTooltip.style.display = 'none';
-                            tooltipVisible = false;
-                        }
-                    });
+                    sizeGuideBtn.addEventListener('click', (e) => { e.stopPropagation(); tooltipVisible = !tooltipVisible; sizeTooltip.style.display = tooltipVisible ? 'block' : 'none'; });
+                    document.addEventListener('click', e => { if (!sizeGuideBtn.contains(e.target) && !sizeTooltip.contains(e.target)) { sizeTooltip.style.display = 'none'; tooltipVisible = false; } });
                 }
             },
 
