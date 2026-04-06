@@ -905,9 +905,15 @@
                     tongTienDisplay += `<div style="font-size:11px; color:#10b981; font-weight:600; margin-top:2px;" title="Đã hoàn lại tiền cho khách">(- Hoàn: ${tienHoan.toLocaleString('vi-VN')} ₫)</div>`;
                 }
 
+                // 🌟 TẠO GIAO DIỆN NHẬN DIỆN ĐƠN CÓ ĐỔI TRẢ
+                let maDonHtml = `<div style="font-weight:800; color:#555;">${hd.ma}</div>`;
+                if (hd.coDoiTra) { // Lấy tín hiệu từ biến isCoDoiTra() vừa tạo bên Java
+                    maDonHtml += `<div style="margin-top: 4px; display: inline-block; font-size: 9px; font-weight: 800; background: #f59e0b; color: #fff; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;" title="Đơn hàng này đã có sản phẩm bị đổi hoặc trả">CÓ ĐỔI / TRẢ</div>`;
+                }
+
                 let trContent = `
                     <td style="text-align:center;">${startSTT + idx}</td>
-                    <td style="font-weight:800; color:#555;">${hd.ma}</td>
+                    <td>${maDonHtml}</td>
                     <td style="font-weight:600;">${tenKhach}</td>
                     <td>${sdtKhach}</td>`;
 
@@ -917,12 +923,20 @@
 
                 if (isHistory) trContent += `<td>${hinhThucTT}</td>`;
 
+                // 🌟 1. THÊM ĐIỀU KIỆN ẨN/HIỆN NÚT HỦY
+                let btnHuyHtml = '';
+                if (hd.trangThaiHoaDon && (hd.trangThaiHoaDon.ma === 'CHO_XAC_NHAN' || hd.trangThaiHoaDon.ma === 'CHO_THANH_TOAN')) {
+                    btnHuyHtml = `<button class="btn-icon btn-danger" title="Hủy đơn" onclick="OrderApp.huyDon(${hd.id})"><i class="bi bi-x-circle"></i></button>`;
+                }
+
+                // 🌟 2. NHÚNG BIẾN ${btnHuyHtml} VÀO CỘT THAO TÁC (BÊN DƯỚI NÚT XEM CHI TIẾT)
                 trContent += `
                     <td><span class="badge-type ${hd.loaiHoaDon === 0 ? 'type-pos' : 'type-online'}">${hd.loaiHoaDon === 0 ? 'TẠI QUẦY' : 'ONLINE'}</span></td>
                     <td style="font-size:12px; color:#888;">${ngayTaoVN}</td>
                     <td style="text-align:center;">${trangThaiBadge}</td>
-                    <td style="text-align:right;">
+                    <td style="text-align:right; white-space: nowrap;">
                         <button class="btn-icon" title="Xem chi tiết" onclick="OrderApp.openDetail(${hd.id})"><i class="bi bi-eye"></i></button>
+                        ${btnHuyHtml}
                     </td>`;
 
                 return `<tr class="${isHighlight ? 'highlight-order' : ''}" data-id="${hd.id}">${trContent}</tr>`;

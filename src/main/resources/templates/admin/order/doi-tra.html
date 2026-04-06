@@ -70,9 +70,24 @@
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; display: none; backdrop-filter: blur(2px);}
         .overlay.show { display: block; }
 
-        .detail-card { border: 1px solid var(--gray-200); border-radius: 4px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden;}
-        .detail-card-header { background: #f8f9fa; padding: 12px 15px; font-size: 12px; font-weight: 800; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; gap: 8px; color: #333; text-transform: uppercase;}
+        /* 🌟 FIX LỖI GIAO DIỆN: Chống bóp méo Card và Nổi Dropdown lên trên cùng */
+        .detail-card { border: 1px solid var(--gray-200); border-radius: 4px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: visible !important; flex-shrink: 0 !important; }
+        .detail-card-header { background: #f8f9fa; padding: 12px 15px; font-size: 12px; font-weight: 800; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; gap: 8px; color: #333; text-transform: uppercase; border-radius: 4px 4px 0 0;}
         .detail-card-body { padding: 15px; }
+
+        /* ITEM LIST & SEARCH PROD */
+        .item-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px dashed var(--gray-200); gap: 15px; }
+        .item-row:last-child { border-bottom: none; }
+        .search-prod-wrapper { position: relative; margin-bottom: 15px; }
+        .search-prod-input { width: 100%; height: 40px; padding: 0 15px 0 40px; border: 1px solid var(--gray-300); border-radius: 4px; font-size: 13px; outline: none; background: #fff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%23000" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>') no-repeat 15px center; transition: 0.2s;}
+        .search-prod-input:focus { border-color: #2563eb; }
+
+        /* 🌟 Nổi z-index lên 99999 để che phủ tất cả */
+        .search-results { position: absolute; top: calc(100% + 5px); left: 0; width: 100%; background: #fff; border: 1px solid var(--gray-300); border-radius: 4px; box-shadow: 0 15px 40px rgba(0,0,0,0.25); z-index: 99999 !important; max-height: 350px; display: flex; flex-direction: column; display: none; overflow: hidden; }
+        .search-results.show { display: block; }
+        .sr-item { padding: 12px 15px; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; gap: 12px; cursor: pointer; transition: 0.2s; }
+        .sr-item:hover { background: var(--gray-100); }
+        .sr-content-wrapper { overflow-y: auto; max-height: 300px; flex: 1; }
 
         /* ITEM LIST & SEARCH PROD */
         .item-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px dashed var(--gray-200); gap: 15px; }
@@ -161,7 +176,7 @@
         <button class="btn-icon" onclick="ReturnApp.closeDetailDrawer()" style="border:none;"><i class="bi bi-x-lg"></i></button>
     </div>
 
-    <div class="drawer-body">
+    <div class="drawer-body" style="padding-bottom: 60px;">
         <div class="detail-card">
             <div class="detail-card-header"><i class="bi bi-info-circle"></i> THÔNG TIN CHUNG</div>
             <div class="detail-card-body" style="display:grid; grid-template-columns:1fr 1fr; gap:20px; font-size:13px; line-height:1.8;">
@@ -179,7 +194,8 @@
         <div class="detail-card">
             <div class="detail-card-header" style="color: #dc2626;"><i class="bi bi-box-seam"></i> SẢN PHẨM KHÁCH TRẢ LẠI (CỘNG KHO)</div>
             <div class="detail-card-body">
-                <div id="rtChiTietList"></div>
+                <div id="rtChiTietList" style="max-height: 250px; overflow-y: auto; padding-right: 10px;"></div>
+
                 <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--gray-300); padding-top: 10px;">
                     <span style="font-weight: 700; color: #666;">Tổng tiền hàng khách trả:</span>
                     <span style="font-size: 16px; font-weight: 900; color: #dc2626;" id="rtLblTongTienTra">0 ₫</span>
@@ -195,10 +211,11 @@
             <div class="detail-card-header" style="color: #2563eb; background: #eff6ff; border-bottom-color: #bfdbfe;"><i class="bi bi-cart-plus"></i> CHỌN SẢN PHẨM MỚI (TRỪ KHO)</div>
             <div class="detail-card-body">
                 <div class="search-prod-wrapper">
-                    <input type="text" class="search-prod-input" placeholder="Nhập tên, mã, SKU để tìm..." onkeyup="ReturnApp.searchNewProducts(this.value)">
+                    <input type="text" id="rtSearchExchangeInput" class="search-prod-input" placeholder="Nhập tên, mã, SKU để tìm..." onkeyup="ReturnApp.searchNewProducts(this.value)">
                     <div class="search-results" id="rtSearchResults"></div>
                 </div>
-                <div id="rtExchangeCartList"></div>
+                <div id="rtExchangeCartList" style="max-height: 250px; overflow-y: auto; padding-right: 10px;"></div>
+
                 <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed #bfdbfe; padding-top: 10px;">
                     <span style="font-weight: 700; color: #2563eb;">Tổng tiền hàng lấy mới:</span>
                     <span style="font-size: 16px; font-weight: 900; color: #2563eb;" id="rtLblTongTienMoi">0 ₫</span>
@@ -217,9 +234,15 @@
         </div>
     </div>
 
-    <div class="drawer-footer" id="rtModalFooterActions">
-        <button class="btn btn-secondary" style="color:#dc2626; border-color:#dc2626;" onclick="ReturnApp.rejectRequest()">TỪ CHỐI YÊU CẦU</button>
-        <button class="btn btn-primary" onclick="ReturnApp.approveExchangeAPI()"><i class="bi bi-check-circle"></i> DUYỆT & HOÀN TẤT</button>
+    <div class="drawer-footer" id="rtModalFooterActions" style="display: flex; align-items: center; justify-content: space-between;">
+        <label style="display:flex; align-items:center; gap:8px; font-size:12px; font-weight:700; cursor:pointer; color:#000;">
+            <input type="checkbox" id="chkCongKho" checked style="width:16px; height:16px; cursor:pointer;">
+            SP còn nguyên vẹn (Cộng lại kho)
+        </label>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn btn-secondary" style="color:#dc2626; border-color:#dc2626;" onclick="ReturnApp.rejectRequest()">TỪ CHỐI</button>
+            <button class="btn btn-primary" onclick="ReturnApp.approveExchangeAPI()"><i class="bi bi-check-circle"></i> DUYỆT & HOÀN TẤT</button>
+        </div>
     </div>
 </aside>
 
@@ -269,7 +292,7 @@
 
             <div>
                 <div style="font-size: 12px; font-weight: 800; margin-bottom: 10px; color: #000;">2. CHỌN SẢN PHẨM CẦN TRẢ LẠI:</div>
-                <div id="rtCreateItems" style="border: 1px solid var(--gray-200); border-radius: 4px; overflow: hidden; background: #fff;"></div>
+                <div id="rtCreateItems" style="border: 1px solid var(--gray-200); border-radius: 4px; overflow-y: auto; max-height: 250px; background: #fff;"></div>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px;">
@@ -327,7 +350,7 @@
     window.ReturnApp = {
         dbData: [],
         filteredData: [],
-        state: { activeTab: 'PENDING', q: '', method: '', page: 0, size: 10, totalPages: 0 },
+        state: { activeTab: 'PENDING', q: '', method: '', page: 0, size: 10, totalPages: 0, currentExchangeSearchResults: [] },
         currentId: null,
         currentType: 'TRẢ HÀNG',
         tienTraCuaKhach: 0,
@@ -527,7 +550,6 @@
             this.renderPagination();
         },
 
-        // --- CHI TIẾT DRAWER ---
         openDetail: async function(id) {
             this.currentId = id;
             if(window.showLoading) window.showLoading();
@@ -541,10 +563,12 @@
                 this.exchangeCart = [];
                 this.paymentMethod = (data.payment || '').includes('VNPAY') ? 'VNPAY' : ((data.payment || '').includes('MOMO') ? 'MOMO' : 'Tiền mặt');
 
+                // 🌟 LƯU LẠI DANH SÁCH SP KHÁCH TRẢ ĐỂ ĐỐI CHIẾU KHI ĐỔI MÀU/SIZE
+                this.currentChiTiets = data.chiTiets || [];
+
                 document.getElementById('rtLblTitleMaYC').innerText = data.maYC;
                 document.getElementById('rtLblMaHD').innerText = data.maHD;
                 document.getElementById('rtLblKhachHangName').innerText = data.khachHang;
-
                 document.getElementById('rtLblKhachHangPhone').innerHTML = (data.sdt && String(data.sdt) !== 'null') ? data.sdt : '<span style="color:#aaa; font-style:italic;">Không có</span>';
 
                 const exchangeCard = document.getElementById('rtExchangeCard');
@@ -561,13 +585,14 @@
                 else payLabel.innerHTML = '<i class="bi bi-cash" style="color: #10b981;"></i> Tiền mặt / COD';
 
                 const itemList = document.getElementById('rtChiTietList');
-                if (data.chiTiets && data.chiTiets.length > 0) {
-                    itemList.innerHTML = data.chiTiets.map(item => `
+                if (this.currentChiTiets.length > 0) {
+                    itemList.innerHTML = this.currentChiTiets.map(item => `
                         <div class="item-row">
                             <img src="${item.hinhAnh || 'https://placehold.co/60x60'}" style="width: 50px; height: 50px; border-radius: 4px; border: 1px solid var(--gray-200); object-fit: cover;">
                             <div style="flex: 1;">
                                 <div style="font-weight: 700; font-size: 13px; color: #111;">${item.tenSP}</div>
-                                <div style="font-size: 12px; color: #666;">${item.thuocTinh} | SL: <strong style="color:#000;">x${item.soLuong}</strong></div>
+                                <div style="font-size: 11px; color: #1d4ed8; font-weight: 600; margin-top: 2px;">SKU: ${item.sku || 'N/A'}</div>
+                                <div style="font-size: 12px; color: #666; margin-top: 2px;">${item.thuocTinh} | SL: <strong style="color:#000;">x${item.soLuong}</strong></div>
                             </div>
                             <div style="text-align: right; font-weight: 700; font-size: 13px; color: #dc2626;">${new Intl.NumberFormat('vi-VN').format(item.giaBan || 0)} ₫</div>
                         </div>
@@ -580,6 +605,7 @@
                 this.calculateFinancials();
 
                 document.getElementById('rtModalFooterActions').style.display = this.state.activeTab === 'PENDING' ? 'flex' : 'none';
+                document.getElementById('chkCongKho').checked = true; // Mặc định luôn tick cộng kho khi mở
                 document.getElementById('rtDrawerBackdrop').classList.add('show');
                 document.getElementById('rtDetailDrawer').classList.add('show');
             } catch (e) {
@@ -596,7 +622,7 @@
 
         searchNewProducts: function(keyword) {
             const resultsBox = document.getElementById('rtSearchResults');
-            if (keyword.length < 2) { resultsBox.style.display = 'none'; return; }
+            if (keyword.trim().length < 2) { resultsBox.style.display = 'none'; return; }
 
             clearTimeout(this.searchTimer);
             this.searchTimer = setTimeout(async () => {
@@ -604,14 +630,15 @@
                     const res = await fetch(`/api/pos/products/search?q=${keyword}&color=&size=`);
                     const data = await res.json();
 
+                    this.currentExchangeSearchResults = data; // 🌟 Lưu kết quả vào biến tạm để chống lỗi HTML
+
                     if (data.length === 0) {
                         resultsBox.innerHTML = '<div style="padding: 15px; text-align: center; color: #888;">Không tìm thấy sản phẩm phù hợp</div>';
                     } else {
                         resultsBox.innerHTML = data.map(p => {
                             let price = (p.giaSauKhuyenMai && p.giaSauKhuyenMai < p.giaBan) ? p.giaSauKhuyenMai : p.giaBan;
-                            let safeP = {id: p.id, name: p.sanPham.ten, sku: p.sku, attr: `${p.mauSac.ten} - ${p.kichThuoc.ten}`, price: price, stock: p.soLuong, img: p.hinhAnh};
                             return `
-                            <div class="sr-item" onclick='ReturnApp.addExchangeItem(${JSON.stringify(safeP).replace(/'/g, "&#39;")})'>
+                            <div class="sr-item" onclick="ReturnApp.addExchangeItemById(${p.id})">
                                 <img src="${p.hinhAnh || 'https://placehold.co/60x60'}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover;">
                                 <div style="flex: 1;">
                                     <div style="font-weight: 700; font-size: 13px;">${p.sanPham.ten}</div>
@@ -625,6 +652,45 @@
                     resultsBox.style.display = 'block';
                 } catch(e) {}
             }, 300);
+        },
+
+        addExchangeItemById: function(id) {
+            const p = this.currentExchangeSearchResults.find(x => x.id === id);
+            if(!p) return;
+
+            const existing = this.exchangeCart.find(i => i.id === id);
+            if (existing) {
+                if (existing.qty < p.soLuong) existing.qty++;
+                else { window.toast("Vượt quá số lượng tồn kho!", "warning"); return; }
+            } else {
+                if (p.soLuong > 0) {
+                    let price = (p.giaSauKhuyenMai && p.giaSauKhuyenMai < p.giaBan) ? p.giaSauKhuyenMai : p.giaBan;
+
+                    // 🌟 FIX LỖI 2: ÉP GIÁ SP MỚI BẰNG GIÁ SP CŨ NẾU KHÁCH ĐỔI CÙNG MỘT MẪU
+                    if (this.currentChiTiets) {
+                        const returnedItem = this.currentChiTiets.find(ct => ct.tenSP === p.sanPham.ten);
+                        if (returnedItem) {
+                            price = returnedItem.giaBan; // Giữ nguyên mức giá ưu đãi lúc khách mua
+                        }
+                    }
+
+                    this.exchangeCart.push({
+                        id: p.id,
+                        name: p.sanPham.ten,
+                        sku: p.sku,
+                        attr: `${p.mauSac.ten} - ${p.kichThuoc.ten}`,
+                        price: price,
+                        stock: p.soLuong,
+                        img: p.hinhAnh,
+                        qty: 1
+                    });
+                } else { window.toast("Sản phẩm đã hết hàng!", "warning"); return; }
+            }
+
+            document.getElementById('rtSearchResults').style.display = 'none';
+            document.getElementById('rtSearchExchangeInput').value = '';
+            this.renderExchangeCart();
+            this.calculateFinancials();
         },
 
         addExchangeItem: function(prod) {
@@ -729,12 +795,16 @@
 
             let msg = this.currentType === 'ĐỔI HÀNG'
                 ? "Duyệt yêu cầu Đổi hàng? (Thu hồi hàng cũ, trừ kho hàng mới)"
-                : "Xác nhận đã hoàn tiền và thu hồi hàng vào kho?";
+                : "Xác nhận đã hoàn tiền và thu hồi hàng trả lại?";
 
             window.toastConfirm("XÁC NHẬN DUYỆT", msg, async () => {
                 if(window.showLoading) window.showLoading();
                 try {
-                    const payload = { chiTietMoi: this.exchangeCart.map(item => ({ idSanPhamChiTiet: item.id, soLuong: item.qty })) };
+                    const congKho = document.getElementById('chkCongKho').checked; // 🌟 Lấy giá trị checkbox
+                    const payload = {
+                        chiTietMoi: this.exchangeCart.map(item => ({ idSanPhamChiTiet: item.id, soLuong: item.qty })),
+                        congKho: congKho
+                    };
                     const res = await fetch(`/api/doi-tra/${this.currentId}/approve`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -747,7 +817,9 @@
                         this.switchTab('HISTORY');
                         window.toast(`Đã duyệt yêu cầu thành công!`, "success");
                     } else {
-                        window.toast("Lỗi xử lý từ máy chủ!", "error");
+                        let errorMsg = "Lỗi xử lý từ máy chủ!";
+                        try { const errData = await res.json(); errorMsg = errData.message || errorMsg; } catch (ex) {}
+                        window.toast(errorMsg, "error");
                     }
                 } catch (e) {
                     window.toast("Lỗi kết nối", "error");

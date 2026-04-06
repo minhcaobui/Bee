@@ -483,7 +483,7 @@
     }
 
     const PosApp = {
-        products: [], invoices: [], activeInvoiceId: null, isCreating: false, countdownTimer: null,
+        products: [], invoices: [], usedVoucherIds: [], activeInvoiceId: null, isCreating: false, countdownTimer: null,
 
         // 🌟 BIẾN STATE CHO MODAL NHẬP SỐ LƯỢNG MỚI
         state: { qtyAction: null, qtySpctId: null },
@@ -595,11 +595,12 @@
 
             listEl.innerHTML = activeVouchers.map(v => {
                 const isEligible = totalAfterSale >= v.dieuKien;
-
                 const isStackable = v.choPhepCongDon === true || v.choPhepCongDon === 1;
                 const meetsStackCondition = isStackable || hasFullPriceItem;
-
                 const isSelected = (selectedCode === (v.maCode || v.code));
+
+                // 🌟 KIỂM TRA MÃ NÀY KHÁCH ĐÃ DÙNG CHƯA
+                const isUsed = this.usedVoucherIds && this.usedVoucherIds.includes(v.id);
 
                 const tongSL = v.soLuong || 0;
                 const daDung = v.luotSuDung || 0;
@@ -611,7 +612,12 @@
                 let noteHtml = `<div style="font-size: 11px; color: #10b981; margin-top: 4px; font-weight:700;">Đơn tối thiểu: ${new Intl.NumberFormat('vi-VN').format(v.dieuKien)}&nbsp;₫</div>`;
                 let cardClass = 'voucher-card';
 
-                if (isSelected) {
+                if (isUsed) {
+                    cardClass += ' disabled-stack';
+                    opacity = '0.6';
+                    actionBtn = `<button disabled class="btn btn-secondary" style="color:#a1a1aa; cursor:not-allowed;">ĐÃ DÙNG</button>`;
+                    noteHtml += `<div style="font-size: 11px; color: #ef4444; margin-top: 2px; font-style:italic;">(Khách hàng đã dùng mã này)</div>`;
+                } else if (isSelected) {
                     cardClass += ' selected';
                     actionBtn = `<button class="btn btn-secondary" style="border-color:#ef4444; color:#ef4444;" onclick="PosApp.removeVoucher()">BỎ CHỌN</button>`;
                 } else if (!meetsStackCondition) {
@@ -697,7 +703,8 @@
                 const res = await fetch('/api/pos/vouchers/apply', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code: code, cart: inv.cart })
+                    // 🌟 BỔ SUNG: TRUYỀN THÊM customerId ĐỂ BACKEND NHẬN DIỆN VÀ CHẶN LẠI NẾU ĐÃ DÙNG
+                    body: JSON.stringify({ code: code, cart: inv.cart, customerId: inv.customerId })
                 });
                 const data = await res.json();
                 if(!res.ok) {
@@ -1217,7 +1224,7 @@
             }catch(e){}
         },
 
-        selectCustomer: function (name, phone, id) {
+        selectCustomer: async function (name, phone, id) {
             let inv = this.getCurrentInvoice();
 
             if (!inv) {
@@ -1228,6 +1235,12 @@
                 this.createInvoice();
                 inv = this.getCurrentInvoice();
             }
+
+            // 🌟 Lấy danh sách Voucher đã dùng của KH này
+            try {
+                const usedRes = await fetch(`/api/pos/customers/${id}/used-vouchers`);
+                if (usedRes.ok) this.usedVoucherIds = await usedRes.json();
+            } catch(e) {}
 
             inv.customer = name;
             inv.phone = phone;
@@ -1709,7 +1722,11 @@
             }catch(e){}
         },
 
-        selectCustomerInline: function(name, phone, id) {
+        selectCustomerInline: async function(name, phone, id) {
+            try {
+                const usedRes = await fetch(`/api/pos/customers/${id}/used-vouchers`);
+                if (usedRes.ok) this.usedVoucherIds = await usedRes.json();
+            } catch(e) {}
             const inv = this.getCurrentInvoice();
             if (!inv) { window.toast("VUI LÒNG TẠO HÓA ĐƠN TRƯỚC", "warning"); return; }
             inv.customer = name; inv.phone = phone; inv.customerId = id;
@@ -1725,7 +1742,8 @@
             this.saveState(); this.renderTabs();
             document.getElementById('inlineCustomerSearch').style.display = 'none';
             window.toast("Đã chuyển về KHÁCH VÃNG LAI", "success");
-        }
+            this.usedVoucherIds = []; // 🌟 Xóa lịch sử khi là khách vãng lai
+        },
     };
 
     window.PosApp = PosApp;

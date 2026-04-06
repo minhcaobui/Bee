@@ -29,9 +29,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/register", "/login", "/css/**", "/js/**", "/images/**", "/customer/**").permitAll()
                         .requestMatchers("/api/products/**", "/api/hoa-don/tra-cuu/**", "/api/hoa-don/checkout", "/api/hoa-don/check-employee", "/api/thong-bao/**", "/api/khach-hang/reviews/**").permitAll()
-                        .requestMatchers("/api/khach-hang/my-profile", "/api/khach-hang/change-password", "/api/khach-hang/**", "/api/hoa-don/my-orders", "/api/vouchers/**", "/api/hoa-don/**").hasAnyAuthority("ROLE_CUSTOMER", "ROLE_STAFF", "ROLE_ADMIN")
+                        .requestMatchers("/api/khach-hang/**").hasAuthority("ROLE_CUSTOMER")
+                        .requestMatchers("/api/khach-hang/my-profile", "/api/khach-hang/change-password", "/api/khach-hang/**", "/api/hoa-don/my-orders", "/api/vouchers/**", "/api/hoa-don/**", "/api/doi-tra/create/**", "/api/pos/**").hasAnyAuthority("ROLE_CUSTOMER", "ROLE_STAFF", "ROLE_ADMIN")
                         .requestMatchers("/api/nhan-vien/my-profile", "/api/nhan-vien/change-password").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
-                        .requestMatchers("/dashboards/**", "/returns/**", "/api/thong-ke/**", "/api/nhan-vien/**", "/staff/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/dashboards/**", "/returns/**", "/api/thong-ke/**", "/api/nhan-vien/**", "/api/chuc-vu/**", "/staff/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/admin/**", "/products/**", "/pos/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
                         .requestMatchers("/api/khach-hang", "/api/khach-hang/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
                         .requestMatchers("/api/hoa-don", "/api/hoa-don/**", "/api/reviews/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")

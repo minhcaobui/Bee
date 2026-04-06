@@ -20,4 +20,8 @@ public class ChucVu {
 
     @Column(name = "ten", nullable = false, length = 150)
     private String ten;
+
+    // Bổ sung thêm trường mô tả để khớp với giao diện
+    @Column(name = "mo_ta", length = 500)
+    private String moTa;
 }

@@ -19,7 +19,8 @@
         /* Actions Bar & Tabs */
         .actions-bar { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--gray-200); margin-bottom: 20px; padding-bottom: 0; }
         .tabs { display: flex; gap: 30px; margin-bottom: 0; border: none; }
-        .tab { font-size: 13px; font-weight: 700; color: #888; padding: 0 0 12px 0; cursor: default; text-transform: uppercase; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; display: flex; align-items: center; gap: 6px; }
+        .tab { font-size: 13px; font-weight: 700; color: #888; padding: 0 0 12px 0; cursor: pointer; text-transform: uppercase; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; display: flex; align-items: center; gap: 6px; transition: 0.2s;}
+        .tab:hover { color: #000; }
         .tab.active { color: #000; border-bottom-color: #000; }
 
         /* Buttons */
@@ -78,21 +79,25 @@
         input:checked + .slider-sm:before { transform: translateX(16px); }
 
         /* DRAWER CHÍNH */
-        .overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 999; display: none; }
+        .overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 999; display: none; backdrop-filter: blur(2px);}
         .overlay.show { display: block; }
-        .drawer { position: fixed; top: 0; right: -1000px; width: 600px; height: 100vh; background: #fff; border-left: 1px solid var(--gray-200); z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1); }
+        .drawer { position: fixed; top: 0; right: -1000px; width: 600px; height: 100vh; background: #fff; border-left: 1px solid var(--gray-200); z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -5px 0 40px rgba(0, 0, 0, 0.15); }
         .drawer.show { right: 0; }
 
-        .drawer-header { padding: 15px 20px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center;}
+        /* Drawer Chức vụ (Nhỏ Hơn) */
+        #roleDrawer { width: 450px; right: -450px; z-index: 1000; }
+        #roleDrawer.show { right: 0 !important; }
+
+        .drawer-header { padding: 18px 24px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center;}
         .drawer-title { font-size: 15px; font-weight: 800; text-transform: uppercase; margin: 0; }
-        .drawer-body { flex: 1; padding: 20px; overflow-y: auto; background: #fdfdfd; }
-        .drawer-footer { padding: 15px 20px; border-top: 1px solid var(--gray-200); display: flex; gap: 10px; background: #fff;}
+        .drawer-body { flex: 1; padding: 24px; overflow-y: auto; background: #fdfdfd; }
+        .drawer-footer { padding: 15px 24px; border-top: 1px solid var(--gray-200); display: flex; gap: 10px; background: #fff;}
 
         /* Form Elements Đồng Bộ */
-        .form-group { margin-bottom: 18px; }
-        .form-label { font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; display: block; color: #444; }
-        .form-input, .form-select, .form-textarea { width: 100%; padding: 0 12px; font-size: 13px; border: 1px solid var(--gray-300); outline: none; border-radius: 4px; background: #fff; height: 40px; font-family: inherit;}
-        .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #000; }
+        .form-group { margin-bottom: 20px; }
+        .form-label { font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 8px; display: block; color: #444; }
+        .form-input, .form-select, .form-textarea { width: 100%; padding: 0 14px; font-size: 13px; border: 1px solid var(--gray-300); outline: none; border-radius: 4px; background: #fff; height: 40px; font-family: inherit; transition: 0.2s;}
+        .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #000; box-shadow: 0 0 0 2px rgba(0,0,0,0.05);}
         .form-input:disabled { background: #f9f9f9; color: #555; cursor: not-allowed; border-color: #eee; }
 
         .upload-area { width: 100px; height: 100px; border-radius: 50%; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; margin: 0 auto 10px; transition: 0.2s; background: #fafafa; }
@@ -101,7 +106,7 @@
         .upload-area i { font-size: 24px; color: #ccc; }
         .upload-area.disabled { cursor: not-allowed; border-color: #eee; background: #f9f9f9; pointer-events: none; }
 
-        .drawer-tabs { display: flex; border-bottom: 1px solid #eee; margin-bottom: 20px; gap: 20px; overflow-x: auto; white-space: nowrap;}
+        .drawer-tabs { display: flex; border-bottom: 1px solid #eee; margin-bottom: 24px; gap: 24px; overflow-x: auto; white-space: nowrap;}
         .drawer-tab { padding-bottom: 10px; font-size: 12px; font-weight: 800; text-transform: uppercase; color: #888; cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; }
         .drawer-tab.active { color: #000; border-bottom-color: #000; }
         .drawer-tab:hover { color: #000; }
@@ -121,8 +126,13 @@
         .bee-toast-box.success { border-left-color: #10b981; }
         .bee-toast-box.error { border-left-color: #ef4444; }
         .bee-toast-box.warning { border-left-color: #f59e0b; }
+        .bee-toast-box.info { border-left-color: #2563eb; }
         .bee-toast-box.hiding { transform: translateX(120%); opacity: 0; margin-top: -80px; }
         @keyframes beeToastSlideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        .view-section { display: none; animation: fadeIn 0.3s ease; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -130,52 +140,91 @@
 <div class="container">
     <div class="actions-bar">
         <nav class="tabs">
-            <div class="tab active">
+            <div class="tab active" id="tabNV" onclick="window.StaffApp.switchMainTab('nv')">
                 <i class="bi bi-person-badge-fill"></i> QUẢN LÝ NHÂN VIÊN
             </div>
+            <div class="tab" id="tabCV" onclick="window.StaffApp.switchMainTab('cv')">
+                <i class="bi bi-briefcase-fill"></i> QUẢN LÝ CHỨC VỤ
+            </div>
         </nav>
-        <button class="btn" id="btnAdd" onclick="window.StaffApp.openDrawer('add')">
-            <i class="bi bi-person-plus-fill"></i> TẠO HỒ SƠ MỚI
+        <button class="btn" id="btnAddNV" onclick="window.StaffApp.openDrawer('add')">
+            <i class="bi bi-person-plus-fill"></i> THÊM NHÂN VIÊN
+        </button>
+        <button class="btn" id="btnAddCV" onclick="window.StaffApp.Role.openDrawer()" style="display: none;">
+            <i class="bi bi-plus-lg"></i> TẠO CHỨC VỤ MỚI
         </button>
     </div>
 
-    <section class="search-section">
-        <div class="search-wrapper">
-            <div class="search-box">
-                <i class="bi bi-search"></i>
-                <input type="text" id="liveSearch" class="search-input" placeholder="Tìm theo tên, mã, số điện thoại..." oninput="window.StaffApp.handleSearch(this.value)">
+    <div id="viewNV" class="view-section active">
+        <section class="search-section">
+            <div class="search-wrapper">
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="liveSearch" class="search-input" placeholder="Tìm nhân viên theo tên, mã, SĐT..." oninput="window.StaffApp.handleSearch(this.value)">
+                </div>
+                <select id="filterStatus" class="filter-select" onchange="window.StaffApp.handleSearch()">
+                    <option value="">TẤT CẢ TRẠNG THÁI</option>
+                    <option value="true">ĐANG LÀM VIỆC</option>
+                    <option value="false">NGHỈ VIỆC</option>
+                </select>
+                <button class="btn-reset" onclick="window.StaffApp.resetFilters()" title="Làm mới bộ lọc">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </button>
             </div>
-            <select id="filterStatus" class="filter-select" onchange="window.StaffApp.handleSearch()">
-                <option value="">TẤT CẢ TRẠNG THÁI</option>
-                <option value="true">ĐANG LÀM VIỆC</option>
-                <option value="false">NGHỈ VIỆC</option>
-            </select>
-            <button class="btn-reset" onclick="window.StaffApp.resetFilters()" title="Làm mới bộ lọc">
-                <i class="bi bi-arrow-counterclockwise"></i>
-            </button>
-        </div>
-    </section>
+        </section>
 
-    <div class="table-wrapper">
-        <table>
-            <thead>
-            <tr>
-                <th style="width: 50px; text-align: center;">STT</th>
-                <th>MÃ NHÂN VIÊN</th>
-                <th>HỌ VÀ TÊN</th>
-                <th>LIÊN HỆ</th>
-                <th>GIỚI TÍNH</th>
-                <th style="text-align: center;">TRẠNG THÁI</th>
-                <th style="text-align: right;">THAO TÁC</th>
-            </tr>
-            </thead>
-            <tbody id="tableContent">
-            <tr><td colspan="7" style="text-align:center; padding: 20px; color:#888;">Đang tải dữ liệu...</td></tr>
-            </tbody>
-        </table>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th style="width: 50px; text-align: center;">STT</th>
+                    <th>MÃ NV</th>
+                    <th>HỌ VÀ TÊN</th>
+                    <th>CHỨC VỤ</th>
+                    <th>LIÊN HỆ</th>
+                    <th style="text-align: center;">TRẠNG THÁI</th>
+                    <th style="text-align: right;">THAO TÁC</th>
+                </tr>
+                </thead>
+                <tbody id="tableContent">
+                <tr><td colspan="7" style="text-align:center; padding: 20px; color:#888;">Đang tải dữ liệu...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="paginationContainer" class="pagination-wrapper"></div>
     </div>
 
-    <div id="paginationContainer" class="pagination-wrapper"></div>
+    <div id="viewCV" class="view-section">
+        <section class="search-section">
+            <div class="search-wrapper">
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="liveSearchCV" class="search-input" placeholder="Tìm kiếm chức vụ theo tên, mã..." oninput="window.StaffApp.Role.handleSearch(this.value)">
+                </div>
+                <button class="btn-reset" onclick="window.StaffApp.Role.resetFilters()" title="Làm mới bộ lọc">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </button>
+            </div>
+        </section>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th style="width: 50px; text-align: center;">STT</th>
+                    <th style="width: 150px;">MÃ CHỨC VỤ</th>
+                    <th style="width: 250px;">TÊN CHỨC VỤ</th>
+                    <th>MÔ TẢ / GHI CHÚ</th>
+                    <th style="text-align: right; width: 100px;">THAO TÁC</th>
+                </tr>
+                </thead>
+                <tbody id="tableRoleContent">
+                <tr><td colspan="5" style="text-align:center; padding: 20px; color:#888;">Đang tải dữ liệu...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="paginationRoleContainer" class="pagination-wrapper"></div>
+    </div>
 </div>
 
 <div class="overlay" id="overlay" onclick="window.StaffApp.closeDrawer()"></div>
@@ -187,8 +236,8 @@
 
     <div class="drawer-body">
         <div class="drawer-tabs" id="drawerTabs">
-            <div class="drawer-tab active" onclick="window.StaffApp.switchTab('info')" id="tabInfo">THÔNG TIN CHUNG</div>
-            <div class="drawer-tab" onclick="window.StaffApp.switchTab('address')" id="tabAddr">ĐỊA CHỈ LIÊN HỆ</div>
+            <div class="drawer-tab active" onclick="window.StaffApp.switchDrawerTab('info')" id="tabInfo">THÔNG TIN CHUNG</div>
+            <div class="drawer-tab" onclick="window.StaffApp.switchDrawerTab('address')" id="tabAddr">ĐỊA CHỈ LIÊN HỆ</div>
         </div>
 
         <div id="contentInfo">
@@ -205,6 +254,13 @@
             <div class="form-group">
                 <label class="form-label">Họ và Tên <span style="color:red" class="required-star">*</span></label>
                 <input id="nvHoTen" class="form-input" placeholder="Nhập họ tên...">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Chức vụ <span style="color:red" class="required-star">*</span></label>
+                <select id="nvChucVu" class="form-select">
+                    <option value="">-- Chọn chức vụ --</option>
+                </select>
             </div>
 
             <div style="display: flex; gap: 15px;">
@@ -292,6 +348,33 @@
     </div>
 </aside>
 
+<div class="overlay" id="roleOverlay" onclick="window.StaffApp.Role.closeDrawer()"></div>
+<aside class="drawer" id="roleDrawer">
+    <div class="drawer-header">
+        <h3 class="drawer-title" id="roleDrawerTitle">TẠO CHỨC VỤ MỚI</h3>
+        <button class="btn-icon" onclick="window.StaffApp.Role.closeDrawer()" style="border:none;"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="drawer-body">
+        <input type="hidden" id="cvId">
+        <div class="form-group">
+            <label class="form-label">Mã chức vụ <span style="text-transform:none; font-weight:500; color:#888;">(Để trống sẽ tự tạo)</span></label>
+            <input type="text" id="cvMa" class="form-input" placeholder="Ví dụ: QUAN_LY, NV_KHO...">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Tên chức vụ <span style="color:red">*</span></label>
+            <input type="text" id="cvTen" class="form-input" placeholder="Ví dụ: Quản lý cửa hàng...">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Mô tả / Ghi chú <span style="color:red">*</span></label>
+            <textarea id="cvMoTa" class="form-textarea" style="height: 120px; padding: 12px; resize: none;" placeholder="Mô tả quyền hạn, nhiệm vụ của chức vụ này..."></textarea>
+        </div>
+    </div>
+    <div class="drawer-footer">
+        <button class="btn btn-secondary" style="flex: 1; height: 40px !important;" onclick="window.StaffApp.Role.closeDrawer()">HỦY BỎ</button>
+        <button class="btn" style="flex: 1; height: 40px !important;" id="btnSaveRole" onclick="window.StaffApp.Role.save()">LƯU CHỨC VỤ</button>
+    </div>
+</aside>
+
 <div class="modal-otp-overlay" id="otpModal">
     <div class="modal-otp-box">
         <h4 style="color: #2563eb;"><i class="bi bi-envelope-check-fill" style="font-size: 24px; display: block; margin-bottom: 10px;"></i> XÁC THỰC EMAIL</h4>
@@ -360,32 +443,194 @@
     // --- MAIN APP ---
     window.StaffApp = {
         state: {
+            mainTab: 'nv', // 'nv' hoặc 'cv'
             page: 0, size: 10, totalPages: 0, q: '', status: '',
             editingId: null, isViewMode: false, originalEmail: '', tempPayload: null
         },
 
+        // --- SUB-MODULE: CHỨC VỤ ---
+        Role: {
+            state: { page: 0, size: 10, totalPages: 0, q: '', editingId: null },
+
+            async loadData() {
+                const tbody = document.getElementById('tableRoleContent');
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color:#888;">Đang tải dữ liệu...</td></tr>`;
+                try {
+                    const res = await fetch(`/api/chuc-vu?q=${this.state.q}&page=${this.state.page}&size=${this.state.size}`);
+                    let data = await res.json();
+
+                    const list = data.content || data;
+                    this.state.totalPages = data.totalPages || Math.ceil(list.length / this.state.size) || 1;
+
+                    if(!list || list.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 40px; color:#888; font-style:italic;">Không tìm thấy chức vụ nào</td></tr>`;
+                        document.getElementById('paginationRoleContainer').innerHTML = '';
+                        return;
+                    }
+
+                    const startIdx = this.state.page * this.state.size;
+                    tbody.innerHTML = list.map((item, idx) => `
+                        <tr>
+                            <td style="text-align:center;">${startIdx + idx + 1}</td>
+                            <td style="font-weight:800; color:#555;">${item.ma || '---'}</td>
+                            <td><span style="font-weight: 700; color: #000; font-size: 13px;">${item.ten || 'Chưa có tên'}</span></td>
+                            <td style="color:#666; font-size:12.5px;">${item.moTa || item.ghiChu || 'Không có mô tả'}</td>
+                            <td style="text-align:right; white-space: nowrap;">
+                                <button class="btn-icon" title="Sửa chức vụ" onclick="window.StaffApp.Role.openDrawer(${item.id})"><i class="bi bi-pencil"></i></button>
+                            </td>
+                        </tr>
+                    `).join('');
+
+                    const totalEls = data.totalElements !== undefined ? data.totalElements : list.length;
+                    const numEls = data.numberOfElements !== undefined ? data.numberOfElements : list.length;
+                    window.StaffApp.renderPagination(this.state.page, this.state.totalPages, totalEls, numEls, 'paginationRoleContainer', 'window.StaffApp.Role.changePage');
+                } catch(e) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color:red;">Lỗi tải dữ liệu chức vụ!</td></tr>`;
+                }
+            },
+
+            async populateSelect() {
+                const sel = document.getElementById('nvChucVu');
+                try {
+                    const res = await fetch(`/api/chuc-vu?size=100`);
+                    let data = await res.json();
+                    let list = data.content || data;
+                    sel.innerHTML = '<option value="">-- Chọn chức vụ --</option>' + list.map(cv => `<option value="${cv.id}">${cv.ten}</option>`).join('');
+                } catch(e) { sel.innerHTML = '<option value="">-- Lỗi tải chức vụ --</option>'; }
+            },
+
+            changePage(p) { this.state.page = p; this.loadData(); },
+
+            handleSearch(v) {
+                clearTimeout(this.timeout);
+                this.timeout = setTimeout(() => { this.state.q = v; this.state.page = 0; this.loadData(); }, 500);
+            },
+
+            resetFilters() { document.getElementById('liveSearchCV').value = ''; this.handleSearch(''); },
+
+            openDrawer(id = null) {
+                if (id === 'add') id = null;
+                this.state.editingId = id;
+                const title = document.getElementById('roleDrawerTitle');
+                const btn = document.getElementById('btnSaveRole');
+
+                document.getElementById('cvId').value = '';
+                document.getElementById('cvMa').value = '';
+                document.getElementById('cvTen').value = '';
+                document.getElementById('cvMoTa').value = '';
+
+                if (id) {
+                    title.innerText = 'CẬP NHẬT CHỨC VỤ';
+                    btn.innerText = 'LƯU THAY ĐỔI';
+                    this.fetchDetail(id);
+                } else {
+                    title.innerText = 'TẠO CHỨC VỤ MỚI';
+                    btn.innerText = 'LƯU CHỨC VỤ';
+                }
+
+                document.getElementById('roleDrawer').classList.add('show');
+                document.getElementById('roleOverlay').classList.add('show');
+                setTimeout(() => document.getElementById('cvTen').focus(), 300);
+            },
+
+            closeDrawer() {
+                document.getElementById('roleDrawer').classList.remove('show');
+                document.getElementById('roleOverlay').classList.remove('show');
+            },
+
+            async fetchDetail(id) {
+                try {
+                    const res = await fetch(`/api/chuc-vu/${id}`);
+                    if(!res.ok) throw new Error();
+                    const d = await res.json();
+                    document.getElementById('cvId').value = d.id;
+                    document.getElementById('cvMa').value = d.ma || '';
+                    document.getElementById('cvTen').value = d.ten || '';
+                    document.getElementById('cvMoTa').value = d.moTa || d.ghiChu || '';
+                } catch(e) { window.toast("Lỗi tải thông tin chức vụ", "error"); this.closeDrawer(); }
+            },
+
+            async save() {
+                const btn = document.getElementById('btnSaveRole');
+                const oldTxt = btn.innerText;
+
+                const payload = {
+                    ma: document.getElementById('cvMa').value.trim(),
+                    ten: document.getElementById('cvTen').value.trim(),
+                    moTa: document.getElementById('cvMoTa').value.trim()
+                };
+
+                if(!payload.ten) {
+                    window.toast("Tên chức vụ không được để trống!", "warning");
+                    return;
+                }
+
+                if(!payload.moTa) {
+                    window.toast("Mô tả chức vụ không được để trống!", "warning");
+                    document.getElementById('cvMoTa').focus();
+                    return;
+                }
+
+                window.toastConfirm(
+                    this.state.editingId ? "Xác nhận cập nhật" : "Xác nhận tạo mới",
+                    `Bạn có chắc chắn muốn lưu thông tin chức vụ "${payload.ten}" này không?`,
+                    async () => {
+                        btn.innerText = 'ĐANG XỬ LÝ...'; btn.disabled = true;
+                        try {
+                            const method = this.state.editingId ? 'PUT' : 'POST';
+                            const url = this.state.editingId ? `/api/chuc-vu/${this.state.editingId}` : `/api/chuc-vu`;
+
+                            const res = await fetch(url, {
+                                method: method,
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                            });
+
+                            if (res.ok) {
+                                window.toast(this.state.editingId ? "Cập nhật chức vụ thành công" : "Tạo chức vụ thành công", "success");
+                                this.closeDrawer();
+                                this.loadData();
+                                window.StaffApp.Role.populateSelect();
+                            } else {
+                                const err = await res.json();
+                                window.toast(err.message || "Lưu thất bại", "error");
+                            }
+                        } catch(e) { window.toast("Lỗi kết nối", "error"); }
+                        finally { btn.innerText = oldTxt; btn.disabled = false; }
+                    }
+                );
+            }
+        },
+
+        // --- SUB-MODULE: ADDRESS ---
         Address: {
             async loadProvinces(sid) {
-                const res = await fetch('https://esgoo.net/api-tinhthanh/1/0.htm');
-                const d = await res.json();
-                document.getElementById(sid).innerHTML = '<option value="">-- Tỉnh/TP --</option>' + d.data.map(p => `<option value="${p.id}" data-name="${p.full_name}">${p.full_name}</option>`).join('');
+                try {
+                    const res = await fetch('https://esgoo.net/api-tinhthanh/1/0.htm');
+                    const d = await res.json();
+                    document.getElementById(sid).innerHTML = '<option value="">-- Tỉnh/TP --</option>' + d.data.map(p => `<option value="${p.id}" data-name="${p.full_name}">${p.full_name}</option>`).join('');
+                } catch(e) {}
             },
             async loadDistricts(pid, did, wid) {
                 const ds = document.getElementById(did); const ws = document.getElementById(wid);
                 ws.innerHTML = '<option value="">-- Xã/Phường --</option>'; ws.disabled = true;
                 if(!pid) { ds.innerHTML = '<option value="">-- Quận/Huyện --</option>'; ds.disabled = true; return; }
-                const res = await fetch(`https://esgoo.net/api-tinhthanh/2/${pid}.htm`);
-                const d = await res.json();
-                ds.innerHTML = '<option value="">-- Quận/Huyện --</option>' + d.data.map(i => `<option value="${i.id}" data-name="${i.full_name}">${i.full_name}</option>`).join('');
-                ds.disabled = false;
+                try {
+                    const res = await fetch(`https://esgoo.net/api-tinhthanh/2/${pid}.htm`);
+                    const d = await res.json();
+                    ds.innerHTML = '<option value="">-- Quận/Huyện --</option>' + d.data.map(i => `<option value="${i.id}" data-name="${i.full_name}">${i.full_name}</option>`).join('');
+                    ds.disabled = false;
+                } catch(e){}
             },
             async loadWards(did, wid) {
                 const ws = document.getElementById(wid);
                 if(!did) { ws.innerHTML = '<option value="">-- Xã/Phường --</option>'; ws.disabled = true; return; }
-                const res = await fetch(`https://esgoo.net/api-tinhthanh/3/${did}.htm`);
-                const d = await res.json();
-                ws.innerHTML = '<option value="">-- Xã/Phường --</option>' + d.data.map(i => `<option value="${i.id}" data-name="${i.full_name}">${i.full_name}</option>`).join('');
-                ws.disabled = false;
+                try {
+                    const res = await fetch(`https://esgoo.net/api-tinhthanh/3/${did}.htm`);
+                    const d = await res.json();
+                    ws.innerHTML = '<option value="">-- Xã/Phường --</option>' + d.data.map(i => `<option value="${i.id}" data-name="${i.full_name}">${i.full_name}</option>`).join('');
+                    ws.disabled = false;
+                } catch(e){}
             },
             getText(id) { const s = document.getElementById(id); return s.selectedIndex > 0 ? s.options[s.selectedIndex].getAttribute('data-name') : ''; },
             reset(cid, did, wid) {
@@ -404,6 +649,7 @@
         init() {
             this.initDateDropdowns();
             this.loadData();
+            this.Role.populateSelect();
             this.Address.loadProvinces('inpCity');
 
             document.getElementById('nvTrangThaiSwitch').onchange = function() {
@@ -411,7 +657,28 @@
             };
         },
 
-        // 🌟 INIT DROPDOWN NGÀY THÁNG NĂM CHỐNG SAI SÓT
+        switchMainTab(tab) {
+            this.state.mainTab = tab;
+            document.getElementById('tabNV').classList.remove('active');
+            document.getElementById('tabCV').classList.remove('active');
+            document.getElementById('viewNV').classList.remove('active');
+            document.getElementById('viewCV').classList.remove('active');
+            document.getElementById('btnAddNV').style.display = 'none';
+            document.getElementById('btnAddCV').style.display = 'none';
+
+            if(tab === 'nv') {
+                document.getElementById('tabNV').classList.add('active');
+                document.getElementById('viewNV').classList.add('active');
+                document.getElementById('btnAddNV').style.display = 'inline-flex';
+                this.loadData();
+            } else {
+                document.getElementById('tabCV').classList.add('active');
+                document.getElementById('viewCV').classList.add('active');
+                document.getElementById('btnAddCV').style.display = 'inline-flex';
+                this.Role.loadData();
+            }
+        },
+
         initDateDropdowns() {
             const daySel = document.getElementById('nvDay');
             const monthSel = document.getElementById('nvMonth');
@@ -453,26 +720,22 @@
             }
         },
 
-        // 🌟 LOAD DATA CÓ PHÂN TRANG (API TRẢ VỀ DẠNG PAGE)
         async loadData() {
             const tbody = document.getElementById('tableContent');
             tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px; color:#888;">Đang tải dữ liệu...</td></tr>`;
             try {
-                // Do API cũ list-json không có phân trang, mình đang móc sang dùng filter ở Client
-                // Nếu Backend sau này sửa thành Pageable thì dùng cách lấy Data giống Khách Hàng nhé
                 const res = await fetch(`/api/nhan-vien/list-json?q=${this.state.q}&status=${this.state.status}`);
                 let list = await res.json();
 
-                // Thuật toán cắt mảng để giả lập phân trang ở Frontend
-                this.state.totalPages = Math.ceil(list.length / this.state.size);
-                if (this.state.page >= this.state.totalPages) this.state.page = 0; // Reset nếu quá trang
+                this.state.totalPages = Math.ceil(list.length / this.state.size) || 1;
+                if (this.state.page >= this.state.totalPages) this.state.page = 0;
 
                 const start = this.state.page * this.state.size;
                 const end = start + this.state.size;
                 const pageContent = list.slice(start, end);
 
                 this.renderTable(pageContent, start);
-                this.renderPagination({ totalPages: this.state.totalPages, totalElements: list.length, numberOfElements: pageContent.length });
+                this.renderPagination(this.state.page, this.state.totalPages, list.length, pageContent.length, 'paginationContainer', 'window.StaffApp.changePage');
 
             } catch(e) {
                 tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px; color:red;">Lỗi tải dữ liệu!</td></tr>`;
@@ -485,16 +748,26 @@
                 tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 40px; color:#888; font-style:italic;">Không tìm thấy nhân viên nào</td></tr>`;
                 return;
             }
-            tbody.innerHTML = list.map((item, idx) => `
+            tbody.innerHTML = list.map((item, idx) => {
+                let chucVuName = '---';
+                if (item.chucVu) {
+                    if (typeof item.chucVu === 'object') {
+                        chucVuName = item.chucVu.ten || item.chucVu.id || '---';
+                    } else {
+                        chucVuName = item.chucVu;
+                    }
+                }
+
+                return `
                 <tr>
                     <td style="text-align:center;">${startIdx + idx + 1}</td>
                     <td style="font-weight:800; color:#555;">${item.ma || '---'}</td>
                     <td><span style="font-weight: 700; color: #000; font-size: 13px;">${item.hoTen || 'Chưa cập nhật'}</span></td>
+                    <td><span style="font-weight: 600; color: #2563eb;">${chucVuName}</span></td>
                     <td>
                         <div style="font-weight:700;">${item.soDienThoai || '---'}</div>
                         <div style="font-size:12px; color:#666;">${item.email || '---'}</div>
                     </td>
-                    <td>${item.gioiTinh || '---'}</td>
                     <td style="text-align:center;">
                         <label class="switch-sm"><input type="checkbox" ${item.trangThai?'checked':''} onchange="window.StaffApp.quickToggle(${item.id}, this)"><span class="slider-sm"></span></label>
                     </td>
@@ -503,21 +776,20 @@
                         <button class="btn-icon" title="Sửa hồ sơ" onclick="window.StaffApp.openEdit(${item.id}, false)"><i class="bi bi-pencil"></i></button>
                     </td>
                 </tr>
-            `).join('');
+            `}).join('');
         },
 
-        renderPagination(data) {
-            const container = document.getElementById('paginationContainer');
-            if (data.totalPages <= 0) { container.innerHTML = ''; return; }
+        renderPagination(currPage, totalPages, totalElements, numberOfElements, containerId, callbackStr) {
+            const container = document.getElementById(containerId);
+            if (totalPages <= 0) { container.innerHTML = ''; return; }
 
-            let html = `<div class="pagination-info">Hiển thị ${data.numberOfElements || 0}/${data.totalElements || 0} bản ghi</div><div class="pagination">`;
-            html += `<button class="page-number" ${this.state.page === 0 ? 'disabled' : ''} onclick="window.StaffApp.changePage(${this.state.page - 1})"><i class="bi bi-chevron-left"></i></button>`;
+            let html = `<div class="pagination-info">HIỂN THỊ ${numberOfElements}/${totalElements} BẢN GHI</div><div class="pagination">`;
+            html += `<button class="page-number" ${currPage === 0 ? 'disabled' : ''} onclick="${callbackStr}(${currPage - 1})"><i class="bi bi-chevron-left"></i></button>`;
 
-            const last = data.totalPages; const delta = 1;
-            const left = this.state.page + 1 - delta; const right = this.state.page + 1 + delta;
+            const left = currPage + 1 - 1; const right = currPage + 1 + 1;
             const range = []; const rangeWithDots = []; let l;
 
-            for (let i = 1; i <= last; i++) { if (i === 1 || i === last || (i >= left && i <= right)) range.push(i); }
+            for (let i = 1; i <= totalPages; i++) { if (i === 1 || i === totalPages || (i >= left && i <= right)) range.push(i); }
             for (let i of range) {
                 if (l) {
                     if (i - l === 2) { rangeWithDots.push(l + 1); }
@@ -529,12 +801,11 @@
                 if (i === '...') {
                     html += `<span class="page-number" style="border:none; background:transparent; pointer-events:none; cursor:default; min-width: 15px;">...</span>`;
                 } else {
-                    const pageIndex = i - 1;
-                    const activeClass = pageIndex === this.state.page ? 'active' : '';
-                    html += `<button class="page-number ${activeClass}" onclick="window.StaffApp.changePage(${pageIndex})">${i}</button>`;
+                    const activeClass = (i - 1) === currPage ? 'active' : '';
+                    html += `<button class="page-number ${activeClass}" onclick="${callbackStr}(${i - 1})">${i}</button>`;
                 }
             }
-            html += `<button class="page-number" ${this.state.page === data.totalPages - 1 ? 'disabled' : ''} onclick="window.StaffApp.changePage(${this.state.page + 1})"><i class="bi bi-chevron-right"></i></button></div>`;
+            html += `<button class="page-number" ${currPage === totalPages - 1 ? 'disabled' : ''} onclick="${callbackStr}(${currPage + 1})"><i class="bi bi-chevron-right"></i></button></div>`;
             container.innerHTML = html;
         },
 
@@ -565,7 +836,7 @@
             document.getElementById('nvTrangThaiSwitch').disabled = true;
             document.getElementById('statusLabel').innerText = "ĐANG LÀM VIỆC";
 
-            this.switchTab('info');
+            this.switchDrawerTab('info');
             this.resetForm();
             this.toggleInputs(false);
 
@@ -582,7 +853,7 @@
             document.getElementById('passwordBlock').style.display = isView ? 'none' : 'block';
             document.getElementById('nvTrangThaiSwitch').disabled = isView;
 
-            this.switchTab('info');
+            this.switchDrawerTab('info');
             try {
                 const res = await fetch(`/api/nhan-vien/detail/${id}`);
                 if (!res.ok) throw new Error("Không thể tải thông tin");
@@ -594,6 +865,10 @@
                 document.getElementById('nvHoTen').value = d.hoTen;
                 document.getElementById('nvSdt').value = d.soDienThoai;
                 document.getElementById('nvEmail').value = d.email;
+
+                if (d.chucVu) {
+                    document.getElementById('nvChucVu').value = typeof d.chucVu === 'object' ? d.chucVu.id : d.chucVu;
+                }
 
                 let dob = d.ngaySinh;
                 if (Array.isArray(dob)) dob = `${dob[0]}-${String(dob[1]).padStart(2, '0')}-${String(dob[2]).padStart(2, '0')}`;
@@ -653,7 +928,7 @@
             }
         },
 
-        switchTab(t) {
+        switchDrawerTab(t) {
             document.querySelectorAll('.drawer-tab').forEach(el => el.classList.remove('active'));
             if(t === 'info') {
                 document.getElementById('tabInfo').classList.add('active');
@@ -674,15 +949,15 @@
                 const name = document.getElementById('nvHoTen').value.trim();
                 const phone = document.getElementById('nvSdt').value.trim();
                 const email = document.getElementById('nvEmail').value.trim();
+                const chucVu = document.getElementById('nvChucVu').value;
                 const dob = document.getElementById('nvNgaySinh').value;
                 const isNew = !this.state.editingId;
 
-                if (!name || !phone || !email || !dob) {
-                    this.switchTab('info'); window.toast("Vui lòng điền đầy đủ các trường thông tin có dấu (*)", "warning");
+                if (!name || !phone || !email || !dob || !chucVu) {
+                    this.switchDrawerTab('info'); window.toast("Vui lòng điền đầy đủ các trường thông tin có dấu (*)", "warning");
                     btn.innerHTML = 'LƯU HỒ SƠ'; btn.disabled = false; return;
                 }
 
-                // Chặn không cho sửa admin
                 if (!isNew && email === 'admin@shop.com') {
                     window.toast("Tài khoản Quản trị tối cao (Admin) không được phép sửa từ bảng này!", "error");
                     btn.innerHTML = 'LƯU HỒ SƠ'; btn.disabled = false; return;
@@ -695,7 +970,7 @@
 
                 if (addrDiv.style.display !== 'none') {
                     if (!city || !dist || !ward) {
-                        this.switchTab('address'); window.toast("Vui lòng CHỌN ĐỦ Tỉnh/Thành, Quận/Huyện, Xã/Phường!", "warning");
+                        this.switchDrawerTab('address'); window.toast("Vui lòng CHỌN ĐỦ Tỉnh/Thành, Quận/Huyện, Xã/Phường!", "warning");
                         btn.innerHTML = 'LƯU HỒ SƠ'; btn.disabled = false; return;
                     }
                 }
@@ -706,6 +981,7 @@
                 payload.append('email', email);
                 payload.append('ngaySinh', dob);
                 payload.append('gioiTinh', document.getElementById('nvGender').value);
+                payload.append('chucVuId', chucVu);
                 payload.append('trangThai', document.getElementById('nvTrangThaiSwitch').checked);
 
                 let diaChiChiTiet = document.getElementById('inpDetail').value.trim();
@@ -721,7 +997,6 @@
                     payload.append('confirmPassword', document.getElementById('nvConfirmPass').value);
                 }
 
-                // 🌟 TÍCH HỢP UPLOAD ẢNH QUA CLOUDINARY TRƯỚC
                 const fileInput = document.getElementById('inpFile');
                 if (fileInput.files[0]) {
                     try {
@@ -741,12 +1016,12 @@
                 const idParam = isNew ? '' : `&id=${this.state.editingId}`;
 
                 const checkPhoneRes = await fetch(`/api/nhan-vien/check-phone?phone=${phone}${idParam}`);
-                if (!checkPhoneRes.ok) { this.switchTab('info'); window.toast(await checkPhoneRes.text(), "error"); btn.innerHTML = 'LƯU HỒ SƠ'; btn.disabled = false; return; }
+                if (!checkPhoneRes.ok) { this.switchDrawerTab('info'); window.toast(await checkPhoneRes.text(), "error"); btn.innerHTML = 'LƯU HỒ SƠ'; btn.disabled = false; return; }
 
                 const isEmailChanged = (email !== this.state.originalEmail);
                 if (isNew || isEmailChanged) {
                     const checkEmailRes = await fetch(`/api/nhan-vien/check-email?email=${email}${idParam}`);
-                    if (!checkEmailRes.ok) { this.switchTab('info'); window.toast(await checkEmailRes.text(), "error"); btn.innerHTML = 'LƯU HỒ SƠ'; btn.disabled = false; return; }
+                    if (!checkEmailRes.ok) { this.switchDrawerTab('info'); window.toast(await checkEmailRes.text(), "error"); btn.innerHTML = 'LƯU HỒ SƠ'; btn.disabled = false; return; }
 
                     document.getElementById('otpModal').style.display = 'flex';
                     document.getElementById('otpInputGroup').style.display = 'none';
@@ -828,6 +1103,7 @@
             document.querySelectorAll('#drawer input:not([type="checkbox"]):not([type="hidden"])').forEach(i => i.value = '');
             document.getElementById('imgPreview').src = ''; document.getElementById('imgPreview').style.display = 'none';
             document.getElementById('iconUpload').style.display = 'block';
+            document.getElementById('nvChucVu').selectedIndex = 0;
             this.Address.reset('inpCity', 'inpDist', 'inpWard');
             this.setDateDropdowns('');
         },

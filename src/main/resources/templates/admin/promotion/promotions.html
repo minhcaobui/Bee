@@ -836,25 +836,34 @@
             const originalState = !el.checked;
             const isSale = this.state.activeTab === 'sale';
 
-            this.toastConfirm("Đổi trạng thái", "Xác nhận thay đổi trạng thái kích hoạt của chương trình này?", async () => {
+            // 🌟 ĐÃ FIX: Gọi window.toastConfirm thay vì this.toastConfirm
+            window.toastConfirm("Đổi trạng thái", "Xác nhận thay đổi trạng thái kích hoạt của chương trình này?", async () => {
                     const endpoint = isSale ? `/api/khuyen-mai/${id}/trang-thai` : `/api/vouchers/${id}/trang-thai`;
                     const parent = el.closest('.switch-sm');
                     try {
                         parent.classList.add('loading');
                         const res = await fetch(endpoint, { method: 'PATCH' });
-                        let data = {}; try { data = await res.json(); } catch (e) {}
+
+                        let data = {};
+                        try { data = await res.json(); } catch (e) {}
 
                         if (res.ok) {
                             window.toast(data.message || "Cập nhật thành công.", 'success');
                             this.loadData();
                         } else {
                             window.toast(data.message || "Lỗi cập nhật.", 'error');
-                            el.checked = originalState;
+                            el.checked = originalState; // Hoàn tác lại trạng thái cũ trên UI nếu lỗi
                         }
-                    } catch (e) { window.toast("Lỗi kết nối.", "error"); el.checked = originalState; }
+                    } catch (e) {
+                        window.toast("Lỗi kết nối.", "error");
+                        el.checked = originalState; // Hoàn tác lại trạng thái cũ trên UI nếu lỗi mạng
+                    }
                     finally { parent.classList.remove('loading'); }
                 },
-                () => { el.checked = originalState; }
+                () => {
+                    // 🌟 ĐÃ FIX: Nếu người dùng bấm Hủy (Cancel) thì hoàn tác lại cái nút switch ngay lập tức
+                    el.checked = originalState;
+                }
             );
         },
 

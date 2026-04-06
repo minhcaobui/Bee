@@ -425,8 +425,10 @@ public class KhachHangApi {
                     "gioiTinh", kh.getGioiTinh() != null ? kh.getGioiTinh() : "",
                     "ngaySinh", kh.getNgaySinh() != null ? kh.getNgaySinh().toString() : "",
                     "hinhAnh", kh.getHinhAnh() != null ? kh.getHinhAnh() : "",
-                    // 🌟 ĐÃ BỔ SUNG DÒNG NÀY ĐỂ ĐỊNH DANH TÀI KHOẢN
-                    "taiKhoanId", kh.getTaiKhoan() != null ? kh.getTaiKhoan().getId() : 0
+                    "taiKhoanId", kh.getTaiKhoan() != null ? kh.getTaiKhoan().getId() : 0,
+                    // 🌟 BỔ SUNG THÊM 2 TRƯỜNG NÀY CHO KHÁCH HÀNG:
+                    "tenDangNhap", kh.getTaiKhoan() != null ? kh.getTaiKhoan().getTenDangNhap() : "",
+                    "daDoiTenDangNhap", kh.getTaiKhoan() != null && Boolean.TRUE.equals(kh.getTaiKhoan().getDaDoiTenDangNhap())
             ));
         }
 
@@ -440,8 +442,10 @@ public class KhachHangApi {
                     "gioiTinh", nv.getGioiTinh() != null ? nv.getGioiTinh() : "",
                     "ngaySinh", nv.getNgaySinh() != null ? nv.getNgaySinh().toString() : "",
                     "hinhAnh", nv.getHinhAnh() != null ? nv.getHinhAnh() : "",
-                    // 🌟 ĐÃ BỔ SUNG DÒNG NÀY ĐỂ ĐỊNH DANH TÀI KHOẢN
-                    "taiKhoanId", nv.getTaiKhoan() != null ? nv.getTaiKhoan().getId() : 0
+                    "taiKhoanId", nv.getTaiKhoan() != null ? nv.getTaiKhoan().getId() : 0,
+                    // 🌟 BỔ SUNG THÊM 2 TRƯỜNG NÀY CHO NHÂN VIÊN:
+                    "tenDangNhap", nv.getTaiKhoan() != null ? nv.getTaiKhoan().getTenDangNhap() : "",
+                    "daDoiTenDangNhap", nv.getTaiKhoan() != null && Boolean.TRUE.equals(nv.getTaiKhoan().getDaDoiTenDangNhap())
             ));
         }
 
@@ -518,17 +522,33 @@ public class KhachHangApi {
 
         khRepo.save(kh);
 
+        boolean isUsernameChanged = false; // 🌟 Thêm cờ theo dõi
         String newUsername = payload.get("tenDangNhap");
 
         if (newUsername != null && !newUsername.trim().isEmpty() && !newUsername.equals(taiKhoan.getTenDangNhap())) {
+
+            // Kiểm tra quyền đổi
+            if (Boolean.TRUE.equals(taiKhoan.getDaDoiTenDangNhap())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Bạn chỉ được đổi tên đăng nhập 1 lần duy nhất!"));
+            }
+
             if (taiKhoanRepository.existsByTenDangNhap(newUsername)) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Tên đăng nhập này đã có người sử dụng!"));
             }
+
             taiKhoan.setTenDangNhap(newUsername);
+            taiKhoan.setDaDoiTenDangNhap(true);
             taiKhoanRepository.save(taiKhoan);
+
+            isUsernameChanged = true; // 🌟 Đánh dấu là đã đổi tên đăng nhập
         }
 
-        return ResponseEntity.ok(Map.of("message", "Cập nhật thành công!"));
+        // 🌟 Trả về thêm tín hiệu cho Frontend
+        return ResponseEntity.ok(Map.of(
+                "message", "Cập nhật thành công!",
+                "usernameChanged", isUsernameChanged
+        ));
+
     }
 
     @GetMapping("/{id}/dia-chi")
