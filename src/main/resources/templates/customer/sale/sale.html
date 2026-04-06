@@ -1,324 +1,520 @@
 <section id="sale-section">
     <style>
+        /* ══════════════════════════════════════════
+           COLOR SYSTEM + FONTS (mirror home)
+        ══════════════════════════════════════════ */
         #sale-section {
-            min-height: 100vh;
+            --accent:       #3D5A4C;
+            --accent-light: #4d7060;
+            --accent-pale:  rgba(61,90,76,0.08);
+            --white:        #FFFFFF;
+            --bg:           #F7F5F2;
+            --text:         #1A1A1A;
+            --muted:        #8A8A8A;
+            --border:       rgba(0,0,0,0.08);
+            --shadow-sm:    0 2px 16px rgba(61,90,76,0.07);
+            --shadow-md:    0 8px 40px rgba(61,90,76,0.13);
+            --btn-h:        42px;
+            --font-display: 'Cormorant Garamond', serif;
+            --font-body:    'DM Sans', sans-serif;
             background: var(--bg);
+            font-family: var(--font-body);
         }
+        #sale-section h1,
+        #sale-section h2,
+        #sale-section .use-display { font-family: var(--font-display) !important; }
 
-        /* ── HERO ── */
+        /* ══════════════════════════════════════════
+           HERO
+        ══════════════════════════════════════════ */
         .sale-hero {
-            padding: 72px 60px 80px;
+            padding: 64px 60px 72px;
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 0;
-            border-bottom: 1px solid rgba(0,0,0,0.07);
-            position: relative;
-            overflow: hidden;
+            border-bottom: 1px solid var(--border);
+            position: relative; overflow: hidden;
+            background: var(--white);
         }
         .sale-hero::before {
             content: 'SALE';
-            position: absolute;
-            right: -20px; top: -20px;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 220px; font-weight: 300;
+            position: absolute; right: -16px; top: -16px;
+            font-family: var(--font-display);
+            font-size: 210px; font-weight: 300;
             color: rgba(61,90,76,0.05);
             line-height: 1; letter-spacing: -0.04em;
             pointer-events: none; user-select: none;
         }
-
-        .sale-hero-left {}
         .sale-hero-eyebrow {
-            font-size: 11px; letter-spacing: 0.25em;
+            font-size: 10px; letter-spacing: 0.25em;
             color: var(--accent); text-transform: uppercase;
-            font-weight: 500; margin-bottom: 20px;
+            font-weight: 600; margin-bottom: 18px;
             display: flex; align-items: center; gap: 10px;
         }
-        .sale-hero-eyebrow::before { content:''; width:20px; height:1px; background:var(--accent); }
+        .sale-hero-eyebrow::before { content:''; width:18px; height:1px; background:var(--accent); }
         .sale-hero-title {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: clamp(44px, 6vw, 80px);
-            font-weight: 300; line-height: 1.0;
-            letter-spacing: -0.01em;
+            font-family: var(--font-display) !important;
+            font-size: clamp(40px, 5.5vw, 76px);
+            font-weight: 300; line-height: 1.02; letter-spacing: -0.01em;
         }
         .sale-hero-title em { font-style: italic; color: var(--accent); }
 
         .sale-hero-right {
-            padding-left: 80px;
+            padding-left: 72px;
             display: flex; flex-direction: column;
-            justify-content: flex-end; gap: 32px;
+            justify-content: flex-end; gap: 28px;
         }
         .sale-hero-desc {
-            font-size: 15px; color: var(--muted);
-            line-height: 1.8; font-weight: 300;
-            max-width: 360px;
+            font-size: 14px; color: var(--muted);
+            line-height: 1.85; font-weight: 300; max-width: 360px;
         }
 
         /* Countdown */
-        .sale-countdown {
-            display: flex; gap: 0;
-            align-items: stretch;
-        }
+        .sale-countdown { display: flex; gap: 0; align-items: stretch; }
         .sale-countdown-block {
-            background: var(--text); color: white;
-            padding: 20px 24px; text-align: center;
-            min-width: 72px;
+            background: var(--accent);
+            color: white;
+            padding: 18px 22px; text-align: center; min-width: 68px;
             position: relative;
         }
-        .sale-countdown-block:not(:last-child) {
-            border-right: 1px solid rgba(255,255,255,0.1);
-        }
+        .sale-countdown-block:not(:last-child) { border-right: 1px solid rgba(255,255,255,0.1); }
         .sale-countdown-num {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 36px; font-weight: 300;
-            line-height: 1; display: block;
-            letter-spacing: -0.02em;
+            font-family: var(--font-display) !important;
+            font-size: 34px; font-weight: 300;
+            line-height: 1; display: block; letter-spacing: -0.02em;
         }
         .sale-countdown-label {
             font-size: 9px; letter-spacing: 0.18em;
             color: rgba(255,255,255,0.4);
-            text-transform: uppercase; margin-top: 6px;
+            text-transform: uppercase; margin-top: 5px;
             display: block; font-weight: 400;
         }
-        .sale-countdown-note {
-            font-size: 11px; color: var(--muted);
-            letter-spacing: 0.06em; margin-top: 12px;
-            font-weight: 300;
+        .sale-countdown-note { font-size: 11px; color: var(--muted); letter-spacing: 0.05em; margin-top: 10px; font-weight: 300; }
+        /* Countdown ended / no sale */
+        .sale-ended-note {
+            display: inline-block; padding: 10px 18px;
+            border: 1px solid var(--border); font-size: 12px;
+            color: var(--muted); letter-spacing: 0.06em;
         }
 
-        /* ── FILTER ── */
+        /* ══════════════════════════════════════════
+           VOUCHER BANNERS
+        ══════════════════════════════════════════ */
+        .sale-vouchers-section { margin: 24px 60px 0; }
+        .sale-voucher-list { display: flex; flex-direction: column; gap: 10px; }
+
+        /* Primary voucher — nền xanh rêu đậm, giống promo banner cũ */
+        .sale-voucher-card {
+            background: var(--accent); padding: 28px 40px;
+            display: flex; align-items: center; justify-content: space-between; gap: 24px;
+        }
+
+        .sale-voucher-title {
+            font-family: var(--font-display) !important;
+            font-size: 24px; font-weight: 300; color: white; margin-bottom: 4px; line-height: 1.2;
+        }
+        .sale-voucher-title em { font-style: italic; }
+        .sale-voucher-sub { font-size: 13px; color: rgba(255,255,255,0.7); font-weight: 300; letter-spacing: 0.03em; }
+        .sale-voucher-code { display: flex; align-items: center; gap: 0; flex-shrink: 0; }
+        .sale-voucher-code-box {
+            background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+            padding: 12px 20px; font-family: var(--font-body);
+            font-size: 16px; font-weight: 500; color: white;
+            letter-spacing: 0.12em; text-transform: uppercase;
+        }
+        .sale-voucher-copy {
+            background: white; color: var(--accent); border: none;
+            padding: 12px 20px; font-family: var(--font-body);
+            font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+            font-weight: 500; cursor: pointer; transition: background .2s; white-space: nowrap;
+        }
+        .sale-voucher-copy:hover { background: var(--bg); }
+
+        /* Expand/collapse vouchers */
+        .sale-vouchers-more {
+            display: flex; gap: 10px; flex-direction: column;
+            overflow: hidden; max-height: 0; transition: max-height .45s cubic-bezier(.4,0,.2,1);
+        }
+        .sale-vouchers-more.open { max-height: 600px; }
+        .sale-voucher-toggle {
+            margin-top: 10px; display: inline-flex; align-items: center; gap: 6px;
+            background: none; border: none; cursor: pointer;
+            font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+            color: var(--accent); font-weight: 600; padding: 0; transition: opacity .2s;
+        }
+        .sale-voucher-toggle:hover { opacity: .65; }
+        .sale-voucher-toggle svg { width: 13px; height: 13px; stroke: currentColor; fill: none; transition: transform .3s; }
+        .sale-voucher-toggle.open svg { transform: rotate(180deg); }
+
+        /* Tên đợt khuyến mãi + countdown */
+        .sale-promo-label {
+            font-size: 10px; letter-spacing: 0.2em; color: var(--accent);
+            text-transform: uppercase; font-weight: 600; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .sale-promo-label::before { content:''; width:14px; height:1px; background:var(--accent); }
+        .sale-promo-name {
+            font-family: var(--font-display) !important;
+            font-size: 20px; font-weight: 300; color: var(--text);
+            margin-bottom: 14px; line-height: 1.2;
+        }
+
+        /* Expand/collapse promos */
+        .sale-promos-more {
+            display: flex; flex-direction: column;
+            overflow: hidden; max-height: 0; transition: max-height .45s cubic-bezier(.4,0,.2,1);
+        }
+        .sale-promos-more.open { max-height: 800px; }
+
+        /* ══════════════════════════════════════════
+           FILTER BAR + COLLAPSIBLE PANEL
+        ══════════════════════════════════════════ */
         .sale-filter-bar {
             padding: 0 60px;
-            display: flex; justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(0,0,0,0.07);
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border);
+            background: var(--white); margin-top: 24px;
+            position: sticky; top: 0; z-index: 30;
         }
         .sale-filter-tabs { display: flex; gap: 0; }
         .sale-filter-tab {
-            padding: 16px 24px;
-            font-size: 12px; letter-spacing: 0.1em;
+            padding: 15px 22px;
+            font-size: 11px; letter-spacing: 0.1em;
             text-transform: uppercase; cursor: pointer;
             border: none; background: none;
-            font-family: 'DM Sans', sans-serif;
+            font-family: var(--font-body);
             color: var(--muted); font-weight: 400;
             border-bottom: 2px solid transparent;
-            transition: color 0.2s, border-color 0.2s;
+            transition: color .2s, border-color .2s;
             position: relative; bottom: -1px;
             white-space: nowrap;
         }
-        .sale-filter-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-        .sale-filter-tab:hover { color: var(--text); }
-        .sale-filter-right {
-            display: flex; align-items: center; gap: 16px;
+        .sale-filter-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+        .sale-filter-tab:hover:not(.active) { color: var(--text); }
+        .sale-filter-tab .tab-count {
+            display: inline-block; font-size: 9px; vertical-align: super;
+            background: var(--accent-pale); color: var(--accent);
+            border-radius: 2px; padding: 1px 4px; margin-left: 4px; font-weight: 600;
         }
+        .sale-filter-right { display: flex; align-items: center; gap: 14px; }
+        .sale-count-label { font-size: 12px; color: var(--muted); letter-spacing: 0.06em; font-weight: 300; }
         .sale-sort {
-            border: 1px solid rgba(0,0,0,0.1); padding: 10px 16px;
-            font-family: 'DM Sans', sans-serif; font-size: 12px;
+            border: 1px solid var(--border); padding: 9px 14px;
+            font-family: var(--font-body); font-size: 11px;
             background: var(--white); color: var(--text);
-            letter-spacing: 0.08em; cursor: pointer; outline: none;
+            letter-spacing: 0.06em; cursor: pointer; outline: none;
         }
-        .sale-count-label {
-            font-size: 12px; color: var(--muted);
-            letter-spacing: 0.06em; font-weight: 300;
+        .sale-filter-adv-btn {
+            display: flex; align-items: center; gap: 6px;
+            height: var(--btn-h); padding: 0 16px;
+            background: none; border: 1px solid var(--border);
+            font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+            color: var(--muted); font-weight: 500; cursor: pointer; transition: all .2s;
+            font-family: var(--font-body);
         }
+        .sale-filter-adv-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; }
+        .sale-filter-adv-btn:hover, .sale-filter-adv-btn.open { border-color: var(--accent); color: var(--accent); }
+        .sale-filter-adv-btn .adv-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--accent); display: none;
+        }
+        .sale-filter-adv-btn .adv-dot.show { display: block; }
 
-        /* ── FEATURED ROW (editorial top) ── */
-        .sale-featured {
-            padding: 64px 60px 0;
-            display: grid;
-            grid-template-columns: 1.6fr 1fr;
-            gap: 24px;
-            margin-bottom: 24px;
+        /* Advanced panel */
+        .sale-adv-panel {
+            background: var(--white); border-bottom: 1px solid var(--border);
+            max-height: 0; overflow: hidden;
+            transition: max-height .45s cubic-bezier(.4,0,.2,1);
         }
-        .sale-featured-card {
-            position: relative; overflow: hidden;
-            background: var(--white);
-            cursor: pointer;
+        .sale-adv-panel.open { max-height: 240px; }
+        .sale-adv-inner { padding: 24px 60px; display: flex; gap: 48px; align-items: flex-start; }
+        .sale-adv-group { flex: 0 0 auto; }
+        .sale-adv-label {
+            font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+            font-weight: 700; color: var(--muted); margin-bottom: 10px;
         }
-        .sale-featured-card:hover .sale-card-img-bg { transform: scale(1.04); }
-        .sale-featured-img {
-            width: 100%; aspect-ratio: 16/9;
-            overflow: hidden; position: relative;
+        .sale-adv-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+        .sale-adv-pill {
+            height: 32px; padding: 0 14px;
+            font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+            cursor: pointer; border: 1px solid var(--border); background: transparent;
+            color: var(--muted); font-weight: 500; transition: all .2s;
+            display: flex; align-items: center; font-family: var(--font-body);
         }
-        .sale-featured-card:nth-child(2) .sale-featured-img { aspect-ratio: 3/4; height: 100%; }
-        .sale-card-img-bg {
-            width: 100%; height: 100%;
-            transition: transform 0.7s ease;
+        .sale-adv-pill.active { background: var(--text); color: white; border-color: var(--text); }
+        .sale-adv-pill:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+        .sale-adv-reset {
+            margin-left: auto; align-self: flex-end;
+            font-size: 11px; color: var(--muted); background: none; border: none;
+            cursor: pointer; letter-spacing: 0.06em; text-decoration: underline;
+            font-family: var(--font-body); transition: color .2s;
         }
+        .sale-adv-reset:hover { color: var(--text); }
 
-        /* ── REGULAR GRID ── */
-        .sale-grid {
-            padding: 0 60px 100px;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2px;
-            background: rgba(0,0,0,0.04);
+        /* ══════════════════════════════════════════
+           NO SALE EMPTY STATE
+        ══════════════════════════════════════════ */
+        .sale-empty {
+            padding: 100px 60px; text-align: center;
+            display: none; flex-direction: column; align-items: center; gap: 16px;
         }
-
-        /* ── PRODUCT CARD (shared) ── */
-        .sale-product-card {
-            background: var(--white);
-            position: relative; overflow: hidden;
-            cursor: pointer;
-            transition: box-shadow 0.4s ease;
+        .sale-empty.show { display: flex; }
+        .sale-empty svg { width: 48px; height: 48px; stroke: rgba(0,0,0,0.12); fill: none; }
+        .sale-empty h3 {
+            font-family: var(--font-display) !important;
+            font-size: 28px; font-weight: 300; color: var(--text);
         }
-        .sale-product-card:hover { box-shadow: var(--card-shadow-hover); }
-        .sale-product-card:hover .sale-card-img-bg { transform: scale(1.04); }
-
-        .sale-product-img {
-            width: 100%; aspect-ratio: 3/4;
-            overflow: hidden; position: relative;
-        }
-        .sale-featured-img .sale-card-img-bg,
-        .sale-product-img .sale-card-img-bg {
-            width: 100%; height: 100%;
-            transition: transform 0.7s ease;
-        }
-
-        /* Discount badge */
-        .sale-badge {
-            position: absolute; top: 16px; left: 16px;
-            background: #c08060; color: white;
-            font-size: 11px; font-weight: 500;
-            letter-spacing: 0.08em; padding: 6px 12px;
-            z-index: 2;
-        }
-        .sale-badge-big {
-            position: absolute; top: 20px; left: 20px;
+        .sale-empty p { font-size: 13px; color: var(--muted); line-height: 1.8; max-width: 360px; }
+        .sale-empty-btn {
+            display: inline-flex; align-items: center; gap: 10px;
+            height: var(--btn-h); padding: 0 28px;
             background: var(--accent); color: white;
-            font-size: 13px; font-weight: 500;
-            letter-spacing: 0.06em; padding: 8px 16px;
-            z-index: 2;
+            border: none; font-size: 11px; font-weight: 600;
+            letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
+            font-family: var(--font-body); transition: background .2s; margin-top: 8px;
+        }
+        .sale-empty-btn:hover { background: var(--accent-light); }
+
+        /* ══════════════════════════════════════════
+           PRODUCT GRID (SALE) — mirror home exactly
+        ══════════════════════════════════════════ */
+        .sale-products-section { padding: 36px 0 80px; background: var(--bg); }
+
+        .sale-products-grid {
+            padding: 0 60px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
         }
 
-        /* Quick add overlay */
-        .sale-product-overlay {
-            position: absolute; inset: 0;
-            background: rgba(26,26,26,0);
-            display: flex; align-items: flex-end;
-            padding: 20px;
-            transition: background 0.4s ease;
+        /* ── SKELETON (mirror home) ── */
+        .skeleton-card { background: var(--white); display: flex; flex-direction: column; box-shadow: var(--shadow-sm); }
+        .skeleton-img {
+            width: 100%; aspect-ratio: 3/4;
+            background: linear-gradient(90deg,#f0eeeb 25%,#e8e5e0 50%,#f0eeeb 75%);
+            background-size: 200% 100%; animation: shimmer 1.4s infinite;
         }
-        .sale-product-card:hover .sale-product-overlay,
-        .sale-featured-card:hover .sale-product-overlay { background: rgba(26,26,26,0.07); }
-        .sale-quick-add {
-            background: white; color: var(--text);
-            border: none; padding: 12px 24px;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 12px; letter-spacing: 0.1em;
-            text-transform: uppercase; cursor: pointer;
+        .skeleton-body { padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 8px; }
+        .skeleton-line {
+            height: 10px; border-radius: 2px;
+            background: linear-gradient(90deg,#f0eeeb 25%,#e8e5e0 50%,#f0eeeb 75%);
+            background-size: 200% 100%; animation: shimmer 1.4s infinite;
+        }
+        .skeleton-line.short { width: 45%; }
+        .skeleton-line.medium { width: 70%; height: 14px; margin-top: 2px; }
+        .skeleton-line.price { width: 55%; height: 12px; margin-top: 4px; }
+        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+        /* ── PRODUCT CARD (copied from home) ── */
+        .product-card {
+            background: var(--white); position: relative; overflow: hidden;
+            cursor: pointer; box-shadow: var(--shadow-sm);
+            transition: box-shadow .35s, transform .3s;
+            display: flex; flex-direction: column;
+        }
+        .product-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); z-index: 2; }
+        .product-card.show-selection { z-index: 95; }
+
+        .product-img { width: 100%; aspect-ratio: 3/4; position: relative; overflow: hidden; background: #f9f8f6; }
+        .img-placeholder { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .65s ease, opacity .25s; }
+        .product-card:not(.show-selection):hover .img-placeholder { transform: scale(1.04); }
+        .img-hover { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .5s ease, transform .65s ease; z-index: 1; }
+        .product-card:not(.show-selection):hover .img-hover { opacity: 1; transform: scale(1.04); }
+        .img-overlay {
+            position: absolute; inset: 0; background: rgba(0,0,0,0);
+            display: flex; align-items: flex-end; padding: 12px;
+            transition: background .35s; z-index: 2;
+        }
+        .product-card:not(.show-selection):hover .img-overlay { background: rgba(0,0,0,0.04); }
+
+        .btn-quick {
+            width: 100%; height: var(--btn-h); padding: 0 12px;
+            background: var(--accent); color: white; border: none;
+            font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px;
             transform: translateY(8px); opacity: 0;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-            width: 100%; font-weight: 400;
+            transition: transform .28s ease, opacity .28s ease, background .2s;
+            font-family: var(--font-body);
         }
-        .sale-product-card:hover .sale-quick-add,
-        .sale-featured-card:hover .sale-quick-add {
-            transform: translateY(0); opacity: 1;
-        }
+        .btn-quick svg { width: 12px; height: 12px; stroke: white; fill: none; flex-shrink: 0; }
+        .product-card:not(.show-selection):hover .btn-quick { transform: translateY(0); opacity: 1; }
+        .btn-quick:hover { background: #2c4238; }
 
-        /* Card info */
-        .sale-card-info {
-            padding: 18px 20px 22px;
-        }
-        .sale-card-tag {
-            font-size: 10px; letter-spacing: 0.18em;
-            color: var(--accent); text-transform: uppercase;
-            font-weight: 500; margin-bottom: 6px;
-        }
-        .sale-card-name {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 18px; font-weight: 400;
-            margin-bottom: 10px; line-height: 1.2;
-        }
-        .sale-card-prices {
-            display: flex; align-items: baseline; gap: 10px;
-        }
-        .sale-price-new {
-            font-size: 15px; color: var(--accent); font-weight: 500;
-        }
-        .sale-price-old {
-            font-size: 13px; color: var(--muted);
-            text-decoration: line-through; font-weight: 300;
-        }
-        .sale-price-save {
-            font-size: 11px; color: #c08060;
-            letter-spacing: 0.06em; font-weight: 400;
-        }
+        /* Badges — sale % badge */
+        .prod-badges { position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 4px; z-index: 3; pointer-events: none; }
+        .prod-badge { padding: 3px 9px; font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: white; width: fit-content; }
+        .prod-badge.new { background: var(--accent); }
+        .prod-badge.sale-pct { background: #c08060; font-size: 10px; padding: 4px 10px; letter-spacing: 0.08em; }
+        .prod-badge.limited { background: #991B1B; }
 
-        /* Featured card info (bigger) */
-        .sale-featured-info {
-            padding: 24px 28px 28px;
+        /* Heart button (copied from home) */
+        .heart-btn {
+            position: absolute; top: 10px; right: 10px; z-index: 4;
+            width: 34px; height: 34px; border-radius: 50%;
+            background: rgba(255,255,255,0.88); border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transform: scale(0.7);
+            transition: opacity .25s, transform .25s, background .2s;
+            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.12);
         }
-        .sale-featured-info .sale-card-name {
-            font-size: 22px;
-        }
+        .product-card:not(.show-selection):hover .heart-btn { opacity: 0.75; transform: scale(1); }
+        .heart-btn.liked { opacity: 1 !important; transform: scale(1) !important; background: rgba(255,245,245,0.95); }
+        .heart-btn svg { width: 15px; height: 15px; stroke: var(--text); fill: none; transition: stroke .2s, fill .2s; pointer-events: none; }
+        .heart-btn.liked svg { stroke: #e74c3c; fill: #e74c3c; }
+        @keyframes heartPop { 0%{transform:scale(1)} 25%{transform:scale(1.55)} 50%{transform:scale(0.85)} 75%{transform:scale(1.2)} 100%{transform:scale(1)} }
+        .heart-btn.pop { animation: heartPop .46s cubic-bezier(.4,0,.2,1); }
 
-        /* ── PROMO BANNER ── */
-        .sale-promo-banner {
-            margin: 0 60px 24px;
-            background: var(--accent);
-            padding: 28px 40px;
-            display: flex; align-items: center;
-            justify-content: space-between; gap: 24px;
-        }
-        .sale-promo-text {
-            color: white;
-        }
-        .sale-promo-title {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 24px; font-weight: 300;
-            margin-bottom: 4px;
-        }
-        .sale-promo-title em { font-style: italic; }
-        .sale-promo-sub {
-            font-size: 13px; color: rgba(255,255,255,0.7);
-            font-weight: 300;
-        }
-        .sale-promo-code {
-            display: flex; align-items: center; gap: 0; flex-shrink: 0;
-        }
-        .sale-promo-code-box {
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.3);
-            padding: 12px 20px;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 16px; font-weight: 500;
-            color: white; letter-spacing: 0.12em;
-            text-transform: uppercase;
-        }
-        .sale-promo-copy {
-            background: white; color: var(--accent);
-            border: none; padding: 12px 20px;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 11px; letter-spacing: 0.12em;
-            text-transform: uppercase; font-weight: 500;
-            cursor: pointer; transition: background 0.2s;
-            white-space: nowrap;
-        }
-        .sale-promo-copy:hover { background: var(--bg); }
+        /* Product info */
+        .product-info { padding: 14px 16px 18px; flex-grow: 1; display: flex; flex-direction: column; }
+        .product-tag { font-size: 9px; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase; font-weight: 600; margin-bottom: 4px; }
+        .product-name { font-family: var(--font-display) !important; font-size: 17px; font-weight: 400; line-height: 1.2; margin-bottom: 10px; }
 
-        /* Reveal */
-        .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+        /* Swatches */
+        .prod-swatches { display: flex; align-items: center; gap: 4px; margin-bottom: 8px; }
+        .swatch-dot { width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); flex-shrink: 0; }
+        .swatch-more { font-size: 9px; color: var(--muted); font-weight: 500; letter-spacing: 0.05em; padding: 2px 6px; border: 1px solid var(--border); border-radius: 2px; margin-left: 2px; }
+
+        /* Stock low */
+        .stock-low { display: flex; align-items: center; gap: 5px; font-size: 10px; color: #92400e; margin-bottom: 6px; font-weight: 500; }
+        .stock-pulse { width: 5px; height: 5px; border-radius: 50%; background: #f59e0b; flex-shrink: 0; animation: pulse 1.5s ease-in-out infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+        /* Price — sale version: sale price + strikethrough + "Tiết kiệm Xk" */
+        .prod-price { display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
+        .price-sale   { font-size: 14px; color: var(--accent); font-weight: 600; }
+        .price-orig   { font-size: 12px; color: var(--muted); text-decoration: line-through; font-weight: 300; }
+        .price-save   { font-size: 10px; color: #c08060; font-weight: 600; letter-spacing: 0.03em; }
+        .price-normal { font-size: 14px; color: var(--text); font-weight: 500; }
+
+        /* ── QUICK SELECTION OVERLAY (copied from home) ── */
+        #sale-qa-backdrop {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            z-index: 90; opacity: 0; pointer-events: none;
+            transition: opacity .35s; cursor: pointer;
+        }
+        #sale-qa-backdrop.show { opacity: 1; pointer-events: all; }
+
+        .qs-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.8) 30%, rgba(255,255,255,0.98) 50%, #ffffff 100%);
+            z-index: 5; display: flex; flex-direction: column;
+            justify-content: flex-end; padding: 15px;
+            transform: translateY(100%);
+            transition: transform .38s cubic-bezier(.4,0,.2,1);
+            cursor: default;
+        }
+        .product-card.show-selection .qs-overlay { transform: translateY(0); }
+        .qs-close { position: absolute; top: 10px; right: 12px; background: none; border: none; cursor: pointer; color: var(--muted); font-size: 22px; line-height: 1; padding: 4px; }
+        .qs-name { font-family: var(--font-display) !important; font-size: 17px; text-align: center; margin-bottom: 14px; }
+        .qs-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); margin-bottom: 7px; text-align: center; font-weight: 600; }
+        .qs-opts { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 11px; justify-content: center; }
+        .qs-dot { width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.14); cursor: pointer; box-shadow: inset 0 0 0 2px #fff; transition: all .18s; }
+        .qs-dot.active { border: 2px solid var(--text); transform: scale(1.18); }
+        .qs-size { height: 34px; padding: 0 12px; border: 1px solid #e0e0e0; background: none; font-size: 11px; cursor: pointer; min-width: 36px; transition: all .18s; font-weight: 500; display: flex; align-items: center; justify-content: center; font-family: var(--font-body); }
+        .qs-size.active { background: var(--text); color: white; border-color: var(--text); }
+        .qs-size.disabled { opacity: 0.28; cursor: not-allowed; text-decoration: line-through; }
+        .qs-price { font-size: 13px; text-align: center; margin-bottom: 8px; }
+        .qs-qty-selector { display: flex; border: 1px solid var(--border); border-radius: 2px; overflow: hidden; width: 100px; margin: 0 auto 12px; background: #fff; height: 32px; }
+        .qs-qty-btn { width: 30px; display: flex; align-items: center; justify-content: center; background: none; border: none; font-size: 11px; cursor: pointer; color: var(--text); transition: .2s; }
+        .qs-qty-btn:hover { background: rgba(0,0,0,0.04); }
+        .qs-qty-input { flex: 1; width: 100%; border: none; text-align: center; font-family: var(--font-body); font-size: 13px; font-weight: 600; color: var(--text); padding: 0; outline: none; -moz-appearance: textfield; }
+        .qs-qty-input::-webkit-outer-spin-button, .qs-qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .qs-actions { display: flex; gap: 7px; margin-top: 8px; }
+        .qs-btn { flex: 1; height: var(--btn-h); border: none; font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all .2s; display: flex; align-items: center; justify-content: center; font-family: var(--font-body); }
+        .qs-btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+        .qs-btn.ghost:hover { border-color: var(--text); }
+        .qs-btn.primary { background: var(--accent); color: white; }
+        .qs-btn.primary:hover { background: #2c4238; }
+        .qs-wishlist { width: 100%; margin-top: 7px; height: var(--btn-h); background: none; border: 1px solid var(--border); font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); cursor: pointer; transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--font-body); }
+        .qs-wishlist svg { width: 12px; height: 12px; fill: none; stroke: currentColor; flex-shrink: 0; }
+        .qs-wishlist:hover { border-color: #e74c3c; color: #e74c3c; }
+        .qs-wishlist.liked { border-color: #e74c3c; color: #e74c3c; background: #fff5f5; }
+        .qs-wishlist.liked svg { fill: #e74c3c; stroke: #e74c3c; }
+
+        /* Global modal */
+        #sale-qs-modal {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%) scale(0.95);
+            width: 320px; background: var(--white); border-radius: 4px; z-index: 100;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15); opacity: 0; pointer-events: none;
+            transition: all .3s cubic-bezier(.4,0,.2,1); padding: 24px;
+        }
+        #sale-qs-modal.show { transform: translate(-50%,-50%) scale(1); opacity: 1; pointer-events: all; }
+
+        /* ── LOAD MORE ── */
+        .sale-load-wrap { padding: 40px 60px; display: flex; justify-content: center; gap: 12px; }
+        .btn-load-more, .btn-collapse {
+            display: inline-flex; align-items: center; gap: 10px;
+            height: var(--btn-h); padding: 0 36px;
+            background: none; border: 1px solid var(--border);
+            font-size: 12px; font-weight: 500; letter-spacing: 0.1em;
+            text-transform: uppercase; cursor: pointer; transition: all .25s; color: var(--text);
+            font-family: var(--font-body);
+        }
+        .btn-load-more:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-collapse { color: var(--muted); }
+        .btn-collapse:hover { border-color: var(--text); color: var(--text); }
+        .btn-load-more.loading { opacity: .5; pointer-events: none; }
+        .btn-load-more svg, .btn-collapse svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+
+        /* ── DELIVERY MODAL (copied from home) ── */
+        .delivery-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+        .delivery-modal { width: 100%; max-width: 480px; background: #fff; border-radius: 2px; padding: 30px; box-shadow: 0 15px 50px rgba(0,0,0,0.2); transform: scale(0.95); opacity: 0; transition: all .3s ease; }
+        .delivery-modal.open { transform: scale(1); opacity: 1; }
+        .dm-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 20px; }
+        .dm-title { font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+        .dm-close-btn { background: none; border: none; cursor: pointer; color: var(--muted); padding: 4px; transition: color .2s; }
+        .dm-close-btn:hover { color: var(--text); }
+        .dm-close-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; }
+        .dm-option { display: flex; align-items: center; gap: 16px; padding: 18px; border: 1px solid var(--border); cursor: pointer; transition: .3s; border-radius: 2px; background: #fafafa; margin-bottom: 12px; }
+        .dm-option:hover { border-color: var(--accent); background: #fff; box-shadow: var(--shadow-sm); }
+        .dm-label { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+        .dm-desc { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+
+        /* ── REVEAL ── */
+        .reveal { opacity: 0; transform: translateY(20px); transition: opacity .65s ease, transform .65s ease; }
         .reveal.visible { opacity: 1; transform: translateY(0); }
-        .reveal-delay-1 { transition-delay: 0.1s; }
-        .reveal-delay-2 { transition-delay: 0.2s; }
 
-        /* responsive */
+        /* ══════════════════════════════════════════
+           RESPONSIVE
+        ══════════════════════════════════════════ */
+        @media (max-width: 1100px) { .sale-products-grid { grid-template-columns: repeat(3,1fr); } }
         @media (max-width: 900px) {
-            .sale-hero { grid-template-columns: 1fr; padding: 48px 24px 60px; }
+            .sale-hero { grid-template-columns: 1fr; padding: 44px 24px 56px; }
             .sale-hero::before { font-size: 120px; }
-            .sale-hero-right { padding-left: 0; margin-top: 32px; }
-            .sale-filter-bar { padding: 0 24px; flex-direction: column; align-items: flex-start; gap: 0; }
-            .sale-featured { grid-template-columns: 1fr; padding: 40px 24px 0; }
-            .sale-grid { grid-template-columns: 1fr 1fr; padding: 0 24px 80px; }
-            .sale-promo-banner { margin: 0 24px 24px; flex-direction: column; align-items: flex-start; }
+            .sale-hero-right { padding-left: 0; margin-top: 28px; }
+            .sale-products-grid { grid-template-columns: repeat(2,1fr); padding: 0 16px; }
+            .sale-vouchers-section { margin: 16px 24px 0; }
+            .sale-voucher-card { padding: 20px 24px; }
+            .sale-voucher-card.secondary { padding: 16px 24px; }
+            .sale-filter-bar { padding: 0 16px; overflow-x: auto; }
+            .sale-adv-inner { padding: 20px 24px; flex-direction: column; gap: 20px; }
+            .sale-load-wrap { padding: 32px 24px; }
+        }
+        @media (max-width: 768px) {
+            .sale-products-grid { grid-template-columns: repeat(2,1fr); gap: 12px; padding: 0 12px; }
+            .sale-filter-tabs { gap: 0; }
+            .sale-filter-tab { padding: 12px 14px; font-size: 10px; }
+            .sale-vouchers-section { margin: 12px 16px 0; }
+            .sale-voucher-card { flex-direction: column; align-items: flex-start; gap: 14px; padding: 18px 20px; }
+            .sale-voucher-card.secondary { padding: 14px 20px; }
+            .sale-voucher-code { width: 100%; }
+            .sale-voucher-code-box { flex: 1; text-align: center; }
+            .sale-voucher-copy { padding: 12px 16px; }
+        }
+        @media (max-width: 375px) {
+            .sale-products-grid { grid-template-columns: repeat(2,1fr); gap: 8px; padding: 0 8px; }
+            .product-name { font-size: 14px; }
+            .product-info { padding: 10px 12px 14px; }
+            .sale-vouchers-section { margin: 10px 12px 0; }
         }
     </style>
 
-    <!-- HERO -->
+    <!-- ══════════════════════ HERO ══════════════════════ -->
     <div class="sale-hero reveal">
         <div class="sale-hero-left">
             <div class="sale-hero-eyebrow">Ưu đãi đặc biệt</div>
-            <h1 class="sale-hero-title">
+            <h1 class="sale-hero-title use-display">
                 Những chiếc áo<br>
                 tốt, giá<br>
                 <em>tốt hơn.</em>
@@ -328,299 +524,963 @@
             <p class="sale-hero-desc">
                 Beemate không sale vì hàng không bán được — mà vì chúng tôi muốn nhiều người hơn được mặc những chiếc áo tốt. Đợt sale này kết thúc khi hết hàng.
             </p>
-            <!-- Countdown -->
-            <div>
-                <div class="sale-countdown" id="saleCountdown">
-                    <div class="sale-countdown-block">
-                        <span class="sale-countdown-num" id="cdDays">03</span>
-                        <span class="sale-countdown-label">Ngày</span>
-                    </div>
-                    <div class="sale-countdown-block">
-                        <span class="sale-countdown-num" id="cdHours">12</span>
-                        <span class="sale-countdown-label">Giờ</span>
-                    </div>
-                    <div class="sale-countdown-block">
-                        <span class="sale-countdown-num" id="cdMins">44</span>
-                        <span class="sale-countdown-label">Phút</span>
-                    </div>
-                    <div class="sale-countdown-block">
-                        <span class="sale-countdown-num" id="cdSecs">08</span>
-                        <span class="sale-countdown-label">Giây</span>
-                    </div>
+            <!-- Countdown (filled by JS from API) -->
+            <div id="saleCountdownWrap">
+                <div class="sale-promo-label" id="salePromoLabel" style="display:none;">Đợt khuyến mãi</div>
+                <div class="sale-promo-name" id="salePromoName" style="display:none;"></div>
+                <div class="sale-countdown" id="saleCountdown" style="display:none;">
+                    <div class="sale-countdown-block"><span class="sale-countdown-num" id="cdDays">00</span><span class="sale-countdown-label">Ngày</span></div>
+                    <div class="sale-countdown-block"><span class="sale-countdown-num" id="cdHours">00</span><span class="sale-countdown-label">Giờ</span></div>
+                    <div class="sale-countdown-block"><span class="sale-countdown-num" id="cdMins">00</span><span class="sale-countdown-label">Phút</span></div>
+                    <div class="sale-countdown-block"><span class="sale-countdown-num" id="cdSecs">00</span><span class="sale-countdown-label">Giây</span></div>
                 </div>
-                <div class="sale-countdown-note">Sale kết thúc: 14/03/2026 · 23:59</div>
+                <div class="sale-countdown-note" id="saleCountdownNote" style="display:none;"></div>
             </div>
         </div>
     </div>
 
-    <!-- FILTER BAR -->
+    <!-- ══════════════════════ VOUCHERS ══════════════════════ -->
+    <div class="sale-vouchers-section" id="saleVouchersSection" style="display:none;"></div>
+
+    <!-- ══════════════════════ FILTER BAR ══════════════════════ -->
     <div class="sale-filter-bar">
-        <div class="sale-filter-tabs">
-            <button class="sale-filter-tab active" data-sale-filter="all">Tất cả</button>
-            <button class="sale-filter-tab" data-sale-filter="upto50">Giảm đến 50%</button>
-            <button class="sale-filter-tab" data-sale-filter="upto30">Giảm đến 30%</button>
-            <button class="sale-filter-tab" data-sale-filter="limited">Hàng giới hạn</button>
+        <div class="sale-filter-tabs" id="saleFilterTabs">
+            <button class="sale-filter-tab active" data-pct="all" onclick="SaleApp.filterTab(this)">
+                Tất cả <span class="tab-count" id="cnt-all">0</span>
+            </button>
+            <button class="sale-filter-tab" data-pct="50" onclick="SaleApp.filterTab(this)">
+                Giảm 50%+ <span class="tab-count" id="cnt-50">0</span>
+            </button>
+            <button class="sale-filter-tab" data-pct="30" onclick="SaleApp.filterTab(this)">
+                Giảm 30–49% <span class="tab-count" id="cnt-30">0</span>
+            </button>
+            <button class="sale-filter-tab" data-pct="10" onclick="SaleApp.filterTab(this)">
+                Giảm 10–29% <span class="tab-count" id="cnt-10">0</span>
+            </button>
+            <button class="sale-filter-tab" data-pct="limited" onclick="SaleApp.filterTab(this)">
+                Hàng giới hạn <span class="tab-count" id="cnt-limited">0</span>
+            </button>
         </div>
         <div class="sale-filter-right">
-            <span class="sale-count-label" id="saleCountLabel">9 sản phẩm</span>
-            <select class="sale-sort">
-                <option>Giảm nhiều nhất</option>
-                <option>Giá thấp → cao</option>
-                <option>Giá cao → thấp</option>
-                <option>Mới nhất</option>
+            <span class="sale-count-label" id="saleCountLabel">— sản phẩm</span>
+            <select class="sale-sort" id="saleSort" onchange="SaleApp.onSort()">
+                <option value="disc_desc">Giảm nhiều nhất</option>
+                <option value="price_asc">Giá thấp → cao</option>
+                <option value="price_desc">Giá cao → thấp</option>
+                <option value="new">Mới nhất</option>
             </select>
+            <button class="sale-filter-adv-btn" id="saleAdvBtn" onclick="SaleApp.toggleAdvPanel()">
+                <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
+                Bộ lọc
+                <div class="adv-dot" id="advActiveDot"></div>
+            </button>
         </div>
     </div>
 
-    <!-- PROMO CODE BANNER -->
-    <div class="sale-promo-banner reveal">
-        <div class="sale-promo-text">
-            <div class="sale-promo-title">Giảm thêm <em>10%</em> cho đơn từ 800k</div>
-            <div class="sale-promo-sub">Áp dụng mã khi thanh toán · Không kết hợp với ưu đãi khác</div>
-        </div>
-        <div class="sale-promo-code">
-            <div class="sale-promo-code-box">BEESALE10</div>
-            <button class="sale-promo-copy" onclick="copyPromoCode(this)">Sao chép</button>
-        </div>
-    </div>
-
-    <!-- FEATURED (2 sản phẩm lớn) -->
-    <div class="sale-featured">
-        <!-- Featured 1 — landscape -->
-        <div class="sale-featured-card reveal" data-sale-tag="upto50">
-            <div class="sale-featured-img">
-                <div class="sale-card-img-bg" style="background:linear-gradient(160deg,#e8ddd1,#c4b49d)"></div>
-                <span class="sale-badge-big">−40%</span>
-                <div class="sale-product-overlay">
-                    <button class="sale-quick-add" onclick="window.showToast()">+ Thêm nhanh</button>
+    <!-- ADVANCED PANEL -->
+    <div class="sale-adv-panel" id="saleAdvPanel">
+        <div class="sale-adv-inner">
+            <div class="sale-adv-group">
+                <div class="sale-adv-label">Danh mục</div>
+                <div class="sale-adv-pills" id="saleAdvCats">
+                    <button class="sale-adv-pill active" data-cat="" onclick="SaleApp.selectCat(this)">Tất cả</button>
                 </div>
             </div>
-            <div class="sale-featured-info">
-                <div class="sale-card-tag">Bestseller · Limited</div>
-                <div class="sale-card-name">Set Áo Quần Linen Tonal</div>
-                <div class="sale-card-prices">
-                    <span class="sale-price-new">594.000 ₫</span>
-                    <span class="sale-price-old">990.000 ₫</span>
-                    <span class="sale-price-save">Tiết kiệm 396k</span>
+            <div class="sale-adv-group">
+                <div class="sale-adv-label">Tình trạng</div>
+                <div class="sale-adv-pills">
+                    <button class="sale-adv-pill active" id="advStockAll" onclick="SaleApp.selectStock('all', this)">Tất cả</button>
+                    <button class="sale-adv-pill" id="advStockLow" onclick="SaleApp.selectStock('low', this)">Sắp hết</button>
+                    <button class="sale-adv-pill" id="advStockNew" onclick="SaleApp.selectStock('new', this)">Mới về</button>
                 </div>
             </div>
-        </div>
-
-        <!-- Featured 2 — portrait -->
-        <div class="sale-featured-card reveal reveal-delay-1" data-sale-tag="upto50">
-            <div class="sale-featured-img" style="aspect-ratio:unset;height:100%;min-height:320px">
-                <div class="sale-card-img-bg" style="background:linear-gradient(160deg,#c5cfc7,#3D5A4C)"></div>
-                <span class="sale-badge-big">−35%</span>
-                <div class="sale-product-overlay">
-                    <button class="sale-quick-add" onclick="window.showToast()">+ Thêm nhanh</button>
-                </div>
-            </div>
-            <div class="sale-featured-info">
-                <div class="sale-card-tag">AW 2024 · Xanh rêu</div>
-                <div class="sale-card-name">Áo Sơ Mi Linen Xanh Rêu</div>
-                <div class="sale-card-prices">
-                    <span class="sale-price-new">292.000 ₫</span>
-                    <span class="sale-price-old">450.000 ₫</span>
-                    <span class="sale-price-save">Tiết kiệm 158k</span>
-                </div>
-            </div>
+            <button class="sale-adv-reset" onclick="SaleApp.resetFilters()">Xóa bộ lọc</button>
         </div>
     </div>
 
-    <!-- REGULAR GRID -->
-    <div class="sale-grid" id="saleGrid">
+    <!-- ══════════════════════ PRODUCTS SECTION ══════════════════════ -->
+    <section class="sale-products-section" id="saleProductsSection">
+        <div id="sale-qa-backdrop" onclick="SaleApp.closeAllSelections()"></div>
+        <div id="sale-qs-modal"></div>
 
-        <div class="sale-product-card reveal" data-sale-tag="upto30">
-            <div class="sale-product-img">
-                <div class="sale-card-img-bg" style="background:linear-gradient(160deg,#d4cfc9,#b0a99f)"></div>
-                <span class="sale-badge">−20%</span>
-                <div class="sale-product-overlay"><button class="sale-quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div>
+        <!-- Empty state -->
+        <div class="sale-empty" id="saleEmpty">
+            <svg viewBox="0 0 24 24" stroke-width="1"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/><line x1="3" y1="3" x2="21" y2="21"/></svg>
+            <h3 class="use-display">Chưa có sản phẩm sale</h3>
+            <p>Chúng tôi chưa có chương trình khuyến mãi nào đang hoạt động. Hãy quay lại sớm nhé — những chiếc áo tốt, giá tốt hơn đang được chuẩn bị!</p>
+            <button class="sale-empty-btn" onclick="window.location.hash='#shop'">
+                Xem toàn bộ sản phẩm
+                <svg viewBox="0 0 24 24" width="14" height="14" stroke="white" fill="none" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+        </div>
+
+        <div class="sale-products-grid" id="saleProductsGrid">
+            <!-- Skeleton placeholders -->
+            <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line short"></div><div class="skeleton-line medium"></div><div class="skeleton-line price"></div></div></div>
+            <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line short"></div><div class="skeleton-line medium"></div><div class="skeleton-line price"></div></div></div>
+            <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line short"></div><div class="skeleton-line medium"></div><div class="skeleton-line price"></div></div></div>
+            <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line short"></div><div class="skeleton-line medium"></div><div class="skeleton-line price"></div></div></div>
+        </div>
+
+        <div class="sale-load-wrap" id="saleLoadWrap" style="display:none;">
+            <button class="btn-load-more" id="saleLoadMoreBtn" onclick="SaleApp.loadMore()">
+                <span>Xem thêm sản phẩm</span>
+                <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <button class="btn-collapse" id="saleCollapseBtn" onclick="SaleApp.collapseProducts()" style="display:none;">
+                <span>Thu gọn</span>
+                <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M5 15l7-7 7 7"/></svg>
+            </button>
+        </div>
+    </section>
+
+    <!-- ══════════════════════ DELIVERY MODAL ══════════════════════ -->
+    <div class="delivery-modal-overlay" id="saleDeliveryModalOverlay" onclick="if(event.target===this)SaleApp.closeDeliveryModal()">
+        <div class="delivery-modal">
+            <div class="dm-header">
+                <div class="dm-title">Chọn hình thức nhận hàng</div>
+                <button class="dm-close-btn" onclick="SaleApp.closeDeliveryModal()">
+                    <svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
             </div>
-            <div class="sale-card-info">
-                <div class="sale-card-tag">Cotton · Cơ bản</div>
-                <div class="sale-card-name">Áo Cotton Cổ Tròn Basic</div>
-                <div class="sale-card-prices">
-                    <span class="sale-price-new">256.000 ₫</span>
-                    <span class="sale-price-old">320.000 ₫</span>
+            <div style="margin-top:4px;">
+                <div class="dm-option" onclick="SaleApp.selectDeliveryAndCheckout('store')">
+                    <i class="fa-solid fa-store" style="font-size:28px;color:var(--accent);width:36px;text-align:center;"></i>
+                    <div style="flex:1;">
+                        <div class="dm-label">Nhận tại cửa hàng</div>
+                        <div class="dm-desc">Miễn phí vận chuyển. Nhận hàng tại: 13 phố Phan Tây Nhạc, Nam Từ Liêm, Hà Nội.</div>
+                    </div>
+                </div>
+                <div class="dm-option" onclick="SaleApp.selectDeliveryAndCheckout('home')">
+                    <i class="fa-solid fa-truck-fast" style="font-size:28px;color:var(--accent);width:36px;text-align:center;"></i>
+                    <div style="flex:1;">
+                        <div class="dm-label">Giao hàng tận nơi</div>
+                        <div class="dm-desc">Giao hàng đến địa chỉ của bạn. Phí vận chuyển tính theo khoảng cách.</div>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <div class="sale-product-card reveal reveal-delay-1" data-sale-tag="upto30">
-            <div class="sale-product-img">
-                <div class="sale-card-img-bg" style="background:linear-gradient(160deg,#cfd4cc,#94a091)"></div>
-                <span class="sale-badge">−25%</span>
-                <div class="sale-product-overlay"><button class="sale-quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div>
-            </div>
-            <div class="sale-card-info">
-                <div class="sale-card-tag">Bamboo · Nhẹ</div>
-                <div class="sale-card-name">Áo Thun Bamboo Nhẹ</div>
-                <div class="sale-card-prices">
-                    <span class="sale-price-new">210.000 ₫</span>
-                    <span class="sale-price-old">280.000 ₫</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="sale-product-card reveal reveal-delay-2" data-sale-tag="upto30">
-            <div class="sale-product-img">
-                <div class="sale-card-img-bg" style="background:linear-gradient(160deg,#d1c9c0,#a89e93)"></div>
-                <span class="sale-badge">−20%</span>
-                <div class="sale-product-overlay"><button class="sale-quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div>
-            </div>
-            <div class="sale-card-info">
-                <div class="sale-card-tag">Cotton · Classic</div>
-                <div class="sale-card-name">Áo Polo Cotton Wash</div>
-                <div class="sale-card-prices">
-                    <span class="sale-price-new">304.000 ₫</span>
-                    <span class="sale-price-old">380.000 ₫</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="sale-product-card reveal" data-sale-tag="upto50 limited">
-            <div class="sale-product-img">
-                <div class="sale-card-img-bg" style="background:linear-gradient(160deg,#d4c5b0,#a08060)"></div>
-                <span class="sale-badge">−50%</span>
-                <div class="sale-product-overlay"><button class="sale-quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div>
-            </div>
-            <div class="sale-card-info">
-                <div class="sale-card-tag">Limited · Còn 2</div>
-                <div class="sale-card-name">Áo Linen Wash Vintage</div>
-                <div class="sale-card-prices">
-                    <span class="sale-price-new">225.000 ₫</span>
-                    <span class="sale-price-old">450.000 ₫</span>
-                    <span class="sale-price-save">−50%</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="sale-product-card reveal reveal-delay-1" data-sale-tag="upto30 limited">
-            <div class="sale-product-img">
-                <div class="sale-card-img-bg" style="background:linear-gradient(160deg,#c8c0b8,#706860)"></div>
-                <span class="sale-badge">−30%</span>
-                <div class="sale-product-overlay"><button class="sale-quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div>
-            </div>
-            <div class="sale-card-info">
-                <div class="sale-card-tag">AW24 · Còn 3</div>
-                <div class="sale-card-name">Áo Len Mỏng Oversize</div>
-                <div class="sale-card-prices">
-                    <span class="sale-price-new">315.000 ₫</span>
-                    <span class="sale-price-old">450.000 ₫</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="sale-product-card reveal reveal-delay-2" data-sale-tag="upto50">
-            <div class="sale-product-img">
-                <div class="sale-card-img-bg" style="background:linear-gradient(160deg,#b8c4b0,#607858)"></div>
-                <span class="sale-badge">−45%</span>
-                <div class="sale-product-overlay"><button class="sale-quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div>
-            </div>
-            <div class="sale-card-info">
-                <div class="sale-card-tag">Linen · AW24</div>
-                <div class="sale-card-name">Áo Linen Tay Lỡ Xanh</div>
-                <div class="sale-card-prices">
-                    <span class="sale-price-new">247.000 ₫</span>
-                    <span class="sale-price-old">450.000 ₫</span>
-                    <span class="sale-price-save">Tiết kiệm 203k</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="sale-product-card reveal" data-sale-tag="upto30">
-            <div class="sale-product-img">
-                <div class="sale-card-img-bg" style="background:linear-gradient(160deg,#e0d8cc,#c0b8a8)"></div>
-                <span class="sale-badge">−15%</span>
-                <div class="sale-product-overlay"><button class="sale-quick-add" onclick="window.showToast()">+ Thêm nhanh</button></div>
-            </div>
-            <div class="sale-card-info">
-                <div class="sale-card-tag">The Basics</div>
-                <div class="sale-card-name">Áo Cotton Tay Dài Trắng</div>
-                <div class="sale-card-prices">
-                    <span class="sale-price-new">272.000 ₫</span>
-                    <span class="sale-price-old">320.000 ₫</span>
-                </div>
-            </div>
-        </div>
-
     </div>
 
     <script>
-        window.SaleApp = {
-            init: function() {
-                // Countdown timer — đặt target 3 ngày từ lúc load
-                const target = new Date();
-                target.setDate(target.getDate() + 3);
-                target.setHours(23, 59, 0, 0);
+        window.SaleApp = (function () {
 
-                function updateCountdown() {
-                    const now = new Date();
-                    const diff = target - now;
-                    if (diff <= 0) return;
-                    const d = Math.floor(diff / 86400000);
-                    const h = Math.floor((diff % 86400000) / 3600000);
-                    const m = Math.floor((diff % 3600000) / 60000);
-                    const s = Math.floor((diff % 60000) / 1000);
-                    const pad = n => String(n).padStart(2, '0');
-                    const cd = document.getElementById('cdDays');
-                    const ch = document.getElementById('cdHours');
-                    const cm = document.getElementById('cdMins');
-                    const cs = document.getElementById('cdSecs');
-                    if (cd) cd.textContent = pad(d);
-                    if (ch) ch.textContent = pad(h);
-                    if (cm) cm.textContent = pad(m);
-                    if (cs) cs.textContent = pad(s);
+            /* ── Constants ── */
+            const PAGE_SIZE  = 8;
+            const STOCK_LOW  = 20;
+
+            /* ── State ── */
+            const state = {
+                allSaleProducts: [],   // chỉ sản phẩm đang sale
+                filtered: [],
+                offset: 0,
+                activePct: 'all',      // tab % giảm
+                activeCat: '',
+                activeStock: 'all',
+                sort: 'disc_desc',
+                likedIds: new Set(safeGet('bee_wishlist', []))
+            };
+            const tempSel = {};
+            let revealObs = null;
+            let countdownTimers = [];
+
+            function renderPromos(promos) {
+                const wrap = document.getElementById('saleCountdownWrap');
+                wrap.innerHTML = '';
+                countdownTimers.forEach(t => clearInterval(t));
+                countdownTimers = [];
+
+                if (!promos || promos.length === 0) return;
+
+                const primary = promos[0];
+                const secondary = promos.slice(1);
+
+                // Hàm gen HTML cho 1 đợt khuyến mãi
+                const buildPromoHtml = (promo, idx, isLast) => {
+                    const target = parseDate(promo.ngayKetThuc);
+                    if (!target || isNaN(target)) return '';
+                    const cdId = 'cd-' + idx;
+                    const df = new Intl.DateTimeFormat('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+
+                    return `
+            <div style="margin-bottom: ${isLast ? '0' : '24px'};">
+                ${promo.ten ? `
+                <div class="sale-promo-label">Đợt khuyến mãi</div>
+                <div class="sale-promo-name">${promo.ten}</div>
+                ` : ''}
+                <div class="sale-countdown" id="${cdId}">
+                    <div class="sale-countdown-block"><span class="sale-countdown-num" id="${cdId}-d">00</span><span class="sale-countdown-label">Ngày</span></div>
+                    <div class="sale-countdown-block"><span class="sale-countdown-num" id="${cdId}-h">00</span><span class="sale-countdown-label">Giờ</span></div>
+                    <div class="sale-countdown-block"><span class="sale-countdown-num" id="${cdId}-m">00</span><span class="sale-countdown-label">Phút</span></div>
+                    <div class="sale-countdown-block"><span class="sale-countdown-num" id="${cdId}-s">00</span><span class="sale-countdown-label">Giây</span></div>
+                </div>
+                <div class="sale-countdown-note" id="${cdId}-note">Kết thúc: ${df.format(target).replace(',', ' ·')}</div>
+            </div>
+        `;
+                };
+
+                // Render đợt đầu tiên
+                let html = buildPromoHtml(primary, 0, secondary.length > 0);
+
+                // Render các đợt phụ vào trong khung thu gọn
+                if (secondary.length > 0) {
+                    html += `<div class="sale-promos-more" id="salePromosMore" style="margin-top: 24px;">`;
+                    secondary.forEach((p, i) => html += buildPromoHtml(p, i + 1, i === secondary.length - 1));
+                    html += `</div>`;
+
+                    // Nút xem thêm (Tái sử dụng class CSS của voucher cho chuẩn style)
+                    html += `
+            <button class="sale-voucher-toggle" id="salePromoToggle" onclick="SaleApp.togglePromos()" style="margin-top: 16px;">
+                <span id="salePromoToggleTxt">Xem thêm ${secondary.length} đợt khuyến mãi</span>
+                <svg viewBox="0 0 24 24" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg>
+            </button>
+        `;
                 }
-                updateCountdown();
-                setInterval(updateCountdown, 1000);
 
-                // Filter tabs
-                document.querySelectorAll('#sale-section .sale-filter-tab').forEach(tab => {
-                    tab.addEventListener('click', () => {
-                        document.querySelectorAll('#sale-section .sale-filter-tab').forEach(t => t.classList.remove('active'));
-                        tab.classList.add('active');
-                        const filter = tab.dataset.saleFilter;
-                        const allCards = document.querySelectorAll('#sale-section [data-sale-tag]');
-                        let count = 0;
-                        allCards.forEach(card => {
-                            const tags = card.dataset.saleTag || '';
-                            const show = filter === 'all' || tags.includes(filter);
-                            card.style.display = show ? '' : 'none';
-                            if (show) count++;
-                        });
-                        const lbl = document.getElementById('saleCountLabel');
-                        if (lbl) lbl.textContent = count + ' sản phẩm';
-                    });
+                wrap.innerHTML = html;
+
+                // Kích hoạt timer cho tất cả các đợt
+                promos.forEach((promo, idx) => {
+                    const target = parseDate(promo.ngayKetThuc);
+                    if (!target || isNaN(target)) return;
+                    const cdId = 'cd-' + idx;
+
+                    function tick() {
+                        const diff = target - new Date();
+                        if (diff <= 0) {
+                            ['d','h','m','s'].forEach(p => {
+                                const el = document.getElementById(`${cdId}-${p}`);
+                                if(el) el.textContent = '00';
+                            });
+                            const noteEl = document.getElementById(`${cdId}-note`);
+                            if(noteEl) noteEl.textContent = 'Chương trình đã kết thúc';
+                            return;
+                        }
+                        const d=Math.floor(diff/86400000), h=Math.floor((diff%86400000)/3600000),
+                            m=Math.floor((diff%3600000)/60000), s=Math.floor((diff%60000)/1000);
+
+                        const elD = document.getElementById(`${cdId}-d`); if(elD) elD.textContent = pad(d);
+                        const elH = document.getElementById(`${cdId}-h`); if(elH) elH.textContent = pad(h);
+                        const elM = document.getElementById(`${cdId}-m`); if(elM) elM.textContent = pad(m);
+                        const elS = document.getElementById(`${cdId}-s`); if(elS) elS.textContent = pad(s);
+                    }
+                    tick();
+                    countdownTimers.push(setInterval(tick, 1000));
                 });
-
-                // Reveal on scroll
-                const reveals = document.querySelectorAll('#sale-section .reveal');
-                const obs = new IntersectionObserver(entries => {
-                    entries.forEach(e => {
-                        if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
-                    });
-                }, { threshold: 0.1 });
-                reveals.forEach(r => obs.observe(r));
-                setTimeout(() => {
-                    reveals.forEach(r => {
-                        if (r.getBoundingClientRect().top < window.innerHeight) r.classList.add('visible');
-                    });
-                }, 100);
             }
-        };
 
-        window.copyPromoCode = function(btn) {
-            navigator.clipboard?.writeText('BEESALE10').then(() => {
-                btn.textContent = '✓ Đã chép';
-                btn.style.background = 'var(--accent-light)';
-                btn.style.color = 'white';
-                setTimeout(() => {
-                    btn.textContent = 'Sao chép';
-                    btn.style.background = '';
-                    btn.style.color = '';
-                }, 2000);
-            });
-        };
+            /* ── Helpers ── */
+            function safeGet(k, fb) { try { return JSON.parse(localStorage.getItem(k) || JSON.stringify(fb)); } catch { return fb; } }
+            function safeSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+            function fmt(n) { return new Intl.NumberFormat('vi-VN').format(n) + ' ₫'; }
+            function pad(n) { return String(n).padStart(2, '0'); }
+            function isNew(p) { return p.ngayTao && (new Date() - new Date(p.ngayTao)) / 864e5 <= 7; }
+            function getStock(p) { const v = p.chiTietSanPhams||p.chiTietSanPhamList||p.bienThes||p.skus||[]; return v.reduce((s,x)=>s+(x.soLuong||0),0); }
+
+            function prices(p) {
+                const v = p.chiTietSanPhams||p.chiTietSanPhamList||p.bienThes||p.skus||[];
+                const origs = v.map(x=>x.giaBan||0).filter(x=>x>0);
+                const sales  = v.map(x=>x.giaSauKhuyenMai||x.giaBan||0).filter(x=>x>0);
+                const minOrig = origs.length ? Math.min(...origs) : (p.giaBan||0);
+                const minSale = sales.length  ? Math.min(...sales)  : minOrig;
+                return { minOrig, minSale, hasSale: minSale > 0 && minSale < minOrig };
+            }
+
+            function discountPct(p) {
+                const { minOrig, minSale, hasSale } = prices(p);
+                if (!hasSale || minOrig === 0) return 0;
+                return Math.round((1 - minSale / minOrig) * 100);
+            }
+
+            function optImg(url) {
+                if (!url) return '';
+                return url.includes('res.cloudinary.com')
+                    ? url.replace('/image/upload/', '/image/upload/c_fill,w_500,h_667,f_auto,q_auto/')
+                    : url;
+            }
+
+            /* ── Color utils ── */
+            const COLOR_MAP = {
+                'trắng':'#ffffff','đen':'#1a1a1a','xám':'#9ca3af','ghi':'#d1cfc9','be':'#c4b49d',
+                'kem':'#fef3c7','nâu':'#92400e','rêu':'#3D5A4C','đỏ':'#dc2626','hồng':'#f472b6',
+                'xanh biển':'#3b82f6','xanh dương':'#3b82f6','vàng':'#eab308','cam':'#f97316',
+                'xanh lá':'#16a34a','tím':'#a855f7'
+            };
+            function colorHex(name) {
+                if (!name) return '#aaa';
+                const n = name.toLowerCase().trim();
+                if (COLOR_MAP[n]) return COLOR_MAP[n];
+                for (const [k,v] of Object.entries(COLOR_MAP)) if (n.includes(k)) return v;
+                let h=0; for (let i=0;i<n.length;i++) h=n.charCodeAt(i)+((h<<5)-h);
+                let c='#'; for (let i=0;i<3;i++) c+=('00'+((h>>(i*8))&0xFF).toString(16)).substr(-2);
+                return c;
+            }
+            function contrastBorder(hex) {
+                if (!hex) return 'rgba(0,0,0,0.14)';
+                const c=hex.replace('#','').padStart(6,'0');
+                const r=parseInt(c.substr(0,2),16),g=parseInt(c.substr(2,2),16),b=parseInt(c.substr(4,2),16);
+                return ((r*299+g*587+b*114)/1000>210)?'rgba(0,0,0,0.28)':'rgba(0,0,0,0.12)';
+            }
+            function sortSizes(arr) {
+                const O={'freesize':0,'one size':0,'os':0,'xxs':1,'xs':2,'s':3,'m':4,'l':5,'xl':6,'xxl':7,'2xl':7,'xxxl':8,'3xl':8,'4xl':9};
+                return arr.sort((a,b)=>{
+                    const na=a.ten.toLowerCase().replace('size','').trim(), nb=b.ten.toLowerCase().replace('size','').trim();
+                    const da=parseFloat(na), db=parseFloat(nb);
+                    if (!isNaN(da)&&!isNaN(db)) return da-db;
+                    return (O[na]??99)-(O[nb]??99)||na.localeCompare(nb);
+                });
+            }
+
+            /* ══════════════════════════════════════════
+               COUNTDOWN
+            ══════════════════════════════════════════ */
+            // Spring Boot trả LocalDateTime dạng mảng [2026,3,14,23,59] hoặc chuỗi ISO
+            function parseDate(d) {
+                if (!d) return null;
+                if (Array.isArray(d)) return new Date(d[0], d[1]-1, d[2], d[3]||0, d[4]||0, d[5]||0);
+                return new Date(d);
+            }
+
+
+
+            /* ══════════════════════════════════════════
+               VOUCHER BANNERS
+            ══════════════════════════════════════════ */
+            function renderVouchers(vouchers) {
+                const sec = document.getElementById('saleVouchersSection');
+                if (!vouchers || !vouchers.length) { sec.style.display = 'none'; return; }
+                sec.style.display = 'block';
+
+                const primary   = vouchers.slice(0, 1);
+                const secondary = vouchers.slice(1);
+
+                function buildTitle(v) {
+                    const isPercent = v.loaiGiamGia === 'PERCENTAGE' || (v.loaiGiamGia||'').includes('%');
+                    const val = v.giaTriGiamGia || 0;
+                    const cap = v.giaTriGiamGiaToiDa;
+                    const minOrder = v.dieuKien || 0;
+                    if (v.ten) {
+                        const discStr = isPercent ? `${val}%` : fmt(val);
+                        return `${v.ten} — Giảm <em>${discStr}</em>`;
+                    }
+                    if (isPercent) {
+                        let t = `Giảm thêm <em>${val}%</em>`;
+                        if (minOrder > 0) t += ` cho đơn từ <em>${fmt(minOrder)}</em>`;
+                        if (cap > 0) t += ` (tối đa ${fmt(cap)})`;
+                        return t;
+                    }
+                    let t = `Giảm thêm <em>${fmt(val)}</em>`;
+                    if (minOrder > 0) t += ` cho đơn từ <em>${fmt(minOrder)}</em>`;
+                    return t;
+                }
+
+                function buildSub(v) {
+                    const parts = ['Áp dụng mã khi thanh toán'];
+                    if (v.choPhepCongDon === false) parts.push('Không kết hợp với ưu đãi khác');
+                    if (v.ngayKetThuc) {
+                        // Xử lý cả dạng mảng [2026,3,14,...] và chuỗi ISO
+                        const d = parseDate(v.ngayKetThuc);
+                        if (d && !isNaN(d)) {
+                            const df = new Intl.DateTimeFormat('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric' });
+                            parts.push('HSD: ' + df.format(d));
+                        }
+                    }
+                    return parts.join(' · ');
+                }
+
+                const cardHtml = (v, cls) => `
+<div class="sale-voucher-card ${cls}">
+    <div class="sale-voucher-text">
+        <div class="sale-voucher-title">${buildTitle(v)}</div>
+        <div class="sale-voucher-sub">${buildSub(v)}</div>
+    </div>
+    <div class="sale-voucher-code">
+        <div class="sale-voucher-code-box">${v.maCode}</div>
+        <button class="sale-voucher-copy" onclick="SaleApp.copyVoucher(this,'${v.maCode}')">Sao chép</button>
+    </div>
+</div>`;
+
+                let html = `<div class="sale-voucher-list">`;
+                primary.forEach(v   => html += cardHtml(v, ''));
+                html += `<div class="sale-vouchers-more" id="saleVouchersMore">`;
+                secondary.forEach(v => html += cardHtml(v, ''));
+                html += `</div>`;
+                if (secondary.length) {
+                    html += `<button class="sale-voucher-toggle" id="saleVoucherToggle" onclick="SaleApp.toggleVouchers()">
+                <span id="saleVoucherToggleTxt">Xem thêm ${secondary.length} mã khuyến mãi</span>
+                <svg viewBox="0 0 24 24" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg>
+            </button>`;
+                }
+                html += `</div>`;
+                sec.innerHTML = html;
+            }
+
+            /* ══════════════════════════════════════════
+               LOAD PRODUCTS
+            ══════════════════════════════════════════ */
+            function showSkeleton() {
+                document.getElementById('saleProductsGrid').innerHTML =
+                    Array(4).fill(`<div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line short"></div><div class="skeleton-line medium"></div><div class="skeleton-line price"></div></div></div>`).join('');
+                document.getElementById('saleEmpty').classList.remove('show');
+            }
+
+            async function loadProducts() {
+                showSkeleton();
+                try {
+                    const res = await fetch('/api/products?page=0&size=100&trangThai=true');
+                    if (!res.ok) throw new Error('network');
+                    const data = await res.json();
+                    const list = (data.content || data).filter(p => {
+                        const v = p.chiTietSanPhams||p.chiTietSanPhamList||p.bienThes||p.skus||[];
+                        return v.length > 0 && prices(p).hasSale;
+                    });
+
+                    state.allSaleProducts = list;
+
+                    if (!list.length) {
+                        showNoSale();
+                        return;
+                    }
+
+                    buildCatPills(list);
+                    buildTabCounts(list);
+                    applyFilters();
+                } catch {
+                    document.getElementById('saleProductsGrid').innerHTML =
+                        '<div style="grid-column:1/-1;padding:60px;text-align:center;color:var(--muted);font-size:13px;">Không thể kết nối máy chủ. <button onclick="SaleApp.reload()" style="color:var(--accent);background:none;border:none;cursor:pointer;text-decoration:underline;font-size:13px;">Thử lại</button></div>';
+                }
+            }
+
+            async function loadSaleInfo() {
+                try {
+                    const res = await fetch('/api/khuyen-mai?trangThai=true&page=0&size=10'); // Tăng size để lấy list
+                    if (res.ok) {
+                        const data  = await res.json();
+                        const list  = data.content || (Array.isArray(data) ? data : []);
+                        if (list.length > 0) renderPromos(list); // Gọi hàm render mới
+                    }
+                } catch(e) { console.error('Lỗi API KM:', e); }
+                try {
+                    const res = await fetch('/api/vouchers/active');
+                    if (res.ok) {
+                        const data = await res.json();
+                        renderVouchers(Array.isArray(data) ? data : (data.content || []));
+                    }
+                } catch(e) { console.error('Lỗi API Voucher:', e); }
+            }
+
+            function showNoSale() {
+                document.getElementById('saleProductsGrid').innerHTML = '';
+                document.getElementById('saleEmpty').classList.add('show');
+                document.getElementById('saleCountLabel').textContent = '0 sản phẩm';
+                document.getElementById('saleLoadWrap').style.display = 'none';
+            }
+
+            /* ── Tab counts ── */
+            function buildTabCounts(list) {
+                const c50      = list.filter(p => discountPct(p) >= 50).length;
+                const c30      = list.filter(p => { const d=discountPct(p); return d>=30&&d<50; }).length;
+                const c10      = list.filter(p => { const d=discountPct(p); return d>=10&&d<30; }).length;
+                const cLimited = list.filter(p => getStock(p) > 0 && getStock(p) <= STOCK_LOW).length;
+                document.getElementById('cnt-all').textContent     = list.length;
+                document.getElementById('cnt-50').textContent      = c50;
+                document.getElementById('cnt-30').textContent      = c30;
+                document.getElementById('cnt-10').textContent      = c10;
+                document.getElementById('cnt-limited').textContent = cLimited;
+            }
+
+            /* ── Category pills ── */
+            function buildCatPills(list) {
+                const cats = new Map();
+                list.forEach(p => { if (p.danhMuc?.ten) { const k=p.danhMuc.ten; cats.set(k,(cats.get(k)||0)+1); } });
+                const container = document.getElementById('saleAdvCats');
+                container.querySelectorAll('[data-cat]:not([data-cat=""])').forEach(e=>e.remove());
+                cats.forEach((count, name) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'sale-adv-pill';
+                    btn.dataset.cat = name;
+                    btn.textContent = `${name} (${count})`;
+                    btn.onclick = () => pub.selectCat(btn);
+                    container.appendChild(btn);
+                });
+            }
+
+            /* ── Apply filters + sort ── */
+            function applyFilters() {
+                let list = state.allSaleProducts;
+
+                // Tab %
+                if (state.activePct === '50')      list = list.filter(p => discountPct(p) >= 50);
+                else if (state.activePct === '30') list = list.filter(p => { const d=discountPct(p); return d>=30&&d<50; });
+                else if (state.activePct === '10') list = list.filter(p => { const d=discountPct(p); return d>=10&&d<30; });
+                else if (state.activePct === 'limited') list = list.filter(p => getStock(p)>0&&getStock(p)<=STOCK_LOW);
+
+                // Category
+                if (state.activeCat) list = list.filter(p => p.danhMuc?.ten === state.activeCat);
+
+                // Stock
+                if (state.activeStock === 'low')  list = list.filter(p => { const s=getStock(p); return s>0&&s<=STOCK_LOW; });
+                else if (state.activeStock === 'new') list = list.filter(p => isNew(p));
+
+                // Sort
+                const sort = state.sort;
+                if (sort === 'disc_desc') list = [...list].sort((a,b) => discountPct(b)-discountPct(a));
+                else if (sort === 'price_asc')  list = [...list].sort((a,b) => prices(a).minSale-prices(b).minSale);
+                else if (sort === 'price_desc') list = [...list].sort((a,b) => prices(b).minSale-prices(a).minSale);
+                else if (sort === 'new') list = [...list].sort((a,b) => new Date(b.ngayTao||0)-new Date(a.ngayTao||0));
+
+                state.filtered = list;
+                state.offset = 0;
+                renderPage(true);
+
+                // ADV dot
+                const hasAdv = state.activeCat !== '' || state.activeStock !== 'all';
+                document.getElementById('advActiveDot').classList.toggle('show', hasAdv);
+            }
+
+            /* ── Render grid ── */
+            function renderPage(reset) {
+                const grid    = document.getElementById('saleProductsGrid');
+                const wrap    = document.getElementById('saleLoadWrap');
+                const loadBtn = document.getElementById('saleLoadMoreBtn');
+                const colBtn  = document.getElementById('saleCollapseBtn');
+                const chunk   = state.filtered.slice(state.offset, state.offset + PAGE_SIZE);
+                const empty   = document.getElementById('saleEmpty');
+
+                empty.classList.remove('show');
+
+                if (reset) {
+                    if (!state.filtered.length) {
+                        grid.innerHTML = '<div style="grid-column:1/-1;padding:60px;text-align:center;color:var(--muted);font-size:14px;">Không có sản phẩm nào trong bộ lọc này.</div>';
+                        wrap.style.display = 'none';
+                        document.getElementById('saleCountLabel').textContent = '0 sản phẩm';
+                        return;
+                    }
+                    grid.innerHTML = chunk.map(cardHtml).join('');
+                } else {
+                    chunk.forEach(p => grid.insertAdjacentHTML('beforeend', cardHtml(p)));
+                }
+                state.offset += chunk.length;
+                document.getElementById('saleCountLabel').textContent = state.filtered.length + ' sản phẩm';
+                setupAnimations();
+
+                const hasMore  = state.offset < state.filtered.length;
+                const hasExtra = state.offset > PAGE_SIZE;
+                wrap.style.display = (hasMore || hasExtra) ? 'flex' : 'none';
+                if (loadBtn) {
+                    loadBtn.style.display = hasMore ? 'inline-flex' : 'none';
+                    loadBtn.classList.remove('loading');
+                    loadBtn.querySelector('span').textContent = `Xem thêm (còn ${state.filtered.length - state.offset})`;
+                }
+                if (colBtn) colBtn.style.display = hasExtra ? 'inline-flex' : 'none';
+            }
+
+            /* ── Card HTML (mirror home, adapted for sale) ── */
+            function cardHtml(p) {
+                const v = p.chiTietSanPhams||p.chiTietSanPhamList||p.bienThes||p.skus||[];
+                const { minOrig, minSale } = prices(p);
+                const pct   = discountPct(p);
+                const saved = minOrig - minSale;
+                const img   = optImg(p.hinhAnhs?.[0]?.url || '');
+                const imgH  = p.hinhAnhs?.length > 1
+                    ? `<img src="${optImg(p.hinhAnhs[1].url)}" loading="lazy" class="img-hover" alt="${p.ten}">` : '';
+
+                const stock  = getStock(p);
+                const liked  = state.likedIds.has(p.id);
+
+                // Badges: % discount badge (replace SALE), limited badge, new badge
+                let badges = `<div class="prod-badge sale-pct">-${pct}%</div>`;
+                // if (stock > 0 && stock <= STOCK_LOW) badges += `<div class="prod-badge limited">Còn ${stock}</div>`;
+                if (isNew(p)) badges += `<div class="prod-badge new">MỚI</div>`;
+
+                // Swatches
+                const uColors = [];
+                v.forEach(x => { if (x.mauSac && !uColors.find(c=>c.id===x.mauSac.id)) uColors.push(x.mauSac); });
+                const show = uColors.slice(0,4), extra = uColors.length - 4;
+                let swHtml = show.map(c => {
+                    const hex = c.maMau || colorHex(c.ten);
+                    return `<div class="swatch-dot" style="background:${hex};box-shadow:inset 0 0 0 1px ${contrastBorder(hex)};" title="${c.ten}"></div>`;
+                }).join('');
+                if (extra > 0) swHtml += `<span class="swatch-more">+${extra}</span>`;
+
+                const stockHtml = (stock > 0 && stock <= STOCK_LOW)
+                    ? `<div class="stock-low"><div class="stock-pulse"></div>Còn ${stock} sản phẩm</div>` : '';
+
+                // Price: sale price + orig strikethrough + "Tiết kiệm Xk"
+                const savedK = saved >= 1000 ? Math.round(saved/1000) + 'k' : fmt(saved);
+                const priceHtml = `
+            <span class="price-sale">${fmt(minSale)}</span>
+            <span class="price-orig">${fmt(minOrig)}</span>
+            <span class="price-save">Tiết kiệm ${savedK}</span>`;
+
+                return `
+<div class="product-card" id="sale-card-${p.id}">
+    <div class="prod-badges">${badges}</div>
+    <div class="product-img" onclick="SaleApp.viewDetail(${p.id})">
+        ${img ? `<img src="${img}" loading="lazy" class="img-placeholder" alt="${p.ten}">` : '<div style="width:100%;height:100%;background:#f3f1ee;"></div>'}
+        ${imgH}
+        <div class="img-overlay">
+            <button class="btn-quick" onclick="event.stopPropagation();SaleApp.openSelection(${p.id},event)">
+                <svg viewBox="0 0 24 24" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+                Chọn & Mua
+            </button>
+        </div>
+        <button class="heart-btn${liked?' liked':''}" id="sale-heart-${p.id}"
+            onclick="event.stopPropagation();SaleApp.toggleWishlist(${p.id})" title="Yêu thích">
+            <svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        </button>
+    </div>
+
+    <div class="qs-overlay" onclick="event.stopPropagation()">
+        <button class="qs-close" onclick="SaleApp.closeAllSelections()">×</button>
+        <div class="qs-name">${p.ten}</div>
+        <div class="qs-lbl">Màu sắc <span id="s-qs-cn-${p.id}" style="font-weight:600;text-transform:none;letter-spacing:0;margin-left:3px;"></span></div>
+        <div class="qs-opts" id="s-qs-colors-${p.id}"></div>
+        <div class="qs-lbl">Kích cỡ</div>
+        <div class="qs-opts" id="s-qs-sizes-${p.id}"></div>
+        <div class="qs-qty-selector" onclick="event.stopPropagation()">
+            <button class="qs-qty-btn" onclick="SaleApp.changeQsQty(${p.id},'s-qty-${p.id}',-1,event)"><i class="fa-solid fa-minus"></i></button>
+            <input type="number" id="s-qty-${p.id}" class="qs-qty-input" value="1" min="1" onchange="SaleApp.validateQsQty(${p.id},'s-qty-${p.id}',event)">
+            <button class="qs-qty-btn" onclick="SaleApp.changeQsQty(${p.id},'s-qty-${p.id}',1,event)"><i class="fa-solid fa-plus"></i></button>
+        </div>
+        <div class="qs-actions">
+            <button class="qs-btn ghost" onclick="SaleApp.confirmAdd(${p.id},event,false,'s-qty-${p.id}')">Thêm giỏ</button>
+            <button class="qs-btn primary" onclick="SaleApp.confirmAdd(${p.id},event,true,'s-qty-${p.id}')">Mua ngay</button>
+        </div>
+        <button class="qs-wishlist${liked?' liked':''}" id="s-qs-wish-${p.id}" onclick="SaleApp.toggleWishlist(${p.id})">
+            <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+            ${liked ? 'Đã yêu thích' : 'Thêm vào yêu thích'}
+        </button>
+    </div>
+
+    <div class="product-info" onclick="SaleApp.viewDetail(${p.id})">
+        <div class="prod-swatches">${swHtml}</div>
+        ${stockHtml}
+        <div class="product-tag">${p.danhMuc?.ten || 'Bee Collection'}</div>
+        <div class="product-name">${p.ten}</div>
+        <div class="prod-price">${priceHtml}</div>
+    </div>
+</div>`;
+            }
+
+            /* ── QS overlay helpers ── */
+            function renderSelOpts(productId, prefix) {
+                const product = state.allSaleProducts.find(p => p.id === productId);
+                const skus = product.chiTietSanPhams || [];
+                const cMap = new Map(), sMap = new Map();
+                skus.forEach(s => { if (s.mauSac) cMap.set(s.mauSac.id, s.mauSac); if (s.kichThuoc) sMap.set(s.kichThuoc.id, s.kichThuoc); });
+                const colors = [...cMap.values()], sizes = sortSizes([...sMap.values()]);
+                const sel = tempSel[productId];
+
+                let cHtml = '', selName = '';
+                colors.forEach(c => {
+                    const active = sel.colorId === c.id;
+                    if (active) selName = c.ten;
+                    const hex = c.maMau || colorHex(c.ten);
+                    cHtml += `<div class="qs-dot${active?' active':''}" style="background:${hex};border-color:${contrastBorder(hex)};" title="${c.ten}" onclick="SaleApp.selectAttr(${productId},'color',${c.id},event,'${prefix}')"></div>`;
+                });
+                const colEl = document.getElementById(`${prefix}qs-colors-${productId}`);
+                if (colEl) colEl.innerHTML = cHtml;
+                const lbl = document.getElementById(`${prefix}qs-cn-${productId}`);
+                if (lbl) lbl.textContent = selName ? '— ' + selName : '';
+
+                let sHtml = '';
+                sizes.forEach(s => {
+                    const avail = !sel.colorId || skus.some(sk => sk.mauSac.id === sel.colorId && sk.kichThuoc.id === s.id && sk.soLuong > 0);
+                    sHtml += `<button class="qs-size${sel.sizeId===s.id?' active':''}${!avail?' disabled':''}" onclick="SaleApp.selectAttr(${productId},'size',${s.id},event,'${prefix}')">${s.ten}</button>`;
+                });
+                const sizeEl = document.getElementById(`${prefix}qs-sizes-${productId}`);
+                if (sizeEl) sizeEl.innerHTML = sHtml;
+            }
+
+            /* ── Animations ── */
+            function setupAnimations() {
+                if (!revealObs) {
+                    revealObs = new IntersectionObserver(entries => {
+                        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); } });
+                    }, { threshold: 0.08 });
+                }
+                document.querySelectorAll('#sale-section .reveal:not(.visible)').forEach(r => revealObs.observe(r));
+            }
+
+            /* ══════════════════════════════════════════
+               PUBLIC API
+            ══════════════════════════════════════════ */
+            const pub = {
+                reload: loadProducts,
+
+                filterTab(btn) {
+                    document.querySelectorAll('.sale-filter-tab').forEach(t => t.classList.remove('active'));
+                    btn.classList.add('active');
+                    state.activePct = btn.dataset.pct;
+                    applyFilters();
+                },
+
+                onSort() {
+                    state.sort = document.getElementById('saleSort').value;
+                    applyFilters();
+                },
+
+                toggleAdvPanel() {
+                    const panel = document.getElementById('saleAdvPanel');
+                    const btn   = document.getElementById('saleAdvBtn');
+                    panel.classList.toggle('open');
+                    btn.classList.toggle('open');
+                },
+
+                selectCat(btn) {
+                    document.querySelectorAll('#saleAdvCats .sale-adv-pill').forEach(p => p.classList.remove('active'));
+                    btn.classList.add('active');
+                    state.activeCat = btn.dataset.cat;
+                    applyFilters();
+                },
+
+                selectStock(val, btn) {
+                    document.querySelectorAll('#sale-section .sale-adv-pill[id^="advStock"]').forEach(p => p.classList.remove('active'));
+                    btn.classList.add('active');
+                    state.activeStock = val;
+                    applyFilters();
+                },
+
+                resetFilters() {
+                    state.activeCat   = '';
+                    state.activeStock = 'all';
+                    document.querySelectorAll('#saleAdvCats .sale-adv-pill').forEach(p => p.classList.remove('active'));
+                    document.querySelector('#saleAdvCats [data-cat=""]').classList.add('active');
+                    document.getElementById('advStockAll').classList.add('active');
+                    document.getElementById('advStockLow').classList.remove('active');
+                    document.getElementById('advStockNew').classList.remove('active');
+                    applyFilters();
+                },
+
+                loadMore() {
+                    const btn = document.getElementById('saleLoadMoreBtn');
+                    if (btn) { btn.classList.add('loading'); btn.querySelector('span').textContent = 'Đang tải...'; }
+                    setTimeout(() => renderPage(false), 300);
+                },
+
+                collapseProducts() {
+                    const grid = document.getElementById('saleProductsGrid');
+                    Array.from(grid.children).slice(PAGE_SIZE).forEach(c => c.remove());
+                    state.offset = PAGE_SIZE;
+                    document.getElementById('saleProductsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    const hasMore = state.offset < state.filtered.length;
+                    const loadBtn = document.getElementById('saleLoadMoreBtn');
+                    const colBtn  = document.getElementById('saleCollapseBtn');
+                    const wrap    = document.getElementById('saleLoadWrap');
+                    wrap.style.display = hasMore ? 'flex' : 'none';
+                    if (loadBtn) { loadBtn.style.display = hasMore ? 'inline-flex' : 'none'; loadBtn.querySelector('span').textContent = `Xem thêm (còn ${state.filtered.length - state.offset})`; }
+                    if (colBtn) colBtn.style.display = 'none';
+                },
+
+                closeAllSelections() {
+                    document.querySelectorAll('#saleProductsGrid .product-card.show-selection').forEach(c => c.classList.remove('show-selection'));
+                    document.getElementById('sale-qa-backdrop')?.classList.remove('show');
+                    document.getElementById('sale-qs-modal')?.classList.remove('show');
+                },
+
+                async openSelection(productId, event) {
+                    if (event) event.stopPropagation();
+                    this.closeAllSelections();
+                    const product = state.allSaleProducts.find(p => p.id === productId);
+                    if (!product) return;
+                    try {
+                        if (!product._variantsFetched) {
+                            const res = await fetch('/api/products/' + productId + '/variants');
+                            if (!res.ok) throw new Error();
+                            const variants = await res.json();
+                            if (!variants?.length) { window.showToast('Sản phẩm đang cập nhật kho', 'warning'); return; }
+                            product.chiTietSanPhams = variants;
+                            product._variantsFetched = true;
+                        }
+                        document.getElementById('sale-card-' + productId).classList.add('show-selection');
+                        document.getElementById('sale-qa-backdrop').classList.add('show');
+                        tempSel[productId] = { colorId: null, sizeId: null, sku: null };
+                        renderSelOpts(productId, 's-');
+                    } catch { window.showToast('Không thể kết nối máy chủ', 'warning'); }
+                },
+
+                selectAttr(productId, type, attrId, event, prefix) {
+                    if (event) event.stopPropagation();
+                    const product = state.allSaleProducts.find(p => p.id === productId);
+                    const skus = product.chiTietSanPhams || [];
+                    if (type === 'color') {
+                        tempSel[productId].colorId = attrId;
+                        tempSel[productId].sizeId  = null;
+                        const cs = skus.find(s => s.mauSac.id === attrId && s.hinhAnh);
+                        if (cs?.hinhAnh) {
+                            const mainImg = document.querySelector(`#sale-card-${productId} .img-placeholder`);
+                            if (mainImg) { mainImg.style.filter='brightness(0.8)'; setTimeout(()=>{ mainImg.src=optImg(cs.hinhAnh); mainImg.style.filter='brightness(1)'; },100); }
+                        }
+                    } else { tempSel[productId].sizeId = attrId; }
+                    const sku = skus.find(s => s.mauSac.id === tempSel[productId].colorId && s.kichThuoc.id === tempSel[productId].sizeId);
+                    if (sku) tempSel[productId].sku = sku;
+                    renderSelOpts(productId, prefix || 's-');
+                },
+
+                changeQsQty(productId, inputId, delta, event) {
+                    if (event) event.stopPropagation();
+                    const input = document.getElementById(inputId); if (!input) return;
+                    let newVal = Math.max(1, (parseInt(input.value)||1) + delta);
+                    const sel = tempSel[productId];
+                    if (sel?.sku && newVal > sel.sku.soLuong) { window.showToast?.(`Chỉ còn ${sel.sku.soLuong} sản phẩm!`,'warning'); newVal=sel.sku.soLuong; }
+                    input.value = newVal;
+                },
+
+                validateQsQty(productId, inputId, event) {
+                    if (event) event.stopPropagation();
+                    const input = document.getElementById(inputId); if (!input) return;
+                    let val = parseInt(input.value); if (isNaN(val)||val<1) val=1;
+                    const sel = tempSel[productId];
+                    if (sel?.sku && val > sel.sku.soLuong) { window.showToast?.(`Chỉ còn ${sel.sku.soLuong} sản phẩm!`,'warning'); val=sel.sku.soLuong; }
+                    input.value = val;
+                },
+
+                confirmAdd(productId, event, isBuyNow, inputId) {
+                    if (event) event.stopPropagation();
+                    const sel = tempSel[productId];
+                    if (!sel?.colorId && !sel?.sizeId) { window.showToast('Vui lòng chọn màu sắc và kích cỡ','warning'); return; }
+                    if (!sel.colorId) { window.showToast('Bạn chưa chọn màu sắc','warning'); return; }
+                    if (!sel.sizeId)  { window.showToast('Bạn chưa chọn kích cỡ','warning'); return; }
+                    if (!sel.sku)     { window.showToast('Phiên bản này đang hết hàng','warning'); return; }
+
+                    const qty  = parseInt(document.getElementById(inputId)?.value) || 1;
+                    const sku  = sel.sku;
+                    const product = state.allSaleProducts.find(p => p.id === productId);
+                    let cart = safeGet('bee_cart', []);
+                    let exist = cart.find(i => i.skuId === sku.id);
+                    if (exist) {
+                        if (exist.qty + qty > sku.soLuong) { window.showToast('Vượt quá số lượng kho!','warning'); return; }
+                        exist.qty += qty;
+                    } else {
+                        cart.push({ skuId:sku.id, productId, name:product.ten, price:sku.giaSauKhuyenMai||sku.giaBan||0, originalPrice:sku.giaBan||0, qty, img:sku.hinhAnh||(product.hinhAnhs?.[0]?.url||''), colorName:sku.mauSac.ten, sizeName:sku.kichThuoc.ten, maxStock:sku.soLuong });
+                    }
+                    safeSet('bee_cart', cart);
+                    this.closeAllSelections();
+                    if (document.getElementById(inputId)) document.getElementById(inputId).value = 1;
+                    if (window.updateCartBadge) window.updateCartBadge();
+                    if (isBuyNow) {
+                        document.getElementById('saleDeliveryModalOverlay').style.display = 'flex';
+                        setTimeout(() => document.querySelector('#saleDeliveryModalOverlay .delivery-modal').classList.add('open'), 10);
+                    } else {
+                        window.showToast('Đã thêm vào giỏ hàng','success');
+                    }
+                },
+
+                closeDeliveryModal() {
+                    const modal = document.querySelector('#saleDeliveryModalOverlay .delivery-modal');
+                    if (modal) modal.classList.remove('open');
+                    setTimeout(() => document.getElementById('saleDeliveryModalOverlay').style.display = 'none', 300);
+                },
+
+                selectDeliveryAndCheckout(method) {
+                    localStorage.setItem('bee_delivery_method', method);
+                    this.closeDeliveryModal();
+                    this.closeAllSelections();
+                    window.location.hash = '#checkout';
+                },
+
+                async toggleWishlist(productId) {
+                    try {
+                        const res = await fetch('/api/khach-hang/wishlist/toggle/' + productId, { method: 'POST' });
+                        if (res.status === 401) {
+                            localStorage.removeItem('bee_wishlist');
+                            state.likedIds.clear();
+                            document.querySelectorAll('.heart-btn.liked,.qs-wishlist.liked').forEach(el => el.classList.remove('liked'));
+                            window.showToast?.('Vui lòng đăng nhập để thực hiện thao tác này!','warning');
+                            setTimeout(() => { window.location.hash = 'login'; }, 1500);
+                            return;
+                        }
+                        if (res.ok) {
+                            const data = await res.json();
+                            const isLiked = state.likedIds.has(productId);
+                            isLiked ? state.likedIds.delete(productId) : state.likedIds.add(productId);
+                            safeSet('bee_wishlist', [...state.likedIds]);
+
+                            [`sale-heart-${productId}`, `s-qs-wish-${productId}`].forEach(id => {
+                                const btn = document.getElementById(id);
+                                if (!btn) return;
+                                btn.classList.toggle('liked', !isLiked);
+                                if (!isLiked) {
+                                    btn.classList.remove('pop'); void btn.offsetWidth; btn.classList.add('pop');
+                                    btn.addEventListener('animationend', () => btn.classList.remove('pop'), { once: true });
+                                }
+                                if (btn.childNodes.length > 0 && id.startsWith('s-qs-wish-')) {
+                                    btn.childNodes[btn.childNodes.length-1].textContent = !isLiked ? 'Đã yêu thích' : 'Thêm vào yêu thích';
+                                }
+                            });
+                            window.showToast?.(data.message || (!isLiked ? 'Đã thêm vào yêu thích ♥' : 'Đã bỏ khỏi danh sách yêu thích'), !isLiked ? 'success' : 'warning');
+                        }
+                    } catch (e) { console.error('Lỗi toggle wishlist:', e); }
+                },
+
+                viewDetail(productId) {
+                    const p = state.allSaleProducts.find(x => x.id === productId);
+                    if (p) {
+                        let r = safeGet('bee_recent_viewed', []);
+                        r = r.filter(i => i.id !== productId);
+                        r.unshift({ id: p.id, ten: p.ten, giaBan: p.giaBan, hinhAnh: p.hinhAnhs?.[0]?.url || '' });
+                        if (r.length > 8) r.pop();
+                        safeSet('bee_recent_viewed', r);
+                    }
+                    window.location.hash = '#detail?id=' + productId;
+                },
+
+                copyVoucher(btn, code) {
+                    navigator.clipboard?.writeText(code).then(() => {
+                        const orig = btn.textContent;
+                        btn.textContent = '✓ Đã chép';
+                        btn.style.background = '#2c4238';
+                        btn.style.color = 'white';
+                        setTimeout(() => { btn.textContent = orig; btn.style.background = ''; btn.style.color = ''; }, 2000);
+                    });
+                },
+
+                toggleVouchers() {
+                    const more = document.getElementById('saleVouchersMore');
+                    const btn  = document.getElementById('saleVoucherToggle');
+                    const txt  = document.getElementById('saleVoucherToggleTxt');
+                    const isOpen = more.classList.toggle('open');
+                    btn.classList.toggle('open', isOpen);
+                    const count = more.querySelectorAll('.sale-voucher-card').length;
+                    txt.textContent = isOpen ? 'Thu gọn' : `Xem thêm ${count} mã khuyến mãi`;
+                },
+
+                togglePromos() {
+                    const more = document.getElementById('salePromosMore');
+                    const btn  = document.getElementById('salePromoToggle');
+                    const txt  = document.getElementById('salePromoToggleTxt');
+                    if (!more || !btn || !txt) return;
+
+                    const isOpen = more.classList.toggle('open');
+                    btn.classList.toggle('open', isOpen);
+                    const count = more.children.length;
+                    txt.textContent = isOpen ? 'Thu gọn' : `Xem thêm ${count} đợt khuyến mãi`;
+                },
+
+                init() {
+                    // Kiểm tra đăng nhập, clear wishlist nếu chưa đăng nhập
+                    fetch('/api/khach-hang/my-profile').then(res => {
+                        if (!res.ok) {
+                            localStorage.removeItem('bee_wishlist');
+                            state.likedIds.clear();
+                            document.querySelectorAll('.heart-btn.liked,.qs-wishlist.liked').forEach(el => {
+                                el.classList.remove('liked','pop');
+                            });
+                        }
+                    }).catch(() => {});
+
+                    document.addEventListener('keydown', e => { if (e.key === 'Escape') pub.closeAllSelections(); });
+
+                    setTimeout(() => {
+                        loadSaleInfo();
+                        loadProducts();
+                        setupAnimations();
+                    }, 80);
+                }
+            };
+
+            return pub;
+        })();
     </script>
 </section>

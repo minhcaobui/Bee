@@ -1,138 +1,520 @@
 <section id="shop-section">
     <style>
         .products-section { padding-top: 40px; padding-bottom: 100px; position: relative; }
-        .section-header { display: flex; justify-content: space-between; align-items: flex-end; padding: 0 60px; margin-bottom: 52px; }
+        .section-header { display: flex; justify-content: space-between; align-items: flex-end; padding: 0 60px; margin-bottom: 32px; }
         .section-eyebrow { font-size: 11px; letter-spacing: 0.22em; color: var(--accent); text-transform: uppercase; font-weight: 500; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
         .section-eyebrow::before { content: ''; width: 20px; height: 1px; background: var(--accent); }
-        .section-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(32px, 4vw, 52px); font-weight: 300; line-height: 1.1; }
-        .section-title em { font-style: italic; }
+        .section-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(32px, 4vw, 38px); font-weight: 300; line-height: 1.1; }
 
         .shop-container { display: grid; grid-template-columns: 240px 1fr; gap: 40px; padding: 0 60px; align-items: start; }
 
+
+        /* ==================== HEART BUTTON (Dành cho trang Shop) ==================== */
+        .heart-btn {
+            position: absolute; top: 10px; right: 10px; z-index: 4;
+            width: 34px; height: 34px; border-radius: 50%;
+            background: rgba(255,255,255,0.88); border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transform: scale(0.7);
+            transition: opacity .25s, transform .25s, background .2s;
+            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+        }
+        .product-card:not(.show-selection):hover .heart-btn { opacity: 0.75; transform: scale(1); }
+        .heart-btn.liked { opacity: 1 !important; transform: scale(1) !important; background: rgba(255,245,245,0.95); }
+        .heart-btn svg { width: 15px; height: 15px; stroke: var(--text); fill: none; transition: stroke .2s, fill .2s; pointer-events: none; }
+        .heart-btn.liked svg { stroke: #e74c3c; fill: #e74c3c; }
+        @keyframes heartPop { 0% {transform:scale(1)} 25% {transform:scale(1.55)} 50% {transform:scale(0.85)} 75% {transform:scale(1.2)} 100% {transform:scale(1)} }
+        .heart-btn.pop { animation: heartPop .46s cubic-bezier(.4,0,.2,1); }
+
+        .qs-wishlist {
+            width: 100%; margin-top: 7px; height: var(--btn-h);
+            background: none; border: 1px solid var(--border);
+            font-size: 10px; font-weight: 500; letter-spacing: 0.1em;
+            text-transform: uppercase; color: var(--muted); cursor: pointer;
+            transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 6px;
+            border-radius: 2px;
+        }
+        .qs-wishlist svg { width: 12px; height: 12px; fill: none; stroke: currentColor; flex-shrink: 0; }
+        .qs-wishlist:hover { border-color: #e74c3c; color: #e74c3c; }
+        .qs-wishlist.liked { border-color: #e74c3c; color: #e74c3c; background: #fff5f5; }
+        .qs-wishlist.liked svg { fill: #e74c3c; stroke: #e74c3c; }
+
+
+        /* ==================== FILTER SIDEBAR ==================== */
         .shop-filters { position: sticky; top: 120px; }
         .filter-widget { margin-bottom: 32px; }
-        .filter-title { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; margin-bottom: 16px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 8px;}
-        .filter-list { list-style: none; padding: 0; margin: 0; }
-        .filter-list li { margin-bottom: 12px; font-size: 13px; color: var(--muted); cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px;}
-        .filter-list li::before { content: ''; width: 12px; height: 12px; border: 1px solid rgba(0,0,0,0.2); border-radius: 2px; transition: 0.2s; display: inline-block;}
-        .filter-list li:hover { color: var(--text); }
-        .filter-list li.active { color: var(--accent); font-weight: 500; }
-        .filter-list li.active::before { background: var(--accent); border-color: var(--accent); }
+        .filter-title { font-size: 11px; letter-spacing: 0.22em; color: var(--accent); text-transform: uppercase; font-weight: 600; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+        .filter-title::before { content: ''; width: 16px; height: 1px; background: var(--accent); }
 
-        .products-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 32px 24px; }
+        #clearAllFilters {
+            width: 100%; padding: 11px 16px; background: #fff; border: 1px solid var(--accent);
+            color: var(--accent); font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
+            text-transform: uppercase; border-radius: 2px; cursor: pointer; transition: all 0.25s ease;
+            margin-bottom: 24px; display: none;
+        }
+        #clearAllFilters:hover { background: var(--accent); color: white; }
+        #clearAllFilters.active { display: block; }
 
+        /* DANH MỤC - Giới hạn chiều cao & Scrollbar */
+        #categoryFilter {
+            max-height: 220px;
+            overflow-y: auto;
+            padding-right: 8px; /* Tránh lẹm chữ khi có scrollbar */
+        }
+        #categoryFilter::-webkit-scrollbar { width: 4px; }
+        #categoryFilter::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 4px; }
+        #categoryFilter::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.3); }
+
+        .filter-list li { font-size: 13.5px; padding: 7px 0; color: var(--muted); cursor: pointer; transition: all 0.2s ease; }
+        .filter-list li:hover { color: var(--text); padding-left: 4px; }
+        .filter-list li.active { color: var(--text); font-weight: 600; }
+
+        /* ==================== MÀU SẮC (Cập nhật viền Đen giống ảnh) ==================== */
+        .filter-color-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(68px, 1fr)); gap: 14px 10px; }
+        .color-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: all 0.2s ease; }
+        .color-item:hover { transform: translateY(-1px); }
+        .color-item .filter-color-dot {
+            width: 32px; height: 32px; border-radius: 50%;
+            border: 2px solid #fff; /* Lớp viền trắng bên trong */
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
+            margin-bottom: 5px; transition: all 0.2s;
+        }
+        .color-item .color-name { font-size: 10.5px; color: var(--muted); text-align: center; line-height: 1.1; font-weight: 500;}
+
+        /* HOVER & ACTIVE ĐỔI THÀNH MÀU ĐEN (var(--text)) */
+        .color-item:hover .filter-color-dot { box-shadow: 0 0 0 2px var(--text); }
+        .color-item.active .filter-color-dot {
+            box-shadow: 0 0 0 2px var(--text); /* Viền ngoài cùng màu đen */
+            transform: scale(1.08);
+        }
+        .color-item.active .color-name { color: var(--text); font-weight: 700; }
+
+        /* KÍCH CỠ */
+        .filter-size-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+        .filter-size-btn { padding: 9px 18px; border: 1px solid var(--border); background: transparent; font-size: 12.5px; font-weight: 500; border-radius: 2px; cursor: pointer; transition: all 0.2s ease; min-width: 44px; text-align: center; }
+        .filter-size-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .filter-size-btn.active { background: var(--text); color: white; border-color: var(--text); }
+
+        /* KHOẢNG GIÁ */
+        .filter-widget input[type="text"] { padding: 12px 14px; font-size: 13px; border: 1px solid var(--border); border-radius: 2px; }
+        .filter-widget input:focus { border-color: var(--accent); }
+        .btn-apply-price { width: 100%; padding: 10px; background: var(--text); color: var(--white); border: none; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; transition: 0.2s; border-radius: 2px; height: 38px;}
+
+        #activeFiltersBar {
+            display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+            margin-bottom: 24px; min-height: 38px;
+        }
+        .filter-tag {
+            background: #f8f5f0; color: var(--text); font-size: 12px;
+            height: 38px; /* CAO BẰNG NÚT XÓA TẤT CẢ */
+            padding: 0 10px 0 14px;
+            border-radius: 2px;
+            display: inline-flex; align-items: center; gap: 8px;
+            border: 1px solid var(--border); transition: all 0.2s;
+        }
+        .filter-tag:hover { background: #ede9e3; }
+        .filter-tag .lbl { color: var(--muted); }
+        .filter-tag .val { font-weight: 600; }
+
+        .filter-tag .remove {
+            color: var(--muted); font-size: 18px; line-height: 1;
+            cursor: pointer; display: inline-block;
+            transition: transform 0.3s cubic-bezier(.4,0,.2,1), color 0.2s;
+        }
+        .filter-tag .remove:hover { color: #e74c3c; transform: rotate(180deg) scale(1.2); }
+
+        /* ==================== HIỆU ỨNG THU GỌN DANH MỤC ==================== */
+        .filter-title.toggleable { cursor: pointer; user-select: none; }
+        .filter-title.toggleable svg { transition: transform 0.3s ease; margin-left: auto; width: 14px; height: 14px; stroke: var(--accent); fill: none;}
+        .filter-title.toggleable.collapsed svg { transform: rotate(-90deg); }
+
+        #categoryFilter {
+            max-height: 280px; overflow-y: auto; padding-right: 8px;
+            transition: max-height 0.4s cubic-bezier(0, 1, 0, 1), opacity 0.3s ease, margin 0.3s ease;
+            opacity: 1;
+        }
+        #categoryFilter.collapsed {
+            max-height: 0; opacity: 0; margin-bottom: 0; overflow: hidden;
+            border: none;
+        }
+
+        /* ==================== GRID 4 CỘT ==================== */
+        .products-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px 24px; }
         #qa-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 90; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; cursor: pointer; }
         #qa-backdrop.show { opacity: 1; pointer-events: all; }
 
-        .product-card { background: var(--white); box-shadow: var(--card-shadow); overflow: hidden; position: relative; cursor: pointer; transition: box-shadow 0.4s ease, transform 0.4s ease; display: flex; flex-direction: column; height: 100%; z-index: 1; }
-        .product-card:hover { box-shadow: var(--card-shadow-hover); transform: translateY(-4px); }
-        .product-card.show-selection { z-index: 95; transform: translateY(-8px); box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
+        /* ==================== COLOR SYSTEM ==================== */
+        #shop-section {
+            --accent: #3D5A4C; --accent-light: #4d7060; --white: #FFFFFF; --text: #1A1A1A;
+            --muted: #8A8A8A; --border: rgba(0,0,0,0.08); --shadow-sm: 0 2px 16px rgba(61,90,76,0.07);
+            --shadow-md: 0 8px 40px rgba(61,90,76,0.13); --btn-h: 42px; --font-display: 'Cormorant Garamond', serif;
+        }
 
-        .product-img { width: 100%; position: relative; overflow: hidden; background: #f4f4f5; aspect-ratio: 3/4;}
-        .img-placeholder { display: block; transition: transform 0.6s ease; width: 100%; height: 100%; object-fit: cover; }
-        .product-card:hover .img-placeholder { transform: scale(1.04); }
+        /* ==================== PRODUCT CARD ==================== */
+        .product-card { background: var(--white); position: relative; overflow: hidden; cursor: pointer; box-shadow: var(--shadow-sm); transition: box-shadow .35s, transform .3s; display: flex; flex-direction: column; }
+        .product-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); z-index: 2; }
+        .product-card.show-selection { z-index: 95; }
+        .product-img { width: 100%; aspect-ratio: 3/4; position: relative; overflow: hidden; background: #f9f8f6; }
+        .img-placeholder { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .65s ease, opacity .25s; }
+        .product-card:not(.show-selection):hover .img-placeholder { transform: scale(1.04); }
+        .img-hover { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .5s ease, transform .65s ease; z-index: 1; }
+        .product-card:not(.show-selection):hover .img-hover { opacity: 1; transform: scale(1.04); }
+        .img-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0); display: flex; align-items: flex-end; padding: 12px; transition: background .35s; z-index: 2; }
+        .product-card:not(.show-selection):hover .img-overlay { background: rgba(0,0,0,0.04); }
+        .btn-quick { width: 100%; height: var(--btn-h); padding: 0 12px; background: var(--accent); color: white; border: none; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; transform: translateY(8px); opacity: 0; transition: transform .28s ease, opacity .28s ease, background .2s; }
+        .btn-quick svg { width: 12px; height: 12px; stroke: white; fill: none; flex-shrink: 0; }
+        .product-card:not(.show-selection):hover .btn-quick { transform: translateY(0); opacity: 1; }
+        .btn-quick:hover { background: #2c4238; }
+        .prod-badges { position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 4px; z-index: 3; pointer-events: none; }
+        .prod-badge { padding: 3px 9px; font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: white; width: fit-content; }
+        .prod-badge.new { background: var(--accent); }
+        .prod-badge.sale { background: #c08060; }
+        .product-info { padding: 14px 16px 18px; flex-grow: 1; display: flex; flex-direction: column; }
+        .product-tag { font-size: 9px; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase; font-weight: 600; margin-bottom: 4px; }
+        .product-name { font-family: var(--font-display) !important; font-size: 17px; font-weight: 400; line-height: 1.2; margin-bottom: 10px; }
+        .prod-swatches { display: flex; align-items: center; gap: 4px; margin-bottom: 8px; }
+        .swatch-dot { width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); flex-shrink: 0; }
+        .swatch-more { font-size: 9px; color: var(--muted); font-weight: 500; letter-spacing: 0.05em; padding: 2px 6px; border: 1px solid var(--border); border-radius: 2px; margin-left: 2px; }
+        .prod-price { display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
+        .price-sale { font-size: 14px; color: var(--accent); font-weight: 600; }
+        .price-orig { font-size: 12px; color: var(--muted); text-decoration: line-through; font-weight: 300; }
+        .price-normal { font-size: 14px; color: var(--text); font-weight: 500; }
 
-        .img-hover { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.5s ease, transform 0.6s ease; z-index: 1; }
-        .product-card:hover .img-hover { opacity: 1; transform: scale(1.04); }
+        /* Quick Selection */
+        /* Lớp phủ chọn nhanh kiểu "Nửa kín nửa hở" */
+        .qs-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to bottom,
+            transparent 0%,
+            rgba(255,255,255,0.7) 25%,
+            rgba(255,255,255,0.95) 45%,
+            #ffffff 100%);
+            z-index: 5; display: flex; flex-direction: column;
+            justify-content: flex-end; padding: 15px;
+            transform: translateY(100%); transition: transform .38s cubic-bezier(.4,0,.2,1); cursor: default;
+        }
 
-        .img-overlay-pattern { position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px); z-index: 2;}
-        .product-overlay { position: absolute; inset: 0; background: rgba(26,26,26,0.0); display: flex; align-items: flex-end; padding: 24px; transition: background 0.4s ease; z-index: 3; }
-        .product-card:hover .product-overlay { background: rgba(26,26,26,0.08); }
+        /* Nút đóng đẩy xuống dưới vùng trong suốt */
+        .qs-close {
+            position: absolute; top: 30% !important; right: 12px;
+            background: #fff; border-radius: 50%; width: 26px; height: 26px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15); border: none; color: var(--muted);
+        }        .product-card.show-selection .qs-overlay { transform: translateY(0); }
+        .qs-close { position: absolute; top: 10px; right: 12px; background: none; border: none; cursor: pointer; color: var(--muted); font-size: 22px; line-height: 1; padding: 4px; }
+        .qs-name { font-family: var(--font-display) !important; font-size: 17px; text-align: center; margin-bottom: 14px; }
+        .qs-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); margin-bottom: 7px; text-align: center; font-weight: 600; }
+        .qs-opts { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 11px; justify-content: center; }
+        .qs-dot { width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.14); cursor: pointer; box-shadow: inset 0 0 0 2px #fff; transition: all .18s; }
+        .qs-dot.active { border: 2px solid var(--text); transform: scale(1.18); }
+        .qs-size { height: 34px; padding: 0 12px; border: 1px solid #e0e0e0; background: none; font-size: 11px; cursor: pointer; min-width: 36px; transition: all .18s; font-weight: 500; display: flex; align-items: center; justify-content: center; }
+        .qs-size.active { background: var(--text); color: white; border-color: var(--text); }
+        .qs-size.disabled { opacity: 0.28; cursor: not-allowed; text-decoration: line-through; }
+        .qs-price { font-size: 13px; text-align: center; margin-bottom: 8px; }
+        .qs-actions { display: flex; gap: 7px; margin-top: 8px; }
+        .qs-btn { flex: 1; height: var(--btn-h); border: none; font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all .2s; display: flex; align-items: center; justify-content: center; border-radius: 2px; }
+        .qs-btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+        .qs-btn.ghost:hover { border-color: var(--text); }
+        .qs-btn.primary { background: var(--accent); color: white; }
+        .qs-btn.primary:hover { background: #2c4238; }
 
-        .quick-selection-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.98); z-index: 5; display: flex; flex-direction: column; justify-content: center; padding: 20px; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: default; }
-        .product-card.show-selection .quick-selection-overlay { transform: translateY(0); }
-
-        .qs-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; margin-bottom: 15px; text-align: center; }
-        .qs-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px; text-align: center; }
-        .qs-options { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; justify-content: center; }
-        .qs-dot { width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.15); cursor: pointer; box-shadow: inset 0 0 0 2px #fff; transition: all 0.2s ease; }
-        .qs-dot.active { border: 1.5px solid var(--text); transform: scale(1.15); padding: 2px; background-clip: content-box; }
-        .qs-size-btn { padding: 6px 12px; border: 1px solid #ddd; background: none; font-size: 11px; cursor: pointer; min-width: 35px; }
-        .qs-size-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
-        .qs-size-btn.disabled { opacity: 0.3; cursor: not-allowed; text-decoration: line-through; }
-        .qs-confirm-btn { width: 100%; padding: 12px; background: var(--accent); color: #fff; border: none; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; margin-top: 10px; transition: background 0.3s;}
-        .qs-confirm-btn:hover { opacity: 0.9; }
-        .qs-close { position: absolute; top: 10px; right: 10px; background: none; border: none; cursor: pointer; color: var(--muted); font-size: 20px; padding: 5px; }
-
-        .product-info { padding: 20px 20px 24px; flex-grow: 1; display: flex; flex-direction: column; }
-        .product-tag { font-size: 10px; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase; font-weight: 500; margin-bottom: 6px; }
-        .product-name { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 400; margin-bottom: auto; line-height: 1.2; padding-bottom: 12px; }
-        .product-price { font-size: 14px; color: var(--text); font-weight: 400; }
-
-        .label-new, .label-sale { position: absolute; top: 16px; left: 16px; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 500; padding: 5px 10px; z-index: 3; }
-        .label-new { background: var(--text); color: white; }
-        .label-sale { background: #c08060; color: white; }
-
+        /* Skeleton & Load more */
         .skeleton { background: linear-gradient(90deg, #ede9e3 25%, #e4dfd8 50%, #ede9e3 75%); background-size: 200% 100%; animation: skeleton-shimmer 1.5s infinite; }
         @keyframes skeleton-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
-        .load-more-btn { background: transparent; border: 1px solid var(--text); color: var(--text); padding: 12px 32px; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: 0.3s ease; margin-top: 20px; }
+        .load-more-btn { background: transparent; border: 1px solid var(--text); color: var(--text); padding: 12px 32px; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: 0.3s ease; margin-top: 20px; border-radius: 2px;}
         .load-more-btn:hover { background: var(--text); color: var(--white); }
 
+        /* ==================== MOBILE FILTER & RESPONSIVE ==================== */
+        .mobile-filter-btn {
+            display: none; align-items: center; gap: 8px;
+            height: 38px; padding: 0 16px; border: 1px solid var(--border);
+            background: var(--white); cursor: pointer; font-size: 11px;
+            text-transform: uppercase; font-weight: 600; letter-spacing: 0.1em;
+            border-radius: 2px; color: var(--text);
+        }
+        .filter-close-btn {
+            display: none; position: absolute; top: 12px; right: 16px;
+            background: none; border: none; font-size: 28px; cursor: pointer;
+            color: var(--muted); line-height: 1; padding: 4px;
+        }
+        #filter-backdrop {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
+        #filter-backdrop.show { opacity: 1; pointer-events: all; cursor: pointer; }
+
         @media (max-width: 900px) {
-            .section-header { padding: 0 24px; flex-direction: column; align-items: flex-start; gap: 20px; }
+            .section-header { padding: 0 24px; flex-direction: column; align-items: flex-start; gap: 16px; }
+            .header-actions { display: flex; width: 100%; justify-content: space-between; gap: 12px; }
+            .mobile-filter-btn { display: flex; }
+
             .shop-container { grid-template-columns: 1fr; padding: 0 24px; gap: 20px; }
-            .shop-filters { display: none; }
-            .products-grid { grid-template-columns: 1fr 1fr; gap: 24px 16px; }
+            .products-grid { grid-template-columns: repeat(2, 1fr); gap: 24px 16px; }
+
+            /* Biến sidebar thành Off-canvas trượt từ trái sang */
+            .shop-filters {
+                position: fixed; top: 0; left: -100%; bottom: 0; width: 300px; max-width: 85vw;
+                background: #fff; z-index: 1000; padding: 40px 24px 24px; overflow-y: auto;
+                transition: left 0.35s cubic-bezier(.4,0,.2,1); display: block;
+                box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+            }
+            .shop-filters.show { left: 0; }
+            .filter-close-btn { display: block; }
         }
-        @media (max-width: 600px) { .products-grid { grid-template-columns: 1fr; } }
 
-        /* --- CSS FIX GIAO DIỆN SẢN PHẨM --- */
-        .prod-badges { position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 6px; z-index: 2; pointer-events: none; }
-        .prod-badge { padding: 4px 8px; font-size: 10px; font-family: 'DM Sans', sans-serif; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 2px; color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .prod-badge.new { background: var(--accent); }
-        .prod-badge.sale { background: #dc2626; } /* Đỏ chuẩn sale */
+        @media (max-width: 600px) {
+            .section-header, .shop-container { padding: 0 12px; }
 
-        .prod-img-wrap { position: relative; overflow: hidden; border-radius: 4px; }
+            /* HIỂN THỊ 2 SẢN PHẨM TRÊN MOBILE - Nới rộng khoảng cách */
+            .products-grid { grid-template-columns: repeat(2, 1fr); gap: 20px 12px; }
 
-        /* Nút trượt từ dưới lên cực sang */
-        .prod-quick-actions {
-            position: absolute; bottom: 0; left: 0; right: 0;
-            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-            opacity: 0; z-index: 10;
+            .product-info { padding: 10px 12px 14px; }
+            .product-name { font-size: 14px; }
+            .price-sale, .price-normal { font-size: 13px; }
+            .price-orig { font-size: 11px; }
+
+            /* Tinh chỉnh thẻ sản phẩm trên Mobile */
+            .btn-quick { font-size: 10px; padding: 0 8px; } /* Tránh tràn chữ */
+            .qs-name { font-size: 15px; }
+            .qs-opts { gap: 5px; }
+            .qs-dot { width: 20px; height: 20px; } /* Thu nhỏ chấm màu */
+            .qs-size { height: 30px; min-width: 32px; font-size: 10px; padding: 0 8px; } /* Thu nhỏ nút size */
+
+            /* FIX LỖI Z-INDEX: Nâng thẻ đang chọn lên trên cùng để ko bị thẻ dưới đè */
+            .product-card.show-selection { z-index: 100; }
         }
-        .prod-card:hover .prod-quick-actions { transform: translateY(0); opacity: 1; }
 
-        .btn-quick-action {
-            width: 100%; padding: 14px 0; border: none; background: rgba(255,255,255,0.95); color: var(--text);
-            font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
-            cursor: pointer; transition: 0.2s; box-shadow: 0 -4px 15px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center; gap: 8px;
+        /* ==================== HIỆU ỨNG MƯỢT KHI LỌC/TẢI SẢN PHẨM ==================== */
+        @keyframes smoothFadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .btn-quick-action:hover { background: var(--accent); color: #fff; }
 
-        /* Hiệu ứng viền kép (Double Ring) cho màu sắc */
-        .color-ring-wrap { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; margin-right: 6px; }
-        .color-dot-inner { width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); }
+        .product-card {
+            animation: smoothFadeIn 0.4s ease-out forwards;
+        }
 
-        /* BỘ LỌC KÍCH CỠ & MÀU SẮC */
-        .filter-color-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-        .filter-color-dot { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(0,0,0,0.1); box-shadow: inset 0 0 0 2px #fff; transition: 0.2s; }
-        .filter-color-dot.active { transform: scale(1.15); border-color: var(--text); }
+        #dynamicShopGrid {
+            transition: opacity 0.3s ease;
+        }
 
-        .filter-size-grid { display: flex; flex-wrap: wrap; gap: 6px; }
-        .filter-size-btn { padding: 6px 10px; border: 1px solid rgba(0,0,0,0.15); background: none; font-size: 11px; cursor: pointer; border-radius: 2px; transition: 0.2s; min-width: 36px; text-align: center; }
-        .filter-size-btn:hover { border-color: var(--accent); }
-        .filter-size-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
+        /* 1. NÚT XÓA TẤT CẢ (Fix lỗi móp méo & Hover xanh) */
+        .btn-clear-tags {
+            height: 38px;
+            padding: 0 16px;
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box; /* Bắt buộc có để giữ form 38px */
+            margin: 0;
+        }
+        .btn-clear-tags:hover {
+            background: var(--accent);
+            color: var(--white);
+        }
 
-        /* SKELETON CARD (HIỆU ỨNG TẢI TRANG) */
-        .skeleton-card { background: #fff; border-radius: 4px; border: 1px solid rgba(0,0,0,0.05); overflow: hidden; }
-        .skel-img { width: 100%; aspect-ratio: 3/4; }
-        .skel-line { height: 14px; margin: 10px 15px; border-radius: 2px; }
-        .skel-line.short { width: 40%; margin-bottom: 20px; }
+        /* 2. NÚT ÁP DỤNG (Hover nền xanh) */
+        .btn-apply-price {
+            transition: all 0.2s ease;
+        }
+        .btn-apply-price:hover {
+            background: var(--accent) !important;
+            color: var(--white) !important;
+        }
 
-        .fly-to-cart-img { position: fixed; z-index: 9999; border-radius: 50%; object-fit: cover; transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); box-shadow: 0 10px 20px rgba(0,0,0,0.2); pointer-events: none; }
+        /* 3. KÍCH CỠ (Hover & Active nền xanh đặc trưng) */
+        .filter-size-btn {
+            transition: all 0.2s ease;
+        }
+        .filter-size-btn:hover {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: var(--white);
+        }
+        .filter-size-btn.active {
+            background: var(--accent);
+            color: var(--white);
+            border-color: var(--accent);
+        }
+
+        /* 4. DANH MỤC (Thêm khối padding, Hover nền xanh, Active nền xanh nhạt) */
+        .filter-list li {
+            font-size: 13.5px;
+            padding: 8px 12px; /* Tạo khối để đổ nền cho đẹp */
+            margin-bottom: 2px;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 2px;
+        }
+        .filter-list li:hover {
+            background: var(--accent);
+            color: var(--white);
+            padding-left: 16px; /* Thụt lề nhẹ tạo điểm nhấn */
+        }
+        .filter-list li.active {
+            color: var(--accent);
+            font-weight: 600;
+            background: rgba(61, 90, 76, 0.08); /* Xanh nhạt tinh tế khi đang được chọn */
+        }
+
+        /* Giới hạn chiều cao cho Màu sắc và Kích cỡ tương tự Danh mục */
+        #colorFilterGrid, #sizeFilterGrid {
+            max-height: 160px; /* Tầm 2-3 hàng màu/size */
+            overflow-y: auto;
+            padding-right: 8px;
+            padding-top: 5px;
+            transition: max-height 0.4s cubic-bezier(0, 1, 0, 1), opacity 0.3s ease;
+            display: grid; /* Giữ nguyên layout grid */
+        }
+
+        /* Khi bị đóng (collapsed) */
+        #colorFilterGrid.collapsed, #sizeFilterGrid.collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin-bottom: 0;
+            overflow: hidden;
+        }
+
+        /* Tùy chỉnh riêng cho Grid Kích cỡ: 3 cột để ra 2 hàng nếu có 6 cái */
+        .filter-size-grid {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        /* Thanh cuộn mảnh cho tinh tế */
+        /* Trả về flex để nút không bị giãn rộng theo cột */
+        #colorFilterGrid, #sizeFilterGrid {
+            max-height: 160px;
+            overflow-y: auto;
+            padding-right: 8px;
+            padding-top: 5px;
+            transition: max-height 0.4s cubic-bezier(0, 1, 0, 1), opacity 0.3s ease;
+            display: flex !important; /* Dùng flex thay vì grid */
+            flex-wrap: wrap;
+            gap: 12px 10px;
+        }
+
+        /* Khi đóng vẫn giữ nguyên logic */
+        #colorFilterGrid.collapsed, #sizeFilterGrid.collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin-bottom: 0;
+            overflow: hidden;
+        }
+
+        /* Thu nhỏ các nút Kích cỡ */
+        .filter-size-btn {
+            padding: 6px 12px; /* Giảm padding cho bé lại */
+            font-size: 11.5px;
+            min-width: 40px;   /* Độ rộng tối thiểu nhỏ lại */
+            height: 32px;      /* Chiều cao cố định cho đều */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Thu nhỏ các chấm Màu sắc */
+        .color-item .filter-color-dot {
+            width: 28px;  /* Giảm từ 32px xuống 28px */
+            height: 28px;
+            border-radius: 50%;
+        }
+        .color-item .color-name {
+            font-size: 10px; /* Chữ nhỏ lại cho thanh thoát */
+        }
+
+
+        /* 1. ĐỒNG BỘ THANH CUỘN CHO PC (Chrome, Safari, Edge) */
+        #categoryFilter::-webkit-scrollbar,
+        #colorFilterGrid::-webkit-scrollbar,
+        #sizeFilterGrid::-webkit-scrollbar {
+            width: 4px; /* Độ rộng siêu mảnh */
+        }
+
+        #categoryFilter::-webkit-scrollbar-thumb,
+        #colorFilterGrid::-webkit-scrollbar-thumb,
+        #sizeFilterGrid::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.15); /* Màu thanh cuộn mờ tinh tế */
+            border-radius: 4px;
+        }
+
+        #categoryFilter::-webkit-scrollbar-thumb:hover,
+        #colorFilterGrid::-webkit-scrollbar-thumb:hover,
+        #sizeFilterGrid::-webkit-scrollbar-thumb:hover {
+            background: rgba(0,0,0,0.3); /* Đậm lên khi hover */
+        }
+
+        /* 2. CẤU CẤU TRÚC HIỂN THỊ (Gọn gàng, không bị vỡ) */
+        #colorFilterGrid, #sizeFilterGrid {
+            max-height: 160px; /* Giới hạn chiều cao để hiện thanh cuộn */
+            overflow-y: auto;
+            padding-right: 8px; /* Khoảng trống để thanh cuộn không đè lên chấm màu/nút size */
+            padding-top: 5px;
+            display: flex !important;
+            flex-wrap: wrap;
+            gap: 12px 10px;
+            transition: max-height 0.4s cubic-bezier(0, 1, 0, 1), opacity 0.3s ease;
+        }
+
+        /* Khi đóng (Collapsed) */
+        #colorFilterGrid.collapsed, #sizeFilterGrid.collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin-bottom: 0;
+            overflow: hidden;
+        }
+
+        /* ==================== DELIVERY MODAL ==================== */
+        .delivery-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); animation: fadeIn 0.3s ease; }
+        .delivery-modal { width: 100%; max-width: 480px; background: #fff; border-radius: 2px; padding: 30px; box-shadow: 0 15px 50px rgba(0,0,0,0.2); transform: scale(0.95); opacity: 0; transition: all 0.3s ease; }
+        .delivery-modal.open { transform: scale(1); opacity: 1; }
+        .dm-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 20px; }
+        .dm-title { font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+        .dm-close-btn { background: none; border: none; cursor: pointer; color: var(--muted); padding: 4px; transition: color 0.2s; }
+        .dm-close-btn:hover { color: var(--text); }
+        .dm-close-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; }
+        .dm-option { display: flex; align-items: center; gap: 16px; padding: 18px; border: 1px solid var(--border); cursor: pointer; transition: 0.3s; border-radius: 2px; background: #fafafa; margin-bottom: 12px; }
+        .dm-option:hover { border-color: var(--accent); background: #fff; box-shadow: var(--shadow-sm); }
+        .dm-label { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+        .dm-desc { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+
+        /* ==================== QTY SELECTOR (Dành cho Mua Nhanh) ==================== */
+        .qs-qty-selector { display: flex; border: 1px solid var(--border); border-radius: 2px; overflow: hidden; width: 100px; margin: 0 auto 12px; background: #fff; height: 32px;}
+        .qs-qty-btn { width: 30px; display: flex; align-items: center; justify-content: center; background: none; border: none; font-size: 11px; cursor: pointer; color: var(--text); transition: 0.2s; }
+        .qs-qty-btn:hover { background: rgba(0,0,0,0.04); }
+        .qs-qty-input { flex: 1; width: 100%; border: none; text-align: center; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; color: var(--text); padding: 0; outline: none; -moz-appearance: textfield; }
+        .qs-qty-input::-webkit-outer-spin-button, .qs-qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
     </style>
 
     <section class="products-section">
         <div id="qa-backdrop" onclick="window.ShopApp.closeAllSelections()"></div>
+        <div id="filter-backdrop" onclick="window.ShopApp.toggleMobileFilter(true)"></div>
 
         <div class="section-header">
             <div>
-                <div class="section-eyebrow">Bộ sưu tập</div>
-                <h2 class="section-title">Tất cả sản phẩm<br><em>Spring / Summer 2025</em></h2>
+                <div class="section-eyebrow">SẢN PHẨM</div>
+                <h2 class="section-title">Tất cả sản phẩm | Beemate </h2>
             </div>
-            <div style="display:flex; gap:16px; align-items:center;">
-                <select id="sortSelect" style="border:1px solid rgba(0,0,0,0.12); padding:10px 16px; font-family:'DM Sans',sans-serif; font-size:12px; background:var(--white); color:var(--text); letter-spacing:0.08em; cursor:pointer; outline:none">
+            <div class="header-actions">
+                <button class="mobile-filter-btn" onclick="window.ShopApp.toggleMobileFilter()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                    Bộ lọc
+                </button>
+                <select id="sortSelect" style="border:1px solid rgba(0,0,0,0.12); border-radius:2px; padding:10px 16px; font-family:'DM Sans',sans-serif; font-size:12px; background:var(--white); color:var(--text); letter-spacing:0.08em; cursor:pointer; outline:none">
                     <option value="newest">Sắp xếp: Mới nhất</option>
                     <option value="price_asc">Giá thấp → cao</option>
                     <option value="price_desc">Giá cao → thấp</option>
@@ -142,36 +524,37 @@
 
         <div class="shop-container">
             <aside class="shop-filters">
+                <button class="filter-close-btn" onclick="window.ShopApp.toggleMobileFilter(true)">×</button>
                 <div class="filter-widget">
-                    <div class="filter-title">Danh mục</div>
+                    <div class="filter-title toggleable" onclick="document.getElementById('categoryFilter').classList.toggle('collapsed'); this.classList.toggle('collapsed');">
+                        Danh mục
+                        <svg viewBox="0 0 24 24" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                    </div>
                     <ul class="filter-list" id="categoryFilter">
                         <li class="active" onclick="window.ShopApp.applyFilter('categoryId', null, this)">Tất cả</li>
                     </ul>
                 </div>
+
                 <div class="filter-widget">
-                    <div class="filter-title">Màu sắc</div>
-                    <div class="filter-color-grid">
-                        <div class="filter-color-dot" style="background: #1a1a1a" onclick="window.ShopApp.toggleColorFilter('Đen', this)" title="Đen"></div>
-                        <div class="filter-color-dot" style="background: #ffffff" onclick="window.ShopApp.toggleColorFilter('Trắng', this)" title="Trắng"></div>
-                        <div class="filter-color-dot" style="background: #c4b49d" onclick="window.ShopApp.toggleColorFilter('Be', this)" title="Be"></div>
-                        <div class="filter-color-dot" style="background: #4682b4" onclick="window.ShopApp.toggleColorFilter('Xanh dương', this)" title="Xanh dương"></div>
-                        <div class="filter-color-dot" style="background: #3D5A4C" onclick="window.ShopApp.toggleColorFilter('Rêu', this)" title="Rêu"></div>
+                    <div class="filter-title toggleable" onclick="document.getElementById('colorFilterGrid').classList.toggle('collapsed'); this.classList.toggle('collapsed');">
+                        Màu sắc
+                        <svg viewBox="0 0 24 24" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                    </div>
+                    <div class="filter-color-grid" id="colorFilterGrid">
                     </div>
                 </div>
 
                 <div class="filter-widget">
-                    <div class="filter-title">Kích cỡ</div>
-                    <div class="filter-size-grid">
-                        <button class="filter-size-btn" onclick="window.ShopApp.toggleSizeFilter('S', this)">S</button>
-                        <button class="filter-size-btn" onclick="window.ShopApp.toggleSizeFilter('M', this)">M</button>
-                        <button class="filter-size-btn" onclick="window.ShopApp.toggleSizeFilter('L', this)">L</button>
-                        <button class="filter-size-btn" onclick="window.ShopApp.toggleSizeFilter('XL', this)">XL</button>
+                    <div class="filter-title toggleable" onclick="document.getElementById('sizeFilterGrid').classList.toggle('collapsed'); this.classList.toggle('collapsed');">
+                        Kích cỡ
+                        <svg viewBox="0 0 24 24" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                    </div>
+                    <div class="filter-size-grid" id="sizeFilterGrid">
                     </div>
                 </div>
 
                 <div class="filter-widget">
                     <div class="filter-title">Khoảng giá</div>
-
                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
                         <input type="text" id="minPriceInput" placeholder="TỪ"
                                style="width: 100%; padding: 8px 10px; font-size: 12px; border: 1px solid rgba(0,0,0,0.15); outline: none; font-family: 'DM Sans', sans-serif;"
@@ -182,8 +565,7 @@
                                oninput="window.ShopApp.formatPriceInput(this)">
                     </div>
 
-                    <button onclick="window.ShopApp.applyCustomPrice()"
-                            style="width: 100%; padding: 10px; background: var(--text); color: var(--white); border: none; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; transition: 0.2s;">
+                    <button class="btn-apply-price" onclick="window.ShopApp.applyCustomPrice()">
                         Áp dụng
                     </button>
 
@@ -194,8 +576,10 @@
                 </div>
             </aside>
 
-            <div>
+            <div class="shop-products-area">
+                <div id="activeFiltersBar" style="display: none;"></div>
                 <div class="products-grid" id="dynamicShopGrid"></div>
+
                 <div id="loadingContainer" style="padding: 60px 0 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
                     <div id="loadingSkeleton" style="display:flex; gap:16px; align-items:center;">
                         <span style="font-size:12px; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase">Đang tải thêm</span>
@@ -212,6 +596,33 @@
         </div>
     </section>
 
+    <div class="delivery-modal-overlay" id="deliveryModalOverlay" onclick="if(event.target === this) window.ShopApp.closeDeliveryModal()">
+        <div class="delivery-modal">
+            <div class="dm-header">
+                <div class="dm-title">Chọn hình thức nhận hàng</div>
+                <button class="dm-close-btn" onclick="window.ShopApp.closeDeliveryModal()">
+                    <svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div style="margin-top:4px;">
+                <div class="dm-option" onclick="window.ShopApp.selectDeliveryAndCheckout('store')">
+                    <i class="fa-solid fa-store" style="font-size:28px; color:var(--accent); width:36px; text-align:center;"></i>
+                    <div style="flex:1;">
+                        <div class="dm-label">Nhận tại cửa hàng</div>
+                        <div class="dm-desc">Miễn phí vận chuyển. Nhận hàng tại: 13 phố Phan Tây Nhạc, Nam Từ Liêm, Hà Nội.</div>
+                    </div>
+                </div>
+                <div class="dm-option" onclick="window.ShopApp.selectDeliveryAndCheckout('home')">
+                    <i class="fa-solid fa-truck-fast" style="font-size:28px; color:var(--accent); width:36px; text-align:center;"></i>
+                    <div style="flex:1;">
+                        <div class="dm-label">Giao hàng tận nơi</div>
+                        <div class="dm-desc">Giao hàng đến địa chỉ của bạn. Phí vận chuyển tính theo khoảng cách.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         window.ShopApp = {
             state: {
@@ -221,16 +632,97 @@
                 products: [],
                 isLoading: false,
                 hasMore: true,
-                filters: { categoryId: null, minPrice: null, maxPrice: null, colors: [], sizes: [] }
+                filters: { categoryId: null, minPrice: null, maxPrice: null, colors: [], sizes: [] },
+                likedIds: new Set(JSON.parse(localStorage.getItem('bee_wishlist') || '[]'))
             },
             tempSelection: {},
 
-            // Map màu sắc dự phòng (Giống bên chi tiết)
             colorMap: {
                 'trắng': '#ffffff', 'đen': '#1a1a1a', 'xám': '#c5cfc7', 'ghi': '#d4cfc9',
                 'be': '#c4b49d', 'kem': '#fef3c7', 'nâu': '#a89e93', 'rêu': '#3D5A4C',
                 'đỏ': '#8b0000', 'hồng': '#ffc0cb', 'xanh biển': '#4682b4', 'xanh dương': '#4682b4',
                 'vàng': '#FBC02D', 'cam': '#f97316', 'xanh lá': '#15803d', 'tím': '#a855f7'
+            },
+
+            // Đã gộp hàm init(), xóa bỏ hàm init bị trùng lặp ở bản cũ
+            init: function() {
+                // Quét rác bóng đè tự động
+                fetch('/api/khach-hang/my-profile').then(res => {
+                    if (!res.ok) {
+                        localStorage.removeItem('bee_wishlist');
+                        this.state.likedIds.clear();
+                        document.querySelectorAll('.heart-btn.liked, .qs-wishlist.liked').forEach(el => {
+                            el.classList.remove('liked', 'pop');
+                        });
+                    }
+                }).catch(()=>{});
+
+                const select = document.getElementById('sortSelect');
+                if (select) {
+                    select.addEventListener('change', (e) => {
+                        this.state.sort = e.target.value;
+                        this.resetAndLoad();
+                    });
+                }
+
+                this.setupKeyboardEvents();
+                this.loadProducts();
+                this.loadCategories();
+                this.loadColors();
+                this.loadSizes();
+                this.updateActiveFiltersBar();
+
+                const firstWidget = document.querySelector('.shop-filters .filter-widget');
+                if (firstWidget && !document.getElementById('clearAllFilters')) {
+                    const clearBtn = document.createElement('button');
+                    clearBtn.id = 'clearAllFilters';
+                    clearBtn.innerHTML = '✕ Xóa tất cả bộ lọc';
+                    clearBtn.onclick = () => this.clearAllFilters();
+                    firstWidget.parentNode.insertBefore(clearBtn, firstWidget);
+                }
+            },
+
+            // Cập nhật hàm loadColors
+            loadColors: async function() {
+                try {
+                    const res = await fetch('/api/mau-sac/all-active');
+                    if (!res.ok) return;
+                    const list = await res.json();
+                    const container = document.getElementById('colorFilterGrid');
+                    if (!container) return;
+
+                    let html = '';
+                    list.forEach(c => {
+                        const isActive = this.state.filters.colors.includes(c.ten);
+                        const hex = c.maMau || this.getColorHex(c.ten);
+                        html += `
+            <div class="color-item ${isActive ? 'active' : ''}" onclick="window.ShopApp.toggleColorFilter('${c.ten}', this)">
+                <div class="filter-color-dot" style="background: ${hex}"></div>
+                <div class="color-name">${c.ten}</div>
+            </div>`;
+                    });
+                    container.innerHTML = html;
+
+                    // Nếu muốn mặc định mở thì thôi, còn muốn quá 10 màu mới đóng thì viết logic ở đây
+                } catch (error) { console.error("Lỗi:", error); }
+            },
+
+            loadSizes: async function() {
+                try {
+                    const res = await fetch('/api/kich-thuoc/all-active');
+                    if (!res.ok) return;
+                    let list = await res.json();
+                    list = this.sortSizes(list);
+                    const container = document.getElementById('sizeFilterGrid');
+                    if (!container) return;
+
+                    let html = '';
+                    list.forEach(s => {
+                        const isActive = this.state.filters.sizes.includes(s.ten);
+                        html += `<button class="filter-size-btn ${isActive ? 'active' : ''}" onclick="window.ShopApp.toggleSizeFilter('${s.ten}', this)">${s.ten}</button>`;
+                    });
+                    container.innerHTML = html;
+                } catch (error) { console.error("Lỗi:", error); }
             },
 
             toggleColorFilter: function(colorName, el) {
@@ -240,6 +732,7 @@
                 else this.state.filters.colors.push(colorName);
                 this.resetAndLoad();
             },
+
             toggleSizeFilter: function(sizeName, el) {
                 el.classList.toggle('active');
                 const idx = this.state.filters.sizes.indexOf(sizeName);
@@ -248,7 +741,6 @@
                 this.resetAndLoad();
             },
 
-            // Hàm thuật toán tính độ sáng/tối của màu để viền đối xứng
             getContrastBorder: function(hexcolor) {
                 if (!hexcolor) return 'rgba(0,0,0,0.15)';
                 let color = hexcolor.replace('#', '');
@@ -257,11 +749,9 @@
                 const g = parseInt(color.substr(2,2),16);
                 const b = parseInt(color.substr(4,2),16);
                 const yiq = ((r*299) + (g*587) + (b*114)) / 1000;
-                // Nếu màu quá sáng (như Trắng, Be), viền đậm hơn một chút để thấy rõ trên nền web trắng.
                 return (yiq > 200) ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.15)';
             },
 
-            // Hàm xử lý Sắp xếp giá
             sortProducts: function(type) {
                 if (!this.state.products) return;
                 if (type === 'price_asc') {
@@ -271,31 +761,15 @@
                 } else if (type === 'newest') {
                     this.state.products.sort((a, b) => new Date(b.ngayTao || 0) - new Date(a.ngayTao || 0));
                 }
-                // Gọi lại hàm render để cập nhật giao diện
                 this.renderProducts(this.state.products);
             },
 
-            init: function() {
-                const select = document.getElementById('sortSelect');
-                if (select) {
-                    select.addEventListener('change', (e) => {
-                        this.state.sort = e.target.value;
-                        this.resetAndLoad();
-                    });
-                }
-                this.setupKeyboardEvents();
-                this.loadProducts();
-                this.loadCategories()
-            },
-
-            // 1. Tự động format phẩy phân cách hàng nghìn khi khách gõ (VD: 150000 -> 150,000)
             formatPriceInput: function(el) {
                 let val = el.value.replace(/[^0-9]/g, '');
                 if (val.length > 1 && val.startsWith('0')) val = val.substring(1);
                 el.value = val ? parseInt(val).toLocaleString('vi-VN') : '';
             },
 
-            // 2. Nhận dữ liệu từ 2 ô input và áp dụng lọc
             applyCustomPrice: function() {
                 let minVal = document.getElementById('minPriceInput').value.replace(/[^0-9]/g, '');
                 let maxVal = document.getElementById('maxPriceInput').value.replace(/[^0-9]/g, '');
@@ -308,22 +782,20 @@
                 let min = minVal ? parseInt(minVal) : 0;
                 let max = maxVal ? parseInt(maxVal) : 999999999;
 
-                // Tự động đảo ngược nếu khách nhập: Từ 500k Đến 100k
                 if (min > max) {
                     let temp = min; min = max; max = temp;
                     document.getElementById('minPriceInput').value = min.toLocaleString('vi-VN');
                     document.getElementById('maxPriceInput').value = max.toLocaleString('vi-VN');
                 }
 
-                // Đẩy vào state và gọi load lại
                 this.state.filters.minPrice = min;
                 this.state.filters.maxPrice = max;
 
                 document.getElementById('clearPriceBtn').style.display = 'block';
                 this.resetAndLoad();
+                this.updateActiveFiltersBar();
             },
 
-            // 3. Nút xóa bộ lọc giá
             clearPriceFilter: function() {
                 document.getElementById('minPriceInput').value = '';
                 document.getElementById('maxPriceInput').value = '';
@@ -331,22 +803,21 @@
                 this.state.filters.maxPrice = null;
                 document.getElementById('clearPriceBtn').style.display = 'none';
                 this.resetAndLoad();
+                this.updateActiveFiltersBar();
             },
 
-            // 🌟 HÀM MỚI: TẢI DANH MỤC TỪ DATABASE
             loadCategories: async function() {
                 try {
                     const res = await fetch('/api/danh-muc/all-active');
                     if (!res.ok) return;
 
                     const data = await res.json();
-                    const list = data.content || data; // Xử lý nếu BE trả về Page hoặc List
+                    const list = data.content || data;
 
                     const ul = document.getElementById('categoryFilter');
                     if (!ul || !list || list.length === 0) return;
 
                     let html = `<li class="active" onclick="window.ShopApp.applyFilter('categoryId', null, this)">Tất cả</li>`;
-
                     list.forEach(cat => {
                         html += `<li onclick="window.ShopApp.applyFilter('categoryId', ${cat.id}, this)">${cat.ten}</li>`;
                     });
@@ -356,9 +827,7 @@
                     console.error("Lỗi tải danh mục:", error);
                 }
             },
-            // ==========================================
-            // THUẬT TOÁN NHẬN DIỆN MÀU THÔNG MINH
-            // ==========================================
+
             getColorHex: function(name) {
                 if(!name) return '#000';
                 const n = name.toLowerCase().trim();
@@ -385,9 +854,6 @@
                 return color;
             },
 
-            // ==========================================
-            // THUẬT TOÁN SẮP XẾP SIZE THÔNG MINH
-            // ==========================================
             sortSizes: function(sizes) {
                 const orderMap = {
                     'freesize': 0, 'one size': 0, 'os': 0,
@@ -430,14 +896,7 @@
                     }
                 }
                 this.resetAndLoad();
-            },
-
-            resetAndLoad: function() {
-                this.state.page = 0;
-                this.state.products = [];
-                this.state.hasMore = true;
-                document.getElementById('dynamicShopGrid').innerHTML = '';
-                this.loadProducts();
+                this.updateActiveFiltersBar();
             },
 
             setupKeyboardEvents: function() {
@@ -472,13 +931,13 @@
                 if (this.state.isLoading || !this.state.hasMore) return;
                 this.state.isLoading = true;
 
-                // HIỆN SKELETON LÚC CHỜ API
                 if (this.state.page === 0) {
                     document.getElementById('dynamicShopGrid').innerHTML = `
-                    <div class="skeleton-card"><div class="skeleton skel-img"></div><div class="skeleton skel-line"></div><div class="skeleton skel-line short"></div></div>
-                    <div class="skeleton-card"><div class="skeleton skel-img"></div><div class="skeleton skel-line"></div><div class="skeleton skel-line short"></div></div>
-                    <div class="skeleton-card"><div class="skeleton skel-img"></div><div class="skeleton skel-line"></div><div class="skeleton skel-line short"></div></div>
+                    <div class="skeleton-card"><div class="skeleton skel-img" style="height:300px;margin-bottom:10px"></div><div class="skeleton skel-line" style="height:20px;margin-bottom:5px"></div><div class="skeleton skel-line short" style="height:20px;width:60%"></div></div>
+                    <div class="skeleton-card"><div class="skeleton skel-img" style="height:300px;margin-bottom:10px"></div><div class="skeleton skel-line" style="height:20px;margin-bottom:5px"></div><div class="skeleton skel-line short" style="height:20px;width:60%"></div></div>
+                    <div class="skeleton-card"><div class="skeleton skel-img" style="height:300px;margin-bottom:10px"></div><div class="skeleton skel-line" style="height:20px;margin-bottom:5px"></div><div class="skeleton skel-line short" style="height:20px;width:60%"></div></div>
                 `;
+                    document.getElementById('dynamicShopGrid').style.opacity = '1';
                 }
 
                 document.getElementById('loadingSkeleton').style.display = 'flex';
@@ -537,7 +996,6 @@
                         return this.loadProducts();
                     }
 
-                    // 🌟 BẢN FIX NẰM Ở ĐÂY: XÓA SKELETON TRƯỚC KHI RENDER SẢN PHẨM THẬT
                     if (this.state.page === 0) {
                         document.getElementById('dynamicShopGrid').innerHTML = '';
                     }
@@ -545,14 +1003,12 @@
                     if (list.length > 0) {
                         this.renderProducts(list, startIndex);
                     } else if (this.state.products.length === 0) {
-                        // NẾU LỌC XONG KHÔNG CÓ SẢN PHẨM NÀO KHỚP
                         document.getElementById('dynamicShopGrid').innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:60px 20px; color:var(--muted); font-size:14px; background:#fff; border-radius:4px; border:1px dashed rgba(0,0,0,0.1);">Không tìm thấy sản phẩm nào phù hợp với bộ lọc của bạn.</div>';
                     }
 
                     this.state.page++;
                 } catch (error) {
                     console.error("Lỗi lấy dữ liệu:", error);
-                    // Lỗi mạng cũng phải xóa Skeleton đi để in ra câu thông báo lỗi
                     if (this.state.page === 0) {
                         document.getElementById('dynamicShopGrid').innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#ef4444; font-size:14px;">Đã xảy ra lỗi khi tải sản phẩm. Vui lòng thử lại sau.</div>';
                     }
@@ -564,9 +1020,8 @@
                 }
             },
 
-            // HÀM RENDER SẢN PHẨM HOÀN CHỈNH (MỚI)
             renderProducts: function(newList, startIndex) {
-                const grid = document.getElementById('dynamicShopGrid') || document.getElementById('dynamicProductsGrid');
+                const grid = document.getElementById('dynamicShopGrid');
                 if (!grid) return;
 
                 let html = '';
@@ -583,11 +1038,9 @@
                         imgHoverHtml = `<img src="${hoverUrl}" loading="lazy" class="img-hover" alt="${p.ten}">`;
                     }
 
-                    // TÌM GIÁ SALE TRONG CÁC BIẾN THỂ
-                    const variants = p.chiTietSanPhams || p.chiTietSanPhamList || p.bienThes || p.skus || [];
+                    const variants = this.getVariants(p);
                     let minOriginal = p.giaBan || 0;
                     let minSale = p.giaSauKhuyenMai || minOriginal;
-
                     if (variants.length > 0) {
                         minOriginal = Math.min(...variants.map(v => v.giaBan || 0));
                         minSale = Math.min(...variants.map(v => v.giaSauKhuyenMai || v.giaBan || 0));
@@ -595,75 +1048,88 @@
 
                     let priceHtml = '';
                     if (minSale < minOriginal && minSale > 0) {
-                        priceHtml = `<span style="color:#c08060; font-weight: 600; font-size:15px;">${new Intl.NumberFormat('vi-VN').format(minSale)} ₫</span><span style="color:var(--muted); text-decoration:line-through; font-size:12px; margin-left: 8px;">${new Intl.NumberFormat('vi-VN').format(minOriginal)} ₫</span>`;
+                        const pct = Math.round((1 - minSale / minOriginal) * 100);
+
+                        priceHtml = `<span class="price-sale">${new Intl.NumberFormat('vi-VN').format(minSale)} ₫</span><span class="price-orig">${new Intl.NumberFormat('vi-VN').format(minOriginal)} ₫</span><span class="price-pct" style="margin-left:4px; font-size:11px; color:#c08060; font-weight:600;">-${pct}%</span>`;
                     } else {
-                        priceHtml = minOriginal > 0 ? `<span style="font-size:15px; font-weight:600;">${new Intl.NumberFormat('vi-VN').format(minOriginal)} ₫</span>` : 'Đang cập nhật';
+                        priceHtml = minOriginal > 0 ? `<span class="price-normal">${new Intl.NumberFormat('vi-VN').format(minOriginal)} ₫</span>` : 'Đang cập nhật';
                     }
 
-                    // LOGIC TAG "MỚI" (Trong 7 ngày) VÀ "SALE"
                     let badgesHtml = '';
                     let isNew = false;
                     if (p.ngayTao) {
                         const diffDays = (new Date() - new Date(p.ngayTao)) / (1000 * 60 * 60 * 24);
                         if (diffDays <= 7) isNew = true;
-                    } else if (startIndex !== undefined && startIndex + i < 3) {
-                        isNew = true;
                     }
                     if (isNew) badgesHtml += '<div class="prod-badge new">MỚI</div>';
                     if (minSale < minOriginal) badgesHtml += '<div class="prod-badge sale">SALE</div>';
 
-                    // LOGIC VÒNG MÀU KÉP
-                    let colorHtml = '';
                     const uniqueColors = [];
                     variants.forEach(ct => {
-                        if(ct.mauSac && !uniqueColors.find(c => c.maMau === ct.mauSac.maMau)) uniqueColors.push(ct.mauSac);
+                        if (ct.mauSac && !uniqueColors.find(c => c.id === ct.mauSac.id)) {
+                            uniqueColors.push(ct.mauSac);
+                        }
                     });
+                    let swHtml = uniqueColors.slice(0, 4).map(c => {
+                        const hex = c.maMau || this.getColorHex(c.ten);
+                        const border = this.getContrastBorder ? this.getContrastBorder(hex) : 'rgba(0,0,0,0.12)';
+                        return `<div class="swatch-dot" style="background:${hex};box-shadow:inset 0 0 0 1px ${border};" title="${c.ten}"></div>`;
+                    }).join('');
+                    if (uniqueColors.length > 4) swHtml += `<span class="swatch-more">+${uniqueColors.length-4}</span>`;
 
-                    uniqueColors.forEach(c => {
-                        const borderColor = (window.ShopApp && window.ShopApp.getContrastBorder) ? window.ShopApp.getContrastBorder(c.maMau) : 'rgba(0,0,0,0.15)';
-                        colorHtml += `<div class="color-ring-wrap" style="border: 1px solid ${borderColor};" title="${c.ten}">
-                                    <div class="color-dot-inner" style="background-color:${c.maMau};"></div>
-                                  </div>`;
-                    });
 
-                    // RÁP HTML
-                    html += `<div class="product-card prod-card" id="shop-card-${p.id}">` +
+                    const isLiked = this.state.likedIds.has(p.id);
 
-                        `<div class="prod-badges">${badgesHtml}</div>` +
+                    html += `
+<div class="product-card" id="shop-card-${p.id}">
+    <div class="prod-badges">${badgesHtml}</div>
+    <div class="product-img" onclick="window.ShopApp.viewDetail(${p.id})">
+        ${imgUrl ? `<img src="${imgUrl}" loading="lazy" class="img-placeholder" alt="${p.ten}">` : '<div style="width:100%;height:100%;background:#f3f1ee;"></div>'}
+        ${imgHoverHtml}
+        <div class="img-overlay">
+            <button class="btn-quick" onclick="event.stopPropagation(); window.ShopApp.openSelection(${p.id}, event)">
+                <svg viewBox="0 0 24 24" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+                Chọn & Mua
+            </button>
+        </div>
+        <button class="heart-btn ${isLiked ? 'liked' : ''}"
+            id="shop-heart-${p.id}"
+            onclick="event.stopPropagation(); window.ShopApp.toggleWishlist(${p.id})"
+            title="Yêu thích">
+            <svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        </button>
+    </div>
 
-                        `<div class="product-img prod-img-wrap" onclick="window.ShopApp.viewDetail(${p.id})">` +
-                        '<div class="img-overlay-pattern"></div>' +
-                        `<img src="${imgUrl}" loading="lazy" class="img-placeholder" alt="${p.ten}">` +
-                        imgHoverHtml +
+    <div class="qs-overlay" onclick="event.stopPropagation()">
+        <button class="qs-close" onclick="window.ShopApp.closeSelection(${p.id}, event)">×</button>
+        <div class="qs-name">${p.ten}</div>
+        <div class="qs-lbl">Màu sắc <span id="shop-qs-color-name-${p.id}" style="font-weight:600;text-transform:none;letter-spacing:0;margin-left:3px;"></span></div>
+        <div class="qs-opts" id="shop-qs-colors-${p.id}"></div>
+        <div class="qs-lbl">Kích cỡ</div>
+        <div class="qs-opts" id="shop-qs-sizes-${p.id}"></div>
+        <div class="qs-price prod-price" id="shop-qs-price-${p.id}">${priceHtml}</div>
+        <div class="qs-qty-selector" onclick="event.stopPropagation()">
+            <button class="qs-qty-btn" onclick="window.ShopApp.changeQsQty(${p.id}, 'shop-qs-qty-${p.id}', -1, event)"><i class="fa-solid fa-minus"></i></button>
+            <input type="number" id="shop-qs-qty-${p.id}" class="qs-qty-input" value="1" min="1" onchange="window.ShopApp.validateQsQty(${p.id}, 'shop-qs-qty-${p.id}', event)">
+            <button class="qs-qty-btn" onclick="window.ShopApp.changeQsQty(${p.id}, 'shop-qs-qty-${p.id}', 1, event)"><i class="fa-solid fa-plus"></i></button>
+        </div>
+        <div class="qs-actions">
+            <button class="qs-btn ghost" onclick="window.ShopApp.confirmAdd(${p.id}, event, false, 'shop-qs-qty-${p.id}')">Thêm giỏ</button>
+            <button class="qs-btn primary" onclick="window.ShopApp.confirmAdd(${p.id}, event, true, 'shop-qs-qty-${p.id}')">Mua ngay</button>
+        </div>
+        <button class="qs-wishlist ${isLiked ? 'liked' : ''}" id="shop-qs-wish-${p.id}" onclick="window.ShopApp.toggleWishlist(${p.id})">
+            <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+            <span>${isLiked ? 'Đã yêu thích' : 'Thêm vào yêu thích'}</span>
+        </button>
+    </div>
 
-                        // NÚT TÙY CHỌN MUA (Gọn gàng 1 nút)
-                        `<div class="prod-quick-actions">
-                        <button class="btn-quick-action" onclick="event.stopPropagation(); window.ShopApp.openSelection(${p.id}, event)"><i class="fa-solid fa-cart-plus"></i> TÙY CHỌN MUA</button>
-                    </div>` +
-                        '</div>' +
-
-                        // POPUP MUA HÀNG GIỮ NGUYÊN (TRONG NÀY MỚI CÓ 2 NÚT)
-                        '<div class="quick-selection-overlay" onclick="event.stopPropagation()">' +
-                        `<button class="qs-close" onclick="window.ShopApp.closeSelection(${p.id}, event)">×</button>` +
-                        `<div class="qs-title">${p.ten}</div>` +
-                        `<div class="qs-label">Màu sắc <span id="shop-qs-color-name-${p.id}" style="color:var(--text); font-weight:600; text-transform:none; margin-left:4px;"></span></div>` +
-                        `<div class="qs-options" id="shop-qs-colors-${p.id}"></div>` +
-                        '<div class="qs-label">Kích cỡ</div>' +
-                        `<div class="qs-options" id="shop-qs-sizes-${p.id}"></div>` +
-                        `<div id="shop-qs-price-${p.id}" style="font-size:14px; font-weight:500; text-align:center; margin-bottom:10px;">${priceHtml}</div>` +
-                        '<div style="display:flex; gap:8px; margin-top:10px;">' +
-                        `<button class="qs-confirm-btn" style="margin-top:0; background:transparent; color:var(--text); border:1px solid rgba(0,0,0,0.2);" onclick="window.ShopApp.confirmAdd(${p.id}, event, false)">Thêm giỏ</button>` +
-                        `<button class="qs-confirm-btn" style="margin-top:0;" onclick="window.ShopApp.confirmAdd(${p.id}, event, true)">Mua ngay</button>` +
-                        '</div>' +
-                        '</div>' +
-
-                        // THÔNG TIN BÊN DƯỚI
-                        `<div class="product-info" onclick="window.ShopApp.viewDetail(${p.id})">` +
-                        `<div style="margin-bottom:8px; display:flex;">${colorHtml}</div>` +
-                        `<div class="product-tag">${p.danhMuc ? p.danhMuc.ten : 'Bee Collection'}</div>` +
-                        `<div class="product-name">${p.ten}</div>` +
-                        `<div class="product-price">${priceHtml}</div>` +
-                        '</div></div>';
+    <div class="product-info" onclick="window.ShopApp.viewDetail(${p.id})">
+        <div class="prod-swatches">${swHtml}</div>
+        <div class="product-tag">${p.danhMuc ? p.danhMuc.ten : 'Bee Collection'}</div>
+        <div class="product-name">${p.ten}</div>
+        <div class="prod-price">${priceHtml}</div>
+    </div>
+</div>`;
                 }
 
                 if (grid.id === 'dynamicShopGrid') grid.insertAdjacentHTML('beforeend', html);
@@ -704,30 +1170,26 @@
                 const colorContainer = document.getElementById('shop-qs-colors-' + productId);
                 const sizeContainer = document.getElementById('shop-qs-sizes-' + productId);
 
-                // --- GỌI HÀM LẤY MÀU SẮC ---
                 let cHtml = '';
                 colorsMap.forEach(c => {
                     const isActive = this.tempSelection[productId].colorId === c.id;
                     const hexCode = c.maMau || this.getColorHex(c.ten);
-                    cHtml += `<div class="qs-dot ${isActive ? 'active' : ''}" style="background:${hexCode}" onclick="window.ShopApp.selectAttr(${productId}, 'color', ${c.id}, event)" title="${c.ten}"></div>`;
-                    if (isActive) document.getElementById('shop-qs-color-name-' + productId).innerText = '- ' + c.ten;
+                    cHtml += `<div class="qs-dot ${isActive ? 'active' : ''}" style="background:${hexCode}; border-color: ${this.getContrastBorder ? this.getContrastBorder(hexCode) : 'rgba(0,0,0,0.14)'};" onclick="window.ShopApp.selectAttr(${productId}, 'color', ${c.id}, event)" title="${c.ten}"></div>`;
+                    if (isActive) document.getElementById('shop-qs-color-name-' + productId).innerText = '— ' + c.ten;
                 });
                 colorContainer.innerHTML = cHtml;
 
-                // --- GỌI HÀM SẮP XẾP KÍCH CỠ ---
                 let sHtml = '';
                 let uniqueSizes = Array.from(sizesMap.values());
                 uniqueSizes = this.sortSizes(uniqueSizes);
-
                 uniqueSizes.forEach(s => {
                     const colorId = this.tempSelection[productId].colorId;
                     const isAvailable = !colorId || skus.some(sku => sku.mauSac.id === colorId && sku.kichThuoc.id === s.id && sku.soLuong > 0);
-                    sHtml += `<button class="qs-size-btn ${this.tempSelection[productId].sizeId === s.id ? 'active' : ''} ${!isAvailable ? 'disabled' : ''}" onclick="window.ShopApp.selectAttr(${productId}, 'size', ${s.id}, event)">${s.ten}</button>`;
+                    sHtml += `<button class="qs-size ${this.tempSelection[productId].sizeId === s.id ? 'active' : ''} ${!isAvailable ? 'disabled' : ''}" onclick="window.ShopApp.selectAttr(${productId}, 'size', ${s.id}, event)">${s.ten}</button>`;
                 });
                 sizeContainer.innerHTML = sHtml;
             },
 
-            // 2. CẬP NHẬT LẠI GIÁ BÁN KHI BẤM CHỌN MỘT MÀU/SIZE CỤ THỂ
             selectAttr: function(productId, type, attrId, event) {
                 if (event) event.stopPropagation();
 
@@ -740,13 +1202,17 @@
 
                     const colorSku = skus.find(s => s.mauSac.id === attrId && s.hinhAnh);
                     if (colorSku && colorSku.hinhAnh) {
-                        const imgEl = document.querySelector(`#shop-card-${productId} .img-placeholder`); // Đổi thành #home-card- nếu ở home.html
+                        const imgEl = document.querySelector(`#shop-card-${productId} .img-placeholder`);
                         if (imgEl) {
                             let imgUrl = colorSku.hinhAnh;
                             if (imgUrl.includes('res.cloudinary.com')) imgUrl = imgUrl.replace('/image/upload/', '/image/upload/c_fill,w_400,h_533,f_auto,q_auto/');
-                            imgEl.style.transition = 'opacity 0.2s ease';
-                            imgEl.style.opacity = 0.5;
-                            setTimeout(() => { imgEl.src = imgUrl; imgEl.style.opacity = 1; }, 150);
+
+                            // HIỆU ỨNG NHÁY NHẸ KHI ĐỔI MÀU
+                            imgEl.style.filter = 'brightness(0.7)';
+                            setTimeout(() => {
+                                imgEl.src = imgUrl;
+                                imgEl.style.filter = 'brightness(1)';
+                            }, 100);
                         }
                     }
                 }
@@ -754,15 +1220,15 @@
 
                 const sku = skus.find(s => s.mauSac.id === this.tempSelection[productId].colorId && s.kichThuoc.id === this.tempSelection[productId].sizeId);
 
-                // 🌟 HIỂN THỊ GIÁ SALE LÊN GIAO DIỆN POPUP CHỌN SIZE
                 if (sku) {
                     this.tempSelection[productId].sku = sku;
                     const currentPrice = sku.giaSauKhuyenMai || sku.giaBan;
                     const originalPrice = sku.giaBan;
 
-                    const priceEl = document.getElementById('shop-qs-price-' + productId); // Đổi thành home-qs-price nếu ở home.html
+                    const priceEl = document.getElementById('shop-qs-price-' + productId);
                     if (currentPrice < originalPrice) {
-                        priceEl.innerHTML = `<span style="color:#c08060; font-weight: 600;">${new Intl.NumberFormat('vi-VN').format(currentPrice)} ₫</span> <span style="color:var(--muted); text-decoration:line-through; font-size:12px; margin-left: 6px;">${new Intl.NumberFormat('vi-VN').format(originalPrice)} ₫</span>`;
+                        const pct = Math.round((1 - currentPrice / originalPrice) * 100);
+                        priceEl.innerHTML = `<span style="color:var(--accent); font-weight: 600;">${new Intl.NumberFormat('vi-VN').format(currentPrice)} ₫</span> <span style="color:var(--muted); text-decoration:line-through; font-size:12px; margin-left: 6px;">${new Intl.NumberFormat('vi-VN').format(originalPrice)} ₫</span> <span class="price-pct" style="margin-left: 4px; color: #c08060; font-weight: 600;">-${pct}%</span>`;
                     } else {
                         priceEl.innerText = new Intl.NumberFormat('vi-VN').format(originalPrice) + ' ₫';
                     }
@@ -770,66 +1236,345 @@
                 this.renderSelectionOptions(productId);
             },
 
-            // 3. ĐẨY GIÁ SALE (NẾU CÓ) VÀO GIỎ HÀNG THAY VÌ GIÁ GỐC
-            confirmAdd: function(productId, event, isBuyNow) {
+            changeQsQty: function(productId, inputId, delta, event) {
+                if(event) event.stopPropagation();
+                const input = document.getElementById(inputId);
+                if(!input) return;
+                let val = parseInt(input.value) || 1;
+                let newVal = Math.max(1, val + delta);
+
+                const sel = this.tempSelection[productId];
+                if (sel && sel.sku && newVal > sel.sku.soLuong) {
+                    if(window.showToast) window.showToast(`Chỉ còn ${sel.sku.soLuong} sản phẩm!`, "warning");
+                    newVal = sel.sku.soLuong;
+                }
+                input.value = newVal;
+            },
+
+            validateQsQty: function(productId, inputId, event) {
+                if(event) event.stopPropagation();
+                const input = document.getElementById(inputId);
+                if(!input) return;
+                let val = parseInt(input.value);
+                if (isNaN(val) || val < 1) val = 1;
+
+                const sel = this.tempSelection[productId];
+                if (sel && sel.sku && val > sel.sku.soLuong) {
+                    if(window.showToast) window.showToast(`Chỉ còn ${sel.sku.soLuong} sản phẩm!`, "warning");
+                    val = sel.sku.soLuong;
+                }
+                input.value = val;
+            },
+
+            confirmAdd: function(productId, event, isBuyNow, inputId = null) {
                 if (event) event.stopPropagation();
                 const selection = this.tempSelection[productId];
-                // this.animateFlyToCart(document.querySelector('#shop-card-'+productId+' .img-placeholder'));
+
                 if (!selection.colorId && !selection.sizeId) { window.showToast("Vui lòng chọn màu sắc và kích cỡ", "warning"); return; }
                 if (!selection.colorId) { window.showToast("Bạn chưa chọn màu sắc", "warning"); return; }
                 if (!selection.sizeId) { window.showToast("Bạn chưa chọn kích cỡ", "warning"); return; }
                 if (!selection.sku) { window.showToast("Phiên bản này đã hết hàng", "warning"); return; }
+
+                // 🌟 Lấy số lượng từ ô input (Nếu có), mặc định là 1
+                const inputQty = parseInt(document.getElementById(inputId)?.value) || 1;
 
                 const product = this.state.products.find(p => p.id === productId);
                 let cart = JSON.parse(localStorage.getItem('bee_cart') || '[]');
                 let exist = cart.find(item => item.skuId === selection.sku.id);
 
                 if (exist) {
-                    if (exist.qty + 1 > selection.sku.soLuong) { window.showToast("Vượt quá số lượng kho!", "warning"); return; }
-                    exist.qty++;
+                    if (exist.qty + inputQty > selection.sku.soLuong) { window.showToast("Vượt quá số lượng kho!", "warning"); return; }
+                    exist.qty += inputQty; // 🌟 Cộng số lượng mới
                 } else {
                     cart.push({
-                        skuId: selection.sku.id,
-                        productId: productId,
-                        name: product.ten,
-                        price: selection.sku.giaSauKhuyenMai || selection.sku.giaBan, // 🌟 LƯU GIÁ SALE VÀO GIỎ HÀNG
-                        originalPrice: selection.sku.giaBan, // Lưu thêm giá gốc để BE tính tổng chiết khấu nếu cần
-                        qty: 1,
-                        colorName: selection.sku.mauSac.ten,
-                        sizeName: selection.sku.kichThuoc.ten,
-                        maxStock: selection.sku.soLuong,
-                        img: selection.sku.hinhAnh || (product.hinhAnhs?.[0]?.url || '')
+                        skuId: selection.sku.id, productId: productId, name: product.ten,
+                        price: selection.sku.giaSauKhuyenMai || selection.sku.giaBan, originalPrice: selection.sku.giaBan,
+                        qty: inputQty, /* 🌟 Set số lượng */
+                        colorName: selection.sku.mauSac.ten, sizeName: selection.sku.kichThuoc.ten,
+                        maxStock: selection.sku.soLuong, img: selection.sku.hinhAnh || (product.hinhAnhs?.[0]?.url || '')
                     });
                 }
                 localStorage.setItem('bee_cart', JSON.stringify(cart));
                 this.closeAllSelections();
 
+                // Reset lại số lượng về 1 phòng khi khách mở lại
+                if (document.getElementById(inputId)) document.getElementById(inputId).value = 1;
+
                 if (window.updateCartBadge) window.updateCartBadge();
 
                 if (isBuyNow) {
-                    window.location.hash = 'checkout';
+                    document.getElementById('deliveryModalOverlay').style.display = 'flex';
+                    setTimeout(() => { document.querySelector('.delivery-modal').classList.add('open'); }, 10);
                 } else {
                     window.showToast("Đã cập nhật giỏ hàng", "success");
                 }
             },
 
+            // Ném 2 hàm này ngay dưới hàm confirmAdd:
+            closeDeliveryModal: function() {
+                const modal = document.querySelector('.delivery-modal');
+                if (modal) modal.classList.remove('open');
+                setTimeout(() => { document.getElementById('deliveryModalOverlay').style.display = 'none'; }, 300);
+            },
+
+            selectDeliveryAndCheckout: function(method) {
+                // Lưu lựa chọn vào LocalStorage
+                localStorage.setItem('bee_delivery_method', method);
+
+                // Đóng modal
+                this.closeDeliveryModal();
+
+                // Đóng luôn cái popup chọn màu/size
+                this.closeAllSelections();
+
+                // Chuyển sang trang thanh toán
+                window.location.hash = 'checkout';
+            },
+
             viewDetail: function(productId) {
-                const product = this.state.products.find(p => p.id === productId);
-                if (product) {
+                const p = this.state.products.find(x => x.id === productId);
+                if (p) {
                     let recent = JSON.parse(localStorage.getItem('bee_recent_viewed') || '[]');
+                    // Xóa thằng cũ nếu trùng id
                     recent = recent.filter(item => item.id !== productId);
+
+                    const variants = this.getVariants(p);
+                    let minOriginal = p.giaBan || 0;
+                    let minSale = p.giaSauKhuyenMai || minOriginal;
+                    let uniqueColors = [];
+
+                    if (variants.length > 0) {
+                        minOriginal = Math.min(...variants.map(v => v.giaBan || 0));
+                        minSale = Math.min(...variants.map(v => v.giaSauKhuyenMai || v.giaBan || 0));
+                        variants.forEach(ct => {
+                            if (ct.mauSac && !uniqueColors.find(c => c.ten === ct.mauSac.ten)) {
+                                uniqueColors.push({
+                                    ten: ct.mauSac.ten,
+                                    maMau: ct.mauSac.maMau || this.getColorHex(ct.mauSac.ten)
+                                });
+                            }
+                        });
+                    }
+
+                    // Nhồi thẳng lên trên cùng
                     recent.unshift({
-                        id: product.id,
-                        ten: product.ten,
-                        giaBan: product.giaBan,
-                        hinhAnh: product.hinhAnhs && product.hinhAnhs.length > 0 ? product.hinhAnhs[0].url : 'https://placehold.co/400x533'
+                        id: p.id,
+                        ten: p.ten,
+                        hinhAnh: p.hinhAnhs && p.hinhAnhs.length > 0 ? p.hinhAnhs[0].url : 'https://placehold.co/400x533',
+                        giaGoc: minOriginal,
+                        giaKhuyenMai: minSale,
+                        colors: uniqueColors
                     });
+
                     if (recent.length > 8) recent.pop();
                     localStorage.setItem('bee_recent_viewed', JSON.stringify(recent));
                 }
                 window.location.hash = 'detail?id=' + productId;
-            }
+            },
+
+            toggleWishlist: async function(productId) {
+                try {
+                    const res = await fetch('/api/khach-hang/wishlist/toggle/' + productId, { method: 'POST' });
+
+                    // 🌟 CHẶN KHI CHƯA ĐĂNG NHẬP (LỖI 401) 🌟
+                    if (res.status === 401) {
+                        // Dọn rác bóng đè
+                        localStorage.removeItem('bee_wishlist');
+                        this.state.likedIds.clear();
+
+                        document.querySelectorAll('.heart-btn.liked, .qs-wishlist.liked').forEach(el => {
+                            el.classList.remove('liked', 'pop');
+                        });
+
+                        // Cảnh báo và sút về trang Login
+                        if(window.showToast) window.showToast("Vui lòng đăng nhập thực hiện thao tác này!", "warning");
+                        setTimeout(() => {
+                            window.location.href = '/login'; // Chuyển thẳng về controller /login của Spring
+                        }, 1500);
+                        return;
+                    }
+
+                    // THÀNH CÔNG
+                    if (res.ok) {
+                        const data = await res.json();
+                        const isLiked = this.state.likedIds.has(productId);
+
+                        // Cập nhật State và LocalStorage
+                        isLiked ? this.state.likedIds.delete(productId) : this.state.likedIds.add(productId);
+                        localStorage.setItem('bee_wishlist', JSON.stringify([...this.state.likedIds]));
+
+                        // 1. Đổi UI cho nút tim ở góc ảnh
+                        const btn = document.getElementById(`shop-heart-${productId}`);
+                        if (btn) {
+                            btn.classList.toggle('liked', !isLiked);
+                            if (!isLiked) {
+                                btn.classList.remove('pop');
+                                void btn.offsetWidth; // Force reflow để chạy hiệu ứng
+                                btn.classList.add('pop');
+                                btn.addEventListener('animationend', ()=> btn.classList.remove('pop'), {once:true});
+                            }
+                        }
+
+                        // 2. Đổi UI cho nút tim trong Quick Selection (Màn hình chọn size)
+                        const qsBtn = document.getElementById(`shop-qs-wish-${productId}`);
+                        if (qsBtn) {
+                            qsBtn.classList.toggle('liked', !isLiked);
+                            const span = qsBtn.querySelector('span');
+                            if (span) {
+                                span.textContent = !isLiked ? 'Đã yêu thích' : 'Thêm vào yêu thích';
+                            }
+                        }
+
+                        if (typeof window.showToast === 'function') {
+                            window.showToast(data.message || (!isLiked ? 'Đã thêm vào yêu thích ♥' : 'Đã bỏ khỏi danh sách yêu thích'), !isLiked ? 'success' : 'warning');
+                        }
+                    }
+                } catch(e) {
+                    console.error('Lỗi toggle wishlist:', e);
+                }
+            },
+
+
+
+            renderColorFilters: function() {
+                const container = document.getElementById('colorFilterGrid');
+                if (!container) return;
+
+                const colors = [
+                    {name: 'Đen', hex: '#1a1a1a'},
+                    {name: 'Trắng', hex: '#ffffff'},
+                    {name: 'Be', hex: '#c4b49d'},
+                    {name: 'Xanh dương', hex: '#4682b4'},
+                    {name: 'Rêu', hex: '#3D5A4C'}
+                ];
+
+                let html = '';
+                colors.forEach(c => {
+                    const isActive = this.state.filters.colors.includes(c.name);
+                    html += `
+                    <div class="color-item ${isActive ? 'active' : ''}"
+                         onclick="window.ShopApp.toggleColorFilter('${c.name}', this)">
+                        <div class="filter-color-dot" style="background: ${c.hex}"></div>
+                        <div class="color-name">${c.name}</div>
+                    </div>`;
+                });
+                container.innerHTML = html;
+            },
+
+            clearAllFilters: function() {
+                this.state.filters = { categoryId: null, minPrice: null, maxPrice: null, colors: [], sizes: [] };
+
+                // Reset UI danh mục
+                document.querySelectorAll('.filter-list li').forEach(li => li.classList.remove('active'));
+                const firstLi = document.querySelector('.filter-list li:first-child');
+                if(firstLi) firstLi.classList.add('active');
+
+                // Reset input giá
+                document.getElementById('minPriceInput').value = '';
+                document.getElementById('maxPriceInput').value = '';
+                document.getElementById('clearPriceBtn').style.display = 'none';
+
+                // Load lại dữ liệu thật cho Màu và Size
+                this.loadColors();
+                this.loadSizes();
+                this.updateActiveFiltersBar();
+                this.resetAndLoad();
+            },
+
+            updateActiveFiltersBar: function() {
+                const bar = document.getElementById('activeFiltersBar');
+                if (!bar) return;
+
+                let tagsHTML = '';
+
+                // Danh mục
+                if (this.state.filters.categoryId) {
+                    const catName = document.querySelector(`#categoryFilter li[onclick*="categoryId, ${this.state.filters.categoryId}"]`)?.textContent || 'Danh mục';
+                    tagsHTML += `<div class="filter-tag"><span class="val">${catName}</span> <span class="remove" onclick="window.ShopApp.removeFilter('categoryId')">×</span></div>`;
+                }
+
+                // Màu sắc (Gộp mảng thành chuỗi)
+                if (this.state.filters.colors.length > 0) {
+                    const colorStr = this.state.filters.colors.join(', ');
+                    tagsHTML += `<div class="filter-tag"><span class="lbl">Màu sắc:</span> <span class="val">${colorStr}</span> <span class="remove" onclick="window.ShopApp.removeFilter('all_colors')">×</span></div>`;
+                }
+
+                // Kích cỡ (Gộp mảng thành chuỗi)
+                if (this.state.filters.sizes.length > 0) {
+                    const sizeStr = this.state.filters.sizes.join(', ');
+                    tagsHTML += `<div class="filter-tag"><span class="lbl">Kích cỡ:</span> <span class="val">${sizeStr}</span> <span class="remove" onclick="window.ShopApp.removeFilter('all_sizes')">×</span></div>`;
+                }
+
+                // Khoảng giá
+                if (this.state.filters.minPrice !== null || this.state.filters.maxPrice !== null) {
+                    const min = this.state.filters.minPrice ? new Intl.NumberFormat('vi-VN').format(this.state.filters.minPrice) : '0';
+                    const max = this.state.filters.maxPrice ? new Intl.NumberFormat('vi-VN').format(this.state.filters.maxPrice) : '∞';
+                    tagsHTML += `<div class="filter-tag"><span class="lbl">Giá:</span> <span class="val">${min} - ${max} ₫</span> <span class="remove" onclick="window.ShopApp.removeFilter('price')">×</span></div>`;
+                }
+
+                if (tagsHTML) {
+                    tagsHTML += `<button class="btn-clear-tags" onclick="window.ShopApp.clearAllFilters()">Xóa tất cả</button>`;
+                    bar.innerHTML = tagsHTML;
+                    bar.style.display = 'flex';
+                } else {
+                    bar.style.display = 'none';
+                }
+            },
+
+            removeFilter: function(type) {
+                if (type === 'categoryId') {
+                    this.state.filters.categoryId = null;
+                    document.querySelectorAll('.filter-list li').forEach(li => li.classList.remove('active'));
+                    const firstLi = document.querySelector('.filter-list li:first-child');
+                    if(firstLi) firstLi.classList.add('active');
+                }
+                else if (type === 'all_colors') {
+                    this.state.filters.colors = [];
+                    this.loadColors(); // Gọi lại hàm load dữ liệu thật
+                }
+                else if (type === 'all_sizes') {
+                    this.state.filters.sizes = [];
+                    this.loadSizes(); // Gọi lại hàm load dữ liệu thật
+                }
+                else if (type === 'price') {
+                    this.state.filters.minPrice = null;
+                    this.state.filters.maxPrice = null;
+                    document.getElementById('minPriceInput').value = '';
+                    document.getElementById('maxPriceInput').value = '';
+                    document.getElementById('clearPriceBtn').style.display = 'none';
+                }
+
+                this.updateActiveFiltersBar();
+                this.resetAndLoad();
+            },
+
+            resetAndLoad: function() {
+                this.state.page = 0;
+                this.state.products = [];
+                this.state.hasMore = true;
+                document.getElementById('dynamicShopGrid').innerHTML = '';
+
+                this.loadProducts();
+                this.updateActiveFiltersBar();
+            },
+
+            toggleMobileFilter: function(forceClose) {
+                const sidebar = document.querySelector('.shop-filters');
+                const backdrop = document.getElementById('filter-backdrop');
+                if (!sidebar || !backdrop) return;
+
+                if (forceClose || sidebar.classList.contains('show')) {
+                    sidebar.classList.remove('show');
+                    backdrop.classList.remove('show');
+                    document.body.style.overflow = ''; // Mở lại cuộn trang
+                } else {
+                    sidebar.classList.add('show');
+                    backdrop.classList.add('show');
+                    document.body.style.overflow = 'hidden'; // Khóa cuộn trang khi đang mở bộ lọc
+                }
+            },
         };
         setTimeout(() => window.ShopApp.init(), 100);
     </script>
 </section>
+

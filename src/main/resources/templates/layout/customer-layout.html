@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beemate — Breathing Space</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <title>Beemate</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cstyle%3Epath%7Bfill%3A%231A1A1A%7D%40media(prefers-color-scheme%3Adark)%7Bpath%7Bfill%3A%23F7F5F2%7D%7D%3C%2Fstyle%3E%3Cpath d='M244.26,92.26a11.5,11.5,0,0,0-4-6.42A76.08,76.08,0,0,0,183.08,64h-3.41A60.27,60.27,0,0,0,128,24,60.27,60.27,0,0,0,76.33,64H72.92a76.08,76.08,0,0,0-57.22,21.84,11.5,11.5,0,0,0-4,6.42,12.09,12.09,0,0,0,2.19,9.45A76,76,0,0,0,60,128a76,76,0,0,0-46.07,26.29,12.09,12.09,0,0,0-2.19,9.45,11.5,11.5,0,0,0,4,6.42A76.08,76.08,0,0,0,72.92,192h5.51A59.5,59.5,0,0,0,128,232a59.5,59.5,0,0,0,49.57-40h5.51a76.08,76.08,0,0,0,57.22-21.84,11.5,11.5,0,0,0,4,6.42,12.09,12.09,0,0,0-2.19-9.45A76,76,0,0,0,196,128a76,76,0,0,0,46.07-26.29A12.09,12.09,0,0,0,244.26,92.26ZM144,206.11A36.19,36.19,0,0,1,128,208a36.19,36.19,0,0,1-16-1.89V168h32Zm0-62.11H112V112h32Zm-49.8-63.53a76.35,76.35,0,0,0,17.8,11.83v21.88a36,36,0,0,1-16,33.82Zm67.6,0a36,36,0,0,1,16,33.82V126.18A76.35,76.35,0,0,0,161.8,80.47ZM128,48a36.19,36.19,0,0,1,16,1.89V72H112V49.89A36.19,36.19,0,0,1,128,48ZM39.5,108.57A52,52,0,0,1,72.92,88h2.62a98,98,0,0,1-10.74,24H36A52.17,52.17,0,0,1,39.5,108.57Zm33.42,63.43A52,52,0,0,1,39.5,147.43,52.17,52.17,0,0,1,36,128H64.8a98,98,0,0,1,10.74,24H72.92ZM183.08,168h-2.62a98,98,0,0,1-10.74-24H220a52.17,52.17,0,0,1-3.5,19.43A52,52,0,0,1,183.08,168Zm33.42-36.57A52,52,0,0,1,183.08,88h2.62a98,98,0,0,1,10.74,24H220A52.17,52.17,0,0,1,216.5,131.43Z'%2F%3E%3C%2Fsvg%3E">    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
@@ -18,17 +18,11 @@
             --main-font: 'DM Sans', sans-serif;
         }
 
-        /* 🌟 3. ÉP TẤT CẢ CÁC TRANG DÙNG CHUNG FONT NÀY */
-        /* Lưu ý: Dùng :not(i) và :not([class*="fa-"]) để không làm lỗi mất các icon FontAwesome */
-        *:not(i):not([class*="fa-"]):not([class*="bi-"]) {
-            font-family: var(--main-font) !important;
-        }
-
         * { margin:0; padding:0; box-sizing:border-box; }
         html { scroll-behavior:smooth; }
 
         /* Chỉnh lại body (Bỏ phần khai báo font cũ đi) */
-        body { background:var(--bg); color:var(--text); font-weight:400; overflow-x:hidden; cursor:none; }
+        body { background:var(--bg); color:var(--text); font-weight:400; overflow-x:hidden; font-family: var(--main-font); }
 
         .cursor { width:10px; height:10px; background:var(--accent); border-radius:50%; position:fixed; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); transition:transform .1s ease,width .3s ease,height .3s ease,background .3s ease; }
         .cursor-ring { width:36px; height:36px; border:1px solid var(--accent); border-radius:50%; position:fixed; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); transition:transform .18s ease,width .3s ease,height .3s ease,opacity .3s ease; opacity:.5; }
@@ -36,10 +30,10 @@
         #site-header { position:fixed; top:0; left:0; right:0; z-index:100; background:var(--bg); transition:background .4s ease,box-shadow .4s ease; }
         #site-header.scrolled { background:rgba(247,245,242,0.98); backdrop-filter:blur(12px); box-shadow:0 2px 20px rgba(0,0,0,.05); }
         nav { display:flex; align-items:center; justify-content:space-between; padding:20px 60px; }
-        .logo { font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:600; letter-spacing:.12em; color:var(--text); text-decoration:none; text-transform:uppercase; flex:1; cursor:none; }
+        .logo { font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:600; letter-spacing:.12em; color:var(--text); text-decoration:none; text-transform:uppercase; flex:1; }
         .logo span { color:var(--accent); }
         .nav-links { display:flex; gap:40px; list-style:none; justify-content:center; flex:2; }
-        .nav-links a { font-size:13px; letter-spacing:.08em; color:var(--text); text-decoration:none; font-weight:400; text-transform:uppercase; position:relative; padding-bottom:2px; cursor:none; }
+        .nav-links a { font-size:13px; letter-spacing:.08em; color:var(--text); text-decoration:none; font-weight:400; text-transform:uppercase; position:relative; padding-bottom:2px; }
         .nav-links a::after { content:''; position:absolute; bottom:0; left:0; width:0; height:1px; background:var(--accent); transition:width .3s ease; }
         .nav-links a:hover::after { width:100%; }
         .nav-actions { display:flex; gap:24px; align-items:center; justify-content:flex-end; flex:1; }
@@ -98,15 +92,39 @@
         .notif-modal-close:hover { color: var(--text); }
 
         .page-selector { display:flex; gap:20px; padding:0 60px; border-top:1px solid rgba(0,0,0,.06); border-bottom:1px solid rgba(0,0,0,.06); background:var(--bg); }
-        .page-tab { padding:16px 24px 16px 0; font-size:12px; letter-spacing:.1em; text-transform:uppercase; cursor:none; border:none; background:none; font-family:'DM Sans',sans-serif; color:var(--muted); font-weight:500; border-bottom:2px solid transparent; transition:color .2s ease,border-color .2s ease; display:flex; align-items:center; gap:8px; text-decoration:none; }
+        .page-tab { padding:16px 24px 16px 0; font-size:12px; letter-spacing:.1em; text-transform:uppercase; border:none; background:none; font-family:'DM Sans',sans-serif; color:var(--muted); font-weight:500; border-bottom:2px solid transparent; transition:color .2s ease,border-color .2s ease; display:flex; align-items:center; gap:8px; text-decoration:none; }
         .page-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
         .page-tab:hover { color:var(--text); }
 
         #content-area { padding-top:0; min-height:100vh; transition:opacity .2s ease; }
-        #globalLoader { position:fixed; top:0; left:0; width:100%; height:3px; background:transparent; z-index:9999; opacity:0; transition:opacity .2s; pointer-events:none; }
-        #globalLoader.show { opacity:1; }
-        #globalLoader::after { content:''; display:block; width:0; height:100%; background:var(--accent); animation:loadProgress 1s infinite ease-in-out; }
-        @keyframes loadProgress { 0%{width:0;margin-left:0} 50%{width:100%;margin-left:0} 100%{width:0;margin-left:100%} }
+        /* Xóa background:transparent cũ, thay bằng nền mờ để nổi bật con ong ở giữa */
+        #globalLoader {
+            position: fixed; inset: 0; background: rgba(247, 245, 242, 0.85); backdrop-filter: blur(4px);
+            z-index: 99999; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        #globalLoader.show { opacity: 1; pointer-events: all; }
+
+        /* Tùy chỉnh kích thước con ong */
+        .bee-loader-svg { width: 50px; height: 50px; }
+
+        /* Kỹ thuật vẽ nét SVG (Line Drawing Animation) */
+        .bee-loader-svg path {
+            fill: transparent; /* Bỏ màu nền ban đầu */
+            stroke: var(--accent); /* Đặt màu nét vẽ là màu xanh rêu */
+            stroke-width: 4; /* Độ dày của nét */
+            stroke-dasharray: 2000; /* Phân mảnh nét vẽ (để dài hơn chu vi hình) */
+            stroke-dashoffset: 2000; /* Đẩy nét vẽ ra khỏi hình */
+            animation: drawBee 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        /* Vòng lặp: Vẽ nét -> Đổ màu -> Xóa đi làm lại */
+        @keyframes drawBee {
+            0% { stroke-dashoffset: 2000; fill: transparent; }
+            60% { stroke-dashoffset: 0; fill: transparent; }
+            80% { stroke-dashoffset: 0; fill: var(--accent); }
+            100% { stroke-dashoffset: 0; fill: var(--accent); opacity: 0; }
+        }@keyframes loadProgress { 0%{width:0;margin-left:0} 50%{width:100%;margin-left:0} 100%{width:0;margin-left:100%} }
 
         .cart-toast { position:fixed; bottom:100px; right:40px; background:var(--text); color:white; padding:20px 28px; display:flex; align-items:center; gap:16px; font-size:13px; transform:translateY(100px); opacity:0; transition:transform .4s ease,opacity .4s ease; z-index:9999; pointer-events:none; max-width:320px; }
         .cart-toast.show { transform:translateY(0); opacity:1; pointer-events:all; }
@@ -121,7 +139,7 @@
         .footer-col-title { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:white; font-weight:500; margin-bottom:20px; }
         .footer-links { list-style:none; }
         .footer-links li { margin-bottom:12px; }
-        .footer-links a { font-size:14px; color:rgba(255,255,255,.5); text-decoration:none; font-weight:300; transition:color .2s ease; cursor:none; }
+        .footer-links a { font-size:14px; color:rgba(255,255,255,.5); text-decoration:none; font-weight:300; transition:color .2s ease; }
         .footer-links a:hover { color:white; }
         .footer-bottom { padding-top:32px; border-top:1px solid rgba(255,255,255,.08); display:flex; justify-content:space-between; align-items:center; }
         .footer-copy { font-size:12px; color:rgba(255,255,255,.35); font-weight:300; }
@@ -157,13 +175,213 @@
             .footer-top { grid-template-columns:1fr 1fr; }
             .notif-dropdown { right:-60px; width:300px; }
         }
+
+        /* ✅ Thêm vào sau @media (max-width:900px) { ... } */
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 16px 20px;
+            }
+            .nav-links {
+                display: none; /* Ẩn menu ngang, sau này có thể làm hamburger */
+            }
+            .logo {
+                font-size: 22px;
+            }
+            .nav-actions {
+                gap: 16px;
+            }
+            .page-selector {
+                padding: 0 16px;
+                gap: 0;
+                overflow-x: auto;
+                scrollbar-width: none;
+            }
+            .page-selector::-webkit-scrollbar {
+                display: none;
+            }
+            .page-tab {
+                padding: 14px 16px 14px 0;
+                font-size: 11px;
+                white-space: nowrap;
+            }
+            .footer-top {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+            footer {
+                padding: 48px 24px 32px;
+            }
+            .footer-bottom {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+            .notif-dropdown {
+                width: 280px;
+                right: -80px;
+            }
+            .cart-toast {
+                right: 16px;
+                left: 16px;
+                bottom: 80px;
+                max-width: unset;
+            }
+        }
+
+        @media (max-width: 375px) {
+            nav {
+                padding: 14px 16px;
+            }
+            .logo {
+                font-size: 20px;
+            }
+            .nav-actions {
+                gap: 12px;
+            }
+            .page-tab {
+                font-size: 10px;
+                padding: 12px 12px 12px 0;
+            }
+            #bee-chat-window {
+                width: calc(100vw - 24px);
+                right: 12px;
+                bottom: 80px;
+            }
+            #bee-chat-btn {
+                right: 70px;
+                bottom: 24px;
+            }
+            #back-to-top {
+                bottom: 24px;
+                right: 24px;
+            }
+        }
+
+
+        body.cursor-ready,
+        body.cursor-ready a,
+        body.cursor-ready button,
+        body.cursor-ready [style*="cursor:none"],
+        body.cursor-ready .logo,
+        body.cursor-ready .nav-links a,
+        body.cursor-ready .cart-icon,
+        body.cursor-ready .notif-bell-btn {
+            cursor: none;
+        }
+
+        /* ══════════════════════════════════════════
+   FOOTER OPTIMIZED (DEEP FOREST THEME)
+   ══════════════════════════════════════════ */
+        footer {
+            background: #24332C; /* Xanh rêu đậm đồng bộ dự án */
+            color: rgba(255,255,255,0.7);
+            padding: 80px 60px 40px;
+            font-family: var(--main-font);
+        }
+
+        .footer-top {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 60px;
+            margin-bottom: 60px;
+        }
+
+        .footer-brand {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 32px;
+            font-weight: 500;
+            color: #FFFFFF;
+            margin-bottom: 16px;
+        }
+
+        .footer-brand span { color: #A8C2B5; } /* Màu xanh nhạt tạo điểm nhấn */
+
+        .footer-desc {
+            font-size: 14px;
+            line-height: 1.8;
+            font-weight: 300;
+            max-width: 300px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .footer-col-title {
+            font-family: 'Cormorant Garamond', serif; /* Dùng font Garamond cho đồng bộ */
+            font-size: 18px;
+            letter-spacing: 0.05em;
+            color: #FFFFFF;
+            font-weight: 600;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        /* Thêm gạch chân nhỏ dưới tiêu đề cho tinh tế */
+        .footer-col-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 20px;
+            height: 1px;
+            background: #A8C2B5;
+        }
+
+        .footer-links { list-style: none; }
+        .footer-links li { margin-bottom: 12px; }
+
+        .footer-links a {
+            font-size: 14px;
+            color: rgba(255,255,255,0.5);
+            text-decoration: none;
+            font-weight: 400;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: #FFFFFF;
+            padding-left: 5px; /* Hiệu ứng dịch nhẹ khi hover */
+        }
+
+        .footer-bottom {
+            padding-top: 32px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-copy { font-size: 12px; color: rgba(255,255,255,0.3); font-weight: 300; }
+
+        .footer-socials { display: flex; gap: 24px; }
+        .footer-socials a {
+            font-size: 12px;
+            letter-spacing: 0.1em;
+            color: rgba(255,255,255,0.4);
+            text-decoration: none;
+            text-transform: uppercase;
+            transition: color 0.2s ease;
+            cursor: none;
+        }
+
+        .footer-socials a:hover { color: #A8C2B5; }
+
+        /* Responsive cho Mobile */
+        @media (max-width: 768px) {
+            footer { padding: 60px 24px 30px; }
+            .footer-top { grid-template-columns: 1fr; gap: 40px; }
+            .footer-brand { font-size: 26px; }
+        }
     </style>
 </head>
 <body>
 
 <div class="cursor" id="cursor"></div>
 <div class="cursor-ring" id="cursorRing"></div>
-<div id="globalLoader"></div>
+<div id="globalLoader">
+    <svg viewBox="0 0 256 256" class="bee-loader-svg">
+        <path d="M244.26,92.26a11.5,11.5,0,0,0-4-6.42A76.08,76.08,0,0,0,183.08,64h-3.41A60.27,60.27,0,0,0,128,24,60.27,60.27,0,0,0,76.33,64H72.92a76.08,76.08,0,0,0-57.22,21.84,11.5,11.5,0,0,0-4,6.42,12.09,12.09,0,0,0,2.19,9.45A76,76,0,0,0,60,128a76,76,0,0,0-46.07,26.29,12.09,12.09,0,0,0-2.19,9.45,11.5,11.5,0,0,0,4,6.42A76.08,76.08,0,0,0,72.92,192h5.51A59.5,59.5,0,0,0,128,232a59.5,59.5,0,0,0,49.57-40h5.51a76.08,76.08,0,0,0,57.22-21.84,11.5,11.5,0,0,0,4-6.42,12.09,12.09,0,0,0-2.19-9.45A76,76,0,0,0,196,128a76,76,0,0,0,46.07-26.29A12.09,12.09,0,0,0,244.26,92.26ZM144,206.11A36.19,36.19,0,0,1,128,208a36.19,36.19,0,0,1-16-1.89V168h32Zm0-62.11H112V112h32Zm-49.8-63.53a76.35,76.35,0,0,0,17.8,11.83v21.88a36,36,0,0,1-16,33.82Zm67.6,0a36,36,0,0,1,16,33.82V126.18A76.35,76.35,0,0,0,161.8,80.47ZM128,48a36.19,36.19,0,0,1,16,1.89V72H112V49.89A36.19,36.19,0,0,1,128,48ZM39.5,108.57A52,52,0,0,1,72.92,88h2.62a98,98,0,0,1-10.74,24H36A52.17,52.17,0,0,1,39.5,108.57Zm33.42,63.43A52,52,0,0,1,39.5,147.43,52.17,52.17,0,0,1,36,128H64.8a98,98,0,0,1,10.74,24H72.92ZM183.08,168h-2.62a98,98,0,0,1-10.74-24H220a52.17,52.17,0,0,1-3.5,19.43A52,52,0,0,1,183.08,168Zm33.42-36.57A52,52,0,0,1,183.08,88h2.62a98,98,0,0,1,10.74,24H220A52.17,52.17,0,0,1,216.5,131.43Z"></path>
+    </svg>
+</div>
 
 <div class="cart-toast" id="cartToast">
     <div class="toast-icon"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div>
@@ -174,7 +392,6 @@
     <nav>
         <a href="#home" class="logo">Bee<span>mate</span></a>
         <ul class="nav-links">
-            <li><a href="#shop">Bộ sưu tập</a></li>
             <li><a href="#home?scroll=new-arrivals">Mới về</a></li>
             <li><a href="#about">About Beemate</a></li>
             <li><a href="#sale">Sale</a></li>
@@ -219,8 +436,21 @@
         </div>
     </nav>
     <div class="page-selector" id="pageSelector">
-        <a href="#home"   class="page-tab" data-tab="home"><i class="fa-solid fa-house"></i> Trang chủ</a>
-        <a href="#shop"   class="page-tab" data-tab="shop"><i class="fa-solid fa-shirt"></i> Sản phẩm</a>
+        <a href="#home"    class="page-tab" data-tab="home">
+            <i class="fa-solid fa-house"></i> Trang chủ
+        </a>
+        <a href="#shop"    class="page-tab" data-tab="shop">
+            <i class="fa-solid fa-shirt"></i> Sản phẩm
+        </a>
+        <a href="#sale"    class="page-tab" data-tab="sale">
+            <i class="fa-solid fa-tag"></i> Sale
+        </a>
+        <a href="#about"   class="page-tab" data-tab="about">
+            <i class="fa-solid fa-leaf"></i> About
+        </a>
+        <a href="#account" class="page-tab" data-tab="account">
+            <i class="fa-solid fa-user"></i> Tài khoản
+        </a>
     </div>
 </div>
 
@@ -229,15 +459,14 @@
 <footer>
     <div class="footer-top">
         <div>
-            <div class="footer-brand">Bee<span>mate</span></div>
+            <div class="footer-brand">BEE<span>MATE</span></div>
             <p class="footer-desc">Trang phục tự nhiên cho những người yêu sự thoải mái trong từng hơi thở.</p>
         </div>
         <div>
             <div class="footer-col-title">Khám phá</div>
             <ul class="footer-links">
-                <li><a href="#shop">Bộ sưu tập mới</a></li>
-                <li><a href="#shop">Áo nam</a></li>
-                <li><a href="#shop">Áo nữ</a></li>
+                <li><a href="#shop">Tất cả sản phẩm</a></li>
+                <li><a href="#shop">Ưu đãi theo mùa</a></li>
                 <li><a href="#sale">Sale</a></li>
             </ul>
         </div>
@@ -261,9 +490,12 @@
         </div>
     </div>
     <div class="footer-bottom">
-        <div class="footer-copy">© 2026 Beemate. Tất cả quyền được bảo lưu.</div>
+        <div class="footer-copy">© 2026 Beemate. Handmade with care in Vietnam.</div>
         <div class="footer-socials">
-            <a href="#">Instagram</a><a href="#">TikTok</a><a href="#">Shopee</a><a href="#">Lazada</a>
+            <a href="#">Instagram</a>
+            <a href="#">TikTok</a>
+            <a href="#">Shopee</a>
+            <a href="#">Lazada</a>
         </div>
     </div>
     <button id="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
@@ -490,8 +722,13 @@
     const cursor = document.getElementById('cursor');
     const cursorRing = document.getElementById('cursorRing');
     document.addEventListener('mousemove', e => {
-        cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px';
-        setTimeout(() => { cursorRing.style.left = e.clientX + 'px'; cursorRing.style.top = e.clientY + 'px'; }, 60);
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+        setTimeout(() => {
+            cursorRing.style.left = e.clientX + 'px';
+            cursorRing.style.top = e.clientY + 'px';
+        }, 60);
+        document.body.classList.add('cursor-ready');
     });
 
     let toastTimeout;
@@ -519,7 +756,9 @@
 
     window.addEventListener('hashchange', () => {
         const hash = window.location.hash.slice(1).split('?')[0] || 'home';
-        document.querySelectorAll('.page-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === hash));
+        document.querySelectorAll('.page-tab').forEach(t =>
+            t.classList.toggle('active', t.dataset.tab === hash)
+        );
     });
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -705,13 +944,32 @@
 </style>
 
 <div id="bee-chat-btn" onclick="toggleChat()">
-    <img src="https://cdn-icons-png.flaticon.com/512/803/803087.png" style="width: 24px; height: 24px; filter: brightness(0) invert(1);" alt="Bee">
+    <svg width="24" height="24" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="32" cy="38" rx="18" ry="14" fill="white" opacity="0.95"/>
+        <ellipse cx="32" cy="38" rx="18" ry="14" fill="none" stroke="white" stroke-width="1.5"/>
+        <rect x="24" y="34" width="16" height="2.5" rx="1.25" fill="#3D5A4C"/>
+        <rect x="26" y="39" width="12" height="2.5" rx="1.25" fill="#3D5A4C"/>
+        <ellipse cx="32" cy="22" rx="9" ry="7" fill="white" opacity="0.95"/>
+        <rect x="29" y="19" width="2.5" height="6" rx="1.25" fill="#3D5A4C"/>
+        <rect x="33" y="19" width="2.5" height="6" rx="1.25" fill="#3D5A4C"/>
+        <path d="M23 20 Q18 14 20 10" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        <path d="M41 20 Q46 14 44 10" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+    </svg>
 </div>
 
 <div id="bee-chat-window">
     <div class="chat-header">
         <div class="title">
-            <img src="https://cdn-icons-png.flaticon.com/512/803/803087.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" alt="Bee">
+            <svg width="20" height="20" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="32" cy="38" rx="18" ry="14" fill="white" opacity="0.9"/>
+                <rect x="24" y="34" width="16" height="2.5" rx="1.25" fill="#3D5A4C"/>
+                <rect x="26" y="39" width="12" height="2.5" rx="1.25" fill="#3D5A4C"/>
+                <ellipse cx="32" cy="22" rx="9" ry="7" fill="white" opacity="0.9"/>
+                <rect x="29" y="19" width="2.5" height="6" rx="1.25" fill="#3D5A4C"/>
+                <rect x="33" y="19" width="2.5" height="6" rx="1.25" fill="#3D5A4C"/>
+                <path d="M23 20 Q18 14 20 10" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+                <path d="M41 20 Q46 14 44 10" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+            </svg>
             BeeMate AI Hỗ Trợ
         </div>
         <div class="close-btn" onclick="toggleChat()"><i class="fa-solid fa-xmark"></i></div>
