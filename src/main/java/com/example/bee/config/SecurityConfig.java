@@ -29,55 +29,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 1. TÀI NGUYÊN CÔNG KHAI & TRANG ĐĂNG NHẬP
                         .requestMatchers("/register", "/login", "/css/**", "/js/**", "/images/**", "/customer/**").permitAll()
-                        // 2. API CÔNG KHAI (Khách vãng lai dùng để xem hàng, tra đơn)
-                        .requestMatchers(
-                                "/api/products/**",
-                                "/api/danh-muc/**",
-                                "/api/mau-sac/**",
-                                "/api/kich-thuoc/**",
-                                "/api/hoa-don/tra-cuu/**",
-                                "/api/hoa-don/checkout",
-                                "/api/hoa-don/check-employee",
-                                "/api/thong-bao/**",
-                                "/api/vouchers/active",
-                                "/api/khuyen-mai/**"
-                        ).permitAll()
-
-                        // Ai cũng được XEM đánh giá
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/khach-hang/reviews/**").permitAll()
-
-                        // 3. API RIÊNG CỦA KHÁCH HÀNG (Phải có tài khoản mới được xài)
-                        .requestMatchers(
-                                "/api/upload", // 🌟 FIX LỖI 403: Cấp quyền upload ảnh cho khách hàng
-                                "/api/khach-hang/reviews/**", // 🌟 Yêu cầu đăng nhập để VIẾT đánh giá và check-eligibility
-                                "/api/khach-hang/wishlist/**",
-                                "/api/khach-hang/my-profile",
-                                "/api/khach-hang/change-password",
-                                "/api/hoa-don/my-orders",
-                                "/api/vouchers/**"
-                        ).hasAnyAuthority("ROLE_CUSTOMER", "ROLE_STAFF", "ROLE_ADMIN")
-
-                        // 4. API DÀNH CHO ADMIN & NHÂN VIÊN
-                        .requestMatchers(
-                                "/api/nhan-vien/my-profile",
-                                "/api/nhan-vien/change-password",
-                                "/admin/**",
-                                "/products/**",
-                                "/pos/**",
-                                "/api/khach-hang/**", // Quản lý khách hàng
-                                "/api/hoa-don/**",    // Quản lý hóa đơn
-                                "/api/reviews/**",    // Quản lý đánh giá tổng
-                                "/api/**"             // Các API còn lại (Phải nằm dưới cùng)
-                        ).hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
-
-                        // 5. API ĐỘC QUYỀN CỦA ADMIN
-                        .requestMatchers(
-                                "/dashboards/**",
-                                "/returns/**",
-                                "/api/thong-ke/**",
-                                "/api/nhan-vien/**",
-                                "/staff/**"
-                        ).hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/api/products/**", "/api/hoa-don/tra-cuu/**", "/api/hoa-don/checkout", "/api/hoa-don/check-employee", "/api/thong-bao/**", "/api/khach-hang/reviews/**", "api/danh-muc/all-active", "api/mau-sac/all-active", "api/kich-thuoc/all-active","/api/khuyen-mai/**").permitAll()
+                        .requestMatchers("/api/khach-hang/**").hasAuthority("ROLE_CUSTOMER")
+                        .requestMatchers("/api/khach-hang/my-profile", "/api/khach-hang/change-password", "/api/khach-hang/**", "/api/hoa-don/my-orders", "/api/hoa-don/**", "/api/vouchers/active", "/api/khuyen-mai/**", "/api/hoa-don/**", "/api/doi-tra/create/**", "/api/pos/**").hasAnyAuthority("ROLE_CUSTOMER", "ROLE_STAFF", "ROLE_ADMIN")
+                        .requestMatchers("/api/nhan-vien/my-profile", "/api/nhan-vien/change-password").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
+                        .requestMatchers("/dashboards/**", "/returns/**", "/api/thong-ke/**", "/api/nhan-vien/**", "/api/chuc-vu/**", "/staff/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/admin/**", "/products/**", "/pos/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
+                        .requestMatchers("/api/khach-hang", "/api/khach-hang/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
+                        .requestMatchers("/api/hoa-don", "/api/hoa-don/**", "/api/reviews/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
+                        .requestMatchers("/api/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
