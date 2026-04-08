@@ -44,8 +44,6 @@ public class HoaDon {
     @Column(name = "dia_chi_giao_hang", columnDefinition = "NVARCHAR(MAX)")
     private String diaChiGiaoHang;
 
-    private String phuongThucThanhToan;
-
     // ĐÃ SỬA THÀNH NVARCHAR(MAX) CHO SQL SERVER
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String ghiChu;

@@ -6,6 +6,7 @@ import com.example.bee.entities.order.HoaDonChiTiet;
 import com.example.bee.entities.order.LichSuHoaDon;
 import com.example.bee.entities.order.TrangThaiHoaDon;
 import com.example.bee.entities.order.YeuCauDoiTra;
+import com.example.bee.entities.order.ThanhToan;
 import com.example.bee.entities.product.SanPhamChiTiet;
 import com.example.bee.entities.user.NhanVien;
 import com.example.bee.repositories.order.ChiTietDoiTraRepository;
@@ -13,6 +14,7 @@ import com.example.bee.repositories.order.HoaDonChiTietRepository;
 import com.example.bee.repositories.order.HoaDonRepository;
 import com.example.bee.repositories.order.LichSuHoaDonRepository;
 import com.example.bee.repositories.order.TrangThaiHoaDonRepository;
+import com.example.bee.repositories.order.ThanhToanRepository;
 import com.example.bee.repositories.order.YeuCauDoiTraRepository;
 import com.example.bee.repositories.products.SanPhamChiTietRepository;
 import com.example.bee.repositories.role.NhanVienRepository;
@@ -40,9 +42,9 @@ public class ReturnApi {
     private final HoaDonRepository hdRepo;
     private final HoaDonChiTietRepository hdctRepo;
 
-    // 🌟 Thêm 2 Repo này để cập nhật trạng thái hóa đơn gốc
     private final TrangThaiHoaDonRepository ttRepo;
     private final LichSuHoaDonRepository lsRepo;
+    private final ThanhToanRepository thanhToanRepo;
 
     @GetMapping("/list")
     public ResponseEntity<?> getList() {
@@ -54,10 +56,18 @@ public class ReturnApi {
             map.put("id", yc.getId());
             map.put("maYC", yc.getMa());
             map.put("maHD", yc.getHoaDon().getMa());
-            map.put("khachHang", yc.getKhachHang() != null ? yc.getKhachHang().getHoTen() : (yc.getHoaDon().getTenNguoiNhan() != null ? yc.getHoaDon().getTenNguoiNhan() : "Khách vãng lai"));
-            map.put("sdt", yc.getKhachHang() != null ? yc.getKhachHang().getSoDienThoai() : yc.getHoaDon().getSdtNhan());
+
+            map.put("khachHang", yc.getHoaDon().getKhachHang() != null ? yc.getHoaDon().getKhachHang().getHoTen() : (yc.getHoaDon().getTenNguoiNhan() != null ? yc.getHoaDon().getTenNguoiNhan() : "Khách vãng lai"));
+            map.put("sdt", yc.getHoaDon().getKhachHang() != null ? yc.getHoaDon().getKhachHang().getSoDienThoai() : yc.getHoaDon().getSdtNhan());
+
+            List<ThanhToan> tts = thanhToanRepo.findByHoaDon_Id(yc.getHoaDon().getId());
+            String pttt = "TIEN_MAT";
+            if (tts != null && !tts.isEmpty()) {
+                pttt = tts.get(0).getPhuongThuc();
+            }
+            map.put("payment", pttt);
+
             map.put("loai", yc.getLoaiYeuCau());
-            map.put("payment", yc.getHoaDon().getPhuongThucThanhToan() != null ? yc.getHoaDon().getPhuongThucThanhToan() : "TIEN_MAT");
             map.put("tienHoan", yc.getSoTienHoan());
             map.put("trangThai", yc.getTrangThai());
             map.put("ngayTao", yc.getNgayTao() != null ? sdf.format(yc.getNgayTao()) : "");
@@ -89,9 +99,17 @@ public class ReturnApi {
         Map<String, Object> result = new HashMap<>();
         result.put("maYC", yc.getMa());
         result.put("maHD", yc.getHoaDon().getMa());
-        result.put("khachHang", yc.getKhachHang() != null ? yc.getKhachHang().getHoTen() : (yc.getHoaDon().getTenNguoiNhan() != null ? yc.getHoaDon().getTenNguoiNhan() : "Khách vãng lai"));
-        result.put("sdt", yc.getKhachHang() != null ? yc.getKhachHang().getSoDienThoai() : yc.getHoaDon().getSdtNhan());
-        result.put("payment", yc.getHoaDon().getPhuongThucThanhToan() != null ? yc.getHoaDon().getPhuongThucThanhToan() : "TIEN_MAT");
+
+        result.put("khachHang", yc.getHoaDon().getKhachHang() != null ? yc.getHoaDon().getKhachHang().getHoTen() : (yc.getHoaDon().getTenNguoiNhan() != null ? yc.getHoaDon().getTenNguoiNhan() : "Khách vãng lai"));
+        result.put("sdt", yc.getHoaDon().getKhachHang() != null ? yc.getHoaDon().getKhachHang().getSoDienThoai() : yc.getHoaDon().getSdtNhan());
+
+        List<ThanhToan> tts = thanhToanRepo.findByHoaDon_Id(yc.getHoaDon().getId());
+        String pttt = "TIEN_MAT";
+        if (tts != null && !tts.isEmpty()) {
+            pttt = tts.get(0).getPhuongThuc();
+        }
+        result.put("payment", pttt);
+
         result.put("tienHoan", yc.getSoTienHoan());
         result.put("lyDo", yc.getLyDo());
         result.put("loai", yc.getLoaiYeuCau());
@@ -113,7 +131,6 @@ public class ReturnApi {
             yc.setNhanVien(nv);
         }
 
-        // 🌟 LẤY TRẠNG THÁI CHECKBOX CỘNG KHO TỪ FRONTEND
         boolean congKho = payload != null && payload.containsKey("congKho") ? (Boolean) payload.get("congKho") : true;
 
         if (yc.getLoaiYeuCau().equalsIgnoreCase("ĐỔI HÀNG") && payload != null && payload.containsKey("chiTietMoi")) {
@@ -137,17 +154,14 @@ public class ReturnApi {
         yc.setNgayXuLy(new Date());
         ycRepo.save(yc);
 
-        // 🌟 FIX LỖI 3 & 4: TĂNG SỐ LƯỢNG TRẢ CỦA HÓA ĐƠN CHI TIẾT (KHÔNG ĐỔI TRẠNG THÁI HÓA ĐƠN MẸ)
         List<ChiTietDoiTra> ctList = ctRepo.findByYeuCauDoiTraId(id);
         for (ChiTietDoiTra ct : ctList) {
             HoaDonChiTiet hdct = ct.getHoaDonChiTiet();
 
-            // Ghi nhận số lượng khách đã trả vào hóa đơn chi tiết gốc
             int daTra = hdct.getSoLuongTra() != null ? hdct.getSoLuongTra() : 0;
             hdct.setSoLuongTra(daTra + ct.getSoLuong());
             hdctRepo.save(hdct);
 
-            // Chỉ cộng lại kho nếu nhân viên tích chọn "Hàng còn nguyên vẹn"
             if (congKho) {
                 SanPhamChiTiet spct = hdct.getSanPhamChiTiet();
                 spct.setSoLuong(spct.getSoLuong() + ct.getSoLuong());
@@ -155,12 +169,11 @@ public class ReturnApi {
             }
         }
 
-        // 🌟 KHÔNG SET LẠI TRẠNG THÁI hd.setTrangThaiHoaDon() NỮA, CHỈ LƯU LỊCH SỬ
         HoaDon hd = yc.getHoaDon();
         if (hd != null) {
             LichSuHoaDon ls = new LichSuHoaDon();
             ls.setHoaDon(hd);
-            ls.setTrangThaiHoaDon(hd.getTrangThaiHoaDon()); // Giữ nguyên trạng thái cũ (HOAN_THANH)
+            ls.setTrangThaiHoaDon(hd.getTrangThaiHoaDon());
             ls.setNhanVien(yc.getNhanVien());
             ls.setGhiChu("Đơn hàng cập nhật số lượng trả do hoàn tất phiếu " + yc.getLoaiYeuCau() + " hàng: " + yc.getMa());
             ls.setNgayTao(new Date());
@@ -193,9 +206,6 @@ public class ReturnApi {
 
         List<HoaDonChiTiet> ctList = hdctRepo.findByHoaDonId(hd.getId());
 
-        // ==============================================================================
-        // 🌟 BƯỚC 1: TÍNH TỔNG TIỀN HÀNG VÀ TỔNG VOUCHER ĐỂ PHÂN BỔ
-        // ==============================================================================
         BigDecimal tongTienHangThucTe = BigDecimal.ZERO;
         for (HoaDonChiTiet ct : ctList) {
             tongTienHangThucTe = tongTienHangThucTe.add(ct.getGiaTien().multiply(BigDecimal.valueOf(ct.getSoLuong())));
@@ -210,9 +220,6 @@ public class ReturnApi {
         for (HoaDonChiTiet ct : ctList) {
             Map<String, Object> item = new HashMap<>();
 
-            // ==============================================================================
-            // 🌟 BƯỚC 2: TÍNH TOÁN "GIÁ THỰC TẾ" (SAU KHI TRỪ VOUCHER) ĐỂ TRẢ VỀ FRONTEND
-            // ==============================================================================
             BigDecimal thanhTienItem = ct.getGiaTien().multiply(BigDecimal.valueOf(ct.getSoLuong()));
             BigDecimal giamGiaItem = BigDecimal.ZERO;
             if (tongTienHangThucTe.compareTo(BigDecimal.ZERO) > 0) {
@@ -223,15 +230,13 @@ public class ReturnApi {
 
             item.put("idHdct", ct.getId());
             item.put("tenSP", ct.getSanPhamChiTiet().getSanPham().getTen());
-            item.put("idSanPham", ct.getSanPhamChiTiet().getSanPham().getId()); // Kèm ID SP cha để Frontend so sánh đổi Size
+            item.put("idSanPham", ct.getSanPhamChiTiet().getSanPham().getId());
             item.put("thuocTinh", ct.getSanPhamChiTiet().getMauSac().getTen() + " - " + ct.getSanPhamChiTiet().getKichThuoc().getTen());
             item.put("hinhAnh", ct.getSanPhamChiTiet().getHinhAnh());
             item.put("soLuong", ct.getSoLuong());
 
-            // Giữ nguyên giá gốc hiển thị bị gạch chéo
             item.put("giaBan", ct.getGiaTien());
 
-            // 🔥 TRƯỜNG DỮ LIỆU MỚI: Giá khách thực trả để dùng cho đổi hàng ngang giá
             item.put("giaThucTe", giaThucTe1Sp);
 
             items.add(item);
@@ -254,21 +259,17 @@ public class ReturnApi {
                 return ResponseEntity.badRequest().body(Map.of("message", "Chỉ được đổi trả hóa đơn đã giao thành công!"));
             }
 
-            // 🌟 TÍNH TỔNG TIỀN HÀNG VÀ VOUCHER CỦA ĐƠN ĐỂ PHÂN BỔ TỈ LỆ
             BigDecimal tongTienDon = BigDecimal.ZERO;
             List<HoaDonChiTiet> allHdct = hdctRepo.findByHoaDonId(hd.getId());
             for (HoaDonChiTiet ct : allHdct) {
                 tongTienDon = tongTienDon.add(ct.getGiaTien().multiply(BigDecimal.valueOf(ct.getSoLuong())));
             }
 
-            // 💡 LƯU Ý: Nếu Entity HoaDon của bạn dùng tên khác (VD: getTienGiamVoucher, getGiaTriKhuyenMai), hãy sửa tên 'getTienGiam()' ở dòng dưới cho khớp nhé.
-            // Dòng code đã sửa đúng theo Entity HoaDon của bạn:
             BigDecimal tienGiam = hd.getGiaTriKhuyenMai() != null ? hd.getGiaTriKhuyenMai() : BigDecimal.ZERO;
 
             YeuCauDoiTra yc = new YeuCauDoiTra();
             yc.setMa("DT" + System.currentTimeMillis());
             yc.setHoaDon(hd);
-            yc.setKhachHang(hd.getKhachHang());
             yc.setLoaiYeuCau(loaiYeuCau);
             yc.setLyDo(lyDo);
             yc.setTrangThai("CHO_XU_LY");
@@ -283,7 +284,6 @@ public class ReturnApi {
 
                 HoaDonChiTiet hdct = hdctRepo.findById(idHdct).orElse(null);
                 if (hdct != null) {
-                    // 🌟 CHECK VALIDATE SỐ LƯỢNG TRẢ
                     int daTra = hdct.getSoLuongTra() != null ? hdct.getSoLuongTra() : 0;
                     int maxCoTheTra = hdct.getSoLuong() - daTra;
 
@@ -297,7 +297,6 @@ public class ReturnApi {
                     ct.setTinhTrangSanPham("Bình thường");
                     ctRepo.save(ct);
 
-                    // 🌟 FIX LỖI 1: TÍNH TIỀN HOÀN CÓ TRỪ ĐI PHẦN TRĂM VOUCHER
                     BigDecimal giaTriSp = hdct.getGiaTien().multiply(BigDecimal.valueOf(sl));
                     if (tongTienDon.compareTo(BigDecimal.ZERO) > 0 && tienGiam.compareTo(BigDecimal.ZERO) > 0) {
                         BigDecimal tyLeGiam = giaTriSp.divide(tongTienDon, 4, java.math.RoundingMode.HALF_UP);

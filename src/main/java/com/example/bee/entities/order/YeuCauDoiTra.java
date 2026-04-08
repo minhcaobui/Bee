@@ -1,6 +1,5 @@
 package com.example.bee.entities.order;
 
-import com.example.bee.entities.customer.KhachHang;
 import com.example.bee.entities.user.NhanVien;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,10 +20,6 @@ public class YeuCauDoiTra {
     @ManyToOne
     @JoinColumn(name = "id_hoa_don")
     private HoaDon hoaDon;
-
-    @ManyToOne
-    @JoinColumn(name = "id_khach_hang")
-    private KhachHang khachHang;
 
     @ManyToOne
     @JoinColumn(name = "id_nhan_vien")

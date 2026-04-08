@@ -41,7 +41,8 @@ public class SecurityConfig {
                                 "/api/thong-bao/**",
                                 "/api/vouchers/active",
                                 "/api/khuyen-mai/**",
-                                "/api/chatbot/**"
+                                "/api/chatbot/**",
+                                "/api/gio-hang/**" // 🌟 ĐÃ MỞ KHÓA API GIỎ HÀNG CHO KHÁCH VÃNG LAI
                         ).permitAll()
 
                         // Ai cũng được XEM đánh giá

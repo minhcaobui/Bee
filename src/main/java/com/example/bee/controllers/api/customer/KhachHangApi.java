@@ -5,6 +5,7 @@ import com.example.bee.dto.DiaChiRequest;
 import com.example.bee.dto.KhachHangRequest;
 import com.example.bee.entities.account.TaiKhoan;
 import com.example.bee.entities.account.VaiTro;
+import com.example.bee.entities.cart.GioHang;
 import com.example.bee.entities.customer.DiaChiKhachHang;
 import com.example.bee.entities.customer.KhachHang;
 import com.example.bee.entities.order.HoaDonChiTiet;
@@ -57,7 +58,8 @@ public class KhachHangApi {
     private final DanhGiaRepository danhGiaRepo;
     private final HoaDonChiTietRepository hoaDonChiTietRepository;
     private final HoaDonRepository hoaDonRepository;
-    private final VaiTroRepository vaiTroRepo; // 🌟 THÊM DÒNG NÀY
+    private final VaiTroRepository vaiTroRepo;
+    private final com.example.bee.repositories.cart.GioHangRepository gioHangRepository;
 
     private String generateMa() {
         long count = khRepo.count();
@@ -131,16 +133,20 @@ public class KhachHangApi {
             }
         }
 
-        // 🌟 BƯỚC QUAN TRỌNG: TẠO TÀI KHOẢN LIÊN KẾT
         VaiTro roleCustomer = vaiTroRepo.findByMa("ROLE_CUSTOMER")
                 .orElseThrow(() -> new RuntimeException("Chưa cấu hình quyền ROLE_CUSTOMER"));
 
         TaiKhoan tk = new TaiKhoan();
-        tk.setTenDangNhap(sdt); // Tên đăng nhập mặc định là SĐT
-        tk.setMatKhau(passwordEncoder.encode("123456")); // Mật khẩu mặc định
+        tk.setTenDangNhap(sdt);
+        tk.setMatKhau(passwordEncoder.encode("123456"));
         tk.setVaiTro(roleCustomer);
         tk.setTrangThai(true);
         TaiKhoan savedTk = taiKhoanRepository.save(tk);
+
+        // 🌟 TẠO GIỎ HÀNG TRỐNG
+        GioHang gioHang = new GioHang();
+        gioHang.setTaiKhoan(savedTk);
+        gioHangRepository.save(gioHang);
 
         KhachHang kh = new KhachHang();
         kh.setMa(generateMa());
@@ -152,7 +158,6 @@ public class KhachHangApi {
         kh.setTrangThai(req.getTrangThai() != null ? req.getTrangThai() : true);
         if (req.getHinhAnh() != null) kh.setHinhAnh(req.getHinhAnh());
 
-        // 🌟 GÁN TÀI KHOẢN VỪA TẠO VÀO KHÁCH HÀNG
         kh.setTaiKhoan(savedTk);
 
         String tinh = req.getTinhThanhPho() != null ? req.getTinhThanhPho().trim() : "";
@@ -217,7 +222,6 @@ public class KhachHangApi {
                 return ResponseEntity.badRequest().body(Map.of("message", "Số điện thoại đã được sử dụng bởi khách hàng khác"));
             }
 
-            // 🌟 ĐỒNG BỘ TÊN ĐĂNG NHẬP NẾU KHÁCH ĐỔI SĐT
             if (kh.getTaiKhoan() != null && kh.getTaiKhoan().getTenDangNhap().equals(kh.getSoDienThoai())) {
                 if (!sdtNew.equals(kh.getSoDienThoai()) && taiKhoanRepository.existsByTenDangNhap(sdtNew)) {
                     return ResponseEntity.badRequest().body(Map.of("message", "Số điện thoại này đã được đăng ký Tài khoản khác!"));
@@ -245,7 +249,6 @@ public class KhachHangApi {
 
         if (req.getTrangThai() != null) {
             kh.setTrangThai(req.getTrangThai());
-            // Khóa/Mở Khách hàng thì cũng Khóa/Mở luôn tài khoản đăng nhập của họ
             if (kh.getTaiKhoan() != null) {
                 kh.getTaiKhoan().setTrangThai(req.getTrangThai());
             }
@@ -256,14 +259,13 @@ public class KhachHangApi {
     }
 
     @PatchMapping("/{id}/trang-thai")
-    @Transactional // 🌟 Bắt buộc phải có Transactional
+    @Transactional
     public ResponseEntity<?> quickToggleStatus(@PathVariable Integer id) {
         KhachHang kh = khRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Khách hàng không tồn tại"));
 
         kh.setTrangThai(!kh.getTrangThai());
 
-        // 🌟 ĐỒNG BỘ KHÓA LUÔN TÀI KHOẢN ĐĂNG NHẬP
         if (kh.getTaiKhoan() != null) {
             TaiKhoan tk = kh.getTaiKhoan();
             tk.setTrangThai(kh.getTrangThai());
@@ -273,7 +275,6 @@ public class KhachHangApi {
         return ResponseEntity.ok(khRepo.save(kh));
     }
 
-    // 🌟 API ĐỔI LẤY DANH SÁCH ĐƠN HÀNG CỦA 1 KHÁCH HÀNG (CÓ PHÂN TRANG & LỌC)
     @GetMapping("/{id}/hoa-don")
     public ResponseEntity<?> getCustomerOrders(
             @PathVariable Integer id,
@@ -282,16 +283,13 @@ public class KhachHangApi {
             @RequestParam(required = false, defaultValue = "") String q,
             @RequestParam(required = false, defaultValue = "") String statusId
     ) {
-        // Lấy tất cả hóa đơn của khách hàng này (Sắp xếp mới nhất)
         List<com.example.bee.entities.order.HoaDon> allOrders = hoaDonRepository.findByKhachHangIdOrderByNgayTaoDesc(id);
 
-        // Lọc theo từ khóa (Mã hóa đơn) và Trạng thái (bằng Java Stream)
         List<com.example.bee.entities.order.HoaDon> filteredList = allOrders.stream()
                 .filter(hd -> q.isEmpty() || hd.getMa().toLowerCase().contains(q.toLowerCase()))
                 .filter(hd -> statusId.isEmpty() || (hd.getTrangThaiHoaDon() != null && hd.getTrangThaiHoaDon().getMa().equals(statusId)))
                 .collect(java.util.stream.Collectors.toList());
 
-        // Xử lý Phân trang thủ công an toàn
         int start = page * size;
         int end = Math.min((start + size), filteredList.size());
         List<com.example.bee.entities.order.HoaDon> pageContent = new java.util.ArrayList<>();
@@ -301,7 +299,6 @@ public class KhachHangApi {
 
         int totalPages = (int) Math.ceil((double) filteredList.size() / size);
 
-        // Trả về chuẩn cấu trúc Page của Spring Boot để Frontend đọc được
         return ResponseEntity.ok(Map.of(
                 "content", pageContent,
                 "totalPages", totalPages,
@@ -310,22 +307,16 @@ public class KhachHangApi {
         ));
     }
 
-    // =========================================================================
-    // API LẤY DANH SÁCH SẢN PHẨM KHÁCH HÀNG ĐÃ MUA (Gom nhóm & Tính tổng)
-    // =========================================================================
     @GetMapping("/{id}/san-pham-da-mua")
     public ResponseEntity<?> getProductsBought(@PathVariable Integer id,
                                                @RequestParam(defaultValue = "0") int page,
                                                @RequestParam(defaultValue = "5") int size) {
-        // 1. Lấy tất cả hóa đơn của khách hàng
         List<com.example.bee.entities.order.HoaDon> orders = hoaDonRepository.findByKhachHangIdOrderByNgayTaoDesc(id);
 
-        // 2. Lọc ra các hóa đơn đã Hoàn Thành
         List<com.example.bee.entities.order.HoaDon> completedOrders = orders.stream()
                 .filter(hd -> hd.getTrangThaiHoaDon() != null && "HOAN_THANH".equals(hd.getTrangThaiHoaDon().getMa()))
                 .collect(java.util.stream.Collectors.toList());
 
-        // 3. Quét các chi tiết hóa đơn, gom nhóm theo ID Sản phẩm chi tiết (SKU)
         Map<Integer, Map<String, Object>> productStats = new java.util.HashMap<>();
 
         for (com.example.bee.entities.order.HoaDon hd : completedOrders) {
@@ -348,11 +339,9 @@ public class KhachHangApi {
             }
         }
 
-        // 4. Sắp xếp giảm dần theo Số lượng mua
         List<Map<String, Object>> sortedList = new java.util.ArrayList<>(productStats.values());
         sortedList.sort((a, b) -> Integer.compare((int) b.get("soLuongMua"), (int) a.get("soLuongMua")));
 
-        // 5. Cắt danh sách (Phân trang thủ công)
         int start = Math.min(page * size, sortedList.size());
         int end = Math.min(start + size, sortedList.size());
         List<Map<String, Object>> pageContent = sortedList.subList(start, end);
@@ -366,16 +355,12 @@ public class KhachHangApi {
         ));
     }
 
-    // =========================================================================
-    // API LẤY DANH SÁCH VOUCHER KHÁCH HÀNG ĐÃ SỬ DỤNG
-    // =========================================================================
     @GetMapping("/{id}/voucher-da-dung")
     public ResponseEntity<?> getVouchersUsed(@PathVariable Integer id,
                                              @RequestParam(defaultValue = "0") int page,
                                              @RequestParam(defaultValue = "5") int size) {
         List<com.example.bee.entities.order.HoaDon> orders = hoaDonRepository.findByKhachHangIdOrderByNgayTaoDesc(id);
 
-        // Lọc các hóa đơn Hoàn Thành VÀ có gắn mã Voucher
         List<com.example.bee.entities.order.HoaDon> ordersWithVoucher = orders.stream()
                 .filter(hd -> hd.getMaGiamGia() != null
                         && hd.getTrangThaiHoaDon() != null
@@ -393,7 +378,6 @@ public class KhachHangApi {
             ));
         }
 
-        // Cắt danh sách (Phân trang)
         int start = Math.min(page * size, voucherList.size());
         int end = Math.min(start + size, voucherList.size());
         List<Map<String, Object>> pageContent = voucherList.subList(start, end);
@@ -426,7 +410,6 @@ public class KhachHangApi {
                     "ngaySinh", kh.getNgaySinh() != null ? kh.getNgaySinh().toString() : "",
                     "hinhAnh", kh.getHinhAnh() != null ? kh.getHinhAnh() : "",
                     "taiKhoanId", kh.getTaiKhoan() != null ? kh.getTaiKhoan().getId() : 0,
-                    // 🌟 BỔ SUNG THÊM 2 TRƯỜNG NÀY CHO KHÁCH HÀNG:
                     "tenDangNhap", kh.getTaiKhoan() != null ? kh.getTaiKhoan().getTenDangNhap() : "",
                     "daDoiTenDangNhap", kh.getTaiKhoan() != null && Boolean.TRUE.equals(kh.getTaiKhoan().getDaDoiTenDangNhap())
             ));
@@ -443,7 +426,6 @@ public class KhachHangApi {
                     "ngaySinh", nv.getNgaySinh() != null ? nv.getNgaySinh().toString() : "",
                     "hinhAnh", nv.getHinhAnh() != null ? nv.getHinhAnh() : "",
                     "taiKhoanId", nv.getTaiKhoan() != null ? nv.getTaiKhoan().getId() : 0,
-                    // 🌟 BỔ SUNG THÊM 2 TRƯỜNG NÀY CHO NHÂN VIÊN:
                     "tenDangNhap", nv.getTaiKhoan() != null ? nv.getTaiKhoan().getTenDangNhap() : "",
                     "daDoiTenDangNhap", nv.getTaiKhoan() != null && Boolean.TRUE.equals(nv.getTaiKhoan().getDaDoiTenDangNhap())
             ));
@@ -522,12 +504,11 @@ public class KhachHangApi {
 
         khRepo.save(kh);
 
-        boolean isUsernameChanged = false; // 🌟 Thêm cờ theo dõi
+        boolean isUsernameChanged = false;
         String newUsername = payload.get("tenDangNhap");
 
         if (newUsername != null && !newUsername.trim().isEmpty() && !newUsername.equals(taiKhoan.getTenDangNhap())) {
 
-            // Kiểm tra quyền đổi
             if (Boolean.TRUE.equals(taiKhoan.getDaDoiTenDangNhap())) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Bạn chỉ được đổi tên đăng nhập 1 lần duy nhất!"));
             }
@@ -540,10 +521,9 @@ public class KhachHangApi {
             taiKhoan.setDaDoiTenDangNhap(true);
             taiKhoanRepository.save(taiKhoan);
 
-            isUsernameChanged = true; // 🌟 Đánh dấu là đã đổi tên đăng nhập
+            isUsernameChanged = true;
         }
 
-        // 🌟 Trả về thêm tín hiệu cho Frontend
         return ResponseEntity.ok(Map.of(
                 "message", "Cập nhật thành công!",
                 "usernameChanged", isUsernameChanged
@@ -851,7 +831,6 @@ public class KhachHangApi {
         return ResponseEntity.ok(list);
     }
 
-    // 🌟 ĐÃ TỐI ƯU VÀ FIX LỖI NPE Ở ĐÂY
     @GetMapping("/my-reviews")
     public ResponseEntity<?> getMyAllReviews(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) return ResponseEntity.ok(java.util.Collections.emptyList());
@@ -864,7 +843,6 @@ public class KhachHangApi {
         return ResponseEntity.ok(myReviews);
     }
 
-    // 🌟 API ĐỔI MẬT KHẨU TỪ PHÍA ADMIN
     @PatchMapping("/{id}/doi-mat-khau")
     @Transactional
     public ResponseEntity<?> adminChangePassword(@PathVariable Integer id, @RequestBody Map<String, String> body) {
@@ -882,7 +860,6 @@ public class KhachHangApi {
             return ResponseEntity.badRequest().body(Map.of("message", "Khách hàng này chưa có tài khoản đăng nhập (Chỉ mua tại quầy)"));
         }
 
-        // Mã hóa mật khẩu mới và lưu lại
         tk.setMatKhau(passwordEncoder.encode(matKhauMoi));
         taiKhoanRepository.save(tk);
 
@@ -919,7 +896,6 @@ public class KhachHangApi {
             return ResponseEntity.ok(Map.of("eligible", false, "message", "Bạn cần mua và nhận sản phẩm này thành công để có thể đánh giá!"));
         }
 
-        // 🌟 ĐÃ SỬA LỖI TYPE MISMATCH VÀ NPE Ở ĐÂY
         List<Integer> reviewedDetailIds = danhGiaRepo.findBySanPhamIdOrderByNgayTaoDesc(sanPhamId).stream()
                 .filter(r -> r.getTaiKhoan() != null && r.getTaiKhoan().getId().equals(userId)
                         && r.getHoaDonChiTiet() != null && r.getHoaDonChiTiet().getId() != null)

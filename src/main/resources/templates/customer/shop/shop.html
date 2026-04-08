@@ -1287,47 +1287,72 @@
                 input.value = val;
             },
 
-            confirmAdd: function(productId, event, isBuyNow, inputId = null) {
+            async confirmAdd(productId, event, isBuyNow, inputId = null) {
                 if (event) event.stopPropagation();
-                const selection = this.tempSelection[productId];
+                const sel = tempSel[productId];
+                if (!sel?.colorId && !sel?.sizeId) { window.showToast('Vui lòng chọn màu sắc và kích cỡ', 'warning'); return; }
+                if (!sel.colorId) { window.showToast('Bạn chưa chọn màu sắc', 'warning'); return; }
+                if (!sel.sizeId) { window.showToast('Bạn chưa chọn kích cỡ', 'warning'); return; }
+                if (!sel.sku) { window.showToast('Phiên bản này đang hết hàng', 'warning'); return; }
 
-                if (!selection.colorId && !selection.sizeId) { window.showToast("Vui lòng chọn màu sắc và kích cỡ", "warning"); return; }
-                if (!selection.colorId) { window.showToast("Bạn chưa chọn màu sắc", "warning"); return; }
-                if (!selection.sizeId) { window.showToast("Bạn chưa chọn kích cỡ", "warning"); return; }
-                if (!selection.sku) { window.showToast("Phiên bản này đã hết hàng", "warning"); return; }
-
-                // 🌟 Lấy số lượng từ ô input (Nếu có), mặc định là 1
                 const inputQty = parseInt(document.getElementById(inputId)?.value) || 1;
+                const sku = sel.sku;
 
-                const product = this.state.products.find(p => p.id === productId);
-                let cart = JSON.parse(localStorage.getItem('bee_cart') || '[]');
-                let exist = cart.find(item => item.skuId === selection.sku.id);
-
-                if (exist) {
-                    if (exist.qty + inputQty > selection.sku.soLuong) { window.showToast("Vượt quá số lượng kho!", "warning"); return; }
-                    exist.qty += inputQty; // 🌟 Cộng số lượng mới
-                } else {
-                    cart.push({
-                        skuId: selection.sku.id, productId: productId, name: product.ten,
-                        price: selection.sku.giaSauKhuyenMai || selection.sku.giaBan, originalPrice: selection.sku.giaBan,
-                        qty: inputQty, /* 🌟 Set số lượng */
-                        colorName: selection.sku.mauSac.ten, sizeName: selection.sku.kichThuoc.ten,
-                        maxStock: selection.sku.soLuong, img: selection.sku.hinhAnh || (product.hinhAnhs?.[0]?.url || '')
-                    });
+                // 🌟 TÌM KIẾM SẢN PHẨM AN TOÀN TUYỆT ĐỐI (Chống lỗi undefined)
+                let product = null;
+                if (this.state.allProducts && this.state.allProducts.length > 0) {
+                    product = this.state.allProducts.find(p => p.id === productId);
                 }
-                localStorage.setItem('bee_cart', JSON.stringify(cart));
-                this.closeAllSelections();
+                if (!product && this.state.allSaleProducts && this.state.allSaleProducts.length > 0) {
+                    product = this.state.allSaleProducts.find(p => p.id === productId);
+                }
+                if (!product && this.state.products && this.state.products.length > 0) {
+                    product = this.state.products.find(p => p.id === productId);
+                }
 
-                // Reset lại số lượng về 1 phòng khi khách mở lại
-                if (document.getElementById(inputId)) document.getElementById(inputId).value = 1;
+                // Bọc lót nếu vẫn không tìm thấy
+                if (!product) {
+                    window.showToast('Hệ thống đang xử lý dữ liệu, vui lòng thử lại sau 1 giây!', 'error');
+                    return;
+                }
 
-                if (window.updateCartBadge) window.updateCartBadge();
+                try {
+                    this.closeAllSelections();
+                    if (document.getElementById(inputId)) document.getElementById(inputId).value = 1;
 
-                if (isBuyNow) {
-                    document.getElementById('deliveryModalOverlay').style.display = 'flex';
-                    setTimeout(() => { document.querySelector('.delivery-modal').classList.add('open'); }, 10);
-                } else {
-                    window.showToast("Đã cập nhật giỏ hàng", "success");
+                    if (isBuyNow) {
+                        const buyNowItem = {
+                            id: 'buynow_' + Date.now(),
+                            idSanPhamChiTiet: sku.id,
+                            productId: productId,
+                            name: product.ten,
+                            price: sku.giaSauKhuyenMai || sku.giaBan,
+                            originalPrice: sku.giaBan,
+                            qty: inputQty,
+                            colorName: sku.mauSac.ten,
+                            colorHex: sku.mauSac.maMau,
+                            sizeName: sku.kichThuoc.ten,
+                            maxStock: sku.soLuong,
+                            img: sku.hinhAnh || (product.hinhAnhs && product.hinhAnhs.length > 0 ? product.hinhAnhs[0].url : '')
+                        };
+                        sessionStorage.setItem('bee_buy_now', JSON.stringify([buyNowItem]));
+                        window.location.hash = 'checkout?mode=buynow';
+                    } else {
+                        await window.CartHelper.add(sku.id, inputQty, {
+                            productId: productId,
+                            name: product.ten,
+                            price: sku.giaSauKhuyenMai || sku.giaBan,
+                            originalPrice: sku.giaBan,
+                            colorName: sku.mauSac.ten,
+                            colorHex: sku.mauSac.maMau,
+                            sizeName: sku.kichThuoc.ten,
+                            maxStock: sku.soLuong,
+                            img: sku.hinhAnh || (product.hinhAnhs && product.hinhAnhs.length > 0 ? product.hinhAnhs[0].url : '')
+                        });
+                        window.showToast(`Đã thêm ${inputQty} sản phẩm vào giỏ!`, 'success');
+                    }
+                } catch (error) {
+                    window.showToast(error.message, 'error');
                 }
             },
 

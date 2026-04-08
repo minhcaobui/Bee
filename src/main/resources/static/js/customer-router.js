@@ -39,7 +39,159 @@ window.hideLoading = function() {
 };
 
 // ==========================================
-// 3. ROUTER LOGIC
+// 3. CART HELPER (BỌC THÉP CHỐNG CRASH)
+// ==========================================
+window.CartHelper = {
+    // Lưu tạm vào LocalStorage
+    saveToLocal(idSanPhamChiTiet, soLuong, productInfo) {
+        let cart = JSON.parse(localStorage.getItem('bee_cart') || '[]');
+        let exist = cart.find(item => item.idSanPhamChiTiet === idSanPhamChiTiet);
+        if (exist) {
+            exist.soLuongTrongGio += soLuong;
+        } else {
+            cart.push({
+                id: 'local_' + Date.now(),
+                idSanPhamChiTiet: idSanPhamChiTiet,
+                soLuongTrongGio: soLuong,
+                ...(productInfo || {})
+            });
+        }
+        localStorage.setItem('bee_cart', JSON.stringify(cart));
+        if (window.updateCartBadge) window.updateCartBadge();
+    },
+
+    // 🌟 VŨ KHÍ BÍ MẬT: HÀM DỊCH JSON AN TOÀN
+    async safeJson(res) {
+        const ct = res.headers.get("content-type");
+        if (ct && ct.includes("application/json")) {
+            return await res.json(); // An toàn thì dịch
+        }
+        // Nếu là HTML thì bắt lại ngay, không cho crash
+        const text = await res.text();
+        console.error("🚨 Server không trả về JSON. Nội dung thực tế là:", text);
+        return null;
+    },
+
+    async getCart() {
+        try {
+            const res = await fetch('/api/gio-hang', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+
+            if (res.ok) {
+                const data = await this.safeJson(res);
+                if (!data) return JSON.parse(localStorage.getItem('bee_cart') || '[]'); // Fallback cứu hộ
+
+                // Đồng bộ từ LocalStorage lên DB
+                let localCart = JSON.parse(localStorage.getItem('bee_cart') || '[]');
+                if (localCart.length > 0) {
+                    for (let item of localCart) {
+                        try {
+                            await fetch('/api/gio-hang/them', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                                body: JSON.stringify({ idSanPhamChiTiet: item.idSanPhamChiTiet, soLuong: item.soLuongTrongGio })
+                            });
+                        } catch(e) {}
+                    }
+                    localStorage.removeItem('bee_cart');
+
+                    const syncRes = await fetch('/api/gio-hang', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                    const syncData = await this.safeJson(syncRes);
+                    return syncData || data;
+                }
+                return data;
+            } else {
+                return JSON.parse(localStorage.getItem('bee_cart') || '[]');
+            }
+        } catch (e) {
+            return JSON.parse(localStorage.getItem('bee_cart') || '[]');
+        }
+    },
+
+    async add(idSanPhamChiTiet, soLuong, productInfo = null) {
+        try {
+            const res = await fetch('/api/gio-hang/them', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify({ idSanPhamChiTiet, soLuong })
+            });
+
+            if (res.status === 401 || res.status === 403) {
+                this.saveToLocal(idSanPhamChiTiet, soLuong, productInfo);
+                return true;
+            }
+
+            if (res.ok) {
+                if (window.updateCartBadge) window.updateCartBadge();
+                return true;
+            }
+
+            const err = await this.safeJson(res);
+            throw new Error(err ? err.message : 'Lỗi hệ thống Backend');
+        } catch (e) {
+            throw e;
+        }
+    },
+
+    async update(idGioHangChiTiet, idSanPhamChiTiet, soLuongMoi) {
+        if (String(idGioHangChiTiet).startsWith('local_')) {
+            let cart = JSON.parse(localStorage.getItem('bee_cart') || '[]');
+            let item = cart.find(i => i.id === idGioHangChiTiet);
+            if (item) {
+                if (soLuongMoi <= 0) cart = cart.filter(i => i.id !== idGioHangChiTiet);
+                else item.soLuongTrongGio = soLuongMoi;
+                localStorage.setItem('bee_cart', JSON.stringify(cart));
+                if (window.updateCartBadge) window.updateCartBadge();
+            }
+            return true;
+        } else {
+            const res = await fetch('/api/gio-hang/cap-nhat', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify({ idGioHangChiTiet, soLuong: soLuongMoi })
+            });
+            if (res.ok) {
+                if (window.updateCartBadge) window.updateCartBadge();
+                return true;
+            }
+            const err = await this.safeJson(res);
+            throw new Error(err ? err.message : 'Lỗi cập nhật');
+        }
+    },
+
+    async remove(idGioHangChiTiet) {
+        if (String(idGioHangChiTiet).startsWith('local_')) {
+            let cart = JSON.parse(localStorage.getItem('bee_cart') || '[]');
+            cart = cart.filter(i => i.id !== idGioHangChiTiet);
+            localStorage.setItem('bee_cart', JSON.stringify(cart));
+            if (window.updateCartBadge) window.updateCartBadge();
+            return true;
+        } else {
+            const res = await fetch(`/api/gio-hang/xoa/${idGioHangChiTiet}`, {
+                method: 'DELETE', headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            if (res.ok) {
+                if (window.updateCartBadge) window.updateCartBadge();
+                return true;
+            }
+            throw new Error("Lỗi khi xóa sản phẩm");
+        }
+    },
+
+    async clear() {
+        try {
+            const res = await fetch('/api/gio-hang/xoa-tat-ca', {
+                method: 'DELETE', headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            if (res.status === 401 || res.status === 403) localStorage.removeItem('bee_cart');
+        } catch(e) {
+            localStorage.removeItem('bee_cart');
+        }
+        if (window.updateCartBadge) window.updateCartBadge();
+    }
+};
+
+// ==========================================
+// 4. ROUTER LOGIC
 // ==========================================
 async function loadModule(moduleName) {
     const contentArea = document.getElementById('content-area');
@@ -47,7 +199,6 @@ async function loadModule(moduleName) {
 
     window.showLoading();
 
-    // Map module → URL controller (giống switch-case bên admin)
     const moduleMap = {
         'home':     { url: '/customer/home',     title: 'Trang chủ' },
         'shop':     { url: '/customer/shop',     title: 'Sản phẩm' },
@@ -70,13 +221,11 @@ async function loadModule(moduleName) {
 
     document.title = `BEEMATE | ${module.title}`;
 
-    // Active nav link
     document.querySelectorAll('.nav-links a[data-module]').forEach(link => {
         link.classList.toggle('active', link.dataset.module === moduleName);
     });
 
     try {
-        // Lấy query string nếu có vd: #detail?id=5
         const queryStr = window.location.hash.includes('?')
             ? window.location.hash.split('?')[1] : '';
         const fetchUrl = queryStr ? `${module.url}?${queryStr}` : module.url;
@@ -86,7 +235,6 @@ async function loadModule(moduleName) {
 
         const html = await res.text();
 
-        // Fade out → inject → fade in
         contentArea.style.opacity = '0';
         contentArea.style.transition = 'opacity 0.2s ease';
 
@@ -118,11 +266,10 @@ async function loadModule(moduleName) {
 }
 
 // ==========================================
-// 4. THỰC THI SCRIPT SAU KHI INJECT HTML
+// 5. THỰC THI SCRIPT SAU KHI INJECT HTML
 // ==========================================
 function executeScripts(container, moduleName) {
     const scripts = container.querySelectorAll('script');
-    console.log(`[Router] Tìm thấy ${scripts.length} script trong module: ${moduleName}`);
 
     Array.from(scripts).forEach(oldScript => {
         if (oldScript.src) {
@@ -134,18 +281,14 @@ function executeScripts(container, moduleName) {
         } else {
             try {
                 eval(oldScript.innerHTML);
-                console.log(`[Router] ✅ Script OK`);
             } catch (e) {
                 console.error(`[Router] ❌ Lỗi script ${moduleName}:`, e);
-                window.toast(`Lỗi script: ${e.message}`, 'error');
             }
         }
         oldScript.remove();
     });
 
-    // Kích hoạt init giống pattern bên admin
     setTimeout(() => {
-        console.log(`[Router] 🚀 Init module: ${moduleName}`);
         if      (moduleName === 'home'     && window.HomeApp)      window.HomeApp.init();
         else if (moduleName === 'shop'     && window.ShopApp)      window.ShopApp.init();
         else if (moduleName === 'detail'   && window.DetailApp)    window.DetailApp.init();
@@ -156,18 +299,17 @@ function executeScripts(container, moduleName) {
         else if (moduleName === 'collection'  && window.CollectionApp)   window.CollectionApp.init();
         else if (moduleName === 'about'  && window.AboutApp)   window.AboutApp.init();
         else if (moduleName === 'sale'  && window.SaleApp)   window.SaleApp.init();
-        else console.warn(`[Router] Chưa có init cho module: ${moduleName}`);
     }, 100);
 }
 
 // ==========================================
-// 5. CẬP NHẬT BADGE GIỎ HÀNG
+// 6. CẬP NHẬT BADGE GIỎ HÀNG
 // ==========================================
 window.updateCartBadge = async function() {
     try {
-        const res = await fetch('/api/cart/count');
-        if (!res.ok) return;
-        const count = await res.json();
+        const cart = await window.CartHelper.getCart();
+        const count = cart.reduce((sum, item) => sum + (item.soLuongTrongGio || item.qty || 0), 0);
+
         const badge = document.getElementById('cartBadge');
         if (badge) {
             badge.textContent = count;
@@ -179,7 +321,7 @@ window.updateCartBadge = async function() {
 };
 
 // ==========================================
-// 6. KHỞI TẠO ROUTER
+// 7. KHỞI TẠO ROUTER
 // ==========================================
 function initRouter() {
     const hash = window.location.hash.slice(1);
@@ -188,9 +330,8 @@ function initRouter() {
     if (moduleName) {
         loadModule(moduleName);
     } else {
-        window.location.hash = '#home'; // mặc định vào home
+        window.location.hash = '#home';
     }
-
     window.updateCartBadge();
 }
 

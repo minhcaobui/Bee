@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "gio_hang")
@@ -29,5 +30,18 @@ public class GioHang {
     private TaiKhoan taiKhoan;
 
     @Column(name = "cap_nhat_cuoi", nullable = false)
-    private LocalDateTime capNhatCuoi = LocalDateTime.now();
+    private LocalDateTime capNhatCuoi;
+
+    @OneToMany(mappedBy = "gioHang", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<GioHangChiTiet> chiTiets;
+
+    @PrePersist
+    public void prePersist() {
+        if (capNhatCuoi == null) capNhatCuoi = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        capNhatCuoi = LocalDateTime.now();
+    }
 }

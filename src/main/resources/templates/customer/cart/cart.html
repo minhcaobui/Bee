@@ -536,11 +536,7 @@
             },
 
             init: function() {
-                this.loadCartFromStorage();
-                this.refreshCartData().then(() => {
-                    // Chờ refresh data xong thì gọi gợi ý
-                    this.loadRecommendations();
-                });
+                await this.loadCartData();
                 const savedNote = localStorage.getItem('bee_cart_note');
                 const noteInput = document.getElementById('cartNoteInput');
                 if (noteInput) {
@@ -559,58 +555,38 @@
                 return '#ccc';
             },
 
-            loadCartFromStorage: function() {
-                const storedCart = localStorage.getItem('bee_cart');
-                if (storedCart) {
-                    try { this.state.items = JSON.parse(storedCart); }
-                    catch (e) { this.state.items = []; }
-                } else this.state.items = [];
-            },
-
-            refreshCartData: async function() {
-                if (this.state.items.length === 0) return;
-
-                // Sử dụng Promise.all để gọi API tất cả sản phẩm cùng lúc cho nhanh
-                const promises = this.state.items.map(async (item) => {
-                    try {
-                        const res = await fetch(`/api/products/${item.productId}/variants`);
-                        if (res.ok) {
-                            const variants = await res.json();
-                            // Tìm đúng biến thể (màu/size) khách đã chọn dựa trên skuId
-                            const liveSku = variants.find(v => v.id === item.skuId);
-
-                            if (liveSku) {
-                                const realStock = liveSku.soLuongKhaDung !== undefined
-                                    ? liveSku.soLuongKhaDung
-                                    : Math.max(0, liveSku.soLuong - (liveSku.soLuongTamGiu || 0));
-
-                                item.price = liveSku.giaSauKhuyenMai || liveSku.giaBan || 0;
-                                item.maxStock = realStock;
-
-                                // ✅ THÊM DÒNG NÀY: cập nhật colorHex từ API nếu chưa có
-                                if (!item.colorHex && liveSku.mauSac?.maMau) {
-                                    item.colorHex = liveSku.mauSac.maMau;
-                                }
-
-                                if (item.qty > realStock) {
-                                    item.qty = realStock;
-                                }
-                            }
+            loadCartData: async function() {
+                try {
+                    const rawItems = await window.CartHelper.getCart();
+                    this.state.items = rawItems.map(item => {
+                        if (item.id && String(item.id).startsWith('local_')) {
+                            // Định dạng LocalStorage của khách vãng lai
+                            return { ...item, qty: item.soLuongTrongGio };
+                        } else {
+                            // Định dạng Database của khách đã đăng nhập
+                            let parts = item.thuocTinh ? item.thuocTinh.split(' - ') : ['',''];
+                            return {
+                                id: item.id,
+                                idSanPhamChiTiet: item.idSanPhamChiTiet,
+                                productId: item.idSanPham,
+                                name: item.tenSanPham,
+                                price: item.giaSauKhuyenMai || item.giaBan,
+                                originalPrice: item.giaBan,
+                                qty: item.soLuongTrongGio,
+                                colorName: parts[0],
+                                sizeName: parts[1],
+                                maxStock: item.soLuongTonKho,
+                                img: item.hinhAnh,
+                                colorHex: this.getColorHex(parts[0]) // Kế thừa hàm lấy mã màu của bạn
+                            };
                         }
-                    } catch (e) {
-                        console.error("Lỗi cập nhật kho cho sản phẩm:", item.name, e);
-                    }
-                });
-
-                await Promise.all(promises);
-
-                // Lưu lại bản sạch vào localStorage và vẽ lại giao diện
-                this.saveCartToStorage();
-                this.render();
-            },
-
-            saveCartToStorage: function() {
-                localStorage.setItem('bee_cart', JSON.stringify(this.state.items));
+                    });
+                    this.render();
+                } catch (e) {
+                    console.error("Lỗi tải giỏ hàng:", e);
+                    this.state.items = [];
+                    this.render();
+                }
             },
 
             render: function() {
@@ -734,19 +710,26 @@
                 this.calculateTotals();
             },
 
-            removeItem: function(index) {
+            removeItem: async function(index) {
+                const item = this.state.items[index];
                 const row = document.getElementById('cart-item-' + index);
                 if (row) {
                     row.style.opacity = '0';
                     row.style.transform = 'translateX(20px)';
-                    if(window.updateCartBadge) window.updateCartBadge();
                 }
-                setTimeout(() => {
-                    this.state.items.splice(index, 1);
-                    this.saveCartToStorage();
-                    this.render();
-                    if(window.updateCartBadge) window.updateCartBadge();
-                }, 300);
+                try {
+                    await window.CartHelper.remove(item.id);
+                    setTimeout(() => {
+                        this.state.items.splice(index, 1);
+                        this.render();
+                    }, 300);
+                } catch (e) {
+                    if (window.showToast) window.showToast('Lỗi xóa sản phẩm', 'error');
+                    if (row) {
+                        row.style.opacity = '1';
+                        row.style.transform = 'none';
+                    }
+                }
             },
 
             calculateTotals: function() {
@@ -902,9 +885,9 @@
                             <div class="qs-lbl">Kích cỡ</div>
                             <div class="qs-opts" id="rc-qs-sizes-${p.id}"></div>
                             <div class="qs-qty-selector" onclick="event.stopPropagation()">
-                                <button class="qs-qty-btn" onclick="window.CartApp.changeQsQty(${p.id},'rc-qty-${p.id}',-1,event)"><i class="fa-solid fa-minus"></i></button>
+                                <button class="qs-qty-btn" onclick="window.CartApp.changeQty(${p.id},'rc-qty-${p.id}',-1,event)"><i class="fa-solid fa-minus"></i></button>
                                 <input type="number" id="rc-qty-${p.id}" class="qs-qty-input" value="1" min="1">
-                                <button class="qs-qty-btn" onclick="window.CartApp.changeQsQty(${p.id},'rc-qty-${p.id}',1,event)"><i class="fa-solid fa-plus"></i></button>
+                                <button class="qs-qty-btn" onclick="window.CartApp.changeQty(${p.id},'rc-qty-${p.id}',1,event)"><i class="fa-solid fa-plus"></i></button>
                             </div>
                             <div class="qs-actions">
                                 <button class="qs-btn" onclick="window.CartApp.confirmAddRec(${p.id}, event, 'rc-qty-${p.id}')">Thêm vào giỏ hàng</button>
@@ -1021,13 +1004,22 @@
                 this.renderSelOpts(productId, prefix);
             },
 
-            changeQsQty: function(productId, inputId, delta, event) {
-                if (event) event.stopPropagation();
-                const input = document.getElementById(inputId); if (!input) return;
-                let newVal = Math.max(1, (parseInt(input.value)||1) + delta);
-                const sel = this.tempSel[productId];
-                if (sel?.sku && newVal > sel.sku.soLuong) { window.showToast?.(`Chỉ còn ${sel.sku.soLuong} sản phẩm!`,'warning'); newVal=sel.sku.soLuong; }
-                input.value = newVal;
+            changeQty: async function(index, delta) {
+                const item = this.state.items[index];
+                const newQty = item.qty + delta;
+                if (newQty < 1) return;
+                if (newQty > item.maxStock) {
+                    if (window.showToast) window.showToast('Vượt quá số lượng kho!', 'warning');
+                    return;
+                }
+                try {
+                    // Gọi API cập nhật
+                    await window.CartHelper.update(item.id, item.idSanPhamChiTiet || item.skuId, newQty);
+                    item.qty = newQty;
+                    this.render();
+                } catch (e) {
+                    if (window.showToast) window.showToast(e.message, 'error');
+                }
             },
 
             confirmAddRec: function(productId, event, inputId) {

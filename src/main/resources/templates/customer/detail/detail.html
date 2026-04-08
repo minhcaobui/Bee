@@ -1575,30 +1575,58 @@
                 window.location.hash = 'checkout';
             },
 
-            addToCart: function(isBuyNow = false) {
-                const sku = this.state.variants.find(v => v.mauSac.id === this.state.selectedColorId && v.kichThuoc.id === this.state.selectedSizeId);
-                if (!sku) { window.showToast("Vui lòng chọn kích cỡ!", "warning"); return; }
-                const availableStock = this.getAvailableStock(sku);
-                if (availableStock <= 0) { window.showToast("Sản phẩm đã hết hàng!", "warning"); return; }
-                const inputQty = parseInt(document.getElementById('detailQtyInput').value) || 1;
-                this.animateFlyToCart(document.getElementById('mainImageDisplay'));
-                let cart = JSON.parse(localStorage.getItem('bee_cart')) || [];
-                let existingItem = cart.find(item => item.skuId === sku.id);
-                if (existingItem) {
-                    if (existingItem.qty + inputQty > availableStock) { window.showToast(`Kho chỉ còn ${availableStock} sản phẩm. (Giỏ hàng đã có ${existingItem.qty})`, "warning"); return; }
-                    existingItem.qty += inputQty;
-                } else {
-                    let productImg = "https://placehold.co/100x130/eee/999?text=No+Img";
-                    if (sku.hinhAnh) productImg = sku.hinhAnh;
-                    else if (this.state.product.hinhAnhs && this.state.product.hinhAnhs.length > 0) productImg = this.state.product.hinhAnhs[0].url;
-                    cart.push({ skuId: sku.id, productId: this.state.product.id, name: this.state.product.ten, price: sku.giaSauKhuyenMai || sku.giaBan || 0, originalPrice: sku.giaBan || 0, qty: inputQty, img: productImg, colorName: sku.mauSac.ten, sizeName: sku.kichThuoc.ten, maxStock: availableStock });
+            addToCart: async function(isBuyNow = false) {
+                if (!this.state.selectedColorId || !this.state.selectedSizeId) {
+                    window.showToast("Vui lòng chọn màu sắc và kích cỡ!", "warning");
+                    return;
                 }
-                localStorage.setItem('bee_cart', JSON.stringify(cart));
-                if (window.updateCartBadge) window.updateCartBadge();
-                if (isBuyNow) {
-                    document.getElementById('deliveryModalOverlay').style.display = 'flex';
-                    setTimeout(() => { document.querySelector('.delivery-modal').classList.add('open'); }, 10);
-                } else { window.showToast(`Đã thêm ${inputQty} sản phẩm vào giỏ!`, 'success'); }
+
+                const sku = this.getSelectedSku();
+                if (!sku || sku.soLuong === 0) {
+                    window.showToast("Sản phẩm tạm hết hàng!", "warning");
+                    return;
+                }
+
+                const inputQty = parseInt(document.getElementById('detailQtyInput').value) || 1;
+                const product = this.state.product;
+
+                try {
+                    if (isBuyNow) {
+                        // 🌟 TẠO GIỎ HÀNG DÙNG 1 LẦN CHO CHỨC NĂNG MUA NGAY
+                        const buyNowItem = {
+                            id: 'buynow_' + Date.now(),
+                            idSanPhamChiTiet: sku.id,
+                            productId: product.id,
+                            name: product.ten,
+                            price: sku.giaSauKhuyenMai || sku.giaBan,
+                            originalPrice: sku.giaBan,
+                            qty: inputQty,
+                            colorName: sku.mauSac.ten,
+                            colorHex: sku.mauSac.maMau,
+                            sizeName: sku.kichThuoc.ten,
+                            maxStock: sku.soLuong,
+                            img: sku.hinhAnh || (product.hinhAnhs?.[0]?.url || '')
+                        };
+                        sessionStorage.setItem('bee_buy_now', JSON.stringify([buyNowItem]));
+                        window.location.hash = 'checkout?mode=buynow';
+                    } else {
+                        // Thêm vào giỏ chung
+                        await window.CartHelper.add(sku.id, inputQty, {
+                            productId: product.id,
+                            name: product.ten,
+                            price: sku.giaSauKhuyenMai || sku.giaBan,
+                            originalPrice: sku.giaBan,
+                            colorName: sku.mauSac.ten,
+                            colorHex: sku.mauSac.maMau,
+                            sizeName: sku.kichThuoc.ten,
+                            maxStock: sku.soLuong,
+                            img: sku.hinhAnh || (product.hinhAnhs?.[0]?.url || '')
+                        });
+                        window.showToast(`Đã thêm ${inputQty} sản phẩm vào giỏ!`, 'success');
+                    }
+                } catch(error) {
+                    window.showToast(error.message, 'error');
+                }
             },
 
             bindTooltip: function() {

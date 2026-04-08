@@ -1337,34 +1337,72 @@
                     input.value = val;
                 },
 
-                confirmAdd(productId, event, isBuyNow, inputId) {
+                async confirmAdd(productId, event, isBuyNow, inputId = null) {
                     if (event) event.stopPropagation();
                     const sel = tempSel[productId];
-                    if (!sel?.colorId && !sel?.sizeId) { window.showToast('Vui lòng chọn màu sắc và kích cỡ','warning'); return; }
-                    if (!sel.colorId) { window.showToast('Bạn chưa chọn màu sắc','warning'); return; }
-                    if (!sel.sizeId)  { window.showToast('Bạn chưa chọn kích cỡ','warning'); return; }
-                    if (!sel.sku)     { window.showToast('Phiên bản này đang hết hàng','warning'); return; }
+                    if (!sel?.colorId && !sel?.sizeId) { window.showToast('Vui lòng chọn màu sắc và kích cỡ', 'warning'); return; }
+                    if (!sel.colorId) { window.showToast('Bạn chưa chọn màu sắc', 'warning'); return; }
+                    if (!sel.sizeId) { window.showToast('Bạn chưa chọn kích cỡ', 'warning'); return; }
+                    if (!sel.sku) { window.showToast('Phiên bản này đang hết hàng', 'warning'); return; }
 
-                    const qty  = parseInt(document.getElementById(inputId)?.value) || 1;
-                    const sku  = sel.sku;
-                    const product = state.allSaleProducts.find(p => p.id === productId);
-                    let cart = safeGet('bee_cart', []);
-                    let exist = cart.find(i => i.skuId === sku.id);
-                    if (exist) {
-                        if (exist.qty + qty > sku.soLuong) { window.showToast('Vượt quá số lượng kho!','warning'); return; }
-                        exist.qty += qty;
-                    } else {
-                        cart.push({ skuId:sku.id, productId, name:product.ten, price:sku.giaSauKhuyenMai||sku.giaBan||0, originalPrice:sku.giaBan||0, qty, img:sku.hinhAnh||(product.hinhAnhs?.[0]?.url||''), colorName:sku.mauSac.ten, sizeName:sku.kichThuoc.ten, maxStock:sku.soLuong });
+                    const inputQty = parseInt(document.getElementById(inputId)?.value) || 1;
+                    const sku = sel.sku;
+
+                    // 🌟 TÌM KIẾM SẢN PHẨM AN TOÀN TUYỆT ĐỐI (Chống lỗi undefined)
+                    let product = null;
+                    if (this.state.allProducts && this.state.allProducts.length > 0) {
+                        product = this.state.allProducts.find(p => p.id === productId);
                     }
-                    safeSet('bee_cart', cart);
-                    this.closeAllSelections();
-                    if (document.getElementById(inputId)) document.getElementById(inputId).value = 1;
-                    if (window.updateCartBadge) window.updateCartBadge();
-                    if (isBuyNow) {
-                        document.getElementById('saleDeliveryModalOverlay').style.display = 'flex';
-                        setTimeout(() => document.querySelector('#saleDeliveryModalOverlay .delivery-modal').classList.add('open'), 10);
-                    } else {
-                        window.showToast('Đã thêm vào giỏ hàng','success');
+                    if (!product && this.state.allSaleProducts && this.state.allSaleProducts.length > 0) {
+                        product = this.state.allSaleProducts.find(p => p.id === productId);
+                    }
+                    if (!product && this.state.products && this.state.products.length > 0) {
+                        product = this.state.products.find(p => p.id === productId);
+                    }
+
+                    // Bọc lót nếu vẫn không tìm thấy
+                    if (!product) {
+                        window.showToast('Hệ thống đang xử lý dữ liệu, vui lòng thử lại sau 1 giây!', 'error');
+                        return;
+                    }
+
+                    try {
+                        this.closeAllSelections();
+                        if (document.getElementById(inputId)) document.getElementById(inputId).value = 1;
+
+                        if (isBuyNow) {
+                            const buyNowItem = {
+                                id: 'buynow_' + Date.now(),
+                                idSanPhamChiTiet: sku.id,
+                                productId: productId,
+                                name: product.ten,
+                                price: sku.giaSauKhuyenMai || sku.giaBan,
+                                originalPrice: sku.giaBan,
+                                qty: inputQty,
+                                colorName: sku.mauSac.ten,
+                                colorHex: sku.mauSac.maMau,
+                                sizeName: sku.kichThuoc.ten,
+                                maxStock: sku.soLuong,
+                                img: sku.hinhAnh || (product.hinhAnhs && product.hinhAnhs.length > 0 ? product.hinhAnhs[0].url : '')
+                            };
+                            sessionStorage.setItem('bee_buy_now', JSON.stringify([buyNowItem]));
+                            window.location.hash = 'checkout?mode=buynow';
+                        } else {
+                            await window.CartHelper.add(sku.id, inputQty, {
+                                productId: productId,
+                                name: product.ten,
+                                price: sku.giaSauKhuyenMai || sku.giaBan,
+                                originalPrice: sku.giaBan,
+                                colorName: sku.mauSac.ten,
+                                colorHex: sku.mauSac.maMau,
+                                sizeName: sku.kichThuoc.ten,
+                                maxStock: sku.soLuong,
+                                img: sku.hinhAnh || (product.hinhAnhs && product.hinhAnhs.length > 0 ? product.hinhAnhs[0].url : '')
+                            });
+                            window.showToast(`Đã thêm ${inputQty} sản phẩm vào giỏ!`, 'success');
+                        }
+                    } catch (error) {
+                        window.showToast(error.message, 'error');
                     }
                 },
 

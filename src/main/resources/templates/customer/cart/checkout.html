@@ -229,7 +229,7 @@
                 this.state.deliveryMethod = localStorage.getItem('bee_delivery_method') || 'home';
 
                 await this.checkLoginStatus();
-                this.loadCartData();
+                await this.loadCartData();
                 this.render();
 
                 // Chỉ tải API GHN nếu là giao tận nhà
@@ -299,11 +299,52 @@
                 this.calculateFinalTotal();
             },
 
-            loadCartData: function() {
-                const cartData = localStorage.getItem('bee_cart');
-                this.state.cart = cartData ? JSON.parse(cartData) : [];
-                const savedNote = localStorage.getItem('bee_cart_note');
-                this.state.note = savedNote ? savedNote : '';
+            loadCartData: async function() {
+                try {
+                    // 🌟 KIỂM TRA MODE ĐỂ TẢI ĐÚNG NGUỒN GIỎ HÀNG
+                    const isBuyNowMode = window.location.hash.includes('mode=buynow');
+                    let rawItems = [];
+
+                    if (isBuyNowMode) {
+                        rawItems = JSON.parse(sessionStorage.getItem('bee_buy_now') || '[]');
+                    } else {
+                        rawItems = await window.CartHelper.getCart();
+                    }
+
+                    this.state.cart = rawItems.map(item => {
+                        if (item.id && (String(item.id).startsWith('local_') || String(item.id).startsWith('buynow_'))) {
+                            return { ...item, qty: item.soLuongTrongGio || item.qty };
+                        } else {
+                            let parts = item.thuocTinh ? item.thuocTinh.split(' - ') : ['',''];
+                            return {
+                                id: item.id,
+                                idSanPhamChiTiet: item.idSanPhamChiTiet,
+                                productId: item.idSanPham,
+                                name: item.tenSanPham,
+                                price: item.giaSauKhuyenMai || item.giaBan,
+                                originalPrice: item.giaBan,
+                                qty: item.soLuongTrongGio,
+                                colorName: parts[0],
+                                sizeName: parts[1],
+                                maxStock: item.soLuongTonKho,
+                                img: item.hinhAnh
+                            };
+                        }
+                    });
+
+                    if (this.state.cart.length === 0) {
+                        document.getElementById('checkout-content').innerHTML = `
+                            <div class="empty-co">
+                                <h2>Đơn hàng của bạn đang trống</h2>
+                                <a href="#shop" class="empty-co-btn">Tiếp tục mua sắm</a>
+                            </div>
+                        `;
+                        return;
+                    }
+                    this.render();
+                } catch (e) {
+                    console.error("Lỗi tải giỏ hàng checkout:", e);
+                }
             },
 
             formatMoney: function(amount) {
@@ -1011,6 +1052,7 @@
             finishQrPayment: function() {
                 document.getElementById('qrModalOverlay').style.display = 'none';
                 if (window.showToast) window.showToast("Cảm ơn bạn đã thanh toán. Đơn hàng đang được xử lý!", "success");
+                window.CartHelper.clear();
                 window.location.hash = 'account';
                 window.location.reload();
             },
@@ -1064,7 +1106,7 @@
                     const matchedVoucher = this.state.availableVouchers.find(v => (v.maCode || v.code) === this.state.appliedPromoCode);
                     if (matchedVoucher) voucherIdToSubmit = matchedVoucher.id;
                 }
-
+                const isBuyNowMode = window.location.hash.includes('mode=buynow');
                 const payload = {
                     tenNguoiNhan: document.getElementById('co-name').value,
                     soDienThoai: document.getElementById('co-phone').value,
@@ -1077,6 +1119,7 @@
                     tienGiam: this.state.discount,
                     tongTien: this.state.total,
                     voucherId: voucherIdToSubmit,
+                    isBuyNow: isBuyNowMode,
                     chiTietDonHangs: this.state.cart.map(function(item) {
                         return { chiTietSanPhamId: item.skuId, soLuong: item.qty, donGia: item.price };
                     }),
@@ -1162,6 +1205,11 @@
                     else {
                         if (window.showToast) { window.showToast("Đặt hàng thành công! Hóa đơn đã được gửi về Email.", "success"); }
                         else { alert("Đặt hàng thành công! Chúng tôi đã gửi hóa đơn về Email của bạn."); }
+                        if (isBuyNowMode) {
+                            sessionStorage.removeItem('bee_buy_now');
+                        } else {
+                            window.CartHelper.clear(); // Chỉ clear giỏ chung nếu thanh toán giỏ chung
+                        }
                         window.location.hash = 'account';
                     }
 

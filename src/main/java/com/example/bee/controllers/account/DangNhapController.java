@@ -2,6 +2,7 @@ package com.example.bee.controllers.account;
 
 import com.example.bee.entities.account.TaiKhoan;
 import com.example.bee.entities.account.VaiTro;
+import com.example.bee.entities.cart.GioHang;
 import com.example.bee.entities.customer.KhachHang;
 import com.example.bee.repositories.account.TaiKhoanRepository;
 import com.example.bee.repositories.account.VaiTroRepository;
@@ -25,6 +26,7 @@ public class DangNhapController {
     private final KhachHangRepository khachHangRepository;
     private final VaiTroRepository vaiTroRepository;
     private final PasswordEncoder passwordEncoder;
+    private final com.example.bee.repositories.cart.GioHangRepository gioHangRepository;
 
     private String generateMa() {
         long count = khachHangRepository.count();
@@ -57,6 +59,12 @@ public class DangNhapController {
             newAccount.setVaiTro(roleCustomer);
             newAccount.setTrangThai(true);
             TaiKhoan savedAccount = taiKhoanRepository.save(newAccount);
+
+            // 🌟 TẠO GIỎ HÀNG TRỐNG MẶC ĐỊNH
+            GioHang gioHang = new GioHang();
+            gioHang.setTaiKhoan(savedAccount);
+            gioHangRepository.save(gioHang);
+
             Optional<KhachHang> khachPos = khachHangRepository.findBySoDienThoai(soDienThoai);
             if (khachPos.isPresent()) {
                 KhachHang existingKh = khachPos.get();

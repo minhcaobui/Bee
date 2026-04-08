@@ -146,7 +146,7 @@ public interface DashboardRepository extends JpaRepository<HoaDon, Integer> {
             ISNULL(kh.ho_ten, N'Khách vãng lai')     AS ten_kh,
             (SELECT COUNT(*) FROM hoa_don_chi_tiet WHERE id_hoa_don = h.id) AS so_sp,
             (h.gia_tong - ISNULL(h.phi_van_chuyen, 0)) AS gia_tong,
-            ISNULL(h.phuong_thuc_thanh_toan, N'Tiền mặt') AS phuong_thuc,
+            ISNULL((SELECT TOP 1 phuong_thuc FROM thanh_toan WHERE id_hoa_don = h.id ORDER BY id DESC), N'Tiền mặt') AS phuong_thuc,
             tthd.ma AS trang_thai
         FROM hoa_don h
         JOIN trang_thai_hoa_don tthd ON h.id_trang_thai_hoa_don = tthd.id
@@ -155,14 +155,19 @@ public interface DashboardRepository extends JpaRepository<HoaDon, Integer> {
         """)
     List<Object[]> getRecentOrders();
 
-    // 🌟 ĐÃ FIX: Tính phương thức thanh toán của TOÀN BỘ đơn hàng (không giới hạn trạng thái)
+    // 🌟 ĐÃ FIX: Tính phương thức thanh toán của TOÀN BỘ đơn hàng bằng JOIN bảng thanh_toan
     @Query(nativeQuery = true, value = """
         SELECT
-            ISNULL(h.phuong_thuc_thanh_toan, N'Tiền mặt') AS method,
-            COUNT(h.id) AS cnt
+            ISNULL(t.phuong_thuc, N'Tiền mặt') AS method,
+            COUNT(DISTINCT h.id) AS cnt
         FROM hoa_don h
+        LEFT JOIN (
+            SELECT id_hoa_don, MAX(phuong_thuc) as phuong_thuc
+            FROM thanh_toan
+            GROUP BY id_hoa_don
+        ) t ON t.id_hoa_don = h.id
         WHERE h.ngay_tao BETWEEN :start AND :end
-        GROUP BY ISNULL(h.phuong_thuc_thanh_toan, N'Tiền mặt')
+        GROUP BY ISNULL(t.phuong_thuc, N'Tiền mặt')
         """)
     List<Object[]> getPaymentMethods(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 

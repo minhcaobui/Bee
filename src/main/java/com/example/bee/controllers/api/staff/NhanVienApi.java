@@ -2,9 +2,11 @@ package com.example.bee.controllers.api.staff;
 
 import com.example.bee.entities.account.TaiKhoan;
 import com.example.bee.entities.account.VaiTro;
+import com.example.bee.entities.cart.GioHang;
 import com.example.bee.entities.role.ChucVu;
 import com.example.bee.entities.user.NhanVien;
 import com.example.bee.repositories.account.TaiKhoanRepository;
+import com.example.bee.repositories.cart.GioHangRepository;
 import com.example.bee.repositories.role.NhanVienRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +20,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -34,6 +35,7 @@ public class NhanVienApi {
     private final TaiKhoanRepository taiKhoanRepository;
     private final PasswordEncoder passwordEncoder;
     private final JavaMailSender mailSender;
+    private final GioHangRepository gioHangRepository;
 
     @Value("${spring.mail.username}")
     private String senderEmail;
@@ -119,14 +121,13 @@ public class NhanVienApi {
 
     @PatchMapping("/toggle-status/{id}")
     @ResponseBody
-    @Transactional // 🌟 Bắt buộc phải có Transactional
+    @Transactional
     public ResponseEntity<?> toggleStatus(@PathVariable Integer id) {
         NhanVien nv = nhanVienRepository.findById(id).orElse(null);
         if (nv == null) return ResponseEntity.notFound().build();
 
         nv.setTrangThai(!nv.getTrangThai());
 
-        // 🌟 ĐỒNG BỘ KHÓA LUÔN TÀI KHOẢN ĐĂNG NHẬP
         if (nv.getTaiKhoan() != null) {
             TaiKhoan tk = nv.getTaiKhoan();
             tk.setTrangThai(nv.getTrangThai());
@@ -161,7 +162,7 @@ public class NhanVienApi {
 
             java.sql.Date ngaySinh;
             try {
-                ngaySinh = java.sql.Date.valueOf(ngaySinhStr); // Chuyển chuỗi YYYY-MM-DD thành SQL Date
+                ngaySinh = java.sql.Date.valueOf(ngaySinhStr);
             } catch (Exception e) {
                 return ResponseEntity.badRequest().body("Ngày sinh không hợp lệ!");
             }
@@ -192,7 +193,6 @@ public class NhanVienApi {
                 target.setChucVu(cv);
             }
 
-            // Gắn tài khoản
             TaiKhoan tk = (target.getTaiKhoan() == null) ? new TaiKhoan() : target.getTaiKhoan();
             tk.setTenDangNhap(email);
 
@@ -200,12 +200,11 @@ public class NhanVienApi {
                 tk.setMatKhau(passwordEncoder.encode("12345678"));
                 tk.setTrangThai(true);
                 VaiTro vt = new VaiTro();
-                vt.setId(2); // ROLE_STAFF
+                vt.setId(2);
                 tk.setVaiTro(vt);
             } else {
                 if (pass != null && !pass.trim().isEmpty()) {
                     if (!pass.equals(confirm)) return ResponseEntity.badRequest().body("Mật khẩu xác nhận không khớp!");
-                    // Kiểm tra độ mạnh của mật khẩu
                     String passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,}).*$";
                     if (!pass.matches(passwordRegex)) return ResponseEntity.badRequest().body("Mật khẩu phải từ 8 ký tự, gồm chữ hoa, thường, số và ký tự đặc biệt!");
                     tk.setMatKhau(passwordEncoder.encode(pass));
@@ -215,7 +214,13 @@ public class NhanVienApi {
             TaiKhoan savedTk = taiKhoanRepository.save(tk);
             target.setTaiKhoan(savedTk);
 
-            // Cập nhật thông tin NV
+            // 🌟 TẠO GIỎ HÀNG TRỐNG CHO TÀI KHOẢN MỚI
+            if (isNew) {
+                GioHang gioHang = new GioHang();
+                gioHang.setTaiKhoan(savedTk);
+                gioHangRepository.save(gioHang);
+            }
+
             target.setHoTen(hoTen);
             target.setSoDienThoai(soDienThoai);
             target.setEmail(email);
@@ -257,9 +262,6 @@ public class NhanVienApi {
         return "Mã Hash trong DB: " + hashTrongDb + "<br>Kết quả so sánh với '123456': " + (isMatch ? "KHỚP 100% (Mật khẩu đúng)" : "SAI BÉT (Mật khẩu sai)");
     }
 
-    // ========================================================
-    // 1. API LẤY THÔNG TIN HỒ SƠ
-    // ========================================================
     @GetMapping("/my-profile")
     @ResponseBody
     public ResponseEntity<?> getMyProfile(Authentication authentication) {
@@ -276,7 +278,6 @@ public class NhanVienApi {
                 Map<String, Object> adminData = new HashMap<>();
                 adminData.put("hoTen", "Quản trị viên hệ thống");
                 adminData.put("tenDangNhap", tk.getTenDangNhap());
-                // 🌟 Lấy trạng thái đã đổi tên từ DB lên
                 adminData.put("daDoiTenDangNhap", tk.getDaDoiTenDangNhap() != null ? tk.getDaDoiTenDangNhap() : false);
                 adminData.put("vaiTro", tk.getVaiTro() != null ? tk.getVaiTro().getTen() : "ADMIN");
 
@@ -301,7 +302,6 @@ public class NhanVienApi {
         data.put("diaChi", nv.getDiaChi());
 
         data.put("tenDangNhap", nv.getTaiKhoan() != null ? nv.getTaiKhoan().getTenDangNhap() : "");
-        // 🌟 Lấy trạng thái đã đổi tên từ DB lên
         data.put("daDoiTenDangNhap", nv.getTaiKhoan() != null && Boolean.TRUE.equals(nv.getTaiKhoan().getDaDoiTenDangNhap()));
 
         data.put("vaiTro", nv.getTaiKhoan() != null && nv.getTaiKhoan().getVaiTro() != null ? nv.getTaiKhoan().getVaiTro().getMa() : "");
@@ -314,9 +314,6 @@ public class NhanVienApi {
         return ResponseEntity.ok(data);
     }
 
-    // ========================================================
-    // 2. API CẬP NHẬT THÔNG TIN VÀ ĐỔI TÊN ĐĂNG NHẬP
-    // ========================================================
     @PutMapping("/my-profile")
     @ResponseBody
     @Transactional
@@ -337,13 +334,11 @@ public class NhanVienApi {
                 tk = nvOpt.get().getTaiKhoan();
             }
 
-            // 🌟 LOGIC KHÓA TÊN ĐĂNG NHẬP DỰA TRÊN CỜ TRONG DB
             if (payload.containsKey("tenDangNhap") && tk != null) {
                 String newUsername = payload.get("tenDangNhap").trim();
                 String oldUsername = tk.getTenDangNhap();
 
                 if (!newUsername.isEmpty() && !newUsername.equals(oldUsername)) {
-                    // Nếu cờ = true -> chặn không cho lưu
                     if (Boolean.TRUE.equals(tk.getDaDoiTenDangNhap())) {
                         return ResponseEntity.badRequest().body(Map.of("message", "Bạn chỉ được phép thay đổi tên đăng nhập 1 lần duy nhất!"));
                     }
@@ -352,12 +347,11 @@ public class NhanVienApi {
                     }
 
                     tk.setTenDangNhap(newUsername);
-                    tk.setDaDoiTenDangNhap(true); // 🌟 BẬT CỜ ĐÃ ĐỔI TÊN
+                    tk.setDaDoiTenDangNhap(true);
                     taiKhoanRepository.save(tk);
                 }
             }
 
-            // Chỉ cập nhật hồ sơ nếu là Nhân viên
             if (nvOpt.isPresent()) {
                 NhanVien nv = nvOpt.get();
                 if (payload.containsKey("hoTen") && !payload.get("hoTen").isEmpty()) nv.setHoTen(payload.get("hoTen"));
@@ -381,10 +375,6 @@ public class NhanVienApi {
         }
     }
 
-
-    // ========================================================
-    // 3. API ĐỔI MẬT KHẨU
-    // ========================================================
     @PostMapping("/change-password")
     @ResponseBody
     @Transactional
@@ -407,7 +397,6 @@ public class NhanVienApi {
             return ResponseEntity.badRequest().body(Map.of("message", "Dữ liệu không hợp lệ"));
         }
 
-        // Kiểm tra độ mạnh của mật khẩu bằng Regex
         String passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,}).*$";
 
         if (!newPw.matches(passwordRegex)) {

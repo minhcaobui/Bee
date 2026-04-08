@@ -257,7 +257,6 @@ public class PosApi {
             hd.setGiaTong(totalFinal);
 
             hd.setNgayThanhToan(new Date());
-            hd.setPhuongThucThanhToan(method);
             TrangThaiHoaDon ttHoanThanh = trangThaiRepo.findByMa("HOAN_THANH");
             hd.setTrangThaiHoaDon(ttHoanThanh);
             hoaDonRepo.save(hd);
@@ -427,7 +426,6 @@ public class PosApi {
         hd.setNgayThanhToan(new Date());
 
         String pMethod = payload.get("method") != null ? payload.get("method").toString() : "ONLINE";
-        hd.setPhuongThucThanhToan(pMethod);
 
         if (voucherId != null) {
             MaGiamGia voucher = maGiamGiaRepo.findById(voucherId).orElse(null);
@@ -675,7 +673,13 @@ public class PosApi {
 
         summary.put("giamGia", giamGia);
         summary.put("tongThanhToan", tongPhaiTra);
-        summary.put("phuongThuc", hd.getPhuongThucThanhToan());
+
+        List<ThanhToan> ttListPrint = thanhToanRepo.findByHoaDon_Id(hd.getId());
+        String ptttPrint = "TIEN_MAT";
+        if (ttListPrint != null && !ttListPrint.isEmpty()) {
+            ptttPrint = ttListPrint.get(0).getPhuongThuc();
+        }
+        summary.put("phuongThuc", ptttPrint);
 
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("store", storeInfo);

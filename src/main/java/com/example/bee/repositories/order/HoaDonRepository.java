@@ -28,7 +28,7 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
 
     List<HoaDon> findTop5ByLoaiHoaDonAndTrangThaiHoaDon_MaOrderByNgayTaoDesc(Integer loaiHoaDon, String maTrangThai);
 
-    // 🌟 ĐÃ FIX: Thêm 'DA_DOI', 'DA_TRA' vào NOT IN để loại khỏi Đơn Chờ Xử Lý
+    // 🌟 ĐÃ FIX: Sửa lỗi JPQL phuongThucThanhToan bằng EXISTS subquery nối sang bảng ThanhToan
     @EntityGraph(attributePaths = {"khachHang", "nhanVien", "trangThaiHoaDon"})
     @Query("SELECT h FROM HoaDon h " +
             "LEFT JOIN h.khachHang kh " +
@@ -38,7 +38,7 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
             "AND (:q IS NULL OR LOWER(h.ma) LIKE LOWER(CONCAT('%', :q, '%')) OR LOWER(kh.hoTen) LIKE LOWER(CONCAT('%', :q, '%')) OR h.sdtNhan LIKE CONCAT('%', :q, '%') OR LOWER(h.tenNguoiNhan) LIKE LOWER(CONCAT('%', :q, '%'))) " +
             "AND (:statusId IS NULL OR tt.id = :statusId) " +
             "AND (:loaiHoaDon IS NULL OR h.loaiHoaDon = :loaiHoaDon) " +
-            "AND (:phuongThuc IS NULL OR h.phuongThucThanhToan = :phuongThuc) " +
+            "AND (:phuongThuc IS NULL OR EXISTS (SELECT t FROM ThanhToan t WHERE t.hoaDon = h AND t.phuongThuc = :phuongThuc)) " +
             "AND (cast(:startDate as date) IS NULL OR h.ngayTao >= :startDate) " +
             "AND (cast(:endDate as date) IS NULL OR h.ngayTao <= :endDate) " +
             "ORDER BY h.ngayTao DESC")
@@ -49,7 +49,7 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
             Pageable pageable
     );
 
-    // 🌟 ĐÃ FIX: Thêm 'DA_DOI', 'DA_TRA' vào IN để hiển thị bên Lịch Sử Hóa Đơn
+    // 🌟 ĐÃ FIX: Sửa lỗi JPQL phuongThucThanhToan bằng EXISTS subquery nối sang bảng ThanhToan
     @EntityGraph(attributePaths = {"khachHang", "nhanVien", "trangThaiHoaDon"})
     @Query("SELECT h FROM HoaDon h " +
             "LEFT JOIN h.khachHang kh " +
@@ -60,7 +60,7 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
             "AND (:statusId IS NULL OR tt.id = :statusId) " +
             "AND (:nhanVienId IS NULL OR nv.id = :nhanVienId) " +
             "AND (:loaiHoaDon IS NULL OR h.loaiHoaDon = :loaiHoaDon) " +
-            "AND (:phuongThuc IS NULL OR h.phuongThucThanhToan = :phuongThuc) " +
+            "AND (:phuongThuc IS NULL OR EXISTS (SELECT t FROM ThanhToan t WHERE t.hoaDon = h AND t.phuongThuc = :phuongThuc)) " +
             "AND (cast(:startDate as date) IS NULL OR h.ngayTao >= :startDate) " +
             "AND (cast(:endDate as date) IS NULL OR h.ngayTao <= :endDate) " +
             "ORDER BY h.ngayTao DESC")
