@@ -420,7 +420,6 @@
         .qs-overlay {
             position: absolute;
             inset: 0;
-            /* Phía trên 30% hoàn toàn trong suốt, bên dưới là nền trắng */
             background: linear-gradient(to bottom,
             transparent 0%,
             rgba(255,255,255,0.8) 30%,
@@ -434,6 +433,7 @@
             transform: translateY(100%);
             transition: transform .38s cubic-bezier(.4, 0, .2, 1);
             cursor: default;
+            pointer-events: none;
         }
 
         /* Đảm bảo tên sản phẩm và đống nút nổi bật */
@@ -458,7 +458,7 @@
         }
 
         .qs-price { background: rgba(255,255,255,0.5); padding: 5px; border-radius: 4px; }
-        .product-card.show-selection .qs-overlay { transform:translateY(0); }
+        .product-card.show-selection .qs-overlay { transform:translateY(0); pointer-events: auto;}
         .qs-close {
             position:absolute; top:10px; right:12px;
             background:none; border:none; cursor:pointer;
@@ -1840,6 +1840,26 @@
                             });
                         }
                     }).catch(()=>{});
+
+                    window.addEventListener('wishlistUpdated', () => {
+                        const localData = JSON.parse(localStorage.getItem('bee_wishlist') || '[]').map(id => parseInt(id, 10));
+                        state.likedIds = new Set(localData);
+
+                        document.querySelectorAll('.heart-btn, .qs-wishlist').forEach(btn => {
+                            // Dùng regex xịn hơn để móc ID ra
+                            const idMatch = btn.id.match(/-(\d+)$/);
+                            if (idMatch && idMatch[1]) {
+                                const pid = parseInt(idMatch[1], 10);
+                                const isLiked = this.state.likedIds.has(pid);
+                                btn.classList.toggle('liked', isLiked);
+
+                                if (btn.classList.contains('qs-wishlist')) {
+                                    const spanNode = btn.querySelector('span');
+                                    if (spanNode) spanNode.textContent = isLiked ? 'Đã yêu thích' : 'Thêm vào yêu thích';
+                                }
+                            }
+                        });
+                    });
 
                     // 2. Chạy logic khởi tạo UI
                     document.addEventListener('keydown', e => { if(e.key==='Escape') pub.closeAllSelections(); });

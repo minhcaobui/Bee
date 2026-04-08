@@ -403,8 +403,9 @@
             transform: translateY(100%);
             transition: transform .38s cubic-bezier(.4,0,.2,1);
             cursor: default;
+            pointer-events: none;
         }
-        .product-card.show-selection .qs-overlay { transform: translateY(0); }
+        .product-card.show-selection .qs-overlay { transform: translateY(0); pointer-events: auto;}
         .qs-close { position: absolute; top: 10px; right: 12px; background: none; border: none; cursor: pointer; color: var(--muted); font-size: 22px; line-height: 1; padding: 4px; }
         .qs-name { font-family: var(--font-display) !important; font-size: 17px; text-align: center; margin-bottom: 14px; }
         .qs-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); margin-bottom: 7px; text-align: center; font-weight: 600; }
@@ -1396,6 +1397,7 @@
                             const isLiked = state.likedIds.has(productId);
                             isLiked ? state.likedIds.delete(productId) : state.likedIds.add(productId);
                             safeSet('bee_wishlist', [...state.likedIds]);
+                            window.dispatchEvent(new Event('wishlistUpdated'));
 
                             [`sale-heart-${productId}`, `s-qs-wish-${productId}`].forEach(id => {
                                 const btn = document.getElementById(id);
@@ -1469,6 +1471,28 @@
                             });
                         }
                     }).catch(() => {});
+
+                    window.addEventListener('wishlistUpdated', () => {
+                        const localData = JSON.parse(localStorage.getItem('bee_wishlist') || '[]').map(id => parseInt(id, 10));
+                        state.likedIds = new Set(localData);
+
+                        // Quét tất cả tim trong trang Sale
+                        document.querySelectorAll('#sale-section .heart-btn, #sale-section .qs-wishlist').forEach(btn => {
+                            const idMatch = btn.id.match(/-(\d+)$/);
+                            if (idMatch && idMatch[1]) {
+                                const pid = parseInt(idMatch[1], 10);
+                                const isLiked = state.likedIds.has(pid);
+                                btn.classList.toggle('liked', isLiked);
+
+                                // Sửa chữ cho nút bự trong modal
+                                if (btn.classList.contains('qs-wishlist')) {
+                                    const spanNode = btn.querySelector('span');
+                                    if (spanNode) spanNode.textContent = isLiked ? 'Đã yêu thích' : 'Thêm vào yêu thích';
+                                }
+                            }
+                        });
+                    });
+
 
                     document.addEventListener('keydown', e => { if (e.key === 'Escape') pub.closeAllSelections(); });
 

@@ -9,34 +9,34 @@
         .checkout-layout { display: grid; grid-template-columns: 1fr 420px; gap: 60px; align-items: start; }
 
         /* --- CỘT TRÁI: FORM ĐIỀN THÔNG TIN --- */
-        .checkout-form-section { background: var(--white); padding: 40px; border: 1px solid rgba(0,0,0,0.08); border-radius: 6px; }
+        .checkout-form-section { background: var(--white); padding: 40px; border: 1px solid rgba(0,0,0,0.08); border-radius: 0px; }
         .form-section-title { font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid rgba(0,0,0,0.06); }
 
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
         .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         .form-group { margin-bottom: 20px; }
         .form-label { display: block; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; font-weight: 600; }
-        .form-control { width: 100%; padding: 14px 16px; border: 1px solid rgba(0,0,0,0.1); font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; transition: border-color 0.3s; border-radius: 4px; background: #fff; }
+        .form-control { width: 100%; padding: 14px 16px; border: 1px solid rgba(0,0,0,0.1); font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; transition: border-color 0.3s; border-radius: 0px; background: #fff; }
         .form-control:focus { border-color: var(--accent); }
         textarea.form-control { resize: none; min-height: 80px; }
         select.form-control { cursor: pointer; appearance: auto; }
 
         /* Phương thức thanh toán */
         .payment-methods { display: flex; flex-direction: column; gap: 12px; }
-        .pm-option { display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid rgba(0,0,0,0.1); cursor: pointer; transition: 0.3s; border-radius: 6px; background: #fafafa;}
+        .pm-option { display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid rgba(0,0,0,0.1); cursor: pointer; transition: 0.3s; border-radius: 0px; background: #fafafa;}
         .pm-option:hover { border-color: var(--accent); background: #fff;}
         .pm-option.active { border-color: var(--accent); border-width: 2px; background: #fff;}
         .pm-option input[type="radio"] { accent-color: var(--accent); transform: scale(1.2); }
-        .pm-label { font-size: 14px; font-weight: 600; color: var(--text);}
+        .pm-label { font-size: 14px; font-weight: 500; color: var(--text);}
         .pm-desc { font-size: 12px; color: var(--muted); margin-top: 4px; font-weight: 500;}
         .pm-icon { width: 32px; height: 32px; object-fit: contain; margin-left: auto; border-radius: 4px;}
 
         /* --- CỘT PHẢI: TÓM TẮT ĐƠN HÀNG --- */
         .checkout-summary { position: sticky; top: 40px; }
-        .co-summary-box { background: #f9f9f9; padding: 32px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.05); }
+        .co-summary-box { background: #f9f9f9; padding: 32px; border-radius: 0px; border: 1px solid rgba(0,0,0,0.05); }
 
         .co-item { display: grid; grid-template-columns: 60px 1fr auto; gap: 16px; align-items: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px dashed rgba(0,0,0,0.1); }
-        .co-item-img { width: 60px; height: 80px; object-fit: cover; border-radius: 4px; }
+        .co-item-img { width: 60px; height: 80px; object-fit: cover; border-radius: 0px; }
         .co-item-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; line-height: 1.3;}
         .co-item-attr { font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 500;}
         .co-item-price { font-size: 14px; font-weight: 600; text-align: right; }
@@ -45,7 +45,7 @@
         .co-calc-row.discount { color: #10b981; }
 
         /* Freeship notice */
-        .freeship-notice { font-size: 11px; padding: 8px 12px; border-radius: 4px; margin-bottom: 16px; text-align: center; font-weight: 600; transition: 0.3s;}
+        .freeship-notice { font-size: 11px; padding: 8px 12px; border-radius: 0px; margin-bottom: 16px; text-align: center; font-weight: 500; transition: 0.3s;}
         .freeship-notice.success { background: #d1fae5; color: #047857; border: 1px solid #a7f3d0; }
         .freeship-notice.warning { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
 
@@ -53,21 +53,21 @@
         .co-total-label { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
         .co-total-val { font-size: 24px; font-weight: 700; color: var(--text); }
 
-        .btn-submit-order { width: 100%; padding: 18px; background: var(--accent); color: white; border: none; font-family: 'DM Sans', sans-serif; font-size: 14px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 700; cursor: pointer; margin-top: 24px; transition: 0.3s; border-radius: 4px; }
+        .btn-submit-order { width: 100%; padding: 18px; background: var(--accent); color: white; border: none; font-family: 'DM Sans', sans-serif; font-size: 14px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 600; cursor: pointer; margin-top: 24px; transition: 0.3s; border-radius: 0px; }
         .btn-submit-order:hover { background: #2c4238; }
         .btn-submit-order:disabled { background: #ccc; cursor: not-allowed; }
 
         .empty-co { text-align: center; padding: 80px 20px; grid-column: 1/-1; }
-        .empty-co-btn { display: inline-block; margin-top: 20px; padding: 14px 32px; background: var(--text); color: white; text-decoration: none; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; border-radius: 4px;}
+        .empty-co-btn { display: inline-block; margin-top: 20px; padding: 14px 32px; background: var(--text); color: white; text-decoration: none; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; border-radius: 0px;}
 
         /* --- VOUCHER & ADDRESS MODAL --- */
-        .promo-selector-btn { width: 100%; padding: 14px 16px; border: 1px dashed var(--accent); background: rgba(61,90,76,0.04); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-radius: 4px; transition: all 0.2s; margin-bottom: 20px; }
+        .promo-selector-btn { width: 100%; padding: 14px 16px; border: 1px dashed var(--accent); background: rgba(61,90,76,0.04); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-radius: 0px; transition: all 0.2s; margin-bottom: 20px; }
         .promo-selector-btn:hover { background: rgba(61,90,76,0.08); }
         .promo-selector-btn.applied { border-style: solid; background: var(--text); color: white; }
         .promo-selector-btn.applied .promo-remove-icon { cursor: pointer; padding: 4px; color: #ffcccc;}
 
         .voucher-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); animation: fadeIn 0.3s ease; }
-        .voucher-modal { width: 100%; max-width: 480px; background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 15px 50px rgba(0,0,0,0.2); transform: scale(0.95); opacity: 0; transition: all 0.3s ease; max-height: 85vh; display: flex; flex-direction: column; }
+        .voucher-modal { width: 100%; max-width: 480px; background: #fff; border-radius: 0px; padding: 24px; box-shadow: 0 15px 50px rgba(0,0,0,0.2); transform: scale(0.95); opacity: 0; transition: all 0.3s ease; max-height: 85vh; display: flex; flex-direction: column; }
         .voucher-modal.open { transform: scale(1); opacity: 1; }
         .voucher-modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.06); padding-bottom: 16px; margin-bottom: 16px; }
         .voucher-modal-title { font-size: 20px; font-weight: 700; text-transform: uppercase;}
@@ -78,7 +78,7 @@
         .voucher-list::-webkit-scrollbar { width: 4px; }
         .voucher-list::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px;}
 
-        .voucher-card { border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; padding: 16px; display: flex; gap: 16px; align-items: center; position: relative; overflow: hidden; background: #fafafa; transition: border-color 0.2s, background 0.2s; cursor: pointer;}
+        .voucher-card { border: 1px solid rgba(0,0,0,0.1); border-radius: 0px; padding: 16px; display: flex; gap: 16px; align-items: center; position: relative; overflow: hidden; background: #fafafa; transition: border-color 0.2s, background 0.2s; cursor: pointer;}
         .voucher-card:hover:not(.disabled) { border-color: var(--accent); background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);}
         .voucher-card.disabled { opacity: 0.5; cursor: not-allowed; }
         .voucher-icon { width: 48px; height: 48px; background: rgba(61,90,76,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--accent); flex-shrink: 0; }
@@ -88,32 +88,32 @@
         .voucher-desc { font-size: 12px; color: var(--muted); line-height: 1.4; margin-bottom: 6px; font-weight: 500;}
         .voucher-meta { font-size: 11px; color: #c08060; font-weight: 600; }
 
-        .voucher-apply-btn { padding: 8px 16px; background: var(--text); color: #fff; border: none; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: 4px; font-weight: 600;}
+        .voucher-apply-btn { padding: 8px 16px; background: var(--text); color: #fff; border: none; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: 0px; font-weight: 500;}
         .voucher-card:hover .voucher-apply-btn { background: var(--accent); }
         .voucher-card.disabled .voucher-apply-btn { display: none; }
 
         /* --- CSS CHO MODAL QR CHUYỂN KHOẢN --- */
         .qr-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 10000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); animation: fadeIn 0.3s ease;}
-        .qr-modal { background: #fff; width: 420px; max-width: 90%; border-radius: 8px; padding: 32px 24px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
-        .qr-image { width: 220px; height: 220px; margin: 15px auto; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; padding: 10px; display: block; }
-        .qr-details { font-size: 14px; margin-bottom: 24px; text-align: left; background: #f9f9fa; padding: 20px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.05); }
+        .qr-modal { background: #fff; width: 420px; max-width: 90%; border-radius: 0px; padding: 32px 24px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+        .qr-image { width: 220px; height: 220px; margin: 15px auto; border: 1px solid rgba(0,0,0,0.1); border-radius: 0px; padding: 10px; display: block; }
+        .qr-details { font-size: 14px; margin-bottom: 24px; text-align: left; background: #f9f9fa; padding: 20px; border-radius: 0px; border: 1px solid rgba(0,0,0,0.05); }
         .qr-details div { margin-bottom: 8px; display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(0,0,0,0.05); padding-bottom: 8px; }
         .qr-details div:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
         .qr-details strong { color: var(--text); font-weight: 600; text-align: right; }
-        .btn-qr-done { padding: 16px 24px; background: var(--accent); color: white; border: none; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: 4px; width: 100%; transition: 0.3s;}
+        .btn-qr-done { padding: 16px 24px; background: var(--accent); color: white; border: none; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: 0px; width: 100%; transition: 0.3s;}
         .btn-qr-done:hover { background: #2c4238; }
 
         /* --- CSS CHO MODAL CONFIRM ĐẶT HÀNG --- */
         .confirm-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 11000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); animation: fadeIn 0.3s ease;}
-        .confirm-modal { background: #fff; width: 400px; max-width: 90%; border-radius: 6px; padding: 32px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.15); transform: translateY(20px); transition: all 0.3s ease; opacity: 0; }
+        .confirm-modal { background: #fff; width: 400px; max-width: 90%; border-radius: 0px; padding: 32px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.15); transform: translateY(20px); transition: all 0.3s ease; opacity: 0; }
         .confirm-modal.open { transform: translateY(0); opacity: 1; }
         .confirm-icon { width: 60px; height: 60px; background: rgba(61,90,76,0.1); color: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; }
         .confirm-title { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600; color: var(--text); margin-bottom: 12px; }
         .confirm-desc { font-size: 14px; color: var(--muted); margin-bottom: 30px; line-height: 1.5; }
         .confirm-actions { display: flex; gap: 12px; }
-        .btn-cf-cancel { flex: 1; padding: 14px; background: #f4f4f5; color: var(--text); border: 1px solid rgba(0,0,0,0.1); border-radius: 4px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: 0.2s;}
+        .btn-cf-cancel { flex: 1; padding: 14px; background: #f4f4f5; color: var(--text); border: 1px solid rgba(0,0,0,0.1); border-radius: 0px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: 0.2s;}
         .btn-cf-cancel:hover { background: #e4e4e7; }
-        .btn-cf-submit { flex: 1; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 4px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: 0.2s;}
+        .btn-cf-submit { flex: 1; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 0px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: 0.2s;}
         .btn-cf-submit:hover { background: #2c4238; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -126,7 +126,14 @@
             .checkout-summary { position: static; }
             .voucher-modal { margin: 20px; }
         }
+
+        .voucher-search-box { display: flex; gap: 8px; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.06); }
+        .voucher-search-box input { flex: 1; padding: 12px 16px; border: 1px solid rgba(0,0,0,0.1); outline: none; font-family: 'DM Sans', sans-serif; font-size: 13px; text-transform: uppercase; border-radius: 0; transition: border-color 0.2s;}
+        .voucher-search-box input:focus { border-color: var(--accent); }
+        .voucher-search-box button { padding: 0 20px; background: var(--text); color: #fff; border: none; font-weight: 500; font-size: 12px; letter-spacing: 0.1em; cursor: pointer; transition: 0.2s; border-radius: 0; }
+        .voucher-search-box button:hover { background: var(--accent); }
     </style>
+
 
     <div class="checkout-page" id="checkout-content"></div>
 
@@ -139,6 +146,12 @@
                 </button>
             </div>
             <div style="font-size:12px; color:var(--muted); margin-bottom:16px; font-weight: 500;">Mã giảm giá sẽ được tự động tính toán dựa trên giỏ hàng của bạn.</div>
+
+            <div class="voucher-search-box">
+                <input type="text" id="manualVoucherInput" placeholder="Nhập mã ưu đãi của bạn...">
+                <button onclick="window.CheckoutApp.applyManualVoucher()">ÁP DỤNG</button>
+            </div>
+
             <div class="voucher-list" id="voucherListContainer">
                 <div style="text-align:center; padding:40px; color:var(--muted); font-style:italic;">Đang lấy dữ liệu ưu đãi...</div>
             </div>
@@ -571,7 +584,7 @@
 
                     (isStore ?
                         `
-                    <div style="padding: 20px; background: #f4f4f5; border-radius: 4px; margin-bottom: 20px;">
+                    <div style="padding: 20px; background: #f4f4f5; border-radius: 0px; margin-bottom: 20px;">
                         <div style="font-weight:600; margin-bottom:8px;"><i class="fa-solid fa-store" style="color:var(--accent);"></i> Nhận tại cửa hàng Beemate</div>
                         <div style="font-size:13px; color:var(--muted); line-height: 1.6;">
                             13 Trịnh Văn Bô, Xuân Phương, Nam Từ Liêm, Hà Nội<br>
@@ -893,6 +906,27 @@
                 listContainer.innerHTML = html;
             },
 
+            applyManualVoucher: function() {
+                const inputEl = document.getElementById('manualVoucherInput');
+                const code = inputEl.value.trim().toUpperCase();
+
+                if (!code) {
+                    if(window.showToast) window.showToast("Vui lòng nhập mã giảm giá!", "warning");
+                    else alert("Vui lòng nhập mã giảm giá!");
+                    return;
+                }
+
+                const v = this.state.availableVouchers.find(x => (x.maCode || x.ma || x.code).toUpperCase() === code);
+
+                if (v) {
+                    this.applyVoucher(v.maCode || v.ma || v.code);
+                    inputEl.value = '';
+                } else {
+                    if(window.showToast) window.showToast("Mã giảm giá không tồn tại hoặc đã hết hạn!", "error");
+                    else alert("Mã giảm giá không tồn tại hoặc đã hết hạn!");
+                }
+            },
+
             applyVoucher: function(code) {
                 if (this.state.cart.length === 0) return;
 
@@ -904,12 +938,22 @@
                 const v = this.state.availableVouchers.find(x => (x.maCode || x.ma || x.code) === code);
                 if (!v) {
                     if(window.showToast) window.showToast("Mã không hợp lệ!", "error");
+                    else alert("Mã không hợp lệ!");
+                    return;
+                }
+
+                // 🌟 FIX LỖI: CHẶN KHÁCH NHẬP TAY MÃ ĐÃ SỬ DỤNG
+                const isUsed = this.state.usedVoucherIds && this.state.usedVoucherIds.includes(v.id);
+                if (isUsed) {
+                    if(window.showToast) window.showToast("Bạn đã sử dụng mã này rồi!", "error");
+                    else alert("Bạn đã sử dụng mã này rồi!");
                     return;
                 }
 
                 const dieuKien = v.dieuKien || v.dieuKienApDung || 0;
                 if (this.state.subTotal < dieuKien) {
                     if(window.showToast) window.showToast(`Đơn hàng chưa đạt tối thiểu ${this.formatMoney(dieuKien)}`, "warning");
+                    else alert(`Đơn hàng chưa đạt tối thiểu ${this.formatMoney(dieuKien)}`);
                     return;
                 }
 

@@ -4,15 +4,15 @@
 
         /* ── MÀN HÌNH CHƯA ĐĂNG NHẬP (GUEST VIEW) ── */
         #guest-view { display: none; padding: 100px 20px; animation: fadeIn 0.5s ease; }
-        .guest-container { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; max-width: 500px; margin: 0 auto; background: var(--white); padding: 60px 40px; border: 1px solid rgba(0,0,0,0.06); border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
+        .guest-container { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; max-width: 500px; margin: 0 auto; background: var(--white); padding: 60px 40px; border: 1px solid rgba(0,0,0,0.06); border-radius: 0px; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
         .guest-icon { width: 72px; height: 72px; border-radius: 50%; background: rgba(61,90,76,0.06); color: var(--accent); display: flex; align-items: center; justify-content: center; margin-bottom: 24px; }
         .guest-icon svg { width: 32px; height: 32px; stroke: currentColor; fill: none; }
         .guest-title { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 400; margin-bottom: 12px; }
         .guest-desc { font-size: 14px; color: var(--muted); font-weight: 300; margin-bottom: 36px; line-height: 1.6; }
         .guest-actions { display: flex; gap: 16px; width: 100%; justify-content: center; flex-wrap: wrap;}
-        .guest-btn-login { padding: 14px 32px; background: var(--text); color: white; border: none; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: 0.3s; text-decoration: none; border-radius: 2px;}
+        .guest-btn-login { padding: 14px 32px; background: var(--text); color: white; border: none; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: 0.3s; text-decoration: none; border-radius: 0px;}
         .guest-btn-login:hover { background: var(--accent); }
-        .guest-btn-shop { padding: 14px 32px; background: transparent; color: var(--text); border: 1px solid rgba(0,0,0,0.2); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: 0.3s; text-decoration: none; border-radius: 2px;}
+        .guest-btn-shop { padding: 14px 32px; background: transparent; color: var(--text); border: 1px solid rgba(0,0,0,0.2); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: 0.3s; text-decoration: none; border-radius: 0px;}
         .guest-btn-shop:hover { border-color: var(--text); }
 
         /* ── MÀN HÌNH ĐÃ ĐĂNG NHẬP (ACCOUNT VIEW) ── */
@@ -44,8 +44,8 @@
         .account-content { padding: 60px; }
         .account-panel { display: none; }
         .account-panel.active { display: block; animation: fadeIn 0.4s ease; }
-        .account-panel-title { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 300; margin-bottom: 8px; }
-        .account-panel-subtitle { font-size: 13px; color: var(--muted); font-weight: 300; margin-bottom: 48px; }
+        .account-panel-title { font-family: 'DM Sans', sans-serif; font-size: 32px; margin-bottom: 8px; }
+        .account-panel-subtitle { font-size: 13px; color: var(--muted);  margin-bottom: 48px; }
 
         /* Overview */
         .account-overview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: rgba(0,0,0,0.06); margin-bottom: 52px; }
@@ -61,7 +61,7 @@
         .account-order-total { font-size: 15px; font-weight: 400; text-align: right; }
 
         /* 🌟 CSS BADGE TRẠNG THÁI ĐỒNG BỘ */
-        .account-order-status { padding: 6px 14px; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; border-radius: 4px; display: inline-block; text-align: center; }
+        .account-order-status { padding: 6px 14px; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; border-radius: 0px; display: inline-block; text-align: center; }
         .status-CHO_THANH_TOAN { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
         .status-CHO_XAC_NHAN { background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; }
         .status-CHO_GIAO { background: #f3f4f6; color: #4b5563; border: 1px solid #e5e7eb; }
@@ -75,7 +75,7 @@
         .orders-filter-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
         .orders-filter-tab:hover { color: var(--text); }
 
-        .account-order-card { background: var(--white); border: 1px solid rgba(0,0,0,0.07); margin-bottom: 16px; overflow: hidden; border-radius: 4px; }
+        .account-order-card { background: var(--white); border: 1px solid rgba(0,0,0,0.07); margin-bottom: 16px; overflow: hidden; border-radius: 0px; }
         .account-order-card-header { display: flex; justify-content: space-between; align-items: flex-start; padding: 24px 28px; border-bottom: 1px solid rgba(0,0,0,0.06); background: #fcfcfc;}
         .order-header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
         .order-timeline { padding: 24px 28px; border-bottom: 1px solid rgba(0,0,0,0.06); }
@@ -100,28 +100,28 @@
         .account-order-card-footer { display: flex; justify-content: space-between; align-items: center; padding: 20px 28px; background: #fafafa; }
         .order-total-text { font-size: 14px; color: var(--text); font-weight: 500; }
         .order-total-text strong { color: var(--accent); font-weight: 700; font-size: 18px; margin-left: 8px;}
-        .account-reorder-btn { font-size: 11px; letter-spacing: 0.1em; color: var(--text); text-transform: uppercase; background: none; border: 1px solid rgba(0,0,0,0.2); padding: 10px 20px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 600; transition: background 0.2s, color 0.2s, border-color 0.2s; border-radius: 2px; text-decoration:none;}
-        .account-reorder-btn:hover { background: var(--text); color: white; border-color: var(--text); }
+        .account-reorder-btn { font-size: 11px; letter-spacing: 0.1em; color: var(--accent); text-transform: uppercase; background: none; border: 1px solid rgba(0,0,0,0.2); padding: 10px 20px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 600; transition: background 0.2s, color 0.2s, border-color 0.2s; border-radius: 0px; text-decoration:none;}
+        .account-reorder-btn:hover { background: var(--text); color: var(--accent); border-color: var(--text); }
 
         /* Profile */
-        .profile-avatar-section { display: flex; align-items: center; gap: 28px; padding: 28px 32px; background: var(--white); border: 1px solid rgba(0,0,0,0.07); margin-bottom: 40px; max-width: 640px; border-radius: 4px; }
+        .profile-avatar-section { display: flex; align-items: center; gap: 28px; padding: 28px 32px; background: var(--white); border: 1px solid rgba(0,0,0,0.07); margin-bottom: 40px; max-width: 640px; border-radius: 0px; }
         .profile-avatar-big { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(160deg, #e8ddd1, #c4b49d); display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 300; color: var(--accent); flex-shrink: 0; overflow: hidden; }
         .profile-avatar-big img { width: 100%; height: 100%; object-fit: cover; }
         .profile-avatar-name { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; margin-bottom: 4px; }
         .profile-avatar-sub { font-size: 12px; color: var(--muted); font-weight: 300; margin-bottom: 14px; }
-        .profile-avatar-upload { font-size: 11px; letter-spacing: 0.1em; color: var(--accent); text-transform: uppercase; background: none; border: 1px solid var(--accent); padding: 9px 18px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 400; transition: background 0.2s, color 0.2s; display: inline-block; border-radius: 2px; }
+        .profile-avatar-upload { font-size: 11px; letter-spacing: 0.1em; color: var(--accent); text-transform: uppercase; background: none; border: 1px solid var(--accent); padding: 9px 18px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 400; transition: background 0.2s, color 0.2s; display: inline-block; border-radius: 0px; }
         .profile-avatar-upload:hover { background: var(--accent); color: white; }
 
         .account-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 640px; margin-bottom: 32px; }
         .account-form-field { display: flex; flex-direction: column; gap: 8px; }
         .account-form-field.full { grid-column: span 2; }
         .account-form-label { font-size: 10px; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; font-weight: 400; }
-        .account-form-input { padding: 13px 16px; border: 1px solid rgba(0,0,0,0.1); background: var(--white); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 300; color: var(--text); outline: none; transition: border-color 0.2s; border-radius: 2px; width: 100%;}
+        .account-form-input { padding: 13px 16px; border: 1px solid rgba(0,0,0,0.1); background: var(--white); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 300; color: var(--text); outline: none; transition: border-color 0.2s; border-radius: 0px; width: 100%;}
         .account-form-input:focus { border-color: var(--accent); }
         .account-form-input:disabled { background: rgba(0,0,0,0.03); color: var(--muted); cursor: not-allowed; border-color: rgba(0,0,0,0.05); }
         select.account-form-input { appearance: auto; cursor: pointer; }
 
-        .account-form-save { padding: 15px 40px; background: var(--accent); color: white; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 400; transition: background 0.2s; border-radius: 2px; }
+        .account-form-save { padding: 15px 40px; background: var(--accent); color: white; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 400; transition: background 0.2s; border-radius: 0px; }
         .account-form-save:hover { background: var(--accent-light); }
         .account-section-divider { width: 100%; height: 1px; background: rgba(0,0,0,0.07); margin: 48px 0; max-width: 640px; }
 
@@ -130,12 +130,12 @@
         .toggle-pw-btn { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--muted); display: flex; align-items: center; opacity: 0.5; transition: opacity 0.2s; }
         .toggle-pw-btn:hover { opacity: 1; }
         .toggle-pw-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; }
-        .password-strength { height: 3px; background: rgba(0,0,0,0.08); margin-top: 8px; border-radius: 2px; overflow: hidden; }
+        .password-strength { height: 3px; background: rgba(0,0,0,0.08); margin-top: 8px; border-radius: 0px; overflow: hidden; }
         .password-strength-bar { height: 100%; width: 0; transition: width 0.3s, background 0.3s; }
         .password-strength-label { font-size: 11px; color: var(--muted); margin-top: 6px; letter-spacing: 0.06em; }
 
         /* SỔ ĐỊA CHỈ */
-        .address-card { border: 1px solid rgba(0,0,0,0.1); border-radius: 4px; padding: 20px; margin-bottom: 16px; background: var(--white); position: relative; max-width: 640px;}
+        .address-card { border: 1px solid rgba(0,0,0,0.1); border-radius: 0px; padding: 20px; margin-bottom: 16px; background: var(--white); position: relative; max-width: 640px;}
         .address-card.default { border-color: var(--accent); background: rgba(61,90,76,0.02); }
         .addr-name-phone { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
         .addr-detail { font-size: 13px; color: var(--text); margin-bottom: 4px; line-height: 1.5; }
@@ -145,18 +145,18 @@
         .addr-action-btn:hover { color: #2c4238; }
         .addr-action-btn.delete { color: #c03c3c; }
         .addr-action-btn.delete:hover { color: #902c2c; }
-        .addr-badge-default { position: absolute; top: 20px; right: 20px; font-size: 10px; background: rgba(61,90,76,0.1); color: var(--accent); padding: 4px 8px; border-radius: 2px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em; }
+        .addr-badge-default { position: absolute; top: 20px; right: 20px; font-size: 10px; background: rgba(61,90,76,0.1); color: var(--accent); padding: 4px 8px; border-radius: 0px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em; }
 
         /* MODAL ĐỊA CHỈ */
         .acc-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); animation: fadeIn 0.3s ease; }
-        .acc-modal { width: 100%; max-width: 540px; background: #fff; border-radius: 6px; padding: 32px; box-shadow: 0 15px 50px rgba(0,0,0,0.2); transform: translateY(20px); opacity: 0; transition: all 0.3s ease; max-height: 90vh; overflow-y: auto; }
+        .acc-modal { width: 100%; max-width: 540px; background: #fff; border-radius: 0px; padding: 32px; box-shadow: 0 15px 50px rgba(0,0,0,0.2); transform: translateY(20px); opacity: 0; transition: all 0.3s ease; max-height: 90vh; overflow-y: auto; }
         .acc-modal.open { transform: translateY(0); opacity: 1; }
         .acc-modal-header { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 400; margin-bottom: 24px; display:flex; justify-content:space-between; align-items:center; }
         .acc-modal-close { background: none; border: none; cursor: pointer; color: var(--muted); padding: 4px; }
         .acc-modal-close svg { width: 24px; height: 24px; stroke: currentColor; fill: none; }
         .acc-modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(0,0,0,0.08); }
-        .btn-cancel { padding: 12px 24px; background: none; border: 1px solid rgba(0,0,0,0.2); border-radius: 2px; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: 'DM Sans', sans-serif;}
-        .btn-save { padding: 12px 24px; background: var(--accent); color: white; border: none; border-radius: 2px; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: 'DM Sans', sans-serif;}
+        .btn-cancel { padding: 12px 24px; background: none; border: 1px solid rgba(0,0,0,0.2); border-radius: 0px; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: 'DM Sans', sans-serif;}
+        .btn-save { padding: 12px 24px; background: var(--accent); color: white; border: none; border-radius: 0px; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: 'DM Sans', sans-serif;}
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -169,7 +169,7 @@
         .detail-product-table { width: 100%; border-collapse: collapse; margin-bottom: 40px; }
         .detail-product-table th { text-align: left; padding: 16px 0; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid rgba(0,0,0,0.08); }
         .detail-product-table td { padding: 20px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .detail-prod-img { width: 60px; aspect-ratio: 3/4; object-fit: cover; border-radius: 2px; margin-right: 15px; border: 1px solid rgba(0,0,0,0.05);}
+        .detail-prod-img { width: 60px; aspect-ratio: 3/4; object-fit: cover; border-radius: 0px; margin-right: 15px; border: 1px solid rgba(0,0,0,0.05);}
 
         @media (max-width: 900px) {
             .account-layout { grid-template-columns: 1fr; }
@@ -188,21 +188,21 @@
         .guest-divider:not(:empty)::before { margin-right: 15px; }
         .guest-divider:not(:empty)::after { margin-left: 15px; }
         .guest-track-wrap { width: 100%; display: flex; gap: 10px; margin-bottom: 10px; }
-        .guest-track-input { flex: 1; padding: 14px 16px; border: 1px solid rgba(0,0,0,0.1); outline: none; font-family: 'DM Sans', sans-serif; font-size: 13px; border-radius: 2px; transition: border-color 0.2s;}
+        .guest-track-input { flex: 1; padding: 14px 16px; border: 1px solid rgba(0,0,0,0.1); outline: none; font-family: 'DM Sans', sans-serif; font-size: 13px; border-radius: 0px; transition: border-color 0.2s;}
         .guest-track-input:focus { border-color: var(--accent); }
-        .guest-track-btn { padding: 0 24px; background: var(--accent); color: white; border: none; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: 0.3s; border-radius: 2px; }
+        .guest-track-btn { padding: 0 24px; background: var(--accent); color: white; border: none; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: 0.3s; border-radius: 0px; }
         .guest-track-btn:hover { background: #2c4238; }
-        .guest-track-result { width: 100%; text-align: left; display: none; background: var(--white); border: 1px solid rgba(0,0,0,0.07); padding: 24px; border-radius: 4px; margin-top: 15px; animation: fadeIn 0.4s ease; box-shadow: 0 5px 15px rgba(0,0,0,0.02);}
+        .guest-track-result { width: 100%; text-align: left; display: none; background: var(--white); border: 1px solid rgba(0,0,0,0.07); padding: 24px; border-radius: 0px; margin-top: 15px; animation: fadeIn 0.4s ease; box-shadow: 0 5px 15px rgba(0,0,0,0.02);}
 
         /* ── CSS POPUP ĐÁNH GIÁ SẢN PHẨM ── */
         .review-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
-        .review-modal { background: #fff; width: 450px; max-width: 90%; border-radius: 4px; padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); position: relative; }
+        .review-modal { background: #fff; width: 450px; max-width: 90%; border-radius: 0px; padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); position: relative; }
         .review-modal-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; margin-bottom: 20px; text-align: center; }
         .star-select { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; font-size: 24px; cursor: pointer; color: #ccc; }
         .star-select i.active { color: #f59e0b; }
-        .review-textarea { width: 100%; height: 100px; border: 1px solid rgba(0,0,0,0.1); border-radius: 4px; padding: 12px; font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; resize: none; margin-bottom: 16px; }
+        .review-textarea { width: 100%; height: 100px; border: 1px solid rgba(0,0,0,0.1); border-radius: 0px; padding: 12px; font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; resize: none; margin-bottom: 16px; }
         .review-textarea:focus { border-color: var(--accent); }
-        .review-img-upload-btn { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text); background: #f4f4f5; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-bottom: 16px; transition: 0.2s; }
+        .review-img-upload-btn { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text); background: #f4f4f5; padding: 8px 16px; border-radius: 0px; cursor: pointer; margin-bottom: 16px; transition: 0.2s; }
         .review-img-upload-btn:hover { background: #e4e4e7; }
         .review-img-previews { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
 
@@ -212,36 +212,286 @@
         .return-product-item:last-child { border-bottom: none; }
         .return-product-info { display: flex; align-items: center; gap: 12px; flex: 1; }
         .return-product-info input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
-        .return-product-img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #eee; }
-        .return-qty-input { width: 60px; padding: 6px; text-align: center; border: 1px solid #ccc; border-radius: 4px; outline: none; }
+        .return-product-img { width: 50px; height: 50px; object-fit: cover; border-radius: 0px; border: 1px solid #eee; }
+        .return-qty-input { width: 60px; padding: 6px; text-align: center; border: 1px solid #ccc; border-radius: 0px; outline: none; }
         .return-qty-input:disabled { background: #f9f9f9; color: #999; }
 
-        .wishlist-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
-        @media (max-width: 900px) { .wishlist-grid { grid-template-columns: 1fr 1fr; } }
-        @media (max-width: 600px) { .wishlist-grid { grid-template-columns: 1fr; } }
+        .wishlist-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px 20px; }
+        @media (max-width: 1100px) { .wishlist-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 750px)  { .wishlist-grid { grid-template-columns: repeat(2, 1fr); gap: 16px 10px; } }
+        /* ── WISHLIST PRODUCT CARD (clone từ shop) ── */
+        #panel-wishlist .product-card {
+            background: var(--white); position: relative; overflow: hidden; cursor: pointer;
+            box-shadow: 0 2px 16px rgba(61,90,76,0.07);
+            transition: box-shadow .35s, transform .3s;
+            display: flex; flex-direction: column;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        #panel-wishlist .product-card:hover { box-shadow: 0 8px 40px rgba(61,90,76,0.13); transform: translateY(-2px); z-index: 2; }
+
+        #panel-wishlist .product-img {
+            width: 100%; aspect-ratio: 3/4; position: relative; overflow: hidden; background: #f9f8f6;
+        }
+        #panel-wishlist .img-placeholder {
+            width: 100%; height: 100%; object-fit: cover; display: block;
+            transition: transform .65s ease, opacity .25s;
+        }
+        #panel-wishlist .product-card:hover .img-placeholder { transform: scale(1.04); }
+
+        #panel-wishlist .img-hover {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            object-fit: cover; opacity: 0;
+            transition: opacity .5s ease, transform .65s ease; z-index: 1;
+        }
+        #panel-wishlist .product-card:hover .img-hover { opacity: 1; transform: scale(1.04); }
+
+        #panel-wishlist .img-overlay {
+            position: absolute; inset: 0; background: rgba(0,0,0,0);
+            display: flex; align-items: flex-end; padding: 12px;
+            transition: background .35s; z-index: 2;
+        }
+        #panel-wishlist .product-card:hover .img-overlay { background: rgba(0,0,0,0.04); }
+
+        #panel-wishlist .btn-quick {
+            width: 100%; height: 42px; padding: 0 12px;
+            background: var(--accent); color: white; border: none;
+            font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px;
+            transform: translateY(8px); opacity: 0;
+            transition: transform .28s ease, opacity .28s ease, background .2s;
+            font-family: 'DM Sans', sans-serif;
+        }
+        #panel-wishlist .btn-quick svg { width: 12px; height: 12px; stroke: white; fill: none; flex-shrink: 0; }
+        #panel-wishlist .product-card:hover .btn-quick { transform: translateY(0); opacity: 1; }
+        #panel-wishlist .btn-quick:hover { background: #2c4238; }
+
+        #panel-wishlist .prod-badges {
+            position: absolute; top: 10px; left: 10px;
+            display: flex; flex-direction: column; gap: 4px; z-index: 3; pointer-events: none;
+        }
+        #panel-wishlist .prod-badge {
+            padding: 3px 9px; font-size: 9px; font-weight: 700;
+            letter-spacing: 0.12em; text-transform: uppercase; color: white; width: fit-content;
+        }
+        #panel-wishlist .prod-badge.new { background: var(--accent); }
+        #panel-wishlist .prod-badge.sale { background: #c08060; }
+
+        #panel-wishlist .heart-btn {
+            position: absolute; top: 10px; right: 10px; z-index: 4;
+            width: 34px; height: 34px; border-radius: 50%;
+            background: rgba(255,245,245,0.95); border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 1; transform: scale(1);
+            transition: background .2s, transform .2s;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+        }
+        #panel-wishlist .heart-btn svg {
+            width: 15px; height: 15px; stroke: #e74c3c; fill: #e74c3c;
+            pointer-events: none;
+        }
+        #panel-wishlist .heart-btn:hover { background: #ffe4e4; transform: scale(1.1); }
+
+        #panel-wishlist .product-info { padding: 14px 16px 18px; flex-grow: 1; display: flex; flex-direction: column; }
+        #panel-wishlist .product-name {
+            font-family: 'Cormorant Garamond', serif !important;
+            font-size: 17px; font-weight: 400; line-height: 1.2; margin-bottom: 10px;
+        }
+        #panel-wishlist .prod-swatches { display: flex; align-items: center; gap: 4px; margin-bottom: 8px; }
+        #panel-wishlist .swatch-dot {
+            width: 14px; height: 14px; border-radius: 50%;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); flex-shrink: 0; display: inline-block;
+        }
+        #panel-wishlist .swatch-more {
+            font-size: 9px; color: var(--muted); font-weight: 500; letter-spacing: 0.05em;
+            padding: 2px 6px; border: 1px solid rgba(0,0,0,0.08); border-radius: 0px; margin-left: 2px;
+        }
+        #panel-wishlist .prod-price { display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
+        #panel-wishlist .price-sale { font-size: 14px; color: var(--accent); font-weight: 600; }
+        #panel-wishlist .price-orig { font-size: 12px; color: var(--muted); text-decoration: line-through; font-weight: 300; }
+        #panel-wishlist .price-normal { font-size: 14px; color: var(--text); font-weight: 500; }
 
         /* Cảnh báo dành riêng cho Staff */
         .staff-banner {
-            background: #fef2f2; border: 1px solid #fca5a5; border-radius: 4px;
+            background: #fef2f2; border: 1px solid #fca5a5; border-radius: 0px;
             padding: 15px; margin-bottom: 30px; display: flex; align-items: center; gap: 15px;
         }
-    </style>
 
+        /* Khung thông tin tra cứu đơn hàng (Giao diện gốc - Desktop) */
+        .guest-track-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            background: #f9f9fa;
+            padding: 20px;
+            border-radius: 0; /* Vuông góc 100% */
+            margin-bottom: 20px;
+            border: 1px solid rgba(0,0,0,0.05);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        /* Vuông góc luôn hình ảnh sản phẩm trong danh sách */
+        .detail-prod-img {
+            border-radius: 0 !important;
+        }
+
+        /* ── RESPONSIVE TẤT CẢ CHO MOBILE ── */
+        @media (max-width: 600px) {
+            #guest-view {
+                padding: 40px 15px;
+            }
+            .guest-container {
+                padding: 40px 15px; /* Giảm padding để khung vừa với màn hình đt */
+            }
+            .guest-title {
+                font-size: 26px;
+            }
+            .guest-actions {
+                flex-direction: column;
+                gap: 12px;
+            }
+            .guest-btn-login,
+            .guest-btn-shop {
+                width: 100%;
+            }
+            .guest-track-wrap {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .guest-track-input,
+            .guest-track-btn {
+                width: 100%;
+                padding: 16px;
+            }
+
+            /* Gập khung thông tin khách hàng & hóa đơn thành 1 cột dọc */
+            .guest-track-info-grid {
+                grid-template-columns: 1fr !important;
+                gap: 15px !important;
+                padding: 15px !important;
+            }
+
+            /* Thu nhỏ padding của toàn bộ khung kết quả tra cứu */
+            .guest-track-result {
+                padding: 15px !important;
+            }
+
+            /* Ngăn bảng sản phẩm bị tràn ra ngoài màn hình */
+            .detail-product-table {
+                display: block;
+                width: 100%;
+                overflow-x: auto;
+                white-space: nowrap; /* Bật cuộn ngang nếu tên sản phẩm quá dài */
+            }
+        }
+
+        /* Style cho nút Accordion (chỉ icon) */
+        .btn-accordion-toggle {
+            background: none;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            color: var(--muted);
+            transition: color 0.2s, transform 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-accordion-toggle:hover { color: var(--accent); }
+        .btn-accordion-toggle.active { transform: rotate(180deg); color: var(--accent); }
+
+        /* Vùng thông tin chi tiết nhanh (Accordion Content) */
+        /* Hiệu ứng Accordion mượt mà */
+        .order-quick-details {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            padding: 0 28px; /* Padding dọc bằng 0 khi đóng */
+            background: #fcfcfc;
+            border-top: 1px dashed transparent;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, padding 0.4s ease, border-color 0.4s ease;
+        }
+
+        .order-quick-details.open {
+            max-height: 200px; /* Đủ rộng để chứa nội dung */
+            opacity: 1;
+            padding: 20px 28px;
+            border-top-color: rgba(0,0,0,0.06);
+        }
+
+        /* Tinh chỉnh nút Accordion */
+        .btn-accordion-toggle {
+            background: none;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            color: var(--muted);
+            transition: transform 0.3s ease, color 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        .btn-accordion-toggle.active {
+            transform: rotate(180deg);
+            color: var(--accent);
+        }
+
+        /* Modal Đăng xuất Style đồng bộ (Dùng trong confirmAction) */
+        .modal-confirm-accent {
+            font-family: 'Cormorant Garamond', serif !important;
+        }
+        .btn-modal-confirm {
+            padding: 14px 24px;
+            background: var(--accent) !important;
+            color: white !important;
+            border: none;
+            cursor: pointer;
+            flex: 1;
+            border-radius: 0px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 12px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .btn-modal-confirm:hover {
+            background: #2c4238 !important;
+        }
+
+        /* Đồng bộ style nút Tra cứu đơn hàng */
+        .btn-global-track-new {
+            padding: 10px 20px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: 0.2s;
+            border-radius: 0px;
+            text-decoration: none;
+        }
+        .btn-global-track-new:hover { background: #2c4238; }
+
+    </style>
     <div class="qr-modal-overlay" id="accQrModalOverlay" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 10000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); animation: fadeIn 0.3s ease;">
-        <div class="qr-modal" style="background: #fff; width: 420px; max-width: 90%; border-radius: 8px; padding: 32px 24px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2);">
+        <div class="qr-modal" style="background: #fff; width: 420px; max-width: 90%; border-radius: 0px; padding: 32px 24px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2);">
             <h3 style="font-family:'Cormorant Garamond',serif; font-size:28px; margin-bottom:8px; font-weight:600;">Thanh toán đơn hàng</h3>
             <p style="font-size:13px; color:var(--muted); margin-bottom:20px;">Vui lòng mở ứng dụng ngân hàng và quét mã QR dưới đây để hoàn tất thanh toán.</p>
 
-            <img src="" id="accQrImage" style="width: 220px; height: 220px; margin: 15px auto; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; padding: 10px; display: block;" alt="Mã QR Chuyển Khoản">
+            <img src="" id="accQrImage" style="width: 220px; height: 220px; margin: 15px auto; border: 1px solid rgba(0,0,0,0.1); border-radius: 0px; padding: 10px; display: block;" alt="Mã QR Chuyển Khoản">
 
-            <div style="font-size: 14px; margin-bottom: 24px; text-align: left; background: #f9f9fa; padding: 20px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.05);">
+            <div style="font-size: 14px; margin-bottom: 24px; text-align: left; background: #f9f9fa; padding: 20px; border-radius: 0px; border: 1px solid rgba(0,0,0,0.05);">
                 <div style="margin-bottom: 8px; display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(0,0,0,0.05); padding-bottom: 8px;"><span>Ngân hàng:</span> <strong id="accQrBankName" style="color: var(--text); font-weight: 600;">MB Bank</strong></div>
                 <div style="margin-bottom: 8px; display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(0,0,0,0.05); padding-bottom: 8px;"><span>Số tài khoản:</span> <strong id="accQrAccountNo" style="color: var(--text); font-weight: 600;">0988123456</strong></div>
                 <div style="margin-bottom: 8px; display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(0,0,0,0.05); padding-bottom: 8px;"><span>Chủ tài khoản:</span> <strong id="accQrAccountName" style="color: var(--text); font-weight: 600;">NGUYEN VAN HOANG</strong></div>
                 <div style="margin-bottom: 8px; display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(0,0,0,0.05); padding-bottom: 8px;"><span>Số tiền:</span> <strong id="accQrAmount" style="color:#dc2626; font-size:16px; font-weight: 600;">0 ₫</strong></div>
                 <div style="display: flex; justify-content: space-between;"><span>Nội dung CK:</span> <strong id="accQrContent" style="color:var(--accent); font-weight: 600;"></strong></div>
             </div>
-            <button id="btnAccQrDone" style="padding: 16px 24px; background: var(--accent); color: white; border: none; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: 4px; width: 100%; transition: 0.3s;">Tôi đã chuyển khoản xong</button>
+            <button id="btnAccQrDone" style="padding: 16px 24px; background: var(--accent); color: white; border: none; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: 0px; width: 100%; transition: 0.3s;">Tôi đã chuyển khoản xong</button>
         </div>
     </div>
 
@@ -269,7 +519,7 @@
 
             <div style="margin-top: 20px;">
                 <label class="account-form-label" style="display: block; margin-bottom: 10px;">Chọn sản phẩm cần đổi trả <span style="color: red;">*</span></label>
-                <div id="returnProductList" style="max-height: 250px; overflow-y: auto; border: 1px solid rgba(0,0,0,0.1); border-radius: 4px; padding: 10px 15px; background: #fafafa;">
+                <div id="returnProductList" style="max-height: 250px; overflow-y: auto; border: 1px solid rgba(0,0,0,0.1); border-radius: 0px; padding: 10px 15px; background: #fafafa;">
                 </div>
             </div>
 
@@ -351,20 +601,24 @@
 
                 <div class="account-recent-title">Đơn hàng gần đây</div>
                 <div id="recentOrdersList"></div>
+                <div id="overviewAddressBlock"></div>
             </div>
 
             <div class="account-panel" id="panel-orders">
                 <div class="account-panel-title">Đơn hàng của tôi</div>
                 <div class="account-panel-subtitle">Lịch sử và trạng thái tất cả đơn hàng.</div>
 
-                <div class="orders-filter-bar" id="ordersFilterBar">
-                    <button class="orders-filter-tab active" data-filter="all">Tất cả</button>
-                    <button class="orders-filter-tab" data-filter="CHO_THANH_TOAN">Chờ thanh toán</button>
-                    <button class="orders-filter-tab" data-filter="CHO_XAC_NHAN">Chờ xác nhận</button>
-                    <button class="orders-filter-tab" data-filter="CHO_GIAO">Chờ lấy hàng</button>
-                    <button class="orders-filter-tab" data-filter="DANG_GIAO">Đang giao</button>
-                    <button class="orders-filter-tab" data-filter="HOAN_THANH">Đã giao</button>
-                    <button class="orders-filter-tab" data-filter="DA_HUY">Đã huỷ</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.08); margin-bottom: 32px; flex-wrap: wrap; gap: 16px;">
+                    <div class="orders-filter-bar" id="ordersFilterBar" style="border-bottom: none; margin-bottom: 0;">
+                        <button class="orders-filter-tab active" data-filter="all">Tất cả</button>
+                        <button class="orders-filter-tab" data-filter="CHO_THANH_TOAN">Chờ thanh toán</button>
+                        <button class="orders-filter-tab" data-filter="CHO_XAC_NHAN">Chờ xác nhận</button>
+                        <button class="orders-filter-tab" data-filter="CHO_GIAO">Chờ lấy hàng</button>
+                        <button class="orders-filter-tab" data-filter="DANG_GIAO">Đang giao</button>
+                        <button class="orders-filter-tab" data-filter="HOAN_THANH">Đã giao</button>
+                        <button class="orders-filter-tab" data-filter="DA_HUY">Đã huỷ</button>
+                    </div>
+                    <button onclick="window.openGlobalTrack()" class="btn-global-track-new">Tra cứu</button>
                 </div>
 
                 <div id="ordersContainer"></div>
@@ -374,12 +628,20 @@
                 <div class="account-panel-title">Sản phẩm yêu thích</div>
                 <div class="account-panel-subtitle">Danh sách các sản phẩm bạn đã lưu.</div>
                 <div class="wishlist-grid" id="wishlistContainer"></div>
+                <div id="wishlistShowMoreWrap" style="display:none; text-align:center; margin-top:28px;">
+                    <button id="btnWishlistToggle" onclick="window.AccountApp.toggleWishlistDisplay()"
+                            style="padding:13px 40px; background:transparent; color:var(--text); border:1px solid rgba(0,0,0,0.15);
+               font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600; letter-spacing:0.12em;
+               text-transform:uppercase; cursor:pointer; border-radius:0px; transition:0.2s;
+               display:inline-flex; align-items:center; gap:8px;">
+                        <i class="fa-solid fa-angles-down" id="wishlistToggleIcon"></i>
+                        <span id="wishlistToggleText">Xem thêm</span>
+                    </button>
+                </div>
             </div>
 
             <div class="account-panel" id="panel-order-detail">
-                <button class="btn-back-orders" onclick="window.AccountApp.switchPanel('orders')">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Quay lại
-                </button>
+
                 <div class="account-panel-title" id="detOrderMa">Chi tiết</div>
                 <div class="detail-info-grid">
                     <div class="detail-info-item"><label>Người nhận</label><p id="detTenNhan"></p><p id="detSdtNhan"></p><p id="detDiaChi"></p></div>
@@ -416,7 +678,7 @@
                     </div>
                 </div>
 
-                <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;margin-bottom:8px">Thông tin cơ bản</div>
+                <div style="font-family:'Cormorant Garamond',serif;font-size:22px;margin-bottom:8px">Thông tin cơ bản</div>
 
                 <div class="account-form-grid">
                     <div class="account-form-field full">
@@ -466,14 +728,14 @@
                 <div class="account-section-divider" id="addressDivider1"></div>
 
                 <div id="addressBookHeaderWrap" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; max-width:640px;">
-                    <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;">Sổ địa chỉ</div>
-                    <button class="account-reorder-btn" onclick="window.AccountApp.openAddressModal()">+ Thêm địa chỉ mới</button>
+                    <div style="font-family:'Cormorant Garamond',serif;font-size:22px;">Sổ địa chỉ</div>
+                    <button onclick="window.AccountApp.openAddressModal()" style="padding: 12px 24px; background: var(--accent); color: white; border: none; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; border-radius: 0px; font-family: 'DM Sans', sans-serif; transition: background 0.2s;" onmouseover="this.style.background='#2c4238'" onmouseout="this.style.background='var(--accent)'">+ Thêm địa chỉ mới</button>
                 </div>
                 <div id="addressBookContainer" style="max-width:640px; margin-bottom:48px;"></div>
 
                 <div class="account-section-divider" id="addressDivider2"></div>
 
-                <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;margin-bottom:8px">Đổi mật khẩu</div>
+                <div style="font-family:'Cormorant Garamond',serif;font-size:22px;margin-bottom:8px">Đổi mật khẩu</div>
                 <div class="account-form-grid">
                     <div class="account-form-field full">
                         <label class="account-form-label">Mật khẩu hiện tại</label>
@@ -555,12 +817,11 @@
             <div style="font-size:10px; color:#c08060; margin-bottom:10px; display:none;" id="editReviewImgWarning">* Lưu ý: Thêm ảnh mới sẽ ghi đè lên các ảnh cũ trước đó của bạn.</div>
             <div class="review-img-previews" id="accReviewImagePreviews"></div>
 
-            <button id="btnSubmitAccReview" style="width: 100%; padding: 14px; background: var(--accent); color: white; border: none; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: 2px;" onclick="window.AccountApp.submitReview()">GỬI ĐÁNH GIÁ</button>
+            <button id="btnSubmitAccReview" style="width: 100%; padding: 14px; background: var(--accent); color: white; border: none; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: 0px;" onclick="window.AccountApp.submitReview()">GỬI ĐÁNH GIÁ</button>
         </div>
     </div>
 
-    <script th:inline="javascript">
-        /*<![CDATA[*/
+    <script>
         window.AccountApp = {
             state: {
                 user: null,
@@ -680,7 +941,7 @@
                 }
             },
 
-            switchPanel: function(pId) {
+            switchPanel: async function(pId) {
                 if (this.state.isStaff && pId !== 'profile') {
                     return;
                 }
@@ -690,12 +951,45 @@
                 if (target) target.classList.add('active');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
 
-                if(pId === 'wishlist') this.renderWishlist();
+                // Đồng bộ trạng thái active của menu sidebar
+                document.querySelectorAll('#account-section .account-nav-btn').forEach(btn => {
+                    if (btn.dataset.panel === pId) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+
+                if(pId === 'wishlist') {
+                    try {
+                        const wlRes = await fetch('/api/khach-hang/wishlist');
+                        if (wlRes.ok) {
+                            const dbWishlist = await wlRes.json();
+                            const uniqueProductIds = [...new Set(dbWishlist.map(w => w.sanPhamId || w.idSanPham))].filter(id => id != null);
+                            const productsMap = new Map();
+
+                            for (let prodId of uniqueProductIds) {
+                                const pRes = await fetch('/api/products/' + prodId);
+                                if (pRes.ok) {
+                                    const p = await pRes.json();
+                                    productsMap.set(p.id, p);
+                                }
+                            }
+                            this.state.wishlist = Array.from(productsMap.values());
+                            this.state.stats.wishlistCount = this.state.wishlist.length;
+                            document.getElementById('statWishlist').innerText = this.state.stats.wishlistCount;
+
+                            localStorage.setItem('bee_wishlist', JSON.stringify(uniqueProductIds));
+                        }
+                    } catch(error) { console.log(error); }
+
+                    this.renderWishlist();
+                }
             },
 
             showAccountNotification: function(title, message, isError = false) {
                 let toast = document.createElement('div');
-                toast.style.cssText = `position:fixed; bottom:20px; right:20px; background:${isError ? '#c03c3c' : '#1a1a1a'}; color:#fff; padding:16px 24px; border-radius:2px; z-index:10000; display:flex; align-items:center; gap:16px; animation: accSlideInUp 0.3s ease forwards; font-family:"DM Sans", sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,0.2);`;
+                toast.style.cssText = `position:fixed; bottom:20px; right:20px; background:${isError ? '#c03c3c' : '#1a1a1a'}; color:#fff; padding:16px 24px; border-radius:0px; z-index:10000; display:flex; align-items:center; gap:16px; animation: accSlideInUp 0.3s ease forwards; font-family:"DM Sans", sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,0.2);`;
 
                 let icon = isError ? '<svg style="width:14px;height:14px;stroke:#fff;fill:none;" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 6L6 18M6 6l12 12"/></svg>' : '<svg style="width:14px;height:14px;stroke:#4ade80;fill:none;" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>';
 
@@ -899,15 +1193,15 @@
                 overlay.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:10000; display:flex; align-items:center; justify-content:center; animation:fadeIn 0.3s ease; backdrop-filter:blur(3px);';
 
                 const modal = document.createElement('div');
-                modal.style.cssText = 'background:var(--white); padding:32px 32px 40px; border-radius:8px; max-width:400px; width:90%; text-align:center; box-shadow:0 20px 40px rgba(0,0,0,0.2); transform:translateY(20px); animation:accSlideUp 0.3s ease forwards; position: relative;';
+                modal.style.cssText = 'background:var(--white); padding:32px 32px 40px; border-radius:0px; border: 1px solid rgba(0,0,0,0.1); max-width:400px; width:90%; text-align:center; box-shadow:0 20px 40px rgba(0,0,0,0.15); transform:translateY(20px); animation:accSlideUp 0.3s ease forwards; position: relative;';
 
                 modal.innerHTML =
                     `<div style="margin-bottom: 20px;">${iconHtml}</div>` +
                     `<h3 style="font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:600; margin-bottom:12px; color:var(--text);">${title}</h3>` +
                     `<p style="font-size:14px; color:var(--muted); margin-bottom:32px; line-height: 1.5;">${message}</p>` +
                     `<div style="display:flex; gap:12px; justify-content:center;">` +
-                    `<button id="btn-cancel-action" style="padding:14px 24px; background:#f4f4f5; border:1px solid rgba(0,0,0,0.05); color: var(--text); cursor:pointer; flex:1; border-radius:4px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; transition:0.2s;" onmouseover="this.style.background='#e4e4e7'" onmouseout="this.style.background='#f4f4f5'">Để sau</button>` +
-                    `<button id="btn-execute-action" style="padding:14px 24px; background:${btnColor}; color:white; border:none; cursor:pointer; flex:1; border-radius:4px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; transition:0.2s; box-shadow: 0 4px 12px ${btnColor}40;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">${confirmBtnText}</button>` +
+                    `<button id="btn-cancel-action" style="padding:14px 24px; background:#f4f4f5; border:1px solid rgba(0,0,0,0.05); color: var(--text); cursor:pointer; flex:1; border-radius:0px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; transition:0.2s;" onmouseover="this.style.background='#e4e4e7'" onmouseout="this.style.background='#f4f4f5'">Để sau</button>` +
+                    `<button id="btn-execute-action" style="padding:14px 24px; background:${btnColor}; color:white; border:none; cursor:pointer; flex:1; border-radius:0px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; transition:0.2s; box-shadow: 0 4px 12px ${btnColor}40;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">${confirmBtnText}</button>` +
                     `</div>`;
 
                 overlay.appendChild(modal);
@@ -1137,7 +1431,7 @@
                     const url = URL.createObjectURL(file);
                     container.innerHTML += `
                         <div style="position:relative; width:60px; height:60px;">
-                            <img src="${url}" style="width:100%; height:100%; object-fit:cover; border-radius:4px;">
+                            <img src="${url}" style="width:100%; height:100%; object-fit:cover; border-radius:0px;">
                             <button onclick="window.AccountApp.removeFile(${index})" style="position:absolute; top:-5px; right:-5px; background:#ef4444; color:white; border:none; border-radius:50%; width:16px; height:16px; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center;">x</button>
                         </div>
                     `;
@@ -1203,21 +1497,24 @@
                 }
             },
 
-            viewOrderDetail: async function(orderId) {
+            viewOrderDetail: async function(orderId, fromPanel = 'orders') {
                 try {
                     this.state.currentViewOrderId = orderId;
                     this.switchPanel('order-detail');
                     const res = await fetch('/api/hoa-don/' + orderId);
                     const data = await res.json();
 
-                    this.state.currentOrderData = data; // 🌟 LƯU DATA LẠI ĐỂ DÙNG CHO MODAL ĐỔI TRẢ
+                    this.state.currentOrderData = data;
 
                     const currentStatus = data.trangThaiMa || '';
                     const statusObj = this.getStatusConfig(currentStatus);
 
                     document.getElementById('detOrderMa').innerHTML = `
-                        Chi tiết Đơn hàng #${data.ma}
-                        <span class="account-order-status ${statusObj.cssClass}" style="margin-left: 15px; font-size: 14px; padding: 6px 16px; vertical-align: middle;">${statusObj.label}</span>
+                    <button class="btn-back-orders" onclick="window.AccountApp.switchPanel('${fromPanel}')" style="margin-bottom: 20px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;margin-right:6px;"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Quay lại
+                    </button>
+                    <br>Chi tiết Đơn hàng #${data.ma}
+                    <span class="account-order-status ${statusObj.cssClass}" style="margin-left: 15px; font-size: 14px; padding: 6px 16px; vertical-align: middle;">${statusObj.label}</span>
                     `;
 
                     const formatDateTime = (dateStr) => {
@@ -1288,7 +1585,7 @@
                                 let imgsHtml = '';
                                 if (existingReview.danhSachHinhAnhList && existingReview.danhSachHinhAnhList.length > 0) {
                                     existingReview.danhSachHinhAnhList.forEach(url => {
-                                        if (url.trim()) imgsHtml += `<img src="${url.trim()}" style="width:40px;height:40px;object-fit:cover;border-radius:2px;border:1px solid #eee;margin-right:6px;" onclick="event.stopPropagation(); window.open(this.src, '_blank')">`;
+                                        if (url.trim()) imgsHtml += `<img src="${url.trim()}" style="width:40px;height:40px;object-fit:cover;border-radius:0px;border:1px solid #eee;margin-right:6px;" onclick="event.stopPropagation(); window.open(this.src, '_blank')">`;
                                     });
                                 }
                                 let editBtnHtml = existingReview.daSua === true
@@ -1296,7 +1593,7 @@
                                     : `<button onclick="window.AccountApp.openReviewModal(${detailId}, '${pName}', '${pl}', true)" style="background:none; border:none; color:var(--accent); font-size:11px; font-weight:500; cursor:pointer; text-decoration:underline; padding:0;">Sửa đánh giá</button>`;
 
                                 reviewSectionHtml = `
-                                    <div style="margin-top:12px; background:rgba(0,0,0,0.02); padding:12px; border-radius:4px; border:1px solid rgba(0,0,0,0.04); width:100%;" onclick="event.stopPropagation()">
+                                    <div style="margin-top:12px; background:rgba(0,0,0,0.02); padding:12px; border-radius:0px; border:1px solid rgba(0,0,0,0.04); width:100%;" onclick="event.stopPropagation()">
                                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                                             <span style="color:#f59e0b; font-size:12px; letter-spacing:2px;">${starsHtml}</span>
                                             ${editBtnHtml}
@@ -1305,7 +1602,7 @@
                                         <div style="display:flex; flex-wrap:wrap;">${imgsHtml}</div>
                                     </div>`;
                             } else {
-                                reviewSectionHtml = `<div style="margin-top:10px;"><button onclick="event.stopPropagation(); window.AccountApp.openReviewModal(${detailId}, '${pName}', '${pl}', false)" style="background:none; color:var(--accent); border:1px solid var(--accent); padding:6px 16px; font-size:10px; font-weight: 500; text-transform:uppercase; letter-spacing:0.1em; border-radius:2px; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='var(--accent)'; this.style.color='#fff'" onmouseout="this.style.background='none'; this.style.color='var(--accent)'"><i class="fa-solid fa-pen-nib"></i> Viết đánh giá</button></div>`;
+                                reviewSectionHtml = `<div style="margin-top:10px;"><button onclick="event.stopPropagation(); window.AccountApp.openReviewModal(${detailId}, '${pName}', '${pl}', false)" style="background:none; color:var(--accent); border:1px solid var(--accent); padding:6px 16px; font-size:10px; font-weight: 500; text-transform:uppercase; letter-spacing:0.1em; border-radius:0px; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='var(--accent)'; this.style.color='#fff'" onmouseout="this.style.background='none'; this.style.color='var(--accent)'"><i class="fa-solid fa-pen-nib"></i> Viết đánh giá</button></div>`;
                             }
                         }
 
@@ -1414,7 +1711,7 @@
                     }
 
                     if (currentStatus === 'CHO_THANH_TOAN' && data.phuongThucThanhToan && data.phuongThucThanhToan.toUpperCase() !== 'COD') {
-                        actionButtonsHtml += `<button onclick="window.AccountApp.repayOrder(${data.id}, ${tongTien}, '${data.phuongThucThanhToan}', '${data.ma}')" class="account-form-save" style="border-radius:4px; padding:10px 24px;"><i class="bi bi-wallet2"></i> THANH TOÁN NGAY</button>`;
+                        actionButtonsHtml += `<button onclick="window.AccountApp.repayOrder(${data.id}, ${tongTien}, '${data.phuongThucThanhToan}', '${data.ma}')" class="account-form-save" style="border-radius:0px; padding:10px 24px;"><i class="bi bi-wallet2"></i> THANH TOÁN NGAY</button>`;
                     }
 
                     if (actionButtonsHtml !== '') {
@@ -1504,7 +1801,7 @@
                 let html = '';
                 this.state.orders.slice(0, 3).forEach(ord => {
                     const statusObj = this.getStatusConfig(ord.trangThaiMa);
-                    html += `<div class="account-recent-order" onclick="window.AccountApp.viewOrderDetail(${ord.id})">
+                    html += `<div class="account-recent-order" onclick="window.AccountApp.viewOrderDetail(${ord.id}, 'overview')">
                         <div><div class="account-order-id">#${ord.ma}</div><div class="account-order-meta">${ord.ngayTao}</div></div>
                         <span class="account-order-status ${statusObj.cssClass}">${statusObj.label}</span>
                         <div class="account-order-total">${this.formatCurrency(ord.tongTien)}</div>
@@ -1521,59 +1818,231 @@
                 document.getElementById('statWishlist').innerText = wishlist.length;
 
                 if (wishlist.length === 0) {
-                    container.innerHTML = '<div style="grid-column:1/-1; padding:40px; text-align:center; color:var(--muted); border:1px dashed rgba(0,0,0,0.1); border-radius:4px; font-size:13px;">Bạn chưa có sản phẩm yêu thích nào.</div>';
+                    container.innerHTML = '<div style="grid-column:1/-1; padding:60px 40px; text-align:center; color:var(--muted); border:1px dashed rgba(0,0,0,0.1); border-radius:0px; font-size:13px;">Bạn chưa có sản phẩm yêu thích nào.</div>';
                     container.style.display = 'block';
+                    document.getElementById('wishlistShowMoreWrap').style.display = 'none';
                     return;
                 }
 
-                container.style.display = 'grid';
-                let html = '';
-                wishlist.forEach(p => {
-                    let imgUrl = 'https://placehold.co/400x533';
+                // ── CONFIG ──
+                const PAGE_SIZE = 8; // Số thẻ hiển thị ban đầu (2 hàng × 4 cột)
+                this._wishlistExpanded = false;
+
+                const fmt = n => new Intl.NumberFormat('vi-VN').format(n || 0) + ' ₫';
+                const colorHexMap = {
+                    'đen':'#1a1a1a','trắng':'#ffffff','be':'#c4b49d','xanh dương':'#4682b4',
+                    'rêu':'#3D5A4C','nâu':'#a0856a','xám':'#888888','đỏ':'#e74c3c',
+                    'hồng':'#f472b6','vàng':'#f5c518','cam':'#f97316','tím':'#a855f7',
+                    'xanh lá':'#15803d','kem':'#fef3c7','ghi':'#c5cfc7','navy':'#1d4ed8'
+                };
+                const getHex = name => {
+                    if (!name) return '#ccc';
+                    const n = name.toLowerCase().trim();
+                    if (colorHexMap[n]) return colorHexMap[n];
+                    // Fuzzy match
+                    for (const [key, val] of Object.entries(colorHexMap)) {
+                        if (n.includes(key) || key.includes(n)) return val;
+                    }
+                    return '#ccc';
+                };
+
+                const buildCard = (p) => {
+                    // ── Ảnh ──
+                    let imgUrl = 'https://placehold.co/400x533/f9f8f6/ccc?text=SP';
+                    let imgHover = '';
                     if (p.hinhAnhs && p.hinhAnhs.length > 0) {
                         imgUrl = p.hinhAnhs[0].url.replace('/image/upload/', '/image/upload/c_fill,w_400,h_533,f_auto,q_auto/');
+                        if (p.hinhAnhs.length > 1)
+                            imgHover = p.hinhAnhs[1].url.replace('/image/upload/', '/image/upload/c_fill,w_400,h_533,f_auto,q_auto/');
                     }
 
+                    // ── Giá ──
                     const variants = p.chiTietSanPhams || p.chiTietSanPhamList || p.bienThes || p.skus || [];
-                    let minSale = p.giaBan || 0;
+                    let minSale = p.giaBan || 0, minOrig = 0;
                     if (variants.length > 0) {
                         minSale = Math.min(...variants.map(v => v.giaSauKhuyenMai || v.giaBan || 0));
+                        minOrig = Math.min(...variants.map(v => v.giaBan || 0));
+                    }
+                    const hasDiscount = minOrig > minSale && minSale > 0;
+                    const pct = hasDiscount ? Math.round((1 - minSale / minOrig) * 100) : 0;
+                    const priceHtml = hasDiscount
+                        ? `<span class="price-sale">${fmt(minSale)}</span>
+               <span class="price-orig">${fmt(minOrig)}</span>
+               <span style="background:#c08060;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;margin-left:4px;">-${pct}%</span>`
+                        : `<span class="price-normal">${fmt(minSale || minOrig)}</span>`;
+
+                    // ── Badge ──
+                    const isNew = p.moiNhat || p.isNew;
+                    let badgesHtml = '';
+                    if (isNew) badgesHtml += `<span class="prod-badge new">Mới</span>`;
+                    if (hasDiscount) badgesHtml += `<span class="prod-badge sale">Sale</span>`;
+
+                    // ── Swatches màu ──
+                    const colors = [...new Set(variants.map(v => v.mauSac?.tenMau || v.mauSac?.ten || v.mauSac || v.color).filter(Boolean))];
+                    let swatchesHtml = '';
+                    if (colors.length > 0) {
+                        const shown = colors.slice(0, 4);
+                        const more  = colors.length > 4 ? colors.length - 4 : 0;
+                        swatchesHtml = `<div class="prod-swatches">
+                ${shown.map(c => `<span class="swatch-dot" style="background:${getHex(c)};" title="${c}"></span>`).join('')}
+                ${more > 0 ? `<span class="swatch-more">+${more}</span>` : ''}
+            </div>`;
                     }
 
-                    html += `
-                        <div class="account-order-card" style="margin-bottom:0; padding:16px; cursor:pointer; position:relative; display:flex; flex-direction:column;" onclick="window.location.href='/customer#detail?id=${p.id}'; window.location.reload();">
-                            <img src="${imgUrl}" style="width:100%; aspect-ratio:3/4; object-fit:cover; border-radius:2px; margin-bottom:12px; background:#f4f4f5;">
-                            <div style="font-family:'Cormorant Garamond', serif; font-size:16px; margin-bottom:4px;">${p.ten}</div>
-                            <div style="font-size:14px; font-weight:500; color:var(--text); margin-top:auto;">${this.formatCurrency(minSale)}</div>
+                    // ── Hover image ──
+                    const hoverImg = imgHover
+                        ? `<img class="img-hover" src="${imgHover}" alt="${p.ten}" loading="lazy"
+                    style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease,transform .65s ease;z-index:1;">`
+                        : '';
 
-                            <button onclick="event.stopPropagation(); window.AccountApp.removeFromWishlist(${p.id})" style="position:absolute; top:24px; right:24px; background:#fff; border:none; width:32px; height:32px; border-radius:50%; box-shadow:0 4px 10px rgba(0,0,0,0.15); color:#ef4444; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:0.2s;"><i class="fa-solid fa-heart"></i></button>
-                        </div>
-                    `;
-                });
-                container.innerHTML = html;
+                    return `
+        <div class="product-card"
+             onclick="window.location.href='/customer#detail?id=${p.id}'; window.location.reload();"
+             style="background:var(--white);position:relative;overflow:hidden;cursor:pointer;
+                    box-shadow:0 2px 16px rgba(61,90,76,0.07);transition:box-shadow .35s,transform .3s;
+                    display:flex;flex-direction:column;animation:fadeIn 0.4s ease-out forwards;">
+
+            <!-- Image -->
+            <div style="width:100%;aspect-ratio:3/4;position:relative;overflow:hidden;background:#f9f8f6;">
+                <img src="${imgUrl}" alt="${p.ten}" loading="lazy"
+                     style="width:100%;height:100%;object-fit:cover;display:block;transition:transform .65s ease,opacity .25s;"
+                     onmouseover="this.style.transform='scale(1.04)'"
+                     onmouseout="this.style.transform='scale(1)'">
+                ${hoverImg}
+
+                <!-- Quick view overlay -->
+                <div style="position:absolute;inset:0;background:rgba(0,0,0,0);display:flex;align-items:flex-end;padding:12px;transition:background .35s;z-index:2;"
+                     onmouseover="this.style.background='rgba(0,0,0,0.04)'"
+                     onmouseout="this.style.background='rgba(0,0,0,0)'">
+                    <button onclick="event.stopPropagation(); window.location.href='/customer#detail?id=${p.id}'; window.location.reload();"
+                            style="width:100%;height:42px;padding:0 12px;background:var(--accent);color:white;border:none;
+                                   font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;
+                                   display:flex;align-items:center;justify-content:center;gap:7px;
+                                   transform:translateY(8px);opacity:0;transition:transform .28s ease,opacity .28s ease;
+                                   font-family:'DM Sans',sans-serif;"
+                            onmouseover="this.style.background='#2c4238'"
+                            onmouseout="this.style.background='var(--accent)'"
+                            class="wl-quick-btn">
+                        <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:white;fill:none;stroke-width:2;flex-shrink:0;">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        Xem sản phẩm
+                    </button>
+                </div>
+
+                <!-- Badges -->
+                ${badgesHtml ? `<div style="position:absolute;top:10px;left:10px;display:flex;flex-direction:column;gap:4px;z-index:3;pointer-events:none;">${badgesHtml}</div>` : ''}
+
+                <!-- Heart (bỏ yêu thích) -->
+                <button title="Bỏ yêu thích"
+                        onclick="event.stopPropagation(); window.AccountApp.removeFromWishlist(${p.id})"
+                        style="position:absolute;top:10px;right:10px;z-index:4;width:34px;height:34px;border-radius:50%;
+                               background:rgba(255,245,245,0.95);border:none;cursor:pointer;
+                               display:flex;align-items:center;justify-content:center;
+                               box-shadow:0 2px 10px rgba(0,0,0,0.12);transition:background .2s,transform .2s;"
+                        onmouseover="this.style.background='#ffe4e4'; this.style.transform='scale(1.1)'"
+                        onmouseout="this.style.background='rgba(255,245,245,0.95)'; this.style.transform='scale(1)'">
+                    <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:#e74c3c;fill:#e74c3c;pointer-events:none;">
+                        <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Info -->
+            <div style="padding:14px 16px 18px;flex-grow:1;display:flex;flex-direction:column;">
+                <div style="font-size:9px;letter-spacing:0.18em;color:var(--accent);text-transform:uppercase;font-weight:600;margin-bottom:4px;">BEEMATE</div>
+                <div style="font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:400;line-height:1.2;margin-bottom:10px;">${p.ten}</div>
+                ${swatchesHtml}
+                <div style="display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;margin-top:auto;">${priceHtml}</div>
+            </div>
+        </div>`;
+                };
+
+                // ── Render & hover effect cho quick btn ──
+                const renderCards = () => {
+                    const list = this._wishlistExpanded ? wishlist : wishlist.slice(0, PAGE_SIZE);
+                    container.style.display = 'grid';
+                    container.innerHTML = list.map(buildCard).join('');
+
+                    // Gắn hover cho nút quick view (vì dùng inline style không có :hover)
+                    container.querySelectorAll('.wl-quick-btn').forEach(btn => {
+                        const card = btn.closest('[style*="aspect-ratio"]').parentElement;
+                        card.addEventListener('mouseenter', () => {
+                            btn.style.transform = 'translateY(0)';
+                            btn.style.opacity   = '1';
+                        });
+                        card.addEventListener('mouseleave', () => {
+                            btn.style.transform = 'translateY(8px)';
+                            btn.style.opacity   = '0';
+                        });
+                    });
+                };
+
+                // ── Nút Xem thêm / Thu gọn ──
+                const wrapEl   = document.getElementById('wishlistShowMoreWrap');
+                const toggleEl = document.getElementById('btnWishlistToggle');
+                const iconEl   = document.getElementById('wishlistToggleIcon');
+                const textEl   = document.getElementById('wishlistToggleText');
+
+                if (wishlist.length > PAGE_SIZE) {
+                    wrapEl.style.display = 'block';
+                    iconEl.className = 'fa-solid fa-angles-down';
+                    textEl.innerText = `Xem thêm (${wishlist.length - PAGE_SIZE} sản phẩm)`;
+                } else {
+                    wrapEl.style.display = 'none';
+                }
+
+                this.toggleWishlistDisplay = () => {
+                    this._wishlistExpanded = !this._wishlistExpanded;
+                    renderCards();
+                    if (this._wishlistExpanded) {
+                        iconEl.className = 'fa-solid fa-angles-up';
+                        textEl.innerText = 'Thu gọn';
+                    } else {
+                        iconEl.className = 'fa-solid fa-angles-down';
+                        textEl.innerText = `Xem thêm (${wishlist.length - PAGE_SIZE} sản phẩm)`;
+                        // Cuộn lên đầu panel wishlist
+                        document.getElementById('panel-wishlist').scrollIntoView({ behavior: 'smooth' });
+                    }
+                };
+
+                renderCards();
             },
 
             removeFromWishlist: async function(id) {
                 if(!confirm("Bạn có muốn bỏ yêu thích sản phẩm này?")) return;
 
                 try {
-                    await fetch('/api/khach-hang/wishlist/toggle/' + id, { method: 'POST' });
+                    const numId = parseInt(id, 10); // Ép kiểu luôn từ đầu
+                    await fetch('/api/khach-hang/wishlist/toggle/' + numId, { method: 'POST' });
                     this.showAccountNotification("Thành công", "Đã xóa khỏi danh sách yêu thích");
 
-                    this.state.wishlist = this.state.wishlist.filter(p => p.id !== id);
+                    // Cập nhật giao diện bên trong Account
+                    this.state.wishlist = this.state.wishlist.filter(p => p.id !== numId);
                     this.renderWishlist();
 
-                    let localWl = JSON.parse(localStorage.getItem('bee_wishlist') || '[]');
-                    localWl = localWl.filter(p => p.id !== id);
+                    // Xóa trong LocalStorage (ép kiểu cẩn thận)
+                    let localWl = JSON.parse(localStorage.getItem('bee_wishlist') || '[]').map(i => parseInt(i, 10));
+                    localWl = localWl.filter(pId => pId !== numId);
                     localStorage.setItem('bee_wishlist', JSON.stringify(localWl));
+
+                    // Phóng event cho mấy module khác tự update tim
+                    window.dispatchEvent(new Event('wishlistUpdated'));
                 } catch(e) { console.log(e); }
             },
 
             renderOrders: function() {
                 if (this.state.isStaff) return;
                 const container = document.getElementById('ordersContainer');
+
                 if (!this.state.orders.length) {
-                    container.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--muted); border: 1px dashed #ccc;">Bạn chưa có đơn hàng nào.</div>';
+                    container.innerHTML = `
+            <div style="padding: 60px 20px; text-align: center; border: 1px dashed rgba(0,0,0,0.1); background: var(--white);">
+                <i class="fa-solid fa-box-open" style="font-size: 48px; color: var(--muted); margin-bottom: 16px; opacity: 0.3;"></i>
+                <div style="font-family:'Cormorant Garamond',serif; font-size: 20px; margin-bottom: 8px;">Bạn chưa có đơn hàng nào</div>
+                <div style="font-size: 13px; color: var(--muted); margin-bottom: 24px;">Hãy khám phá các sản phẩm của Beemate ngay hôm nay.</div>
+                <a href="/#shop" style="display:inline-block; padding:12px 28px; background:var(--accent); color:white; text-decoration:none; font-size:12px; text-transform:uppercase; letter-spacing:0.1em; border-radius:0px; transition:0.2s;" onmouseover="this.style.background='#2c4238'" onmouseout="this.style.background='var(--accent)'">Mua sắm ngay</a>
+            </div>`;
                     return;
                 }
 
@@ -1581,45 +2050,88 @@
                 this.state.orders.forEach(ord => {
                     const statusObj = this.getStatusConfig(ord.trangThaiMa);
 
-                    let actionButtons = '';
-
-                    if (ord.trangThaiMa === 'CHO_XAC_NHAN' || ord.trangThaiMa === 'CHO_THANH_TOAN') {
-                        actionButtons += `<button onclick="window.AccountApp.cancelOrder(${ord.id})" class="account-reorder-btn" style="color:#dc2626; border-color:rgba(220,38,38,0.2); background:rgba(220,38,38,0.05); margin-right:10px;"><i class="fa-solid fa-xmark"></i> Hủy đơn</button>`;
-                    }
-
-                    // 🌟 FIX LỖI: Chỉ hiện nút thanh toán nếu không phải COD
-                    if (ord.trangThaiMa === 'CHO_THANH_TOAN' && ord.phuongThucThanhToan && ord.phuongThucThanhToan.toUpperCase() !== 'COD') {
-                        actionButtons += `<button onclick="window.AccountApp.repayOrder(${ord.id}, ${ord.tongTien}, '${ord.phuongThucThanhToan}', '${ord.ma}')" class="account-reorder-btn" style="background:var(--accent); color:white; margin-right:10px; border-color:var(--accent);"><i class="bi bi-wallet2"></i> Thanh toán ngay</button>`;
-                    }
-
-                    if (ord.trangThaiMa === 'HOAN_THANH' || ord.trangThaiMa === 'DA_HUY' || ord.trangThaiMa === 'TU_CHOI_TRA_HANG' || ord.trangThaiMa === 'DA_HOAN_TIEN') {
-                        actionButtons += `<button onclick="window.AccountApp.reorder(${ord.id})" class="account-reorder-btn" style="margin-right:10px;"><i class="bi bi-cart-plus"></i> Mua lại</button>`;
-                    }
-
-                    actionButtons += `<button onclick="window.AccountApp.viewOrderDetail(${ord.id})" class="account-reorder-btn">Xem Chi Tiết</button>`;
-
+                    // 1. Tính toán số liệu
                     const tongTien = ord.tongTien || ord.giaTong || 0;
+                    const tamTinh = (ord.chiTiets || []).reduce((sum, item) => sum + ((item.giaBan || 0) * (item.soLuong || 0)), 0);
+                    const phiShip = ord.phiVanChuyen || 0;
+                    const giamGia = Math.max(0, (tamTinh + phiShip) - tongTien);
 
-                    html += `<div class="account-order-card" data-status="${ord.trangThaiMa}">
-                        <div class="account-order-card-header">
-                            <div><div class="account-order-id">#${ord.ma}</div><div class="account-order-meta">${ord.ngayTao}</div></div>
-                            <span class="account-order-status ${statusObj.cssClass}">${statusObj.label}</span>
-                        </div>
+                    // 2. Tạo nút Accordion (Không viền, chỉ icon)
+                    let accordionBtn = `
+            <button class="btn-accordion-toggle" onclick="event.stopPropagation(); window.AccountApp.toggleOrderQuickDetails(this, ${ord.id})" title="Xem nhanh dòng tiền">
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+        `;
 
-                        <div class="order-timeline">${this.generateTimelineHTML(ord.trangThaiMa)}</div>
+                    // 3. Xử lý các nút chức năng
+                    let actionButtons = '';
+                    if (ord.trangThaiMa === 'CHO_XAC_NHAN' || ord.trangThaiMa === 'CHO_THANH_TOAN') {
+                        actionButtons += `<button onclick="window.AccountApp.cancelOrder(${ord.id})" style="padding: 10px 20px; background: rgba(220,38,38,0.05); color: #dc2626; border: 1px solid rgba(220,38,38,0.2); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 600; transition: 0.2s; border-radius: 0px; margin-right: 10px;"><i class="fa-solid fa-xmark"></i> Hủy đơn</button>`;
+                    }
+                    if (ord.trangThaiMa === 'CHO_THANH_TOAN' && ord.phuongThucThanhToan && ord.phuongThucThanhToan.toUpperCase() !== 'COD') {
+                        actionButtons += `<button onclick="window.AccountApp.repayOrder(${ord.id}, ${tongTien}, '${ord.phuongThucThanhToan}', '${ord.ma}')" style="padding: 10px 20px; background: var(--accent); color: white; border: none; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 600; transition: 0.2s; border-radius: 0px; margin-right: 10px;"><i class="bi bi-wallet2"></i> Thanh toán ngay</button>`;
+                    }
+                    if (['HOAN_THANH', 'DA_HUY', 'TU_CHOI_TRA_HANG', 'DA_HOAN_TIEN'].includes(ord.trangThaiMa)) {
+                        actionButtons += `<button onclick="window.AccountApp.reorder(${ord.id})" style="padding: 10px 20px; background: transparent; color: var(--accent); border: 1px solid var(--accent); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: 0.2s; border-radius: 0px; margin-right: 10px;" onmouseover="this.style.background='var(--accent)'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='var(--accent)'"><i class="bi bi-cart-plus"></i> Mua lại</button>`;
+                    }
 
-                        <div class="account-order-card-footer" style="display:flex; justify-content: space-between; align-items: center; padding: 20px 28px; background: #fafafa;">
-                            <div style="font-size:14px; color:var(--text); font-weight: 500; text-transform:uppercase;">
-                                Thành tiền: <span style="font-size:18px; font-weight:700; color:var(--accent); margin-left: 8px;">${this.formatCurrency(tongTien)}</span>
-                            </div>
-                            <div style="display:flex; align-items:center;">
-                                ${actionButtons}
-                            </div>
-                        </div>
-                    </div>`;
+                    // Nút Xem chi tiết (Nút chính)
+                    actionButtons += `<button onclick="window.AccountApp.viewOrderDetail(${ord.id})" style="padding: 10px 20px; background: var(--accent); color: white; border: none; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: 0.2s; border-radius: 0px;" onmouseover="this.style.background='#2c4238'" onmouseout="this.style.background='var(--accent)'">Xem Chi Tiết</button>`;
+
+                    // Chèn nút Accordion vào ngay cạnh nút Xem Chi Tiết
+                    actionButtons = accordionBtn + actionButtons;
+
+                    // 4. Lấy thông tin sản phẩm đầu tiên
+                    let firstItemHtml = '';
+                    if (ord.chiTiets && ord.chiTiets.length > 0) {
+                        const item = ord.chiTiets[0];
+                        const hinhAnh = item.hinhAnh || 'https://placehold.co/60x80';
+                        const tenSP = item.tenSanPham || 'Sản phẩm Beemate';
+                        const phanLoai = item.thuocTinh || 'Mặc định';
+                        const sl = item.soLuong || 1;
+                        const moreItemsText = ord.chiTiets.length > 1 ? `<div style="font-size:11px; color:var(--muted); margin-top:4px; font-style:italic;">và ${ord.chiTiets.length - 1} sản phẩm khác...</div>` : '';
+
+                        firstItemHtml = `
+                <div style="display:flex; align-items:center; padding: 20px 28px; border-bottom: 1px solid rgba(0,0,0,0.06); background: #fff; cursor: pointer;" onclick="window.AccountApp.viewOrderDetail(${ord.id})">
+                    <img src="${hinhAnh}" style="width: 50px; height: 65px; object-fit: cover; border-radius: 0px; margin-right: 16px; border: 1px solid rgba(0,0,0,0.05);">
+                    <div style="flex: 1;">
+                        <div style="font-family:'Cormorant Garamond', serif; font-size: 16px; font-weight: 500; color: var(--text);">${tenSP}</div>
+                        <div style="font-size: 12px; color: var(--muted); margin-top: 4px;">Phân loại: ${phanLoai} | SL: ${sl}</div>
+                        ${moreItemsText}
+                    </div>
+                </div>
+            `;
+                    }
+
+                    // 5. Tổng hợp thành Card hoàn chỉnh
+                    html += `<div class="account-order-card" data-status="${ord.trangThaiMa}" style="border-radius: 0px;">
+            <div class="account-order-card-header">
+                <div><div class="account-order-id">#${ord.ma}</div><div class="account-order-meta">${ord.ngayTao}</div></div>
+                <span class="account-order-status ${statusObj.cssClass}" style="border-radius: 0px;">${statusObj.label}</span>
+            </div>
+
+            ${firstItemHtml}
+
+            <div class="order-quick-details" id="quick-details-${ord.id}">
+                <div class="quick-detail-row"><span>Tạm tính hàng:</span> <span>${this.formatCurrency(tamTinh)}</span></div>
+                <div class="quick-detail-row"><span>Phí giao hàng:</span> <span>${this.formatCurrency(phiShip)}</span></div>
+                <div class="quick-detail-row"><span>Giảm giá voucher:</span> <span style="color:#10b981;">-${this.formatCurrency(giamGia)}</span></div>
+                <div class="quick-detail-row total-row"><span>Tổng thanh toán:</span> <span style="color:var(--accent); font-size:16px;">${this.formatCurrency(tongTien)}</span></div>
+            </div>
+
+            <div class="account-order-card-footer" style="display:flex; justify-content: space-between; align-items: center; padding: 20px 28px; background: #fafafa; flex-wrap: wrap; gap: 16px;">
+                <div style="font-size:14px; color:var(--text); font-weight: 500; text-transform:uppercase;">
+                    Thành tiền: <span style="font-size:18px; font-weight:700; color:var(--accent); margin-left: 8px;">${this.formatCurrency(tongTien)}</span>
+                </div>
+                <div style="display:flex; align-items:center; gap: 4px;">
+                    ${actionButtons}
+                </div>
+            </div>
+        </div>`;
                 });
                 container.innerHTML = html;
             },
+
 
             // 🌟 Hàm gọi API xác nhận đã chuyển khoản
             finishQrPayment: async function(orderId) {
@@ -1654,6 +2166,21 @@
                     btn.disabled = false;
                 }
             },
+
+            toggleOrderQuickDetails: function(btn, orderId) {
+                const detailPanel = document.getElementById(`quick-details-${orderId}`);
+                const isHidden = window.getComputedStyle(detailPanel).display === 'none';
+
+                if (isHidden) {
+                    detailPanel.style.display = 'block';
+                    btn.classList.add('active');
+                } else {
+                    detailPanel.style.display = 'none';
+                    btn.classList.remove('active');
+                }
+            },
+
+
 
             // 🌟 NÂNG CẤP XỬ LÝ THANH TOÁN LẠI ĐÚNG PHƯƠNG THỨC
             repayOrder: async function(orderId, amount, paymentMethod, orderCode) {
@@ -1802,7 +2329,7 @@
                 if (this.state.isStaff) return;
                 const container = document.getElementById('addressBookContainer');
                 if(this.state.addresses.length === 0) {
-                    container.innerHTML = '<div style="text-align:center; padding:30px; border:1px dashed rgba(0,0,0,0.1); border-radius:4px; color:var(--muted); font-size:13px;">Bạn chưa lưu địa chỉ giao hàng nào.</div>';
+                    container.innerHTML = '<div style="text-align:center; padding:30px; border:1px dashed rgba(0,0,0,0.1); border-radius:0px; color:var(--muted); font-size:13px;">Bạn chưa lưu địa chỉ giao hàng nào.</div>';
                     return;
                 }
 
@@ -2294,9 +2821,9 @@
                             ${this.generateTimelineHTML(maTrangThai)}
                         </div>
 
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background: #f9f9fa; padding: 20px; border-radius: 6px; margin-bottom: 20px; border: 1px solid rgba(0,0,0,0.05); font-size: 13px; line-height: 1.6;">
-                            <div>
-                                <div style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; font-weight: 600;"><i class="bi bi-person-lines-fill"></i> Thông tin khách hàng</div>
+                        <div class="guest-track-info-grid">
+    <div>
+        <div style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; font-weight: 600;"><i class="bi bi-person-lines-fill"></i> Thông tin khách hàng</div>
                                 <div><strong>Họ tên:</strong> ${tenKhach}</div>
                                 <div><strong>SĐT:</strong> ${sdtKhach}</div>
                                 <div><strong>Email:</strong> ${emailKhach}</div>

@@ -733,7 +733,7 @@ public class KhachHangApi {
         KhachHang kh = khRepo.findByTaiKhoan_TenDangNhap(authentication.getName()).orElse(null);
         if (kh == null || kh.getTaiKhoan() == null) return ResponseEntity.ok(Map.of("isSaved", false));
 
-        boolean isSaved = wishlistRepo.findByTaiKhoanIdAndSanPhamId(kh.getTaiKhoan().getId(), sanPhamId).isPresent();
+        boolean isSaved = wishlistRepo.findFirstByTaiKhoanIdAndSanPhamId(kh.getTaiKhoan().getId(), sanPhamId).isPresent();
         return ResponseEntity.ok(Map.of("isSaved", isSaved));
     }
 
@@ -749,7 +749,7 @@ public class KhachHangApi {
         }
 
         Integer userId = kh.getTaiKhoan().getId();
-        var exist = wishlistRepo.findByTaiKhoanIdAndSanPhamId(userId, sanPhamId);
+        var exist = wishlistRepo.findFirstByTaiKhoanIdAndSanPhamId(userId, sanPhamId);
 
         if (exist.isPresent()) {
             wishlistRepo.delete(exist.get());
