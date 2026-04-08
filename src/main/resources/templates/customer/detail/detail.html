@@ -656,6 +656,15 @@
                     const params = new URLSearchParams(hash.split('?')[1]);
                     if(params.get('id')) id = params.get('id');
                 }
+
+                if (window.currentWishlistHandler) {
+                    window.removeEventListener('wishlistUpdated', window.currentWishlistHandler);
+                }
+                window.currentWishlistHandler = () => {
+                    this.checkWishlist();
+                };
+                window.addEventListener('wishlistUpdated', window.currentWishlistHandler);
+
                 this.state.productId = id;
                 try {
                     const userRes = await fetch('/api/khach-hang/my-profile');
@@ -692,20 +701,35 @@
 
             checkWishlist: function() {
                 try {
-                    // Đọc từ LocalStorage giống hệt bên Home cho mượt
-                    let wishlist = JSON.parse(localStorage.getItem('bee_wishlist') || '[]');
-                    const productId = parseInt(this.state.productId);
+                    // Ép toàn bộ về kiểu số để so sánh không bị ngáo
+                    let wishlist = JSON.parse(localStorage.getItem('bee_wishlist') || '[]').map(id => parseInt(id, 10));
+                    const productId = parseInt(this.state.productId, 10);
+
+                    // Check nút to
                     const btn = document.getElementById('btnWishlist');
                     const text = document.getElementById('wishlistText');
 
-                    if (wishlist.includes(productId)) {
-                        btn.classList.add('active');
-                        text.innerText = 'Đã yêu thích';
-                    } else {
-                        btn.classList.remove('active');
-                        text.innerText = 'Lưu vào yêu thích';
+                    if (btn && text) {
+                        if (wishlist.includes(productId)) {
+                            btn.classList.add('active');
+                            text.innerText = 'Đã yêu thích';
+                        } else {
+                            btn.classList.remove('active');
+                            text.innerText = 'Lưu vào yêu thích';
+                        }
                     }
-                } catch(e) {}
+
+                    // Check list "Sản phẩm gợi ý"
+                    document.querySelectorAll('#recentViewedList .heart-btn').forEach(heartBtn => {
+                        const idMatch = heartBtn.id.match(/-(\d+)$/);
+                        if (idMatch && idMatch[1]) {
+                            const pid = parseInt(idMatch[1], 10);
+                            heartBtn.classList.toggle('liked', wishlist.includes(pid));
+                        }
+                    });
+                } catch(e) {
+                    console.error("Lỗi ở checkWishlist Detail:", e);
+                }
             },
 
             toggleWishlist: async function() {
@@ -738,7 +762,8 @@
 
                         // Cập nhật lại LocalStorage và UI ngay lập tức
                         localStorage.setItem('bee_wishlist', JSON.stringify(wishlist));
-                        this.checkWishlist(); // Hàm này sẽ check mảng vừa lưu và đổi màu UI
+                        this.checkWishlist();
+                        window.dispatchEvent(new Event('wishlistUpdated'));
 
                         if(window.showToast) window.showToast(data.message, data.status === 'added' ? 'success' : 'warning');
                     }

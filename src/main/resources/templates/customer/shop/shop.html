@@ -192,7 +192,7 @@
             #ffffff 100%);
             z-index: 5; display: flex; flex-direction: column;
             justify-content: flex-end; padding: 15px;
-            transform: translateY(100%); transition: transform .38s cubic-bezier(.4,0,.2,1); cursor: default;
+            transform: translateY(100%); transition: transform .38s cubic-bezier(.4,0,.2,1); cursor: default; pointer-events: none;
         }
 
         /* Nút đóng đẩy xuống dưới vùng trong suốt */
@@ -201,7 +201,7 @@
             background: #fff; border-radius: 50%; width: 26px; height: 26px;
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 2px 8px rgba(0,0,0,0.15); border: none; color: var(--muted);
-        }        .product-card.show-selection .qs-overlay { transform: translateY(0); }
+        }        .product-card.show-selection .qs-overlay { transform: translateY(0); pointer-events: auto;}
         .qs-close { position: absolute; top: 10px; right: 12px; background: none; border: none; cursor: pointer; color: var(--muted); font-size: 22px; line-height: 1; padding: 4px; }
         .qs-name { font-family: var(--font-display) !important; font-size: 17px; text-align: center; margin-bottom: 14px; }
         .qs-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); margin-bottom: 7px; text-align: center; font-weight: 600; }
@@ -656,6 +656,27 @@
                         });
                     }
                 }).catch(()=>{});
+
+                window.addEventListener('wishlistUpdated', () => {
+                    const localData = JSON.parse(localStorage.getItem('bee_wishlist') || '[]').map(id => parseInt(id, 10));
+                    state.likedIds = new Set(localData);
+
+                    // Quét lại toàn bộ các nút tim để đổi trạng thái đỏ/trắng
+                    document.querySelectorAll('.heart-btn, .qs-wishlist').forEach(btn => {
+                        const idMatch = btn.id.match(/\d+$/); // Lấy cái ID ở cuối (ví dụ shop-heart-12 => 12)
+                        if (idMatch) {
+                            const pid = parseInt(idMatch[0]);
+                            const isLiked = this.state.likedIds.has(pid);
+                            btn.classList.toggle('liked', isLiked);
+
+                            // Cập nhật text cho nút to trong Quick Selection
+                            if (btn.classList.contains('qs-wishlist') && btn.childNodes.length > 0) {
+                                btn.childNodes[btn.childNodes.length-1].textContent = isLiked ? 'Đã yêu thích' : 'Thêm vào yêu thích';
+                            }
+                        }
+                    });
+                });
+
 
                 const select = document.getElementById('sortSelect');
                 if (select) {
@@ -1402,6 +1423,7 @@
                         // Cập nhật State và LocalStorage
                         isLiked ? this.state.likedIds.delete(productId) : this.state.likedIds.add(productId);
                         localStorage.setItem('bee_wishlist', JSON.stringify([...this.state.likedIds]));
+                        window.dispatchEvent(new Event('wishlistUpdated'));
 
                         // 1. Đổi UI cho nút tim ở góc ảnh
                         const btn = document.getElementById(`shop-heart-${productId}`);

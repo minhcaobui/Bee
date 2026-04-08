@@ -8,5 +8,4 @@ import java.util.Optional;
 
 @Repository
 public interface SanPhamYeuThichRepository extends JpaRepository<SanPhamYeuThich, Long> {
-    Optional<SanPhamYeuThich> findByTaiKhoanIdAndSanPhamId(Integer taiKhoanId, Integer sanPhamId);
-}
+    Optional<SanPhamYeuThich> findFirstByTaiKhoanIdAndSanPhamId(Integer taiKhoanId, Integer sanPhamId);}
