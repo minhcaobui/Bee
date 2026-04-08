@@ -40,7 +40,8 @@ public class SecurityConfig {
                                 "/api/hoa-don/check-employee",
                                 "/api/thong-bao/**",
                                 "/api/vouchers/active",
-                                "/api/khuyen-mai/**"
+                                "/api/khuyen-mai/**",
+                                "/api/chatbot/**"
                         ).permitAll()
 
                         // Ai cũng được XEM đánh giá
@@ -54,7 +55,11 @@ public class SecurityConfig {
                                 "/api/khach-hang/my-profile",
                                 "/api/khach-hang/change-password",
                                 "/api/hoa-don/my-orders",
-                                "/api/vouchers/**"
+                                "/api/vouchers/**",
+                                "/api/khach-hang/addresses/**",
+                                "/api/khach-hang/my-reviews/**",
+                                "/api/hoa-don/my-used-vouchers/**",
+                                "/api/hoa-don/**"
                         ).hasAnyAuthority("ROLE_CUSTOMER", "ROLE_STAFF", "ROLE_ADMIN")
 
                         // 4. API DÀNH CHO ADMIN & NHÂN VIÊN
