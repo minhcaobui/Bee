@@ -502,56 +502,87 @@
         },
 
         Address: {
+            // 🌟 KHAI BÁO TOKEN GHN CỦA BẠN Ở ĐÂY
+            ghnToken: '5c6b4e08-f30a-11f0-9c2d-8ebaf800da9f',
+
             async loadProvinces(selectId) {
                 try {
-                    const res = await fetch('https://esgoo.net/api-tinhthanh/1/0.htm');
-                    const data = await res.json();
-                    if(data.error === 0) {
-                        document.getElementById(selectId).innerHTML = '<option value="">-- Chọn Tỉnh / TP --</option>' + data.data.map(p => `<option value="${p.id}" data-name="${p.full_name}">${p.full_name}</option>`).join('');
+                    const res = await fetch('https://online-gateway.ghn.vn/shiip/public-api/master-data/province', {
+                        headers: { 'Token': this.ghnToken }
+                    });
+                    const result = await res.json();
+                    if (result.code === 200) {
+                        document.getElementById(selectId).innerHTML = '<option value="">-- Chọn Tỉnh / TP --</option>' +
+                            result.data.map(p => `<option value="${p.ProvinceID}" data-name="${p.ProvinceName}">${p.ProvinceName}</option>`).join('');
                     }
-                } catch(e) {}
+                } catch(e) { console.error("Lỗi tải Tỉnh/Thành phố GHN:", e); }
             },
+
             async loadDistricts(provId, distSelectId, wardSelectId) {
                 const distSelect = document.getElementById(distSelectId);
                 const wardSelect = document.getElementById(wardSelectId);
-                wardSelect.innerHTML = '<option value="">-- Chọn Phường / Xã --</option>'; wardSelect.disabled = true;
-                if(!provId) { distSelect.innerHTML = '<option value="">-- Chọn Quận / Huyện --</option>'; distSelect.disabled = true; return; }
+                wardSelect.innerHTML = '<option value="">-- Chọn Phường / Xã --</option>';
+                wardSelect.disabled = true;
+
+                if(!provId) {
+                    distSelect.innerHTML = '<option value="">-- Chọn Quận / Huyện --</option>';
+                    distSelect.disabled = true;
+                    return;
+                }
+
                 try {
-                    const res = await fetch(`https://esgoo.net/api-tinhthanh/2/${provId}.htm`);
-                    const data = await res.json();
-                    if(data.error === 0) {
-                        distSelect.innerHTML = '<option value="">-- Chọn Quận / Huyện --</option>' + data.data.map(d => `<option value="${d.id}" data-name="${d.full_name}">${d.full_name}</option>`).join('');
+                    const res = await fetch(`https://online-gateway.ghn.vn/shiip/public-api/master-data/district?province_id=${provId}`, {
+                        headers: { 'Token': this.ghnToken }
+                    });
+                    const result = await res.json();
+                    if (result.code === 200) {
+                        distSelect.innerHTML = '<option value="">-- Chọn Quận / Huyện --</option>' +
+                            result.data.map(d => `<option value="${d.DistrictID}" data-name="${d.DistrictName}">${d.DistrictName}</option>`).join('');
                         distSelect.disabled = false;
                     }
-                } catch(e) {}
+                } catch(e) { console.error("Lỗi tải Quận/Huyện GHN:", e); }
             },
+
             async loadWards(distId, wardSelectId) {
                 const wardSelect = document.getElementById(wardSelectId);
-                if(!distId) { wardSelect.innerHTML = '<option value="">-- Chọn Phường / Xã --</option>'; wardSelect.disabled = true; return; }
+                if(!distId) {
+                    wardSelect.innerHTML = '<option value="">-- Chọn Phường / Xã --</option>';
+                    wardSelect.disabled = true;
+                    return;
+                }
+
                 try {
-                    const res = await fetch(`https://esgoo.net/api-tinhthanh/3/${distId}.htm`);
-                    const data = await res.json();
-                    if(data.error === 0) {
-                        wardSelect.innerHTML = '<option value="">-- Chọn Phường / Xã --</option>' + data.data.map(w => `<option value="${w.id}" data-name="${w.full_name}">${w.full_name}</option>`).join('');
+                    const res = await fetch(`https://online-gateway.ghn.vn/shiip/public-api/master-data/ward?district_id=${distId}`, {
+                        headers: { 'Token': this.ghnToken }
+                    });
+                    const result = await res.json();
+                    if (result.code === 200) {
+                        // 💡 GHN dùng WardCode (thường là Chuỗi/String) thay vì ID số nguyên
+                        wardSelect.innerHTML = '<option value="">-- Chọn Phường / Xã --</option>' +
+                            result.data.map(w => `<option value="${w.WardCode}" data-name="${w.WardName}">${w.WardName}</option>`).join('');
                         wardSelect.disabled = false;
                     }
-                } catch(e) {}
+                } catch(e) { console.error("Lỗi tải Phường/Xã GHN:", e); }
             },
+
             getText(selectId) {
                 const sel = document.getElementById(selectId);
                 if(sel.selectedIndex <= 0) return '';
                 return sel.options[sel.selectedIndex].getAttribute('data-name');
             },
-            // 🌟 ĐÃ BỔ SUNG HÀM LẤY MÃ (ID) ĐỂ ĐẨY LÊN DB
+
             getValue(selectId) {
                 const sel = document.getElementById(selectId);
                 if(sel.selectedIndex <= 0) return null;
                 return sel.value;
             },
+
             reset(provId, distId, wardId) {
                 document.getElementById(provId).selectedIndex = 0;
-                document.getElementById(distId).innerHTML = '<option value="">-- Chọn Quận / Huyện --</option>'; document.getElementById(distId).disabled = true;
-                document.getElementById(wardId).innerHTML = '<option value="">-- Chọn Phường / Xã --</option>'; document.getElementById(wardId).disabled = true;
+                document.getElementById(distId).innerHTML = '<option value="">-- Chọn Quận / Huyện --</option>';
+                document.getElementById(distId).disabled = true;
+                document.getElementById(wardId).innerHTML = '<option value="">-- Chọn Phường / Xã --</option>';
+                document.getElementById(wardId).disabled = true;
             }
         },
 

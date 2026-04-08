@@ -192,15 +192,48 @@ public class ReturnApi {
         res.put("trangThaiTen", hd.getTrangThaiHoaDon().getTen());
 
         List<HoaDonChiTiet> ctList = hdctRepo.findByHoaDonId(hd.getId());
+
+        // ==============================================================================
+        // 🌟 BƯỚC 1: TÍNH TỔNG TIỀN HÀNG VÀ TỔNG VOUCHER ĐỂ PHÂN BỔ
+        // ==============================================================================
+        BigDecimal tongTienHangThucTe = BigDecimal.ZERO;
+        for (HoaDonChiTiet ct : ctList) {
+            tongTienHangThucTe = tongTienHangThucTe.add(ct.getGiaTien().multiply(BigDecimal.valueOf(ct.getSoLuong())));
+        }
+
+        BigDecimal phiShip = hd.getPhiVanChuyen() != null ? hd.getPhiVanChuyen() : BigDecimal.ZERO;
+        BigDecimal tongPhaiTra = hd.getGiaTong() != null ? hd.getGiaTong() : BigDecimal.ZERO;
+        BigDecimal voucherCalculated = tongTienHangThucTe.add(phiShip).subtract(tongPhaiTra);
+        if (voucherCalculated.compareTo(BigDecimal.ZERO) < 0) voucherCalculated = BigDecimal.ZERO;
+
         List<Map<String, Object>> items = new ArrayList<>();
         for (HoaDonChiTiet ct : ctList) {
             Map<String, Object> item = new HashMap<>();
-            item.put("idHdct", ct.getId()); // Cần ID này để map vào bảng ChiTietDoiTra
+
+            // ==============================================================================
+            // 🌟 BƯỚC 2: TÍNH TOÁN "GIÁ THỰC TẾ" (SAU KHI TRỪ VOUCHER) ĐỂ TRẢ VỀ FRONTEND
+            // ==============================================================================
+            BigDecimal thanhTienItem = ct.getGiaTien().multiply(BigDecimal.valueOf(ct.getSoLuong()));
+            BigDecimal giamGiaItem = BigDecimal.ZERO;
+            if (tongTienHangThucTe.compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal tyLe = thanhTienItem.divide(tongTienHangThucTe, 4, java.math.RoundingMode.HALF_UP);
+                giamGiaItem = voucherCalculated.multiply(tyLe);
+            }
+            BigDecimal giaThucTe1Sp = thanhTienItem.subtract(giamGiaItem).divide(BigDecimal.valueOf(ct.getSoLuong()), 0, java.math.RoundingMode.HALF_UP);
+
+            item.put("idHdct", ct.getId());
             item.put("tenSP", ct.getSanPhamChiTiet().getSanPham().getTen());
+            item.put("idSanPham", ct.getSanPhamChiTiet().getSanPham().getId()); // Kèm ID SP cha để Frontend so sánh đổi Size
             item.put("thuocTinh", ct.getSanPhamChiTiet().getMauSac().getTen() + " - " + ct.getSanPhamChiTiet().getKichThuoc().getTen());
             item.put("hinhAnh", ct.getSanPhamChiTiet().getHinhAnh());
-            item.put("soLuong", ct.getSoLuong()); // Số lượng tối đa có thể trả
+            item.put("soLuong", ct.getSoLuong());
+
+            // Giữ nguyên giá gốc hiển thị bị gạch chéo
             item.put("giaBan", ct.getGiaTien());
+
+            // 🔥 TRƯỜNG DỮ LIỆU MỚI: Giá khách thực trả để dùng cho đổi hàng ngang giá
+            item.put("giaThucTe", giaThucTe1Sp);
+
             items.add(item);
         }
         res.put("chiTiets", items);
