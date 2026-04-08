@@ -1581,7 +1581,10 @@
                     return;
                 }
 
-                const sku = this.getSelectedSku();
+                const sku = this.state.variants.find(v =>
+                    v.mauSac.id === this.state.selectedColorId &&
+                    v.kichThuoc.id === this.state.selectedSizeId
+                );
                 if (!sku || sku.soLuong === 0) {
                     window.showToast("Sản phẩm tạm hết hàng!", "warning");
                     return;

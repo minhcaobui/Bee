@@ -21,4 +21,6 @@ public interface HoaDonChiTietRepository extends JpaRepository<HoaDonChiTiet, In
     List<HoaDonChiTiet> findByHoaDonId(@Param("idHoaDon") Integer idHoaDon);
 
     List<HoaDonChiTiet> findByHoaDon(HoaDon hoaDon);
+
+    List<HoaDonChiTiet> findByHoaDon_Id(Integer id);
 }

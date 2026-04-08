@@ -728,11 +728,13 @@ public class OrderApi {
         orderInfo.put("ngayTao", hd.getNgayTao() != null ? sdf.format(hd.getNgayTao()) : sdf.format(new Date()));
         orderInfo.put("thuNgan", hd.getNhanVien() != null ? hd.getNhanVien().getHoTen() : "Hệ thống");
         if (hd.getKhachHang() != null) {
-            orderInfo.put("tenKhachHang", hd.getKhachHang().getHoTen());
-            orderInfo.put("sdtKhachHang", hd.getKhachHang().getSoDienThoai());
+            // Ưu tiên lấy Tên Người Nhận (được nhập ở form checkout), nếu trống mới lấy Tên Khách Hàng
+            orderInfo.put("tenKhachHang", hd.getTenNguoiNhan() != null ? hd.getTenNguoiNhan() : hd.getKhachHang().getHoTen());
+            orderInfo.put("sdtKhachHang", hd.getSdtNhan() != null ? hd.getSdtNhan() : hd.getKhachHang().getSoDienThoai());
             orderInfo.put("inThongTinTaiKhoan", true);
         } else {
             orderInfo.put("tenKhachHang", hd.getTenNguoiNhan() != null ? hd.getTenNguoiNhan() : "Khách vãng lai");
+            orderInfo.put("sdtKhachHang", hd.getSdtNhan() != null ? hd.getSdtNhan() : "");
             orderInfo.put("inThongTinTaiKhoan", false);
         }
         List<Map<String, Object>> items = new ArrayList<>();

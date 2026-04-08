@@ -66,7 +66,6 @@ window.CartHelper = {
         if (ct && ct.includes("application/json")) {
             return await res.json(); // An toàn thì dịch
         }
-        // Nếu là HTML thì bắt lại ngay, không cho crash
         const text = await res.text();
         console.error("🚨 Server không trả về JSON. Nội dung thực tế là:", text);
         return null;
@@ -200,16 +199,16 @@ async function loadModule(moduleName) {
     window.showLoading();
 
     const moduleMap = {
-        'home':     { url: '/customer/home',     title: 'Trang chủ' },
-        'shop':     { url: '/customer/shop',     title: 'Sản phẩm' },
-        'detail':   { url: '/customer/detail',   title: 'Chi tiết sản phẩm' },
-        'cart':     { url: '/customer/cart',     title: 'Giỏ hàng' },
-        'checkout': { url: '/customer/checkout', title: 'Thanh toán' },
-        'order':   { url: '/customer/order',   title: 'Đơn hàng của tôi' },
-        'account':  { url: '/customer/account',  title: 'Tài khoản' },
-        'about':  { url: '/customer/about',  title: 'About Beemate' },
-        'collection':  { url: '/customer/collection',  title: 'Bộ sưu tập' },
-        'sale':  { url: '/customer/sale',  title: 'Sale' },
+        'home':       { url: '/customer/home',       title: 'Trang chủ' },
+        'shop':       { url: '/customer/shop',       title: 'Sản phẩm' },
+        'detail':     { url: '/customer/detail',     title: 'Chi tiết sản phẩm' },
+        'cart':       { url: '/customer/cart',       title: 'Giỏ hàng' },
+        'checkout':   { url: '/customer/checkout',   title: 'Thanh toán' },
+        'order':      { url: '/customer/order',      title: 'Đơn hàng của tôi' },
+        'account':    { url: '/customer/account',    title: 'Tài khoản' },
+        'about':      { url: '/customer/about',      title: 'About Beemate' },
+        'collection': { url: '/customer/collection', title: 'Bộ sưu tập' },
+        'sale':       { url: '/customer/sale',       title: 'Sale' },
     };
 
     const module = moduleMap[moduleName];
@@ -289,29 +288,38 @@ function executeScripts(container, moduleName) {
     });
 
     setTimeout(() => {
-        if      (moduleName === 'home'     && window.HomeApp)      window.HomeApp.init();
-        else if (moduleName === 'shop'     && window.ShopApp)      window.ShopApp.init();
-        else if (moduleName === 'detail'   && window.DetailApp)    window.DetailApp.init();
-        else if (moduleName === 'cart'     && window.CartApp)      window.CartApp.init();
-        else if (moduleName === 'checkout' && window.CheckoutApp)  window.CheckoutApp.init();
-        else if (moduleName === 'order'   && window.MyOrdersApp)  window.MyOrdersApp.init();
-        else if (moduleName === 'account'  && window.AccountApp)   window.AccountApp.init();
-        else if (moduleName === 'collection'  && window.CollectionApp)   window.CollectionApp.init();
-        else if (moduleName === 'about'  && window.AboutApp)   window.AboutApp.init();
-        else if (moduleName === 'sale'  && window.SaleApp)   window.SaleApp.init();
+        if      (moduleName === 'home'       && window.HomeApp)       window.HomeApp.init();
+        else if (moduleName === 'shop'       && window.ShopApp)       window.ShopApp.init();
+        else if (moduleName === 'detail'     && window.DetailApp)     window.DetailApp.init();
+        else if (moduleName === 'cart'       && window.CartApp)       window.CartApp.init();
+        else if (moduleName === 'checkout'   && window.CheckoutApp)   window.CheckoutApp.init();
+        else if (moduleName === 'order'      && window.MyOrdersApp)   window.MyOrdersApp.init();
+        else if (moduleName === 'account'    && window.AccountApp)    window.AccountApp.init();
+        else if (moduleName === 'collection' && window.CollectionApp) window.CollectionApp.init();
+        else if (moduleName === 'about'      && window.AboutApp)      window.AboutApp.init();
+        else if (moduleName === 'sale'       && window.SaleApp)       window.SaleApp.init();
     }, 100);
 }
 
 // ==========================================
-// 6. CẬP NHẬT BADGE GIỎ HÀNG
+// 6. CẬP NHẬT BADGE GIỎ HÀNG (VIẾT CHUẨN)
 // ==========================================
 window.updateCartBadge = async function() {
     try {
         const cart = await window.CartHelper.getCart();
-        const count = cart.reduce((sum, item) => sum + (item.soLuongTrongGio || item.qty || 0), 0);
+        const count = cart.reduce((sum, item) => sum + parseInt(item.soLuongTrongGio || item.qty || 0), 0);
 
-        const badge = document.getElementById('cartBadge');
+        const badge = document.getElementById('cart-badge-count');
+        const iconWrap = document.querySelector('.cart-icon');
+
         if (badge) {
+            const oldCount = parseInt(badge.textContent || 0);
+            if (count > oldCount && iconWrap) {
+                iconWrap.classList.remove('bounce');
+                void iconWrap.offsetWidth; // Mẹo nhỏ để kích hoạt lại animation
+                iconWrap.classList.add('bounce');
+            }
+
             badge.textContent = count;
             badge.style.display = count > 0 ? 'flex' : 'none';
         }

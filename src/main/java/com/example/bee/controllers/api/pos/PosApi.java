@@ -2,6 +2,7 @@ package com.example.bee.controllers.api.pos;
 
 import com.example.bee.entities.account.TaiKhoan;
 import com.example.bee.entities.account.VaiTro;
+import com.example.bee.entities.cart.GioHang;
 import com.example.bee.entities.order.*;
 import com.example.bee.entities.product.SanPhamChiTiet;
 import com.example.bee.entities.customer.KhachHang;
@@ -10,6 +11,7 @@ import com.example.bee.entities.promotion.MaGiamGia;
 import com.example.bee.entities.user.NhanVien;
 import com.example.bee.repositories.account.TaiKhoanRepository;
 import com.example.bee.repositories.account.VaiTroRepository;
+import com.example.bee.repositories.cart.GioHangRepository;
 import com.example.bee.repositories.catalog.KichThuocRepository;
 import com.example.bee.repositories.catalog.MauSacRepository;
 import com.example.bee.repositories.products.SanPhamChiTietRepository;
@@ -64,6 +66,7 @@ public class PosApi {
     private final TaiKhoanRepository taiKhoanRepo;
     private final VaiTroRepository vaiTroRepo;
     private final PasswordEncoder passwordEncoder;
+    private final GioHangRepository gioHangRepository;
 
     @Value("${momo.partnerCode}")
     private String partnerCode;
@@ -583,6 +586,10 @@ public class PosApi {
             tk.setVaiTro(roleCustomer);
             tk.setTrangThai(true);
             TaiKhoan savedTk = taiKhoanRepo.save(tk);
+
+            GioHang gioHang = new GioHang();
+            gioHang.setTaiKhoan(savedTk);
+            gioHangRepository.save(gioHang);
 
             long count = khachHangRepo.count();
             String ma;

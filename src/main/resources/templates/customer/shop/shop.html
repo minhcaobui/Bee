@@ -1289,7 +1289,10 @@
 
             async confirmAdd(productId, event, isBuyNow, inputId = null) {
                 if (event) event.stopPropagation();
-                const sel = tempSel[productId];
+
+                // 1. SỬA LỖI TÊN BIẾN (Dùng this.tempSelection thay vì tempSel)
+                const sel = this.tempSelection[productId];
+
                 if (!sel?.colorId && !sel?.sizeId) { window.showToast('Vui lòng chọn màu sắc và kích cỡ', 'warning'); return; }
                 if (!sel.colorId) { window.showToast('Bạn chưa chọn màu sắc', 'warning'); return; }
                 if (!sel.sizeId) { window.showToast('Bạn chưa chọn kích cỡ', 'warning'); return; }
@@ -1298,21 +1301,12 @@
                 const inputQty = parseInt(document.getElementById(inputId)?.value) || 1;
                 const sku = sel.sku;
 
-                // 🌟 TÌM KIẾM SẢN PHẨM AN TOÀN TUYỆT ĐỐI (Chống lỗi undefined)
-                let product = null;
-                if (this.state.allProducts && this.state.allProducts.length > 0) {
-                    product = this.state.allProducts.find(p => p.id === productId);
-                }
-                if (!product && this.state.allSaleProducts && this.state.allSaleProducts.length > 0) {
-                    product = this.state.allSaleProducts.find(p => p.id === productId);
-                }
-                if (!product && this.state.products && this.state.products.length > 0) {
-                    product = this.state.products.find(p => p.id === productId);
-                }
+                // 2. LẤY SẢN PHẨM TRỰC TIẾP TỪ STATE CỦA SHOP
+                const product = this.state.products.find(p => p.id === productId);
 
-                // Bọc lót nếu vẫn không tìm thấy
+                // Bọc lót nếu không tìm thấy sản phẩm
                 if (!product) {
-                    window.showToast('Hệ thống đang xử lý dữ liệu, vui lòng thử lại sau 1 giây!', 'error');
+                    window.showToast('Hệ thống đang xử lý dữ liệu, vui lòng thử lại sau!', 'error');
                     return;
                 }
 
