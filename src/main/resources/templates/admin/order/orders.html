@@ -1146,12 +1146,15 @@
                 return;
             }
 
-            const btnHuy = document.createElement('button');
-            btnHuy.className = 'btn btn-secondary';
-            btnHuy.style.cssText = 'flex:1; color:#dc3545; border-color:#dc3545; height:38px !important; border-radius:4px;';
-            btnHuy.innerHTML = '<i class="bi bi-x-lg"></i> HỦY ĐƠN';
-            btnHuy.onclick = () => this.huyDon(hd.id);
-            footer.appendChild(btnHuy);
+            // 🌟 ĐÃ SỬA BUG 1: Chỉ hiện nút HỦY ĐƠN khi ở trạng thái CHO_XAC_NHAN hoặc CHO_THANH_TOAN
+            if (currentMa === 'CHO_XAC_NHAN' || currentMa === 'CHO_THANH_TOAN') {
+                const btnHuy = document.createElement('button');
+                btnHuy.className = 'btn btn-secondary';
+                btnHuy.style.cssText = 'flex:1; color:#dc3545; border-color:#dc3545; height:38px !important; border-radius:4px;';
+                btnHuy.innerHTML = '<i class="bi bi-x-lg"></i> HỦY ĐƠN';
+                btnHuy.onclick = () => this.huyDon(hd.id);
+                footer.appendChild(btnHuy);
+            }
 
             if (currentMa === 'CHO_XAC_NHAN' && paymentMethod === 'CHUYEN_KHOAN') {
                 const btnReqPay = document.createElement('button');
@@ -1201,7 +1204,12 @@
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ ghiChu: "Admin chuyển trạng thái" })
                         });
-                        if (!res.ok) throw new Error("Chuyển trạng thái thất bại");
+
+                        // 🌟 ĐÃ SỬA BUG 2: Hiển thị lỗi chuẩn từ Backend
+                        if (!res.ok) {
+                            const errData = await res.json();
+                            throw new Error(errData.message || "Chuyển trạng thái thất bại");
+                        }
 
                         window.toast("Chuyển trạng thái thành công!", "success");
                         this.loadData();
@@ -1226,7 +1234,11 @@
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' }
                         });
-                        if (!res.ok) throw new Error("Thao tác thất bại");
+
+                        if (!res.ok) {
+                            const errData = await res.json();
+                            throw new Error(errData.message || "Thao tác thất bại");
+                        }
 
                         window.toast("Đã chuyển về trạng thái Chờ thanh toán!", "success");
                         this.loadData();
@@ -1253,7 +1265,12 @@
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ ghiChu: reason })
                         });
-                        if (!res.ok) throw new Error("Hủy đơn thất bại");
+
+                        // 🌟 ĐÃ SỬA BUG 2: Hiển thị lỗi chuẩn từ Backend (đặc biệt khi chặn đơn VNPay/MoMo)
+                        if (!res.ok) {
+                            const errData = await res.json();
+                            throw new Error(errData.message || "Hủy đơn thất bại");
+                        }
 
                         window.toast("Đã hủy đơn hàng!", "success");
                         this.closeDrawer();

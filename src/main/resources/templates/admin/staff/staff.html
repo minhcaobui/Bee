@@ -111,15 +111,6 @@
         .drawer-tab.active { color: #000; border-bottom-color: #000; }
         .drawer-tab:hover { color: #000; }
 
-        /* MODAL OTP XỊN XÒ */
-        .modal-otp-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
-        .modal-otp-box { background: #fff; width: 420px; padding: 30px; border-radius: 6px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: scaleIn 0.2s ease-out; }
-        .modal-otp-box h4 { font-weight: 800; margin-bottom: 10px; text-transform: uppercase; color: #2563eb; }
-        .modal-otp-box p { font-size: 13px; color: #666; margin-bottom: 25px; }
-        .modal-otp-box input { width: 100%; text-align: center; letter-spacing: 15px; font-size: 24px; font-weight: bold; margin-bottom: 20px; height: 50px; background: #fafafa; border: 1px solid var(--gray-300); border-radius: 4px; outline: none; }
-        .modal-otp-box input:focus { border-color: #2563eb; }
-        @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
         /* BEE TOAST CUSTOM */
         #beeToastHost { position: fixed; top: 30px; right: 30px; z-index: 999999; display: flex; flex-direction: column; gap: 15px; pointer-events: none; }
         .bee-toast-box { min-width: 320px; max-width: 400px; padding: 18px 24px; border-radius: 8px; background: #fff; color: #000; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2); display: flex; align-items: flex-start; gap: 14px; border-left: 6px solid #000; animation: beeToastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; transition: all 0.3s ease; pointer-events: auto; }
@@ -374,20 +365,6 @@
         <button class="btn" style="flex: 1; height: 40px !important;" id="btnSaveRole" onclick="window.StaffApp.Role.save()">LƯU CHỨC VỤ</button>
     </div>
 </aside>
-
-<div class="modal-otp-overlay" id="otpModal">
-    <div class="modal-otp-box">
-        <h4 style="color: #2563eb;"><i class="bi bi-envelope-check-fill" style="font-size: 24px; display: block; margin-bottom: 10px;"></i> XÁC THỰC EMAIL</h4>
-        <p id="otpMessage">Hệ thống đang gửi mã xác thực đến Email...</p>
-        <div id="otpInputGroup" style="display: none;">
-            <input type="text" id="inpOtpCode" class="form-input" style="text-align: center; letter-spacing: 15px; font-size: 24px; font-weight: bold; margin-bottom: 20px; height: 50px; background: #fafafa; border: 1px solid #ccc; outline: none;" placeholder="------" maxlength="6">
-            <div style="display: flex; gap: 10px;">
-                <button class="btn btn-secondary" style="flex: 1; height: 40px !important;" onclick="document.getElementById('otpModal').style.display='none'">HỦY BỎ</button>
-                <button class="btn" style="flex: 1; height: 40px !important; background: #2563eb; border-color: #2563eb;" onclick="window.StaffApp.verifyOtpAndSave()">XÁC NHẬN MÀ GỬI</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <div id="beeToastHost"></div>
 
@@ -1018,45 +995,13 @@
                 const checkPhoneRes = await fetch(`/api/nhan-vien/check-phone?phone=${phone}${idParam}`);
                 if (!checkPhoneRes.ok) { this.switchDrawerTab('info'); window.toast(await checkPhoneRes.text(), "error"); btn.innerHTML = 'LƯU HỒ SƠ'; btn.disabled = false; return; }
 
-                const isEmailChanged = (email !== this.state.originalEmail);
-                if (isNew || isEmailChanged) {
-                    const checkEmailRes = await fetch(`/api/nhan-vien/check-email?email=${email}${idParam}`);
-                    if (!checkEmailRes.ok) { this.switchDrawerTab('info'); window.toast(await checkEmailRes.text(), "error"); btn.innerHTML = 'LƯU HỒ SƠ'; btn.disabled = false; return; }
+                const checkEmailRes = await fetch(`/api/nhan-vien/check-email?email=${email}${idParam}`);
+                if (!checkEmailRes.ok) { this.switchDrawerTab('info'); window.toast(await checkEmailRes.text(), "error"); btn.innerHTML = 'LƯU HỒ SƠ'; btn.disabled = false; return; }
 
-                    document.getElementById('otpModal').style.display = 'flex';
-                    document.getElementById('otpInputGroup').style.display = 'none';
-                    document.getElementById('otpMessage').innerText = `Hệ thống đang gửi Email xác thực đến ${email}...`;
-
-                    try {
-                        const res = await fetch(`/api/nhan-vien/send-otp?email=${email}`, { method: 'POST' });
-                        if(res.ok) {
-                            document.getElementById('otpMessage').innerHTML = `Mã xác nhận 6 số đã được gửi tới hòm thư:<br><b style="color:#000;">${email}</b>`;
-                            document.getElementById('otpInputGroup').style.display = 'block';
-                            document.getElementById('inpOtpCode').value = '';
-                        } else {
-                            document.getElementById('otpModal').style.display = 'none';
-                            window.toast(await res.text(), "error");
-                        }
-                    } catch(e) { document.getElementById('otpModal').style.display = 'none'; window.toast("Mất kết nối", "error"); }
-                    finally { btn.innerHTML = 'LƯU HỒ SƠ'; btn.disabled = false; }
-                } else {
-                    this.executeFinalSave();
-                }
-            }, () => {});
-        },
-
-        async verifyOtpAndSave() {
-            const email = document.getElementById('nvEmail').value.trim();
-            const otp = document.getElementById('inpOtpCode').value.trim();
-            if(otp.length < 6) { window.toast("Mã OTP phải gồm 6 chữ số!", "error"); return; }
-
-            const res = await fetch(`/api/nhan-vien/verify-otp?email=${email}&otp=${otp}`, { method: 'POST' });
-            if(res.ok) {
-                document.getElementById('otpModal').style.display = 'none';
+                // 🌟 ĐÃ FIX BUG 1: Dành quyền tối cao cho Admin, lưu thẳng không cần xin OTP của nhân viên
                 this.executeFinalSave();
-            } else {
-                window.toast(await res.text(), "error");
-            }
+
+            }, () => {});
         },
 
         async executeFinalSave() {

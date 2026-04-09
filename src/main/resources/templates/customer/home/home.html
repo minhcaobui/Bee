@@ -1642,28 +1642,23 @@
                 async confirmAdd(productId, event, isBuyNow, inputId = null) {
                     if (event) event.stopPropagation();
 
-                    // 1. SỬA LẠI: Dùng tempSel (của Home) thay vì this.tempSelection (của Shop)
                     const sel = tempSel[productId];
 
-                    if (!sel?.colorId && !sel?.sizeId) { window.showToast('Vui lòng chọn màu sắc và kích cỡ', 'warning'); return; }
-                    if (!sel.colorId) { window.showToast('Bạn chưa chọn màu sắc', 'warning'); return; }
-                    if (!sel.sizeId) { window.showToast('Bạn chưa chọn kích cỡ', 'warning'); return; }
-                    if (!sel.sku) { window.showToast('Phiên bản này đang hết hàng', 'warning'); return; }
+                    if (!sel?.colorId && !sel?.sizeId) { window.showToast?.('Vui lòng chọn màu sắc và kích cỡ', 'warning'); return; }
+                    if (!sel.colorId) { window.showToast?.('Bạn chưa chọn màu sắc', 'warning'); return; }
+                    if (!sel.sizeId) { window.showToast?.('Bạn chưa chọn kích cỡ', 'warning'); return; }
+                    if (!sel.sku) { window.showToast?.('Phiên bản này đang hết hàng', 'warning'); return; }
 
                     const inputQty = parseInt(document.getElementById(inputId)?.value) || 1;
                     const sku = sel.sku;
-
-                    // 2. SỬA LẠI: Lấy sản phẩm từ state.allProducts (không có this)
                     const product = state.allProducts.find(p => p.id === productId);
 
-                    // Bọc lót nếu không tìm thấy sản phẩm
                     if (!product) {
-                        window.showToast('Hệ thống đang xử lý dữ liệu, vui lòng thử lại sau!', 'error');
+                        window.showToast?.('Hệ thống đang xử lý dữ liệu, vui lòng thử lại sau!', 'error');
                         return;
                     }
 
                     try {
-                        this.closeAllSelections();
                         if (document.getElementById(inputId)) document.getElementById(inputId).value = 1;
 
                         if (isBuyNow) {
@@ -1682,8 +1677,14 @@
                                 img: sku.hinhAnh || (product.hinhAnhs && product.hinhAnhs.length > 0 ? product.hinhAnhs[0].url : '')
                             };
                             sessionStorage.setItem('bee_buy_now', JSON.stringify([buyNowItem]));
-                            window.location.hash = 'checkout?mode=buynow';
+
+                            // 🌟 ĐÃ SỬA: Đóng bảng chọn size và bật Popup chọn giao hàng
+                            this.closeAllSelections();
+                            document.getElementById('deliveryModalOverlay').style.display = 'flex';
+                            setTimeout(() => { document.querySelector('.delivery-modal').classList.add('open'); }, 10);
+
                         } else {
+                            this.closeAllSelections();
                             await window.CartHelper.add(sku.id, inputQty, {
                                 productId: productId,
                                 name: product.ten,
@@ -1695,10 +1696,10 @@
                                 maxStock: sku.soLuong,
                                 img: sku.hinhAnh || (product.hinhAnhs && product.hinhAnhs.length > 0 ? product.hinhAnhs[0].url : '')
                             });
-                            window.showToast(`Đã thêm ${inputQty} sản phẩm vào giỏ!`, 'success');
+                            window.showToast?.(`Đã thêm ${inputQty} sản phẩm vào giỏ!`, 'success');
                         }
                     } catch (error) {
-                        window.showToast(error.message, 'error');
+                        window.showToast?.(error.message, 'error');
                     }
                 },
 
@@ -1768,7 +1769,9 @@
                     localStorage.setItem('bee_delivery_method', method);
                     this.closeDeliveryModal();
                     this.closeAllSelections();
-                    window.location.hash = '#checkout';
+
+                    // 🌟 ĐÃ SỬA: Chuyển sang trang thanh toán kèm theo đuôi mode=buynow
+                    window.location.hash = 'checkout?mode=buynow';
                 },
 
                 async toggleWishlist(productId) {

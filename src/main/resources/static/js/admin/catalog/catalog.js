@@ -339,9 +339,25 @@ const CatalogApp = {
 
     saveItem: function () {
         const ten = document.getElementById('fTen').value.trim();
+        const fMaEl = document.getElementById('fMa');
+        const ma = fMaEl ? fMaEl.value.trim() : '';
+
         if (!ten) {
             window.toast('Tên không được để trống!', 'error');
             document.getElementById('fTen').focus();
+            return;
+        }
+
+        // 🌟 ĐÃ FIX: CHẶN KÝ TỰ NGAY TỪ GIAO DIỆN
+        if (ten.length > 100) {
+            window.toast('Tên tối đa 100 ký tự!', 'warning');
+            document.getElementById('fTen').focus();
+            return;
+        }
+
+        if (ma && ma.length > 20) {
+            window.toast('Mã thuộc tính tối đa 20 ký tự!', 'warning');
+            if(fMaEl) fMaEl.focus();
             return;
         }
 

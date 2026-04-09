@@ -1319,7 +1319,8 @@
                 return;
             }
 
-            this.executeFinishOrder(finalMethod, inv, total);
+            // 🌟 ĐÃ SỬA LỖI 1: Chỉ truyền 2 tham số là finalMethod và total
+            this.executeFinishOrder(finalMethod, total);
         },
 
         executeFinishOrder: async function(finalMethod, total) {
@@ -1328,7 +1329,7 @@
 
             const payload = {
                 customerId: inv.customerId,
-                total: total,
+                amount: total,         // 🌟 ĐÃ SỬA LỖI 2: Đổi chữ 'total' thành 'amount' để khớp với Backend
                 method: finalMethod,
                 cart: inv.cart,
                 voucherId: inv.voucher ? inv.voucher.id : null

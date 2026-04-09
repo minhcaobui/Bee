@@ -1,7 +1,8 @@
 package com.example.bee.controllers.api.notification;
 
+import com.example.bee.entities.account.TaiKhoan;
 import com.example.bee.entities.notification.ThongBao;
-import com.example.bee.repositories.customer.KhachHangRepository;
+import com.example.bee.repositories.account.TaiKhoanRepository;
 import com.example.bee.repositories.notification.ThongBaoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,87 +21,91 @@ import java.util.stream.Collectors;
 public class ThongBaoApi {
 
     private final ThongBaoRepository thongBaoRepository;
-    private final KhachHangRepository khachHangRepository;
+    // 🌟 ĐÃ FIX LỖI 1: Chuyển sang dùng TaiKhoanRepository để dùng chung cho cả Khách và Admin
+    private final TaiKhoanRepository taiKhoanRepository;
+
+    // Hàm dùng chung để lấy Tài khoản đang đăng nhập
+    private TaiKhoan getLoggedInAccount() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
+            return null;
+        }
+        return taiKhoanRepository.findByTenDangNhap(auth.getName()).orElse(null);
+    }
 
     @GetMapping("/my-notifications")
     public ResponseEntity<?> getMyNotifications() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
-            return ResponseEntity.ok(Collections.emptyList());
-        }
-        String username = auth.getName();
-        var kh = khachHangRepository.findByTaiKhoan_TenDangNhap(username).orElse(null);
-        if (kh != null && kh.getTaiKhoan() != null) {
-            List<ThongBao> list = thongBaoRepository.findByTaiKhoanIdOrderByNgayTaoDesc(kh.getTaiKhoan().getId());
-            // 🌟 LỌC BỎ NHỮNG THÔNG BÁO ĐÃ XÓA MỀM TRƯỚC KHI TRẢ VỀ FRONTEND
-            List<ThongBao> activeList = list.stream()
-                    .filter(tb -> tb.getDaXoa() == null || !tb.getDaXoa())
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(activeList);
-        }
-        return ResponseEntity.ok(Collections.emptyList());
+        TaiKhoan tk = getLoggedInAccount();
+        if (tk == null) return ResponseEntity.ok(Collections.emptyList());
+
+        // 🌟 ĐÃ FIX LỖI 2: Chỉ lấy những thông báo CHƯA XÓA (Loại bỏ Zombie)
+        List<ThongBao> list = thongBaoRepository.findByTaiKhoanIdOrderByNgayTaoDesc(tk.getId())
+                .stream()
+                .filter(tb -> tb.getDaXoa() == null || !tb.getDaXoa())
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(list);
     }
 
-    @PutMapping("/mark-all-read")
-    public ResponseEntity<?> markAllAsRead() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        String username = auth.getName();
-        var kh = khachHangRepository.findByTaiKhoan_TenDangNhap(username).orElse(null);
-        if (kh != null && kh.getTaiKhoan() != null) {
-            Integer currentUserId = kh.getTaiKhoan().getId();
-            List<ThongBao> unreadList = thongBaoRepository.findByTaiKhoanIdAndDaDocFalse(currentUserId);
-            for (ThongBao tb : unreadList) {
-                tb.setDaDoc(true);
-            }
-            thongBaoRepository.saveAll(unreadList);
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.badRequest().build();
-    }
-
-    @PutMapping("/{id}/read")
+    @PatchMapping("/{id}/read")
     public ResponseEntity<?> markAsRead(@PathVariable Long id) {
         ThongBao tb = thongBaoRepository.findById(id).orElse(null);
         if (tb != null) {
             tb.setDaDoc(true);
             thongBaoRepository.save(tb);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok(Collections.singletonMap("message", "Đã đọc"));
         }
         return ResponseEntity.notFound().build();
     }
 
-    // 🌟 API XÓA 1 THÔNG BÁO (SOFT DELETE)
+    @PatchMapping("/mark-all-read")
+    public ResponseEntity<?> markAllAsRead() {
+        TaiKhoan tk = getLoggedInAccount();
+        if (tk == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        List<ThongBao> list = thongBaoRepository.findByTaiKhoanIdOrderByNgayTaoDesc(tk.getId());
+        boolean hasChanges = false;
+
+        for (ThongBao tb : list) {
+            // 🌟 ĐÃ FIX LỖI 3: Chỉ update những cái CHƯA ĐỌC, tiết kiệm tài nguyên DB
+            if (tb.getDaDoc() == null || !tb.getDaDoc()) {
+                tb.setDaDoc(true);
+                hasChanges = true;
+            }
+        }
+
+        if (hasChanges) thongBaoRepository.saveAll(list);
+        return ResponseEntity.ok(Collections.singletonMap("message", "Đã đọc tất cả"));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteNotification(@PathVariable Long id) {
         ThongBao tb = thongBaoRepository.findById(id).orElse(null);
         if (tb != null) {
-            tb.setDaXoa(true); // Đánh dấu đã xóa
+            tb.setDaXoa(true);
             thongBaoRepository.save(tb);
             return ResponseEntity.ok(Collections.singletonMap("message", "Đã xóa"));
         }
         return ResponseEntity.notFound().build();
     }
 
-    // 🌟 API XÓA TẤT CẢ (SOFT DELETE)
     @DeleteMapping("/delete-all")
     public ResponseEntity<?> deleteAllMyNotifications() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        String username = auth.getName();
-        var kh = khachHangRepository.findByTaiKhoan_TenDangNhap(username).orElse(null);
-        if (kh != null && kh.getTaiKhoan() != null) {
-            List<ThongBao> list = thongBaoRepository.findByTaiKhoanIdOrderByNgayTaoDesc(kh.getTaiKhoan().getId());
-            for (ThongBao tb : list) {
-                tb.setDaXoa(true); // Đánh dấu tất cả là đã xóa
+        TaiKhoan tk = getLoggedInAccount();
+        if (tk == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        List<ThongBao> list = thongBaoRepository.findByTaiKhoanIdOrderByNgayTaoDesc(tk.getId());
+        boolean hasChanges = false;
+
+        for (ThongBao tb : list) {
+            // 🌟 ĐÃ FIX LỖI 3: Chỉ đánh dấu xóa những cái CHƯA XÓA
+            if (tb.getDaXoa() == null || !tb.getDaXoa()) {
+                tb.setDaXoa(true);
+                hasChanges = true;
             }
-            thongBaoRepository.saveAll(list);
-            return ResponseEntity.ok(Collections.singletonMap("message", "Đã xóa tất cả"));
         }
-        return ResponseEntity.badRequest().build();
+
+        if (hasChanges) thongBaoRepository.saveAll(list);
+        return ResponseEntity.ok(Collections.singletonMap("message", "Đã xóa tất cả"));
     }
 }

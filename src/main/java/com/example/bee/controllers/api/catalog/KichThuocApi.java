@@ -27,13 +27,7 @@ public class KichThuocApi {
     private final KichThuocRepository kichThuocRepository;
 
     private String generateMa() {
-        String ma;
-        Random random = new Random();
-        do {
-            int randomNum = 1000 + random.nextInt(9000);
-            ma = "KT" + randomNum;
-        } while (kichThuocRepository.existsByMaIgnoreCase(ma));
-        return ma;
+        return "KT" + System.currentTimeMillis(); // Đổi "CL" thành "HANG", "KT", "MS" tương ứng với từng file
     }
 
     @GetMapping
@@ -87,8 +81,16 @@ public class KichThuocApi {
         if (!entity.getTen().equalsIgnoreCase(newTen) && kichThuocRepository.existsByTenIgnoreCase(newTen)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Trùng tên size!");
         }
+        Boolean newTrangThai = body.getTrangThai();
+        if (newTrangThai != null && !newTrangThai && Boolean.TRUE.equals(entity.getTrangThai())) {
+            boolean isUsed = sanPhamChiTietRepository.existsByKichThuoc_IdAndTrangThaiTrue(id);
+            if (isUsed) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Không thể ngừng hoạt động! Đang có sản phẩm sử dụng kích thước này.");
+            }
+        }
+
         entity.setTen(newTen);
-        entity.setTrangThai(body.getTrangThai() != null ? body.getTrangThai() : entity.getTrangThai());
+        entity.setTrangThai(newTrangThai != null ? newTrangThai : entity.getTrangThai());
         return kichThuocRepository.save(entity);
     }
 

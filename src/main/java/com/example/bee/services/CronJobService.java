@@ -10,6 +10,7 @@ import com.example.bee.repositories.order.HoaDonRepository;
 import com.example.bee.repositories.order.LichSuHoaDonRepository;
 import com.example.bee.repositories.order.TrangThaiHoaDonRepository;
 import com.example.bee.repositories.products.SanPhamChiTietRepository;
+import com.example.bee.repositories.promotion.MaGiamGiaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,8 @@ import java.util.List;
 
 @Service
 public class CronJobService {
+
+    @Autowired private MaGiamGiaRepository maGiamGiaRepo;
 
     @Autowired
     private SanPhamChiTietRepository sanPhamChiTietRepository;
@@ -85,6 +88,18 @@ public class CronJobService {
                     if (spct != null) {
                         spct.setSoLuong(spct.getSoLuong() + ct.getSoLuong()); // Cộng trả lại kho
                         sanPhamChiTietRepository.save(spct);
+                    }
+                }
+                if (hd.getMaGiamGia() != null) {
+                    com.example.bee.entities.promotion.MaGiamGia voucher = hd.getMaGiamGia();
+                    int luotMoi = voucher.getLuotSuDung() - 1;
+                    if (luotMoi >= 0) {
+                        voucher.setLuotSuDung(luotMoi);
+                        // Nếu voucher từng bị tắt do hết lượt, bật lại nó lên
+                        if (!voucher.getTrangThai() && voucher.getNgayKetThuc().isAfter(java.time.LocalDateTime.now())) {
+                            voucher.setTrangThai(true);
+                        }
+                        maGiamGiaRepo.save(voucher);
                     }
                 }
 

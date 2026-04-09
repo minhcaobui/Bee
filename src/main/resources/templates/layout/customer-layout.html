@@ -521,6 +521,8 @@
         notifications: [],
         currentPopNotif: null,
 
+
+
         init: async function() { await this.fetchData(); },
         fetchData: async function() {
             try {
@@ -530,6 +532,9 @@
                 this.render();
             } catch(e) {}
         },
+
+
+
         render: function() {
             const list = document.getElementById('notifList');
             const badge = document.getElementById('notifBadge');
@@ -1191,6 +1196,11 @@
     });
     // Thêm sự kiện đóng overlay khi nhấn phím Esc
     document.addEventListener('keydown', e => { if (e.key === 'Escape') { if(typeof closeGlobalTrack === 'function') closeGlobalTrack(); } });
+    setInterval(() => {
+        if(typeof fetchNotifications === 'function') {
+            fetchNotifications();
+        }
+    }, 30000);
 </script>
 
 </body>

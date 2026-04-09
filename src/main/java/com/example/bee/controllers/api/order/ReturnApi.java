@@ -18,6 +18,7 @@ import com.example.bee.repositories.order.ThanhToanRepository;
 import com.example.bee.repositories.order.YeuCauDoiTraRepository;
 import com.example.bee.repositories.products.SanPhamChiTietRepository;
 import com.example.bee.repositories.role.NhanVienRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -119,6 +120,7 @@ public class ReturnApi {
     }
 
     @PostMapping("/{id}/approve")
+    @Transactional // 🌟 ĐÃ THÊM TRANSACTIONAL: Bảo vệ dữ liệu an toàn tuyệt đối
     public ResponseEntity<?> approveRequest(@PathVariable Integer id, @RequestBody(required = false) Map<String, Object> payload) {
         YeuCauDoiTra yc = ycRepo.findById(id).orElse(null);
         if (yc == null || !yc.getTrangThai().equals("CHO_XU_LY")) {
@@ -132,6 +134,7 @@ public class ReturnApi {
         }
 
         boolean congKho = payload != null && payload.containsKey("congKho") ? (Boolean) payload.get("congKho") : true;
+        HoaDon hd = yc.getHoaDon(); // Lấy hóa đơn gốc ra để thao tác
 
         if (yc.getLoaiYeuCau().equalsIgnoreCase("ĐỔI HÀNG") && payload != null && payload.containsKey("chiTietMoi")) {
             List<Map<String, Object>> chiTietMoi = (List<Map<String, Object>>) payload.get("chiTietMoi");
@@ -142,10 +145,23 @@ public class ReturnApi {
                 SanPhamChiTiet spctMoi = spctRepo.findById(spctId).orElse(null);
                 if (spctMoi != null) {
                     if (spctMoi.getSoLuong() < slMoi) {
-                        return ResponseEntity.badRequest().body(Map.of("message", "Sản phẩm " + spctMoi.getSanPham().getTen() + " không đủ tồn kho để đổi!"));
+                        throw new RuntimeException("Sản phẩm " + spctMoi.getSanPham().getTen() + " không đủ tồn kho để đổi!");
                     }
+                    // Trừ kho SP mới
                     spctMoi.setSoLuong(spctMoi.getSoLuong() - slMoi);
                     spctRepo.save(spctMoi);
+
+                    // 🌟 ĐÃ FIX BUG 1: THÊM SẢN PHẨM MỚI VÀO LẠI HÓA ĐƠN CỦA KHÁCH ĐỂ LƯU DẤU VẾT
+                    BigDecimal giaThucTe = (spctMoi.getGiaSauKhuyenMai() != null && spctMoi.getGiaSauKhuyenMai().compareTo(BigDecimal.ZERO) > 0)
+                            ? spctMoi.getGiaSauKhuyenMai() : spctMoi.getGiaBan();
+
+                    HoaDonChiTiet hdctNew = new HoaDonChiTiet();
+                    hdctNew.setHoaDon(hd);
+                    hdctNew.setSanPhamChiTiet(spctMoi);
+                    hdctNew.setSoLuong(slMoi);
+                    hdctNew.setGiaTien(giaThucTe); // Lưu nguyên giá để sau này đối soát
+                    hdctNew.setSoLuongTra(0); // SP mới chưa bị trả
+                    hdctRepo.save(hdctNew);
                 }
             }
         }
@@ -169,13 +185,12 @@ public class ReturnApi {
             }
         }
 
-        HoaDon hd = yc.getHoaDon();
         if (hd != null) {
             LichSuHoaDon ls = new LichSuHoaDon();
             ls.setHoaDon(hd);
             ls.setTrangThaiHoaDon(hd.getTrangThaiHoaDon());
             ls.setNhanVien(yc.getNhanVien());
-            ls.setGhiChu("Đơn hàng cập nhật số lượng trả do hoàn tất phiếu " + yc.getLoaiYeuCau() + " hàng: " + yc.getMa());
+            ls.setGhiChu("Đơn hàng cập nhật chi tiết do hoàn tất phiếu " + yc.getLoaiYeuCau() + " hàng: " + yc.getMa());
             ls.setNgayTao(new Date());
             lsRepo.save(ls);
         }
@@ -246,6 +261,7 @@ public class ReturnApi {
     }
 
     @PostMapping("/create")
+    @Transactional // 🌟 ĐÃ THÊM TRANSACTIONAL
     public ResponseEntity<?> createRequest(@RequestBody Map<String, Object> payload) {
         try {
             String maHD = (String) payload.get("maHD");
@@ -313,8 +329,8 @@ public class ReturnApi {
 
             return ResponseEntity.ok(Map.of("message", "Tạo yêu cầu thành công!"));
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body(Map.of("message", "Lỗi dữ liệu đầu vào!"));
+            org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage() != null ? e.getMessage() : "Lỗi hệ thống"));
         }
     }
 }

@@ -49,8 +49,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PosApi {
 
-    private static final Map<String, Map<String, Object>> pendingCarts = new java.util.concurrent.ConcurrentHashMap<>();
-
     private final SanPhamChiTietRepository variantRepo;
     private final HoaDonRepository hoaDonRepo;
     private final HoaDonChiTietRepository hdctRepo;
@@ -147,126 +145,167 @@ public class PosApi {
         return ResponseEntity.ok(Map.of("message", "OK"));
     }
 
+    // 🌟 HÀM TẠO ĐƠN HÀNG DÙNG CHUNG (CHO CẢ TIỀN MẶT LẪN ONLINE)
+    private HoaDon createOrderToDB(Map<String, Object> payload, String method, String statusMa) {
+        Integer customerId = (Integer) payload.get("customerId");
+        List<Map<String, Object>> cart = (List<Map<String, Object>>) payload.get("cart");
+        Integer voucherId = (Integer) payload.get("voucherId");
+        BigDecimal totalAmount = new BigDecimal(payload.get("amount").toString());
+
+        if (cart == null || cart.isEmpty()) {
+            throw new RuntimeException("Giỏ hàng trống!");
+        }
+
+        String maHD = ("HD" + System.currentTimeMillis());
+        NhanVien nvChotDon = getLoggedInNhanVien();
+
+        HoaDon hd = HoaDon.builder()
+                .ma(maHD)
+                .giaTamThoi(BigDecimal.ZERO)
+                .giaTong(BigDecimal.ZERO)
+                .loaiHoaDon(0)
+                .ngayTao(new Date())
+                .nhanVien(nvChotDon)
+                .build();
+
+        if (customerId != null) hd.setKhachHang(khachHangRepo.findById(customerId).orElse(null));
+        hd = hoaDonRepo.save(hd);
+
+        BigDecimal giaTamTinh = BigDecimal.ZERO;
+        BigDecimal tongTienNguyenGia = BigDecimal.ZERO;
+
+        for (Map<String, Object> item : cart) {
+            Integer spctId = Integer.valueOf(item.get("id").toString());
+            Integer qty    = Integer.valueOf(item.get("qty").toString());
+            BigDecimal price = new BigDecimal(item.get("price").toString());
+
+            SanPhamChiTiet spct = variantRepo.findById(spctId).orElseThrow(() -> new RuntimeException("Lỗi kho"));
+
+            // Chốt chặn số lượng kho (Cho cả Tiền mặt và Online POS)
+            if (spct.getSoLuong() < qty) {
+                throw new RuntimeException("Sản phẩm " + spct.getSanPham().getTen() + " không đủ số lượng trong kho!");
+            }
+
+            BigDecimal giaGoc = spct.getGiaBan();
+            BigDecimal thanhTienItem = price.multiply(BigDecimal.valueOf(qty));
+            giaTamTinh = giaTamTinh.add(thanhTienItem);
+
+            if (price.compareTo(giaGoc) >= 0) {
+                tongTienNguyenGia = tongTienNguyenGia.add(thanhTienItem);
+            }
+
+            // Trừ kho ngay lập tức
+            spct.setSoLuong(spct.getSoLuong() - qty);
+            spct.setSoLuongTamGiu(Math.max(0, spct.getSoLuongTamGiu() - qty));
+
+            if (spct.getSoLuong() <= 0) spct.setTrangThai(false);
+            variantRepo.save(spct);
+
+            hdctRepo.save(HoaDonChiTiet.builder().hoaDon(hd).sanPhamChiTiet(spct).soLuong(qty).giaTien(price).build());
+        }
+
+        BigDecimal chietKhauNV = BigDecimal.ZERO;
+        if (hd.getKhachHang() != null && hd.getKhachHang().getSoDienThoai() != null) {
+            boolean isEmployee = nvRepo.existsBySoDienThoaiAndTrangThaiTrue(hd.getKhachHang().getSoDienThoai());
+            if (isEmployee) {
+                chietKhauNV = giaTamTinh.multiply(new BigDecimal("0.05")).setScale(0, RoundingMode.HALF_UP);
+            }
+        }
+
+        BigDecimal giamGiaVoucher = BigDecimal.ZERO;
+        if (voucherId != null) {
+            MaGiamGia voucher = maGiamGiaRepo.findById(voucherId).orElse(null);
+            if (voucher != null) {
+                if (!voucher.getTrangThai() ||
+                        voucher.getLuotSuDung() >= voucher.getSoLuong() ||
+                        (voucher.getNgayKetThuc() != null && voucher.getNgayKetThuc().isBefore(java.time.LocalDateTime.now()))) {
+                    throw new RuntimeException("Mã giảm giá này đã hết hạn hoặc hết lượt sử dụng!");
+                }
+
+                if (giaTamTinh.compareTo(voucher.getDieuKien()) < 0) {
+                    throw new RuntimeException("Đơn hàng chưa đạt giá trị tối thiểu " + voucher.getDieuKien() + "đ để dùng mã này!");
+                }
+
+                if (Boolean.FALSE.equals(voucher.getChoPhepCongDon()) && !"FREESHIP".equalsIgnoreCase(voucher.getLoaiGiamGia())) {
+                    if (tongTienNguyenGia.compareTo(BigDecimal.ZERO) == 0) {
+                        throw new RuntimeException("Mã giảm giá này KHÔNG hỗ trợ áp dụng cho các sản phẩm đang chạy Sale!");
+                    }
+                }
+
+                if (hd.getKhachHang() != null) {
+                    boolean daSuDung = hoaDonRepo.existsByKhachHangIdAndMaGiamGiaIdAndTrangThaiHoaDon_MaNot(hd.getKhachHang().getId(), voucher.getId(), "DA_HUY");
+                    if (daSuDung) {
+                        throw new RuntimeException("Khách hàng này đã sử dụng mã giảm giá này rồi!");
+                    }
+                }
+
+                hd.setMaGiamGia(voucher);
+                BigDecimal baseForVoucher = giaTamTinh;
+                if (Boolean.FALSE.equals(voucher.getChoPhepCongDon()) && !"FREESHIP".equalsIgnoreCase(voucher.getLoaiGiamGia())) {
+                    baseForVoucher = tongTienNguyenGia;
+                }
+                boolean isPercent = voucher.getLoaiGiamGia() != null && (voucher.getLoaiGiamGia().toUpperCase().contains("PERCENT") || voucher.getLoaiGiamGia().contains("%"));
+                if (isPercent) {
+                    giamGiaVoucher = baseForVoucher.multiply(voucher.getGiaTriGiamGia().divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP));
+                    if (voucher.getGiaTriGiamGiaToiDa() != null && giamGiaVoucher.compareTo(voucher.getGiaTriGiamGiaToiDa()) > 0) {
+                        giamGiaVoucher = voucher.getGiaTriGiamGiaToiDa();
+                    }
+                } else {
+                    giamGiaVoucher = voucher.getGiaTriGiamGia();
+                    if (giamGiaVoucher.compareTo(baseForVoucher) > 0) giamGiaVoucher = baseForVoucher;
+                }
+                int luotMoi = voucher.getLuotSuDung() + 1;
+                voucher.setLuotSuDung(luotMoi);
+                if (luotMoi >= voucher.getSoLuong()) voucher.setTrangThai(false);
+                maGiamGiaRepo.save(voucher);
+            }
+        }
+
+        BigDecimal tongKhuyenMai = chietKhauNV.add(giamGiaVoucher);
+        BigDecimal maxGiamGiaChoPhep = giaTamTinh.multiply(new BigDecimal("0.70")).setScale(0, RoundingMode.HALF_UP);
+        if (tongKhuyenMai.compareTo(maxGiamGiaChoPhep) > 0) tongKhuyenMai = maxGiamGiaChoPhep;
+
+        hd.setGiaTamThoi(giaTamTinh);
+        hd.setGiaTriKhuyenMai(tongKhuyenMai);
+
+        BigDecimal totalFinal = giaTamTinh.subtract(tongKhuyenMai);
+        if (totalFinal.compareTo(BigDecimal.ZERO) < 0) totalFinal = BigDecimal.ZERO;
+        hd.setGiaTong(totalAmount); // Lấy amount truyền vào để chốt với QR
+
+        TrangThaiHoaDon tthd = trangThaiRepo.findByMa(statusMa);
+        hd.setTrangThaiHoaDon(tthd);
+        if (statusMa.equals("HOAN_THANH")) {
+            hd.setNgayThanhToan(new Date());
+        }
+        hoaDonRepo.save(hd);
+
+        String ttStatus = statusMa.equals("HOAN_THANH") ? "THANH_CONG" : "CHO_THANH_TOAN";
+        String ghiChuLichSu = statusMa.equals("HOAN_THANH") ? "Thanh toán " + method + " trực tiếp" : "Đang chờ thanh toán online " + method;
+
+        thanhToanRepo.save(ThanhToan.builder()
+                .hoaDon(hd)
+                .soTien(hd.getGiaTong())
+                .phuongThuc(method)
+                .trangThai(ttStatus)
+                .nhanVien(nvChotDon)
+                .build());
+
+        lichSuRepo.save(LichSuHoaDon.builder()
+                .hoaDon(hd)
+                .trangThaiHoaDon(tthd)
+                .ghiChu(ghiChuLichSu)
+                .nhanVien(nvChotDon)
+                .build());
+
+        return hd;
+    }
+
     @PostMapping("/finish")
     @Transactional
     public ResponseEntity<?> finishOrder(@RequestBody Map<String, Object> payload) {
         try {
-            Integer customerId = (Integer) payload.get("customerId");
-            String method     = (String)  payload.get("method");
-            Integer voucherId = (Integer) payload.get("voucherId");
-            List<Map<String, Object>> cart = (List<Map<String, Object>>) payload.get("cart");
-
-            if (cart == null || cart.isEmpty()) {
-                throw new RuntimeException("Giỏ hàng trống!");
-            }
-
-            String maHD = ("HD" + System.currentTimeMillis());
-
-            NhanVien nvChotDon = getLoggedInNhanVien();
-
-            HoaDon hd = HoaDon.builder()
-                    .ma(maHD)
-                    .giaTamThoi(BigDecimal.ZERO)
-                    .giaTong(BigDecimal.ZERO)
-                    .loaiHoaDon(0)
-                    .ngayTao(new Date())
-                    .nhanVien(nvChotDon)
-                    .build();
-
-            if (customerId != null) hd.setKhachHang(khachHangRepo.findById(customerId).orElse(null));
-
-            hd = hoaDonRepo.save(hd);
-
-            BigDecimal giaTamTinh = BigDecimal.ZERO;
-            BigDecimal tongTienNguyenGia = BigDecimal.ZERO;
-
-            for (Map<String, Object> item : cart) {
-                Integer spctId = Integer.valueOf(item.get("id").toString());
-                Integer qty    = Integer.valueOf(item.get("qty").toString());
-                BigDecimal price = new BigDecimal(item.get("price").toString());
-
-                SanPhamChiTiet spct = variantRepo.findById(spctId).orElseThrow(() -> new RuntimeException("Lỗi kho"));
-
-                BigDecimal giaGoc = spct.getGiaBan();
-                BigDecimal thanhTienItem = price.multiply(BigDecimal.valueOf(qty));
-                giaTamTinh = giaTamTinh.add(thanhTienItem);
-
-                if (price.compareTo(giaGoc) >= 0) {
-                    tongTienNguyenGia = tongTienNguyenGia.add(thanhTienItem);
-                }
-
-                spct.setSoLuong(spct.getSoLuong() - qty);
-                spct.setSoLuongTamGiu(Math.max(0, spct.getSoLuongTamGiu() - qty));
-
-                if (spct.getSoLuong() <= 0) spct.setTrangThai(false);
-                variantRepo.save(spct);
-
-                hdctRepo.save(HoaDonChiTiet.builder().hoaDon(hd).sanPhamChiTiet(spct).soLuong(qty).giaTien(price).build());
-            }
-
-            BigDecimal chietKhauNV = BigDecimal.ZERO;
-            String noteKhuyenMai = "";
-            if (hd.getKhachHang() != null && hd.getKhachHang().getSoDienThoai() != null) {
-                boolean isEmployee = nvRepo.existsBySoDienThoaiAndTrangThaiTrue(hd.getKhachHang().getSoDienThoai());
-                if (isEmployee) {
-                    chietKhauNV = giaTamTinh.multiply(new BigDecimal("0.05")).setScale(0, RoundingMode.HALF_UP);
-                    noteKhuyenMai += "(Áp dụng giảm 5% NV) ";
-                }
-            }
-
-            BigDecimal giamGiaVoucher = BigDecimal.ZERO;
-            if (voucherId != null) {
-                MaGiamGia voucher = maGiamGiaRepo.findById(voucherId).orElse(null);
-                if (voucher != null) {
-
-                    // 🌟 BỔ SUNG: KIỂM TRA MỖI KHÁCH CHỈ ĐƯỢC DÙNG 1 LẦN KHI CHỐT ĐƠN TẠI POS
-                    if (hd.getKhachHang() != null) {
-                        boolean daSuDung = hoaDonRepo.existsByKhachHangIdAndMaGiamGiaIdAndTrangThaiHoaDon_MaNot(hd.getKhachHang().getId(), voucher.getId(), "DA_HUY");
-                        if (daSuDung) {
-                            throw new RuntimeException("Khách hàng này đã sử dụng mã giảm giá này rồi!"); // Ném lỗi để rollback giao dịch
-                        }
-                    }
-
-                    hd.setMaGiamGia(voucher);
-                    BigDecimal baseForVoucher = giaTamTinh;
-                    if (Boolean.FALSE.equals(voucher.getChoPhepCongDon()) && !"FREESHIP".equalsIgnoreCase(voucher.getLoaiGiamGia())) {
-                        baseForVoucher = tongTienNguyenGia;
-                    }
-                    boolean isPercent = voucher.getLoaiGiamGia() != null && (voucher.getLoaiGiamGia().toUpperCase().contains("PERCENT") || voucher.getLoaiGiamGia().contains("%"));
-                    if (isPercent) {
-                        giamGiaVoucher = baseForVoucher.multiply(voucher.getGiaTriGiamGia().divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP));
-                        if (voucher.getGiaTriGiamGiaToiDa() != null && giamGiaVoucher.compareTo(voucher.getGiaTriGiamGiaToiDa()) > 0) {
-                            giamGiaVoucher = voucher.getGiaTriGiamGiaToiDa();
-                        }
-                    } else {
-                        giamGiaVoucher = voucher.getGiaTriGiamGia();
-                        if (giamGiaVoucher.compareTo(baseForVoucher) > 0) giamGiaVoucher = baseForVoucher;
-                    }
-                    int luotMoi = voucher.getLuotSuDung() + 1;
-                    voucher.setLuotSuDung(luotMoi);
-                    if (luotMoi >= voucher.getSoLuong()) voucher.setTrangThai(false);
-                    maGiamGiaRepo.save(voucher);
-                }
-            }
-
-            BigDecimal tongKhuyenMai = chietKhauNV.add(giamGiaVoucher);
-            BigDecimal maxGiamGiaChoPhep = giaTamTinh.multiply(new BigDecimal("0.70")).setScale(0, RoundingMode.HALF_UP);
-            if (tongKhuyenMai.compareTo(maxGiamGiaChoPhep) > 0) tongKhuyenMai = maxGiamGiaChoPhep;
-
-            hd.setGiaTamThoi(giaTamTinh);
-            hd.setGiaTriKhuyenMai(tongKhuyenMai);
-            BigDecimal totalFinal = giaTamTinh.subtract(tongKhuyenMai);
-            if (totalFinal.compareTo(BigDecimal.ZERO) < 0) totalFinal = BigDecimal.ZERO;
-            hd.setGiaTong(totalFinal);
-
-            hd.setNgayThanhToan(new Date());
-            TrangThaiHoaDon ttHoanThanh = trangThaiRepo.findByMa("HOAN_THANH");
-            hd.setTrangThaiHoaDon(ttHoanThanh);
-            hoaDonRepo.save(hd);
-
-            thanhToanRepo.save(ThanhToan.builder().hoaDon(hd).soTien(hd.getGiaTong()).phuongThuc(method).trangThai("THANH_CONG").nhanVien(nvChotDon).build());
-            lichSuRepo.save(LichSuHoaDon.builder().hoaDon(hd).trangThaiHoaDon(ttHoanThanh).ghiChu("Thanh toán trực tiếp").nhanVien(nvChotDon).build());
-
+            String method = payload.get("method") != null ? payload.get("method").toString() : "TIEN_MAT";
+            HoaDon hd = createOrderToDB(payload, method, "HOAN_THANH");
             return ResponseEntity.ok(Map.of("message", "Thành công!", "ma", hd.getMa(), "id", hd.getId()));
         } catch (Exception e) {
             org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -275,75 +314,68 @@ public class PosApi {
     }
 
     @PostMapping("/momo-payment")
+    @Transactional
     public ResponseEntity<?> getMomoUrl(@RequestBody Map<String, Object> payload) {
         try {
-            BigDecimal totalAmount = new BigDecimal(payload.get("amount").toString());
-
-            String maHD = ("HD" + System.currentTimeMillis());
-
-            payload.put("maHD", maHD);
-            pendingCarts.put(maHD, payload);
+            // Lưu xuống DB ngay lập tức
+            HoaDon hd = createOrderToDB(payload, "MOMO", "CHO_THANH_TOAN");
 
             String rId = String.valueOf(System.currentTimeMillis());
-            String oId = maHD + "_" + rId;
-            String amountStr = totalAmount.setScale(0, RoundingMode.HALF_UP).toString();
+            String oId = hd.getMa() + "_" + rId;
+            String amountStr = hd.getGiaTong().setScale(0, RoundingMode.HALF_UP).toString();
 
-            // 🌟 ĐÃ SỬA: Ép cứng ReturnUrl chạy vào Backend của POS trước
             String posReturnUrl = "http://localhost:8080/api/pos/momo-callback";
-
-            String rawHash = "accessKey=" + accessKey.trim() + "&amount=" + amountStr + "&extraData=&ipnUrl=" + notifyUrl.trim() + "&orderId=" + oId + "&orderInfo=ThanhToan_" + maHD + "&partnerCode=" + partnerCode.trim() + "&redirectUrl=" + posReturnUrl + "&requestId=" + rId + "&requestType=captureWallet";
+            String rawHash = "accessKey=" + accessKey.trim() + "&amount=" + amountStr + "&extraData=&ipnUrl=" + notifyUrl.trim() + "&orderId=" + oId + "&orderInfo=ThanhToan_" + hd.getMa() + "&partnerCode=" + partnerCode.trim() + "&redirectUrl=" + posReturnUrl + "&requestId=" + rId + "&requestType=captureWallet";
             String signature = MomoSecurity.signHmacSHA256(rawHash, secretKey.trim());
+
             Map<String, Object> body = new LinkedHashMap<>();
             body.put("partnerCode", partnerCode.trim());
             body.put("accessKey", accessKey.trim());
             body.put("requestId", rId);
             body.put("amount", Long.valueOf(amountStr));
             body.put("orderId", oId);
-            body.put("orderInfo", "ThanhToan_" + maHD);
-            body.put("redirectUrl", posReturnUrl); // 🌟 BẮT MOMO TRẢ VỀ BACKEND
+            body.put("orderInfo", "ThanhToan_" + hd.getMa());
+            body.put("redirectUrl", posReturnUrl);
             body.put("ipnUrl", notifyUrl.trim());
             body.put("extraData", "");
             body.put("requestType", "captureWallet");
             body.put("signature", signature);
             body.put("lang", "vi");
+
             RestTemplate restTemplate = new RestTemplate();
             Map<String, Object> response = restTemplate.postForObject(endpoint.trim(), body, Map.class);
-            return ResponseEntity.ok(Map.of("payUrl", response.get("payUrl"), "maHD", maHD));
+            return ResponseEntity.ok(Map.of("payUrl", response.get("payUrl"), "maHD", hd.getMa()));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage() != null ? e.getMessage() : "Lỗi hệ thống"));
         }
     }
 
     @PostMapping("/vnpay-payment")
+    @Transactional
     public ResponseEntity<?> getVnPayUrl(@RequestBody Map<String, Object> payload, HttpServletRequest request) {
         try {
-            BigDecimal totalAmount = new BigDecimal(payload.get("amount").toString());
+            // Lưu xuống DB ngay lập tức
+            HoaDon hd = createOrderToDB(payload, "VNPAY", "CHO_THANH_TOAN");
 
-            String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            StringBuilder sb = new StringBuilder("HD");
-            Random random = new Random();
-            for (int i = 0; i < 6; i++) sb.append(characters.charAt(random.nextInt(characters.length())));
-            String maHD = sb.toString();
-
-            payload.put("maHD", maHD);
-            pendingCarts.put(maHD, payload);
-
-            String vnp_TxnRef = maHD + "_" + System.currentTimeMillis();
+            String vnp_TxnRef = hd.getMa() + "_" + System.currentTimeMillis();
             Map<String, String> vnp_Params = new HashMap<>();
             vnp_Params.put("vnp_Version", "2.1.0");
             vnp_Params.put("vnp_Command", "pay");
             vnp_Params.put("vnp_TmnCode", vnp_TmnCode.trim());
-            vnp_Params.put("vnp_Amount", String.valueOf(totalAmount.multiply(new BigDecimal("100")).setScale(0, RoundingMode.HALF_UP)));
+            vnp_Params.put("vnp_Amount", String.valueOf(hd.getGiaTong().multiply(new BigDecimal("100")).setScale(0, RoundingMode.HALF_UP)));
             vnp_Params.put("vnp_CurrCode", "VND");
             vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
-            vnp_Params.put("vnp_OrderInfo", "ThanhToan_HoaDon_" + maHD);
+            vnp_Params.put("vnp_OrderInfo", "ThanhToan_HoaDon_" + hd.getMa());
             vnp_Params.put("vnp_OrderType", "other");
             vnp_Params.put("vnp_Locale", "vn");
             vnp_Params.put("vnp_ReturnUrl", vnp_ReturnUrl.trim());
             vnp_Params.put("vnp_IpAddr", "127.0.0.1");
+
             Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
             vnp_Params.put("vnp_CreateDate", formatter.format(cld.getTime()));
+
             List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
             Collections.sort(fieldNames);
             StringBuilder hashData = new StringBuilder();
@@ -364,103 +396,58 @@ public class PosApi {
             }
             String vnp_SecureHash = VnPayUtil.hmacSHA512(vnp_HashSecret.trim(), hashData.toString());
             String paymentUrl = vnp_PayUrl.trim() + "?" + query.toString() + "&vnp_SecureHash=" + vnp_SecureHash;
-            return ResponseEntity.ok(Map.of("payUrl", paymentUrl, "maHD", maHD));
+
+            return ResponseEntity.ok(Map.of("payUrl", paymentUrl, "maHD", hd.getMa()));
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage() != null ? e.getMessage() : "Lỗi hệ thống"));
         }
     }
 
+    // 🌟 ĐÃ SỬA: Hàm Confirm bây giờ chỉ cần tìm Hóa đơn trong DB và cập nhật trạng thái
     @PostMapping("/confirm-online-payment")
     @Transactional
     public ResponseEntity<?> confirmOnlinePayment(@RequestBody Map<String, String> body) {
         String maHD = body.get("maHD");
+        HoaDon hd = hoaDonRepo.findByMa(maHD);
 
-        // 🌟 BƯỚC 1: Xóa ngay lập tức Payload khỏi RAM để chống chạy 2 lần đồng thời
-        Map<String, Object> payload = pendingCarts.remove(maHD);
-
-        if (payload == null) {
-            // Nếu payload = null -> Request này là Request sinh đôi đang chạy chậm hơn, hoặc HĐ đã được xử lý xong
-            HoaDon existing = hoaDonRepo.findByMa(maHD);
-            if (existing != null) {
-                // Trả về lỗi để trình duyệt KHÔNG IN RA HÓA ĐƠN NỮA
-                return ResponseEntity.badRequest().body(Map.of("message", "Đã in hóa đơn trước đó rồi"));
-            }
-            return ResponseEntity.badRequest().body(Map.of("message", "Lỗi hoặc hóa đơn đã bị hủy"));
+        if (hd == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Không tìm thấy hóa đơn"));
         }
 
-        // BƯỚC 2: Request đầu tiên qua được chốt chặn sẽ thực hiện lưu vào DB
-        Integer customerId = (Integer) payload.get("customerId");
-        List<Map<String, Object>> cart = (List<Map<String, Object>>) payload.get("cart");
-        Integer voucherId = (Integer) payload.get("voucherId");
-
-        HoaDon hd = HoaDon.builder()
-                .ma(maHD)
-                .giaTamThoi(BigDecimal.ZERO)
-                .giaTong(BigDecimal.ZERO)
-                .loaiHoaDon(0) // Tại quầy
-                .ngayTao(new Date())
-                .nhanVien(getLoggedInNhanVien())
-                .build();
-
-        if (customerId != null) hd.setKhachHang(khachHangRepo.findById(customerId).orElse(null));
-        hd = hoaDonRepo.save(hd);
-
-        BigDecimal giaTamTinh = BigDecimal.ZERO;
-
-        for (Map<String, Object> item : cart) {
-            SanPhamChiTiet spct = variantRepo.findById(Integer.valueOf(item.get("id").toString())).get();
-            int qty = Integer.valueOf(item.get("qty").toString());
-            BigDecimal price = new BigDecimal(item.get("price").toString());
-
-            spct.setSoLuong(spct.getSoLuong() - qty);
-            spct.setSoLuongTamGiu(Math.max(0, spct.getSoLuongTamGiu() - qty));
-
-            if (spct.getSoLuong() <= 0) spct.setTrangThai(false);
-            variantRepo.save(spct);
-            hdctRepo.save(HoaDonChiTiet.builder().hoaDon(hd).sanPhamChiTiet(spct).soLuong(qty).giaTien(price).build());
-            giaTamTinh = giaTamTinh.add(price.multiply(BigDecimal.valueOf(qty)));
+        if ("HOAN_THANH".equals(hd.getTrangThaiHoaDon().getMa())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Đã in hóa đơn trước đó rồi"));
         }
 
-        BigDecimal totalAmount = new BigDecimal(payload.get("amount").toString());
-        hd.setGiaTamThoi(giaTamTinh);
-        hd.setGiaTriKhuyenMai(giaTamTinh.subtract(totalAmount));
-        hd.setGiaTong(totalAmount);
+        TrangThaiHoaDon ttHoanThanh = trangThaiRepo.findByMa("HOAN_THANH");
+        hd.setTrangThaiHoaDon(ttHoanThanh);
         hd.setNgayThanhToan(new Date());
-
-        String pMethod = payload.get("method") != null ? payload.get("method").toString() : "ONLINE";
-
-        if (voucherId != null) {
-            MaGiamGia voucher = maGiamGiaRepo.findById(voucherId).orElse(null);
-            if (voucher != null) {
-                hd.setMaGiamGia(voucher);
-                int luotMoi = voucher.getLuotSuDung() + 1;
-                voucher.setLuotSuDung(luotMoi);
-                if (luotMoi >= voucher.getSoLuong()) voucher.setTrangThai(false);
-                maGiamGiaRepo.save(voucher);
-            }
-        }
-
-        hd.setTrangThaiHoaDon(trangThaiRepo.findByMa("HOAN_THANH"));
         hoaDonRepo.save(hd);
 
-        thanhToanRepo.save(ThanhToan.builder().hoaDon(hd).soTien(totalAmount).phuongThuc(pMethod).trangThai("THANH_CONG").nhanVien(getLoggedInNhanVien()).build());
-        lichSuRepo.save(LichSuHoaDon.builder().hoaDon(hd).trangThaiHoaDon(hd.getTrangThaiHoaDon()).ghiChu("Thanh toán " + pMethod + " thành công").nhanVien(getLoggedInNhanVien()).build());
+        List<ThanhToan> tts = thanhToanRepo.findByHoaDon_Id(hd.getId());
+        if (tts != null && !tts.isEmpty()) {
+            ThanhToan tt = tts.get(0);
+            tt.setTrangThai("THANH_CONG");
+            tt.setNgayThanhToan(new Date());
+            thanhToanRepo.save(tt);
+        }
 
-        // CHỈ TRẢ VỀ ID CHO REQUEST CHẠY ĐẦU TIÊN NÀY
-        return ResponseEntity.ok(Map.of(
-                "message", "Thành công",
-                "id", hd.getId()
-        ));
+        lichSuRepo.save(LichSuHoaDon.builder()
+                .hoaDon(hd)
+                .trangThaiHoaDon(ttHoanThanh)
+                .ghiChu("Thanh toán Online thành công")
+                .nhanVien(getLoggedInNhanVien())
+                .build());
+
+        return ResponseEntity.ok(Map.of("message", "Thành công", "id", hd.getId()));
     }
 
-    // 🌟 SỬA LỖI MOMO VÀ VNPAY TRẢ VỀ SAI CÚ PHÁP
     @RequestMapping(value = "/momo-callback", method = {RequestMethod.GET, RequestMethod.POST})
     public void momoCallback(HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
         String queryString = request.getQueryString();
         String redirectUrl = "http://localhost:8080/admin";
 
-        // Nếu QueryString rỗng (do MoMo dùng POST), tự động móc dữ liệu từ Body ra để ghép thành URL
         if (queryString == null || queryString.isEmpty()) {
             StringBuilder sb = new StringBuilder();
             for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
@@ -473,9 +460,7 @@ public class PosApi {
         if (queryString != null && !queryString.isEmpty()) {
             redirectUrl += "?" + queryString;
         }
-        redirectUrl += "#pos"; // Đẩy về đúng tab POS
-
-        // Dùng sendRedirect nguyên thủy của Servlet để trình duyệt không bao giờ bị lỗi URL
+        redirectUrl += "#pos";
         response.sendRedirect(redirectUrl);
     }
 
@@ -503,7 +488,6 @@ public class PosApi {
     public ResponseEntity<?> applyVoucher(@RequestBody Map<String, Object> payload) {
         String code = (String) payload.get("code");
         List<Map<String, Object>> cart = (List<Map<String, Object>>) payload.get("cart");
-        // 🌟 Lấy thêm ID Khách hàng từ payload (nếu có chọn khách)
         Object customerIdObj = payload.get("customerId");
 
         Optional<MaGiamGia> voucherOpt = maGiamGiaRepo.findByMaCode(code);
@@ -516,7 +500,6 @@ public class PosApi {
             return ResponseEntity.badRequest().body(Map.of("message", "MÃ GIẢM GIÁ ĐÃ HẾT HẠN HOẶC HẾT LƯỢT SỬ DỤNG"));
         }
 
-        // 🌟 BỔ SUNG: KIỂM TRA MỖI KHÁCH 1 LẦN NGAY LÚC ÁP MÃ
         if (customerIdObj != null && !customerIdObj.toString().trim().isEmpty()) {
             Integer cId = Integer.valueOf(customerIdObj.toString());
             boolean daSuDung = hoaDonRepo.existsByKhachHangIdAndMaGiamGiaIdAndTrangThaiHoaDon_MaNot(cId, v.getId(), "DA_HUY");
@@ -697,7 +680,6 @@ public class PosApi {
         return ResponseEntity.ok(responseData);
     }
 
-    // 🌟 API Lấy danh sách ID mã giảm giá của một khách hàng cụ thể (Dành cho POS)
     @GetMapping("/customers/{id}/used-vouchers")
     public ResponseEntity<?> getCustomerUsedVouchers(@PathVariable Integer id) {
         List<Integer> usedIds = hoaDonRepo.findByKhachHangIdOrderByNgayTaoDesc(id).stream()

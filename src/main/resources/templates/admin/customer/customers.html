@@ -997,14 +997,35 @@
         },
 
         async saveCustomer() {
+            // 🌟 ĐÃ FIX: Lấy dữ liệu và gán biến gọn gàng
+            const nameInput = document.getElementById('inpName').value.trim();
+            const phoneInput = document.getElementById('inpPhone').value.trim();
+            const emailInput = document.getElementById('inpEmail').value.trim();
+
+            // 🌟 ĐÃ FIX: Chặn lỗi bằng Regex ngay trên giao diện cho siêu mượt
+            if (!nameInput || !phoneInput) {
+                window.toast('Vui lòng nhập đầy đủ Tên và Số điện thoại!', 'warning');
+                return;
+            }
+            if (!/^0[0-9]{9}$/.test(phoneInput)) {
+                window.toast('Số điện thoại phải đủ 10 số và bắt đầu bằng số 0!', 'warning');
+                document.getElementById('inpPhone').focus();
+                return;
+            }
+            if (emailInput && !/^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$/.test(emailInput)) {
+                window.toast('Email không đúng định dạng!', 'warning');
+                document.getElementById('inpEmail').focus();
+                return;
+            }
+
             window.toastConfirm("Xác nhận lưu", "Bạn có chắc chắn muốn lưu thông tin khách hàng này vào hệ thống?", async () => {
                 const btn = document.getElementById('btnSave');
                 btn.innerHTML = 'ĐANG XỬ LÝ...'; btn.disabled = true;
 
                 const payload = {
-                    hoTen: document.getElementById('inpName').value.trim(),
-                    soDienThoai: document.getElementById('inpPhone').value.trim(),
-                    email: document.getElementById('inpEmail').value.trim(),
+                    hoTen: nameInput,
+                    soDienThoai: phoneInput,
+                    email: emailInput,
                     ngaySinh: document.getElementById('inpDob').value,
                     gioiTinh: document.getElementById('inpGender').value === 'true',
                     trangThai: document.getElementById('inpStatus').checked
@@ -1022,21 +1043,15 @@
                     } catch(e) { window.toast('Lỗi kết nối khi upload ảnh.', 'error'); btn.innerHTML = 'LƯU THÔNG TIN'; btn.disabled = false; return; }
                 }
 
-                // 🌟 BỔ SUNG LẤY MÃ (ID) TỈNH/HUYỆN/XÃ VÀO PAYLOAD Ở ĐÂY
                 if (!this.state.editingId) {
                     payload.tinhThanhPho = window.CustomerApp.Address.getText('inpCity') || 'Chưa cập nhật';
                     payload.maTinh = window.CustomerApp.Address.getValue('inpCity') || null;
-
                     payload.quanHuyen = window.CustomerApp.Address.getText('inpDist') || 'Chưa cập nhật';
                     payload.maHuyen = window.CustomerApp.Address.getValue('inpDist') || null;
-
                     payload.phuongXa = window.CustomerApp.Address.getText('inpWard') || 'Chưa cập nhật';
                     payload.maXa = window.CustomerApp.Address.getValue('inpWard') || null;
-
                     payload.diaChiChiTiet = document.getElementById('inpDetail').value.trim() || 'Mua tại cửa hàng';
                 }
-
-                if (!payload.hoTen || !payload.soDienThoai) { window.toast('Vui lòng nhập đầy đủ Tên và Số điện thoại.', 'warning'); btn.innerHTML = 'LƯU THÔNG TIN'; btn.disabled = false; return; }
 
                 try {
                     const method = this.state.editingId ? 'PUT' : 'POST';
@@ -1044,8 +1059,14 @@
                     const res = await fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
 
                     if (res.ok) {
-                        window.toast(this.state.editingId ? 'Cập nhật thành công.' : 'Tạo mới thành công.', 'success');
-                        this.closeDrawer(); this.loadData();
+                        // 🌟 ĐÃ FIX: Thông báo rõ ràng Mật khẩu mặc định cho Admin
+                        if (!this.state.editingId) {
+                            window.toast('Tạo mới thành công! Mật khẩu đăng nhập mặc định là: 123456', 'success');
+                        } else {
+                            window.toast('Cập nhật thông tin thành công.', 'success');
+                        }
+                        this.closeDrawer();
+                        this.loadData();
                     } else {
                         let errorMsg = 'Yêu cầu không thể hoàn tất.';
                         try { const err = await res.json(); errorMsg = err.message || err.error || errorMsg; } catch (errJson) {}

@@ -4,133 +4,321 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập | Đăng ký - BEEMATE</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cstyle%3Epath%7Bfill%3A%231A1A1A%7D%40media(prefers-color-scheme%3Adark)%7Bpath%7Bfill%3A%23F7F5F2%7D%7D%3C%2Fstyle%3E%3Cpath d='M244.26,92.26a11.5,11.5,0,0,0-4-6.42A76.08,76.08,0,0,0,183.08,64h-3.41A60.27,60.27,0,0,0,128,24,60.27,60.27,0,0,0,76.33,64H72.92a76.08,76.08,0,0,0-57.22,21.84,11.5,11.5,0,0,0-4,6.42,12.09,12.09,0,0,0,2.19,9.45A76,76,0,0,0,60,128a76,76,0,0,0-46.07,26.29,12.09,12.09,0,0,0-2.19,9.45,11.5,11.5,0,0,0,4,6.42A76.08,76.08,0,0,0,72.92,192h5.51A59.5,59.5,0,0,0,128,232a59.5,59.5,0,0,0,49.57-40h5.51a76.08,76.08,0,0,0,57.22-21.84,11.5,11.5,0,0,0,4,6.42,12.09,12.09,0,0,0-2.19-9.45A76,76,0,0,0,196,128a76,76,0,0,0,46.07-26.29A12.09,12.09,0,0,0,244.26,92.26ZM144,206.11A36.19,36.19,0,0,1,128,208a36.19,36.19,0,0,1-16-1.89V168h32Zm0-62.11H112V112h32Zm-49.8-63.53a76.35,76.35,0,0,0,17.8,11.83v21.88a36,36,0,0,1-16,33.82Zm67.6,0a36,36,0,0,1,16,33.82V126.18A76.35,76.35,0,0,0,161.8,80.47ZM128,48a36.19,36.19,0,0,1,16,1.89V72H112V49.89A36.19,36.19,0,0,1,128,48ZM39.5,108.57A52,52,0,0,1,72.92,88h2.62a98,98,0,0,1-10.74,24H36A52.17,52.17,0,0,1,39.5,108.57Zm33.42,63.43A52,52,0,0,1,39.5,147.43,52.17,52.17,0,0,1,36,128H64.8a98,98,0,0,1,10.74,24H72.92ZM183.08,168h-2.62a98,98,0,0,1-10.74-24H220a52.17,52.17,0,0,1-3.5,19.43A52,52,0,0,1,183.08,168Zm33.42-36.57A52,52,0,0,1,183.08,88h2.62a98,98,0,0,1,10.74,24H220A52.17,52.17,0,0,1,216.5,131.43Z'%2F%3E%3C%2Fsvg%3E">    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&display=swap"
-          rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/login/login.css}">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cstyle%3Epath%7Bfill%3A%231A1A1A%7D%40media(prefers-color-scheme%3Adark)%7Bpath%7Bfill%3A%23F7F5F2%7D%7D%3C%2Fstyle%3E%3Cpath d='M244.26,92.26a11.5,11.5,0,0,0-4-6.42A76.08,76.08,0,0,0,183.08,64h-3.41A60.27,60.27,0,0,0,128,24,60.27,60.27,0,0,0,76.33,64H72.92a76.08,76.08,0,0,0-57.22,21.84,11.51,11.51,0,0,0-4.81,15.7A11.33,11.33,0,0,0,16.59,106a77.36,77.36,0,0,0,19.57,20,77.36,77.36,0,0,0-19.57,20,11.5,11.5,0,0,0,10.51,19.55A76.08,76.08,0,0,0,84.32,143.7h3.41a60.27,60.27,0,0,0,55.09,40,60.27,60.27,0,0,0,51.64-40h3.41a76.08,76.08,0,0,0,57.22,21.84,11.5,11.5,0,0,0,10.51-19.55,77.36,77.36,0,0,0-19.57-20A77.36,77.36,0,0,0,244.26,92.26Zm-164,12.35A37.33,37.33,0,0,1,111.45,82.49a53.64,53.64,0,0,1-8.52,19.58A53.64,53.64,0,0,1,111.45,121.65,37.33,37.33,0,0,1,80.25,104.61ZM128,47a37.28,37.28,0,0,1,36.57,22.1A53.51,53.51,0,0,1,128,95.53,53.51,53.51,0,0,1,91.43,69.11,37.28,37.28,0,0,1,128,47ZM91.43,134.89a53.51,53.51,0,0,1,36.57,26.42A53.51,53.51,0,0,1,164.57,134.89a37.28,37.28,0,0,1-36.57,22.1A37.28,37.28,0,0,1,91.43,134.89Zm61.64-13.24a53.64,53.64,0,0,1-8.52-19.58A53.64,53.64,0,0,1,153.07,82.49a37.33,37.33,0,0,1-31.2,22.12A37.33,37.33,0,0,1,153.07,121.65Zm71.55,2.16a53.86,53.86,0,0,1-38.38-16.71A60,60,0,0,0,195.4,94a53.86,53.86,0,0,1,38.38-16.71A53.86,53.86,0,0,1,224.62,123.81ZM31.38,80.19A53.86,53.86,0,0,1,69.76,96.9a60,60,0,0,0,9.16,13.06,53.86,53.86,0,0,1-38.38,16.71A53.86,53.86,0,0,1,31.38,80.19Z'/%3E%3C/svg%3E">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* Checkbox vuông, đồng màu với theme */
-        .checkbox-label input[type="checkbox"] {
-            appearance: none;
-            -webkit-appearance: none;
-            width: 15px;
-            height: 15px;
-            border: 1.5px solid var(--accent, #c8a96e);
-            border-radius: 2px;
-            background: transparent;
-            cursor: pointer;
-            flex-shrink: 0;
-            position: relative;
-            transition: background 0.2s, border-color 0.2s;
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #fafafa; color: #111; position: relative; overflow: hidden; }
+
+        .bg-shapes { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+        .shape { position: absolute; filter: blur(60px); border-radius: 50%; animation: float 10s infinite ease-in-out; }
+        .shape-1 { width: 400px; height: 400px; background: rgba(0, 0, 0, 0.05); top: -100px; left: -100px; animation-delay: 0s; }
+        .shape-2 { width: 300px; height: 300px; background: rgba(0, 0, 0, 0.03); bottom: -50px; right: -50px; animation-delay: -2s; }
+        .shape-3 { width: 200px; height: 200px; background: rgba(0, 0, 0, 0.04); top: 50%; left: 50%; transform: translate(-50%, -50%); animation-delay: -4s; }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
         }
-        .checkbox-label input[type="checkbox"]:checked {
-            background: var(--accent, #c8a96e);
-            border-color: var(--accent, #c8a96e);
-        }
-        .checkbox-label input[type="checkbox"]:checked::after {
-            content: '';
-            position: absolute;
-            left: 3px;
-            top: 0px;
-            width: 5px;
-            height: 9px;
-            border: 2px solid #fff;
-            border-top: none;
-            border-left: none;
-            transform: rotate(45deg);
-        }
+
+        .auth-container { width: 100%; max-width: 420px; padding: 20px; z-index: 1; }
+        .auth-card { background: #fff; border-radius: 16px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); overflow: hidden; border: 1px solid #eee; }
+
+        .auth-header { padding: 30px 30px 20px; text-align: center; }
+        .logo-wrap { display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; background: #000; border-radius: 14px; margin-bottom: 16px; box-shadow: 0 8px 16px rgba(0,0,0,0.15); }
+        .logo-wrap svg { width: 32px; height: 32px; fill: #fff; }
+        .auth-title { font-size: 22px; font-weight: 800; color: #000; margin-bottom: 6px; letter-spacing: -0.5px; }
+        .auth-subtitle { font-size: 14px; color: #666; font-weight: 500; }
+
+        .auth-tabs { display: flex; border-bottom: 1px solid #eee; padding: 0 30px; }
+        .tab-btn { flex: 1; padding: 12px 0; background: none; border: none; font-size: 14px; font-weight: 700; color: #888; cursor: pointer; position: relative; transition: 0.3s; }
+        .tab-btn::after { content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background: #000; transform: scaleX(0); transition: 0.3s; transform-origin: center; }
+        .tab-btn.active { color: #000; }
+        .tab-btn.active::after { transform: scaleX(1); }
+
+        .auth-body { padding: 30px; position: relative; min-height: 320px; }
+        .form-view { position: absolute; inset: 0; padding: 30px; opacity: 0; pointer-events: none; transition: 0.3s ease; transform: translateX(20px); }
+        .form-view.active { opacity: 1; pointer-events: auto; transform: translateX(0); position: relative; padding: 0; }
+
+        .form-group { margin-bottom: 20px; position: relative; }
+        .form-label { display: block; font-size: 12px; font-weight: 700; color: #333; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-input { width: 100%; height: 48px; padding: 0 16px; font-size: 14px; background: #f9f9f9; border: 1px solid #e5e5e5; border-radius: 8px; outline: none; transition: 0.2s; color: #000; }
+        .form-input:focus { border-color: #000; background: #fff; box-shadow: 0 0 0 4px rgba(0,0,0,0.05); }
+
+        .toggle-pw-btn { position: absolute; right: 12px; bottom: 13px; background: none; border: none; color: #888; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
+        .toggle-pw-btn:hover { color: #000; }
+
+        .btn-submit { width: 100%; height: 48px; background: #000; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; }
+        .btn-submit:hover { background: #222; transform: translateY(-2px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+        .btn-submit:active { transform: translateY(0); }
+
+        .alert-box { padding: 12px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 10px; margin-bottom: 20px; animation: slideDown 0.3s ease; }
+        .alert-error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+        .alert-success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .divider { display: flex; align-items: center; text-align: center; margin: 24px 0; color: #aaa; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #eee; }
+        .divider:not(:empty)::before { margin-right: .5em; }
+        .divider:not(:empty)::after { margin-left: .5em; }
+
+        .btn-google { width: 100%; height: 48px; background: #fff; color: #333; border: 1px solid #e5e5e5; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-google:hover { background: #f9f9f9; border-color: #ccc; }
+        .btn-google svg { width: 20px; height: 20px; }
+
+        .footer-links { text-align: center; margin-top: 20px; font-size: 13px; font-weight: 500; color: #666; }
+        .footer-links a { color: #000; text-decoration: none; font-weight: 700; transition: 0.2s; }
+        .footer-links a:hover { text-decoration: underline; }
+
+        /* 🌟 CSS MODAL QUÊN MẬT KHẨU */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); opacity: 0; transition: 0.3s; }
+        .modal-overlay.show { display: flex; opacity: 1; }
+        .modal-box { background: #fff; width: 400px; padding: 30px; border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); transform: scale(0.9); transition: 0.3s; }
+        .modal-overlay.show .modal-box { transform: scale(1); }
+        .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 10px; color: #000; }
+        .modal-desc { font-size: 13px; color: #666; margin-bottom: 20px; line-height: 1.5; }
+        .btn-cancel { width: 100%; height: 48px; background: #f4f4f5; color: #333; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .btn-cancel:hover { background: #e4e4e7; }
     </style>
 </head>
 <body>
-<div class="auth-wrapper">
-    <div class="auth-logo">B E E <span style="color: var(--accent, #c8a96e);">M A T E</span></div>
-    <a href="/customer" style="display: block; text-align: center; font-size: 12px; color: #aaa; margin-top: -8px; margin-bottom: 16px; text-decoration: none; letter-spacing: 0.03em;">
-        ← Về trang chủ
-    </a>
-    <div class="auth-tabs">
-        <button class="auth-tab active" onclick="switchTab('login')">Đăng nhập</button>
-        <button class="auth-tab" onclick="switchTab('register')">Đăng ký nhanh</button>
-    </div>
-    <div id="form-login" class="auth-form active">
 
-        <div th:if="${param.error}">
-            <div th:if="${param.error[0] == 'disabled'}" class="error-message">
-                Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ với Quản trị viên!
-            </div>
-            <div th:if="${param.error[0] == 'invalid' || param.error[0] == 'true'}" class="error-message">
-                Tài khoản hoặc mật khẩu không chính xác.
-            </div>
-        </div>
-
-        <div th:if="${param.logout}"
-             style="background: #f0fdf4; color: #166534; padding: 12px 16px; font-size: 13px; border-left: 3px solid #166534; margin-bottom: 24px;">
-            Bạn đã đăng xuất thành công.
-        </div>
-        <div th:if="${param.registered}"
-             style="background: #f0fdf4; color: #166534; padding: 12px 16px; font-size: 13px; border-left: 3px solid #166534; margin-bottom: 24px;">
-            Đăng ký tài khoản thành công! Vui lòng đăng nhập.
-        </div>
-        <div th:if="${param.regError}" class="error-message" th:text="${param.regError}">
-            Lỗi đăng ký
-        </div>
-
-        <form th:action="@{/login}" method="POST">
-            <div class="form-group">
-                <label class="form-label">Số điện thoại / Tên đăng nhập</label>
-                <input type="text" name="username" class="form-input" placeholder="Nhập số điện thoại..." required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Mật khẩu</label>
-                <input type="password" name="password" id="login-pw" class="form-input" placeholder="Nhập mật khẩu..."
-                       required>
-                <button type="button" class="toggle-pw-btn" onclick="togglePassword('login-pw')">
-                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="1.5"
-                         fill="none">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                        <circle cx="12" cy="12" r="3"/>
-                    </svg>
-                </button>
-            </div>
-            <div class="form-options">
-                <label class="checkbox-label">
-                    <input type="checkbox" name="remember-me"> Ghi nhớ tôi
-                </label>
-                <a href="#" class="forgot-link">Quên mật khẩu?</a>
-            </div>
-            <button type="submit" class="btn-submit">Đăng nhập</button>
-        </form>
-    </div>
-
-    <div id="form-register" class="auth-form">
-        <form th:action="@{/register}" method="POST" id="registerForm">
-            <div class="form-group">
-                <label class="form-label">Họ và Tên</label>
-                <input type="text" name="hoTen" class="form-input" placeholder="VD: Nguyễn Văn A" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Số điện thoại</label>
-                <input type="tel" name="soDienThoai" id="reg-phone" class="form-input"
-                       placeholder="Dùng để đăng nhập..." pattern="^0[0-9]{9}$"
-                       title="Vui lòng nhập đúng số điện thoại (VD: 0987654321)" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Mật khẩu</label>
-                <input type="password" name="password" id="reg-pw" class="form-input" placeholder="Tối thiểu 8 ký tự..."
-                       required>
-                <button type="button" class="toggle-pw-btn" onclick="togglePassword('reg-pw')">
-                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="1.5"
-                         fill="none">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                        <circle cx="12" cy="12" r="3"/>
-                    </svg>
-                </button>
-            </div>
-            <button type="submit" class="btn-submit">Tạo tài khoản</button>
-        </form>
-    </div>
+<div class="bg-shapes">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
 </div>
-<script th:src="@{/js/login/login.js}"></script>
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+<!--            <div class="logo-wrap">-->
+<!--                <a href="/oauth2/authorization/google" class="btn-google" style="text-decoration:none;">-->
+<!--                    <img src="https://img.icons8.com/color/24/000000/google-logo.png" alt="Google Logo"/>-->
+<!--                    Đăng nhập bằng Google-->
+<!--                </a>-->
+<!--            </div>-->
+            <h1 class="auth-title">Chào mừng trở lại</h1>
+                    <p class="auth-subtitle">Đăng nhập để tiếp tục mua sắm cùng BeeMate</p>
+            </div>
+
+            <div class="auth-tabs">
+                <button class="tab-btn active" onclick="switchTab('login')">Đăng nhập</button>
+                <button class="tab-btn" onclick="switchTab('register')">Đăng ký mới</button>
+            </div>
+
+            <div class="auth-body">
+                <form id="view-login" class="form-view active" action="/login" method="post">
+                    <div th:if="${param.error}" class="alert-box alert-error">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        Tài khoản hoặc mật khẩu không chính xác!
+                    </div>
+                    <div th:if="${param.logout}" class="alert-box alert-success">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+                        Bạn đã đăng xuất an toàn!
+                    </div>
+                    <div th:if="${param.registered}" class="alert-box alert-success">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+                        Đăng ký thành công! Bạn có thể đăng nhập ngay.
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Tên đăng nhập (SĐT)</label>
+                        <input type="text" name="username" class="form-input" placeholder="Nhập số điện thoại..." required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Mật khẩu</label>
+                        <input type="password" name="password" id="login-pw" class="form-input" placeholder="••••••••" required>
+                        <button type="button" class="toggle-pw-btn" onclick="togglePassword('login-pw')">
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="1.5" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <label style="font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; cursor: pointer; color: #555;">
+                            <input type="checkbox" name="remember-me" style="accent-color: #000; width: 14px; height: 14px;"> Ghi nhớ đăng nhập
+                        </label>
+                        <a href="javascript:void(0)" onclick="openForgotModal()" style="font-size: 13px; font-weight: 700; color: #2563eb; text-decoration: none;">Quên mật khẩu?</a>
+                    </div>
+
+                    <button type="submit" class="btn-submit">
+                        Đăng nhập <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </button>
+
+                    <div class="divider">hoặc tiếp tục với</div>
+                    <a href="/oauth2/authorization/google" class="btn-google" style="text-decoration:none;">
+                        <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                        Đăng nhập bằng Google
+                    </a>
+                </form>
+
+                <form id="view-register" class="form-view" action="/register" method="post">
+                    <div th:if="${param.regError}" class="alert-box alert-error">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        <span th:text="${param.regError}"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Họ và Tên</label>
+                        <input type="text" name="hoTen" class="form-input" placeholder="VD: Nguyễn Văn A" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Số điện thoại</label>
+                        <input type="tel" name="soDienThoai" id="reg-phone" class="form-input"
+                               placeholder="Dùng để đăng nhập..." pattern="^0[0-9]{9}$"
+                               title="Vui lòng nhập đúng số điện thoại (VD: 0987654321)" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" class="form-input" placeholder="Dùng để lấy lại mật khẩu..." required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Mật khẩu</label>
+                        <input type="password" name="password" id="reg-pw" class="form-input" placeholder="Tối thiểu 8 ký tự..."
+                               required>
+                        <button type="button" class="toggle-pw-btn" onclick="togglePassword('reg-pw')">
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="1.5" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+
+                    <button type="submit" class="btn-submit">Tạo tài khoản ngay</button>
+                    <div class="footer-links">Đã có tài khoản? <a href="#" onclick="switchTab('login')">Đăng nhập</a></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="forgotModal">
+        <div class="modal-box">
+            <h3 class="modal-title">Khôi phục mật khẩu</h3>
+            <p class="modal-desc" id="forgotDesc">Vui lòng nhập địa chỉ Email đã đăng ký. Hệ thống sẽ gửi một mã OTP gồm 6 chữ số để xác thực.</p>
+
+            <div id="step1">
+                <div class="form-group">
+                    <input type="email" id="forgotEmail" class="form-input" placeholder="Nhập Email của bạn...">
+                </div>
+                <button class="btn-submit" id="btnSendOtp" onclick="sendForgotOtp()">GỬI MÃ OTP</button>
+            </div>
+
+            <div id="step2" style="display: none;">
+                <div class="form-group">
+                    <input type="text" id="forgotOtp" class="form-input" placeholder="Nhập mã 6 số (------)" style="text-align: center; letter-spacing: 10px; font-weight: bold; font-size: 20px;" maxlength="6">
+                </div>
+                <button class="btn-submit" id="btnVerifyOtp" onclick="verifyForgotOtp()">XÁC NHẬN MÃ</button>
+            </div>
+
+            <button class="btn-cancel" onclick="closeForgotModal()">HỦY BỎ</button>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.form-view').forEach(v => v.classList.remove('active'));
+
+            const isLogin = tab === 'login';
+            document.querySelector(`.tab-btn:nth-child(${isLogin ? 1 : 2})`).classList.add('active');
+            document.getElementById(`view-${tab}`).classList.add('active');
+
+            // Đổi Header cho mượt
+            document.querySelector('.auth-title').textContent = isLogin ? 'Chào mừng trở lại' : 'Đăng ký tài khoản';
+            document.querySelector('.auth-subtitle').textContent = isLogin ? 'Đăng nhập để tiếp tục mua sắm cùng BeeMate' : 'Trở thành thành viên để nhận ngàn ưu đãi';
+        }
+
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+            } else {
+                input.type = 'password';
+            }
+        }
+
+        // 🌟 SCRIPT TỰ ĐỘNG ĐIỀN DỮ LIỆU SAU KHI ĐĂNG KÝ
+        document.getElementById('view-register').addEventListener('submit', function() {
+            const phone = document.getElementById('reg-phone').value;
+            const pw = document.getElementById('reg-pw').value;
+            // Lưu tạm vào Session (an toàn hơn Cookie, tự xóa khi đóng tab)
+            sessionStorage.setItem('temp_reg_phone', phone);
+            sessionStorage.setItem('temp_reg_pw', pw);
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mở sẵn tab đăng ký nếu có lỗi đăng ký
+            if (window.location.search.includes('regError')) switchTab('register');
+
+            // Tự động điền dữ liệu nếu vừa đăng ký thành công
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('registered') === 'true') {
+                const tempPhone = sessionStorage.getItem('temp_reg_phone');
+                const tempPw = sessionStorage.getItem('temp_reg_pw');
+                if (tempPhone && tempPw) {
+                    document.querySelector('input[name="username"]').value = tempPhone;
+                    document.querySelector('input[name="password"]').value = tempPw;
+                    // Xóa luôn để bảo mật
+                    sessionStorage.removeItem('temp_reg_phone');
+                    sessionStorage.removeItem('temp_reg_pw');
+                }
+            }
+        });
+
+        // 🌟 SCRIPT XỬ LÝ QUÊN MẬT KHẨU
+        function openForgotModal() {
+            document.getElementById('forgotModal').classList.add('show');
+            document.getElementById('step1').style.display = 'block';
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('forgotEmail').value = '';
+            document.getElementById('forgotOtp').value = '';
+            document.getElementById('forgotDesc').textContent = 'Vui lòng nhập địa chỉ Email đã đăng ký. Hệ thống sẽ gửi một mã OTP gồm 6 chữ số để xác thực.';
+        }
+
+        function closeForgotModal() {
+            document.getElementById('forgotModal').classList.remove('show');
+        }
+
+        async function sendForgotOtp() {
+            const email = document.getElementById('forgotEmail').value.trim();
+            if (!email) { alert("Vui lòng nhập Email!"); return; }
+
+            const btn = document.getElementById('btnSendOtp');
+            btn.disabled = true; btn.textContent = 'Đang gửi...';
+
+            try {
+                const res = await fetch(`/forgot-password/send-otp?email=${encodeURIComponent(email)}`, { method: 'POST' });
+                const msg = await res.text();
+                if (res.ok) {
+                    document.getElementById('step1').style.display = 'none';
+                    document.getElementById('step2').style.display = 'block';
+                    document.getElementById('forgotDesc').innerHTML = `Mã xác thực đã được gửi tới <b>${email}</b>. Vui lòng kiểm tra hộp thư.`;
+                } else {
+                    alert(msg);
+                }
+            } catch (e) { alert("Lỗi mạng, không thể gửi yêu cầu!"); }
+            finally { btn.disabled = false; btn.textContent = 'GỬI MÃ OTP'; }
+        }
+
+        async function verifyForgotOtp() {
+            const email = document.getElementById('forgotEmail').value.trim();
+            const otp = document.getElementById('forgotOtp').value.trim();
+            if (otp.length < 6) { alert("Vui lòng nhập đủ 6 số OTP!"); return; }
+
+            const btn = document.getElementById('btnVerifyOtp');
+            btn.disabled = true; btn.textContent = 'Đang xác thực...';
+
+            try {
+                const res = await fetch(`/forgot-password/reset?email=${encodeURIComponent(email)}&otp=${encodeURIComponent(otp)}`, { method: 'POST' });
+                const msg = await res.text();
+                if (res.ok) {
+                    alert(msg);
+                    closeForgotModal();
+                    document.querySelector('input[name="username"]').focus(); // Focus vào ô đăng nhập để khách dùng mật khẩu mới
+                } else {
+                    alert(msg);
+                }
+            } catch (e) { alert("Lỗi mạng, không thể xác thực!"); }
+            finally { btn.disabled = false; btn.textContent = 'XÁC NHẬN MÃ'; }
+        }
+    </script>
 </body>
 </html>

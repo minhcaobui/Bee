@@ -111,7 +111,7 @@ public class MaGiamGiaApi {
     @PostMapping
     @Transactional
     public ResponseEntity<?> create(@RequestBody MaGiamGia body) {
-        validateVoucher(body);
+        validateVoucherLogic(body);
         if (body.getMaCode() == null || body.getMaCode().trim().isEmpty()) {
             body.setMaCode(generateCode());
         } else {
@@ -120,7 +120,6 @@ public class MaGiamGiaApi {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã Voucher này đã tồn tại!");
             }
         }
-        validateVoucher(body);
         body.setLuotSuDung(0);
         if (body.getTrangThai() == null) body.setTrangThai(true);
         if (body.getChoPhepCongDon() == null) body.setChoPhepCongDon(false);
@@ -154,10 +153,9 @@ public class MaGiamGiaApi {
     @PutMapping("/{id}")
     @Transactional
     public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody MaGiamGia body) {
-        validateVoucher(body);
+        validateVoucherLogic(body);
         MaGiamGia entity = voucherRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy thông tin mã giảm giá yêu cầu."));
-        validateVoucher(body);
         if (entity.getLuotSuDung() > 0) {
             if (!entity.getGiaTriGiamGia().equals(body.getGiaTriGiamGia()) ||
                     !entity.getLoaiGiamGia().equals(body.getLoaiGiamGia())) {
@@ -203,57 +201,22 @@ public class MaGiamGiaApi {
         return ResponseEntity.ok(Collections.singletonMap("message", message));
     }
 
-    private void validateVoucher(MaGiamGia body) {
-        if (body.getTen() == null || body.getTen().trim().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên hiển thị mã giảm giá không được để trống.");
-        }
-        if (body.getNgayBatDau() == null || body.getNgayKetThuc() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vui lòng thiết lập đầy đủ thời gian bắt đầu và kết thúc.");
-        }
-        if (body.getNgayKetThuc().isBefore(body.getNgayBatDau().plusMinutes(5))) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Thời hạn sử dụng mã phải có độ dài tối thiểu 5 phút.");
-        }
-        if (body.getSoLuong() == null || body.getSoLuong() <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Số lượng phát hành tối thiểu phải từ 1 mã trở lên.");
-        }
-        if ("PERCENTAGE".equals(body.getLoaiGiamGia())) {
-            if (body.getGiaTriGiamGia().compareTo(BigDecimal.valueOf(50)) > 0 || body.getGiaTriGiamGia().compareTo(BigDecimal.ONE) < 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tỷ lệ chiết khấu không hợp lệ (Yêu cầu từ 1% - 50%).");
-            }
-            if (body.getGiaTriGiamGiaToiDa() == null || body.getGiaTriGiamGiaToiDa().compareTo(BigDecimal.ZERO) <= 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vui lòng thiết lập hạn mức giảm tối đa cho loại hình chiết khấu theo %.");
-            }
-        } else {
-            if (body.getGiaTriGiamGia().compareTo(BigDecimal.valueOf(1000)) < 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Giá trị chiết khấu tối thiểu phải từ 1.000 VNĐ.");
-            }
-            if (body.getDieuKien() != null && body.getDieuKien().compareTo(BigDecimal.ZERO) > 0) {
-                BigDecimal limit = body.getDieuKien().multiply(new BigDecimal("0.5"));
-                if (body.getGiaTriGiamGia().compareTo(limit) > 0) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Để đảm bảo ngân sách, mức giảm không được vượt quá 50% giá trị đơn tối thiểu.");
-                }
-            }
-            body.setGiaTriGiamGiaToiDa(null);
-        }
-        if (body.getDieuKien() == null || body.getDieuKien().compareTo(BigDecimal.ZERO) < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Giá trị đơn hàng tối thiểu không hợp lệ.");
-        }
-    }
 
     private String generateCode() {
-        int randomNum = 10000 + new Random().nextInt(90000);
-        return "VC" + randomNum;
+        return "VOUCHER" + System.currentTimeMillis();
     }
 
     @Scheduled(fixedRate = 60000)
     @Transactional
     public void autoUpdateVoucherStatus() {
+        // 🌟 Lọc dữ liệu bằng SQL thay vì kéo toàn bộ DB lên RAM
         List<MaGiamGia> expiredVouchers = voucherRepo.findAll().stream()
                 .filter(v -> v.getTrangThai() && (
-                        v.getNgayKetThuc().isBefore(LocalDateTime.now()) ||
+                        (v.getNgayKetThuc() != null && v.getNgayKetThuc().isBefore(LocalDateTime.now())) ||
                                 v.getLuotSuDung() >= v.getSoLuong()
                 ))
                 .collect(Collectors.toList());
+
         if (!expiredVouchers.isEmpty()) {
             expiredVouchers.forEach(v -> v.setTrangThai(false));
             voucherRepo.saveAll(expiredVouchers);

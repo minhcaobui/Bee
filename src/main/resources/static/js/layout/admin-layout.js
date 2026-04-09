@@ -248,3 +248,9 @@ const NotifApp = {
 document.addEventListener("DOMContentLoaded", () => {
     NotifApp.init();
 });
+
+setInterval(() => {
+    if(typeof fetchNotifications === 'function') {
+        fetchNotifications();
+    }
+}, 30000);

@@ -17,7 +17,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 @RestController
 @RequestMapping("/api/danh-muc")
@@ -27,14 +26,9 @@ public class DanhMucApi {
     private final DanhMucRepository danhMucRepository;
     private final SanPhamRepository sanPhamRepository;
 
+    // 🌟 ĐÃ FIX: Sinh mã bằng Timestamp, an toàn tuyệt đối, không sợ vô hạn
     private String generateMa() {
-        String ma;
-        Random random = new Random();
-        do {
-            int randomNum = 1000 + random.nextInt(9000);
-            ma = "DM" + randomNum;
-        } while (danhMucRepository.existsByMaIgnoreCase(ma));
-        return ma;
+        return "DM" + System.currentTimeMillis();
     }
 
     @GetMapping
@@ -63,17 +57,20 @@ public class DanhMucApi {
         String ma = (body.getMa() == null || body.getMa().trim().isEmpty())
                 ? generateMa()
                 : body.getMa().trim().toUpperCase();
-        if (ma.length() > 20) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã tối đa 20 ký tự thôi cu!");
+
+        // 🌟 ĐÃ FIX: Văn phong báo lỗi chuyên nghiệp
+        if (ma.length() > 20) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã thuộc tính tối đa 20 ký tự!");
         if (!ma.matches("^[A-Z0-9_]*$")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã chỉ được chứa chữ hoa, số và dấu gạch dưới (_)");
         }
-        if (ten.isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên đéo được để trống!");
+        if (ten.isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên thuộc tính không được để trống!");
         if (ten.length() > 100)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên dài quá (max 100), bớt văn vở lại!");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên thuộc tính tối đa 100 ký tự!");
         if (danhMucRepository.existsByTenIgnoreCase(ten))
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên này có thằng dùng rồi!");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên danh mục này đã tồn tại!");
         if (danhMucRepository.existsByMaIgnoreCase(ma))
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã này bị trùng rồi!");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã danh mục này đã tồn tại!");
+
         DanhMuc entity = new DanhMuc();
         entity.setMa(ma);
         entity.setTen(ten);
@@ -90,13 +87,23 @@ public class DanhMucApi {
         String newTen = body.getTen() != null ? body.getTen().trim() : "";
         if (newTen.isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên không được để trống!");
         if (newTen.length() > 100)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên tối đa 100 ký tự thôi!");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên tối đa 100 ký tự!");
         if (!entity.getTen().equalsIgnoreCase(newTen) && danhMucRepository.existsByTenIgnoreCase(newTen)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên này đã tồn tại ở bản ghi khác!");
         }
+
+        // 🌟 ĐÃ FIX BUG LÁCH LUẬT: Check điều kiện khi người dùng gạt tắt trạng thái ở form Edit
+        Boolean newTrangThai = body.getTrangThai();
+        if (newTrangThai != null && !newTrangThai && Boolean.TRUE.equals(entity.getTrangThai())) {
+            boolean isUsed = sanPhamRepository.existsByDanhMuc_IdAndTrangThaiTrue(id);
+            if (isUsed) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Không thể ngừng hoạt động! Đang có sản phẩm thuộc danh mục này đang được bày bán.");
+            }
+        }
+
         entity.setTen(newTen);
         if (body.getMoTa() != null) entity.setMoTa(body.getMoTa().trim());
-        entity.setTrangThai(body.getTrangThai() != null ? body.getTrangThai() : entity.getTrangThai());
+        entity.setTrangThai(newTrangThai != null ? newTrangThai : entity.getTrangThai());
         entity.setNgaySua(LocalDateTime.now());
         return danhMucRepository.save(entity);
     }

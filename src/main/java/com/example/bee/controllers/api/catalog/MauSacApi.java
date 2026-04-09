@@ -27,13 +27,7 @@ public class MauSacApi {
     private final MauSacRepository mauSacRepository;
 
     private String generateMa() {
-        String ma;
-        Random random = new Random();
-        do {
-            int randomNum = 1000 + random.nextInt(9000);
-            ma = "MS" + randomNum;
-        } while (mauSacRepository.existsByMaIgnoreCase(ma));
-        return ma;
+        return "MS" + System.currentTimeMillis(); // Đổi "CL" thành "HANG", "KT", "MS" tương ứng với từng file
     }
 
     @GetMapping
@@ -87,8 +81,16 @@ public class MauSacApi {
         if (!entity.getTen().equalsIgnoreCase(newTen) && mauSacRepository.existsByTenIgnoreCase(newTen)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Trùng tên màu!");
         }
+        Boolean newTrangThai = body.getTrangThai();
+        if (newTrangThai != null && !newTrangThai && Boolean.TRUE.equals(entity.getTrangThai())) {
+            boolean isUsed = sanPhamChiTietRepository.existsByMauSac_IdAndTrangThaiTrue(id);
+            if (isUsed) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Không thể ngừng hoạt động! Đang có sản phẩm sử dụng màu sắc này.");
+            }
+        }
+
         entity.setTen(newTen);
-        entity.setTrangThai(body.getTrangThai() != null ? body.getTrangThai() : entity.getTrangThai());
+        entity.setTrangThai(newTrangThai != null ? newTrangThai : entity.getTrangThai());
         return mauSacRepository.save(entity);
     }
 

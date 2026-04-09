@@ -98,7 +98,8 @@ public class DashBoardApi {
         double pAvg = p[2] != null ? ((Number) p[2]).doubleValue() : 0;
         double pCust = p[7] != null ? ((Number) p[7]).doubleValue() : 0;
 
-        double rate = (comp + canc) > 0 ? Math.round(comp / (comp + canc) * 100) : 0;
+        // 🌟 ĐÃ FIX: Tính tỷ lệ hoàn thành dựa trên TỔNG TOÀN BỘ ĐƠN HÀNG
+        double rate = ord > 0 ? Math.round((comp / ord) * 100.0) : 0;
 
         double revChg = calcChg(rev, pRev);
         double ordChg = calcChg(ord, pOrd);

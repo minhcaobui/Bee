@@ -7,6 +7,7 @@ import com.example.bee.entities.role.ChucVu;
 import com.example.bee.entities.user.NhanVien;
 import com.example.bee.repositories.account.TaiKhoanRepository;
 import com.example.bee.repositories.cart.GioHangRepository;
+import com.example.bee.repositories.role.ChucVuRepository;
 import com.example.bee.repositories.role.NhanVienRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ public class NhanVienApi {
     private final PasswordEncoder passwordEncoder;
     private final JavaMailSender mailSender;
     private final GioHangRepository gioHangRepository;
+    private final ChucVuRepository chucVuRepository;
 
     @Value("${spring.mail.username}")
     private String senderEmail;
@@ -148,6 +150,7 @@ public class NhanVienApi {
             @RequestParam(value = "ngaySinh", required = true) String ngaySinhStr,
             @RequestParam(value = "gioiTinh", required = false) String gioiTinh,
             @RequestParam(value = "diaChi", required = false) String diaChi,
+            @RequestParam(value = "chucVuId", required = true) Integer chucVuId,
             @RequestParam(value = "trangThai", required = false, defaultValue = "true") Boolean trangThai,
             @RequestParam(value = "hinhAnh", required = false) String hinhAnh,
             @RequestParam(value = "password", required = false) String pass,
@@ -171,26 +174,31 @@ public class NhanVienApi {
             int tuoi = Period.between(ngaySinh.toLocalDate(), hienTai).getYears();
             if (tuoi < 15) return ResponseEntity.badRequest().body("Nhân viên phải từ đủ 15 tuổi trở lên!");
 
+            ChucVu cv = chucVuRepository.findById(chucVuId)
+                    .orElseThrow(() -> new RuntimeException("Chức vụ được chọn không tồn tại!"));
+
             NhanVien target;
             boolean isNew = (id == null);
 
             if (!isNew) {
                 target = nhanVienRepository.findByIdWithTaiKhoan(id).orElseThrow(() -> new RuntimeException("Không tìm thấy NV"));
-                if (target.getChucVu() != null && target.getChucVu().getId() == 1)
-                    return ResponseEntity.badRequest().body("Thông tin Admin là bảo mật, không thể xem hoặc sửa!");
+                if (target.getChucVu() != null && target.getChucVu().getId() == 1 && chucVuId != 1) {
+                    return ResponseEntity.badRequest().body("Không thể giáng chức của Admin tối cao!");
+                }
+
                 if (nhanVienRepository.existsBySoDienThoaiAndIdNot(soDienThoai, id))
                     return ResponseEntity.badRequest().body("Số điện thoại này đã thuộc về nhân viên khác!");
-                if (nhanVienRepository.existsByEmailAndIdNot(email, id))
-                    return ResponseEntity.badRequest().body("Email/Tài khoản này đã tồn tại!");
+
+                TaiKhoan tkCheck = taiKhoanRepository.findByTenDangNhap(email).orElse(null);
+                if (tkCheck != null && (target.getTaiKhoan() == null || !tkCheck.getId().equals(target.getTaiKhoan().getId()))) {
+                    return ResponseEntity.badRequest().body("Email này đã được đăng ký cho một tài khoản khác (Nhân viên/Khách hàng)!");
+                }
             } else {
                 if (nhanVienRepository.existsBySoDienThoai(soDienThoai)) return ResponseEntity.badRequest().body("Số điện thoại đã tồn tại!");
-                if (nhanVienRepository.existsByEmail(email)) return ResponseEntity.badRequest().body("Email đã tồn tại!");
+                if (taiKhoanRepository.existsByTenDangNhap(email)) return ResponseEntity.badRequest().body("Email này đã được đăng ký tài khoản!");
 
                 target = new NhanVien();
                 target.setMa("TEMP");
-                ChucVu cv = new ChucVu();
-                cv.setId(2);
-                target.setChucVu(cv);
             }
 
             TaiKhoan tk = (target.getTaiKhoan() == null) ? new TaiKhoan() : target.getTaiKhoan();
@@ -214,12 +222,13 @@ public class NhanVienApi {
             TaiKhoan savedTk = taiKhoanRepository.save(tk);
             target.setTaiKhoan(savedTk);
 
-            // 🌟 TẠO GIỎ HÀNG TRỐNG CHO TÀI KHOẢN MỚI
             if (isNew) {
                 GioHang gioHang = new GioHang();
                 gioHang.setTaiKhoan(savedTk);
                 gioHangRepository.save(gioHang);
             }
+
+            target.setChucVu(cv);
 
             target.setHoTen(hoTen);
             target.setSoDienThoai(soDienThoai);
@@ -292,6 +301,7 @@ public class NhanVienApi {
 
         NhanVien nv = nvOpt.get();
         Map<String, Object> data = new HashMap<>();
+        data.put("id", nv.getId()); // 🌟 ĐÃ BỔ SUNG ĐỂ HỖ TRỢ KIỂM TRA TRÙNG LẶP OTP BÊN FRONTEND
         data.put("ma", nv.getMa());
         data.put("hoTen", nv.getHoTen());
         data.put("hinhAnh", nv.getHinhAnh());
@@ -354,9 +364,32 @@ public class NhanVienApi {
 
             if (nvOpt.isPresent()) {
                 NhanVien nv = nvOpt.get();
-                if (payload.containsKey("hoTen") && !payload.get("hoTen").isEmpty()) nv.setHoTen(payload.get("hoTen"));
-                if (payload.containsKey("soDienThoai") && !payload.get("soDienThoai").isEmpty()) nv.setSoDienThoai(payload.get("soDienThoai"));
-                if (payload.containsKey("email") && !payload.get("email").isEmpty()) nv.setEmail(payload.get("email"));
+
+                if (payload.containsKey("hoTen")) {
+                    String hoTen = payload.get("hoTen").trim();
+                    if (hoTen.isEmpty()) return ResponseEntity.badRequest().body(Map.of("message", "Họ tên không được để trống!"));
+                    nv.setHoTen(hoTen);
+                }
+
+                if (payload.containsKey("soDienThoai") && !payload.get("soDienThoai").isEmpty()) {
+                    String phone = payload.get("soDienThoai").trim();
+                    if (!phone.matches("^0[0-9]{9}$")) return ResponseEntity.badRequest().body(Map.of("message", "Số điện thoại phải đủ 10 số và bắt đầu bằng số 0!"));
+                    if (nhanVienRepository.existsBySoDienThoaiAndIdNot(phone, nv.getId())) {
+                        return ResponseEntity.badRequest().body(Map.of("message", "Số điện thoại này đã được người khác sử dụng!"));
+                    }
+                    nv.setSoDienThoai(phone);
+                }
+
+                if (payload.containsKey("email") && !payload.get("email").isEmpty()) {
+                    String email = payload.get("email").trim();
+                    if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$")) return ResponseEntity.badRequest().body(Map.of("message", "Email không đúng định dạng!"));
+                    TaiKhoan tkCheck = taiKhoanRepository.findByTenDangNhap(email).orElse(null);
+                    if (tkCheck != null && (nv.getTaiKhoan() == null || !tkCheck.getId().equals(nv.getTaiKhoan().getId()))) {
+                        return ResponseEntity.badRequest().body(Map.of("message", "Email này đã được đăng ký cho tài khoản khác!"));
+                    }
+                    nv.setEmail(email);
+                }
+
                 if (payload.containsKey("gioiTinh")) nv.setGioiTinh(payload.get("gioiTinh"));
                 if (payload.containsKey("diaChi")) nv.setDiaChi(payload.get("diaChi"));
                 if (payload.containsKey("hinhAnh")) nv.setHinhAnh(payload.get("hinhAnh"));
@@ -386,23 +419,20 @@ public class NhanVienApi {
         String username = authentication.getName();
         TaiKhoan tk = taiKhoanRepository.findByTenDangNhap(username).orElse(null);
 
-        if (tk == null) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Tài khoản không tồn tại"));
-        }
+        if (tk == null) return ResponseEntity.badRequest().body(Map.of("message", "Tài khoản không tồn tại"));
 
         String oldPw = payload.get("oldPassword");
         String newPw = payload.get("newPassword");
 
-        if (oldPw == null || newPw == null) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Dữ liệu không hợp lệ"));
+        if (oldPw == null || newPw == null) return ResponseEntity.badRequest().body(Map.of("message", "Dữ liệu không hợp lệ"));
+
+        if (oldPw.equals(newPw)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Mật khẩu mới không được trùng với mật khẩu hiện tại!"));
         }
 
         String passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,}).*$";
-
         if (!newPw.matches(passwordRegex)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
-                    "message", "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt!"
-            ));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt!"));
         }
 
         if (!passwordEncoder.matches(oldPw, tk.getMatKhau())) {

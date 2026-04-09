@@ -364,6 +364,18 @@ public class OrderApi {
         HoaDon hd = hdRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy hóa đơn"));
         String currentStatus = hd.getTrangThaiHoaDon().getMa();
+
+        // 🌟 BỔ SUNG: Chặn hủy đơn nếu ĐÃ THANH TOÁN ONLINE THÀNH CÔNG
+        List<ThanhToan> ttList = thanhToanRepo.findByHoaDon_Id(hd.getId());
+        boolean daThanhToanOnline = ttList.stream().anyMatch(tt ->
+                ("VNPAY".equals(tt.getPhuongThuc()) || "MOMO".equals(tt.getPhuongThuc()))
+                        && "THANH_CONG".equals(tt.getTrangThai())
+        );
+
+        if (daThanhToanOnline) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Đơn hàng đã được thanh toán trực tuyến. Vui lòng liên hệ Hotline CSKH để yêu cầu hủy và hoàn tiền!"));
+        }
+
         if ("HOAN_THANH".equals(currentStatus) || "DANG_GIAO".equals(currentStatus) || "DA_TRA".equals(currentStatus) || "DA_DOI".equals(currentStatus)) {
             return ResponseEntity.badRequest().body(Map.of("message", "Không thể hủy đơn hàng đã giao hoặc đang giao!"));
         }
@@ -433,6 +445,10 @@ public class OrderApi {
     @Transactional
     public ResponseEntity<?> checkout(@RequestBody CheckoutRequest req) {
         try {
+            if (req.chiTietDonHangs == null || req.chiTietDonHangs.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("message", "Giỏ hàng trống, không thể tạo đơn hàng!"));
+            }
             HoaDon hd = new HoaDon();
             hd.setMa("HD" + System.currentTimeMillis());
             hd.setLoaiHoaDon(1);
@@ -606,8 +622,8 @@ public class OrderApi {
                 System.out.println("Lỗi gửi Email: " + e.getMessage());
             }
 
-            return ResponseEntity.ok(Map.of("message", "Đặt hàng thành công", "maHoaDon", savedHd.getMa(), "id", savedHd.getId(), "tongTienThucTe", tongTienCuoi));
-
+// Đổi chữ tongTienCuoi thành tongTienCuoiThucTe
+            return ResponseEntity.ok(Map.of("message", "Đặt hàng thành công", "maHoaDon", savedHd.getMa(), "id", savedHd.getId(), "tongTienThucTe", tongTienCuoiThucTe));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));

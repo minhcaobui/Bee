@@ -127,8 +127,7 @@ public class KhuyenMaiApi {
     }
 
     private String generateCode() {
-        int randomNum = 100000 + new Random().nextInt(900000);
-        return "KM" + randomNum;
+        return "KM" + System.currentTimeMillis();
     }
 
     @GetMapping("/san-pham")

@@ -641,7 +641,7 @@
             clearTimeout(this.searchTimer);
             this.searchTimer = setTimeout(async () => {
                 try {
-                    const res = await fetch(`/api/pos/products/search?q=${keyword}&color=&size=`);
+                    const res = await fetch(`/api/pos/products/search?q=${encodeURIComponent(keyword)}&color=&size=`);
                     const data = await res.json();
 
                     this.currentExchangeSearchResults = data; // 🌟 Lưu kết quả vào biến tạm để chống lỗi HTML
@@ -892,7 +892,7 @@
             clearTimeout(this.searchOrdersTimer);
             this.searchOrdersTimer = setTimeout(async () => {
                 try {
-                    const res = await fetch(`/api/hoa-don/lich-su?q=${currentKeyword}&size=5&page=${page}`);
+                    const res = await fetch(`/api/hoa-don/lich-su?q=${encodeURIComponent(currentKeyword)}&size=5&page=${page}`);
                     if(!res.ok) throw new Error("Lỗi API");
                     const pageData = await res.json();
                     const data = pageData.content || pageData;
@@ -1042,17 +1042,29 @@
             if(!lyDo) { window.toast("Vui lòng nhập lý do!", "warning"); return; }
 
             const items = [];
+            let hasError = false; // 🌟 Thêm biến kiểm tra lỗi
+
             this.createCartItems.forEach((item, idx) => {
                 const chk = document.getElementById(`chk_${idx}`);
                 if(chk && chk.checked) {
-                    const qty = parseInt(document.getElementById(`qty_${idx}`).value);
-                    if(qty > 0 && qty <= item.soLuong) {
+                    const qtyStr = document.getElementById(`qty_${idx}`).value;
+                    const qty = parseInt(qtyStr);
+
+                    // 🌟 VALIDATE SỐ LƯỢNG NGHIÊM NGẶT
+                    if (isNaN(qty) || qty <= 0) {
+                        window.toast(`Số lượng trả của SP thứ ${idx + 1} không hợp lệ!`, "error");
+                        hasError = true;
+                    } else if (qty > item.soLuong) {
+                        window.toast(`SP thứ ${idx + 1} chỉ được trả tối đa ${item.soLuong} cái!`, "error");
+                        hasError = true;
+                    } else {
                         items.push({ idHoaDonChiTiet: item.idHdct, soLuong: qty });
                     }
                 }
             });
 
-            if(items.length === 0) { window.toast("Chọn ít nhất 1 sản phẩm!", "warning"); return; }
+            if(hasError) return; // 🌟 Dừng ngay lập tức nếu có ô nhập sai
+            if(items.length === 0) { window.toast("Chọn ít nhất 1 sản phẩm để đổi trả!", "warning"); return; }
 
             window.toastConfirm("XÁC NHẬN TẠO", `Tạo yêu cầu ${loai.toLowerCase()} cho hóa đơn ${maHD}?`, async () => {
                 if(window.showLoading) window.showLoading();

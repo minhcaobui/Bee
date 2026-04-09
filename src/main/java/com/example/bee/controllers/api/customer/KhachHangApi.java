@@ -24,12 +24,14 @@ import com.example.bee.repositories.role.NhanVienRepository;
 import com.example.bee.repositories.wishlist.SanPhamYeuThichRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -38,16 +40,17 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.security.SecureRandom;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/khach-hang")
 @RequiredArgsConstructor
 public class KhachHangApi {
 
+    private static final Map<String, String> otpStorageKhach = new HashMap<>();
+    private final org.springframework.mail.javamail.JavaMailSender mailSender;
+    @Value("${spring.mail.username}")
+    private String senderEmail;
     private static final SecureRandom RAND = new SecureRandom();
     private final KhachHangRepository khRepo;
     private final NhanVienRepository nvRepo;
@@ -62,14 +65,7 @@ public class KhachHangApi {
     private final com.example.bee.repositories.cart.GioHangRepository gioHangRepository;
 
     private String generateMa() {
-        long count = khRepo.count();
-        String ma;
-        do {
-            count++;
-            ma = String.format("KH%08d", count);
-
-        } while (khRepo.existsByMaIgnoreCase(ma));
-        return ma;
+        return "KH" + System.currentTimeMillis();
     }
 
     @GetMapping
@@ -222,13 +218,7 @@ public class KhachHangApi {
                 return ResponseEntity.badRequest().body(Map.of("message", "Số điện thoại đã được sử dụng bởi khách hàng khác"));
             }
 
-            if (kh.getTaiKhoan() != null && kh.getTaiKhoan().getTenDangNhap().equals(kh.getSoDienThoai())) {
-                if (!sdtNew.equals(kh.getSoDienThoai()) && taiKhoanRepository.existsByTenDangNhap(sdtNew)) {
-                    return ResponseEntity.badRequest().body(Map.of("message", "Số điện thoại này đã được đăng ký Tài khoản khác!"));
-                }
-                kh.getTaiKhoan().setTenDangNhap(sdtNew);
-            }
-
+            // 🌟 ĐÃ XÓA LOGIC TỰ ĐỘNG ĐỔI TÊN ĐĂNG NHẬP Ở ĐÂY THEO YÊU CẦU CỦA BẠN
             kh.setSoDienThoai(sdtNew);
         }
 
@@ -538,6 +528,7 @@ public class KhachHangApi {
     }
 
     @PostMapping("/{id}/dia-chi")
+    @Transactional
     public ResponseEntity<?> addAddress(@PathVariable Integer id, @RequestBody DiaChiRequest req) {
         KhachHang kh = khRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -559,6 +550,7 @@ public class KhachHangApi {
     }
 
     @DeleteMapping("/dia-chi/{idDiaChi}")
+    @Transactional
     public ResponseEntity<?> deleteAddress(@PathVariable Integer idDiaChi) {
         DiaChiKhachHang dc = dcRepo.findById(idDiaChi)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -782,6 +774,18 @@ public class KhachHangApi {
         HoaDonChiTiet hdct = hoaDonChiTietRepository.findById(orderDetailId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy chi tiết hóa đơn"));
 
+        // 🌟 BƯỚC CHẶN 1: KIỂM TRA BẢO MẬT (CHỐNG IDOR VÀ HACKER LÀM GIẢ MÃ)
+        if (hdct.getHoaDon() == null || hdct.getHoaDon().getKhachHang() == null ||
+                hdct.getHoaDon().getKhachHang().getTaiKhoan() == null ||
+                !hdct.getHoaDon().getKhachHang().getTaiKhoan().getId().equals(tk.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Bạn không có quyền đánh giá sản phẩm của đơn hàng này!"));
+        }
+
+        // 🌟 BƯỚC CHẶN 2: CHỈ ĐƠN HÀNG ĐÃ GIAO THÀNH CÔNG MỚI ĐƯỢC ĐÁNH GIÁ
+        if (hdct.getHoaDon().getTrangThaiHoaDon() == null || !"HOAN_THANH".equals(hdct.getHoaDon().getTrangThaiHoaDon().getMa())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Chỉ đơn hàng đã giao thành công mới được phép đánh giá!"));
+        }
+
         SanPham sp = hdct.getSanPhamChiTiet().getSanPham();
 
         Optional<DanhGia> existingOpt = danhGiaRepo.findByHoaDonChiTiet_Id(orderDetailId);
@@ -805,8 +809,14 @@ public class KhachHangApi {
         danhGia.setSanPham(sp);
         danhGia.setHoaDonChiTiet(hdct);
 
-        danhGia.setSoSao(req.getSoSao());
-        danhGia.setNoiDung(req.getNoiDung());
+        // Chặn lỗi nhập đánh giá rỗng (nếu Front-end lọt)
+        String noiDung = req.getNoiDung() != null ? req.getNoiDung().trim() : "";
+        if (noiDung.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Vui lòng nhập nội dung đánh giá!"));
+        }
+
+        danhGia.setSoSao(req.getSoSao() != null ? req.getSoSao() : 5);
+        danhGia.setNoiDung(noiDung);
         danhGia.setPhanLoai(req.getPhanLoai());
         danhGia.setDanhSachHinhAnh(req.getDanhSachHinhAnh());
 
@@ -921,6 +931,56 @@ public class KhachHangApi {
                 "phanLoai", phanLoai
         ));
     }
+
+    @PostMapping("/send-otp")
+    @ResponseBody
+    public ResponseEntity<?> sendOtp(@RequestParam String email) {
+        try {
+            String otp = String.format("%06d", new Random().nextInt(999999));
+            otpStorageKhach.put(email, otp);
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(senderEmail);
+            message.setTo(email);
+            message.setSubject("[BeeMate] MÃ XÁC THỰC OTP THAY ĐỔI EMAIL");
+            message.setText("Chào bạn,\n\nBạn đang thực hiện thao tác thay đổi Email trên hệ thống BeeMate.\n"
+                    + "Mã xác thực OTP của bạn là: " + otp + "\n\n"
+                    + "Vui lòng nhập mã này vào hệ thống để hoàn tất.\n"
+                    + "Trân trọng,\nBan Quản Trị Hệ Thống BeeMate.");
+            mailSender.send(message);
+            return ResponseEntity.ok("Đã gửi mã OTP thành công đến email: " + email);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Lỗi gửi Email: Mất mạng hoặc cấu hình sai!");
+        }
+    }
+
+    @PostMapping("/verify-otp")
+    @ResponseBody
+    public ResponseEntity<?> verifyOtp(@RequestParam String email, @RequestParam String otp) {
+        String savedOtp = otpStorageKhach.get(email);
+        if (savedOtp != null && savedOtp.equals(otp)) {
+            otpStorageKhach.remove(email);
+            return ResponseEntity.ok("Xác thực OTP thành công!");
+        }
+        return ResponseEntity.badRequest().body("Mã OTP không chính xác, vui lòng nhập lại!");
+    }
+
+    @GetMapping("/check-email")
+    @ResponseBody
+    public ResponseEntity<?> checkEmail(@RequestParam String email, @RequestParam(required = false) Integer id) {
+        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"))
+            return ResponseEntity.badRequest().body("Email không đúng định dạng!");
+        if (id == null) {
+            if (khRepo.existsByEmail(email))
+                return ResponseEntity.badRequest().body("Email này đã tồn tại trong hệ thống!");
+        } else {
+            if (khRepo.existsByEmailAndIdNot(email, id))
+                return ResponseEntity.badRequest().body("Email này đã thuộc về tài khoản khác!");
+        }
+        return ResponseEntity.ok("Email hợp lệ");
+    }
+
+
 
     private void mapRequestToEntity(DiaChiRequest req, DiaChiKhachHang dc) {
         dc.setHoTenNhan(req.getHoTenNhan());

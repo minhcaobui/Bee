@@ -28,13 +28,7 @@ public class HangApi {
     private final SanPhamRepository sanPhamRepository;
 
     private String generateMa() {
-        String ma;
-        Random random = new Random();
-        do {
-            int randomNum = 1000 + random.nextInt(9000);
-            ma = "HANG" + randomNum;
-        } while (hangRepository.existsByMaIgnoreCase(ma));
-        return ma;
+        return "H" + System.currentTimeMillis(); // Đổi "CL" thành "HANG", "KT", "MS" tương ứng với từng file
     }
 
     @GetMapping
@@ -59,20 +53,27 @@ public class HangApi {
     @PostMapping
     public ResponseEntity<Hang> create(@Valid @RequestBody Hang body) {
         String ten = body.getTen() != null ? body.getTen().trim() : "";
-        String ma = (body.getMa() == null || body.getMa().trim().isEmpty()) ? generateMa() : body.getMa().trim().toUpperCase();
-        if (ma.length() > 20 || !ma.matches("^[A-Z0-9_]*$")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã max 20, không dấu tiếng Việt, cho phép dấu gạch dưới!");
+        String ma = (body.getMa() == null || body.getMa().trim().isEmpty())
+                ? generateMa()
+                : body.getMa().trim().toUpperCase();
+
+        // 🌟 ĐÃ FIX: Văn phong báo lỗi chuyên nghiệp
+        if (ma.length() > 20) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã thuộc tính tối đa 20 ký tự!");
+        if (!ma.matches("^[A-Z0-9_]*$")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã chỉ được chứa chữ hoa, số và dấu gạch dưới (_)");
         }
-        if (ten.isEmpty() || ten.length() > 100)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên max 100 chữ!");
+        if (ten.isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên thuộc tính không được để trống!");
+        if (ten.length() > 100)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên thuộc tính tối đa 100 ký tự!");
         if (hangRepository.existsByTenIgnoreCase(ten))
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên hãng này có rồi!");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên hãng này đã tồn tại!");
         if (hangRepository.existsByMaIgnoreCase(ma))
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã này bị trùng!");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã hãng này đã tồn tại!");
+
         Hang entity = new Hang();
         entity.setMa(ma);
         entity.setTen(ten);
-        entity.setMoTa(body.getMoTa());
+        if (body.getMoTa() != null) entity.setMoTa(body.getMoTa().trim());
         entity.setTrangThai(body.getTrangThai() != null ? body.getTrangThai() : true);
         entity.setNgayTao(LocalDateTime.now());
         return ResponseEntity.ok(hangRepository.save(entity));
@@ -80,15 +81,28 @@ public class HangApi {
 
     @PutMapping("/{id}")
     public Hang update(@PathVariable Integer id, @Valid @RequestBody Hang body) {
-        Hang entity = hangRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Hang entity = hangRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         String newTen = body.getTen() != null ? body.getTen().trim() : "";
-        if (newTen.isEmpty() || newTen.length() > 100)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên max 100 chữ!");
-        if (!entity.getTen().equalsIgnoreCase(newTen) && hangRepository.existsByTenIgnoreCase(newTen))
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên hãng trùng rồi!");
+        if (newTen.isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên không được để trống!");
+        if (newTen.length() > 100)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên tối đa 100 ký tự!");
+        if (!entity.getTen().equalsIgnoreCase(newTen) && hangRepository.existsByTenIgnoreCase(newTen)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên này đã tồn tại ở bản ghi khác!");
+        }
+
+        // 🌟 ĐÃ FIX BUG LÁCH LUẬT: Check điều kiện khi người dùng gạt tắt trạng thái ở form Edit
+        Boolean newTrangThai = body.getTrangThai();
+        if (newTrangThai != null && !newTrangThai && Boolean.TRUE.equals(entity.getTrangThai())) {
+            boolean isUsed = sanPhamRepository.existsByHang_IdAndTrangThaiTrue(id);
+            if (isUsed) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Không thể ngừng hoạt động! Đang có sản phẩm thuộc hãng này đang được bày bán.");
+            }
+        }
+
         entity.setTen(newTen);
-        entity.setMoTa(body.getMoTa());
-        entity.setTrangThai(body.getTrangThai() != null ? body.getTrangThai() : entity.getTrangThai());
+        if (body.getMoTa() != null) entity.setMoTa(body.getMoTa().trim());
+        entity.setTrangThai(newTrangThai != null ? newTrangThai : entity.getTrangThai());
         entity.setNgaySua(LocalDateTime.now());
         return hangRepository.save(entity);
     }

@@ -211,6 +211,22 @@
 
             debounceTimer: null,
 
+            // 🌟 HÀM MỚI: BỘ LỌC CHỐNG MÃ ĐỘC XSS CỰC MẠNH
+            escapeHTML: function(str) {
+                if (!str) return '';
+                return str.replace(/[&<>'"]/g,
+                    tag => ({
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        "'": '&#39;',
+                        '"': '&quot;'
+                    }[tag] || tag)
+                );
+            },
+
+            debounceTimer: null,
+
             init: function() {
                 this.loadData();
             },
@@ -302,18 +318,25 @@
                         if(imgHtml) imgHtml = `<div class="rv-images">${imgHtml}</div>`;
                     }
 
-                    const cusName = rv.tenKhachHang || 'Khách hàng ẩn danh';
-                    const avatar = `https://ui-avatars.com/api/?name=${cusName}&background=f4f4f5&color=000`;
+                    // 🌟 ĐÃ FIX XSS: Bọc tất cả nội dung có thể nhập từ người dùng qua hàm escapeHTML
+                    const cusNameSafe = this.escapeHTML(rv.tenKhachHang) || 'Khách hàng ẩn danh';
+                    const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(cusNameSafe)}&background=f4f4f5&color=000`;
+
+                    const noiDungAnToan = this.escapeHTML(rv.noiDung);
+                    const noiDungHienThi = noiDungAnToan ? noiDungAnToan : '<i style="color:#aaa;">Khách hàng không để lại bình luận</i>';
 
                     let replyHtml = '';
                     if (rv.noiDungTraLoi) {
+                        const noiDungTraLoiAnToan = this.escapeHTML(rv.noiDungTraLoi);
+                        const tenNhanVienSafe = this.escapeHTML(rv.tenNhanVienTraLoi) || 'Nhân viên';
+
                         replyHtml = `
                             <div class="rv-reply-box">
                                 <div class="rv-reply-header">
-                                    <span class="rv-reply-name"><i class="bi bi-person-badge"></i> PHẢN HỒI TỪ CỬA HÀNG (${rv.tenNhanVienTraLoi || 'Nhân viên'})</span>
+                                    <span class="rv-reply-name"><i class="bi bi-person-badge"></i> PHẢN HỒI TỪ CỬA HÀNG (${tenNhanVienSafe})</span>
                                     <span class="rv-reply-date">${this.formatDate(rv.ngayTraLoi)}</span>
                                 </div>
-                                <div class="rv-reply-text">${rv.noiDungTraLoi}</div>
+                                <div class="rv-reply-text">${noiDungTraLoiAnToan}</div>
                             </div>
                         `;
                     } else {
@@ -331,23 +354,26 @@
                         `;
                     }
 
+                    const tenSanPhamSafe = this.escapeHTML(rv.tenSanPham);
+                    const phanLoaiSafe = this.escapeHTML(rv.phanLoai);
+
                     html += `
                         <div class="rv-card">
                             <div class="rv-card-header">
                                 <div class="rv-customer">
                                     <img src="${avatar}" class="rv-avatar">
                                     <div>
-                                        <div class="rv-cus-name">${cusName} <span class="rv-badge-buy"><i class="bi bi-check-circle-fill"></i> Đã mua hàng</span></div>
+                                        <div class="rv-cus-name">${cusNameSafe} <span class="rv-badge-buy"><i class="bi bi-check-circle-fill"></i> Đã mua hàng</span></div>
                                         <div class="rv-cus-date">${this.formatDate(rv.ngayTao)}</div>
                                     </div>
                                 </div>
                                 <a href="/customer#detail?id=${rv.sanPhamId}" target="_blank" class="rv-product-ref" title="Xem sản phẩm">
-                                    ${rv.tenSanPham} (${rv.phanLoai}) <i class="bi bi-box-arrow-up-right"></i>
+                                    ${tenSanPhamSafe} (${phanLoaiSafe}) <i class="bi bi-box-arrow-up-right"></i>
                                 </a>
                             </div>
 
                             <div class="rv-stars">${this.renderStars(rv.soSao)}</div>
-                            <div class="rv-content">${rv.noiDung || '<i style="color:#aaa;">Khách hàng không để lại bình luận</i>'}</div>
+                            <div class="rv-content">${noiDungHienThi}</div>
                             ${imgHtml}
                             ${replyHtml}
                         </div>
@@ -377,6 +403,12 @@
                     return;
                 }
 
+                // 🌟 ĐÃ THÊM VALIDATE ĐỘ DÀI
+                if (content.length > 1000) {
+                    window.toast("Nội dung phản hồi quá dài (Tối đa 1000 ký tự)!", "warning");
+                    return;
+                }
+
                 window.toastConfirm("Xác nhận phản hồi", "Bạn có chắc chắn muốn gửi câu trả lời này cho khách hàng?", async () => {
                     try {
                         const res = await fetch(`/api/reviews/${id}/reply`, {
@@ -385,7 +417,10 @@
                             body: JSON.stringify({ noiDungTraLoi: content })
                         });
 
-                        if (!res.ok) throw new Error("Gửi phản hồi thất bại");
+                        if (!res.ok) {
+                            const err = await res.json();
+                            throw new Error(err.message || "Gửi phản hồi thất bại");
+                        }
 
                         window.toast("Đã gửi phản hồi thành công!", "success");
                         this.loadData();

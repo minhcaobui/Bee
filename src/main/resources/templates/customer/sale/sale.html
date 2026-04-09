@@ -1360,7 +1360,6 @@
                     }
 
                     try {
-                        this.closeAllSelections();
                         if (document.getElementById(inputId)) document.getElementById(inputId).value = 1;
 
                         if (isBuyNow) {
@@ -1379,8 +1378,14 @@
                                 img: sku.hinhAnh || (product.hinhAnhs && product.hinhAnhs.length > 0 ? product.hinhAnhs[0].url : '')
                             };
                             sessionStorage.setItem('bee_buy_now', JSON.stringify([buyNowItem]));
-                            window.location.hash = 'checkout?mode=buynow';
+
+                            // 🌟 ĐÃ SỬA: Đóng bảng chọn size và bật Popup chọn phương thức nhận hàng (Dùng đúng ID của trang Sale)
+                            this.closeAllSelections();
+                            document.getElementById('saleDeliveryModalOverlay').style.display = 'flex';
+                            setTimeout(() => { document.querySelector('#saleDeliveryModalOverlay .delivery-modal').classList.add('open'); }, 10);
+
                         } else {
+                            this.closeAllSelections();
                             await window.CartHelper.add(sku.id, inputQty, {
                                 productId: productId,
                                 name: product.ten,
@@ -1406,10 +1411,17 @@
                 },
 
                 selectDeliveryAndCheckout(method) {
+                    // Lưu lựa chọn vào LocalStorage
                     localStorage.setItem('bee_delivery_method', method);
+
+                    // Đóng modal
                     this.closeDeliveryModal();
+
+                    // Đóng luôn cái popup chọn màu/size
                     this.closeAllSelections();
-                    window.location.hash = '#checkout';
+
+                    // 🌟 ĐÃ SỬA: Chuyển sang trang thanh toán kèm theo đuôi mode=buynow
+                    window.location.hash = 'checkout?mode=buynow';
                 },
 
                 async toggleWishlist(productId) {

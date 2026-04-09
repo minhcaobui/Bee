@@ -188,7 +188,7 @@
                 </div>
 
                 <div class="pf-form-group" style="margin-bottom:18px;">
-                    <label class="pf-label">Mật khẩu mới <span style="font-weight: 500; text-transform:none; color: #888;">(Tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt)</span></label>
+                    <label class="pf-label">Mật khẩu mới <span style="font-weight: 500; text-transform:none; color: #888;">(Tối thiểu 8 ký tự, gồm chữ hoa, thường, số, ký tự đặc biệt)</span></label>
                     <div class="input-password-wrap">
                         <input type="password" id="inpNewPw" class="pf-input" placeholder="Nhập mật khẩu mới">
                         <button class="toggle-pw-btn" onclick="ProfileApp.togglePw('inpNewPw', this)"><i class="bi bi-eye-slash-fill"></i></button>
@@ -204,6 +204,20 @@
                 </div>
 
                 <button class="btn" id="btnSavePassword" onclick="ProfileApp.changePassword()" style="width:100%;">CẬP NHẬT MẬT KHẨU</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-otp-overlay" id="otpModal" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(3px);">
+    <div class="modal-otp-box" style="background: #fff; width: 420px; padding: 30px; border-radius: 6px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+        <h4 style="color: #2563eb; font-weight: 800; margin-bottom: 10px;"><i class="bi bi-envelope-check-fill" style="font-size: 24px; display: block; margin-bottom: 10px;"></i> XÁC THỰC EMAIL</h4>
+        <p id="otpMessage" style="font-size: 13px; color: #666; margin-bottom: 25px;">Hệ thống đang gửi mã xác thực đến Email...</p>
+        <div id="otpInputGroup" style="display: none;">
+            <input type="text" id="inpOtpCode" style="width: 100%; text-align: center; letter-spacing: 15px; font-size: 24px; font-weight: bold; margin-bottom: 20px; height: 50px; background: #fafafa; border: 1px solid #ccc; border-radius: 4px; outline: none;" placeholder="------" maxlength="6">
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-secondary" style="flex: 1; height: 40px !important; border: 1px solid #ccc; background: #fff; color: #000;" onclick="document.getElementById('otpModal').style.display='none'">HỦY BỎ</button>
+                <button class="btn" style="flex: 1; height: 40px !important; background: #2563eb; border: none; color: #fff;" onclick="ProfileApp.verifyOtpAndSave()">XÁC NHẬN</button>
             </div>
         </div>
     </div>
@@ -321,7 +335,7 @@
                 document.getElementById('inpDob').value = parts;
             }
 
-            // Logic khóa Tên Đăng Nhập (Cờ từ Backend báo xuống)
+            // Logic khóa Tên Đăng Nhập
             if (d.daDoiTenDangNhap === true) {
                 inpUser.disabled = true;
                 document.getElementById('usernameWarning').style.display = 'block';
@@ -334,10 +348,12 @@
         saveProfile: async function() {
             const hoTen = document.getElementById('inpName').value.trim();
             const tenDangNhapMoi = document.getElementById('inpUsername').value.trim();
-            if (!hoTen) {
-                window.toast && window.toast("Vui lòng nhập họ và tên!", "warning");
-                return;
-            }
+            const phone = document.getElementById('inpPhone').value.trim();
+            const email = document.getElementById('inpEmail').value.trim();
+
+            if (!hoTen) { window.toast && window.toast("Vui lòng nhập họ và tên!", "warning"); return; }
+            if (phone && !/^0[0-9]{9}$/.test(phone)) { window.toast && window.toast("Số điện thoại không hợp lệ!", "warning"); return; }
+            if (email && !/^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$/.test(email)) { window.toast && window.toast("Email không đúng định dạng!", "warning"); return; }
 
             window.toastConfirm("XÁC NHẬN LƯU", "Bạn có chắc chắn muốn lưu những thay đổi của hồ sơ này?", async () => {
                 const btn = document.getElementById('btnSaveProfile');
@@ -346,50 +362,120 @@
 
                 const payload = {
                     hoTen: hoTen,
-                    soDienThoai: document.getElementById('inpPhone').value.trim(),
-                    email: document.getElementById('inpEmail').value.trim(),
+                    soDienThoai: phone,
+                    email: email,
                     gioiTinh: document.getElementById('inpGender').value,
                     ngaySinh: document.getElementById('inpDob').value,
                     diaChi: document.getElementById('inpAddress').value.trim(),
                     tenDangNhap: tenDangNhapMoi
                 };
 
-                try {
-                    const res = await fetch('/api/nhan-vien/my-profile', {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
+                // 🌟 KIỂM TRA NẾU ĐỔI EMAIL THÌ GỌI OTP
+                if (email !== this.data.email) {
+                    document.getElementById('otpModal').style.display = 'flex';
+                    document.getElementById('otpInputGroup').style.display = 'none';
+                    document.getElementById('otpMessage').innerText = `Hệ thống đang gửi Email xác thực đến ${email}...`;
 
-                    if (!res.ok) {
-                        const err = await res.json();
-                        throw new Error(err.message || "Tên đăng nhập đã tồn tại hoặc xảy ra lỗi.");
+                    try {
+                        const idParam = this.data.id ? `&id=${this.data.id}` : '';
+                        const checkRes = await fetch(`/api/nhan-vien/check-email?email=${email}${idParam}`);
+                        if (!checkRes.ok) {
+                            document.getElementById('otpModal').style.display = 'none';
+                            window.toast && window.toast(await checkRes.text(), "error");
+                            btn.disabled = false; btn.innerHTML = 'LƯU THAY ĐỔI';
+                            return;
+                        }
+
+                        const res = await fetch(`/api/nhan-vien/send-otp?email=${email}`, { method: 'POST' });
+                        if(res.ok) {
+                            document.getElementById('otpMessage').innerHTML = `Mã xác nhận 6 số đã được gửi tới hòm thư:<br><b style="color:#000;">${email}</b>`;
+                            document.getElementById('otpInputGroup').style.display = 'block';
+                            document.getElementById('inpOtpCode').value = '';
+                        } else {
+                            document.getElementById('otpModal').style.display = 'none';
+                            window.toast && window.toast(await res.text(), "error");
+                        }
+                    } catch(e) {
+                        document.getElementById('otpModal').style.display = 'none';
+                        window.toast && window.toast("Mất kết nối server", "error");
+                    } finally {
+                        btn.disabled = false;
+                        btn.innerHTML = 'LƯU THAY ĐỔI';
                     }
+                } else {
+                    // Không đổi email, lưu thẳng
+                    this.executeFinalSave(payload);
+                }
+            });
+        },
 
-                    // 🌟 NẾU ĐỔI TÊN ĐĂNG NHẬP THÀNH CÔNG -> ÉP ĐĂNG NHẬP LẠI
-                    if (payload.tenDangNhap && payload.tenDangNhap !== this.data.tenDangNhap) {
-                        window.toast && window.toast("Đổi tên đăng nhập thành công. Vui lòng đăng nhập lại!", "success");
-                        setTimeout(() => {
-                            // Chuyển hướng về trang đăng nhập hoặc tải lại trang để tự đá ra
-                            window.location.href = '/login';
-                        }, 2000);
-                        return; // Dừng, không cập nhật UI nữa
-                    }
+        verifyOtpAndSave: async function() {
+            const email = document.getElementById('inpEmail').value.trim();
+            const otp = document.getElementById('inpOtpCode').value.trim();
+            if(otp.length < 6) { window.toast && window.toast("Mã OTP phải gồm 6 chữ số!", "error"); return; }
 
-                    window.toast && window.toast("Cập nhật thông tin thành công!", "success");
+            const btn = document.getElementById('btnSaveProfile');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split spinning"></i> ĐANG LƯU...';
 
-                    // Cập nhật lại UI Header (nếu không bị đá ra)
-                    document.getElementById('pfNameBig').textContent = payload.hoTen;
-                    const miniName = document.querySelector('.user-mini-name');
-                    if(miniName) miniName.textContent = payload.hoTen;
-
-                } catch (err) {
-                    window.toast && window.toast(err.message, "error");
-                } finally {
+            try {
+                const res = await fetch(`/api/nhan-vien/verify-otp?email=${email}&otp=${otp}`, { method: 'POST' });
+                if(res.ok) {
+                    document.getElementById('otpModal').style.display = 'none';
+                    const payload = {
+                        hoTen: document.getElementById('inpName').value.trim(),
+                        soDienThoai: document.getElementById('inpPhone').value.trim(),
+                        email: email,
+                        gioiTinh: document.getElementById('inpGender').value,
+                        ngaySinh: document.getElementById('inpDob').value,
+                        diaChi: document.getElementById('inpAddress').value.trim(),
+                        tenDangNhap: document.getElementById('inpUsername').value.trim()
+                    };
+                    this.executeFinalSave(payload);
+                } else {
+                    window.toast && window.toast(await res.text(), "error");
                     btn.disabled = false;
                     btn.innerHTML = 'LƯU THAY ĐỔI';
                 }
-            });
+            } catch(e) {
+                window.toast && window.toast("Lỗi kết nối", "error");
+                btn.disabled = false;
+                btn.innerHTML = 'LƯU THAY ĐỔI';
+            }
+        },
+
+        executeFinalSave: async function(payload) {
+            const btn = document.getElementById('btnSaveProfile');
+            try {
+                const res = await fetch('/api/nhan-vien/my-profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.message || "Tên đăng nhập đã tồn tại hoặc xảy ra lỗi.");
+                }
+
+                if (payload.tenDangNhap && payload.tenDangNhap !== this.data.tenDangNhap) {
+                    window.toast && window.toast("Đổi tên đăng nhập thành công. Vui lòng đăng nhập lại!", "success");
+                    setTimeout(() => { window.location.href = '/login'; }, 2000);
+                    return;
+                }
+
+                window.toast && window.toast("Cập nhật thông tin thành công!", "success");
+                this.data.email = payload.email; // Cập nhật lại email gốc
+                document.getElementById('pfNameBig').textContent = payload.hoTen;
+                const miniName = document.querySelector('.user-mini-name');
+                if(miniName) miniName.textContent = payload.hoTen;
+
+            } catch (err) {
+                window.toast && window.toast(err.message, "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'LƯU THAY ĐỔI';
+            }
         },
 
         togglePw: function(inputId, btnEl) {
@@ -415,7 +501,11 @@
                 return;
             }
 
-            // 🌟 VALIDATE ĐỘ MẠNH CỦA MẬT KHẨU MỚI (CHỮ HOA, CHỮ THƯỜNG, SỐ, KÝ TỰ ĐẶC BIỆT, >= 8 KÝ TỰ)
+            if (oldPw === newPw) {
+                window.toast && window.toast("Mật khẩu mới không được giống mật khẩu hiện tại!", "warning");
+                return;
+            }
+
             const strongRegex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])(?=.{8,})");
             if (!strongRegex.test(newPw)) {
                 window.toast && window.toast("Mật khẩu phải từ 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt!", "warning");

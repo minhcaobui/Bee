@@ -530,6 +530,23 @@
         </div>
     </div>
 
+    <div class="acc-modal-overlay" id="otpModalOverlay" style="display:none; z-index: 10001; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px);">
+        <div class="acc-modal" style="width: 100%; max-width: 420px; background: #fff; padding: 32px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2); transform: translateY(0); opacity: 1;">
+            <h4 style="color: var(--accent); font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 600; margin-bottom: 10px;">
+                <i class="bi bi-envelope-check-fill" style="display: block; font-size: 36px; margin-bottom: 12px; color: #10b981;"></i>
+                Xác Thực Email
+            </h4>
+            <p id="otpMessage" style="font-size: 13px; color: var(--muted); margin-bottom: 25px; line-height: 1.5;">Hệ thống đang gửi mã xác thực đến Email...</p>
+            <div id="otpInputGroup" style="display: none;">
+                <input type="text" id="inpOtpCode" style="width: 100%; text-align: center; letter-spacing: 15px; font-size: 24px; font-weight: bold; margin-bottom: 24px; height: 50px; background: #f9f9f9; border: 1px solid rgba(0,0,0,0.1); border-radius: 0px; outline: none;" placeholder="------" maxlength="6">
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn-cancel" style="flex: 1;" onclick="document.getElementById('otpModalOverlay').style.display='none'">Hủy Bỏ</button>
+                    <button class="btn-save" style="flex: 1;" onclick="window.AccountApp.verifyOtpAndSave()">Xác Nhận</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="guest-view">
         <div class="guest-container">
             <div class="guest-icon">
@@ -664,7 +681,7 @@
                 </div>
 
                 <div class="account-panel-title">Thông tin cá nhân</div>
-                <div class="account-panel-subtitle">Cập nhật hồ sơ và thông tin bảo mật.</div>
+                <div class="account-panel-subtitle">Cập nhật hồ sơ và thông vị bảo mật.</div>
 
                 <div class="profile-avatar-section">
                     <div class="profile-avatar-big" id="profileAvatarBig">
@@ -906,13 +923,14 @@
 
                             if(this.state.user) { this.state.user.hinhAnh = imageUrl; }
 
+                            // 🌟 ĐÃ FIX BUG 2: CHỈ GỬI LÊN DỮ LIỆU ĐÃ LƯU TRƯỚC ĐÓ CỦA USER ĐỂ TRÁNH LƯU NHÁP LỖI
                             const payload = {
-                                hoTen: document.getElementById('inpFirstName').value || (this.state.user ? this.state.user.hoTen : ''),
-                                soDienThoai: document.getElementById('inpPhone').value || (this.state.user ? this.state.user.soDienThoai : ''),
-                                gioiTinh: document.getElementById('inpGender').value || (this.state.user ? this.state.user.gioiTinh : ''),
-                                ngaySinh: document.getElementById('inpDob').value || (this.state.user ? this.state.user.ngaySinh : ''),
-                                email: document.getElementById('inpEmail').value || (this.state.user ? this.state.user.email : ''),
-                                tenDangNhap: document.getElementById('inpUsername').value || (this.state.user ? this.state.user.tenDangNhap : ''),
+                                hoTen: this.state.user ? this.state.user.hoTen : '',
+                                soDienThoai: this.state.user ? this.state.user.soDienThoai : '',
+                                gioiTinh: this.state.user ? this.state.user.gioiTinh : '',
+                                ngaySinh: this.state.user ? this.state.user.ngaySinh : '',
+                                email: this.state.user ? this.state.user.email : '',
+                                tenDangNhap: this.state.user ? this.state.user.tenDangNhap : '',
                                 hinhAnh: imageUrl
                             };
 
@@ -1383,7 +1401,11 @@
                 document.getElementById('reviewModalProductType').innerText = phanLoai;
                 document.getElementById('accReviewModalOverlay').style.display = 'flex';
 
-                const existingReview = this.state.myReviews.find(r => r.hoaDonChiTietId === detailId);
+                // 🌟 ĐÃ FIX: Hỗ trợ tìm kiếm cả trường hợp BE trả về object hoaDonChiTiet
+                const existingReview = this.state.myReviews.find(r =>
+                    r.hoaDonChiTietId === detailId ||
+                    (r.hoaDonChiTiet && r.hoaDonChiTiet.id === detailId)
+                );
 
                 if (isEdit || existingReview) {
                     document.getElementById('reviewModalTitleText').innerText = "Sửa đánh giá";
@@ -1459,7 +1481,11 @@
                             }
                         }
                     } else {
-                        const existingReview = this.state.myReviews.find(r => r.hoaDonChiTietId === this.reviewState.orderDetailId);
+                        // 🌟 ĐÃ FIX TÌM KIẾM REVIEW Ở ĐÂY NỮA
+                        const existingReview = this.state.myReviews.find(r =>
+                            r.hoaDonChiTietId === this.reviewState.orderDetailId ||
+                            (r.hoaDonChiTiet && r.hoaDonChiTiet.id === this.reviewState.orderDetailId)
+                        );
                         if (existingReview && existingReview.danhSachHinhAnh) {
                             uploadedUrls = existingReview.danhSachHinhAnh.split(',');
                         }
@@ -1557,7 +1583,7 @@
                     let html = '';
                     const chiTiets = data.chiTiets || [];
                     let calculatedGiaTamThoi = 0;
-                    let hasReturnableItems = false; // Biến kiểm tra xem còn SP nào để đổi trả không
+                    let hasReturnableItems = false;
 
                     chiTiets.forEach(item => {
                         let reviewSectionHtml = '';
@@ -1570,24 +1596,30 @@
                         const itemQty = item.soLuong || 1;
                         const itemTra = item.soLuongTra || 0;
 
-                        if (itemQty > itemTra) {
-                            hasReturnableItems = true;
-                        }
-
+                        if (itemQty > itemTra) hasReturnableItems = true;
                         calculatedGiaTamThoi += (itemPrice * itemQty);
 
                         if (currentStatus === 'HOAN_THANH' && detailId) {
-                            const existingReview = this.state.myReviews.find(r => r.hoaDonChiTietId === detailId);
+
+                            // 🌟 ĐÃ FIX LỖI TÌM KIẾM TẠI ĐÂY
+                            const existingReview = this.state.myReviews.find(r =>
+                                r.hoaDonChiTietId === detailId ||
+                                (r.hoaDonChiTiet && r.hoaDonChiTiet.id === detailId)
+                            );
 
                             if (existingReview) {
                                 let starsHtml = '';
                                 for (let i = 1; i <= 5; i++) starsHtml += i <= existingReview.soSao ? '★' : '☆';
+
                                 let imgsHtml = '';
-                                if (existingReview.danhSachHinhAnhList && existingReview.danhSachHinhAnhList.length > 0) {
-                                    existingReview.danhSachHinhAnhList.forEach(url => {
+                                // Xử lý tách chuỗi ảnh an toàn
+                                let imgList = existingReview.danhSachHinhAnhList || (existingReview.danhSachHinhAnh ? existingReview.danhSachHinhAnh.split(',') : []);
+                                if (imgList.length > 0) {
+                                    imgList.forEach(url => {
                                         if (url.trim()) imgsHtml += `<img src="${url.trim()}" style="width:40px;height:40px;object-fit:cover;border-radius:0px;border:1px solid #eee;margin-right:6px;" onclick="event.stopPropagation(); window.open(this.src, '_blank')">`;
                                     });
                                 }
+
                                 let editBtnHtml = existingReview.daSua === true
                                     ? `<span style="font-size:11px; color:#888; font-style:italic;">(Đã đánh giá)</span>`
                                     : `<button onclick="window.AccountApp.openReviewModal(${detailId}, '${pName}', '${pl}', true)" style="background:none; border:none; color:var(--accent); font-size:11px; font-weight:500; cursor:pointer; text-decoration:underline; padding:0;">Sửa đánh giá</button>`;
@@ -1608,11 +1640,8 @@
 
                         let badgeTraHang = '';
                         if (itemTra > 0) {
-                            if (itemTra >= itemQty) {
-                                badgeTraHang = `<div style="margin-top:4px; font-size:10px; color:#ef4444; font-weight:600;">[Đã đổi/trả toàn bộ]</div>`;
-                            } else {
-                                badgeTraHang = `<div style="margin-top:4px; font-size:10px; color:#f59e0b; font-weight:600;">[Đã đổi/trả ${itemTra}/${itemQty} SP]</div>`;
-                            }
+                            if (itemTra >= itemQty) badgeTraHang = `<div style="margin-top:4px; font-size:10px; color:#ef4444; font-weight:600;">[Đã đổi/trả toàn bộ]</div>`;
+                            else badgeTraHang = `<div style="margin-top:4px; font-size:10px; color:#f59e0b; font-weight:600;">[Đã đổi/trả ${itemTra}/${itemQty} SP]</div>`;
                         }
 
                         html += `<tr>
@@ -1636,7 +1665,7 @@
 
                     const phiShip = data.phiVanChuyen || 0;
                     const tongTien = data.tongTien || 0;
-                    const tienHoan = data.tienHoan || 0; // 🌟 Thêm logic tính Tiền hoàn
+                    const tienHoan = data.tienHoan || 0;
 
                     let giamGia = (calculatedGiaTamThoi + phiShip) - tongTien;
                     if (giamGia < 0) giamGia = data.tienGiamVoucher || 0;
@@ -1666,7 +1695,6 @@
                                         </div>
                     `;
 
-                    // Hiển thị tiền hoàn nếu có
                     if (tienHoan > 0) {
                         const tienThucTe = tongTien - tienHoan;
                         totalRow += `
@@ -1681,16 +1709,9 @@
                         `;
                     }
 
-                    totalRow += `
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
+                    totalRow += `</div></div></td></tr>`;
 
-                    // 5. 🌟 GOM CÁC NÚT THAO TÁC VÀO CHUNG MỘT HÀNG (TRÁNH BỊ CHỒNG HOẶC LỖI HTML)
                     let actionButtonsHtml = '';
-
                     if (currentStatus === 'CHO_XAC_NHAN' || currentStatus === 'CHO_THANH_TOAN') {
                         actionButtonsHtml += `<button onclick="window.AccountApp.cancelOrder(${data.id})" class="account-reorder-btn" style="color:#dc2626; border-color:rgba(220,38,38,0.2); background:rgba(220,38,38,0.05); margin-right:10px;"><i class="fa-solid fa-xmark"></i> Hủy đơn</button>`;
                     }
@@ -1699,13 +1720,10 @@
                         actionButtonsHtml += `<button onclick="window.AccountApp.reorder(${data.id})" class="account-reorder-btn" style="background:#fff; color:var(--text); border-color:var(--text); margin-right:10px;"><i class="bi bi-cart-plus"></i> Mua lại</button>`;
                     }
 
-                    // 🌟 KIỂM TRA XEM ĐƠN HÀNG NÀY ĐÃ TỪNG TẠO PHIẾU ĐỔI TRẢ CHƯA
-                    // Dựa vào: Có tiền hoàn > 0, SP có số lượng trả > 0, hoặc trạng thái đơn hàng thuộc nhóm đổi trả
                     const isDaDoiTra = (tienHoan > 0) ||
                         chiTiets.some(item => (item.soLuongTra && item.soLuongTra > 0)) ||
                         ['YEU_CAU_TRA_HANG', 'TU_CHOI_TRA_HANG', 'DA_HOAN_TIEN', 'DA_DOI', 'DA_TRA'].includes(currentStatus);
 
-                    // 🌟 NÚT ĐỔI TRẢ: Chỉ hiện khi trạng thái là HOÀN THÀNH, CÒN SP ĐỂ TRẢ, VÀ CHƯA TỪNG ĐỔI TRẢ
                     if (currentStatus === 'HOAN_THANH' && hasReturnableItems && !isDaDoiTra) {
                         actionButtonsHtml += `<button onclick="window.AccountApp.openReturnModal()" class="account-reorder-btn" style="background:#f59e0b; color:white; border-color:#f59e0b; margin-right:10px;"><i class="fa-solid fa-rotate-left"></i> Đổi/Trả Hàng</button>`;
                     }
@@ -1718,7 +1736,6 @@
                         totalRow += `<tr><td colspan="4" style="text-align:right; padding-top:20px; border-bottom:none;">${actionButtonsHtml}</td></tr>`;
                     }
 
-                    // GẮN CHUỖI HTML HOÀN CHỈNH VÀO TABLE
                     document.getElementById('detProductList').innerHTML = html + totalRow;
 
                 } catch (e) {
@@ -1902,7 +1919,6 @@
                     box-shadow:0 2px 16px rgba(61,90,76,0.07);transition:box-shadow .35s,transform .3s;
                     display:flex;flex-direction:column;animation:fadeIn 0.4s ease-out forwards;">
 
-            <!-- Image -->
             <div style="width:100%;aspect-ratio:3/4;position:relative;overflow:hidden;background:#f9f8f6;">
                 <img src="${imgUrl}" alt="${p.ten}" loading="lazy"
                      style="width:100%;height:100%;object-fit:cover;display:block;transition:transform .65s ease,opacity .25s;"
@@ -1910,7 +1926,6 @@
                      onmouseout="this.style.transform='scale(1)'">
                 ${hoverImg}
 
-                <!-- Quick view overlay -->
                 <div style="position:absolute;inset:0;background:rgba(0,0,0,0);display:flex;align-items:flex-end;padding:12px;transition:background .35s;z-index:2;"
                      onmouseover="this.style.background='rgba(0,0,0,0.04)'"
                      onmouseout="this.style.background='rgba(0,0,0,0)'">
@@ -1930,10 +1945,8 @@
                     </button>
                 </div>
 
-                <!-- Badges -->
                 ${badgesHtml ? `<div style="position:absolute;top:10px;left:10px;display:flex;flex-direction:column;gap:4px;z-index:3;pointer-events:none;">${badgesHtml}</div>` : ''}
 
-                <!-- Heart (bỏ yêu thích) -->
                 <button title="Bỏ yêu thích"
                         onclick="event.stopPropagation(); window.AccountApp.removeFromWishlist(${p.id})"
                         style="position:absolute;top:10px;right:10px;z-index:4;width:34px;height:34px;border-radius:50%;
@@ -1948,7 +1961,6 @@
                 </button>
             </div>
 
-            <!-- Info -->
             <div style="padding:14px 16px 18px;flex-grow:1;display:flex;flex-direction:column;">
                 <div style="font-size:9px;letter-spacing:0.18em;color:var(--accent);text-transform:uppercase;font-weight:600;margin-bottom:4px;">BEEMATE</div>
                 <div style="font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:400;line-height:1.2;margin-bottom:10px;">${p.ten}</div>
@@ -2414,21 +2426,107 @@
                 return html + '</div>';
             },
 
+            // 🌟 ĐÃ FIX BUG: CHẶN VALIDATE, KIỂM TRA ĐỔI EMAIL, GỌI OTP TRƯỚC KHI LƯU
             updateProfile: async function() {
+                const hoTen = document.getElementById('inpFirstName').value.trim();
+                const phone = document.getElementById('inpPhone').value.trim();
+                const email = document.getElementById('inpEmail').value.trim();
+                const gioiTinh = document.getElementById('inpGender').value;
+                const ngaySinh = document.getElementById('inpDob').value;
+                const tenDangNhapMoi = document.getElementById('inpUsername').value.trim();
+
+                // 1. Chặn lỗi Validate
+                if (!hoTen) { this.showAccountNotification("Lỗi", "Vui lòng nhập họ và tên!", true); return; }
+                if (phone && !/^0[0-9]{9}$/.test(phone)) { this.showAccountNotification("Lỗi", "Số điện thoại không hợp lệ!", true); return; }
+                if (email && !/^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$/.test(email)) { this.showAccountNotification("Lỗi", "Email không đúng định dạng!", true); return; }
+
                 const btn = document.getElementById('btnSaveProfile');
                 const oldText = btn.innerText;
-                btn.innerText = "Đang lưu...";
+                btn.innerText = "Đang xử lý...";
                 btn.disabled = true;
 
                 const payload = {
-                    hoTen: document.getElementById('inpFirstName').value,
-                    soDienThoai: document.getElementById('inpPhone').value,
-                    gioiTinh: document.getElementById('inpGender').value,
-                    ngaySinh: document.getElementById('inpDob').value,
-                    email: document.getElementById('inpEmail').value,
-                    tenDangNhap: document.getElementById('inpUsername').value
+                    hoTen: hoTen,
+                    soDienThoai: phone,
+                    gioiTinh: gioiTinh,
+                    ngaySinh: ngaySinh,
+                    email: email,
+                    tenDangNhap: tenDangNhapMoi
                 };
 
+                // 2. Logic kiểm tra đổi Email & Gọi OTP
+                if (this.state.user && email !== this.state.user.email) {
+                    document.getElementById('otpModalOverlay').style.display = 'flex';
+                    document.getElementById('otpInputGroup').style.display = 'none';
+                    document.getElementById('otpMessage').innerText = `Hệ thống đang gửi mã xác nhận đến ${email}...`;
+
+                    try {
+                        const idParam = this.state.user.id ? `&id=${this.state.user.id}` : '';
+                        const checkRes = await fetch(`/api/khach-hang/check-email?email=${email}${idParam}`);
+                        if (!checkRes.ok) {
+                            document.getElementById('otpModalOverlay').style.display = 'none';
+                            this.showAccountNotification("Lỗi", await checkRes.text(), true);
+                            btn.innerText = oldText; btn.disabled = false;
+                            return;
+                        }
+
+                        const res = await fetch(`/api/khach-hang/send-otp?email=${email}`, { method: 'POST' });
+                        if(res.ok) {
+                            document.getElementById('otpMessage').innerHTML = `Mã xác thực 6 số đã được gửi tới:<br><b style="color:#000;">${email}</b>`;
+                            document.getElementById('otpInputGroup').style.display = 'block';
+                            document.getElementById('inpOtpCode').value = '';
+                        } else {
+                            document.getElementById('otpModalOverlay').style.display = 'none';
+                            this.showAccountNotification("Lỗi", await res.text(), true);
+                        }
+                    } catch(e) {
+                        document.getElementById('otpModalOverlay').style.display = 'none';
+                        this.showAccountNotification("Lỗi", "Mất kết nối server", true);
+                    } finally {
+                        btn.innerText = oldText; btn.disabled = false;
+                    }
+                } else {
+                    // Nếu Email không đổi, cho phép lưu thẳng
+                    this.executeFinalProfileSave(payload, btn, oldText);
+                }
+            },
+
+            // 🌟 HÀM MỚI: XÁC THỰC MÃ OTP VÀ LƯU
+            verifyOtpAndSave: async function() {
+                const email = document.getElementById('inpEmail').value.trim();
+                const otp = document.getElementById('inpOtpCode').value.trim();
+                if(otp.length < 6) { this.showAccountNotification("Lỗi", "Vui lòng nhập đủ 6 số OTP!", true); return; }
+
+                const btn = document.getElementById('btnSaveProfile');
+                const oldText = "Lưu thay đổi";
+                btn.innerText = 'Đang xác thực...';
+                btn.disabled = true;
+
+                try {
+                    const res = await fetch(`/api/khach-hang/verify-otp?email=${email}&otp=${otp}`, { method: 'POST' });
+                    if(res.ok) {
+                        document.getElementById('otpModalOverlay').style.display = 'none';
+                        const payload = {
+                            hoTen: document.getElementById('inpFirstName').value.trim(),
+                            soDienThoai: document.getElementById('inpPhone').value.trim(),
+                            gioiTinh: document.getElementById('inpGender').value,
+                            ngaySinh: document.getElementById('inpDob').value,
+                            email: email,
+                            tenDangNhap: document.getElementById('inpUsername').value.trim()
+                        };
+                        this.executeFinalProfileSave(payload, btn, oldText);
+                    } else {
+                        this.showAccountNotification("Lỗi", await res.text(), true);
+                        btn.innerText = oldText; btn.disabled = false;
+                    }
+                } catch(e) {
+                    this.showAccountNotification("Lỗi", "Lỗi kết nối máy chủ!", true);
+                    btn.innerText = oldText; btn.disabled = false;
+                }
+            },
+
+            // Hàm LƯU CHÍNH THỨC
+            executeFinalProfileSave: async function(payload, btn, oldText) {
                 try {
                     const endpoint = this.state.isStaff ? '/api/nhan-vien/my-profile' : '/api/khach-hang/my-profile';
                     const res = await fetch(endpoint, {
@@ -2439,18 +2537,15 @@
 
                     if(res.ok) {
                         const dataRes = await res.json();
-
-                        // 🌟 LOGIC MỚI: KIỂM TRA TÍN HIỆU TỪ BACKEND
                         if (dataRes.usernameChanged) {
                             this.showAccountNotification('Thành công', 'Đổi tên đăng nhập thành công. Vui lòng đăng nhập lại!');
-
-                            // Đợi 1.5 giây cho khách đọc thông báo rồi Log out
                             setTimeout(async () => {
                                 await fetch('/logout', { method: 'POST' });
                                 window.location.href = '/login';
                             }, 1500);
                         } else {
                             this.showAccountNotification('Thành công', 'Đã cập nhật hồ sơ cá nhân!');
+                            if (this.state.user) this.state.user.email = payload.email; // Cập nhật lại Email nội bộ
                             await this.fetchData();
                         }
                     } else {
@@ -2460,8 +2555,7 @@
                 } catch(e) {
                     this.showAccountNotification('Lỗi', "Lỗi kết nối máy chủ!", true);
                 } finally {
-                    btn.innerText = oldText;
-                    btn.disabled = false;
+                    if (btn) { btn.innerText = oldText; btn.disabled = false; }
                 }
             },
 
@@ -2822,8 +2916,8 @@
                         </div>
 
                         <div class="guest-track-info-grid">
-    <div>
-        <div style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; font-weight: 600;"><i class="bi bi-person-lines-fill"></i> Thông tin khách hàng</div>
+                            <div>
+                                <div style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; font-weight: 600;"><i class="bi bi-person-lines-fill"></i> Thông tin khách hàng</div>
                                 <div><strong>Họ tên:</strong> ${tenKhach}</div>
                                 <div><strong>SĐT:</strong> ${sdtKhach}</div>
                                 <div><strong>Email:</strong> ${emailKhach}</div>
@@ -2873,6 +2967,5 @@
         };
 
         setTimeout(() => window.AccountApp.init(), 100);
-        /*]]>*/
     </script>
 </section>

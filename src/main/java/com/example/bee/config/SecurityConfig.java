@@ -28,7 +28,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         // 1. TÀI NGUYÊN CÔNG KHAI & TRANG ĐĂNG NHẬP
-                        .requestMatchers("/register", "/login", "/css/**", "/js/**", "/images/**", "/customer/**").permitAll()
+                        // 🌟 ĐÃ FIX BUG 2: Mở khóa /forgot-password/** cho khách quên mật khẩu
+                        .requestMatchers("/register", "/login", "/forgot-password/**", "/css/**", "/js/**", "/images/**", "/customer/**").permitAll()
+
                         // 2. API CÔNG KHAI (Khách vãng lai dùng để xem hàng, tra đơn)
                         .requestMatchers(
                                 "/api/products/**",
@@ -38,20 +40,40 @@ public class SecurityConfig {
                                 "/api/hoa-don/tra-cuu/**",
                                 "/api/hoa-don/checkout",
                                 "/api/hoa-don/check-employee",
-                                "/api/thong-bao/**",
                                 "/api/vouchers/active",
                                 "/api/khuyen-mai/**",
                                 "/api/chatbot/**",
-                                "/api/gio-hang/**" // 🌟 ĐÃ MỞ KHÓA API GIỎ HÀNG CHO KHÁCH VÃNG LAI
+                                "/api/gio-hang/**"
                         ).permitAll()
 
                         // Ai cũng được XEM đánh giá
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/khach-hang/reviews/**").permitAll()
 
-                        // 3. API RIÊNG CỦA KHÁCH HÀNG (Phải có tài khoản mới được xài)
+                        // ========================================================
+                        // 🌟 ĐÃ FIX BUG 1: SẮP XẾP LẠI THỨ TỰ PHÂN QUYỀN CHUẨN XÁC
+                        // ========================================================
+
+                        // 3. API ĐỘC QUYỀN CỦA ADMIN (Bắt buộc phải nằm trên cùng để chặn Staff)
                         .requestMatchers(
-                                "/api/upload", // 🌟 FIX LỖI 403: Cấp quyền upload ảnh cho khách hàng
-                                "/api/khach-hang/reviews/**", // 🌟 Yêu cầu đăng nhập để VIẾT đánh giá và check-eligibility
+                                "/dashboards/**",
+                                "/returns/**",
+                                "/api/thong-ke/**",
+                                "/staff/**"
+                        ).hasAuthority("ROLE_ADMIN")
+
+                        // 4. NGOẠI LỆ CHO STAFF (Được tự sửa profile của mình)
+                        .requestMatchers(
+                                "/api/nhan-vien/my-profile",
+                                "/api/nhan-vien/change-password"
+                        ).hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
+
+                        // 5. CÁC API NHÂN VIÊN CÒN LẠI (Staff sẽ bị chặn ở đây)
+                        .requestMatchers("/api/nhan-vien/**").hasAuthority("ROLE_ADMIN")
+
+                        // 6. API CHUNG CỦA TẤT CẢ (Khách hàng, Staff, Admin đều dùng được)
+                        .requestMatchers(
+                                "/api/upload",
+                                "/api/khach-hang/reviews/**",
                                 "/api/khach-hang/wishlist/**",
                                 "/api/khach-hang/my-profile",
                                 "/api/khach-hang/change-password",
@@ -60,30 +82,20 @@ public class SecurityConfig {
                                 "/api/khach-hang/addresses/**",
                                 "/api/khach-hang/my-reviews/**",
                                 "/api/hoa-don/my-used-vouchers/**",
-                                "/api/hoa-don/**"
+                                "/api/hoa-don/**",
+                                "/api/thong-bao/**" // 🌟 ĐÃ FIX BUG 3: Yêu cầu đăng nhập để xem thông báo
                         ).hasAnyAuthority("ROLE_CUSTOMER", "ROLE_STAFF", "ROLE_ADMIN")
 
-                        // 4. API DÀNH CHO ADMIN & NHÂN VIÊN
+                        // 7. API QUẢN LÝ (Catch-all cho Admin và Staff, bắt buộc nằm dưới cùng)
                         .requestMatchers(
-                                "/api/nhan-vien/my-profile",
-                                "/api/nhan-vien/change-password",
                                 "/admin/**",
                                 "/products/**",
                                 "/pos/**",
-                                "/api/khach-hang/**", // Quản lý khách hàng
-                                "/api/hoa-don/**",    // Quản lý hóa đơn
-                                "/api/reviews/**",    // Quản lý đánh giá tổng
-                                "/api/**"             // Các API còn lại (Phải nằm dưới cùng)
+                                "/api/khach-hang/**",
+                                "/api/reviews/**",
+                                "/api/**"
                         ).hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
 
-                        // 5. API ĐỘC QUYỀN CỦA ADMIN
-                        .requestMatchers(
-                                "/dashboards/**",
-                                "/returns/**",
-                                "/api/thong-ke/**",
-                                "/api/nhan-vien/**",
-                                "/staff/**"
-                        ).hasAuthority("ROLE_ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

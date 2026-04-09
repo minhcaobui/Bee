@@ -6,6 +6,7 @@ import com.example.bee.entities.user.NhanVien;
 import com.example.bee.repositories.customer.KhachHangRepository;
 import com.example.bee.repositories.reviews.DanhGiaRepository;
 import com.example.bee.repositories.role.NhanVienRepository;
+import jakarta.transaction.Transactional;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -94,24 +95,30 @@ public class AdminReviewApi {
 
     // 2. API Nhân viên gửi câu trả lời
     @PostMapping("/{id}/reply")
+    @Transactional // 🌟 ĐÃ THÊM TRANSACTIONAL ĐỂ BẢO VỆ DATABASE
     public ResponseEntity<?> replyReview(@PathVariable Long id, @RequestBody Map<String, String> payload) {
         String noiDungTraLoi = payload.get("noiDungTraLoi");
 
         if (noiDungTraLoi == null || noiDungTraLoi.trim().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nội dung trả lời không được để trống");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nội dung trả lời không được để trống!");
+        }
+
+        // 🌟 ĐÃ THÊM VALIDATE CHỐNG TRÀN DATABASE
+        if (noiDungTraLoi.length() > 1000) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nội dung trả lời quá dài (Tối đa 1000 ký tự)!");
         }
 
         // Lấy thông tin Nhân viên đang đăng nhập (Bảo mật)
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập bằng tài khoản Nhân viên");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập bằng tài khoản Nhân viên!");
         }
 
         NhanVien nv = nvRepo.findByTaiKhoan_TenDangNhap(auth.getName())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Tài khoản không có quyền thao tác"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Tài khoản không có quyền thao tác!"));
 
         DanhGia dg = danhGiaRepo.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy đánh giá"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy đánh giá!"));
 
         // Ghi nhận phản hồi
         dg.setNhanVienTraLoi(nv);

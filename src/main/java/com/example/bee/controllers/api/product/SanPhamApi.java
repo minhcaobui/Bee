@@ -99,11 +99,7 @@ public class SanPhamApi {
     }
 
     private String generateMa() {
-        for (int i = 1; i <= 9999; i++) {
-            String ma = String.format("SP%04d", i); // SP0001 → SP9999
-            if (!sanPhamrepo.existsByMaIgnoreCase(ma)) return ma;
-        }
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Đã hết mã sản phẩm (SP0001-SP9999)");
+        return "SP" + System.currentTimeMillis();
     }
 
     @GetMapping("/{id}")
@@ -170,6 +166,14 @@ public class SanPhamApi {
 
         // 2. Kiểm tra trùng BỘ 4 THUỘC TÍNH (Tên, Danh Mục, Hãng, Chất Liệu)
         String ten = body.getTen().trim();
+        if (ten.length() > 255) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Collections.singletonMap("message", "Tên sản phẩm tối đa 255 ký tự!"));
+        }
+        if (sp.getMa() != null && sp.getMa().length() > 50) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Collections.singletonMap("message", "Mã sản phẩm tối đa 50 ký tự!"));
+        }
         Integer idDM = body.getIdDanhMuc();
         Integer idHang = body.getIdHang();
         Integer idCL = body.getIdChatLieu();
@@ -336,16 +340,37 @@ public class SanPhamApi {
     @Transactional
     public ResponseEntity<?> updateVariant(@PathVariable Integer id, @RequestBody VariantRequest req) {
         return variantRepo.findById(id).map(variant -> {
-            boolean isChangingAttr = !variant.getMauSac().getId().equals(req.getIdMauSac())
-                    || !variant.getKichThuoc().getId().equals(req.getIdKichThuoc());
+            // 🌟 ĐÃ FIX: Lấy ID an toàn chống NullPointerException
+            Integer currentMauId = variant.getMauSac() != null ? variant.getMauSac().getId() : null;
+            Integer currentSizeId = variant.getKichThuoc() != null ? variant.getKichThuoc().getId() : null;
+
+            boolean isChangingAttr = false;
+            if (req.getIdMauSac() != null && !req.getIdMauSac().equals(currentMauId)) isChangingAttr = true;
+            if (req.getIdKichThuoc() != null && !req.getIdKichThuoc().equals(currentSizeId)) isChangingAttr = true;
+
             if (isChangingAttr && variantRepo.existsBySanPhamIdAndMauSacIdAndKichThuocId(
                     variant.getSanPham().getId(), req.getIdMauSac(), req.getIdKichThuoc())) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Biến thể Màu + Size này đã tồn tại!");
             }
-            variant.setGiaBan(req.getGiaBan());
-            variant.setMauSac(mauSacRepo.findById(req.getIdMauSac()).orElse(variant.getMauSac()));
-            variant.setKichThuoc(kichThuocRepo.findById(req.getIdKichThuoc()).orElse(variant.getKichThuoc()));
-            if (req.getHinhAnh() != null) variant.setHinhAnh(req.getHinhAnh());
+
+            // Cập nhật các trường an toàn
+            if (req.getGiaBan() != null) {
+                if (req.getGiaBan().compareTo(BigDecimal.ZERO) < 0) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Giá bán không được nhỏ hơn 0!");
+                }
+                variant.setGiaBan(req.getGiaBan());
+            }
+
+            if (req.getIdMauSac() != null) {
+                variant.setMauSac(mauSacRepo.findById(req.getIdMauSac()).orElse(variant.getMauSac()));
+            }
+            if (req.getIdKichThuoc() != null) {
+                variant.setKichThuoc(kichThuocRepo.findById(req.getIdKichThuoc()).orElse(variant.getKichThuoc()));
+            }
+            if (req.getHinhAnh() != null) {
+                variant.setHinhAnh(req.getHinhAnh());
+            }
+
             variantRepo.save(variant);
             return ResponseEntity.ok(Collections.singletonMap("message", "Cập nhật biến thể thành công!"));
         }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy biến thể"));
@@ -356,6 +381,12 @@ public class SanPhamApi {
     public ResponseEntity<?> updateStock(@PathVariable Integer id, @RequestBody Map<String, Integer> body) {
         return variantRepo.findById(id).map(variant -> {
             Integer newQty = body.get("soLuong");
+
+            // 🌟 ĐÃ FIX: Chặn nhập kho âm
+            if (newQty == null || newQty < 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Số lượng tồn kho không được nhỏ hơn 0!");
+            }
+
             variant.setSoLuong(newQty);
             if (newQty > 0 && (variant.getTrangThai() == null || !variant.getTrangThai())) {
                 variant.setTrangThai(true);
