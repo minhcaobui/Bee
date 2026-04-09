@@ -15,20 +15,10 @@ import java.util.List;
 @Repository
 public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
 
-    List<HoaDon> findByLoaiHoaDonAndTrangThaiHoaDonMa(Integer loai, String maTrangThai);
-
-    List<HoaDon> findByLoaiHoaDonAndTrangThaiHoaDonMaInOrderByNgayTaoDesc(Integer loai, List<String> mas);
-
     HoaDon findByMa(String ma);
-
-    @Query("SELECT h FROM HoaDon h WHERE h.loaiHoaDon = 0 OR (h.loaiHoaDon = 1 AND h.trangThaiHoaDon.id IN (2, 3)) ORDER BY h.ngayTao DESC")
-    List<HoaDon> findLichSuHoaDon();
 
     List<HoaDon> findByKhachHangIdOrderByNgayTaoDesc(Integer khachHangId);
 
-    List<HoaDon> findTop5ByLoaiHoaDonAndTrangThaiHoaDon_MaOrderByNgayTaoDesc(Integer loaiHoaDon, String maTrangThai);
-
-    // 🌟 ĐÃ FIX: Sửa lỗi JPQL phuongThucThanhToan bằng EXISTS subquery nối sang bảng ThanhToan
     @EntityGraph(attributePaths = {"khachHang", "nhanVien", "trangThaiHoaDon"})
     @Query("SELECT h FROM HoaDon h " +
             "LEFT JOIN h.khachHang kh " +
@@ -49,7 +39,6 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
             Pageable pageable
     );
 
-    // 🌟 ĐÃ FIX: Sửa lỗi JPQL phuongThucThanhToan bằng EXISTS subquery nối sang bảng ThanhToan
     @EntityGraph(attributePaths = {"khachHang", "nhanVien", "trangThaiHoaDon"})
     @Query("SELECT h FROM HoaDon h " +
             "LEFT JOIN h.khachHang kh " +

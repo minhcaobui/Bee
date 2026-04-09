@@ -27,7 +27,8 @@ public class ChatLieuApi {
     private final SanPhamRepository sanPhamRepository;
 
     private String generateMa() {
-        return "CL" + System.currentTimeMillis(); // Đổi "CL" thành "HANG", "KT", "MS" tương ứng với từng file
+        String timeStr = String.valueOf(System.currentTimeMillis());
+        return "CL" + timeStr.substring(timeStr.length() - 5);
     }
 
     @GetMapping
@@ -56,12 +57,13 @@ public class ChatLieuApi {
                 ? generateMa()
                 : body.getMa().trim().toUpperCase();
 
-        // 🌟 ĐÃ FIX: Văn phong báo lỗi chuyên nghiệp
-        if (ma.length() > 20) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã thuộc tính tối đa 20 ký tự!");
+        if (ma.length() > 20)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã thuộc tính tối đa 20 ký tự!");
         if (!ma.matches("^[A-Z0-9_]*$")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã chỉ được chứa chữ hoa, số và dấu gạch dưới (_)");
         }
-        if (ten.isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên thuộc tính không được để trống!");
+        if (ten.isEmpty())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên thuộc tính không được để trống!");
         if (ten.length() > 100)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên thuộc tính tối đa 100 ký tự!");
         if (chatLieuRepository.existsByTenIgnoreCase(ten))
@@ -90,7 +92,6 @@ public class ChatLieuApi {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên này đã tồn tại ở bản ghi khác!");
         }
 
-        // 🌟 ĐÃ FIX BUG LÁCH LUẬT: Check điều kiện khi người dùng gạt tắt trạng thái ở form Edit
         Boolean newTrangThai = body.getTrangThai();
         if (newTrangThai != null && !newTrangThai && Boolean.TRUE.equals(entity.getTrangThai())) {
             boolean isUsed = sanPhamRepository.existsByChatLieu_IdAndTrangThaiTrue(id);

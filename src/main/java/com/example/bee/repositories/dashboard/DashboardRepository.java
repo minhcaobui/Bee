@@ -155,7 +155,6 @@ public interface DashboardRepository extends JpaRepository<HoaDon, Integer> {
         """)
     List<Object[]> getRecentOrders();
 
-    // 🌟 ĐÃ FIX: Tính phương thức thanh toán của TOÀN BỘ đơn hàng bằng JOIN bảng thanh_toan
     @Query(nativeQuery = true, value = """
         SELECT
             ISNULL(t.phuong_thuc, N'Tiền mặt') AS method,

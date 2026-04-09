@@ -8,10 +8,10 @@ public class DiaChiRequest {
     private String sdtNhan;
     private String diaChiChiTiet;
     private String tinhThanhPho;
-    private Integer maTinh; // Thêm mã tỉnh của GHN
+    private Integer maTinh;
     private String quanHuyen;
-    private Integer maHuyen; // Thêm mã huyện của GHN
+    private Integer maHuyen;
     private String phuongXa;
-    private String maXa;     // Thêm mã xã của GHN
+    private String maXa;
     private Boolean laMacDinh;
 }

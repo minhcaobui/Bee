@@ -17,8 +17,6 @@ public class KhachHangRequest {
     private String tinhThanhPho;
     private String quanHuyen;
     private String phuongXa;
-
-    // 🌟 ĐÃ SỬA LẠI KIỂU DỮ LIỆU ĐỂ KHỚP VỚI DATABASE VÀ GHN API
     private Integer maTinh;
     private Integer maHuyen;
     private String maXa;

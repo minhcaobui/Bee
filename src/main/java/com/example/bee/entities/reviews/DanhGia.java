@@ -3,7 +3,7 @@ package com.example.bee.entities.reviews;
 import com.example.bee.entities.account.TaiKhoan;
 import com.example.bee.entities.order.HoaDonChiTiet;
 import com.example.bee.entities.product.SanPham;
-import com.example.bee.entities.user.NhanVien;
+import com.example.bee.entities.staff.NhanVien;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,12 +26,10 @@ public class DanhGia {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 🌟 Đã map khóa ngoại TaiKhoan
     @ManyToOne
     @JoinColumn(name = "tai_khoan_id")
     private TaiKhoan taiKhoan;
 
-    // 🌟 Đã map khóa ngoại SanPham
     @ManyToOne
     @JoinColumn(name = "san_pham_id")
     private SanPham sanPham;
@@ -51,7 +49,6 @@ public class DanhGia {
     @Column(name = "ngay_tao")
     private LocalDateTime ngayTao = LocalDateTime.now();
 
-    // 🌟 Đã map khóa ngoại HoaDonChiTiet
     @ManyToOne
     @JoinColumn(name = "hoa_don_chi_tiet_id")
     private HoaDonChiTiet hoaDonChiTiet;
@@ -59,7 +56,6 @@ public class DanhGia {
     @Column(name = "da_sua")
     private Boolean daSua = false;
 
-    // 🌟 Map khóa ngoại NhanVien
     @ManyToOne
     @JoinColumn(name = "nhan_vien_tra_loi_id")
     private NhanVien nhanVienTraLoi;
@@ -73,7 +69,6 @@ public class DanhGia {
     @Transient
     private String tenKhachHang;
 
-    // Tự động cắt chuỗi link ảnh thành mảng cho Frontend dễ dùng
     @Transient
     public List<String> getDanhSachHinhAnhList() {
         if (this.danhSachHinhAnh == null || this.danhSachHinhAnh.trim().isEmpty()) {

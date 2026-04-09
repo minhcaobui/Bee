@@ -5,9 +5,11 @@ import com.example.bee.dto.VariantRequest;
 import com.example.bee.entities.product.HinhAnhSanPham;
 import com.example.bee.entities.product.SanPham;
 import com.example.bee.entities.product.SanPhamChiTiet;
+import com.example.bee.entities.promotion.KhuyenMai;
 import com.example.bee.repositories.catalog.*;
 import com.example.bee.repositories.products.SanPhamChiTietRepository;
 import com.example.bee.repositories.products.SanPhamRepository;
+import com.example.bee.repositories.promotion.KhuyenMaiRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,10 +22,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
-import com.example.bee.entities.promotion.KhuyenMai;
-import com.example.bee.repositories.promotion.KhuyenMaiRepository;
-import java.math.BigDecimal;
 
+import java.math.BigDecimal;
 import java.net.URI;
 import java.util.*;
 
@@ -53,15 +53,10 @@ public class SanPhamApi {
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
-        // 1. Lấy danh sách sản phẩm từ DB
         Page<SanPham> pageResult = sanPhamrepo.search(q, trangThai, idDanhMuc, idHang, idChatLieu, pageable);
 
-        // 2. 🌟 VÒNG LẶP TÍNH GIÁ SALE CHO TỪNG BIẾN THỂ TRƯỚC KHI TRẢ VỀ FRONTEND
         for (SanPham sp : pageResult.getContent()) {
-            // Tìm xem SP này có đang được áp dụng đợt Sale nào không
             List<KhuyenMai> activeSales = khuyenMaiRepo.findActiveKhuyenMaiBySanPhamId(sp.getId());
-
-            // Nếu sản phẩm có biến thể (Màu/Size)
             if (sp.getChiTietSanPhams() != null) {
                 for (SanPhamChiTiet spct : sp.getChiTietSanPhams()) {
                     BigDecimal giaGoc = spct.getGiaBan();
@@ -69,9 +64,8 @@ public class SanPhamApi {
 
                     BigDecimal giaSauKM = giaGoc;
 
-                    // Nếu có đợt Sale đang chạy -> Bắt đầu trừ tiền
                     if (activeSales != null && !activeSales.isEmpty()) {
-                        KhuyenMai km = activeSales.get(0); // Lấy đợt Sale đầu tiên
+                        KhuyenMai km = activeSales.get(0);
                         if ("PERCENT".equals(km.getLoai())) {
                             BigDecimal tyLe = km.getGiaTri().divide(new BigDecimal("100"), 2, java.math.RoundingMode.HALF_UP);
                             BigDecimal tienGiam = giaGoc.multiply(tyLe).setScale(0, java.math.RoundingMode.HALF_UP);
@@ -82,19 +76,13 @@ public class SanPhamApi {
                             }
                         }
                     }
-
-                    // Không để giá sale bị âm
                     if (giaSauKM.compareTo(BigDecimal.ZERO) < 0) {
                         giaSauKM = BigDecimal.ZERO;
                     }
-
-                    // Gán giá sau Sale vào biến thể để Frontend đọc được
                     spct.setGiaSauKhuyenMai(giaSauKM);
                 }
             }
         }
-
-        // 3. Trả về kết quả đã được tính toán
         return pageResult;
     }
 
@@ -111,7 +99,6 @@ public class SanPhamApi {
 
         SanPham sp = spOpt.get();
 
-        // 🌟 VÒNG LẶP TÍNH GIÁ KHUYẾN MÃI CHO TỪNG BIẾN THỂ
         List<KhuyenMai> activeSales = khuyenMaiRepo.findActiveKhuyenMaiBySanPhamId(sp.getId());
 
         if (sp.getChiTietSanPhams() != null) {
@@ -121,7 +108,6 @@ public class SanPhamApi {
 
                 BigDecimal giaSauKM = giaGoc;
 
-                // Nếu có đợt Sale đang chạy -> Bắt đầu trừ tiền
                 if (activeSales != null && !activeSales.isEmpty()) {
                     KhuyenMai km = activeSales.get(0);
                     if ("PERCENT".equals(km.getLoai())) {
@@ -135,7 +121,6 @@ public class SanPhamApi {
                     }
                 }
 
-                // Không để giá sale bị âm
                 if (giaSauKM.compareTo(BigDecimal.ZERO) < 0) {
                     giaSauKM = BigDecimal.ZERO;
                 }
@@ -152,7 +137,6 @@ public class SanPhamApi {
     public ResponseEntity<?> create(@Valid @RequestBody SanPhamRequest body, UriComponentsBuilder uriBuilder) {
         SanPham sp = new SanPham();
 
-        // 1. Kiểm tra trùng MÃ
         if (isBlank(body.getMa())) {
             sp.setMa(generateMa());
         } else {
@@ -164,7 +148,6 @@ public class SanPhamApi {
             sp.setMa(ma);
         }
 
-        // 2. Kiểm tra trùng BỘ 4 THUỘC TÍNH (Tên, Danh Mục, Hãng, Chất Liệu)
         String ten = body.getTen().trim();
         if (ten.length() > 255) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -195,7 +178,6 @@ public class SanPhamApi {
         SanPham sp = sanPhamrepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy sản phẩm"));
 
-        // Kiểm tra trùng BỘ 4 THUỘC TÍNH khi Cập nhật (Loại trừ chính nó)
         String ten = body.getTen().trim();
         Integer idDM = body.getIdDanhMuc();
         Integer idHang = body.getIdHang();
@@ -215,9 +197,9 @@ public class SanPhamApi {
         sp.setMoTa(safeTrim(body.getMoTa()));
         sp.setTrangThai(body.getTrangThai() != null ? body.getTrangThai() : true);
         if (sp.getId() == null) {
-            sp.setNgayTao(new Date()); // Nếu chưa có ID (Thêm mới) -> Gán ngày tạo
+            sp.setNgayTao(new Date());
         } else {
-            sp.setNgaySua(new Date()); // Nếu đã có ID (Cập nhật) -> Gán ngày sửa
+            sp.setNgaySua(new Date());
         }
         sp.setDanhMuc(body.getIdDanhMuc() != null ? danhMucRepo.findById(body.getIdDanhMuc()).orElse(null) : null);
         sp.setHang(body.getIdHang() != null ? hangRepo.findById(body.getIdHang()).orElse(null) : null);
@@ -231,7 +213,7 @@ public class SanPhamApi {
             for (String path : body.getDanhSachHinhAnh()) {
                 HinhAnhSanPham ha = new HinhAnhSanPham();
                 ha.setUrl(path);
-                ha.setSanPham(sp); // BẮT BUỘC PHẢI CÓ DÒNG NÀY ĐỂ MAPPING DB
+                ha.setSanPham(sp);
                 sp.getHinhAnhs().add(ha);
             }
         }
@@ -252,7 +234,6 @@ public class SanPhamApi {
     public List<SanPhamChiTiet> getVariants(@PathVariable Integer id) {
         List<SanPhamChiTiet> variants = variantRepo.findBySanPhamId(id);
 
-        // 🌟 VÒNG LẶP TÍNH GIÁ KHUYẾN MÃI CHO DANH SÁCH BIẾN THỂ
         List<KhuyenMai> activeSales = khuyenMaiRepo.findActiveKhuyenMaiBySanPhamId(id);
 
         for (SanPhamChiTiet spct : variants) {
@@ -261,7 +242,6 @@ public class SanPhamApi {
 
             BigDecimal giaSauKM = giaGoc;
 
-            // Nếu có đợt Sale đang chạy -> Bắt đầu trừ tiền
             if (activeSales != null && !activeSales.isEmpty()) {
                 KhuyenMai km = activeSales.get(0);
                 if ("PERCENT".equals(km.getLoai())) {
@@ -275,12 +255,10 @@ public class SanPhamApi {
                 }
             }
 
-            // Không để giá sale bị âm
             if (giaSauKM.compareTo(BigDecimal.ZERO) < 0) {
                 giaSauKM = BigDecimal.ZERO;
             }
 
-            // Gán giá sau Sale vào biến thể để Frontend đọc được
             spct.setGiaSauKhuyenMai(giaSauKM);
         }
 
@@ -300,7 +278,6 @@ public class SanPhamApi {
         SanPhamChiTiet variant = new SanPhamChiTiet();
         variant.setSanPham(sp);
 
-        // 1. Lấy ra Object Màu và Kích thước thật từ DB
         var mauSac = mauSacRepo.findById(req.getIdMauSac())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Màu sắc không hợp lệ"));
         var kichThuoc = kichThuocRepo.findById(req.getIdKichThuoc())
@@ -312,22 +289,17 @@ public class SanPhamApi {
         variant.setGiaBan(req.getGiaBan());
         variant.setHinhAnh(req.getHinhAnh());
 
-        // 🌟 2. CẬP NHẬT: Nhận Tồn kho từ Frontend truyền lên (Thay vì set cứng = 0)
         int soLuongNhap = (req.getSoLuong() != null) ? req.getSoLuong() : 0;
         variant.setSoLuong(soLuongNhap);
 
-        // Bật trạng thái Tự động (Nếu SL > 0 thì tự bật Đang kinh doanh)
         variant.setTrangThai(soLuongNhap > 0);
 
-        // 🌟 3. NÂNG CẤP: Logic sinh mã SKU thông minh (Ví dụ: SP0001-DEN-XL)
-        String maSanPham = sp.getMa(); // Lấy mã SP gốc
-        String maMau = mauSac.getMa(); //removeVietnameseTones(mauSac.getMa()); // Hàm chuyển tiếng việt không dấu
-        String maKichThuoc = kichThuoc.getMa(); //removeVietnameseTones(kichThuoc.getMa());
+        String maSanPham = sp.getMa();
+        String maMau = mauSac.getMa();
+        String maKichThuoc = kichThuoc.getMa();
 
-        // Ép chuỗi thành mã (Ví dụ: SP0001-DEN-XL)
         String skuCode = String.format("%s-%s-%s", maSanPham, maMau, maKichThuoc);
 
-        // Nếu mã này lỡ bị trùng (Hiếm khi xảy ra), thì cộng thêm random
         if (variantRepo.existsBySku(skuCode)) {
             skuCode += "-" + System.currentTimeMillis();
         }
@@ -340,7 +312,6 @@ public class SanPhamApi {
     @Transactional
     public ResponseEntity<?> updateVariant(@PathVariable Integer id, @RequestBody VariantRequest req) {
         return variantRepo.findById(id).map(variant -> {
-            // 🌟 ĐÃ FIX: Lấy ID an toàn chống NullPointerException
             Integer currentMauId = variant.getMauSac() != null ? variant.getMauSac().getId() : null;
             Integer currentSizeId = variant.getKichThuoc() != null ? variant.getKichThuoc().getId() : null;
 
@@ -353,7 +324,6 @@ public class SanPhamApi {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Biến thể Màu + Size này đã tồn tại!");
             }
 
-            // Cập nhật các trường an toàn
             if (req.getGiaBan() != null) {
                 if (req.getGiaBan().compareTo(BigDecimal.ZERO) < 0) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Giá bán không được nhỏ hơn 0!");
@@ -382,7 +352,6 @@ public class SanPhamApi {
         return variantRepo.findById(id).map(variant -> {
             Integer newQty = body.get("soLuong");
 
-            // 🌟 ĐÃ FIX: Chặn nhập kho âm
             if (newQty == null || newQty < 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Số lượng tồn kho không được nhỏ hơn 0!");
             }
@@ -417,7 +386,6 @@ public class SanPhamApi {
         return s == null ? null : s.trim();
     }
 
-    // 🌟 HÀM TIỆN ÍCH DÙNG ĐỂ BÓC DẤU TIẾNG VIỆT (Nên để ở cuối class SanPhamApi)
     private String removeVietnameseTones(String str) {
         if (str == null) return "";
         str = str.replaceAll("à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ", "a");
@@ -428,7 +396,6 @@ public class SanPhamApi {
         str = str.replaceAll("ỳ|ý|ỵ|ỷ|ỹ", "y");
         str = str.replaceAll("đ", "d");
         str = str.replaceAll("À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ", "A");
-        // ... Cắt các ký tự đặc biệt
         str = str.replaceAll("[^a-zA-Z0-9 ]", "");
         return str.replaceAll("\\s+", "").toUpperCase();
     }

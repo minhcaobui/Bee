@@ -49,11 +49,11 @@ public class DashBoardApi {
 
     private LocalDateTime[] getPrevRange(String period, LocalDateTime[] cur) {
         return switch (period) {
-            case "today"  -> new LocalDateTime[]{cur[0].minusDays(1),  cur[1].minusDays(1)};
-            case "week"   -> new LocalDateTime[]{cur[0].minusWeeks(1), cur[1].minusWeeks(1)};
-            case "month"  -> new LocalDateTime[]{cur[0].minusMonths(1),cur[1].minusMonths(1)};
-            case "year"   -> new LocalDateTime[]{cur[0].minusYears(1), cur[1].minusYears(1)};
-            default       -> new LocalDateTime[]{cur[0].minusMonths(1),cur[1].minusMonths(1)};
+            case "today" -> new LocalDateTime[]{cur[0].minusDays(1), cur[1].minusDays(1)};
+            case "week" -> new LocalDateTime[]{cur[0].minusWeeks(1), cur[1].minusWeeks(1)};
+            case "month" -> new LocalDateTime[]{cur[0].minusMonths(1), cur[1].minusMonths(1)};
+            case "year" -> new LocalDateTime[]{cur[0].minusYears(1), cur[1].minusYears(1)};
+            default -> new LocalDateTime[]{cur[0].minusMonths(1), cur[1].minusMonths(1)};
         };
     }
 
@@ -88,7 +88,6 @@ public class DashBoardApi {
         double sold = c[6] != null ? ((Number) c[6]).doubleValue() : 0;
         double cust = c[7] != null ? ((Number) c[7]).doubleValue() : 0;
 
-        // 🌟 Lấy thêm 3 thông số mới đẻ ra
         double pureComp = c.length > 8 && c[8] != null ? ((Number) c[8]).doubleValue() : 0;
         double exchanged = c.length > 9 && c[9] != null ? ((Number) c[9]).doubleValue() : 0;
         double returned = c.length > 10 && c[10] != null ? ((Number) c[10]).doubleValue() : 0;
@@ -98,7 +97,6 @@ public class DashBoardApi {
         double pAvg = p[2] != null ? ((Number) p[2]).doubleValue() : 0;
         double pCust = p[7] != null ? ((Number) p[7]).doubleValue() : 0;
 
-        // 🌟 ĐÃ FIX: Tính tỷ lệ hoàn thành dựa trên TỔNG TOÀN BỘ ĐƠN HÀNG
         double rate = ord > 0 ? Math.round((comp / ord) * 100.0) : 0;
 
         double revChg = calcChg(rev, pRev);
@@ -124,27 +122,36 @@ public class DashBoardApi {
         res.put("rate", (long) rate);
         res.put("cancelled", (long) canc);
 
-        // 🌟 Bơm vào JSON trả về Frontend
         res.put("pureCompleted", (long) pureComp);
         res.put("exchanged", (long) exchanged);
         res.put("returned", (long) returned);
 
         return ResponseEntity.ok(res);
     }
-        private Map<String, Object> emptyStats() {
-            Map<String, Object> m = new HashMap<>();
-            m.put("rev", 0.0);   m.put("revChg", 0.0);  m.put("revUp", true);
-            m.put("ord", 0L);    m.put("ordChg", 0.0);   m.put("ordUp", true);
-            m.put("pend", 0L);   m.put("avg", 0.0);
-            m.put("avgChg", 0.0); m.put("avgUp", true);
-            m.put("cust", 0L);   m.put("custChg", 0.0);  m.put("custUp", true);
-            m.put("sold", 0L);   m.put("rate", 0L);       m.put("cancelled", 0L);
-            // 🌟 Bơm vào object rỗng
-            m.put("pureCompleted", 0L);
-            m.put("exchanged", 0L);
-            m.put("returned", 0L);
-            return m;
-        }
+
+    private Map<String, Object> emptyStats() {
+        Map<String, Object> m = new HashMap<>();
+        m.put("rev", 0.0);
+        m.put("revChg", 0.0);
+        m.put("revUp", true);
+        m.put("ord", 0L);
+        m.put("ordChg", 0.0);
+        m.put("ordUp", true);
+        m.put("pend", 0L);
+        m.put("avg", 0.0);
+        m.put("avgChg", 0.0);
+        m.put("avgUp", true);
+        m.put("cust", 0L);
+        m.put("custChg", 0.0);
+        m.put("custUp", true);
+        m.put("sold", 0L);
+        m.put("rate", 0L);
+        m.put("cancelled", 0L);
+        m.put("pureCompleted", 0L);
+        m.put("exchanged", 0L);
+        m.put("returned", 0L);
+        return m;
+    }
 
     @GetMapping("/chart")
     public ResponseEntity<?> chart(
@@ -152,45 +159,45 @@ public class DashBoardApi {
             @RequestParam(required = false) String from,
             @RequestParam(required = false) String to) {
 
-        LocalDateTime[] cur  = getRange(period, from, to);
+        LocalDateTime[] cur = getRange(period, from, to);
         LocalDateTime[] prev = getPrevRange(period, cur);
 
-        List<Object[]> curRows  = switch (period) {
-            case "today"  -> repo.getChartHour(cur[0],  cur[1]);
-            case "week"   -> repo.getChartWeek(cur[0],  cur[1]);
-            case "year"   -> repo.getChartMonth(cur[0], cur[1]);
-            default       -> repo.getChartDay(cur[0],   cur[1]);
+        List<Object[]> curRows = switch (period) {
+            case "today" -> repo.getChartHour(cur[0], cur[1]);
+            case "week" -> repo.getChartWeek(cur[0], cur[1]);
+            case "year" -> repo.getChartMonth(cur[0], cur[1]);
+            default -> repo.getChartDay(cur[0], cur[1]);
         };
         List<Object[]> prevRows = switch (period) {
-            case "today"  -> repo.getChartHour(prev[0],  prev[1]);
-            case "week"   -> repo.getChartWeek(prev[0],  prev[1]);
-            case "year"   -> repo.getChartMonth(prev[0], prev[1]);
-            default       -> repo.getChartDay(prev[0],   prev[1]);
+            case "today" -> repo.getChartHour(prev[0], prev[1]);
+            case "week" -> repo.getChartWeek(prev[0], prev[1]);
+            case "year" -> repo.getChartMonth(prev[0], prev[1]);
+            default -> repo.getChartDay(prev[0], prev[1]);
         };
 
-        Map<Integer, long[]> curMap  = new LinkedHashMap<>();
-        Map<Integer, Long>   prevMap = new LinkedHashMap<>();
-        curRows.forEach(r  -> curMap.put( ((Number)r[0]).intValue(), new long[]{((Number)r[1]).longValue(), ((Number)r[2]).longValue()}));
-        prevRows.forEach(r -> prevMap.put(((Number)r[0]).intValue(),              ((Number)r[1]).longValue()));
+        Map<Integer, long[]> curMap = new LinkedHashMap<>();
+        Map<Integer, Long> prevMap = new LinkedHashMap<>();
+        curRows.forEach(r -> curMap.put(((Number) r[0]).intValue(), new long[]{((Number) r[1]).longValue(), ((Number) r[2]).longValue()}));
+        prevRows.forEach(r -> prevMap.put(((Number) r[0]).intValue(), ((Number) r[1]).longValue()));
 
         List<String> labels = switch (period) {
-            case "today"  -> IntStream.rangeClosed(7, 21).mapToObj(h -> h + "h").toList();
-            case "week"   -> List.of("T2","T3","T4","T5","T6","T7","CN");
-            case "year"   -> List.of("T1","T2","T3","T4","T5","T6","T7","T8","T9","T10","T11","T12");
+            case "today" -> IntStream.rangeClosed(7, 21).mapToObj(h -> h + "h").toList();
+            case "week" -> List.of("T2", "T3", "T4", "T5", "T6", "T7", "CN");
+            case "year" -> List.of("T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10", "T11", "T12");
             default -> IntStream.rangeClosed(1, cur[0].toLocalDate().lengthOfMonth())
                     .mapToObj(String::valueOf).toList();
         };
 
-        List<Long>   revList      = new ArrayList<>();
-        List<Long>   ordList      = new ArrayList<>();
-        List<Long>   revPrevList  = new ArrayList<>();
+        List<Long> revList = new ArrayList<>();
+        List<Long> ordList = new ArrayList<>();
+        List<Long> revPrevList = new ArrayList<>();
 
         for (int i = 0; i < labels.size(); i++) {
             int key = switch (period) {
-                case "today"  -> i + 7;
-                case "week"   -> (i == 6) ? 1 : i + 2; // MySQL DAYOFWEEK: 1=CN, 2=T2
-                case "year"   -> i + 1;
-                default       -> i + 1;
+                case "today" -> i + 7;
+                case "week" -> (i == 6) ? 1 : i + 2;
+                case "year" -> i + 1;
+                default -> i + 1;
             };
             long[] cv = curMap.getOrDefault(key, new long[]{0L, 0L});
             revList.add(cv[0]);
@@ -200,39 +207,35 @@ public class DashBoardApi {
 
         int spFrom = Math.max(0, revList.size() - 7);
 
-        List<Double> spAvg  = new ArrayList<>();
-        List<Long>   spCust = new ArrayList<>();
+        List<Double> spAvg = new ArrayList<>();
+        List<Long> spCust = new ArrayList<>();
         long totalSeconds = java.time.Duration.between(cur[0], cur[1]).getSeconds();
-        long stepSeconds  = Math.max(totalSeconds / 7, 1);
+        long stepSeconds = Math.max(totalSeconds / 7, 1);
         for (int i = 0; i < 7; i++) {
             LocalDateTime s = cur[0].plusSeconds(i * stepSeconds);
             LocalDateTime e = cur[0].plusSeconds((i + 1) * stepSeconds);
-            Double avg  = repo.getAvgOrderValue(s, e);
-            Long   cust = repo.getNewCustomers(s, e);
-            spAvg.add(avg  != null ? avg  : 0.0);
+            Double avg = repo.getAvgOrderValue(s, e);
+            Long cust = repo.getNewCustomers(s, e);
+            spAvg.add(avg != null ? avg : 0.0);
             spCust.add(cust != null ? cust : 0L);
         }
 
         Map<String, Object> chartRes = new HashMap<>();
-        chartRes.put("cL",     labels);
-        chartRes.put("cR",     revList);
-        chartRes.put("cO",     ordList);
+        chartRes.put("cL", labels);
+        chartRes.put("cR", revList);
+        chartRes.put("cO", ordList);
         chartRes.put("cRprev", revPrevList);
-        chartRes.put("spRev",  revList.subList(spFrom, revList.size()));
-        chartRes.put("spOrd",  ordList.subList(spFrom, ordList.size()));
-        chartRes.put("spAvg",  spAvg);
+        chartRes.put("spRev", revList.subList(spFrom, revList.size()));
+        chartRes.put("spOrd", ordList.subList(spFrom, ordList.size()));
+        chartRes.put("spAvg", spAvg);
         chartRes.put("spCust", spCust);
         return ResponseEntity.ok(chartRes);
     }
 
-    // ═══════════════════════════════
-    //  TÍNH NĂNG MỚI: AI INSIGHTS
-    // ═══════════════════════════════
     @GetMapping("/ai-insights")
     public ResponseEntity<?> getAiInsights() {
         List<Map<String, Object>> insights = new ArrayList<>();
 
-        // 1. Phân tích doanh thu tháng này
         LocalDateTime[] curMonth = getRange("month", null, null);
         LocalDateTime[] prevMonth = getPrevRange("month", curMonth);
         List<Object[]> cList = repo.getStats(curMonth[0], curMonth[1]);
@@ -261,7 +264,6 @@ public class DashBoardApi {
             }
         }
 
-        // 2. Cảnh báo kho hàng
         List<Object[]> lowStock = repo.getLowStock();
         if (lowStock != null && !lowStock.isEmpty()) {
             if (lowStock.size() >= 3) {
@@ -272,7 +274,6 @@ public class DashBoardApi {
             }
         }
 
-        // 3. Phân tích hành vi (Giả lập AI phân tích từ Heatmap)
         insights.add(Map.of("type", "info", "msg", "Dữ liệu Heatmap cho thấy khách hàng thường chốt đơn mạnh vào 10h-12h trưa và 19h-21h tối. Đây là " +
                 "khung giờ vàng để chạy Flash Sale."));
 
@@ -290,12 +291,12 @@ public class DashBoardApi {
 
         List<Map<String, Object>> result = rows.stream().map(r -> {
             Map<String, Object> m = new HashMap<>();
-            m.put("id",   ((Number) r[0]).intValue());
+            m.put("id", ((Number) r[0]).intValue());
             m.put("name", r[1].toString());
-            m.put("sku",  r[2].toString());
+            m.put("sku", r[2].toString());
             m.put("attr", r[3].toString());
             m.put("sold", ((Number) r[4]).longValue());
-            m.put("rev",  ((Number) r[5]).longValue());
+            m.put("rev", ((Number) r[5]).longValue());
             return m;
         }).collect(Collectors.toList());
 
@@ -305,21 +306,21 @@ public class DashBoardApi {
     @GetMapping("/recent-orders")
     public ResponseEntity<?> recentOrders() {
         Map<String, String> statusMap = Map.of(
-                "HOAN_THANH",     "completed",
-                "DA_HUY",         "cancelled",
+                "HOAN_THANH", "completed",
+                "DA_HUY", "cancelled",
                 "CHO_THANH_TOAN", "pending",
-                "CHO_XAC_NHAN",   "pending",
-                "CHO_GIAO",       "pending",
-                "DANG_GIAO",      "pending"
+                "CHO_XAC_NHAN", "pending",
+                "CHO_GIAO", "pending",
+                "DANG_GIAO", "pending"
         );
 
         List<Map<String, Object>> result = repo.getRecentOrders().stream().map(r -> {
             Map<String, Object> m = new HashMap<>();
-            m.put("id",     ((Number) r[0]).intValue());
-            m.put("code",   r[1].toString());
-            m.put("name",   r[2].toString());
-            m.put("items",  ((Number) r[3]).intValue());
-            m.put("total",  ((Number) r[4]).longValue());
+            m.put("id", ((Number) r[0]).intValue());
+            m.put("code", r[1].toString());
+            m.put("name", r[2].toString());
+            m.put("items", ((Number) r[3]).intValue());
+            m.put("total", ((Number) r[4]).longValue());
             m.put("method", r[5].toString());
             m.put("status", statusMap.getOrDefault(r[6].toString(), "pending"));
             return m;
@@ -339,7 +340,6 @@ public class DashBoardApi {
 
         Map<String, Long> aggregated = new LinkedHashMap<>();
 
-        // 🌟 Chuẩn hóa tên phương thức về các KEY cố định
         rows.forEach(r -> {
             String rawMethod = r[0] != null ? r[0].toString().toUpperCase() : "TIEN_MAT";
             String key = "TIEN_MAT";
@@ -367,12 +367,12 @@ public class DashBoardApi {
 
         List<Map<String, Object>> result = rows.stream().map(r -> {
             Map<String, Object> m = new HashMap<>();
-            m.put("id",   ((Number) r[0]).intValue());
+            m.put("id", ((Number) r[0]).intValue());
             m.put("name", r[1].toString());
-            m.put("sku",  r[2].toString());
+            m.put("sku", r[2].toString());
             m.put("attr", r[3].toString());
-            m.put("qty",  ((Number) r[4]).intValue());
-            m.put("max",  100);
+            m.put("qty", ((Number) r[4]).intValue());
+            m.put("max", 100);
             return m;
         }).collect(Collectors.toList());
 
@@ -391,12 +391,12 @@ public class DashBoardApi {
         int[] dayOrder = {2, 3, 4, 5, 6, 7, 1};
         int hourStart = 7, hourEnd = 18;
         int numHours = hourEnd - hourStart + 1;
-        int numDays  = 7;
+        int numDays = 7;
 
         double[][] grid = new double[numDays][numHours];
         rows.forEach(r -> {
             int dow = ((Number) r[0]).intValue();
-            int hr  = ((Number) r[1]).intValue();
+            int hr = ((Number) r[1]).intValue();
             double rev = ((Number) r[2]).doubleValue() / 1_000_000.0;
             for (int i = 0; i < dayOrder.length; i++) {
                 if (dayOrder[i] == dow && hr >= hourStart && hr <= hourEnd) {
@@ -413,8 +413,8 @@ public class DashBoardApi {
         }
 
         Map<String, Object> res = new HashMap<>();
-        res.put("days",  List.of("T2","T3","T4","T5","T6","T7","CN"));
-        res.put("hours", List.of("7h","8h","9h","10h","11h","12h","13h","14h","15h","16h","17h","18h"));
+        res.put("days", List.of("T2", "T3", "T4", "T5", "T6", "T7", "CN"));
+        res.put("hours", List.of("7h", "8h", "9h", "10h", "11h", "12h", "13h", "14h", "15h", "16h", "17h", "18h"));
         res.put("values", values);
         return ResponseEntity.ok(res);
     }
@@ -424,11 +424,9 @@ public class DashBoardApi {
         String userMsg = payload.getOrDefault("message", "").toLowerCase();
         String reply = "Xin lỗi sếp, em chưa hiểu ý sếp lắm. Sếp có thể hỏi về doanh thu hoặc đơn hàng hôm nay nhé!";
 
-        // Formatter để in tiền đẹp
         NumberFormat currencyFormat = NumberFormat.getInstance(new Locale("vi", "VN"));
 
         try {
-            // Thiết lập mốc thời gian là Ngày hôm nay để trả lời
             LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
             LocalDateTime endOfDay = LocalDate.now().atTime(23, 59, 59);
 
@@ -436,12 +434,11 @@ public class DashBoardApi {
                 List<Object[]> stats = repo.getStats(startOfDay, endOfDay);
                 if (!stats.isEmpty() && stats.get(0)[0] != null) {
                     double rev = ((Number) stats.get(0)[0]).doubleValue();
-                    reply = "Báo cáo sếp, doanh thu thực tế hôm nay là: <b>" + currencyFormat.format(rev) + " ₫</b> ạ! 🚀";
+                    reply = "Báo cáo sếp, doanh thu thực tế hôm nay là: <b>" + currencyFormat.format(rev) + " ₫</b> ạ!";
                 } else {
-                    reply = "Hôm nay chưa có doanh thu nào sếp ạ 😢";
+                    reply = "Hôm nay chưa có doanh thu nào sếp ạ";
                 }
-            }
-            else if (userMsg.contains("đơn hàng") || userMsg.contains("bao nhiêu đơn")) {
+            } else if (userMsg.contains("đơn hàng") || userMsg.contains("bao nhiêu đơn")) {
                 List<Object[]> stats = repo.getStats(startOfDay, endOfDay);
                 if (!stats.isEmpty() && stats.get(0)[1] != null) {
                     long ord = ((Number) stats.get(0)[1]).longValue();
@@ -449,13 +446,11 @@ public class DashBoardApi {
                 } else {
                     reply = "Hôm nay chưa có đơn hàng nào cả sếp ơi.";
                 }
-            }
-            else if (userMsg.contains("chào") || userMsg.contains("hello")) {
-                reply = "Dạ em chào sếp! Chúc sếp một ngày làm việc chốt được ngàn đơn nhé! 😎";
-            }
-            else if (userMsg.contains("tồn kho") || userMsg.contains("hết hàng")) {
+            } else if (userMsg.contains("chào") || userMsg.contains("hello")) {
+                reply = "Dạ em chào sếp! Chúc sếp một ngày làm việc chốt được ngàn đơn nhé!";
+            } else if (userMsg.contains("tồn kho") || userMsg.contains("hết hàng")) {
                 List<Object[]> lowStock = repo.getLowStock();
-                if(lowStock.isEmpty()) {
+                if (lowStock.isEmpty()) {
                     reply = "Tuyệt vời, hiện tại không có sản phẩm nào sắp hết hàng sếp nhé!";
                 } else {
                     reply = "Cảnh báo sếp: Đang có <b>" + lowStock.size() + "</b> mã sản phẩm sắp cạn kho. Sếp nhớ nhập thêm hàng nha!";

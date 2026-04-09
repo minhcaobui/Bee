@@ -1,13 +1,15 @@
 package com.example.bee.controllers.api;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -20,14 +22,13 @@ import java.util.Map;
 @RequestMapping("/api/chatbot")
 public class ChatbotApi {
 
+    private final String[] API_KEYS = {
+            "AIzaSyBwNQTRdPiX0eaKnsRHHN9ZTCJHJ4q9A9M",
+            "AIzaSyAL1Hx_Gi9HDD5hiZKIJuXb5LI1JOzOD8M",
+            "AIzaSyCkNEFWilwtJoi8nRENh7-iaQH1TQw68MU"
+    };
     @Autowired
     private EntityManager entityManager;
-
-    private final String[] API_KEYS = {
-            "AIzaSyBwNQTRdPiX0eaKnsRHHN9ZTCJHJ4q9A9M", // Key 1 (Key hiện tại của bạn)
-            "AIzaSyAL1Hx_Gi9HDD5hiZKIJuXb5LI1JOzOD8M", // Key 2 (Tạo từ Gmail khác)
-            "AIzaSyCkNEFWilwtJoi8nRENh7-iaQH1TQw68MU"  // Key 3 (Tạo từ Gmail khác)
-    };
 
     @PostMapping("/ask")
     public ResponseEntity<Map<String, String>> askBot(@RequestBody Map<String, String> payload) {
@@ -39,23 +40,16 @@ public class ChatbotApi {
             return ResponseEntity.ok(result);
         }
 
-        // RANDOM LẤY 1 KEY TRONG MẢNG ĐỂ VƯỢT GIỚI HẠN RATE LIMIT
         int randomIndex = new java.util.Random().nextInt(API_KEYS.length);
         String selectedKey = API_KEYS[randomIndex];
         String GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + selectedKey;
 
-        // ==========================================
-        // GỌI CÁC HÀM LẤY DATA TỪ DATABASE
-        // ==========================================
         String categoriesContext = fetchCategories();
         String attributesContext = fetchColorsAndSizes();
         String productsContext = fetchProductsContext();
         String voucherContext = fetchVouchers();
         String promotionContext = fetchPromotions();
 
-        // ==========================================
-        // XÂY DỰNG PROMPT & INSTRUCTION CHO AI
-        // ==========================================
         StringBuilder promptBuilder = new StringBuilder();
         promptBuilder.append("Bạn là 'Bee', nhân viên tư vấn cực kỳ dễ thương, chuyên nghiệp của shop thời trang nam nữ BeeMate. ");
         promptBuilder.append("Xưng hô là 'mình' hoặc 'shop' và gọi khách là 'cậu' hoặc 'bạn'. ");
@@ -78,9 +72,6 @@ public class ChatbotApi {
         promptBuilder.append("Khách hàng nhắn: \"").append(userMessage).append("\"\n");
         promptBuilder.append("Bee trả lời:");
 
-        // ==========================================
-        // ĐÓNG GÓI REQUEST GỬI SANG GEMINI
-        // ==========================================
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -103,7 +94,6 @@ public class ChatbotApi {
             List<Map<String, Object>> responseParts = (List<Map<String, Object>>) content.get("parts");
             String botReply = (String) responseParts.get(0).get("text");
 
-            // Lọc bỏ các dấu sao Markdown bị Gemini cố tình sinh ra (thay bằng thẻ HTML)
             botReply = botReply.replace("**", "<b>").replace("**", "</b>");
             botReply = botReply.replace("*", "<br>• ");
 
@@ -120,17 +110,15 @@ public class ChatbotApi {
         }
     }
 
-    // =========================================================
-    // CÁC HÀM HELPER: TRUY VẤN DATABASE CHUYÊN SÂU
-    // =========================================================
-
     private String fetchCategories() {
         try {
             String sql = "SELECT ten FROM danh_muc WHERE trang_thai = 1";
             List<String> list = entityManager.createNativeQuery(sql).getResultList();
             if (list.isEmpty()) return "";
             return "1. DANH MỤC SHOP BÁN: " + String.join(", ", list) + ".";
-        } catch (Exception e) { return ""; }
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     private String fetchColorsAndSizes() {
@@ -144,13 +132,14 @@ public class ChatbotApi {
             return "2. THUỘC TÍNH SẢN PHẨM HIỆN CÓ:\n" +
                     "- Các Màu sắc: " + String.join(", ", colors) + "\n" +
                     "- Các Kích cỡ (Size): " + String.join(", ", sizes) + ".";
-        } catch (Exception e) { return ""; }
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     private String fetchProductsContext() {
         StringBuilder sb = new StringBuilder("3. TOP SẢN PHẨM BÁN CHẠY & MỚI NHẤT:\n");
         try {
-            // Nâng lên TOP 40, kèm Danh mục và Khoảng giá để AI tư vấn linh hoạt hơn
             String sql = "SELECT TOP 40 sp.id, sp.ten, dm.ten AS danh_muc, MIN(spct.gia_ban) AS gia_min, MAX(spct.gia_ban) AS gia_max " +
                     "FROM san_pham sp " +
                     "JOIN san_pham_chi_tiet spct ON sp.id = spct.id_san_pham " +
@@ -177,7 +166,6 @@ public class ChatbotApi {
     private String fetchVouchers() {
         StringBuilder sb = new StringBuilder("4. MÃ GIẢM GIÁ (VOUCHER) ĐANG HOẠT ĐỘNG:\n");
         try {
-            // Lọc ra các voucher chưa hết hạn và còn lượt dùng
             String sql = "SELECT ma_code, ten, dieu_kien_toithieu_hoadon, gia_tri_giam, loai FROM ma_giam_gia " +
                     "WHERE trang_thai = 1 AND so_luong > luot_su_dung AND (ngay_ket_thuc IS NULL OR ngay_ket_thuc >= GETDATE())";
             List<Object[]> list = entityManager.createNativeQuery(sql).getResultList();
@@ -189,7 +177,8 @@ public class ChatbotApi {
                         .append(" | Giảm: ").append(row[3]).append(loaiGiam)
                         .append(" | Điều kiện: Đơn tối thiểu ").append(row[2]).append(" VNĐ\n");
             }
-        } catch (Exception e) { }
+        } catch (Exception e) {
+        }
         return sb.toString();
     }
 
@@ -212,7 +201,8 @@ public class ChatbotApi {
                         .append(" | Mức giảm: ").append(row[2]).append(loaiGiam)
                         .append(" | Áp dụng cho: ").append(spApDung).append("\n");
             }
-        } catch (Exception e) { }
+        } catch (Exception e) {
+        }
         return sb.toString();
     }
 }

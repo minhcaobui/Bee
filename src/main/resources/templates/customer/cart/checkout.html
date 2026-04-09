@@ -1105,7 +1105,7 @@
                     phuongThucThanhToan: paymentMethod,
                     tienHang: this.state.subTotal,
                     phiShip: this.state.shippingFee,
-                    tienGiam: this.state.discount,
+                    tienGiam: this.state.discount + this.state.employeeDiscount,
                     tongTien: this.state.total,
                     voucherId: voucherIdToSubmit,
                     isBuyNow: isBuyNowMode,
@@ -1127,11 +1127,20 @@
                     const invoiceId = responseData.id || responseData.invoiceId;
                     const maHD = responseData.ma || ('HD' + invoiceId);
 
-                    // 🌟 FIX LỖI "MUA NGAY BỊ MẤT GIỎ HÀNG CHUNG" (FRONTEND)
+                    //FIX LỖI "MUA NGAY BỊ MẤT GIỎ HÀNG CHUNG" (FRONTEND)
                     if (!isBuyNowMode) {
-                        localStorage.removeItem('bee_cart');
+                        // TRƯỜNG HỢP 1: Mua từ GIỎ HÀNG CHUNG
+                        // Gọi API xóa toàn bộ giỏ hàng trong Database và dọn sạch localStorage
+                        if (window.CartHelper && typeof window.CartHelper.clear === 'function') {
+                            await window.CartHelper.clear();
+                        } else {
+                            localStorage.removeItem('bee_cart');
+                        }
                         localStorage.removeItem('bee_cart_note');
                     } else {
+                        // TRƯỜNG HỢP 2: Khách bấm MUA NGAY
+                        // CHỈ xóa dữ liệu của món hàng "Mua ngay" lưu tạm trong sessionStorage
+                        // TUYỆT ĐỐI KHÔNG ĐỤNG CHẠM đến giỏ hàng chung của khách (bee_cart trong localStorage và DB)
                         sessionStorage.removeItem('bee_buy_now');
                     }
 
@@ -1175,8 +1184,8 @@
                     }
                     else if (paymentMethod === 'CHUYEN_KHOAN') {
                         const bankId = "MB";
-                        const accountNo = "0988123456";
-                        const accountName = "NGUYEN VAN HOANG";
+                        const accountNo = "08101102004";
+                        const accountName = "BUI CAO MINH";
                         const amount = this.state.total;
                         const addInfo = "ThanhToan_" + maHD;
 

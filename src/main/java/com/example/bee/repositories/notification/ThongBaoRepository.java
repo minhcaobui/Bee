@@ -10,6 +10,4 @@ import java.util.List;
 public interface ThongBaoRepository extends JpaRepository<ThongBao, Long> {
 
     List<ThongBao> findByTaiKhoanIdOrderByNgayTaoDesc(Integer taiKhoanId);
-
-    List<ThongBao> findByTaiKhoanIdAndDaDocFalse(Integer taiKhoanId);
 }

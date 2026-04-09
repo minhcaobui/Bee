@@ -1,23 +1,11 @@
 package com.example.bee.controllers.api.order;
 
-import com.example.bee.entities.order.ChiTietDoiTra;
-import com.example.bee.entities.order.HoaDon;
-import com.example.bee.entities.order.HoaDonChiTiet;
-import com.example.bee.entities.order.LichSuHoaDon;
-import com.example.bee.entities.order.TrangThaiHoaDon;
-import com.example.bee.entities.order.YeuCauDoiTra;
-import com.example.bee.entities.order.ThanhToan;
+import com.example.bee.entities.order.*;
 import com.example.bee.entities.product.SanPhamChiTiet;
-import com.example.bee.entities.user.NhanVien;
-import com.example.bee.repositories.order.ChiTietDoiTraRepository;
-import com.example.bee.repositories.order.HoaDonChiTietRepository;
-import com.example.bee.repositories.order.HoaDonRepository;
-import com.example.bee.repositories.order.LichSuHoaDonRepository;
-import com.example.bee.repositories.order.TrangThaiHoaDonRepository;
-import com.example.bee.repositories.order.ThanhToanRepository;
-import com.example.bee.repositories.order.YeuCauDoiTraRepository;
+import com.example.bee.entities.staff.NhanVien;
+import com.example.bee.repositories.order.*;
 import com.example.bee.repositories.products.SanPhamChiTietRepository;
-import com.example.bee.repositories.role.NhanVienRepository;
+import com.example.bee.repositories.staff.NhanVienRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -120,7 +108,7 @@ public class ReturnApi {
     }
 
     @PostMapping("/{id}/approve")
-    @Transactional // 🌟 ĐÃ THÊM TRANSACTIONAL: Bảo vệ dữ liệu an toàn tuyệt đối
+    @Transactional
     public ResponseEntity<?> approveRequest(@PathVariable Integer id, @RequestBody(required = false) Map<String, Object> payload) {
         YeuCauDoiTra yc = ycRepo.findById(id).orElse(null);
         if (yc == null || !yc.getTrangThai().equals("CHO_XU_LY")) {
@@ -134,7 +122,7 @@ public class ReturnApi {
         }
 
         boolean congKho = payload != null && payload.containsKey("congKho") ? (Boolean) payload.get("congKho") : true;
-        HoaDon hd = yc.getHoaDon(); // Lấy hóa đơn gốc ra để thao tác
+        HoaDon hd = yc.getHoaDon();
 
         if (yc.getLoaiYeuCau().equalsIgnoreCase("ĐỔI HÀNG") && payload != null && payload.containsKey("chiTietMoi")) {
             List<Map<String, Object>> chiTietMoi = (List<Map<String, Object>>) payload.get("chiTietMoi");
@@ -147,11 +135,9 @@ public class ReturnApi {
                     if (spctMoi.getSoLuong() < slMoi) {
                         throw new RuntimeException("Sản phẩm " + spctMoi.getSanPham().getTen() + " không đủ tồn kho để đổi!");
                     }
-                    // Trừ kho SP mới
                     spctMoi.setSoLuong(spctMoi.getSoLuong() - slMoi);
                     spctRepo.save(spctMoi);
 
-                    // 🌟 ĐÃ FIX BUG 1: THÊM SẢN PHẨM MỚI VÀO LẠI HÓA ĐƠN CỦA KHÁCH ĐỂ LƯU DẤU VẾT
                     BigDecimal giaThucTe = (spctMoi.getGiaSauKhuyenMai() != null && spctMoi.getGiaSauKhuyenMai().compareTo(BigDecimal.ZERO) > 0)
                             ? spctMoi.getGiaSauKhuyenMai() : spctMoi.getGiaBan();
 
@@ -159,8 +145,8 @@ public class ReturnApi {
                     hdctNew.setHoaDon(hd);
                     hdctNew.setSanPhamChiTiet(spctMoi);
                     hdctNew.setSoLuong(slMoi);
-                    hdctNew.setGiaTien(giaThucTe); // Lưu nguyên giá để sau này đối soát
-                    hdctNew.setSoLuongTra(0); // SP mới chưa bị trả
+                    hdctNew.setGiaTien(giaThucTe);
+                    hdctNew.setSoLuongTra(0);
                     hdctRepo.save(hdctNew);
                 }
             }
@@ -261,7 +247,7 @@ public class ReturnApi {
     }
 
     @PostMapping("/create")
-    @Transactional // 🌟 ĐÃ THÊM TRANSACTIONAL
+    @Transactional
     public ResponseEntity<?> createRequest(@RequestBody Map<String, Object> payload) {
         try {
             String maHD = (String) payload.get("maHD");

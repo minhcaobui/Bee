@@ -1,7 +1,6 @@
-package com.example.bee.entities.user;
+package com.example.bee.entities.staff;
 
 import com.example.bee.entities.account.TaiKhoan;
-import com.example.bee.entities.role.ChucVu;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
@@ -35,7 +34,6 @@ public class NhanVien {
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "Asia/Ho_Chi_Minh")
     private Date ngaySinh;
 
-    // ĐÃ SỬA THÀNH NVARCHAR(MAX) CHO SQL SERVER
     @Column(name = "dia_chi", columnDefinition = "NVARCHAR(MAX)")
     private String diaChi;
 
@@ -45,7 +43,6 @@ public class NhanVien {
     @Column(name = "email", length = 150)
     private String email;
 
-    // ĐÃ SỬA THÀNH NVARCHAR(MAX) CHO SQL SERVER
     @Column(name = "hinh_anh", columnDefinition = "NVARCHAR(MAX)")
     private String hinhAnh;
 

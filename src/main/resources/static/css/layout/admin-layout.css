@@ -20,7 +20,6 @@
     outline: none;
 }
 
-/* 🌟 ÉP TOÀN BỘ TRANG DÙNG FONT BE VIETNAM PRO */
 body {
     background: var(--bg);
     color: var(--text);
@@ -30,12 +29,10 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-/* Ép font cho tất cả các thẻ input, textarea, button */
 button, input, select, textarea {
     font-family: inherit;
 }
 
-/* Scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 4px; }
@@ -47,7 +44,6 @@ button, input, select, textarea {
     overflow: hidden;
 }
 
-/* SIDEBAR */
 #main-sidebar {
     width: var(--sidebar-width);
     background: var(--panel);
@@ -126,7 +122,6 @@ button, input, select, textarea {
     text-align: center;
 }
 
-/* USER PANEL */
 .sidebar-user-panel {
     background: var(--panel);
     color: var(--text);
@@ -194,7 +189,6 @@ button, input, select, textarea {
     color: var(--red-primary);
 }
 
-/* COLLAPSED STATE */
 #main-sidebar.collapsed .brand span,
 #main-sidebar.collapsed .sidebar-label,
 #main-sidebar.collapsed .sidebar-item span,
@@ -209,7 +203,6 @@ button, input, select, textarea {
 #main-sidebar.collapsed .brand { padding: 0 20px; justify-content: center; }
 #main-sidebar.collapsed .brand i { margin: 0; }
 
-/* MAIN CONTAINER */
 #main-container {
     flex: 1;
     display: flex;
@@ -290,7 +283,6 @@ button, input, select, textarea {
     position: relative;
 }
 
-/* DROPDOWN NOTIFICATION */
 .header-action-container { position: relative; }
 .dropdown-menu {
     position: absolute;
@@ -313,7 +305,6 @@ button, input, select, textarea {
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* BUTTONS CHUNG TẠI ADMIN */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -341,7 +332,6 @@ button, input, select, textarea {
     backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center;
 }
 
-/* LOADER */
 .loader-overlay {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
     background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(3px);
@@ -351,10 +341,8 @@ button, input, select, textarea {
 .loader-overlay.show { display: flex !important; opacity: 1; visibility: visible; }
 .loader-content { text-align: center; padding: 20px; border-radius: 12px; }
 
-/* TOAST (Đã đồng bộ) */
 .toast-container { position: fixed; top: 30px; right: 30px; z-index: 10002; display: flex; flex-direction: column; gap: 15px; }
 
-/* NOTIF LIST */
 .notif-list { display: flex; flex-direction: column; }
 .notif-item { padding: 15px 20px; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s; display: flex; gap: 15px; align-items: flex-start; }
 .notif-item:hover { background: #f8f9fa; }

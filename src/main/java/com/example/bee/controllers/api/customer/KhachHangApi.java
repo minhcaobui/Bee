@@ -8,11 +8,12 @@ import com.example.bee.entities.account.VaiTro;
 import com.example.bee.entities.cart.GioHang;
 import com.example.bee.entities.customer.DiaChiKhachHang;
 import com.example.bee.entities.customer.KhachHang;
+import com.example.bee.entities.order.HoaDon;
 import com.example.bee.entities.order.HoaDonChiTiet;
 import com.example.bee.entities.product.SanPham;
 import com.example.bee.entities.product.SanPhamYeuThich;
 import com.example.bee.entities.reviews.DanhGia;
-import com.example.bee.entities.user.NhanVien;
+import com.example.bee.entities.staff.NhanVien;
 import com.example.bee.repositories.account.TaiKhoanRepository;
 import com.example.bee.repositories.account.VaiTroRepository;
 import com.example.bee.repositories.customer.DiaChiKhachHangRepository;
@@ -20,8 +21,8 @@ import com.example.bee.repositories.customer.KhachHangRepository;
 import com.example.bee.repositories.order.HoaDonChiTietRepository;
 import com.example.bee.repositories.order.HoaDonRepository;
 import com.example.bee.repositories.reviews.DanhGiaRepository;
-import com.example.bee.repositories.role.NhanVienRepository;
-import com.example.bee.repositories.wishlist.SanPhamYeuThichRepository;
+import com.example.bee.repositories.staff.NhanVienRepository;
+import com.example.bee.repositories.products.SanPhamYeuThichRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,6 +42,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/khach-hang")
@@ -48,10 +50,8 @@ import java.util.*;
 public class KhachHangApi {
 
     private static final Map<String, String> otpStorageKhach = new HashMap<>();
-    private final org.springframework.mail.javamail.JavaMailSender mailSender;
-    @Value("${spring.mail.username}")
-    private String senderEmail;
     private static final SecureRandom RAND = new SecureRandom();
+    private final org.springframework.mail.javamail.JavaMailSender mailSender;
     private final KhachHangRepository khRepo;
     private final NhanVienRepository nvRepo;
     private final DiaChiKhachHangRepository dcRepo;
@@ -63,6 +63,8 @@ public class KhachHangApi {
     private final HoaDonRepository hoaDonRepository;
     private final VaiTroRepository vaiTroRepo;
     private final com.example.bee.repositories.cart.GioHangRepository gioHangRepository;
+    @Value("${spring.mail.username}")
+    private String senderEmail;
 
     private String generateMa() {
         return "KH" + System.currentTimeMillis();
@@ -139,7 +141,6 @@ public class KhachHangApi {
         tk.setTrangThai(true);
         TaiKhoan savedTk = taiKhoanRepository.save(tk);
 
-        // 🌟 TẠO GIỎ HÀNG TRỐNG
         GioHang gioHang = new GioHang();
         gioHang.setTaiKhoan(savedTk);
         gioHangRepository.save(gioHang);
@@ -218,7 +219,6 @@ public class KhachHangApi {
                 return ResponseEntity.badRequest().body(Map.of("message", "Số điện thoại đã được sử dụng bởi khách hàng khác"));
             }
 
-            // 🌟 ĐÃ XÓA LOGIC TỰ ĐỘNG ĐỔI TÊN ĐĂNG NHẬP Ở ĐÂY THEO YÊU CẦU CỦA BẠN
             kh.setSoDienThoai(sdtNew);
         }
 
@@ -273,16 +273,16 @@ public class KhachHangApi {
             @RequestParam(required = false, defaultValue = "") String q,
             @RequestParam(required = false, defaultValue = "") String statusId
     ) {
-        List<com.example.bee.entities.order.HoaDon> allOrders = hoaDonRepository.findByKhachHangIdOrderByNgayTaoDesc(id);
+        List<HoaDon> allOrders = hoaDonRepository.findByKhachHangIdOrderByNgayTaoDesc(id);
 
-        List<com.example.bee.entities.order.HoaDon> filteredList = allOrders.stream()
+        List<HoaDon> filteredList = allOrders.stream()
                 .filter(hd -> q.isEmpty() || hd.getMa().toLowerCase().contains(q.toLowerCase()))
                 .filter(hd -> statusId.isEmpty() || (hd.getTrangThaiHoaDon() != null && hd.getTrangThaiHoaDon().getMa().equals(statusId)))
-                .collect(java.util.stream.Collectors.toList());
+                .collect(Collectors.toList());
 
         int start = page * size;
         int end = Math.min((start + size), filteredList.size());
-        List<com.example.bee.entities.order.HoaDon> pageContent = new java.util.ArrayList<>();
+        List<HoaDon> pageContent = new ArrayList<>();
         if (start <= filteredList.size()) {
             pageContent = filteredList.subList(start, end);
         }
@@ -301,17 +301,17 @@ public class KhachHangApi {
     public ResponseEntity<?> getProductsBought(@PathVariable Integer id,
                                                @RequestParam(defaultValue = "0") int page,
                                                @RequestParam(defaultValue = "5") int size) {
-        List<com.example.bee.entities.order.HoaDon> orders = hoaDonRepository.findByKhachHangIdOrderByNgayTaoDesc(id);
+        List<HoaDon> orders = hoaDonRepository.findByKhachHangIdOrderByNgayTaoDesc(id);
 
-        List<com.example.bee.entities.order.HoaDon> completedOrders = orders.stream()
+        List<HoaDon> completedOrders = orders.stream()
                 .filter(hd -> hd.getTrangThaiHoaDon() != null && "HOAN_THANH".equals(hd.getTrangThaiHoaDon().getMa()))
-                .collect(java.util.stream.Collectors.toList());
+                .collect(Collectors.toList());
 
         Map<Integer, Map<String, Object>> productStats = new java.util.HashMap<>();
 
-        for (com.example.bee.entities.order.HoaDon hd : completedOrders) {
-            List<com.example.bee.entities.order.HoaDonChiTiet> details = hoaDonChiTietRepository.findByHoaDonId(hd.getId());
-            for (com.example.bee.entities.order.HoaDonChiTiet ct : details) {
+        for (HoaDon hd : completedOrders) {
+            List<HoaDonChiTiet> details = hoaDonChiTietRepository.findByHoaDonId(hd.getId());
+            for (HoaDonChiTiet ct : details) {
                 Integer spctId = ct.getSanPhamChiTiet().getId();
 
                 productStats.putIfAbsent(spctId, new java.util.HashMap<>(Map.of(
@@ -358,13 +358,21 @@ public class KhachHangApi {
                 .collect(java.util.stream.Collectors.toList());
 
         List<Map<String, Object>> voucherList = new java.util.ArrayList<>();
+
+        // 🌟 ĐÃ FIX: Dùng SimpleDateFormat để xử lý chuẩn xác kiểu java.util.Date của sếp
+        java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+
         for (com.example.bee.entities.order.HoaDon hd : ordersWithVoucher) {
+            // Lấy ra đúng kiểu java.util.Date
+            java.util.Date ngay = hd.getNgayThanhToan() != null ? hd.getNgayThanhToan() : hd.getNgayTao();
+            String formattedDate = ngay != null ? formatter.format(ngay) : "---";
+
             voucherList.add(Map.of(
                     "maVoucher", hd.getMaGiamGia().getMaCode(),
                     "tenVoucher", hd.getMaGiamGia().getTen(),
                     "giamGia", hd.getGiaTriKhuyenMai(),
                     "maDonHang", hd.getMa(),
-                    "ngaySuDung", hd.getNgayThanhToan() != null ? hd.getNgayThanhToan() : hd.getNgayTao()
+                    "ngaySuDung", formattedDate // Trả về chuỗi đẹp luôn
             ));
         }
 
@@ -731,7 +739,7 @@ public class KhachHangApi {
             wl.setTaiKhoanId(userId);
             wl.setSanPhamId(sanPhamId);
             wishlistRepo.save(wl);
-            return ResponseEntity.ok(Map.of("message", "Đã lưu vào danh sách yêu thích! ❤️", "status", "added"));
+            return ResponseEntity.ok(Map.of("message", "Đã lưu vào danh sách yêu thích!", "status", "added"));
         }
     }
 
@@ -774,14 +782,12 @@ public class KhachHangApi {
         HoaDonChiTiet hdct = hoaDonChiTietRepository.findById(orderDetailId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy chi tiết hóa đơn"));
 
-        // 🌟 BƯỚC CHẶN 1: KIỂM TRA BẢO MẬT (CHỐNG IDOR VÀ HACKER LÀM GIẢ MÃ)
         if (hdct.getHoaDon() == null || hdct.getHoaDon().getKhachHang() == null ||
                 hdct.getHoaDon().getKhachHang().getTaiKhoan() == null ||
                 !hdct.getHoaDon().getKhachHang().getTaiKhoan().getId().equals(tk.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Bạn không có quyền đánh giá sản phẩm của đơn hàng này!"));
         }
 
-        // 🌟 BƯỚC CHẶN 2: CHỈ ĐƠN HÀNG ĐÃ GIAO THÀNH CÔNG MỚI ĐƯỢC ĐÁNH GIÁ
         if (hdct.getHoaDon().getTrangThaiHoaDon() == null || !"HOAN_THANH".equals(hdct.getHoaDon().getTrangThaiHoaDon().getMa())) {
             return ResponseEntity.badRequest().body(Map.of("message", "Chỉ đơn hàng đã giao thành công mới được phép đánh giá!"));
         }
@@ -809,7 +815,6 @@ public class KhachHangApi {
         danhGia.setSanPham(sp);
         danhGia.setHoaDonChiTiet(hdct);
 
-        // Chặn lỗi nhập đánh giá rỗng (nếu Front-end lọt)
         String noiDung = req.getNoiDung() != null ? req.getNoiDung().trim() : "";
         if (noiDung.isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("message", "Vui lòng nhập nội dung đánh giá!"));
@@ -843,7 +848,8 @@ public class KhachHangApi {
 
     @GetMapping("/my-reviews")
     public ResponseEntity<?> getMyAllReviews(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) return ResponseEntity.ok(java.util.Collections.emptyList());
+        if (authentication == null || !authentication.isAuthenticated())
+            return ResponseEntity.ok(java.util.Collections.emptyList());
         KhachHang kh = khRepo.findByTaiKhoan_TenDangNhap(authentication.getName()).orElse(null);
         if (kh == null || kh.getTaiKhoan() == null) return ResponseEntity.ok(java.util.Collections.emptyList());
 
@@ -888,13 +894,13 @@ public class KhachHangApi {
 
         Integer userId = kh.getTaiKhoan().getId();
 
-        List<com.example.bee.entities.order.HoaDon> myOrders = hoaDonRepository.findByKhachHangIdOrderByNgayTaoDesc(kh.getId());
-        List<com.example.bee.entities.order.HoaDonChiTiet> purchasedDetails = new java.util.ArrayList<>();
+        List<HoaDon> myOrders = hoaDonRepository.findByKhachHangIdOrderByNgayTaoDesc(kh.getId());
+        List<HoaDonChiTiet> purchasedDetails = new java.util.ArrayList<>();
 
-        for (com.example.bee.entities.order.HoaDon hd : myOrders) {
+        for (HoaDon hd : myOrders) {
             if ("HOAN_THANH".equals(hd.getTrangThaiHoaDon().getMa())) {
-                List<com.example.bee.entities.order.HoaDonChiTiet> chiTiets = hoaDonChiTietRepository.findByHoaDonId(hd.getId());
-                for (com.example.bee.entities.order.HoaDonChiTiet ct : chiTiets) {
+                List<HoaDonChiTiet> chiTiets = hoaDonChiTietRepository.findByHoaDonId(hd.getId());
+                for (HoaDonChiTiet ct : chiTiets) {
                     if (ct.getSanPhamChiTiet().getSanPham().getId().equals(sanPhamId)) {
                         purchasedDetails.add(ct);
                     }
@@ -912,8 +918,8 @@ public class KhachHangApi {
                 .map(r -> r.getHoaDonChiTiet().getId())
                 .collect(java.util.stream.Collectors.toList());
 
-        com.example.bee.entities.order.HoaDonChiTiet unreviewedDetail = null;
-        for (com.example.bee.entities.order.HoaDonChiTiet ct : purchasedDetails) {
+        HoaDonChiTiet unreviewedDetail = null;
+        for (HoaDonChiTiet ct : purchasedDetails) {
             if (!reviewedDetailIds.contains(ct.getId())) {
                 unreviewedDetail = ct;
                 break;
@@ -979,7 +985,6 @@ public class KhachHangApi {
         }
         return ResponseEntity.ok("Email hợp lệ");
     }
-
 
 
     private void mapRequestToEntity(DiaChiRequest req, DiaChiKhachHang dc) {

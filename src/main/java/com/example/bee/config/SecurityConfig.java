@@ -1,6 +1,7 @@
 package com.example.bee.config;
 
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,10 +13,10 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Autowired
-    private CustomAuthenticationSuccessHandler successHandler;
+    private final CustomAuthenticationSuccessHandler successHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -27,11 +28,8 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // 1. TÀI NGUYÊN CÔNG KHAI & TRANG ĐĂNG NHẬP
-                        // 🌟 ĐÃ FIX BUG 2: Mở khóa /forgot-password/** cho khách quên mật khẩu
                         .requestMatchers("/register", "/login", "/forgot-password/**", "/css/**", "/js/**", "/images/**", "/customer/**").permitAll()
 
-                        // 2. API CÔNG KHAI (Khách vãng lai dùng để xem hàng, tra đơn)
                         .requestMatchers(
                                 "/api/products/**",
                                 "/api/danh-muc/**",
@@ -46,14 +44,8 @@ public class SecurityConfig {
                                 "/api/gio-hang/**"
                         ).permitAll()
 
-                        // Ai cũng được XEM đánh giá
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/khach-hang/reviews/**").permitAll()
 
-                        // ========================================================
-                        // 🌟 ĐÃ FIX BUG 1: SẮP XẾP LẠI THỨ TỰ PHÂN QUYỀN CHUẨN XÁC
-                        // ========================================================
-
-                        // 3. API ĐỘC QUYỀN CỦA ADMIN (Bắt buộc phải nằm trên cùng để chặn Staff)
                         .requestMatchers(
                                 "/dashboards/**",
                                 "/returns/**",
@@ -61,16 +53,13 @@ public class SecurityConfig {
                                 "/staff/**"
                         ).hasAuthority("ROLE_ADMIN")
 
-                        // 4. NGOẠI LỆ CHO STAFF (Được tự sửa profile của mình)
                         .requestMatchers(
                                 "/api/nhan-vien/my-profile",
                                 "/api/nhan-vien/change-password"
                         ).hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
 
-                        // 5. CÁC API NHÂN VIÊN CÒN LẠI (Staff sẽ bị chặn ở đây)
                         .requestMatchers("/api/nhan-vien/**").hasAuthority("ROLE_ADMIN")
 
-                        // 6. API CHUNG CỦA TẤT CẢ (Khách hàng, Staff, Admin đều dùng được)
                         .requestMatchers(
                                 "/api/upload",
                                 "/api/khach-hang/reviews/**",
@@ -83,10 +72,9 @@ public class SecurityConfig {
                                 "/api/khach-hang/my-reviews/**",
                                 "/api/hoa-don/my-used-vouchers/**",
                                 "/api/hoa-don/**",
-                                "/api/thong-bao/**" // 🌟 ĐÃ FIX BUG 3: Yêu cầu đăng nhập để xem thông báo
+                                "/api/thong-bao/**"
                         ).hasAnyAuthority("ROLE_CUSTOMER", "ROLE_STAFF", "ROLE_ADMIN")
 
-                        // 7. API QUẢN LÝ (Catch-all cho Admin và Staff, bắt buộc nằm dưới cùng)
                         .requestMatchers(
                                 "/admin/**",
                                 "/products/**",

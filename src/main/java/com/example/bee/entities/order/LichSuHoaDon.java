@@ -1,6 +1,6 @@
 package com.example.bee.entities.order;
 
-import com.example.bee.entities.user.NhanVien;
+import com.example.bee.entities.staff.NhanVien;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
@@ -32,7 +32,6 @@ public class LichSuHoaDon {
     @JoinColumn(name = "id_nhan_vien")
     private NhanVien nhanVien;
 
-    // ĐÃ SỬA THÀNH NVARCHAR(MAX) CHO SQL SERVER
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String ghiChu;
 

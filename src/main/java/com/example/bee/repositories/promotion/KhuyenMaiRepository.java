@@ -37,9 +37,9 @@ public interface KhuyenMaiRepository extends JpaRepository<KhuyenMai, Integer> {
             "JOIN km.sanPhams sp " +
             "WHERE sp.id IN :listIdSp " +
             "AND km.trangThai = true " +
-            "AND km.id <> :idHienTai " + // Loại trừ chính nó (khi update)
+            "AND km.id <> :idHienTai " +
             "AND ( " +
-            "   (km.ngayBatDau <= :ketThuc AND km.ngayKetThuc >= :batDau) " + // Logic giao nhau thời gian
+            "   (km.ngayBatDau <= :ketThuc AND km.ngayKetThuc >= :batDau) " +
             ")")
     List<KhuyenMai> checkTrungLich(
             @Param("listIdSp") List<Integer> listIdSp,
@@ -52,7 +52,6 @@ public interface KhuyenMaiRepository extends JpaRepository<KhuyenMai, Integer> {
             "JOIN KhuyenMaiSanPham kmsp ON sp.id = kmsp.idSanPham " +
             "WHERE kmsp.idKhuyenMai = :kmId " +
             "AND sp.trangThai = true")
-        // Chỉ check duy nhất trạng thái sản phẩm
     long countValidProductsInPromotion(@Param("kmId") Integer kmId);
 
     @Modifying

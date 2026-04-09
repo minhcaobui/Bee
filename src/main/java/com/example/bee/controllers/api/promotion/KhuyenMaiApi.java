@@ -40,7 +40,7 @@ public class KhuyenMaiApi {
     private final TaiKhoanRepository taiKhoanRepository;
 
     // =======================================================
-    // HÀM VALIDATE CHỐNG LỖ (KIỂM TRA GIÁ BÁN SO VỚI MỨC GIẢM)
+    // HÀM VALIDATE CHỐNG LỖ ĐÃ ĐƯỢC FIX LỖI NULL & SẢN PHẨM RỖNG
     // =======================================================
     private void validateChongLo(PromotionRequest req, List<SanPham> danhSachSanPham) {
         if (req.getTen() == null || req.getTen().trim().isEmpty()) {
@@ -65,14 +65,25 @@ public class KhuyenMaiApi {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mức giảm giá tối thiểu là 1.000 VNĐ.");
             }
 
-            // CỰC KỲ QUAN TRỌNG: Check chống bán giá âm
             for (SanPham sp : danhSachSanPham) {
+                // 🌟 ĐÃ FIX 1: Chặn đứng lỗi nếu Sản phẩm chưa có SKU nào
+                if (sp.getChiTietSanPhams() == null || sp.getChiTietSanPhams().isEmpty()) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "Sản phẩm '" + sp.getTen() + "' chưa có biến thể (SKU) nào nên không có giá gốc để đối chiếu. Vui lòng bổ sung SKU trước khi áp dụng Sale!");
+                }
+
+                // 🌟 ĐÃ FIX 2: Ép kiểu tránh NullPointerException nếu có SKU quên chưa nhập giá
                 BigDecimal minPrice = sp.getChiTietSanPhams().stream()
-                        .map(ct -> ct.getGiaBan())
+                        .map(ct -> ct.getGiaBan() != null ? ct.getGiaBan() : BigDecimal.ZERO)
                         .min(BigDecimal::compareTo)
                         .orElse(BigDecimal.ZERO);
 
-                // Giảm giá VNĐ không được quá 70% giá trị nhỏ nhất của sản phẩm đó
+                // 🌟 ĐÃ FIX 3: Cảnh báo nếu giá gốc bằng 0
+                if (minPrice.compareTo(BigDecimal.ZERO) == 0) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "Sản phẩm '" + sp.getTen() + "' đang có biến thể giá 0đ, không thể áp dụng Khuyến mãi tiền mặt.");
+                }
+
                 BigDecimal maxSafeDiscount = minPrice.multiply(new BigDecimal("0.7"));
 
                 if (req.getGiaTri().compareTo(maxSafeDiscount) > 0) {
@@ -84,9 +95,6 @@ public class KhuyenMaiApi {
         }
     }
 
-    // =======================================================
-    // HÀM VALIDATE CHỐNG TRÙNG LỊCH SALE
-    // =======================================================
     private void validateConflict(Integer currentId, PromotionRequest request) {
         if (request.getIdSanPhams() == null || request.getIdSanPhams().isEmpty()) {
             return;
@@ -127,7 +135,10 @@ public class KhuyenMaiApi {
     }
 
     private String generateCode() {
-        return "KM" + System.currentTimeMillis();
+        // Lấy thời gian hiện tại thành chuỗi (13 chữ số)
+        String timeStr = String.valueOf(System.currentTimeMillis());
+        // Chỉ lấy 8 số cuối cùng ghép với chữ "KM" -> Tổng cộng vừa đúng 10 ký tự
+        return "KM" + timeStr.substring(timeStr.length() - 8);
     }
 
     @GetMapping("/san-pham")
@@ -174,13 +185,11 @@ public class KhuyenMaiApi {
     @PostMapping
     @Transactional
     public ResponseEntity<?> create(@Valid @RequestBody PromotionRequest body) {
-        // Lấy danh sách sản phẩm từ DB để soi giá bán
         List<SanPham> danhSachSanPham = new ArrayList<>();
         if (body.getIdSanPhams() != null && !body.getIdSanPhams().isEmpty()) {
             danhSachSanPham = sanPhamRepo.findAllById(body.getIdSanPhams());
         }
 
-        // Gọi chuỗi kiểm tra logic
         validateChongLo(body, danhSachSanPham);
         validateConflict(null, body);
 

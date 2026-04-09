@@ -1,6 +1,6 @@
-package com.example.bee.repositories.role;
+package com.example.bee.repositories.staff;
 
-import com.example.bee.entities.user.NhanVien;
+import com.example.bee.entities.staff.NhanVien;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

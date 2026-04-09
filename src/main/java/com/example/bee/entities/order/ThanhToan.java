@@ -1,6 +1,6 @@
 package com.example.bee.entities.order;
 
-import com.example.bee.entities.user.NhanVien;
+import com.example.bee.entities.staff.NhanVien;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
@@ -44,7 +44,6 @@ public class ThanhToan {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private Date ngayThanhToan;
 
-    // ĐÃ SỬA THÀNH NVARCHAR(MAX) CHO SQL SERVER
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String ghiChu;
 

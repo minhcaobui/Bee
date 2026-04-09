@@ -2,10 +2,10 @@ package com.example.bee.controllers.api.product;
 
 import com.example.bee.entities.customer.KhachHang;
 import com.example.bee.entities.reviews.DanhGia;
-import com.example.bee.entities.user.NhanVien;
+import com.example.bee.entities.staff.NhanVien;
 import com.example.bee.repositories.customer.KhachHangRepository;
 import com.example.bee.repositories.reviews.DanhGiaRepository;
-import com.example.bee.repositories.role.NhanVienRepository;
+import com.example.bee.repositories.staff.NhanVienRepository;
 import jakarta.transaction.Transactional;
 import lombok.Builder;
 import lombok.Data;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter; // 🌟 Thêm import này
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Map;
 
@@ -35,7 +35,6 @@ public class AdminReviewApi {
     private final KhachHangRepository khRepo;
     private final NhanVienRepository nvRepo;
 
-    // 1. API Lấy danh sách đánh giá (Có Lọc & Phân trang)
     @GetMapping
     public ResponseEntity<?> getReviews(
             @RequestParam(required = false) String q,
@@ -45,7 +44,6 @@ public class AdminReviewApi {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        // Xử lý Sắp xếp
         Sort sortObj = Sort.by(Sort.Direction.DESC, "noiDungTraLoi");
 
         if ("OLDEST".equalsIgnoreCase(sort)) {
@@ -56,18 +54,15 @@ public class AdminReviewApi {
 
         Pageable pageable = PageRequest.of(page, size, sortObj);
 
-        // Chuẩn hóa chuỗi tìm kiếm
         String keyword = (q != null && !q.trim().isEmpty()) ? q.trim() : null;
         String status = (trangThai != null && !trangThai.trim().isEmpty()) ? trangThai.trim() : null;
 
         Page<DanhGia> resultPage = danhGiaRepo.findAdminReviews(keyword, soSao, status, pageable);
 
-        // 🌟 BỘ FORMATTER KÉP: Xử lý mượt mà cả Date cũ và LocalDateTime mới
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
         Page<ReviewAdminResponse> responsePage = resultPage.map(dg -> {
-            // Tìm tên khách hàng từ TaiKhoan_Id
             String tenKH = "Khách vãng lai";
             if (dg.getTaiKhoan() != null) {
                 KhachHang kh = khRepo.findByTaiKhoan_Id(dg.getTaiKhoan().getId()).orElse(null);
@@ -83,19 +78,18 @@ public class AdminReviewApi {
                     .noiDung(dg.getNoiDung())
                     .phanLoai(dg.getPhanLoai())
                     .danhSachHinhAnh(dg.getDanhSachHinhAnh())
-                    .ngayTao(dg.getNgayTao() != null ? dg.getNgayTao().format(dtf) : null) // 🌟 Dùng dtf cho LocalDateTime
+                    .ngayTao(dg.getNgayTao() != null ? dg.getNgayTao().format(dtf) : null)
                     .tenNhanVienTraLoi(dg.getNhanVienTraLoi() != null ? dg.getNhanVienTraLoi().getHoTen() : null)
                     .noiDungTraLoi(dg.getNoiDungTraLoi())
-                    .ngayTraLoi(dg.getNgayTraLoi() != null ? sdf.format(dg.getNgayTraLoi()) : null) // 🌟 Dùng sdf cho Date
+                    .ngayTraLoi(dg.getNgayTraLoi() != null ? sdf.format(dg.getNgayTraLoi()) : null)
                     .build();
         });
 
         return ResponseEntity.ok(responsePage);
     }
 
-    // 2. API Nhân viên gửi câu trả lời
     @PostMapping("/{id}/reply")
-    @Transactional // 🌟 ĐÃ THÊM TRANSACTIONAL ĐỂ BẢO VỆ DATABASE
+    @Transactional
     public ResponseEntity<?> replyReview(@PathVariable Long id, @RequestBody Map<String, String> payload) {
         String noiDungTraLoi = payload.get("noiDungTraLoi");
 
@@ -103,12 +97,10 @@ public class AdminReviewApi {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nội dung trả lời không được để trống!");
         }
 
-        // 🌟 ĐÃ THÊM VALIDATE CHỐNG TRÀN DATABASE
         if (noiDungTraLoi.length() > 1000) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nội dung trả lời quá dài (Tối đa 1000 ký tự)!");
         }
 
-        // Lấy thông tin Nhân viên đang đăng nhập (Bảo mật)
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập bằng tài khoản Nhân viên!");
@@ -120,7 +112,6 @@ public class AdminReviewApi {
         DanhGia dg = danhGiaRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy đánh giá!"));
 
-        // Ghi nhận phản hồi
         dg.setNhanVienTraLoi(nv);
         dg.setNoiDungTraLoi(noiDungTraLoi.trim());
         dg.setNgayTraLoi(new Date());
@@ -130,9 +121,6 @@ public class AdminReviewApi {
         return ResponseEntity.ok(Map.of("message", "Đã gửi phản hồi thành công!"));
     }
 
-    // ==========================================
-    // DTO Dành cho Response
-    // ==========================================
     @Data
     @Builder
     public static class ReviewAdminResponse {

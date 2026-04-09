@@ -1,31 +1,17 @@
 package com.example.bee.controllers.api.order;
 
-import com.example.bee.dto.HoaDonChiTietResponse;
-import com.example.bee.dto.HoaDonResponse;
 import com.example.bee.entities.customer.KhachHang;
 import com.example.bee.entities.notification.ThongBao;
-import com.example.bee.entities.order.HoaDon;
-import com.example.bee.entities.order.HoaDonChiTiet;
-import com.example.bee.entities.order.LichSuHoaDon;
-import com.example.bee.entities.order.TrangThaiHoaDon;
-import com.example.bee.entities.order.YeuCauDoiTra;
-import com.example.bee.entities.order.ChiTietDoiTra;
-import com.example.bee.entities.order.ThanhToan;
+import com.example.bee.entities.order.*;
 import com.example.bee.entities.product.SanPhamChiTiet;
 import com.example.bee.entities.promotion.MaGiamGia;
-import com.example.bee.entities.user.NhanVien;
+import com.example.bee.entities.staff.NhanVien;
 import com.example.bee.repositories.customer.KhachHangRepository;
 import com.example.bee.repositories.notification.ThongBaoRepository;
-import com.example.bee.repositories.order.HoaDonChiTietRepository;
-import com.example.bee.repositories.order.HoaDonRepository;
-import com.example.bee.repositories.order.LichSuHoaDonRepository;
-import com.example.bee.repositories.order.TrangThaiHoaDonRepository;
-import com.example.bee.repositories.order.YeuCauDoiTraRepository;
-import com.example.bee.repositories.order.ChiTietDoiTraRepository;
-import com.example.bee.repositories.order.ThanhToanRepository;
+import com.example.bee.repositories.order.*;
 import com.example.bee.repositories.products.SanPhamChiTietRepository;
 import com.example.bee.repositories.promotion.MaGiamGiaRepository;
-import com.example.bee.repositories.role.NhanVienRepository;
+import com.example.bee.repositories.staff.NhanVienRepository;
 import com.example.bee.services.EmailService;
 import com.example.bee.utils.MomoSecurity;
 import jakarta.servlet.http.HttpServletRequest;
@@ -223,7 +209,6 @@ public class OrderApi {
         response.put("sdtKhachHang", hd.getSdtNhan() != null ? hd.getSdtNhan() : (hd.getKhachHang() != null ? hd.getKhachHang().getSoDienThoai() : ""));
         response.put("email", hd.getKhachHang() != null ? hd.getKhachHang().getEmail() : "");
 
-        // Ẩn chữ [BUY_NOW] cho Frontend
         String rawGhiChu = hd.getGhiChu() != null ? hd.getGhiChu() : "";
         if (rawGhiChu.contains("[BUY_NOW]")) {
             rawGhiChu = rawGhiChu.replace("[BUY_NOW]", "").trim();
@@ -365,7 +350,6 @@ public class OrderApi {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy hóa đơn"));
         String currentStatus = hd.getTrangThaiHoaDon().getMa();
 
-        // 🌟 BỔ SUNG: Chặn hủy đơn nếu ĐÃ THANH TOÁN ONLINE THÀNH CÔNG
         List<ThanhToan> ttList = thanhToanRepo.findByHoaDon_Id(hd.getId());
         boolean daThanhToanOnline = ttList.stream().anyMatch(tt ->
                 ("VNPAY".equals(tt.getPhuongThuc()) || "MOMO".equals(tt.getPhuongThuc()))
@@ -461,7 +445,6 @@ public class OrderApi {
             BigDecimal chietKhauNV = BigDecimal.ZERO;
             String ghiChu = req.ghiChu != null ? req.ghiChu : "";
 
-            // 🌟 ĐÁNH DẤU LÀ ĐƠN MUA NGAY ĐỂ TÍNH NĂNG KHÁC KHÔNG XÓA NHẦM GIỎ HÀNG CHUNG
             if (req.isBuyNow != null && req.isBuyNow) {
                 ghiChu += " [BUY_NOW]";
             }
@@ -595,7 +578,6 @@ public class OrderApi {
             ls.setNgayTao(new Date());
             lsRepo.save(ls);
 
-            // 🌟 CHỈ LÀM SẠCH GIỎ HÀNG CHUNG NẾU LÀ ĐƠN THANH TOÁN BÌNH THƯỜNG (KHÔNG PHẢI MUA NGAY)
             if ((req.isBuyNow == null || !req.isBuyNow) && savedHd.getKhachHang() != null && savedHd.getKhachHang().getTaiKhoan() != null) {
                 com.example.bee.entities.cart.GioHang gh = gioHangRepository.findByTaiKhoan_Id(savedHd.getKhachHang().getTaiKhoan().getId()).orElse(null);
                 if (gh != null) {
@@ -622,7 +604,6 @@ public class OrderApi {
                 System.out.println("Lỗi gửi Email: " + e.getMessage());
             }
 
-// Đổi chữ tongTienCuoi thành tongTienCuoiThucTe
             return ResponseEntity.ok(Map.of("message", "Đặt hàng thành công", "maHoaDon", savedHd.getMa(), "id", savedHd.getId(), "tongTienThucTe", tongTienCuoiThucTe));
         } catch (Exception e) {
             e.printStackTrace();
@@ -692,7 +673,6 @@ public class OrderApi {
         }
         result.put("phuongThucThanhToan", ptttTC);
 
-        // Ẩn chữ [BUY_NOW] cho Frontend
         String rawGhiChu = hoaDon.getGhiChu() != null ? hoaDon.getGhiChu() : "";
         if (rawGhiChu.contains("[BUY_NOW]")) {
             rawGhiChu = rawGhiChu.replace("[BUY_NOW]", "").trim();
@@ -744,7 +724,6 @@ public class OrderApi {
         orderInfo.put("ngayTao", hd.getNgayTao() != null ? sdf.format(hd.getNgayTao()) : sdf.format(new Date()));
         orderInfo.put("thuNgan", hd.getNhanVien() != null ? hd.getNhanVien().getHoTen() : "Hệ thống");
         if (hd.getKhachHang() != null) {
-            // Ưu tiên lấy Tên Người Nhận (được nhập ở form checkout), nếu trống mới lấy Tên Khách Hàng
             orderInfo.put("tenKhachHang", hd.getTenNguoiNhan() != null ? hd.getTenNguoiNhan() : hd.getKhachHang().getHoTen());
             orderInfo.put("sdtKhachHang", hd.getSdtNhan() != null ? hd.getSdtNhan() : hd.getKhachHang().getSoDienThoai());
             orderInfo.put("inThongTinTaiKhoan", true);
@@ -879,7 +858,6 @@ public class OrderApi {
                             thanhToanRepo.save(tt);
                         }
 
-                        // 🌟 CHỈ LÀM SẠCH GIỎ HÀNG CHUNG NẾU LÀ ĐƠN BÌNH THƯỜNG
                         boolean isBuyNow = hd.getGhiChu() != null && hd.getGhiChu().contains("[BUY_NOW]");
                         if (!isBuyNow && hd.getKhachHang() != null && hd.getKhachHang().getTaiKhoan() != null) {
                             com.example.bee.entities.cart.GioHang gh = gioHangRepository.findByTaiKhoan_Id(hd.getKhachHang().getTaiKhoan().getId()).orElse(null);
@@ -1053,7 +1031,6 @@ public class OrderApi {
                             thanhToanRepo.save(tt);
                         }
 
-                        // 🌟 CHỈ LÀM SẠCH GIỎ HÀNG CHUNG NẾU LÀ ĐƠN BÌNH THƯỜNG
                         boolean isBuyNow = hd.getGhiChu() != null && hd.getGhiChu().contains("[BUY_NOW]");
                         if (!isBuyNow && hd.getKhachHang() != null && hd.getKhachHang().getTaiKhoan() != null) {
                             com.example.bee.entities.cart.GioHang gh = gioHangRepository.findByTaiKhoan_Id(hd.getKhachHang().getTaiKhoan().getId()).orElse(null);
@@ -1146,28 +1123,6 @@ public class OrderApi {
         return ResponseEntity.ok(result);
     }
 
-    public static class CheckoutRequest {
-        public String tenNguoiNhan;
-        public String soDienThoai;
-        public String email;
-        public String diaChiGiaoHang;
-        public String ghiChu;
-        public String phuongThucThanhToan;
-        public BigDecimal tienHang;
-        public BigDecimal phiShip;
-        public BigDecimal tienGiam;
-        public BigDecimal tongTien;
-        public Integer voucherId;
-        public Boolean isBuyNow; // 🌟 TRƯỜNG DỮ LIỆU MỚI ĐỂ NHẬN DIỆN MUA NGAY
-        public List<CheckoutItemRequest> chiTietDonHangs;
-    }
-
-    public static class CheckoutItemRequest {
-        public Integer chiTietSanPhamId;
-        public Integer soLuong;
-        public BigDecimal donGia;
-    }
-
     @PostMapping("/{id}/confirm-transfer")
     @Transactional
     public ResponseEntity<?> confirmTransferPayment(@PathVariable Integer id) {
@@ -1182,7 +1137,6 @@ public class OrderApi {
             hd.setNgayThanhToan(new Date());
             hdRepo.save(hd);
 
-            // 🌟 CHỈ LÀM SẠCH GIỎ HÀNG CHUNG NẾU LÀ ĐƠN BÌNH THƯỜNG
             boolean isBuyNow = hd.getGhiChu() != null && hd.getGhiChu().contains("[BUY_NOW]");
             if (!isBuyNow && hd.getKhachHang() != null && hd.getKhachHang().getTaiKhoan() != null) {
                 com.example.bee.entities.cart.GioHang gh = gioHangRepository.findByTaiKhoan_Id(hd.getKhachHang().getTaiKhoan().getId()).orElse(null);
@@ -1221,5 +1175,27 @@ public class OrderApi {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(usedIds);
+    }
+
+    public static class CheckoutRequest {
+        public String tenNguoiNhan;
+        public String soDienThoai;
+        public String email;
+        public String diaChiGiaoHang;
+        public String ghiChu;
+        public String phuongThucThanhToan;
+        public BigDecimal tienHang;
+        public BigDecimal phiShip;
+        public BigDecimal tienGiam;
+        public BigDecimal tongTien;
+        public Integer voucherId;
+        public Boolean isBuyNow;
+        public List<CheckoutItemRequest> chiTietDonHangs;
+    }
+
+    public static class CheckoutItemRequest {
+        public Integer chiTietSanPhamId;
+        public Integer soLuong;
+        public BigDecimal donGia;
     }
 }

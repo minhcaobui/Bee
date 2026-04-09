@@ -3,23 +3,23 @@ package com.example.bee.controllers.api.pos;
 import com.example.bee.entities.account.TaiKhoan;
 import com.example.bee.entities.account.VaiTro;
 import com.example.bee.entities.cart.GioHang;
+import com.example.bee.entities.customer.KhachHang;
 import com.example.bee.entities.order.*;
 import com.example.bee.entities.product.SanPhamChiTiet;
-import com.example.bee.entities.customer.KhachHang;
 import com.example.bee.entities.promotion.KhuyenMai;
 import com.example.bee.entities.promotion.MaGiamGia;
-import com.example.bee.entities.user.NhanVien;
+import com.example.bee.entities.staff.NhanVien;
 import com.example.bee.repositories.account.TaiKhoanRepository;
 import com.example.bee.repositories.account.VaiTroRepository;
 import com.example.bee.repositories.cart.GioHangRepository;
 import com.example.bee.repositories.catalog.KichThuocRepository;
 import com.example.bee.repositories.catalog.MauSacRepository;
-import com.example.bee.repositories.products.SanPhamChiTietRepository;
-import com.example.bee.repositories.order.*;
 import com.example.bee.repositories.customer.KhachHangRepository;
+import com.example.bee.repositories.order.*;
+import com.example.bee.repositories.products.SanPhamChiTietRepository;
 import com.example.bee.repositories.promotion.KhuyenMaiRepository;
 import com.example.bee.repositories.promotion.MaGiamGiaRepository;
-import com.example.bee.repositories.role.NhanVienRepository;
+import com.example.bee.repositories.staff.NhanVienRepository;
 import com.example.bee.utils.MomoSecurity;
 import com.example.bee.utils.VnPayUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -130,7 +130,7 @@ public class PosApi {
     @Transactional
     public ResponseEntity<?> updateHoldStock(@RequestBody Map<String, Object> body) {
         Integer spctId = (Integer) body.get("spctId");
-        Integer delta  = (Integer) body.get("delta");
+        Integer delta = (Integer) body.get("delta");
 
         SanPhamChiTiet spct = variantRepo.findById(spctId)
                 .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
@@ -145,7 +145,6 @@ public class PosApi {
         return ResponseEntity.ok(Map.of("message", "OK"));
     }
 
-    // 🌟 HÀM TẠO ĐƠN HÀNG DÙNG CHUNG (CHO CẢ TIỀN MẶT LẪN ONLINE)
     private HoaDon createOrderToDB(Map<String, Object> payload, String method, String statusMa) {
         Integer customerId = (Integer) payload.get("customerId");
         List<Map<String, Object>> cart = (List<Map<String, Object>>) payload.get("cart");
@@ -176,12 +175,11 @@ public class PosApi {
 
         for (Map<String, Object> item : cart) {
             Integer spctId = Integer.valueOf(item.get("id").toString());
-            Integer qty    = Integer.valueOf(item.get("qty").toString());
+            Integer qty = Integer.valueOf(item.get("qty").toString());
             BigDecimal price = new BigDecimal(item.get("price").toString());
 
             SanPhamChiTiet spct = variantRepo.findById(spctId).orElseThrow(() -> new RuntimeException("Lỗi kho"));
 
-            // Chốt chặn số lượng kho (Cho cả Tiền mặt và Online POS)
             if (spct.getSoLuong() < qty) {
                 throw new RuntimeException("Sản phẩm " + spct.getSanPham().getTen() + " không đủ số lượng trong kho!");
             }
@@ -194,7 +192,6 @@ public class PosApi {
                 tongTienNguyenGia = tongTienNguyenGia.add(thanhTienItem);
             }
 
-            // Trừ kho ngay lập tức
             spct.setSoLuong(spct.getSoLuong() - qty);
             spct.setSoLuongTamGiu(Math.max(0, spct.getSoLuongTamGiu() - qty));
 
@@ -270,7 +267,7 @@ public class PosApi {
 
         BigDecimal totalFinal = giaTamTinh.subtract(tongKhuyenMai);
         if (totalFinal.compareTo(BigDecimal.ZERO) < 0) totalFinal = BigDecimal.ZERO;
-        hd.setGiaTong(totalAmount); // Lấy amount truyền vào để chốt với QR
+        hd.setGiaTong(totalAmount);
 
         TrangThaiHoaDon tthd = trangThaiRepo.findByMa(statusMa);
         hd.setTrangThaiHoaDon(tthd);
@@ -317,7 +314,6 @@ public class PosApi {
     @Transactional
     public ResponseEntity<?> getMomoUrl(@RequestBody Map<String, Object> payload) {
         try {
-            // Lưu xuống DB ngay lập tức
             HoaDon hd = createOrderToDB(payload, "MOMO", "CHO_THANH_TOAN");
 
             String rId = String.valueOf(System.currentTimeMillis());
@@ -355,7 +351,6 @@ public class PosApi {
     @Transactional
     public ResponseEntity<?> getVnPayUrl(@RequestBody Map<String, Object> payload, HttpServletRequest request) {
         try {
-            // Lưu xuống DB ngay lập tức
             HoaDon hd = createOrderToDB(payload, "VNPAY", "CHO_THANH_TOAN");
 
             String vnp_TxnRef = hd.getMa() + "_" + System.currentTimeMillis();
@@ -405,7 +400,6 @@ public class PosApi {
         }
     }
 
-    // 🌟 ĐÃ SỬA: Hàm Confirm bây giờ chỉ cần tìm Hóa đơn trong DB và cập nhật trạng thái
     @PostMapping("/confirm-online-payment")
     @Transactional
     public ResponseEntity<?> confirmOnlinePayment(@RequestBody Map<String, String> body) {
@@ -473,7 +467,8 @@ public class PosApi {
             if (queryString.length() > 0) queryString.append("&");
             try {
                 queryString.append(entry.getKey()).append("=").append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8.name()));
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
         }
 
         if (queryString.length() > 0) redirectUrl += "?" + queryString.toString();

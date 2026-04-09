@@ -1,7 +1,7 @@
 package com.example.bee.controllers.api.staff;
 
-import com.example.bee.entities.role.ChucVu;
-import com.example.bee.repositories.role.ChucVuRepository;
+import com.example.bee.entities.staff.ChucVu;
+import com.example.bee.repositories.staff.ChucVuRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,7 +18,6 @@ public class ChucVuApi {
 
     private final ChucVuRepository chucVuRepo;
 
-    // 1. Lấy danh sách có phân trang và tìm kiếm
     @GetMapping
     public ResponseEntity<?> getDanhSach(
             @RequestParam(defaultValue = "0") int page,
@@ -30,7 +29,6 @@ public class ChucVuApi {
         return ResponseEntity.ok(result);
     }
 
-    // 2. Lấy chi tiết 1 chức vụ để đưa lên Form Sửa
     @GetMapping("/{id}")
     public ResponseEntity<?> getChiTiet(@PathVariable Integer id) {
         return chucVuRepo.findById(id)
@@ -38,14 +36,12 @@ public class ChucVuApi {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // 3. Tạo mới chức vụ
     @PostMapping
     public ResponseEntity<?> createChucVu(@RequestBody ChucVu request) {
         if (request.getTen() == null || request.getTen().trim().isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("message", "Tên chức vụ không được để trống!"));
         }
 
-        // Tự động tạo mã nếu để trống
         String maCV = request.getMa();
         if (maCV == null || maCV.trim().isEmpty()) {
             maCV = "CV" + System.currentTimeMillis();
@@ -66,7 +62,6 @@ public class ChucVuApi {
         return ResponseEntity.ok(Map.of("message", "Tạo chức vụ thành công!"));
     }
 
-    // 4. Cập nhật chức vụ
     @PutMapping("/{id}")
     public ResponseEntity<?> updateChucVu(@PathVariable Integer id, @RequestBody ChucVu request) {
         ChucVu existingCv = chucVuRepo.findById(id).orElse(null);
@@ -80,7 +75,7 @@ public class ChucVuApi {
 
         String maCV = request.getMa();
         if (maCV == null || maCV.trim().isEmpty()) {
-            maCV = existingCv.getMa(); // Giữ nguyên mã cũ nếu xóa trắng
+            maCV = existingCv.getMa();
         } else {
             maCV = maCV.trim().toUpperCase();
             if (chucVuRepo.existsByMaAndIdNot(maCV, id)) {

@@ -1126,10 +1126,19 @@
                 'xanh lá': 'GREEN', 'cam': 'ORANGE', 'tím': 'PURPLE', 'hồng': 'PINK'
             };
 
+            let skippedCount = 0; // 🌟 Bổ sung biến đếm số lượng SKU bị bỏ qua
+
             colorChecks.forEach(c => {
                 sizeChecks.forEach(s => {
                     const cid = c.value, cName = c.dataset.name;
                     const sid = s.value, sName = s.dataset.name;
+
+                    // 🌟 LOGIC CHẶN TRÙNG LẶP: Kiểm tra xem biến thể này đã tồn tại chưa
+                    const isExist = this.state.variantList.some(v => v.mauSac?.id === parseInt(cid) && v.kichThuoc?.id === parseInt(sid));
+                    if (isExist) {
+                        skippedCount++;
+                        return; // Bỏ qua không sinh dòng HTML này nữa
+                    }
 
                     let cCode = c.dataset.code;
                     if (!cCode) {
@@ -1154,8 +1163,20 @@
             </tr>`;
                 });
             });
-            tbody.innerHTML = html;
-            document.getElementById('bulkSettings').style.display = 'block';
+
+            // 🌟 Kiểm tra nếu tất cả các tổ hợp đều đã tồn tại (không sinh được dòng nào)
+            if (html === '') {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#dc2626; padding:20px; font-weight: 600;">Các biến thể bạn chọn đều đã tồn tại. Không có biến thể mới nào được tạo!</td></tr>`;
+                document.getElementById('bulkSettings').style.display = 'none';
+            } else {
+                tbody.innerHTML = html;
+                document.getElementById('bulkSettings').style.display = 'block';
+
+                // Báo cáo nhẹ cho người dùng biết hệ thống vừa chặn trùng lặp
+                if (skippedCount > 0) {
+                    window.toast(`Đã bỏ qua ${skippedCount} biến thể vì chúng đã có sẵn trong danh sách!`, "info");
+                }
+            }
         },
         applyBulkSettings: function() {
             const priceVal = document.getElementById('bulkCommonPrice').value;

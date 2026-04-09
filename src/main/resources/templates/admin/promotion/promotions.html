@@ -541,11 +541,11 @@
                 const fm = new Intl.NumberFormat('vi-VN');
 
                 let typeLabel = '';
-                if (item.loaiGiamGia === 'PERCENTAGE') typeLabel = '<span class="badge-type">Phần trăm</span>';
+                if (item.loaiGiamGia === 'PERCENT') typeLabel = '<span class="badge-type">Phần trăm</span>';
                 else if (item.loaiGiamGia === 'FREESHIP') typeLabel = '<span class="badge-type" style="background:#dbeafe; color:#2563eb;"><i class="bi bi-truck"></i> Freeship</span>';
                 else typeLabel = '<span class="badge-type">Tiền mặt</span>';
 
-                const val = item.loaiGiamGia === 'PERCENTAGE' ? item.giaTriGiamGia + '%' : fm.format(item.giaTriGiamGia) + ' ₫';
+                const val = item.loaiGiamGia === 'PERCENT' ? item.giaTriGiamGia + '%' : fm.format(item.giaTriGiamGia) + ' ₫';
                 const cond = fm.format(item.dieuKien);
                 const toggleHtml = `<label class="switch-sm"><input type="checkbox" ${item.trangThai ? 'checked' : ''} onchange="window.PromotionApp.quickToggle(${item.id}, this)"><span class="slider-sm"></span></label>`;
 
@@ -668,7 +668,7 @@
                 if (isSale) {
                     document.getElementById('kmLoai').value = item.loai;
                 } else {
-                    if (item.loaiGiamGia === 'PERCENTAGE') document.getElementById('kmLoai').value = 'PERCENT';
+                    if (item.loaiGiamGia === 'PERCENT') document.getElementById('kmLoai').value = 'PERCENT';
                     else if (item.loaiGiamGia === 'FREESHIP') document.getElementById('kmLoai').value = 'FREESHIP';
                     else document.getElementById('kmLoai').value = 'AMOUNT';
                 }
@@ -700,7 +700,7 @@
                     document.getElementById('vDieuKien').value = item.dieuKien ? new Intl.NumberFormat('en-US').format(item.dieuKien) : '';
                     document.getElementById('vSoLuong').value = item.soLuong;
 
-                    if (item.loaiGiamGia === 'PERCENTAGE') {
+                    if (item.loaiGiamGia === 'PERCENT') {
                         document.getElementById('vGiaTriToiDa').value = item.giaTriGiamGiaToiDa ? new Intl.NumberFormat('en-US').format(item.giaTriGiamGiaToiDa) : '';
                         document.getElementById('groupMaxGiam').style.display = 'block';
                     }
@@ -723,13 +723,17 @@
 
         // 🌟 BỔ SUNG TOAST CONFIRM KHI LƯU
         saveItem: async function () {
+            const formatDateTime = (val) => {
+                if (!val) return null;
+                return val.length === 16 ? val + ':00' : val;
+            };
             const isSale = this.state.activeTab === 'sale';
             const actionTitle = this.state.editingId ? "Cập nhật dữ liệu" : "Thêm mới";
             const nameLabel = isSale ? "đợt Sale" : "Voucher";
 
             const ten = document.getElementById('kmTen').value.trim();
-            const ngayBatDau = document.getElementById('kmNgayBatDau').value;
-            const ngayKetThuc = document.getElementById('kmNgayKetThuc').value;
+            const ngayBatDau = formatDateTime(document.getElementById('kmNgayBatDau').value);
+            const ngayKetThuc = formatDateTime(document.getElementById('kmNgayKetThuc').value);
 
             const cleanMoney = (id, defaultValue = null) => {
                 const val = document.getElementById(id).value;
@@ -768,7 +772,7 @@
                 } else {
                     payload.maCode = document.getElementById('kmMa').value.trim();
 
-                    if (loaiRaw === 'PERCENT') payload.loaiGiamGia = 'PERCENTAGE';
+                    if (loaiRaw === 'PERCENT') payload.loaiGiamGia = 'PERCENT';
                     else if (loaiRaw === 'FREESHIP') payload.loaiGiamGia = 'FREESHIP';
                     else payload.loaiGiamGia = 'FIXED';
 

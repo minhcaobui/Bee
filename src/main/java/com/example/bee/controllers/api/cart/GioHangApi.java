@@ -8,16 +8,19 @@ import com.example.bee.repositories.account.TaiKhoanRepository;
 import com.example.bee.repositories.cart.GioHangChiTietRepository;
 import com.example.bee.repositories.cart.GioHangRepository;
 import com.example.bee.repositories.products.SanPhamChiTietRepository;
-import org.springframework.transaction.annotation.Transactional; // 🌟 DÙNG THƯ VIỆN CHUẨN CỦA SPRING
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/gio-hang")
@@ -175,7 +178,6 @@ public class GioHangApi {
         return ResponseEntity.ok(Map.of("message", "Cập nhật số lượng thành công"));
     }
 
-    // 🌟 ĐÃ GẮN EXPLICIT PATH VARIABLE ĐỂ CHỐNG LỖI COMPILER
     @DeleteMapping("/xoa/{idGioHangChiTiet}")
     public ResponseEntity<?> deleteCartItem(@PathVariable("idGioHangChiTiet") Integer idGioHangChiTiet) {
         TaiKhoan tk = getLoggedInUser();

@@ -2,7 +2,7 @@ package com.example.bee.entities.order;
 
 import com.example.bee.entities.customer.KhachHang;
 import com.example.bee.entities.promotion.MaGiamGia;
-import com.example.bee.entities.user.NhanVien;
+import com.example.bee.entities.staff.NhanVien;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
@@ -40,11 +40,9 @@ public class HoaDon {
     @Column(name = "sdt_nhan")
     private String sdtNhan;
 
-    // ĐÃ SỬA THÀNH NVARCHAR(MAX) CHO SQL SERVER
     @Column(name = "dia_chi_giao_hang", columnDefinition = "NVARCHAR(MAX)")
     private String diaChiGiaoHang;
 
-    // ĐÃ SỬA THÀNH NVARCHAR(MAX) CHO SQL SERVER
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String ghiChu;
 

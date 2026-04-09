@@ -1,9 +1,8 @@
 package com.example.bee.config;
 
-import com.example.bee.entities.user.NhanVien;
-import com.example.bee.repositories.role.NhanVienRepository;
+import com.example.bee.entities.staff.NhanVien;
+import com.example.bee.repositories.staff.NhanVienRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;

@@ -6,6 +6,7 @@ import com.example.bee.entities.cart.GioHang;
 import com.example.bee.entities.customer.KhachHang;
 import com.example.bee.repositories.account.TaiKhoanRepository;
 import com.example.bee.repositories.account.VaiTroRepository;
+import com.example.bee.repositories.cart.GioHangRepository;
 import com.example.bee.repositories.customer.KhachHangRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -20,27 +21,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 @Controller
 @RequiredArgsConstructor
 public class DangNhapController {
 
+    private static final Map<String, String> otpForgotStorage = new HashMap<>();
     private final TaiKhoanRepository taiKhoanRepository;
     private final KhachHangRepository khachHangRepository;
     private final VaiTroRepository vaiTroRepository;
     private final PasswordEncoder passwordEncoder;
-    private final com.example.bee.repositories.cart.GioHangRepository gioHangRepository;
-    private final JavaMailSender mailSender; // 🌟 Bổ sung để gửi Email OTP
+    private final GioHangRepository gioHangRepository;
+    private final JavaMailSender mailSender;
 
-    // Lưu trữ OTP tạm thời trên RAM
-    private static final Map<String, String> otpForgotStorage = new HashMap<>();
-
-    // 🌟 ĐÃ FIX BUG: Chống vòng lặp vô hạn gây sập Server
     private String generateMa() {
         return "KH" + System.currentTimeMillis();
     }
@@ -55,7 +49,7 @@ public class DangNhapController {
     public String register(
             @RequestParam("hoTen") String hoTen,
             @RequestParam("soDienThoai") String soDienThoai,
-            @RequestParam("email") String email, // 🌟 Bổ sung thu thập Email
+            @RequestParam("email") String email,
             @RequestParam("password") String password,
             RedirectAttributes redirectAttributes) {
         try {
@@ -63,7 +57,6 @@ public class DangNhapController {
                 redirectAttributes.addAttribute("regError", "Số điện thoại này đã được đăng ký!");
                 return "redirect:/login";
             }
-
             if (khachHangRepository.existsByEmail(email)) {
                 redirectAttributes.addAttribute("regError", "Email này đã được sử dụng!");
                 return "redirect:/login";
@@ -78,7 +71,6 @@ public class DangNhapController {
             newAccount.setTrangThai(true);
             TaiKhoan savedAccount = taiKhoanRepository.save(newAccount);
 
-            // TẠO GIỎ HÀNG TRỐNG MẶC ĐỊNH
             GioHang gioHang = new GioHang();
             gioHang.setTaiKhoan(savedAccount);
             gioHangRepository.save(gioHang);
@@ -88,14 +80,14 @@ public class DangNhapController {
                 KhachHang existingKh = khachPos.get();
                 existingKh.setTaiKhoan(savedAccount);
                 existingKh.setHoTen(hoTen);
-                existingKh.setEmail(email); // 🌟 Lưu Email
+                existingKh.setEmail(email);
                 khachHangRepository.save(existingKh);
             } else {
                 KhachHang newCustomer = new KhachHang();
                 newCustomer.setMa(generateMa());
                 newCustomer.setHoTen(hoTen);
                 newCustomer.setSoDienThoai(soDienThoai);
-                newCustomer.setEmail(email); // 🌟 Lưu Email
+                newCustomer.setEmail(email);
                 newCustomer.setTaiKhoan(savedAccount);
                 newCustomer.setTrangThai(true);
                 khachHangRepository.save(newCustomer);
@@ -108,10 +100,6 @@ public class DangNhapController {
             return "redirect:/login";
         }
     }
-
-    // =======================================================
-    // 🌟 TÍNH NĂNG MỚI: QUÊN MẬT KHẨU (GỬI OTP VÀ CẤP LẠI)
-    // =======================================================
 
     @PostMapping("/forgot-password/send-otp")
     @ResponseBody
@@ -155,14 +143,12 @@ public class DangNhapController {
                 return ResponseEntity.badRequest().body("Lỗi xác thực tài khoản!");
             }
 
-            // Tạo mật khẩu ngẫu nhiên mới
             String newPw = UUID.randomUUID().toString().substring(0, 8);
 
             TaiKhoan tk = kh.getTaiKhoan();
             tk.setMatKhau(passwordEncoder.encode(newPw));
             taiKhoanRepository.save(tk);
 
-            // Gửi mật khẩu mới qua mail
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(email);
             message.setSubject("[BeeMate] MẬT KHẨU MỚI CỦA BẠN");
@@ -171,8 +157,7 @@ public class DangNhapController {
                     + "Vui lòng đăng nhập và đổi lại mật khẩu ngay lập tức để bảo đảm an toàn.\n"
                     + "Trân trọng,\nĐội ngũ BeeMate.");
             mailSender.send(message);
-
-            otpForgotStorage.remove(email); // Xóa OTP sau khi dùng
+            otpForgotStorage.remove(email);
             return ResponseEntity.ok("Thành công! Mật khẩu mới đã được gửi vào Email của bạn.");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Lỗi hệ thống, không thể đặt lại mật khẩu!");

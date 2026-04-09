@@ -1,6 +1,6 @@
-package com.example.bee.repositories.role;
+package com.example.bee.repositories.staff;
 
-import com.example.bee.entities.role.ChucVu;
+import com.example.bee.entities.staff.ChucVu;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

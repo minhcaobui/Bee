@@ -36,7 +36,6 @@ public class SanPham {
     @Column(nullable = false, length = 100)
     private String ten;
 
-    // ĐÃ SỬA THÀNH NVARCHAR(MAX) CHO SQL SERVER
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String moTa;
 

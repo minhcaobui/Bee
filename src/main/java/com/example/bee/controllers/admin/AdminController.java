@@ -1,8 +1,8 @@
 package com.example.bee.controllers.admin;
 
-import com.example.bee.entities.user.NhanVien;
-import com.example.bee.repositories.role.NhanVienRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.bee.entities.staff.NhanVien;
+import com.example.bee.repositories.staff.NhanVienRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.util.List;
 
 @Controller
+@RequiredArgsConstructor
 public class AdminController {
 
-    @Autowired
-    private NhanVienRepository nhanVienRepository;
+    private final NhanVienRepository nhanVienRepository;
 
     @GetMapping("/admin")
     public String showAdminLayout() {

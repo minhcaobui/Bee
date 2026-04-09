@@ -21,10 +21,8 @@ import java.util.stream.Collectors;
 public class ThongBaoApi {
 
     private final ThongBaoRepository thongBaoRepository;
-    // 🌟 ĐÃ FIX LỖI 1: Chuyển sang dùng TaiKhoanRepository để dùng chung cho cả Khách và Admin
     private final TaiKhoanRepository taiKhoanRepository;
 
-    // Hàm dùng chung để lấy Tài khoản đang đăng nhập
     private TaiKhoan getLoggedInAccount() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
@@ -38,7 +36,6 @@ public class ThongBaoApi {
         TaiKhoan tk = getLoggedInAccount();
         if (tk == null) return ResponseEntity.ok(Collections.emptyList());
 
-        // 🌟 ĐÃ FIX LỖI 2: Chỉ lấy những thông báo CHƯA XÓA (Loại bỏ Zombie)
         List<ThongBao> list = thongBaoRepository.findByTaiKhoanIdOrderByNgayTaoDesc(tk.getId())
                 .stream()
                 .filter(tb -> tb.getDaXoa() == null || !tb.getDaXoa())
@@ -67,7 +64,6 @@ public class ThongBaoApi {
         boolean hasChanges = false;
 
         for (ThongBao tb : list) {
-            // 🌟 ĐÃ FIX LỖI 3: Chỉ update những cái CHƯA ĐỌC, tiết kiệm tài nguyên DB
             if (tb.getDaDoc() == null || !tb.getDaDoc()) {
                 tb.setDaDoc(true);
                 hasChanges = true;
@@ -98,7 +94,6 @@ public class ThongBaoApi {
         boolean hasChanges = false;
 
         for (ThongBao tb : list) {
-            // 🌟 ĐÃ FIX LỖI 3: Chỉ đánh dấu xóa những cái CHƯA XÓA
             if (tb.getDaXoa() == null || !tb.getDaXoa()) {
                 tb.setDaXoa(true);
                 hasChanges = true;

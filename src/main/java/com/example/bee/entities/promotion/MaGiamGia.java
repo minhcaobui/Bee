@@ -75,11 +75,7 @@ public class MaGiamGia {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Giá trị đơn hàng tối thiểu không hợp lệ.");
         }
 
-        // =========================================================
-        // 🌟 RULE CHỐNG LỖ: KIỂM SOÁT TỶ LỆ GIẢM GIÁ TỐI ĐA
-        // =========================================================
         if ("PERCENTAGE".equalsIgnoreCase(body.getLoaiGiamGia())) {
-            // Sàn thương mại thường khóa trần ở mức 50% hoặc 70%
             BigDecimal maxPercent = new BigDecimal("70");
 
             if (body.getGiaTriGiamGia().compareTo(maxPercent) > 0 || body.getGiaTriGiamGia().compareTo(BigDecimal.ONE) < 0) {
@@ -93,15 +89,13 @@ public class MaGiamGia {
             if (body.getGiaTriGiamGia().compareTo(new BigDecimal("1000")) < 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Giá trị chiết khấu tối thiểu phải từ 1.000 VNĐ.");
             }
-
-            // Nếu đơn tối thiểu là 100k, thì voucher tiền mặt chỉ được tối đa 50k (50%)
             if (body.getDieuKien().compareTo(BigDecimal.ZERO) > 0) {
-                BigDecimal limit = body.getDieuKien().multiply(new BigDecimal("0.5")); // Ngưỡng 50%
+                BigDecimal limit = body.getDieuKien().multiply(new BigDecimal("0.5"));
                 if (body.getGiaTriGiamGia().compareTo(limit) > 0) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Để đảm bảo lợi nhuận, mức giảm tiền mặt không được vượt quá 50% giá trị đơn hàng tối thiểu (Tối đa " + limit.longValue() + "đ cho đơn " + body.getDieuKien().longValue() + "đ).");
                 }
             }
-            body.setGiaTriGiamGiaToiDa(null); // Clear data rác
+            body.setGiaTriGiamGiaToiDa(null);
         }
     }
 }

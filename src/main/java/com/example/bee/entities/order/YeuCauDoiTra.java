@@ -1,6 +1,6 @@
 package com.example.bee.entities.order;
 
-import com.example.bee.entities.user.NhanVien;
+import com.example.bee.entities.staff.NhanVien;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,7 +29,7 @@ public class YeuCauDoiTra {
     private String lyDo;
     private String ghiChu;
     private BigDecimal soTienHoan;
-    private String trangThai; // CHO_XU_LY, HOAN_THANH, TU_CHOI
+    private String trangThai;
     private Date ngayTao;
     private Date ngayXuLy;
 }

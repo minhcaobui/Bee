@@ -26,9 +26,9 @@ public class DanhMucApi {
     private final DanhMucRepository danhMucRepository;
     private final SanPhamRepository sanPhamRepository;
 
-    // 🌟 ĐÃ FIX: Sinh mã bằng Timestamp, an toàn tuyệt đối, không sợ vô hạn
     private String generateMa() {
-        return "DM" + System.currentTimeMillis();
+        String timeStr = String.valueOf(System.currentTimeMillis());
+        return "DM" + timeStr.substring(timeStr.length() - 5);
     }
 
     @GetMapping
@@ -58,12 +58,13 @@ public class DanhMucApi {
                 ? generateMa()
                 : body.getMa().trim().toUpperCase();
 
-        // 🌟 ĐÃ FIX: Văn phong báo lỗi chuyên nghiệp
-        if (ma.length() > 20) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã thuộc tính tối đa 20 ký tự!");
+        if (ma.length() > 20)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã thuộc tính tối đa 20 ký tự!");
         if (!ma.matches("^[A-Z0-9_]*$")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã chỉ được chứa chữ hoa, số và dấu gạch dưới (_)");
         }
-        if (ten.isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên thuộc tính không được để trống!");
+        if (ten.isEmpty())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên thuộc tính không được để trống!");
         if (ten.length() > 100)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên thuộc tính tối đa 100 ký tự!");
         if (danhMucRepository.existsByTenIgnoreCase(ten))
@@ -92,7 +93,6 @@ public class DanhMucApi {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên này đã tồn tại ở bản ghi khác!");
         }
 
-        // 🌟 ĐÃ FIX BUG LÁCH LUẬT: Check điều kiện khi người dùng gạt tắt trạng thái ở form Edit
         Boolean newTrangThai = body.getTrangThai();
         if (newTrangThai != null && !newTrangThai && Boolean.TRUE.equals(entity.getTrangThai())) {
             boolean isUsed = sanPhamRepository.existsByDanhMuc_IdAndTrangThaiTrue(id);

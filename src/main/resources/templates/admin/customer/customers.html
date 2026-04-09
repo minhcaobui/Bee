@@ -987,7 +987,9 @@
                         <td>
                             <span style="color:#555; font-weight:700;">${v.maDonHang}</span>
                         </td>
-                        <td style="font-size:12px; color:#666;">${new Date(v.ngaySuDung).toLocaleString('vi-VN')}</td>
+                        <td style="font-size:12px; color:#666;">
+                            ${v.ngaySuDung}
+                        </td>
                     </tr>
                 `).join('');
                 this.renderPagination(data, 'pagiVoucher', 'window.CustomerApp.changeSubPageVoucher', this.state.subParams.voucher.page);

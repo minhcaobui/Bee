@@ -10,7 +10,6 @@ import java.util.List;
 @Repository
 public interface GioHangChiTietRepository extends JpaRepository<GioHangChiTiet, Integer> {
 
-    // 🌟 VŨ KHÍ TỐI THƯỢNG: Lấy toàn bộ dữ liệu trong 1 câu SQL, chống lỗi Hibernate Proxy
     @EntityGraph(attributePaths = {"sanPhamChiTiet", "sanPhamChiTiet.sanPham", "sanPhamChiTiet.mauSac", "sanPhamChiTiet.kichThuoc"})
     List<GioHangChiTiet> findByGioHang_Id(Integer gioHangId);
 

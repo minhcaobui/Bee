@@ -46,7 +46,7 @@ public class DiaChiKhachHang {
     private Integer maHuyen;
 
     @Column(name = "ma_xa")
-    private String maXa; // WardCode của GHN là String
+    private String maXa;
 
     @Column(name = "loai_dia_chi")
     private String loaiDiaChi = "Nhà riêng";

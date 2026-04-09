@@ -16,7 +16,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 @RestController
 @RequestMapping("/api/kich-thuoc")
@@ -27,7 +26,8 @@ public class KichThuocApi {
     private final KichThuocRepository kichThuocRepository;
 
     private String generateMa() {
-        return "KT" + System.currentTimeMillis(); // Đổi "CL" thành "HANG", "KT", "MS" tương ứng với từng file
+        String timeStr = String.valueOf(System.currentTimeMillis());
+        return "KT" + timeStr.substring(timeStr.length() - 5);
     }
 
     @GetMapping

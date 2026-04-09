@@ -19,9 +19,6 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
 
     boolean existsBySanPhamIdAndMauSacIdAndKichThuocId(Integer spId, Integer msId, Integer ktId);
 
-    @Query("SELECT MAX(v.id) FROM SanPhamChiTiet v")
-    Long findMaxId();
-
     boolean existsBySku(String sku);
 
     @EntityGraph(attributePaths = {"sanPham", "mauSac", "kichThuoc"})
@@ -40,7 +37,6 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
 
     boolean existsByKichThuoc_IdAndTrangThaiTrue(Integer kichThuocId);
 
-    // Lệnh này dùng để reset toàn bộ số lượng tạm giữ về 0
     @Modifying
     @Transactional
     @Query("UPDATE SanPhamChiTiet s SET s.soLuongTamGiu = 0 WHERE s.soLuongTamGiu > 0")
