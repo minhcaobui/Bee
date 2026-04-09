@@ -1,12 +1,14 @@
-# Sử dụng Maven để build file .jar
-FROM maven:3.8.5-openjdk-17 AS build
+# Sử dụng Maven bản chuẩn cho Java 21 để build
+FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
 COPY . .
-RUN mvn clean package -DskipTests
+# Ép Maven dùng bảng mã UTF-8 để không bị lỗi khi đọc tiếng Việt
+RUN mvn clean package -DskipTests -Dfile.encoding=UTF-8
 
-# Chạy file .jar vừa build ra
-FROM openjdk:21.0.1-jdk-slim
+# Môi trường chạy Java 21
+FROM eclipse-temurin:21-jdk
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","app.jar"]
+# Ép Java dùng UTF-8 lúc chạy để không bị lỗi font khi insert vào Database
+ENTRYPOINT ["java", "-Dfile.encoding=UTF-8", "-jar", "app.jar"]
