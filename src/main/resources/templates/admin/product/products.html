@@ -148,6 +148,47 @@
 
         .v-checkbox { accent-color: #000; width: 16px; height: 16px; cursor: pointer; }
         .overlay:not(.show) { display: none !important; pointer-events: none !important; }
+
+        /* ==========================================================================
+           RESPONSIVE MOBILE CHO TRANG SẢN PHẨM
+           ========================================================================== */
+        @media (max-width: 768px) {
+            /* Thanh tìm kiếm */
+            .search-wrapper { flex-direction: column; align-items: stretch; gap: 10px; }
+            .filter-select { width: 100%; }
+
+            /* Phân trang */
+            .pagination-wrapper { flex-direction: column; gap: 10px; align-items: center; }
+
+            /* Giao diện Drawer: Ép chiều rộng 100% khi trên mobile */
+            .drawer { width: 100% !important; right: -100% !important; }
+            .drawer.show { right: 0 !important; }
+
+            /* Đưa các form group 2 cột về 1 cột */
+            .drawer-body > div[style*="display:flex; gap:15px"],
+            #vFormDrawer .drawer-body > div[style*="display:flex"],
+            #bulkSettings > div[style*="display:flex"] {
+                flex-direction: column !important;
+                gap: 12px !important;
+            }
+
+            #bulkSettings .btn { width: 100%; }
+
+            /* Bẻ layout tóm tắt thông tin trong Drawer Biến thể */
+            .product-brief { grid-template-columns: 1fr; }
+            .brief-desc { grid-column: span 1; }
+
+            /* Khu vực thao tác (Action Bar) trong Drawer Biến Thể */
+            .drawer-header > div[style*="display: flex"] { flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+            .drawer-header .btn { padding: 0 10px !important; height: 32px !important; font-size: 10px;}
+
+            #variantBulkActions { flex-direction: column; align-items: stretch !important; gap: 12px; }
+            #variantBulkActions > div:last-child { display: flex; flex-wrap: wrap; gap: 8px; }
+            #variantBulkActions .btn { flex: 1; text-align: center; }
+
+            /* Sửa lưới hiển thị ảnh Bulk */
+            .bulk-color-images-container { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        }
     </style>
 </head>
 <body>

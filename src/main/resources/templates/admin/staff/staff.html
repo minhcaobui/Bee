@@ -124,6 +124,46 @@
         .view-section { display: none; animation: fadeIn 0.3s ease; }
         .view-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* ==========================================================================
+           RESPONSIVE MOBILE CHO TRANG QUẢN LÝ NHÂN VIÊN
+           ========================================================================== */
+        @media (max-width: 768px) {
+            /* Thanh Tabs & Header */
+            .actions-bar { flex-direction: column; align-items: stretch; gap: 15px; padding-bottom: 10px; }
+            .tabs { width: 100%; border-bottom: 1px solid var(--gray-200); margin-bottom: 0; }
+
+            /* Thanh Tìm kiếm và Bộ lọc */
+            .search-wrapper { flex-direction: column; align-items: stretch; gap: 10px;}
+            .search-box { width: 100%; min-width: 100%;}
+            .filter-select { width: 100%; }
+            .btn-reset { width: 100% !important; margin-top: 5px; }
+
+            /* Phân trang */
+            .pagination-wrapper { flex-direction: column; gap: 10px; align-items: center; }
+
+            /* Khung Drawer (Bao gồm form Nhân viên & Chức vụ) */
+            .drawer, #roleDrawer { width: 100% !important; right: -100% !important; }
+            .drawer.show { right: 0 !important; }
+
+            /* Form nhập liệu (Chuyển các grid/flex 2 cột thành 1 cột) */
+            .drawer-body > div[style*="display: flex"],
+            #passwordBlock > div[style*="display: flex"] {
+                flex-direction: column !important;
+                gap: 12px !important;
+            }
+            .drawer-body > div[style*="display: flex"] > *,
+            #passwordBlock > div[style*="display: flex"] > * {
+                flex: none !important;
+                width: 100% !important;
+            }
+
+            /* Sửa riêng phần dropdown Ngày/Tháng/Năm */
+            .form-group[style*="flex: 2;"] > div[style*="display: flex"] {
+                flex-direction: row !important; /* Giữ nguyên 3 ô trên 1 dòng */
+                gap: 5px !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -408,7 +448,7 @@
                 </div>
                 <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px; border-top: 1px dashed #eee; padding-top: 12px;">
                     <button class="btn btn-secondary" id="toastCancel" style="height: 32px !important; font-size: 11px; padding: 0 16px !important; border-radius: 4px;">HỦY BỎ</button>
-                    <button class="btn" id="toastOk" style="height: 32px !important; font-size: 11px; padding: 0 16px !important; border-radius: 4px;">XÁC NHẬN</button>
+                    <button class="btn" id="toastOk" style="height: 32px !important; font-size: 11px; padding: 0 16px !important; border-radius: 4px; background: #ef4444; border-color: #ef4444; color: #fff;">XÁC NHẬN</button>
                 </div>
             `;
             container.appendChild(el);

@@ -111,6 +111,43 @@
         .bee-toast-box.warning { border-left-color: #f59e0b; }
         .bee-toast-box.hiding { transform: translateX(120%); opacity: 0; margin-top: -80px; }
         @keyframes beeToastSlideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* ==========================================================================
+           RESPONSIVE MOBILE CHO TRANG ĐỔI TRẢ
+           ========================================================================== */
+        @media (max-width: 768px) {
+            /* 1. Header & Tabs */
+            .actions-bar { flex-direction: column; align-items: stretch; gap: 10px; }
+            .tabs { width: 100%; border-bottom: 1px solid var(--gray-200); }
+
+            /* 2. Form tìm kiếm & bộ lọc */
+            .search-section { flex-direction: column; align-items: stretch; padding: 15px; gap: 10px; }
+            .filter-group { width: 100%; }
+
+            /* 3. Phân trang */
+            .pagination-wrapper { flex-direction: column; gap: 10px; align-items: center; }
+
+            /* 4. Khung Drawer (Chi tiết yêu cầu & Thêm mới) */
+            .drawer { width: 100% !important; right: -100% !important; }
+            .drawer.show { right: 0 !important; }
+            .drawer-footer { flex-direction: column; align-items: stretch !important; gap: 10px; }
+            .drawer-footer > div { display: flex; justify-content: space-between; width: 100%; }
+            .drawer-footer .btn { flex: 1; height: 40px !important; }
+
+            /* 5. Detail Card - Bẻ layout grid 2 cột thành 1 cột */
+            .detail-card-body[style*="grid-template-columns"],
+            #rtCreateOrderInfo > div[style*="grid-template-columns"] {
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
+            }
+            #rtCreateOrderInfo > div:first-child { flex-direction: column; gap: 10px; }
+            #rtCreateOrderInfo > div:first-child > div { text-align: left !important; }
+
+            /* 6. Item Row - Gọn lại thông tin sản phẩm */
+            .item-row { flex-direction: column; align-items: flex-start; position: relative; gap: 8px;}
+            .item-row img { width: 60px !important; height: 60px !important; }
+            .item-row > div:nth-child(3) { width: 100%; display: flex; justify-content: space-between; align-items: center; }
+        }
     </style>
 </head>
 <body>

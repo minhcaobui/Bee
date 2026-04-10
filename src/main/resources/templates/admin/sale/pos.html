@@ -124,6 +124,43 @@
         .voucher-card.selected { border: 2px solid #2563eb !important; background-color: #eff6ff !important; }
         .voucher-card.selected::before { content: 'ĐANG CHỌN'; position: absolute; top: -10px; right: -10px; background: #2563eb; color: #fff; font-size: 10px; padding: 4px 8px; border-radius: 4px; font-weight: 800; box-shadow: 0 2px 5px rgba(37,99,235,0.3); }
         .voucher-card.disabled-stack { background: #fafafa; }
+
+        /* ==========================================================================
+           RESPONSIVE MOBILE CHO TRANG POS BÁN HÀNG TẠI QUẦY
+           ========================================================================== */
+        @media (max-width: 900px) {
+            body { overflow: auto; } /* Hủy chặn cuộn trang */
+            .pos-wrapper { height: auto; min-height: 100vh; padding: 10px; }
+
+            /* Bẻ khung POS layout từ ngang (row) thành dọc (column) */
+            .pos-layout { flex-direction: column; box-shadow: none; border: none; background: transparent; gap: 15px;}
+
+            /* Đảo vị trí: Danh sách SP (panel-right) lên trên, Giỏ hàng (panel-left) xuống dưới */
+            .panel-right { width: 100%; order: 1; border: 1px solid var(--gray-200); border-radius: 6px; background: #fff; padding: 15px;}
+            .panel-left { width: 100%; order: 2; border: 1px solid var(--gray-200); border-radius: 6px; }
+
+            /* Đảm bảo thanh tìm kiếm sản phẩm bị đẩy xuống dọc nếu quá chật */
+            .search-bar-wrapper { flex-wrap: wrap; }
+            .search-bar-wrapper > div { width: 100%; flex: unset; }
+            .search-bar-wrapper .filter-select { width: calc(50% - 5px); flex: 1; }
+
+            /* Giỏ hàng cần có min-height để thấy rõ khi trống */
+            .panel-left .table-wrapper { min-height: 250px; }
+
+            /* Điều chỉnh lại table để vuốt mượt mà trên đt */
+            .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+            /* Tùy chỉnh Modal Thanh toán trên mobile */
+            #payModal .modal-dialog { width: 100% !important; margin: 10px; }
+            .payment-tabs { flex-direction: column; }
+            .payment-tab { padding: 10px; }
+            #transfer-section > div { flex-wrap: wrap; }
+            .payment-option { width: 100%; flex: unset; height: 80px; }
+
+            /* Các Toast cảnh báo trôi lên trên để dễ thấy */
+            #beeToastHost { top: 10px; left: 10px; right: 10px; }
+            .bee-toast-box { min-width: 100%; max-width: 100%; }
+        }
     </style>
 </head>
 <body>
