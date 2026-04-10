@@ -104,6 +104,35 @@
     .bee-toast-box.warning { border-left-color: #f59e0b; }
     .bee-toast-box.hiding { transform: translateX(120%); opacity: 0; margin-top: -80px; }
     @keyframes beeToastSlideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    /* ==========================================================================
+       RESPONSIVE MOBILE CHO TRANG CÁ NHÂN
+       ========================================================================== */
+    @media (max-width: 768px) {
+        #profile-page { padding: 15px; }
+
+        /* Căn giữa Header trên điện thoại */
+        #profile-page .pf-header {
+            flex-direction: column;
+            text-align: center;
+            padding: 20px 15px;
+        }
+        #profile-page .pf-role { justify-content: center; }
+
+        /* Bẻ form 2 cột thành 1 cột */
+        #profile-page .pf-form-grid { grid-template-columns: 1fr; gap: 15px; }
+        #profile-page .pf-form-group.full { grid-column: span 1; }
+
+        /* Nút lưu chiếm toàn bộ chiều ngang */
+        #btnSaveProfile, #btnSavePassword { width: 100%; margin-top: 10px; }
+
+        /* Điều chỉnh Toast */
+        #beeToastHost { left: 15px; right: 15px; top: 15px; }
+        .bee-toast-box { min-width: 100%; max-width: 100%; }
+
+        /* Điều chỉnh Modal OTP */
+        .modal-otp-box { padding: 20px !important; }
+    }
 </style>
 
 <div id="profile-page">
@@ -210,7 +239,7 @@
 </div>
 
 <div class="modal-otp-overlay" id="otpModal" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(3px);">
-    <div class="modal-otp-box" style="background: #fff; width: 420px; padding: 30px; border-radius: 6px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+    <div class="modal-otp-box" style="background: #fff; width: 100%; max-width: 420px; margin: 0 20px; padding: 30px; border-radius: 6px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
         <h4 style="color: #2563eb; font-weight: 800; margin-bottom: 10px;"><i class="bi bi-envelope-check-fill" style="font-size: 24px; display: block; margin-bottom: 10px;"></i> XÁC THỰC EMAIL</h4>
         <p id="otpMessage" style="font-size: 13px; color: #666; margin-bottom: 25px;">Hệ thống đang gửi mã xác thực đến Email...</p>
         <div id="otpInputGroup" style="display: none;">

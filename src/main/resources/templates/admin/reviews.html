@@ -92,6 +92,45 @@
         .bee-toast-box.hiding { transform: translateX(120%); opacity: 0; margin-top: -80px; }
         @keyframes beeToastSlideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ==========================================================================
+           RESPONSIVE MOBILE CHO TRANG QUẢN LÝ ĐÁNH GIÁ
+           ========================================================================== */
+        @media (max-width: 768px) {
+            .rv-container { padding: 15px; }
+
+            /* Thanh Tabs */
+            .actions-bar { padding-bottom: 10px; }
+            .tabs { width: 100%; border-bottom: 1px solid var(--gray-200); }
+
+            /* Thanh Tìm kiếm và Bộ lọc */
+            .search-wrapper { flex-direction: column; align-items: stretch; gap: 10px; }
+            .search-box { width: 100%; min-width: 100%; }
+            .filter-select { width: 100%; }
+            .btn-reset { width: 100% !important; margin-top: 5px; }
+
+            /* Card Đánh giá (Header) */
+            .rv-card-header {
+                flex-direction: column; /* Đẩy khối Sản phẩm xuống dưới Khách hàng */
+                align-items: flex-start;
+                gap: 12px;
+            }
+            .rv-product-ref {
+                margin-top: 0;
+                width: 100%;
+                justify-content: space-between; /* Trải dài link sản phẩm */
+            }
+
+            /* Box Trả lời của Nhân viên */
+            .rv-reply-header { flex-direction: column; align-items: flex-start; gap: 4px; }
+
+            /* Khung nhập phản hồi (Nút bấm) */
+            .rv-form-actions { flex-direction: column; align-items: stretch; }
+            .rv-form-actions .btn { width: 100%; }
+
+            /* Phân trang */
+            .pagination-wrapper { flex-direction: column; gap: 10px; align-items: center; }
+        }
     </style>
 
     <div class="rv-container">

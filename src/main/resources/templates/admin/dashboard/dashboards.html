@@ -347,6 +347,54 @@
             .db-stats { grid-template-columns:repeat(2,1fr); }
             .db-row-main, .db-row-bottom, .db-row-extra { grid-template-columns:1fr; }
         }
+
+        /* ==========================================================================
+           RESPONSIVE MOBILE HOÀN CHỈNH
+           ========================================================================== */
+        @media (max-width: 768px) {
+            /* Thanh công cụ trên cùng (Bộ lọc) */
+            .db-topbar-left { flex-direction: column; align-items: stretch; width: 100%; }
+            .period-tabs { display: flex; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .period-tabs::-webkit-scrollbar { height: 0; display: none; }
+            .db-date-input { width: 100%; }
+            .date-from-wrap, .date-to-wrap.visible { max-width: 100%; width: 100%; }
+            .db-topbar-right { width: 100%; }
+            .db-topbar-right .btn { width: 100%; }
+            .compare-toggle { justify-content: center; }
+
+            /* Bảng Thống Kê (Thẻ Card) */
+            .db-stats { grid-template-columns: repeat(2, 1fr); gap: 12px;}
+
+            /* Các Box Panel */
+            .db-row-main, .db-row-bottom, .db-row-extra { grid-template-columns: 1fr; gap: 15px;}
+            .db-panel-head { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .db-panel-head > div, .db-panel-head > button { width: 100%; justify-content: space-between; }
+
+            /* Chart & Phân tích chi tiết */
+            .drilldown-kpis { grid-template-columns: repeat(2, 1fr); }
+
+            /* Đảm bảo bảng dữ liệu không bị vỡ */
+            .db-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+            /* Sửa riêng khu vực Heatmap */
+            #heatmapWrap { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 10px;}
+            .heatmap-grid { min-width: 600px; padding: 10px 15px;} /* Bắt buộc cuộn ngang */
+
+            /* Drawer (Menu trượt ngang) */
+            .db-drawer { width: 100% !important; max-width: 100% !important; }
+            .drawer-filter { flex-direction: column; align-items: stretch; }
+            .drawer-filter .btn { width: 100%; margin-left: 0 !important; margin-top: 10px;}
+            .db-drawer-body { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .drawer-order-table { min-width: 800px; } /* Bảng trong drawer phải có cuộn ngang */
+
+            /* Cửa sổ Chatbot AI */
+            .bee-chat-window { width: calc(100vw - 40px); bottom: 95px; right: 20px; height: 60vh;}
+        }
+
+        @media (max-width: 480px) {
+            /* Điện thoại cực nhỏ -> Xếp 1 thẻ thống kê / hàng */
+            .db-stats { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -864,7 +912,7 @@
             <div class="db-panel">
                 <div class="db-panel-head">
                     <span class="db-panel-title">Biểu đồ doanh thu</span>
-                    <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="display:flex;align-items:center;gap:12px; flex-wrap: wrap;">
                         <div class="chart-legend" id="chartLegend">
                             <span class="leg-item" id="leg-0" onclick="DB.toggleDataset(0)">
                                 <span class="leg-line" style="background:#000;"></span>Kỳ này
@@ -924,7 +972,7 @@
             </div>
             <div class="db-panel">
                 <div class="db-panel-head"><span class="db-panel-title">Tỷ lệ Phương thức Thanh toán</span></div>
-                <div style="padding:20px;display:flex;align-items:center;gap:25px;">
+                <div style="padding:20px;display:flex;align-items:center;gap:25px; flex-wrap: wrap; justify-content: center;">
                     <div class="db-donut-wrap">
                         <canvas id="payChart" width="130" height="130"></canvas>
                         <div class="db-donut-center"><div class="db-donut-val" id="donut-val">0</div><div class="db-donut-lbl">đơn</div></div>
@@ -1432,5 +1480,4 @@
     };
 </script>
 </body>
-</html>
 </html>

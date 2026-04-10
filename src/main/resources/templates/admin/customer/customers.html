@@ -139,6 +139,49 @@
 
         .product-img-sm { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid #eee; }
         .flex-center { display: flex; align-items: center; gap: 10px; }
+
+        /* ==========================================================================
+           RESPONSIVE MOBILE CHO TRANG KHÁCH HÀNG
+           ========================================================================== */
+        @media (max-width: 768px) {
+            /* 1. Thanh Header & Tabs */
+            .actions-bar { flex-direction: column; align-items: stretch; gap: 15px; padding-bottom: 10px; }
+            .tabs { width: 100%; border-bottom: 1px solid var(--gray-200); margin-bottom: 0; }
+
+            /* 2. Khung tìm kiếm ngoài màn hình chính */
+            .search-wrapper { flex-direction: column; align-items: stretch; }
+            .filter-select { width: 100%; }
+            .btn-reset { width: 100% !important; margin-top: 5px; }
+
+            /* 3. Khung Drawer (Slide Panel Thêm/Sửa) */
+            .drawer { width: 100% !important; right: -100% !important; }
+            .drawer.show { right: 0 !important; }
+            .drawer.wide { width: 100% !important; }
+            #pwdDrawer { width: 100% !important; right: -100% !important; }
+            #pwdDrawer.show { right: 0 !important; }
+
+            /* 4. Chuyển các cặp Input xếp ngang thành dọc (Dựa vào inline CSS) */
+            #tabContentInfo div[style*="display: flex"],
+            #defaultAddressGroup div[style*="display: flex"],
+            #tabContentOrder div[style*="display: flex"] {
+                flex-direction: column !important;
+                gap: 12px !important;
+            }
+            #tabContentInfo div[style*="display: flex"] > *,
+            #defaultAddressGroup div[style*="display: flex"] > *,
+            #tabContentOrder div[style*="display: flex"] > * {
+                flex: none !important;
+                width: 100% !important;
+            }
+
+            /* 5. Xử lý các thành phần con bên trong Drawer */
+            .drawer-tabs { padding-bottom: 8px; }
+            .drawer-tabs::-webkit-scrollbar { height: 3px; }
+            .sub-table-container { padding: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch;}
+
+            /* 6. Phân trang */
+            .pagination-wrapper { flex-direction: column; gap: 10px; align-items: center; }
+        }
     </style>
 </head>
 <body>

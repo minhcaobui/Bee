@@ -147,6 +147,52 @@
             from { transform: translateX(120%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
+
+        /* ==========================================================================
+           RESPONSIVE MOBILE HOÀN CHỈNH
+           ========================================================================== */
+        @media (max-width: 768px) {
+            /* Thanh tìm kiếm & bộ lọc */
+            .filter-row-1.online-mode,
+            .filter-row-1.history-mode,
+            .filter-row-2.history-mode {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            .filter-group { width: 100%; }
+            .btn-group-filter { width: 100%; margin-top: 5px; }
+            .btn-group-filter .btn { width: 100%; }
+
+            /* Ngăn kéo chi tiết Drawer */
+            .drawer { width: 100% !important; right: -100% !important; }
+            .drawer.show { right: 0 !important; }
+
+            /* Các Card chứa thông tin 2 cột bẻ thành 1 cột */
+            .detail-card-body[style*="justify-content:space-around"],
+            .detail-card-body[style*="grid-template-columns"],
+            #cardExtraInfo .detail-card-body > div[style*="grid-template-columns"] {
+                display: flex !important;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            /* Tổng kết hộp thoại nổi ở góc -> thả tự do */
+            #viewSummaryBox { float: none !important; max-width: 100% !important; margin-top: 15px;}
+
+            /* Box Cập nhật trạng thái dưới cùng */
+            #drawerFooter { flex-direction: column; }
+            #drawerFooter button, #drawerFooter div { width: 100%; }
+
+            /* Phân trang */
+            .pagination-wrapper { flex-direction: column; gap: 10px; align-items: center;}
+
+            /* Timeline bẻ thành dọc */
+            .timeline-horizontal { flex-direction: column; align-items: flex-start; padding-left: 20px; gap: 15px;}
+            .timeline-horizontal::before { left: 35px; top: 20px; bottom: 20px; height: auto; width: 2px; right: auto; }
+            .th-step { display: flex; align-items: center; text-align: left; gap: 15px; width: 100%; }
+            .th-icon { margin: 0; }
+            .th-time { margin-top: 0; margin-left: auto; }
+        }
     </style>
 </head>
 <body>

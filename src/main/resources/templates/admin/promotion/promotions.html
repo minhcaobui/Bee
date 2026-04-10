@@ -124,6 +124,53 @@
         .progress-fill { height: 100%; border-radius: 10px; transition: width 0.6s ease; }
         .bg-safe { background-color: #10b981; } .bg-warning { background-color: #f59e0b; } .bg-danger { background-color: #ef4444; }
         .text-safe { color: #059669; } .text-warning { color: #d97706; } .text-danger { color: #dc2626; }
+
+        /* ==========================================================================
+           RESPONSIVE MOBILE CHO TRANG KHUYẾN MÃI & VOUCHER
+           ========================================================================== */
+        @media (max-width: 768px) {
+            /* Thanh Header & Tabs */
+            .actions-bar { flex-direction: column; align-items: stretch; gap: 15px; padding-bottom: 10px; }
+            .tabs { width: 100%; border-bottom: 1px solid var(--gray-200); margin-bottom: 0; }
+
+            /* Khung tìm kiếm ngoài màn hình chính */
+            .search-wrapper { flex-direction: column; align-items: stretch; }
+            .filter-select { width: 100%; }
+            .btn-reset { width: 100% !important; margin-top: 5px; }
+
+            /* Khung Drawer (Slide Panel Thêm/Sửa) */
+            .drawer { width: 100% !important; right: -100% !important; }
+            .drawer.show { right: 0 !important; }
+
+            /* Chuyển các cặp Input xếp ngang thành dọc (Dựa vào cấu trúc flex inline) */
+            .drawer-body > div[style*="display: flex; gap: 15px"],
+            #voucherFields > div[style*="display: flex"] {
+                flex-direction: column !important;
+                gap: 12px !important;
+            }
+            .drawer-body > div[style*="display: flex"] > *,
+            #voucherFields > div[style*="display: flex"] > * {
+                flex: none !important;
+                width: 100% !important;
+            }
+
+            /* Tìm kiếm sản phẩm trong Drawer Sale */
+            .form-group > div[style*="display:flex; justify-content:space-between"] {
+                flex-direction: column;
+                align-items: stretch !important;
+                gap: 10px;
+            }
+            .form-group > div[style*="display:flex; justify-content:space-between"] .search-box {
+                width: 100% !important;
+            }
+            #selectedCount {
+                align-self: flex-start;
+                margin-bottom: 5px;
+            }
+
+            /* Phân trang */
+            .pagination-wrapper { flex-direction: column; gap: 10px; align-items: center; }
+        }
     </style>
 </head>
 <body>

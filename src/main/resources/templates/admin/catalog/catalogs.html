@@ -6,6 +6,67 @@
     <title>Quản Lý Thuộc Tính</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link rel="stylesheet" th:href="@{/css/admin/catalog/catalog.css}">
+
+    <style>
+        /* CSS dùng chung để thay thế các style inline cứng */
+        .top-controls {
+            display: flex;
+            gap: 16px;
+        }
+        .search-wrapper {
+            flex: 1;
+        }
+        .search-box-container {
+            flex: 2;
+            min-width: 200px;
+        }
+        .sys-info-group {
+            display: flex;
+            gap: 15px;
+        }
+        .sys-info-item {
+            flex: 1;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        /* Tùy chỉnh riêng cho màn hình điện thoại và máy tính bảng nhỏ (< 768px) */
+        @media (max-width: 768px) {
+            .actions-bar {
+                flex-direction: column; /* Xếp dọc nút thêm mới và tabs */
+                align-items: stretch;
+                gap: 12px;
+            }
+            .tabs {
+                display: flex;
+                overflow-x: auto; /* Cho phép vuốt ngang các tabs */
+                white-space: nowrap;
+                padding-bottom: 5px;
+            }
+            .tabs::-webkit-scrollbar {
+                height: 4px;
+            }
+            .top-controls {
+                flex-direction: column; /* Đẩy bộ lọc xuống dưới ô tìm kiếm */
+                gap: 10px;
+            }
+            .filter-select {
+                width: 100%;
+            }
+            .drawer {
+                width: 100% !important; /* Khung thêm/sửa chiếm toàn màn hình */
+                max-width: 100%;
+            }
+            .sys-info-group {
+                flex-direction: column; /* Xếp dọc ngày tạo/ngày sửa */
+                gap: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
 <div class="container">
@@ -20,9 +81,9 @@
         <button class="btn" id="btnAdd"><i class="bi bi-plus-lg"></i> THÊM MỚI</button>
     </div>
     <section class="search-section">
-        <div style="display: flex; gap: 16px;">
-            <div class="search-wrapper" style="flex: 1;">
-                <div style="flex: 2; min-width: 200px;">
+        <div class="top-controls">
+            <div class="search-wrapper">
+                <div class="search-box-container">
                     <div class="search-box">
                         <i class="bi bi-search"></i>
                         <input type="text" class="search-input" id="search"
@@ -77,12 +138,12 @@
         </div>
         <div id="groupFullDetail" style="display: none; border-top: 1px solid #eee; padding-top: 20px; margin-top: 20px;">
             <h5 style="font-weight:700; margin-bottom:12px; font-size:13px; color:#555;">2. Thông tin hệ thống</h5>
-            <div style="display: flex; gap: 15px;">
-                <div class="form-group" style="flex: 1;">
+            <div class="sys-info-group">
+                <div class="form-group sys-info-item">
                     <label class="form-label">Ngày tạo</label>
                     <input id="fNgayTao" class="form-input" disabled style="background: #f9fafb; color: #666;">
                 </div>
-                <div class="form-group" style="flex: 1;">
+                <div class="form-group sys-info-item">
                     <label class="form-label">Ngày sửa</label>
                     <input id="fNgaySua" class="form-input" disabled style="background: #f9fafb; color: #666;">
                 </div>
