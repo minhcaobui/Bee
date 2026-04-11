@@ -1,4 +1,4 @@
-package com.example.bee.config;
+package com.example.bee.configs;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;

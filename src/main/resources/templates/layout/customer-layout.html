@@ -1021,20 +1021,16 @@
         if (!message) return;
 
         inputField.value = '';
-
         const chatBody = document.getElementById('chat-body');
         const typingIndicator = document.getElementById('typing-indicator');
 
-        // Hiện tin nhắn của khách
         const userMsgHtml = `<div class="chat-msg user">${message}</div>`;
         typingIndicator.insertAdjacentHTML('beforebegin', userMsgHtml);
         chatBody.scrollTop = chatBody.scrollHeight;
 
-        // Hiện chữ "Đang gõ..."
         typingIndicator.style.display = 'block';
 
         try {
-            // GỌI XUỐNG API CỦA SPRING BOOT MÀ BẠN VỪA TẠO LÚC NÃY
             const response = await fetch('/api/chatbot/ask', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1042,12 +1038,15 @@
             });
 
             const data = await response.json();
-
-            // Tắt chữ "Đang gõ..."
             typingIndicator.style.display = 'none';
 
-            // In câu trả lời của AI ra màn hình
-            const botMsgHtml = `<div class="chat-msg bot">${data.reply}</div>`;
+            // 🌟 BỔ SUNG BƯỚC GIẢI MÃ HTML TẠI ĐÂY
+            let decoder = document.createElement('textarea');
+            decoder.innerHTML = data.reply;
+            let finalReply = decoder.value;
+
+            // In câu trả lời đã được giải mã ra màn hình
+            const botMsgHtml = `<div class="chat-msg bot">${finalReply}</div>`;
             typingIndicator.insertAdjacentHTML('beforebegin', botMsgHtml);
             chatBody.scrollTop = chatBody.scrollHeight;
 

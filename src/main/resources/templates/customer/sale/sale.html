@@ -856,7 +856,7 @@
                 const secondary = vouchers.slice(1);
 
                 function buildTitle(v) {
-                    const isPercent = v.loaiGiamGia === 'PERCENTAGE' || (v.loaiGiamGia||'').includes('%');
+                    const isPercent = v.loaiGiamGia === 'PERCENT' || (v.loaiGiamGia||'').includes('%');
                     const val = v.giaTriGiamGia || 0;
                     const cap = v.giaTriGiamGiaToiDa;
                     const minOrder = v.dieuKien || 0;

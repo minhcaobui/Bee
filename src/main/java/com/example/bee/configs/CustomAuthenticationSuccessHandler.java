@@ -1,4 +1,4 @@
-package com.example.bee.config;
+package com.example.bee.configs;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

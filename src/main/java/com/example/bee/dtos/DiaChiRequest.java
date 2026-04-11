@@ -1,4 +1,4 @@
-package com.example.bee.dto;
+package com.example.bee.dtos;
 
 import lombok.Data;
 

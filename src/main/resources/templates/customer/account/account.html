@@ -171,18 +171,6 @@
         .detail-product-table td { padding: 20px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
         .detail-prod-img { width: 60px; aspect-ratio: 3/4; object-fit: cover; border-radius: 0px; margin-right: 15px; border: 1px solid rgba(0,0,0,0.05);}
 
-        @media (max-width: 900px) {
-            .account-layout { grid-template-columns: 1fr; }
-            .account-sidebar { position: static; padding: 32px 0; border-right: none; border-bottom: 1px solid rgba(0,0,0,0.07); }
-            .account-content { padding: 40px 24px; }
-            .account-overview-grid { grid-template-columns: 1fr 1fr; }
-            .account-form-grid { grid-template-columns: 1fr; }
-            .account-form-field.full { grid-column: span 1; }
-            .order-timeline-step:not(:last-child)::after { display: none; }
-            .orders-filter-bar { overflow-x: auto; }
-            .detail-info-grid { grid-template-columns: 1fr; }
-        }
-
         .guest-divider { margin: 35px 0 25px; width: 100%; display: flex; align-items: center; text-align: center; color: var(--muted); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; }
         .guest-divider::before, .guest-divider::after { content: ''; flex: 1; border-bottom: 1px solid rgba(0,0,0,0.08); }
         .guest-divider:not(:empty)::before { margin-right: 15px; }
@@ -337,53 +325,80 @@
         }
 
         /* ── RESPONSIVE TẤT CẢ CHO MOBILE ── */
-        @media (max-width: 600px) {
-            #guest-view {
-                padding: 40px 15px;
-            }
-            .guest-container {
-                padding: 40px 15px; /* Giảm padding để khung vừa với màn hình đt */
-            }
-            .guest-title {
-                font-size: 26px;
-            }
-            .guest-actions {
-                flex-direction: column;
-                gap: 12px;
-            }
-            .guest-btn-login,
-            .guest-btn-shop {
-                width: 100%;
-            }
-            .guest-track-wrap {
-                flex-direction: column;
-                gap: 10px;
-            }
-            .guest-track-input,
-            .guest-track-btn {
-                width: 100%;
-                padding: 16px;
-            }
+        @media (max-width: 900px) {
+            .account-layout { grid-template-columns: 1fr; }
+            .account-sidebar { position: static; padding: 32px 24px; border-right: none; border-bottom: 1px solid rgba(0,0,0,0.07); }
+            .account-content { padding: 40px 15px; }
 
-            /* Gập khung thông tin khách hàng & hóa đơn thành 1 cột dọc */
-            .guest-track-info-grid {
-                grid-template-columns: 1fr !important;
-                gap: 15px !important;
-                padding: 15px !important;
-            }
-
-            /* Thu nhỏ padding của toàn bộ khung kết quả tra cứu */
-            .guest-track-result {
-                padding: 15px !important;
-            }
-
-            /* Ngăn bảng sản phẩm bị tràn ra ngoài màn hình */
-            .detail-product-table {
-                display: block;
-                width: 100%;
+            /* Dàn lại Sidebar ngang (Menu cuộn) */
+            .account-nav {
+                display: flex;
                 overflow-x: auto;
-                white-space: nowrap; /* Bật cuộn ngang nếu tên sản phẩm quá dài */
+                white-space: nowrap;
+                border-bottom: 1px solid rgba(0,0,0,0.08);
+                -webkit-overflow-scrolling: touch;
             }
+            .account-nav::-webkit-scrollbar { display: none; } /* Ẩn thanh cuộn trên mobile */
+            .nav-item-wrapper { display: inline-block; }
+            .account-nav-btn {
+                padding: 12px 15px;
+                border-left: none;
+                border-bottom: 2px solid transparent;
+                background: none !important;
+            }
+            .account-nav-btn.active {
+                border-bottom-color: var(--accent);
+                color: var(--accent);
+                background: none !important;
+            }
+            .account-nav-logout {
+                margin-top: 15px;
+                padding: 15px 0 0 0;
+                justify-content: center;
+                display: flex;
+            }
+
+            /* Các Card Thống Kê / Đơn Hàng */
+            .account-overview-grid { grid-template-columns: 1fr; gap: 15px; margin-bottom: 30px;}
+            .account-stat-card { border: 1px solid rgba(0,0,0,0.05); }
+
+            /* Bẻ Form nhập liệu thành 1 cột */
+            .account-form-grid { grid-template-columns: 1fr; gap: 15px; }
+            .account-form-field.full { grid-column: span 1; }
+
+            /* Bộ lọc đơn hàng (Ngang) */
+            .orders-filter-bar {
+                overflow-x: auto;
+                white-space: nowrap;
+                -webkit-overflow-scrolling: touch;
+                padding-bottom: 5px;
+            }
+            .orders-filter-bar::-webkit-scrollbar { height: 4px; }
+            .orders-filter-bar::-webkit-scrollbar-thumb { background: var(--gray-300); }
+
+            /* Bảng sản phẩm trong Chi tiết đơn hàng */
+            .detail-product-table { display: block; width: 100%; overflow-x: auto; white-space: nowrap; }
+
+            /* Thông tin chi tiết đơn hàng (2 cột -> 1 cột) */
+            .detail-info-grid { grid-template-columns: 1fr !important; gap: 20px !important; padding: 20px !important;}
+
+            /* Nút hiển thị thông tin nhanh (Timeline line mờ) */
+            .order-timeline-step:not(:last-child)::after { display: none; }
+
+            /* Sửa lại lưới sản phẩm yêu thích (Wishlist) */
+            .wishlist-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 15px 10px !important;}
+
+            /* Các thành phần Guest View */
+            #guest-view { padding: 40px 15px; }
+            .guest-container { padding: 40px 15px; }
+            .guest-title { font-size: 26px; }
+            .guest-actions { flex-direction: column; gap: 12px; }
+            .guest-btn-login, .guest-btn-shop { width: 100%; }
+            .guest-track-wrap { flex-direction: column; gap: 10px; }
+            .guest-track-input, .guest-track-btn { width: 100%; padding: 16px; }
+
+            .guest-track-info-grid { grid-template-columns: 1fr !important; gap: 15px !important; padding: 15px !important; }
+            .guest-track-result { padding: 15px !important; }
         }
 
         /* Style cho nút Accordion (chỉ icon) */
@@ -1148,7 +1163,7 @@
                 } else if (actionType === 'profile') {
                     title = "Lưu thay đổi";
                     message = "Bạn có chắc chắn muốn cập nhật thông tin cá nhân?";
-                    confirmBtnText = "Lưu thông tin";
+                    confirmBtnText = "Lưu thông margin";
                     iconHtml = '<i class="bi bi-person-check" style="font-size: 32px; color: var(--accent);"></i>';
                     btnColor = "var(--accent)";
                     actionFunc = () => this.updateProfile();
