@@ -15,11 +15,11 @@ public class UploadApi {
 
     @PostMapping
     public ResponseEntity<?> taiLen(@RequestParam("file") MultipartFile file) {
-        return uploadService.upload(file);
+        return uploadService.taiLen(file);
     }
 
     @DeleteMapping
     public ResponseEntity<?> xoaAnh(@RequestParam("url") String url) {
-        return uploadService.deleteImage(url);
+        return uploadService.xoaAnh(url);
     }
 }

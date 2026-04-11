@@ -16,19 +16,19 @@ import java.util.Map;
 public class GhnService {
 
     @Value("${ghn.api.url.leadtime}")
-    private String ghnLeadtimeUrl;
+    private String urlThoiGianGiaoHangGhn;
 
     @Value("${ghn.api.token}")
-    private String ghnToken;
+    private String maXacThucGhn;
 
     @Value("${ghn.shop.id}")
-    private Integer ghnShopId;
+    private Integer idCuaHangGhn;
 
     @Value("${ghn.from.district.id}")
-    private Integer fromDistrictId;
+    private Integer idQuanHuyenGui;
 
     @Value("${ghn.from.ward.code}")
-    private String fromWardCode;
+    private String maPhuongXaGui;
 
     // Sử dụng RestTemplate mặc định của Spring
     private final RestTemplate restTemplate;
@@ -40,48 +40,48 @@ public class GhnService {
     /**
      * Tính toán ngày dự kiến nhận hàng từ GHN
      *
-     * @param toDistrictId ID Quận/Huyện của khách
-     * @param toWardCode   Mã Phường/Xã của khách
-     * @param serviceId    ID Dịch vụ giao hàng (VD: 53320 cho Standard, 53321 cho Nhanh...)
+     * @param idQuanHuyenNhan ID Quận/Huyện của khách
+     * @param maPhuongXaNhan  Mã Phường/Xã của khách
+     * @param idDichVu        ID Dịch vụ giao hàng (VD: 53320 cho Standard, 53321 cho Nhanh...)
      * @return java.util.Date ngày dự kiến nhận
      */
-    public Date calculateExpectedDeliveryDate(Integer toDistrictId, String toWardCode, Integer serviceId) {
+    public Date tinhNgayNhanHangDuKien(Integer idQuanHuyenNhan, String maPhuongXaNhan, Integer idDichVu) {
         try {
             // 1. Khởi tạo Headers theo yêu cầu của GHN
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Content-Type", "application/json");
-            headers.set("Token", ghnToken);
-            headers.set("ShopId", String.valueOf(ghnShopId));
+            HttpHeaders tieuDe = new HttpHeaders();
+            tieuDe.set("Content-Type", "application/json");
+            tieuDe.set("Token", maXacThucGhn);
+            tieuDe.set("ShopId", String.valueOf(idCuaHangGhn));
 
             // 2. Khởi tạo Body Payload
-            Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("from_district_id", fromDistrictId);
-            requestBody.put("from_ward_code", fromWardCode);
-            requestBody.put("to_district_id", toDistrictId);
-            requestBody.put("to_ward_code", toWardCode);
-            requestBody.put("service_id", serviceId);
+            Map<String, Object> duLieuGui = new HashMap<>();
+            duLieuGui.put("from_district_id", idQuanHuyenGui);
+            duLieuGui.put("from_ward_code", maPhuongXaGui);
+            duLieuGui.put("to_district_id", idQuanHuyenNhan);
+            duLieuGui.put("to_ward_code", maPhuongXaNhan);
+            duLieuGui.put("service_id", idDichVu);
 
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+            HttpEntity<Map<String, Object>> thucThe = new HttpEntity<>(duLieuGui, tieuDe);
 
             // 3. Gọi API POST
-            ResponseEntity<Map> response = restTemplate.exchange(
-                    ghnLeadtimeUrl,
+            ResponseEntity<Map> phanHoi = restTemplate.exchange(
+                    urlThoiGianGiaoHangGhn,
                     HttpMethod.POST,
-                    entity,
+                    thucThe,
                     Map.class
             );
 
             // 4. Bóc tách dữ liệu JSON trả về
-            Map<String, Object> responseBody = response.getBody();
-            if (responseBody != null && responseBody.get("code").equals(200)) {
-                Map<String, Object> data = (Map<String, Object>) responseBody.get("data");
-                if (data != null && data.get("leadtime") != null) {
+            Map<String, Object> noiDungPhanHoi = phanHoi.getBody();
+            if (noiDungPhanHoi != null && noiDungPhanHoi.get("code").equals(200)) {
+                Map<String, Object> duLieu = (Map<String, Object>) noiDungPhanHoi.get("data");
+                if (duLieu != null && duLieu.get("leadtime") != null) {
 
                     // GHN trả về Unix Timestamp (tính bằng giây). Trong Java, Date dùng mili-giây
-                    long leadtimeSeconds = Long.parseLong(data.get("leadtime").toString());
-                    long leadtimeMillis = leadtimeSeconds * 1000L;
+                    long thoiGianGiaoGiay = Long.parseLong(duLieu.get("leadtime").toString());
+                    long thoiGianGiaoMiliGiay = thoiGianGiaoGiay * 1000L;
 
-                    return new Date(leadtimeMillis);
+                    return new Date(thoiGianGiaoMiliGiay);
                 }
             }
         } catch (Exception e) {

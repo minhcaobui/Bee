@@ -17,40 +17,58 @@ public class CommonApi {
 
     private final CommonService commonService;
 
-    // --- CÁC HÀM XỬ LÝ OTP CHUNG CHO CẢ KHÁCH HÀNG & NHÂN VIÊN ---
+    // --- CÁC HÀM XỬ LÝ OTP & KIỂM TRA DỮ LIỆU ---
+
     @PostMapping("/gui-otp")
     public ResponseEntity<?> guiOtp(@RequestParam String email) {
         return commonService.guiOtp(email);
     }
 
     @PostMapping("/xac-thuc-otp")
-    public ResponseEntity<?> xacThucOtp(@RequestParam String email, @RequestParam String otp) {
-        return commonService.xacThucOtp(email, otp);
+    public ResponseEntity<?> xacThucOtp(@RequestParam String email, @RequestParam String maXacThuc) {
+        return commonService.xacThucOtp(email, maXacThuc);
     }
 
-    // --- CÁC HÀM TIỆN ÍCH DÙNG CHUNG (TÌM KIẾM, MÃ GIẢM GIÁ...) ---
+    @GetMapping("/kiem-tra-email")
+    public ResponseEntity<?> kiemTraEmail(
+            @RequestParam String email,
+            @RequestParam(required = false) Integer id,
+            @RequestParam(required = false, defaultValue = "KHACH_HANG") String loaiTaiKhoan) {
+        return commonService.kiemTraEmail(email, id, loaiTaiKhoan);
+    }
+
+    @GetMapping("/kiem-tra-sdt")
+    public ResponseEntity<?> kiemTraSdt(
+            @RequestParam String soDienThoai,
+            @RequestParam(required = false) Integer id,
+            @RequestParam(required = false, defaultValue = "KHACH_HANG") String loaiTaiKhoan) {
+        return commonService.kiemTraSdt(soDienThoai, id, loaiTaiKhoan);
+    }
+
+    // --- CÁC HÀM TIỆN ÍCH DÙNG CHUNG ---
+
     @GetMapping("/san-pham/tim-kiem")
     public ResponseEntity<List<SanPhamChiTiet>> timKiemSanPham(
-            @RequestParam(required = false, defaultValue = "") String q,
-            @RequestParam(required = false) Integer color,
-            @RequestParam(required = false) Integer size) {
-        return ResponseEntity.ok(commonService.searchProductsForCheckout(q, color, size));
+            @RequestParam(required = false, defaultValue = "") String tuKhoa,
+            @RequestParam(required = false) Integer idMauSac,
+            @RequestParam(required = false) Integer idKichThuoc) {
+        return ResponseEntity.ok(commonService.timKiemSanPhamChoThanhToan(tuKhoa, idMauSac, idKichThuoc));
     }
 
     @GetMapping("/thuoc-tinh")
     public ResponseEntity<Map<String, Object>> layThuocTinh() {
-        return ResponseEntity.ok(commonService.getAttributes());
+        return ResponseEntity.ok(commonService.layThuocTinh());
     }
 
     @GetMapping("/khach-hang/tim-kiem")
-    public ResponseEntity<List<KhachHang>> timKiemKhachHang(@RequestParam String q) {
-        return ResponseEntity.ok(commonService.searchCustomers(q));
+    public ResponseEntity<List<KhachHang>> timKiemKhachHang(@RequestParam String tuKhoa) {
+        return ResponseEntity.ok(commonService.timKiemKhachHang(tuKhoa));
     }
 
     @PostMapping("/khach-hang")
-    public ResponseEntity<?> taoMoiKhachHang(@RequestBody KhachHang kh) {
+    public ResponseEntity<?> taoMoiKhachHangNhanh(@RequestBody KhachHang kh) {
         try {
-            return ResponseEntity.ok(commonService.createCustomerFast(kh));
+            return ResponseEntity.ok(commonService.taoMoiKhachHangNhanh(kh));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         } catch (Exception e) {
@@ -59,9 +77,9 @@ public class CommonApi {
     }
 
     @PostMapping("/ma-giam-gia/ap-dung")
-    public ResponseEntity<?> apDungMaGiamGia(@RequestBody Map<String, Object> payload) {
+    public ResponseEntity<?> apDungMaGiamGia(@RequestBody Map<String, Object> duLieu) {
         try {
-            return ResponseEntity.ok(commonService.applyVoucher(payload));
+            return ResponseEntity.ok(commonService.apDungMaGiamGia(duLieu));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
@@ -69,6 +87,6 @@ public class CommonApi {
 
     @GetMapping("/khach-hang/{id}/ma-giam-gia-da-dung")
     public ResponseEntity<?> layMaGiamGiaDaDungCuaKhach(@PathVariable Integer id) {
-        return ResponseEntity.ok(commonService.getCustomerUsedVouchers(id));
+        return ResponseEntity.ok(commonService.layMaGiamGiaDaDungCuaKhach(id));
     }
 }

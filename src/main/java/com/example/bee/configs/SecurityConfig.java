@@ -27,62 +27,77 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        // 1. PUBLIC ROUTES (Ai cũng truy cập được)
                         .requestMatchers("/", "/register", "/login", "/forgot-password/**", "/css/**", "/js/**", "/images/**", "/customer/**").permitAll()
 
+                        // Các API công khai
                         .requestMatchers(
-                                "/api/products/**",
+                                "/api/san-pham/**",
                                 "/api/danh-muc/**",
+                                "/api/hang/**",
+                                "/api/chat-lieu/**",
                                 "/api/mau-sac/**",
                                 "/api/kich-thuoc/**",
                                 "/api/hoa-don/tra-cuu/**",
-                                "/api/hoa-don/checkout",
-                                "/api/hoa-don/check-employee",
-                                "/api/vouchers/active",
+                                "/api/hoa-don/thanh-toan",
+                                "/api/ma-giam-gia/hoat-dong",
                                 "/api/khuyen-mai/**",
-                                "/api/chatbot/**",
-                                "/api/gio-hang/**"
+                                "/api/tro-ly-ao/**",
+                                "/api/gio-hang/**",
+                                "/api/chung/**",        // Cho phép gọi các hàm tiện ích, gửi OTP chung
+                                "/api/thanh-toan/**"    // Cực kỳ quan trọng để Momo/VNPay gọi Callback thành công
                         ).permitAll()
 
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/khach-hang/reviews/**").permitAll()
+                        // Cho phép xem đánh giá sản phẩm mà không cần đăng nhập
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/khach-hang/danh-gia/**").permitAll()
 
+                        // 2. CHỈ DÀNH CHO ADMIN
                         .requestMatchers(
                                 "/dashboards/**",
                                 "/returns/**",
                                 "/api/thong-ke/**",
+                                "/api/chuc-vu/**",      // Quản lý chức vụ
                                 "/staff/**"
                         ).hasAuthority("ROLE_ADMIN")
 
-                        .requestMatchers(
-                                "/api/nhan-vien/my-profile",
-                                "/api/nhan-vien/change-password"
-                        ).hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
-
+                        // Quyền riêng cho Admin thao tác trên toàn bộ nhân viên
                         .requestMatchers("/api/nhan-vien/**").hasAuthority("ROLE_ADMIN")
 
+                        // 3. ADMIN VÀ STAFF CÓ THỂ XEM/SỬA HỒ SƠ CỦA CHÍNH MÌNH
                         .requestMatchers(
-                                "/api/upload",
-                                "/api/khach-hang/reviews/**",
-                                "/api/khach-hang/wishlist/**",
-                                "/api/khach-hang/my-profile",
-                                "/api/khach-hang/change-password",
-                                "/api/hoa-don/my-orders",
-                                "/api/vouchers/**",
-                                "/api/khach-hang/addresses/**",
-                                "/api/khach-hang/my-reviews/**",
-                                "/api/hoa-don/my-used-vouchers/**",
+                                "/api/nhan-vien/ho-so-cua-toi",
+                                "/api/nhan-vien/doi-mat-khau"
+                        ).hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
+
+                        // 4. API CHO NGƯỜI DÙNG ĐÃ ĐĂNG NHẬP (Customer, Staff, Admin đều dùng được)
+                        .requestMatchers(
+                                "/api/tai-len",
+                                "/api/khach-hang/danh-gia/**",
+                                "/api/khach-hang/yeu-thich/**",
+                                "/api/khach-hang/ho-so-cua-toi",
+                                "/api/khach-hang/doi-mat-khau-ca-nhan",
+                                "/api/hoa-don/cua-toi",
+                                "/api/ma-giam-gia/**",
+                                "/api/khach-hang/dia-chi-ca-nhan/**",
+                                "/api/khach-hang/danh-gia-cua-toi/**",
+                                "/api/hoa-don/voucher-da-dung",
                                 "/api/hoa-don/**",
                                 "/api/thong-bao/**"
                         ).hasAnyAuthority("ROLE_CUSTOMER", "ROLE_STAFF", "ROLE_ADMIN")
 
+                        // 5. CÁC API QUẢN LÝ (Chỉ Admin và Staff mới được thao tác)
                         .requestMatchers(
                                 "/admin/**",
                                 "/products/**",
                                 "/pos/**",
-                                "/api/khach-hang/**",
-                                "/api/reviews/**",
-                                "/api/**"
+                                "/api/ban-hang/**",         // API POS bán hàng
+                                "/api/doi-tra/**",          // API xử lý đổi trả
+                                "/api/khach-hang/**",       // Quản lý khách hàng từ phía Admin
+                                "/api/quan-ly-danh-gia/**", // Quản lý review
+                                "/api/**"                   // Quét toàn bộ các API quản lý còn lại
                         ).hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
 
+                        // Mọi request khác đều phải đăng nhập
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
