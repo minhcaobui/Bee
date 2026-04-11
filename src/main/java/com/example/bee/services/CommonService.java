@@ -79,9 +79,6 @@ public class CommonService {
         } else if (hd.getKhachHang() != null) {
             tenNhan = hd.getKhachHang().getHoTen();
             sdtNhan = hd.getKhachHang().getSoDienThoai();
-        } else if (hd.getTenNguoiNhan() != null) { // Fallback cấu trúc cũ
-            tenNhan = hd.getTenNguoiNhan();
-            sdtNhan = hd.getSdtNhan() != null ? hd.getSdtNhan() : "";
         }
 
         orderInfo.put("tenKhachHang", tenNhan);
