@@ -4,7 +4,6 @@ import com.example.bee.entities.customer.KhachHang;
 import com.example.bee.entities.product.SanPhamChiTiet;
 import com.example.bee.services.CommonService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,41 +11,44 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/common")
+@RequestMapping("/api/chung")
 @RequiredArgsConstructor
 public class CommonApi {
 
     private final CommonService commonService;
 
-    @GetMapping("/invoices/{id}/print-data")
-    public ResponseEntity<?> getInvoicePrintData(@PathVariable Integer id) {
-        try {
-            return ResponseEntity.ok(commonService.getInvoicePrintData(id));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", e.getMessage()));
-        }
+    // --- CÁC HÀM XỬ LÝ OTP CHUNG CHO CẢ KHÁCH HÀNG & NHÂN VIÊN ---
+    @PostMapping("/gui-otp")
+    public ResponseEntity<?> guiOtp(@RequestParam String email) {
+        return commonService.guiOtp(email);
     }
 
-    @GetMapping("/products/search")
-    public ResponseEntity<List<SanPhamChiTiet>> searchProducts(
+    @PostMapping("/xac-thuc-otp")
+    public ResponseEntity<?> xacThucOtp(@RequestParam String email, @RequestParam String otp) {
+        return commonService.xacThucOtp(email, otp);
+    }
+
+    // --- CÁC HÀM TIỆN ÍCH DÙNG CHUNG (TÌM KIẾM, MÃ GIẢM GIÁ...) ---
+    @GetMapping("/san-pham/tim-kiem")
+    public ResponseEntity<List<SanPhamChiTiet>> timKiemSanPham(
             @RequestParam(required = false, defaultValue = "") String q,
             @RequestParam(required = false) Integer color,
             @RequestParam(required = false) Integer size) {
         return ResponseEntity.ok(commonService.searchProductsForCheckout(q, color, size));
     }
 
-    @GetMapping("/attributes")
-    public ResponseEntity<Map<String, Object>> getAttributes() {
+    @GetMapping("/thuoc-tinh")
+    public ResponseEntity<Map<String, Object>> layThuocTinh() {
         return ResponseEntity.ok(commonService.getAttributes());
     }
 
-    @GetMapping("/customers/search")
-    public ResponseEntity<List<KhachHang>> searchCustomers(@RequestParam String q) {
+    @GetMapping("/khach-hang/tim-kiem")
+    public ResponseEntity<List<KhachHang>> timKiemKhachHang(@RequestParam String q) {
         return ResponseEntity.ok(commonService.searchCustomers(q));
     }
 
-    @PostMapping("/customers")
-    public ResponseEntity<?> createCustomer(@RequestBody KhachHang kh) {
+    @PostMapping("/khach-hang")
+    public ResponseEntity<?> taoMoiKhachHang(@RequestBody KhachHang kh) {
         try {
             return ResponseEntity.ok(commonService.createCustomerFast(kh));
         } catch (IllegalArgumentException e) {
@@ -56,8 +58,8 @@ public class CommonApi {
         }
     }
 
-    @PostMapping("/vouchers/apply")
-    public ResponseEntity<?> applyVoucher(@RequestBody Map<String, Object> payload) {
+    @PostMapping("/ma-giam-gia/ap-dung")
+    public ResponseEntity<?> apDungMaGiamGia(@RequestBody Map<String, Object> payload) {
         try {
             return ResponseEntity.ok(commonService.applyVoucher(payload));
         } catch (IllegalArgumentException e) {
@@ -65,8 +67,8 @@ public class CommonApi {
         }
     }
 
-    @GetMapping("/customers/{id}/used-vouchers")
-    public ResponseEntity<?> getCustomerUsedVouchers(@PathVariable Integer id) {
+    @GetMapping("/khach-hang/{id}/ma-giam-gia-da-dung")
+    public ResponseEntity<?> layMaGiamGiaDaDungCuaKhach(@PathVariable Integer id) {
         return ResponseEntity.ok(commonService.getCustomerUsedVouchers(id));
     }
 }
