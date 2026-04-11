@@ -25,7 +25,9 @@ public class ChatbotApi {
 
     // 🌟 LƯU Ý: CHỈ COPY ĐOẠN CHỮ API KEY, KHÔNG COPY DÍNH ĐỊNH DẠNG LINK
     private final String[] API_KEYS = {
-            "AIzaSyB0ZZfC88hr1fGAU0TMZH7Ribx1bi0JcxQ"
+            "AIzaSyDEFcb-eS-6ksIMVypn38nkgoPXYcn44X4444",
+            "AIzaSyCTRuuWMWKpxg3LWDYcEq-0bJRORQiV5i4444",
+            "AIzaSyBcFi73Vv1vu82wOPo9HhejtLvTi9JBO_0444"
     };
 
     @Autowired

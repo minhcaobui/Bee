@@ -1,7 +1,7 @@
 package com.example.bee.controllers.api.product;
 
-import com.example.bee.dto.SanPhamRequest;
-import com.example.bee.dto.VariantRequest;
+import com.example.bee.dtos.SanPhamRequest;
+import com.example.bee.dtos.VariantRequest;
 import com.example.bee.entities.product.HinhAnhSanPham;
 import com.example.bee.entities.product.SanPham;
 import com.example.bee.entities.product.SanPhamChiTiet;

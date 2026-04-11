@@ -1,8 +1,7 @@
-package com.example.bee.config;
+package com.example.bee.configs;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -28,7 +27,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/register", "/login", "/forgot-password/**", "/css/**", "/js/**", "/images/**", "/customer/**").permitAll()
+                        .requestMatchers("/", "/register", "/login", "/forgot-password/**", "/css/**", "/js/**", "/images/**", "/customer/**").permitAll()
 
                         .requestMatchers(
                                 "/api/products/**",

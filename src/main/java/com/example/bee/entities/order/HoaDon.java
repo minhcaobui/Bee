@@ -34,17 +34,17 @@ public class HoaDon {
 
     private BigDecimal giaTong;
 
-    @Column(name = "ten_nguoi_nhan")
-    private String tenNguoiNhan;
-
-    @Column(name = "sdt_nhan")
-    private String sdtNhan;
-
-    @Column(name = "dia_chi_giao_hang", columnDefinition = "NVARCHAR(MAX)")
-    private String diaChiGiaoHang;
+    // Cột JSON lưu trữ thông tin nhận hàng
+    @Column(name = "thong_tin_giao_hang", columnDefinition = "NVARCHAR(MAX)")
+    @Convert(converter = com.example.bee.converters.ThongTinGiaoHangConverter.class)
+    private ThongTinGiaoHang thongTinGiaoHang;
 
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String ghiChu;
+
+    // Phân loại hình thức: GIAO_TAN_NOI hoặc NHAN_TAI_CUA_HANG
+    @Column(name = "hinh_thuc_giao_hang", length = 50)
+    private String hinhThucGiaoHang;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_nhan_vien")
@@ -72,6 +72,22 @@ public class HoaDon {
     @Temporal(TemporalType.TIMESTAMP)
     private Date ngayThanhToan;
 
+    // Các cột thời gian cho API Vận chuyển và Lấy tại cửa hàng
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "ngay_nhan_hang_du_kien")
+    private Date ngayNhanHangDuKien;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "ngay_hen_lay_hang")
+    private Date ngayHenLayHang;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "ngay_hang_san_sang")
+    private Date ngayHangSanSang;
+
     @PrePersist
     public void prePersist() {
         this.ngayTao = new Date();
@@ -81,6 +97,7 @@ public class HoaDon {
 
         if (this.giaTamThoi == null) this.giaTamThoi = BigDecimal.ZERO;
         if (this.giaTong == null) this.giaTong = BigDecimal.ZERO;
+        if (this.hinhThucGiaoHang == null) this.hinhThucGiaoHang = "GIAO_TAN_NOI";
     }
 
     @OneToMany(mappedBy = "hoaDon")

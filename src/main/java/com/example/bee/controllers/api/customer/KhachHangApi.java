@@ -1,8 +1,8 @@
 package com.example.bee.controllers.api.customer;
 
-import com.example.bee.dto.DanhGiaRequest;
-import com.example.bee.dto.DiaChiRequest;
-import com.example.bee.dto.KhachHangRequest;
+import com.example.bee.dtos.DanhGiaRequest;
+import com.example.bee.dtos.DiaChiRequest;
+import com.example.bee.dtos.KhachHangRequest;
 import com.example.bee.entities.account.TaiKhoan;
 import com.example.bee.entities.account.VaiTro;
 import com.example.bee.entities.cart.GioHang;

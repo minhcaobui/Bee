@@ -1,4 +1,4 @@
-package com.example.bee.config;
+package com.example.bee.configs;
 
 import com.example.bee.entities.staff.NhanVien;
 import com.example.bee.repositories.staff.NhanVienRepository;
