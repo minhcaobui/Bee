@@ -18,19 +18,19 @@ public class UploadService {
 
     private final Cloudinary cloudinary;
 
-    public ResponseEntity<?> upload(MultipartFile file) {
-        if (file.isEmpty()) {
+    public ResponseEntity<?> taiLen(MultipartFile tep) {
+        if (tep.isEmpty()) {
             return ResponseEntity.badRequest()
                     .body(Collections.singletonMap("message", "File trống!"));
         }
-        String contentType = file.getContentType();
-        if (contentType == null || !contentType.startsWith("image/")) {
+        String loaiTep = tep.getContentType();
+        if (loaiTep == null || !loaiTep.startsWith("image/")) {
             return ResponseEntity.badRequest()
                     .body(Collections.singletonMap("message", "Chỉ chấp nhận file ảnh!"));
         }
         try {
-            Map result = cloudinary.uploader().upload(
-                    file.getBytes(),
+            Map ketQua = cloudinary.uploader().upload(
+                    tep.getBytes(),
                     ObjectUtils.asMap(
                             "folder", "beemate/products",
                             "resource_type", "image",
@@ -38,40 +38,40 @@ public class UploadService {
                     )
             );
 
-            String url = (String) result.get("secure_url");
-            return ResponseEntity.ok(Collections.singletonMap("url", url));
+            String duongDan = (String) ketQua.get("secure_url");
+            return ResponseEntity.ok(Collections.singletonMap("url", duongDan));
         } catch (IOException e) {
             return ResponseEntity.internalServerError()
                     .body(Collections.singletonMap("message", "Upload thất bại: " + e.getMessage()));
         }
     }
 
-    public ResponseEntity<?> deleteImage(String url) {
+    public ResponseEntity<?> xoaAnh(String duongDan) {
         try {
-            String publicId = extractPublicId(url);
-            if (publicId == null) {
+            String idCongKhai = tachPublicId(duongDan);
+            if (idCongKhai == null) {
                 return ResponseEntity.badRequest().body(Collections.singletonMap("message", "URL không hợp lệ"));
             }
-            cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+            cloudinary.uploader().destroy(idCongKhai, ObjectUtils.emptyMap());
             return ResponseEntity.ok(Collections.singletonMap("message", "Đã xóa ảnh trên mây thành công"));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(Collections.singletonMap("message", "Lỗi xóa ảnh: " + e.getMessage()));
         }
     }
 
-    private String extractPublicId(String url) {
+    private String tachPublicId(String duongDan) {
         try {
-            String[] parts = url.split("/upload/");
-            if (parts.length < 2) return null;
-            String afterUpload = parts[1];
-            if (afterUpload.matches("^v\\d+/.*")) {
-                afterUpload = afterUpload.replaceFirst("^v\\d+/", "");
+            String[] cacPhan = duongDan.split("/upload/");
+            if (cacPhan.length < 2) return null;
+            String sauUpload = cacPhan[1];
+            if (sauUpload.matches("^v\\d+/.*")) {
+                sauUpload = sauUpload.replaceFirst("^v\\d+/", "");
             }
-            int lastDotIndex = afterUpload.lastIndexOf(".");
-            if (lastDotIndex != -1) {
-                afterUpload = afterUpload.substring(0, lastDotIndex);
+            int viTriChamCuoi = sauUpload.lastIndexOf(".");
+            if (viTriChamCuoi != -1) {
+                sauUpload = sauUpload.substring(0, viTriChamCuoi);
             }
-            return afterUpload;
+            return sauUpload;
         } catch (Exception e) {
             return null;
         }
