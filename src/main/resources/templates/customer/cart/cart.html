@@ -546,6 +546,12 @@
                 this.render();
             },
 
+            getAvailableStock: function(variant) {
+                if (!variant) return 0;
+                if (variant.soLuongKhaDung !== undefined) return variant.soLuongKhaDung;
+                return Math.max(0, (variant.soLuong || 0) - (variant.soLuongTamGiu || 0));
+            },
+
             getColorHex: function(name) {
                 if(!name) return '#000';
                 const n = name.toLowerCase().trim();
@@ -556,29 +562,55 @@
             loadCartData: async function() {
                 try {
                     const rawItems = await window.CartHelper.getCart();
+
+                    // 🌟 BƯỚC MỚI: Quét qua tất cả item để gom ID sản phẩm cần kiểm tra kho
+                    const productIdsToFetch = [...new Set(rawItems.map(item => item.productId || item.idSanPham))].filter(Boolean);
+                    const stockCache = {}; // Lưu trữ số lượng thực tế theo ID Biến Thể
+
+                    // Gọi API lấy thông tin kho mới nhất của các sản phẩm đang có trong giỏ
+                    for (let pid of productIdsToFetch) {
+                        try {
+                            const varRes = await fetch(`/api/products/${pid}/variants`);
+                            if (varRes.ok) {
+                                const variants = await varRes.json();
+                                variants.forEach(v => {
+                                    // 🌟 TÍNH TỒN KHO THỰC TẾ: soLuong - soLuongTamGiu
+                                    stockCache[v.id] = v.soLuongKhaDung !== undefined ? v.soLuongKhaDung : Math.max(0, v.soLuong - (v.soLuongTamGiu || 0));
+                                });
+                            }
+                        } catch (e) {
+                            console.warn("Lỗi đồng bộ kho cho sản phẩm " + pid);
+                        }
+                    }
+
                     this.state.items = rawItems.map(item => {
+                        const variantId = item.idSanPhamChiTiet || item.skuId;
+                        // Cập nhật maxStock theo dữ liệu kho thực tế vừa lấy, nếu không có thì lấy số cũ
+                        const realStock = stockCache[variantId] !== undefined ? stockCache[variantId] : (item.soLuongKhaDung !== undefined ? item.soLuongKhaDung : item.soLuongTonKho);
+
                         if (item.id && String(item.id).startsWith('local_')) {
                             // Định dạng LocalStorage của khách vãng lai
-                            return { ...item, qty: item.soLuongTrongGio };
+                            return { ...item, qty: item.soLuongTrongGio || item.qty, maxStock: realStock };
                         } else {
                             // Định dạng Database của khách đã đăng nhập
                             let parts = item.thuocTinh ? item.thuocTinh.split(' - ') : ['',''];
                             return {
                                 id: item.id,
-                                idSanPhamChiTiet: item.idSanPhamChiTiet,
-                                productId: item.idSanPham,
-                                name: item.tenSanPham,
-                                price: item.giaSauKhuyenMai || item.giaBan,
-                                originalPrice: item.giaBan,
-                                qty: item.soLuongTrongGio,
+                                idSanPhamChiTiet: variantId,
+                                productId: item.idSanPham || item.productId,
+                                name: item.tenSanPham || item.name,
+                                price: item.giaSauKhuyenMai || item.giaBan || item.price,
+                                originalPrice: item.giaBan || item.originalPrice,
+                                qty: item.soLuongTrongGio || item.qty,
                                 colorName: parts[0],
                                 sizeName: parts[1],
-                                maxStock: item.soLuongTonKho,
-                                img: item.hinhAnh,
-                                colorHex: this.getColorHex(parts[0]) // Kế thừa hàm lấy mã màu của bạn
+                                maxStock: realStock, // 🌟 ĐÃ ÁP DỤNG SỐ LƯỢNG THỰC TẾ
+                                img: item.hinhAnh || item.img,
+                                colorHex: this.getColorHex(parts[0] || item.colorName)
                             };
                         }
                     });
+
                     this.render();
                 } catch (e) {
                     console.error("Lỗi tải giỏ hàng:", e);
@@ -874,7 +906,8 @@
                     const img = p.hinhAnhs?.[0]?.url ? this.optImg(p.hinhAnhs[0].url) : '';
                     const imgH = p.hinhAnhs?.length > 1 ? `<img src="${this.optImg(p.hinhAnhs[1].url)}" loading="lazy" class="img-hover" alt="${p.ten}">` : '';
 
-                    const stock = v.reduce((s, x) => s + (x.soLuong || 0), 0);
+                    // 🌟 ĐÃ ÁP DỤNG getAvailableStock VÀO ĐÂY
+                    const stock = v.reduce((s, x) => s + this.getAvailableStock(x), 0);
                     const stockHtml = (stock > 0 && stock <= 20) ? `<div class="stock-low"><div class="stock-pulse"></div>Còn ${stock} sản phẩm</div>` : '';
 
                     let badges = '';
@@ -967,14 +1000,18 @@
                 if (!product) return;
 
                 try {
-                    if (!product._variantsFetched) {
-                        const res = await fetch('/api/products/' + productId + '/variants');
-                        if (!res.ok) throw new Error();
-                        const variants = await res.json();
-                        if (!variants?.length) { window.showToast?.('Sản phẩm đang cập nhật kho', 'warning'); return; }
-                        product.chiTietSanPhams = variants;
-                        product._variantsFetched = true;
+                    // 🌟 BỎ CACHE: LUÔN GỌI API LẤY KHO MỚI NHẤT TỪ SERVER
+                    const res = await fetch('/api/products/' + productId + '/variants');
+                    if (!res.ok) throw new Error();
+                    const variants = await res.json();
+
+                    if (!variants?.length) {
+                        window.showToast?.('Sản phẩm đang cập nhật kho', 'warning');
+                        return;
                     }
+
+                    // Cập nhật lại kho
+                    product.chiTietSanPhams = variants;
 
                     document.getElementById('cart-rec-card-' + productId).classList.add('show-selection');
                     const backdrop = document.getElementById('cart-qa-backdrop');
@@ -982,7 +1019,9 @@
 
                     this.tempSel[productId] = { colorId: null, sizeId: null, sku: null };
                     this.renderSelOpts(productId, 'rc-');
-                } catch { window.showToast?.('Không thể kết nối máy chủ', 'warning'); }
+                } catch {
+                    window.showToast?.('Không thể kết nối máy chủ', 'warning');
+                }
             },
 
             renderSelOpts: function(productId, prefix) {
@@ -1011,7 +1050,8 @@
 
                 let sHtml = '';
                 sizes.forEach(s => {
-                    const avail = !sel.colorId || skus.some(sk => sk.mauSac.id === sel.colorId && sk.kichThuoc.id === s.id && sk.soLuong > 0);
+                    // 🌟 ĐÃ ÁP DỤNG getAvailableStock VÀO ĐÂY
+                    const avail = !sel.colorId || skus.some(sk => sk.mauSac.id === sel.colorId && sk.kichThuoc.id === s.id && this.getAvailableStock(sk) > 0);
                     sHtml += `<button class="qs-size${sel.sizeId===s.id?' active':''}${!avail?' disabled':''}" onclick="window.CartApp.selectAttr(${productId},'size',${s.id},event,'${prefix}')">${s.ten}</button>`;
                 });
                 const sizeEl = document.getElementById(`${prefix}qs-sizes-${productId}`);
@@ -1046,9 +1086,12 @@
                 let newVal = Math.max(1, val + delta);
 
                 const sel = this.tempSel[productId];
-                if (sel && sel.sku && newVal > sel.sku.soLuong) {
-                    if(window.showToast) window.showToast(`Chỉ còn ${sel.sku.soLuong} sản phẩm!`, "warning");
-                    newVal = sel.sku.soLuong;
+                if (sel && sel.sku) {
+                    const availStock = this.getAvailableStock(sel.sku); // 🌟 DÙNG getAvailableStock
+                    if (newVal > availStock) {
+                        if(window.showToast) window.showToast(`Chỉ còn ${availStock} sản phẩm!`, "warning");
+                        newVal = availStock;
+                    }
                 }
                 input.value = newVal;
             },
@@ -1059,16 +1102,18 @@
                 if (!sel?.colorId && !sel?.sizeId) { window.showToast?.('Vui lòng chọn màu sắc và kích cỡ','warning'); return; }
                 if (!sel.colorId) { window.showToast?.('Bạn chưa chọn màu sắc','warning'); return; }
                 if (!sel.sizeId)  { window.showToast?.('Bạn chưa chọn kích cỡ','warning'); return; }
-                if (!sel.sku)     { window.showToast?.('Phiên bản này đang hết hàng','warning'); return; }
+
+                // 🌟 ĐÃ ÁP DỤNG getAvailableStock VÀO ĐÂY
+                if (!sel.sku || this.getAvailableStock(sel.sku) <= 0) {
+                    window.showToast?.('Phiên bản này đang hết hàng','warning'); return;
+                }
 
                 const qty = parseInt(document.getElementById(inputId)?.value) || 1;
                 const sku = sel.sku;
 
-                // Lấy thông tin sản phẩm từ danh sách gợi ý
                 const product = this.state.recommendProducts.find(p => p.id === productId);
 
                 try {
-                    // 🌟 ĐÃ FIX BUG 1: Bổ sung object chứa thông tin sản phẩm cho khách vãng lai
                     await window.CartHelper.add(sku.id, qty, {
                         productId: product.id,
                         name: product.ten,
@@ -1077,7 +1122,7 @@
                         colorName: sku.mauSac.ten,
                         colorHex: sku.mauSac.maMau,
                         sizeName: sku.kichThuoc.ten,
-                        maxStock: sku.soLuong,
+                        maxStock: this.getAvailableStock(sku), // 🌟 Áp dụng tồn kho khả dụng
                         img: sku.hinhAnh || (product.hinhAnhs && product.hinhAnhs.length > 0 ? product.hinhAnhs[0].url : '')
                     });
 

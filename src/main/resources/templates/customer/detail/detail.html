@@ -1409,7 +1409,13 @@
                 }
             },
 
-            selectColor: function(colorId, colorName) {
+            selectColor: async function(colorId, colorName) {
+                // 🌟 REAL-TIME: Tự động "F5 ngầm" kho hàng trước khi xử lý
+                try {
+                    const res = await fetch(`/api/products/${this.state.productId}/variants`);
+                    if (res.ok) this.state.variants = await res.json();
+                } catch(e) {}
+
                 this.state.selectedColorId = colorId;
                 const nameLabel = document.getElementById('dynColorName');
                 nameLabel.innerText = colorName;
@@ -1461,10 +1467,18 @@
                 sizeContainer.innerHTML = html;
             },
 
-            selectSize: function(sizeId, isUnavailable) {
+            selectSize: async function(sizeId, isUnavailable) {
                 if (isUnavailable) return;
+
+                // 🌟 REAL-TIME: Tự động "F5 ngầm" kho hàng trước khi xử lý
+                try {
+                    const res = await fetch(`/api/products/${this.state.productId}/variants`);
+                    if (res.ok) this.state.variants = await res.json();
+                } catch(e) {}
+
                 this.state.selectedSizeId = sizeId;
-                this.renderSizes(); this.updatePriceAndStock();
+                this.renderSizes();
+                this.updatePriceAndStock();
                 document.getElementById('detailQtyInput').value = 1;
             },
 
@@ -1586,17 +1600,36 @@
                     return;
                 }
 
+                // 🌟 REAL-TIME: CHỐT CHẶN CUỐI CÙNG NGAY KHI KHÁCH ĐỊNH BẤM MUA
+                try {
+                    const res = await fetch(`/api/products/${this.state.productId}/variants`);
+                    if (res.ok) this.state.variants = await res.json();
+                } catch(e) {}
+
                 const sku = this.state.variants.find(v =>
                     v.mauSac.id === this.state.selectedColorId &&
                     v.kichThuoc.id === this.state.selectedSizeId
                 );
 
-                if (!sku || sku.soLuong === 0) {
-                    window.showToast?.("Sản phẩm tạm hết hàng!", "warning");
+                // Cập nhật lại giao diện ngay lập tức lỡ kho bị thay đổi
+                this.updatePriceAndStock();
+
+                const availableStock = this.getAvailableStock(sku);
+
+                if (!sku || availableStock <= 0) {
+                    window.showToast?.("Sản phẩm vừa hết hàng, vui lòng chọn phân loại khác!", "warning");
                     return;
                 }
 
-                const inputQty = parseInt(document.getElementById('detailQtyInput').value) || 1;
+                let inputQty = parseInt(document.getElementById('detailQtyInput').value) || 1;
+
+                // Ép lại số lượng nếu khách yêu cầu lớn hơn số hàng còn trong kho mới cập nhật
+                if (inputQty > availableStock) {
+                    window.showToast?.(`Kho hiện chỉ còn ${availableStock} sản phẩm!`, "warning");
+                    document.getElementById('detailQtyInput').value = availableStock;
+                    inputQty = availableStock;
+                }
+
                 const product = this.state.product;
 
                 try {
@@ -1612,17 +1645,17 @@
                             colorName: sku.mauSac.ten,
                             colorHex: sku.mauSac.maMau,
                             sizeName: sku.kichThuoc.ten,
-                            maxStock: sku.soLuong,
+                            maxStock: availableStock, // 🌟 Dùng số kho khả dụng vừa tính
                             img: sku.hinhAnh || (product.hinhAnhs?.[0]?.url || '')
                         };
                         sessionStorage.setItem('bee_buy_now', JSON.stringify([buyNowItem]));
 
-                        // 🌟 ĐÃ SỬA: Bật Popup chọn phương thức nhận hàng thay vì chuyển trang ngay
+                        // Bật Popup chọn phương thức nhận hàng
                         document.getElementById('deliveryModalOverlay').style.display = 'flex';
                         setTimeout(() => { document.querySelector('.delivery-modal').classList.add('open'); }, 10);
 
                     } else {
-                        // Thêm vào giỏ chung
+                        // Thêm vào giỏ
                         await window.CartHelper.add(sku.id, inputQty, {
                             productId: product.id,
                             name: product.ten,
@@ -1631,7 +1664,7 @@
                             colorName: sku.mauSac.ten,
                             colorHex: sku.mauSac.maMau,
                             sizeName: sku.kichThuoc.ten,
-                            maxStock: sku.soLuong,
+                            maxStock: availableStock, // 🌟 Dùng số kho khả dụng vừa tính
                             img: sku.hinhAnh || (product.hinhAnhs?.[0]?.url || '')
                         });
                         window.showToast?.(`Đã thêm ${inputQty} sản phẩm vào giỏ!`, 'success');

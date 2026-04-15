@@ -46,12 +46,6 @@ async function loadModule(moduleName) {
             title = 'QUẢN LÝ HÓA ĐƠN';
             break;
 
-        // 🌟 ROUTE ĐỔI TRẢ MỚI
-        case 'returns':
-            url = '/returns';
-            title = 'QUẢN LÝ ĐỔI TRẢ';
-            break;
-
         case 'catalogs':
             url = '/catalogs';
             title = 'QUẢN LÝ THUỘC TÍNH';
@@ -197,12 +191,6 @@ function executeScripts(container, moduleName) {
         else if (moduleName === 'reviews') {
             if (typeof window.ReviewApp !== 'undefined') {
                 window.ReviewApp.init();
-            }
-        }
-        // 🌟 INIT CHO MODULE ĐỔI TRẢ (Nếu bạn có bọc hàm khởi tạo)
-        else if (moduleName === 'returns') {
-            if (typeof window.ReturnApp !== 'undefined') {
-                window.ReturnApp.init();
             }
         }
     }, 100);

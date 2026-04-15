@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <style>
         /* ==========================================================================
-           CORE STYLES (ĐÃ ĐỒNG BỘ VỚI CATALOG)
+           CORE STYLES
            ========================================================================== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root { --black: #000; --white: #fff; --gray-100: #f4f4f5; --gray-200: #e4e4e7; --gray-300: #d4d4d8; --font-size: 13px; }
@@ -27,15 +27,17 @@
 
         /* BẢNG DỮ LIỆU */
         .table-wrapper { border: 1px solid var(--gray-200); width: 100%; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+        table { width: 100%; border-collapse: collapse; min-width: 1100px; }
         thead th { text-align: left; padding: 12px 15px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #666; background: #fafafa; border-bottom: 1px solid var(--gray-200); white-space: nowrap;}
         tbody td { padding: 10px 15px; border-bottom: 1px solid var(--gray-200); font-size: 13px; vertical-align: middle; }
         tbody tr:hover { background: var(--gray-100); }
 
-        .badge-type { font-size: 10px; padding: 2px 6px; border-radius: 2px; font-weight: 800; text-transform: uppercase; }
-        .type-pos { background: #e0f2fe; color: #0369a1; }
-        .type-online { background: #fef3c7; color: #92400e; }
-        .badge-status { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; text-transform: uppercase; color: #fff; white-space: nowrap; display: inline-block; }
+        .badge-type { font-size: 10px; padding: 4px 6px; border-radius: 4px; font-weight: 800; text-transform: uppercase; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; border: 1px solid transparent;}
+        .type-pos { background: #e0f2fe; color: #0369a1; border-color: #bae6fd; }
+        .type-online-home { background: #fefce8; color: #a16207; border-color: #fde047; }
+        .type-online-store { background: #f3e8ff; color: #6d28d9; border-color: #ddd6fe; }
+
+        .badge-status { padding: 5px 10px; border-radius: 4px; font-size: 10px; font-weight: 800; text-transform: uppercase; color: #fff; white-space: nowrap; display: inline-block; }
 
         /* KHU VỰC TÌM KIẾM & BỘ LỌC */
         .search-section { background: #f8f9fa; padding: 18px 20px; border: 1px solid var(--gray-200); border-radius: 4px; margin-bottom: 20px; }
@@ -96,97 +98,43 @@
         .detail-card-body { padding: 15px; }
 
         .timeline-horizontal { display: flex; justify-content: space-between; position: relative; padding: 20px 0 10px 0; }
-        .timeline-horizontal::before { content: ''; position: absolute; top: 35px; left: 10%; right: 10%; height: 2px; background: #007bff; z-index: 1; transition: 0.3s; }
+        .timeline-horizontal::before { content: ''; position: absolute; top: 35px; left: 10%; right: 10%; height: 2px; background: #2563eb; z-index: 1; transition: 0.3s; }
         .th-step { position: relative; z-index: 2; text-align: center; flex: 1; }
-        .th-icon { width: 32px; height: 32px; background: #007bff; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 16px; border: 4px solid #cce5ff; transition: 0.3s; }
+        .th-icon { width: 32px; height: 32px; background: #2563eb; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 16px; border: 4px solid #dbeafe; transition: 0.3s; }
         .th-step.pending .th-icon { background: #fff; color: #adb5bd; border-color: #e9ecef; }
-        .th-label { font-size: 11px; font-weight: 700; color: #007bff; }
-        .th-step.pending .th-label { color: #888; font-weight: 500; }
-        .th-time { font-size: 10px; color: #888; margin-top: 4px; }
+        .th-label { font-size: 11px; font-weight: 800; color: #2563eb; text-transform: uppercase;}
+        .th-step.pending .th-label { color: #888; font-weight: 600; }
+        .th-time { font-size: 10px; color: #666; margin-top: 4px; font-weight: 500;}
+
+        /* BẢNG LỊCH SỬ THAO TÁC & THANH TOÁN */
+        .history-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+        .history-table th { background: #f8f9fa; color: #555; padding: 8px 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; border-bottom: 1px solid #ddd; }
+        .history-table td { padding: 10px 12px; border-bottom: 1px dashed #eee; vertical-align: top; }
+        .history-table tr:last-child td { border-bottom: none; }
 
         /* BEE TOAST CUSTOM */
-        #beeToastHost {
-            position: fixed;
-            top: 30px;
-            right: 30px;
-            z-index: 999999;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            pointer-events: none;
-        }
-
-        .bee-toast-box {
-            min-width: 320px;
-            max-width: 400px;
-            padding: 18px 24px;
-            border-radius: 8px;
-            background: #fff;
-            color: #000;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: flex-start;
-            gap: 14px;
-            border-left: 6px solid #000;
-            animation: beeToastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
-            transition: all 0.3s ease;
-            pointer-events: auto;
-        }
-
+        #beeToastHost { position: fixed; top: 30px; right: 30px; z-index: 999999; display: flex; flex-direction: column; gap: 15px; pointer-events: none; }
+        .bee-toast-box { min-width: 320px; max-width: 400px; padding: 18px 24px; border-radius: 8px; background: #fff; color: #000; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2); display: flex; align-items: flex-start; gap: 14px; border-left: 6px solid #000; animation: beeToastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; transition: all 0.3s ease; pointer-events: auto; }
         .bee-toast-box.success { border-left-color: #10b981; }
         .bee-toast-box.error { border-left-color: #ef4444; }
         .bee-toast-box.warning { border-left-color: #f59e0b; }
+        .bee-toast-box.hiding { transform: translateX(120%); opacity: 0; margin-top: -80px; }
 
-        .bee-toast-box.hiding {
-            transform: translateX(120%);
-            opacity: 0;
-            margin-top: -80px;
-        }
+        @keyframes beeToastSlideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-        @keyframes beeToastSlideIn {
-            from { transform: translateX(120%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        /* ==========================================================================
-           RESPONSIVE MOBILE HOÀN CHỈNH
-           ========================================================================== */
+        /* RESPONSIVE */
         @media (max-width: 768px) {
-            /* Thanh tìm kiếm & bộ lọc */
-            .filter-row-1.online-mode,
-            .filter-row-1.history-mode,
-            .filter-row-2.history-mode {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
+            .filter-row-1.online-mode, .filter-row-1.history-mode, .filter-row-2.history-mode { grid-template-columns: 1fr; gap: 12px; }
             .filter-group { width: 100%; }
             .btn-group-filter { width: 100%; margin-top: 5px; }
             .btn-group-filter .btn { width: 100%; }
-
-            /* Ngăn kéo chi tiết Drawer */
             .drawer { width: 100% !important; right: -100% !important; }
             .drawer.show { right: 0 !important; }
-
-            /* Các Card chứa thông tin 2 cột bẻ thành 1 cột */
-            .detail-card-body[style*="justify-content:space-around"],
-            .detail-card-body[style*="grid-template-columns"],
-            #cardExtraInfo .detail-card-body > div[style*="grid-template-columns"] {
-                display: flex !important;
-                flex-direction: column;
-                gap: 12px;
-            }
-
-            /* Tổng kết hộp thoại nổi ở góc -> thả tự do */
+            .detail-card-body[style*="justify-content:space-around"], .detail-card-body[style*="grid-template-columns"], #cardExtraInfo .detail-card-body > div[style*="grid-template-columns"] { display: flex !important; flex-direction: column; gap: 12px; }
             #viewSummaryBox { float: none !important; max-width: 100% !important; margin-top: 15px;}
-
-            /* Box Cập nhật trạng thái dưới cùng */
             #drawerFooter { flex-direction: column; }
             #drawerFooter button, #drawerFooter div { width: 100%; }
-
-            /* Phân trang */
             .pagination-wrapper { flex-direction: column; gap: 10px; align-items: center;}
-
-            /* Timeline bẻ thành dọc */
             .timeline-horizontal { flex-direction: column; align-items: flex-start; padding-left: 20px; gap: 15px;}
             .timeline-horizontal::before { left: 35px; top: 20px; bottom: 20px; height: auto; width: 2px; right: auto; }
             .th-step { display: flex; align-items: center; text-align: left; gap: 15px; width: 100%; }
@@ -223,27 +171,10 @@
 <div class="overlay" id="overlay" onclick="OrderApp.closeDrawer()"></div>
 <aside class="drawer" id="drawer">
     <div class="drawer-header">
-        <h3 class="drawer-title">CHI TIẾT ĐƠN HÀNG: <span id="viewMaHD" style="color:#007bff;"></span></h3>
+        <h3 class="drawer-title">CHI TIẾT ĐƠN HÀNG: <span id="viewMaHD" style="color:#2563eb;"></span></h3>
         <button class="btn-icon" onclick="OrderApp.closeDrawer()" style="border:none;"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="drawer-body" id="drawerBody">
-
-        <div class="detail-card">
-            <div class="detail-card-header"><i class="bi bi-person-fill"></i> Thông tin người dùng</div>
-            <div class="detail-card-body" style="display:flex; justify-content:space-around; font-size:13px; font-weight:700; color:#333;">
-                <div>Khách hàng: <span id="viewKhachHang" style="font-weight:500;"></span></div>
-                <div>Nhân viên phụ trách: <span id="viewNhanVien" style="font-weight:500;"></span></div>
-            </div>
-        </div>
-
-        <div class="detail-card">
-            <div class="detail-card-header"><i class="bi bi-box-seam"></i> Danh sách sản phẩm</div>
-            <div class="detail-card-body">
-                <div id="viewProductList" style="border:1px solid #eee; border-radius:4px; margin-bottom:15px; overflow-x:auto;"></div>
-                <div id="viewSummaryBox" style="font-size:12px; line-height:2.2; max-width:320px; float:right;"></div>
-                <div style="clear:both;"></div>
-            </div>
-        </div>
 
         <div class="detail-card" id="cardTimeline">
             <div class="detail-card-header"><i class="bi bi-list-nested"></i> Trạng thái đơn hàng</div>
@@ -257,36 +188,76 @@
             <div class="detail-card-body" style="display:grid; grid-template-columns:1fr 1fr; gap:20px; font-size:13px; line-height:1.8;">
                 <div>
                     <div><span style="color:#666;">Ngày tạo:</span> <span id="viewNgayTao" style="font-weight:600;"></span></div>
-                    <div><span style="color:#666;">Trạng thái hệ thống:</span> <strong id="viewTrangThaiText"></strong></div>
-                    <div><span style="color:#666;">Loại hóa đơn:</span> <span id="viewLoaiDon" style="font-weight:600;"></span></div>
+                    <div><span style="color:#666;">Trạng thái hiện tại:</span> <strong id="viewTrangThaiText"></strong></div>
+                    <div><span style="color:#666;">Phân loại đơn:</span> <span id="viewLoaiDon" style="font-weight:600;"></span></div>
+                    <div id="divNgayGiaoNhan" style="display: none;"><span style="color:#2563eb; font-weight: 800;" id="lblNgayGiaoNhan">Ngày dự kiến:</span> <span id="viewNgayGiaoNhan" style="font-weight:800; color: #2563eb;"></span></div>
+                    <div id="divNgayHangSanSang" style="display: none;"><span style="color:#10b981; font-weight: 800;">Hàng sẵn sàng lúc:</span> <span id="viewNgayHangSanSang" style="font-weight:800; color: #10b981;"></span></div>
                 </div>
                 <div>
                     <div><span style="color:#666;">Địa chỉ nhận:</span> <span id="viewDiaChi" style="font-weight:600;"></span></div>
+                    <div><span style="color:#666;">Khách hàng:</span> <span id="viewKhachHang" style="font-weight:600; color:#2563eb;"></span></div>
                     <div><span style="color:#666;">SĐT Khách hàng:</span> <span id="viewSDTKhach" style="font-weight:600;"></span></div>
-                    <div><span style="color:#666;">Phương thức TT:</span> <span id="viewPTTT" style="font-weight:600;"></span></div>
+                    <div><span style="color:#666;">Mã Voucher áp dụng:</span> <span id="viewMaVoucher" style="font-weight:600; background:#fefce8; border:1px dashed #fde047; padding:2px 6px; border-radius:4px; color:#a16207;"></span></div>
                 </div>
+            </div>
+        </div>
+
+        <div class="detail-card">
+            <div class="detail-card-header"><i class="bi bi-box-seam"></i> Danh sách sản phẩm</div>
+            <div class="detail-card-body">
+                <div id="viewProductList" style="border:1px solid #eee; border-radius:4px; margin-bottom:15px; overflow-x:auto;"></div>
+                <div id="viewSummaryBox" style="font-size:12px; line-height:2.2; max-width:320px; float:right;"></div>
+                <div style="clear:both;"></div>
+            </div>
+        </div>
+
+        <div class="detail-card" id="cardThanhToan">
+            <div class="detail-card-header"><i class="bi bi-credit-card-fill"></i> Lịch sử giao dịch / Thanh toán</div>
+            <div class="detail-card-body" style="padding:0; overflow-x: auto;">
+                <table class="history-table">
+                    <thead>
+                    <tr>
+                        <th style="width: 150px;">Thời gian</th>
+                        <th>Mã GD</th>
+                        <th>Phương thức</th>
+                        <th>Loại GD</th>
+                        <th>Số tiền</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                    </thead>
+                    <tbody id="viewLichSuThanhToan"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="detail-card" id="cardLichSuThaoTac">
+            <div class="detail-card-header"><i class="bi bi-clock-history"></i> Lịch sử thao tác đơn hàng</div>
+            <div class="detail-card-body" style="padding:0; overflow-x: auto;">
+                <table class="history-table">
+                    <thead>
+                    <tr>
+                        <th style="width: 150px;">Thời gian</th>
+                        <th>Người thao tác</th>
+                        <th>Hành động / Ghi chú</th>
+                        <th>Trạng thái cập nhật</th>
+                    </tr>
+                    </thead>
+                    <tbody id="viewLichSuThaoTac"></tbody>
+                </table>
             </div>
         </div>
 
         <div class="detail-card" id="cardExtraInfo" style="border-color: #f59e0b;">
             <div class="detail-card-header" style="background: #fffbeb; color: #b45309; border-bottom-color: #fde68a;">
-                <i class="bi bi-exclamation-square-fill"></i> Ghi chú & Lịch sử xử lý
+                <i class="bi bi-exclamation-square-fill"></i> Ghi chú của khách hàng
             </div>
             <div class="detail-card-body" style="font-size:13px; line-height:1.8;">
-                <div style="background: #fefce8; padding: 12px; border-radius: 4px; border-left: 3px solid #f59e0b; margin-bottom: 15px;">
-                    <span style="color:#854d0e; font-weight:800; font-size:11px; text-transform:uppercase; display:block; margin-bottom:4px;">GHI CHÚ CỦA KHÁCH:</span>
-                    <span id="viewGhiChu" style="font-weight:500; font-style:italic;">Không có ghi chú</span>
-                </div>
-
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
-                    <div><span style="color:#666;">Ngày TT thành công:</span> <span id="viewNgayThanhToan" style="font-weight:600;">---</span></div>
-                    <div id="divNgayXuLyDoiTra" style="display: none;"><span style="color:#dc2626;">Ngày xử lý đổi/trả:</span> <span id="viewNgayXuLyDoiTra" style="font-weight:800; color: #dc2626;">---</span></div>
-                </div>
+                <span id="viewGhiChu" style="font-weight:500; font-style:italic;">Không có ghi chú</span>
             </div>
         </div>
 
         <div class="detail-card" id="cardActions">
-            <div class="detail-card-header"><i class="bi bi-pencil-square"></i> Cập nhật trạng thái</div>
+            <div class="detail-card-header"><i class="bi bi-pencil-square"></i> Bảng điều khiển trạng thái</div>
             <div class="detail-card-body" id="drawerFooter" style="display:flex; gap:10px;"></div>
         </div>
 
@@ -295,22 +266,18 @@
 
 <script>
     // ========================================================================
-    // TOAST & DIALOG SYSTEM (ĐỒNG BỘ VỚI CATALOG)
+    // TOAST & DIALOG SYSTEM
     // ========================================================================
     window.toast = function (message, type = 'success') {
         let container = document.getElementById('beeToastHost');
         if (!container) {
-            container = document.createElement('div');
-            container.id = 'beeToastHost';
-            document.body.appendChild(container);
+            container = document.createElement('div'); container.id = 'beeToastHost'; document.body.appendChild(container);
         }
-
         const el = document.createElement('div');
         el.className = `bee-toast-box ${type}`;
         const prefix = type === 'success' ? 'THÀNH CÔNG' : (type === 'error' ? 'LỖI' : 'THÔNG BÁO');
         const color = type === 'success' ? '#10b981' : (type === 'error' ? '#ef4444' : '#f59e0b');
         const icon = type === 'success' ? 'bi-check-circle-fill' : (type === 'error' ? 'bi-x-circle-fill' : 'bi-exclamation-triangle-fill');
-
         el.innerHTML = `
             <i class="bi ${icon}" style="color:${color}; font-size:22px; margin-top:2px;"></i>
             <div style="display: flex; flex-direction: column; flex: 1;">
@@ -320,28 +287,15 @@
             <i class="bi bi-x-lg" style="cursor: pointer; margin-left: 10px; font-size: 18px; color:#999; transition: 0.2s;" onmouseover="this.style.color='#000'" onmouseout="this.style.color='#999'" onclick="this.parentElement.remove()"></i>
         `;
         container.appendChild(el);
-
-        setTimeout(() => {
-            if (el.parentNode) {
-                el.classList.add('hiding');
-                setTimeout(() => el.remove(), 300);
-            }
-        }, 3500);
+        setTimeout(() => { if (el.parentNode) { el.classList.add('hiding'); setTimeout(() => el.remove(), 300); } }, 3500);
     };
 
     window.toastConfirm = function (title, message, onConfirm) {
         let container = document.getElementById('beeToastHost');
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'beeToastHost';
-            document.body.appendChild(container);
-        }
-
+        if (!container) { container = document.createElement('div'); container.id = 'beeToastHost'; document.body.appendChild(container); }
         const el = document.createElement('div');
         el.className = `bee-toast-box warning`;
-        el.style.flexDirection = 'column';
-        el.style.alignItems = 'stretch';
-
+        el.style.flexDirection = 'column'; el.style.alignItems = 'stretch';
         el.innerHTML = `
             <div style="display: flex; gap: 12px; align-items: flex-start; width: 100%;">
                 <i class="bi bi-question-circle-fill" style="color:#f59e0b; font-size:24px; margin-top:2px;"></i>
@@ -356,31 +310,16 @@
             </div>
         `;
         container.appendChild(el);
-
-        el.querySelector('#toastOk').onclick = () => {
-            el.classList.add('hiding');
-            setTimeout(() => el.remove(), 300);
-            if(onConfirm) onConfirm();
-        };
-        el.querySelector('#toastCancel').onclick = () => {
-            el.classList.add('hiding');
-            setTimeout(() => el.remove(), 300);
-        };
+        el.querySelector('#toastOk').onclick = () => { el.classList.add('hiding'); setTimeout(() => el.remove(), 300); if(onConfirm) onConfirm(); };
+        el.querySelector('#toastCancel').onclick = () => { el.classList.add('hiding'); setTimeout(() => el.remove(), 300); };
     };
 
     window.toastPrompt = function (title, placeholder, onConfirm) {
         let container = document.getElementById('beeToastHost');
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'beeToastHost';
-            document.body.appendChild(container);
-        }
-
+        if (!container) { container = document.createElement('div'); container.id = 'beeToastHost'; document.body.appendChild(container); }
         const el = document.createElement('div');
         el.className = `bee-toast-box warning`;
-        el.style.flexDirection = 'column';
-        el.style.alignItems = 'stretch';
-
+        el.style.flexDirection = 'column'; el.style.alignItems = 'stretch';
         el.innerHTML = `
             <div style="display: flex; gap: 12px; align-items: flex-start; width: 100%;">
                 <i class="bi bi-pencil-square" style="color:#dc2626; font-size:24px; margin-top:2px;"></i>
@@ -395,23 +334,11 @@
             </div>
         `;
         container.appendChild(el);
-
         const input = el.querySelector('#dgInput');
         setTimeout(() => input.focus(), 100);
-
-        el.querySelector('#toastOk').onclick = () => {
-            const val = input.value.trim();
-            el.classList.add('hiding');
-            setTimeout(() => el.remove(), 300);
-            onConfirm(val);
-        };
-        el.querySelector('#toastCancel').onclick = () => {
-            el.classList.add('hiding');
-            setTimeout(() => el.remove(), 300);
-        };
-        input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') el.querySelector('#toastOk').click();
-        });
+        el.querySelector('#toastOk').onclick = () => { const val = input.value.trim(); el.classList.add('hiding'); setTimeout(() => el.remove(), 300); onConfirm(val); };
+        el.querySelector('#toastCancel').onclick = () => { el.classList.add('hiding'); setTimeout(() => el.remove(), 300); };
+        input.addEventListener('keypress', (e) => { if (e.key === 'Enter') el.querySelector('#toastOk').click(); });
     };
 
     // ========================================================================
@@ -424,17 +351,36 @@
         const pad = n => n < 10 ? '0' + n : n;
         return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
     };
+    const formatVNDateOnly = (dateStr) => {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateStr;
+        const pad = n => n < 10 ? '0' + n : n;
+        return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    };
 
     const getStatusBadge = (tt) => {
         if (!tt) return '<span class="badge-status" style="background:#9ca3af;">N/A</span>';
         const id = tt.id;
         const ten = tt.ten;
-        if (id === 6) return `<span class="badge-status" style="background:#10b981;">${ten}</span>`;
-        if (id === 7) return `<span class="badge-status" style="background:#ef4444;">${ten}</span>`;
-        if (id === 1) return `<span class="badge-status" style="background:#f59e0b;">${ten}</span>`;
-        if (id === 5) return `<span class="badge-status" style="background:#3b82f6;">${ten}</span>`;
-        if (id === 12) return `<span class="badge-status" style="background:#8b5cf6;">${ten}</span>`;
-        if (id === 13) return `<span class="badge-status" style="background:#ec4899;">${ten}</span>`;
+        const ma = tt.ma;
+
+        if (ma === 'HOAN_THANH' || id === 6 || ten === 'Hoàn thành') return `<span class="badge-status" style="background:#10b981;">Hoàn thành</span>`;
+        if (ma === 'DA_HUY' || id === 7 || ten === 'Đã hủy') return `<span class="badge-status" style="background:#ef4444;">Đã hủy</span>`;
+        if (ma === 'GIAO_THAT_BAI' || ten === 'Giao thất bại') return `<span class="badge-status" style="background:#ef4444;">Giao thất bại</span>`;
+        if (ma === 'DA_HOAN_HANG' || ten === 'Đã nhận hoàn hàng') return `<span class="badge-status" style="background:#f43f5e;">Đã hoàn hàng</span>`;
+        if (ma === 'TU_CHOI_TRA_HANG') return `<span class="badge-status" style="background:#dc2626;">Từ chối trả hàng</span>`;
+
+        if (ma === 'CHO_THANH_TOAN' || id === 1 || ten === 'Chờ thanh toán') return `<span class="badge-status" style="background:#f59e0b;">Chờ thanh toán</span>`;
+        if (ma === 'DANG_GIAO_HANG' || ten.includes('Đang giao')) return `<span class="badge-status" style="background:#3b82f6;">Đang giao hàng</span>`;
+        if (ma === 'CHO_GIAO_VAN_CHUYEN' || ten === 'Chờ giao cho đơn vị vận chuyển') return `<span class="badge-status" style="background:#0ea5e9;">Chờ giao cho DV VC</span>`;
+
+        if (ma === 'DA_DOI' || id === 12 || ten === 'Đã đổi') return `<span class="badge-status" style="background:#8b5cf6;">Đã đổi</span>`;
+        if (ma === 'DA_TRA' || id === 13 || ten === 'Đã trả') return `<span class="badge-status" style="background:#ec4899;">Đã trả</span>`;
+
+        if (ma === 'DANG_HOAN_HANG') return `<span class="badge-status" style="background:#8b5cf6;">Đang hoàn hàng về kho</span>`;
+        if (ma === 'YEU_CAU_TRA_HANG') return `<span class="badge-status" style="background:#f97316;">Yêu cầu trả hàng</span>`;
+
         return `<span class="badge-status" style="background:#6366f1;">${ten}</span>`;
     };
 
@@ -450,23 +396,37 @@
         _nvSelectedId: null,
         _statusList: [],
 
-        formatPayment: function(method) {
-            if (!method) return '<span style="color:#555;"><i class="bi bi-credit-card"></i> Khác</span>';
+        // 🌟 BỔ SUNG HÀM FORMAT TIỀN BỊ THIẾU
+        formatCurrency: function(num) {
+            return new Intl.NumberFormat('vi-VN').format(num || 0) + ' ₫';
+        },
 
+        formatPayment: function(method, isStorePickup = false) {
+            if (!method) return '<span style="color:#555;"><i class="bi bi-credit-card"></i> Khác</span>';
             const cleanStr = method.trim();
             const upperStr = cleanStr.toUpperCase();
 
-            const map = {
-                'TIEN_MAT': { icon: 'bi-cash', color: '#10b981', text: 'Tiền mặt' },
-                'MOMO': { icon: 'bi-wallet2', color: '#a50064', text: 'Ví MoMo' },
-                'VNPAY': { icon: 'bi-wallet2', color: '#005ba9', text: 'VNPay' },
-                'COD': { icon: 'bi-truck', color: '#3b82f6', text: 'COD (Giao hàng)' },
-                'CHUYEN_KHOAN': { icon: 'bi-bank', color: '#5e5e5e', text: 'Chuyển khoản' }
-            };
+            let text = cleanStr;
+            let icon = 'bi-credit-card';
+            let color = '#555';
 
-            const config = map[upperStr] || map[cleanStr] || { icon: 'bi-credit-card', color: '#555', text: cleanStr };
+            if (upperStr === 'TIEN_MAT') { icon = 'bi-cash'; color = '#10b981'; text = 'Tiền mặt'; }
+            else if (upperStr === 'MOMO') { icon = 'bi-wallet2'; color = '#a50064'; text = 'Ví MoMo'; }
+            else if (upperStr === 'VNPAY') { icon = 'bi-wallet2'; color = '#005ba9'; text = 'VNPay'; }
+            else if (upperStr === 'CHUYEN_KHOAN') { icon = 'bi-bank'; color = '#5e5e5e'; text = 'Chuyển khoản'; }
+            else if (upperStr === 'COD') {
+                if (isStorePickup) {
+                    icon = 'bi-shop'; // Đổi icon thành cửa hàng
+                    color = '#d97706'; // Đổi màu cam
+                    text = 'Thanh toán tại cửa hàng';
+                } else {
+                    icon = 'bi-truck';
+                    color = '#3b82f6';
+                    text = 'COD (Giao hàng)';
+                }
+            }
 
-            return `<span style="color: ${config.color}; font-weight: 600; display: flex; align-items: center; gap: 4px;"><i class="bi ${config.icon}"></i> ${config.text}</span>`;
+            return `<span style="color: ${color}; font-weight: 600; display: flex; align-items: center; gap: 4px;"><i class="bi ${icon}"></i> ${text}</span>`;
         },
 
         renderFilterSection: function() {
@@ -510,11 +470,11 @@
                             </select>
                         </div>
                         <div class="filter-group">
-                            <label class="filter-label">Loại hóa đơn</label>
+                            <label class="filter-label">Loại đơn hàng</label>
                             <select id="filterLoai" onchange="OrderApp.handleFilterChange()">
                                 <option value="">Tất cả</option>
-                                <option value="1">Online</option>
-                                <option value="0">Tại quầy</option>
+                                <option value="1">Online (Web)</option>
+                                <option value="0">Tại quầy (POS)</option>
                             </select>
                         </div>
                         ${dateRangeHtml}
@@ -538,11 +498,11 @@
                             </select>
                         </div>
                         <div class="filter-group">
-                            <label class="filter-label">Loại hóa đơn</label>
+                            <label class="filter-label">Loại đơn hàng</label>
                             <select id="filterLoai" onchange="OrderApp.handleFilterChange()">
                                 <option value="">Tất cả</option>
-                                <option value="1">Online</option>
-                                <option value="0">Tại quầy</option>
+                                <option value="1">Online (Web)</option>
+                                <option value="0">Tại quầy (POS)</option>
                             </select>
                         </div>
                         <div class="filter-group">
@@ -586,9 +546,9 @@
 
             const filteredStatuses = this._statusList.filter(s => {
                 if (isHistory) {
-                    return [6, 7, 12, 13].includes(s.id);
+                    return s.ma === 'HOAN_THANH' || s.ma === 'DA_HUY' || s.ma === 'DA_DOI' || s.ma === 'DA_TRA' || s.ma === 'GIAO_THAT_BAI' || s.ma === 'DA_HOAN_HANG' || s.ma === 'TU_CHOI_TRA_HANG';
                 } else {
-                    return ![6, 7, 12, 13].includes(s.id);
+                    return !(s.ma === 'HOAN_THANH' || s.ma === 'DA_HUY' || s.ma === 'DA_DOI' || s.ma === 'DA_TRA' || s.ma === 'GIAO_THAT_BAI' || s.ma === 'DA_HOAN_HANG' || s.ma === 'TU_CHOI_TRA_HANG');
                 }
             });
 
@@ -632,7 +592,6 @@
                 page: 0, size: 10, totalPages: 0
             };
             this._nvSelectedId = null;
-
             this.renderFilterSection();
             this.loadData();
             window.toast("Đã làm mới bộ lọc", "success");
@@ -647,16 +606,23 @@
 
         loadFilterOptions: async function() {
             try {
+                // 🌟 FIX MÃ TRẠNG THÁI KHỚP DB
                 this._statusList = [
-                    { id: 1, ma: 'CHO_THANH_TOAN', ten: 'Chờ thanh toán' },
-                    { id: 2, ma: 'CHO_XAC_NHAN', ten: 'Chờ xác nhận' },
-                    { id: 3, ma: 'DA_XAC_NHAN', ten: 'Đã xác nhận' },
-                    { id: 4, ma: 'CHO_GIAO', ten: 'Chờ giao hàng' },
-                    { id: 5, ma: 'DANG_GIAO', ten: 'Đang giao hàng' },
-                    { id: 6, ma: 'HOAN_THANH', ten: 'Hoàn thành' },
-                    { id: 7, ma: 'DA_HUY', ten: 'Đã hủy' },
-                    { id: 12, ma: 'DA_DOI', ten: 'Đã đổi' },
-                    { id: 13, ma: 'DA_TRA', ten: 'Đã trả' }
+                    { id: 1, ma: 'CHO_XAC_NHAN', ten: 'Chờ xác nhận' },
+                    { id: 2, ma: 'CHO_THANH_TOAN', ten: 'Chờ thanh toán' },
+                    { id: 3, ma: 'DA_XAC_NHAN', ten: 'Đã xác nhận / Đang xử lý' },
+                    { id: 4, ma: 'CHO_GIAO_VAN_CHUYEN', ten: 'Chờ giao cho đơn vị vận chuyển' },
+                    { id: 5, ma: 'DANG_GIAO_HANG', ten: 'Đang giao hàng' },
+                    { id: 6, ma: 'CHO_KHACH_LAY', ten: 'Chờ khách đến lấy' },
+                    { id: 7, ma: 'HOAN_THANH', ten: 'Hoàn thành' },
+                    { id: 8, ma: 'DA_HUY', ten: 'Đã hủy' },
+                    { id: 9, ma: 'DA_TRA', ten: 'Đã trả' },
+                    { id: 10, ma: 'DA_DOI', ten: 'Đã đổi' },
+                    { id: 11, ma: 'GIAO_THAT_BAI', ten: 'Giao thất bại' },
+                    { id: 12, ma: 'DANG_HOAN_HANG', ten: 'Đang hoàn hàng về kho' },
+                    { id: 13, ma: 'DA_HOAN_HANG', ten: 'Đã nhận lại hàng hoàn' },
+                    { id: 14, ma: 'YEU_CAU_TRA_HANG', ten: 'Yêu cầu trả hàng' },
+                    { id: 15, ma: 'TU_CHOI_TRA_HANG', ten: 'Từ chối trả hàng' }
                 ];
 
                 const resNv = await fetch('/api/nhan-vien/list-json?status=true');
@@ -789,7 +755,7 @@
                     <th>KHÁCH HÀNG</th>
                     <th>SĐT</th>
                     <th>TỔNG TIỀN</th>
-                    <th>LOẠI</th>
+                    <th>LOẠI GIAO HÀNG</th>
                     <th>NGÀY TẠO</th>
                     <th style="text-align:center">TRẠNG THÁI</th>
                     <th style="text-align:right">THAO TÁC</th>
@@ -803,8 +769,8 @@
                     <th>NHÂN VIÊN</th>
                     <th>TỔNG TIỀN</th>
                     <th>PHƯƠNG THỨC TT</th>
-                    <th>LOẠI HÓA ĐƠN</th>
-                    <th>NGÀY TẠO</th>
+                    <th>LOẠI GIAO HÀNG</th>
+                    <th>NGÀY CẬP NHẬT</th>
                     <th style="text-align:center">TRẠNG THÁI</th>
                     <th style="text-align:right">THAO TÁC</th>
                 </tr>`;
@@ -818,7 +784,7 @@
                     ? '/api/hoa-don/don-hang'
                     : '/api/hoa-don/lich-su';
 
-                const params = new URLSearchParams({
+                const paramsObj = {
                     q:                   this.state.q,
                     statusId:            this.state.statusId,
                     nhanVienId:          this.state.nhanVienId,
@@ -828,7 +794,16 @@
                     endDate:             this.state.dateTo,
                     page:                this.state.page,
                     size:                this.state.size
-                });
+                };
+
+                // Thêm tham số sắp xếp theo Tab
+                if (this.state.activeTab === 'lich-su') {
+                    paramsObj.sort = 'ngayCapNhat,desc';
+                } else {
+                    paramsObj.sort = 'ngayTao,desc';
+                }
+
+                const params = new URLSearchParams(paramsObj);
 
                 const res = await fetch(`${endpoint}?${params.toString()}`);
                 if (!res.ok) throw new Error("Lỗi fetch data");
@@ -926,19 +901,20 @@
             const startSTT = this.state.page * this.state.size + 1;
 
             tbody.innerHTML = list.map((hd, idx) => {
-                const tenKhach    = hd.khachHang ? hd.khachHang.hoTen : (hd.tenNguoiNhan ? hd.tenNguoiNhan : 'Khách vãng lai');
-                const sdtKhach    = hd.sdtNhan ? hd.sdtNhan : (hd.khachHang ? hd.khachHang.soDienThoai : '');
+                const tenThongTinGH = hd.thongTinGiaoHang ? hd.thongTinGiaoHang.tenNguoiNhan : null;
+                const sdtThongTinGH = hd.thongTinGiaoHang ? hd.thongTinGiaoHang.sdtNhan : null;
+
+                const tenKhach = tenThongTinGH || hd.tenNguoiNhan || (hd.khachHang ? hd.khachHang.hoTen : 'Khách vãng lai');
+                const sdtKhach = sdtThongTinGH || hd.sdtNhan || (hd.khachHang ? hd.khachHang.soDienThoai : '');
+
                 const tenNhanVien = hd.nhanVien  ? hd.nhanVien.hoTen  : '<span style="color:#aaa; font-style:italic;">Hệ thống</span>';
 
                 const rawMethod = hd.phuongThucThanhToan || (hd.loaiHoaDon === 0 ? 'TIEN_MAT' : 'COD');
-                const hinhThucTT = this.formatPayment(rawMethod);
 
-                const ngayTaoVN   = formatVNTime(hd.ngayTao);
-                const isHighlight  = highlightId && Number(highlightId) === Number(hd.id);
+                // Sử dụng toLocaleString thay cho formatCurrency nếu không chắc chắn (để dự phòng)
+                let tongTienHD = hd.giaTong || 0;
+                let tongTienDisplay = `<div style="font-weight:700; color:#dc2626;">${tongTienHD.toLocaleString('vi-VN')} ₫</div>`;
 
-                const trangThaiBadge = getStatusBadge(hd.trangThaiHoaDon);
-
-                // 🌟 LOGIC HIỂN THỊ KÉP TỔNG TIỀN
                 let tienHoan = hd.tienHoan || 0;
                 if (!tienHoan && hd.yeuCauDoiTras) {
                     hd.yeuCauDoiTras.forEach(yc => {
@@ -946,14 +922,20 @@
                     });
                 }
 
-                let tongTienDisplay = `<div style="font-weight:700; color:#dc2626;">${(hd.giaTong || 0).toLocaleString('vi-VN')} ₫</div>`;
                 if (tienHoan > 0) {
                     tongTienDisplay += `<div style="font-size:11px; color:#10b981; font-weight:600; margin-top:2px;" title="Đã hoàn lại tiền cho khách">(- Hoàn: ${tienHoan.toLocaleString('vi-VN')} ₫)</div>`;
                 }
 
-                // 🌟 TẠO GIAO DIỆN NHẬN DIỆN ĐƠN CÓ ĐỔI TRẢ
+                const ngayTaoVN   = formatVNTime(hd.ngayTao);
+                const ngayCapNhatVN = formatVNTime(hd.ngayCapNhat || hd.ngayTao);
+                const timeToDisplay = isHistory ? ngayCapNhatVN : ngayTaoVN;
+
+                const isHighlight  = highlightId && Number(highlightId) === Number(hd.id);
+
+                const trangThaiBadge = getStatusBadge(hd.trangThaiHoaDon);
+
                 let maDonHtml = `<div style="font-weight:800; color:#555;">${hd.ma}</div>`;
-                if (hd.coDoiTra) { // Lấy tín hiệu từ biến isCoDoiTra() vừa tạo bên Java
+                if (hd.coDoiTra) {
                     maDonHtml += `<div style="margin-top: 4px; display: inline-block; font-size: 9px; font-weight: 800; background: #f59e0b; color: #fff; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;" title="Đơn hàng này đã có sản phẩm bị đổi hoặc trả">CÓ ĐỔI / TRẢ</div>`;
                 }
 
@@ -967,18 +949,36 @@
 
                 trContent += `<td>${tongTienDisplay}</td>`;
 
+                // 🌟 Lấy thuộc tính giao hàng để sửa logic Thanh Toán
+                const giaTamThoi = hd.giaTamThoi || 0;
+                let isStorePickup = (hd.hinhThucGiaoHang === 'NHAN_TAI_CUA_HANG') ||
+                    (hd.loaiHoaDon === 1 && hd.phiVanChuyen === 0 && giaTamThoi < 5000000) ||
+                    (hd.diaChiGiaoHang && hd.diaChiGiaoHang.toLowerCase().includes('nhận tại cửa hàng'));
+
+                // 🌟 GỌI HÀM getPaymentMethodDisplay VỚI THAM SỐ isStorePickup
+                const hinhThucTT = this.formatPayment(rawMethod, isStorePickup || hd.loaiHoaDon === 0);
+
                 if (isHistory) trContent += `<td>${hinhThucTT}</td>`;
 
-                // 🌟 1. THÊM ĐIỀU KIỆN ẨN/HIỆN NÚT HỦY
+                let loaiDonHtml = '';
+                if (hd.loaiHoaDon === 0) {
+                    loaiDonHtml = `<span class="badge-type type-pos"><i class="bi bi-shop"></i> TẠI QUẦY (POS)</span>`;
+                } else {
+                    if (isStorePickup) {
+                        loaiDonHtml = `<span class="badge-type type-online-store"><i class="bi bi-bag-check"></i> ONLINE (LẤY TẠI QUẦY)</span>`;
+                    } else {
+                        loaiDonHtml = `<span class="badge-type type-online-home"><i class="bi bi-truck"></i> ONLINE (GIAO TẬN NƠI)</span>`;
+                    }
+                }
+
                 let btnHuyHtml = '';
                 if (hd.trangThaiHoaDon && (hd.trangThaiHoaDon.ma === 'CHO_XAC_NHAN' || hd.trangThaiHoaDon.ma === 'CHO_THANH_TOAN')) {
                     btnHuyHtml = `<button class="btn-icon btn-danger" title="Hủy đơn" onclick="OrderApp.huyDon(${hd.id})"><i class="bi bi-x-circle"></i></button>`;
                 }
 
-                // 🌟 2. NHÚNG BIẾN ${btnHuyHtml} VÀO CỘT THAO TÁC (BÊN DƯỚI NÚT XEM CHI TIẾT)
                 trContent += `
-                    <td><span class="badge-type ${hd.loaiHoaDon === 0 ? 'type-pos' : 'type-online'}">${hd.loaiHoaDon === 0 ? 'TẠI QUẦY' : 'ONLINE'}</span></td>
-                    <td style="font-size:12px; color:#888;">${ngayTaoVN}</td>
+                    <td>${loaiDonHtml}</td>
+                    <td style="font-size:12px; color:#888;">${timeToDisplay}</td>
                     <td style="text-align:center;">${trangThaiBadge}</td>
                     <td style="text-align:right; white-space: nowrap;">
                         <button class="btn-icon" title="Xem chi tiết" onclick="OrderApp.openDetail(${hd.id})"><i class="bi bi-eye"></i></button>
@@ -1002,103 +1002,153 @@
             }
         },
 
-        // 🌟 BẢN MỚI: Hiển thị thêm Nhãn Đã Trả (cho từng sản phẩm)
         openDetail: async function(id) {
             if (window.showLoading) window.showLoading();
             try {
+                console.log("Đang gọi API chi tiết cho ID:", id);
                 const res = await fetch(`/api/hoa-don/${id}`);
-                if (!res.ok) throw new Error("Lỗi fetch chi tiết");
+                if (!res.ok) {
+                    const errTxt = await res.text();
+                    throw new Error("Lỗi API: " + res.status + " " + errTxt);
+                }
                 const hd = await res.json();
+                console.log("Dữ liệu nhận được từ Java:", hd);
 
-                document.getElementById('drawer').dataset.paymentMethod = hd.phuongThucThanhToan || '';
+                // HÀM GÁN TEXT AN TOÀN CHỐNG CRASH
+                const setTxt = (elementId, value) => {
+                    const el = document.getElementById(elementId);
+                    if(el) el.innerText = value;
+                };
+                const setHtml = (elementId, value) => {
+                    const el = document.getElementById(elementId);
+                    if(el) el.innerHTML = value;
+                };
+                const setDisp = (elementId, displayValue) => {
+                    const el = document.getElementById(elementId);
+                    if(el) el.style.display = displayValue;
+                };
 
-                document.getElementById('viewMaHD').innerText        = hd.ma;
-                document.getElementById('viewKhachHang').innerText   = hd.tenKhachHang || 'Khách vãng lai';
-                document.getElementById('viewNhanVien').innerHTML    = hd.tenNhanVien  || 'Hệ thống';
-                document.getElementById('viewNgayTao').innerText     = hd.ngayTao || '';
-                document.getElementById('viewTrangThaiText').innerText = (hd.trangThaiTen || '').toUpperCase();
-                document.getElementById('viewDiaChi').innerText      = hd.diaChiGiaoHang || 'Nhận hàng tại cửa hàng';
-                document.getElementById('viewLoaiDon').innerText     = hd.loaiHoaDon === 0 ? 'Hóa đơn Tại quầy' : 'Đơn hàng Online';
+                setTxt('viewMaHD', hd.ma || 'N/A');
+                setTxt('viewKhachHang', hd.tenKhachHang || 'Khách vãng lai');
+                setHtml('viewNhanVien', hd.tenNhanVien || 'Hệ thống');
+                setTxt('viewNgayTao', hd.ngayTao || '');
+                setTxt('viewTrangThaiText', (hd.trangThaiTen || '').toUpperCase());
+                setTxt('viewMaVoucher', hd.maVoucher || 'Không áp dụng');
 
-                document.getElementById('viewSDTKhach').innerText    = hd.sdtKhachHang && String(hd.sdtKhachHang) !== 'null' ? hd.sdtKhachHang : "Không có SĐT";
-                document.getElementById('viewGhiChu').innerText      = hd.ghiChu && String(hd.ghiChu).trim() !== '' ? hd.ghiChu : "Không có ghi chú";
-                document.getElementById('viewNgayThanhToan').innerText = hd.ngayThanhToan ? hd.ngayThanhToan : "Chưa thanh toán";
+                // 🌟 FIX ĐỊA CHỈ & HÌNH THỨC GIAO HÀNG
+                const giaTamThoi = hd.giaTamThoi || 0;
+                let isStorePickup = (hd.hinhThucGiaoHang === 'NHAN_TAI_CUA_HANG') ||
+                    (hd.loaiHoaDon === 1 && hd.phiVanChuyen === 0 && giaTamThoi < 5000000) ||
+                    (hd.diaChiGiaoHang && hd.diaChiGiaoHang.toLowerCase().includes('nhận tại cửa hàng'));
 
-                if (hd.ngayCapNhat && (hd.trangThaiMa === 'DA_DOI' || hd.trangThaiMa === 'DA_TRA')) {
-                    document.getElementById('viewNgayXuLyDoiTra').innerText = hd.ngayCapNhat;
-                    document.getElementById('divNgayXuLyDoiTra').style.display = 'block';
+                let rawAddress = hd.diaChiGiaoHang || hd.diaChiNhan || hd.diaChiNguoiNhan;
+                let finalAddress = (rawAddress && String(rawAddress).toLowerCase() !== 'undefined' && String(rawAddress).toLowerCase() !== 'null') ? rawAddress : '---';
+
+                if (hd.loaiHoaDon === 0) {
+                    setHtml('viewLoaiDon', `<span class="badge-type type-pos"><i class="bi bi-shop"></i> BÁN TẠI QUẦY</span>`);
+                    setHtml('viewDiaChi', `<span style="color:var(--muted); font-style:italic;">Mua trực tiếp tại cửa hàng</span>`);
+                    setDisp('divNgayGiaoNhan', 'none');
+                    setDisp('divNgayHangSanSang', 'none');
                 } else {
-                    document.getElementById('divNgayXuLyDoiTra').style.display = 'none';
+                    if (isStorePickup) {
+                        setHtml('viewLoaiDon', `<span class="badge-type type-online-store"><i class="bi bi-bag-check"></i> ONLINE (LẤY TẠI QUẦY)</span>`);
+                        setHtml('viewDiaChi', `<span style="color:var(--muted); font-style:italic;">Khách ghé cửa hàng nhận hàng</span>`);
+
+                        setTxt('lblNgayGiaoNhan', "Ngày khách hẹn lấy:");
+                        setTxt('viewNgayGiaoNhan', hd.ngayHenLayHang ? formatVNTime(hd.ngayHenLayHang) : 'Chưa xác định');
+                        setDisp('divNgayGiaoNhan', 'block');
+
+                        if (hd.ngayHangSanSang) {
+                            setTxt('viewNgayHangSanSang', formatVNTime(hd.ngayHangSanSang));
+                            setDisp('divNgayHangSanSang', 'block');
+                        } else {
+                            setDisp('divNgayHangSanSang', 'none');
+                        }
+                    } else {
+                        setHtml('viewLoaiDon', `<span class="badge-type type-online-home"><i class="bi bi-truck"></i> ONLINE (GIAO TẬN NƠI)</span>`);
+                        setTxt('viewDiaChi', finalAddress);
+
+                        setTxt('lblNgayGiaoNhan', "GHN Dự kiến nhận hàng:");
+                        setTxt('viewNgayGiaoNhan', hd.ngayNhanHangDuKien ? hd.ngayNhanHangDuKien : 'Đang tính toán...');
+                        setDisp('divNgayGiaoNhan', 'block');
+
+                        if (hd.ngayHangSanSang) {
+                            setTxt('viewNgayHangSanSang', formatVNTime(hd.ngayHangSanSang));
+                            setDisp('divNgayHangSanSang', 'block');
+                        } else {
+                            setDisp('divNgayHangSanSang', 'none');
+                        }
+                    }
                 }
 
+                setTxt('viewSDTKhach', (hd.sdtKhachHang && String(hd.sdtKhachHang) !== 'null') ? hd.sdtKhachHang : "Không có SĐT");
+                setTxt('viewGhiChu', (hd.ghiChu && String(hd.ghiChu).trim() !== '') ? hd.ghiChu : "Không có ghi chú");
+                setTxt('viewNgayThanhToan', hd.ngayThanhToan ? hd.ngayThanhToan : "Chưa thanh toán");
+
+                // 🌟 SỬ DỤNG formatPayment CÓ TRUYỀN isStorePickup
                 const rawMethod = hd.phuongThucThanhToan || (hd.loaiHoaDon === 0 ? 'TIEN_MAT' : 'COD');
-                document.getElementById('viewPTTT').innerHTML = this.formatPayment(rawMethod);
+                setHtml('viewPTTT', this.formatPayment(rawMethod, isStorePickup || hd.loaiHoaDon === 0));
 
+                // BẢNG SẢN PHẨM
                 const listSP = hd.chiTiets || [];
-                let productHtml = listSP.length
-                    ? listSP.map(item => {
-                        const giaGoc = Number(item.donGia) || 0;
-                        const giaBan = Number(item.giaBan) || 0;
-                        const soLuongTra = item.soLuongTra || 0;
-                        const soLuong = item.soLuong || 1;
+                let productHtml = listSP.length > 0 ? listSP.map(item => {
+                    const giaGoc = Number(item.donGia) || 0;
+                    const giaBan = Number(item.giaBan) || 0;
+                    const soLuongTra = item.soLuongTra || 0;
+                    const soLuong = item.soLuong || 1;
 
-                        let priceDisplay = `<span style="color:#dc2626; font-weight:700;">${giaBan.toLocaleString('vi-VN')} ₫</span>`;
-                        if (giaGoc > giaBan) priceDisplay += ` <span style="text-decoration:line-through; color:#999; font-size:11px; margin-left:8px;">-${giaGoc.toLocaleString('vi-VN')} ₫</span>`;
+                    let priceDisplay = `<span style="color:#dc2626; font-weight:700;">${giaBan.toLocaleString('vi-VN')} ₫</span>`;
+                    if (giaGoc > giaBan) priceDisplay += ` <span style="text-decoration:line-through; color:#999; font-size:11px; margin-left:8px;">-${giaGoc.toLocaleString('vi-VN')} ₫</span>`;
 
-                        // 🌟 LOGIC HIỆN NHÃN TRẢ LẠI
-                        let traBadge = '';
-                        let opacity = '1';
-
-                        if (soLuongTra > 0) {
-                            if (soLuongTra >= soLuong) {
-                                opacity = '0.5';
-                                traBadge = `<div style="margin-top:6px; display:inline-block; font-size:10px; font-weight:700; background:transparent; color:#f87171; padding:3px 8px; border-radius:3px; border:1px solid #fca5a5;">ĐÃ TRẢ LẠI KHO</div>`;
-                            } else {
-                                traBadge = `<div style="margin-top:6px; display:inline-block; font-size:10px; font-weight:700; background:transparent; color:#f59e0b; padding:3px 8px; border-radius:3px; border:1px solid #fcd34d;">ĐÃ TRẢ ${soLuongTra}/${soLuong} SP</div>`;
-                            }
+                    let traBadge = ''; let opacity = '1';
+                    if (soLuongTra > 0) {
+                        if (soLuongTra >= soLuong) {
+                            opacity = '0.5';
+                            traBadge = `<div style="margin-top:6px; display:inline-block; font-size:10px; font-weight:700; background:transparent; color:#f87171; padding:3px 8px; border-radius:3px; border:1px solid #fca5a5;">ĐÃ TRẢ LẠI KHO</div>`;
+                        } else {
+                            traBadge = `<div style="margin-top:6px; display:inline-block; font-size:10px; font-weight:700; background:transparent; color:#f59e0b; padding:3px 8px; border-radius:3px; border:1px solid #fcd34d;">ĐÃ TRẢ ${soLuongTra}/${soLuong} SP</div>`;
                         }
+                    }
 
-                        return `
-                        <div style="display:flex; align-items:flex-start; padding:12px 0; border-bottom:1px dashed #eee; opacity: ${opacity};">
-                            <img src="${item.hinhAnh || 'https://placehold.co/60x60'}" onerror="this.src='https://placehold.co/60x60'"
-                                style="width:60px; height:60px; object-fit:cover; border-radius:4px; margin-right:12px; border:1px solid #f0f0f0;">
-                            <div style="flex:1; line-height:1.6;">
-                                <div style="font-weight:700; color:#111; font-size:13px;">${item.tenSanPham}</div>
-                                <div style="color:#666; font-size:12px;">${item.sku || 'N/A'} | ${item.thuocTinh} <span style="font-weight:700; color:#000;">x${soLuong}</span></div>
-                                <div style="font-size:12.5px;">Đơn giá: ${priceDisplay}</div>
-                                ${traBadge}
-                            </div>
-                        </div>`;
-                    }).join('')
-                    : `<div style="text-align:center; padding:20px; color:#999; border:1px dashed #ccc; font-style:italic;">Không có dữ liệu sản phẩm</div>`;
+                    return `
+                    <div style="display:flex; align-items:flex-start; padding:12px 0; border-bottom:1px dashed #eee; opacity: ${opacity};">
+                        <img src="${item.hinhAnh || 'https://placehold.co/60x60'}" onerror="this.src='https://placehold.co/60x60'"
+                            style="width:60px; height:60px; object-fit:cover; border-radius:4px; margin-right:12px; border:1px solid #f0f0f0;">
+                        <div style="flex:1; line-height:1.6;">
+                            <div style="font-weight:700; color:#111; font-size:13px;">${item.tenSanPham || 'Sản phẩm'}</div>
+                            <div style="color:#666; font-size:12px;">${item.sku || 'N/A'} | ${item.thuocTinh || ''} <span style="font-weight:700; color:#000;">x${soLuong}</span></div>
+                            <div style="font-size:12.5px;">Đơn giá: ${priceDisplay}</div>
+                            ${traBadge}
+                        </div>
+                    </div>`;
+                }).join('') : `<div style="text-align:center; padding:20px; color:#999; border:1px dashed #ccc; font-style:italic;">Không có dữ liệu sản phẩm</div>`;
 
-                const pList = document.getElementById('viewProductList');
-                pList.innerHTML = productHtml;
-                pList.style.border  = 'none';
-                pList.style.padding = '0';
+                setHtml('viewProductList', productHtml);
 
-                // 🌟 HIỂN THỊ TIỀN ĐÃ HOÀN Ở ADMIN THEO YÊU CẦU
-                const giaTamThoi = hd.tienHang || 0;
-                const phiShip = hd.phiVanChuyen || 0;
-                const tongTien = hd.tongTien || 0;
+                // TỔNG TIỀN
+                const phiShip = Number(hd.phiVanChuyen) || 0;
+                const tongTien = Number(hd.tongTien) || 0;
                 let giamGia = (giaTamThoi + phiShip) - tongTien;
-                if (giamGia < 0) giamGia = hd.tienGiamVoucher || 0;
-                const tienHoan = hd.tienHoan || 0;
+                if (giamGia < 0) giamGia = Number(hd.tienGiamVoucher) || 0;
+                const tienHoan = Number(hd.tienHoan) || 0;
+
+                let phiShipRowHtml = (hd.loaiHoaDon === 0 || isStorePickup) ? '' : `
+                    <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                        <span>Phí vận chuyển:</span> <strong style="color:#000;">${phiShip > 0 ? this.formatCurrency(phiShip) : 'Miễn phí'}</strong>
+                    </div>`;
 
                 let sBoxHtml = `
                     <div style="width:100%; font-size:13px; color:#333;">
                         <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-                            <span>Tiền hàng:</span> <strong style="color:#000;">${Number(giaTamThoi).toLocaleString('vi-VN')} ₫</strong>
+                            <span>Tiền hàng:</span> <strong style="color:#000;">${this.formatCurrency(giaTamThoi)}</strong>
                         </div>
+                        ${phiShipRowHtml}
                         <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-                            <span>Voucher:</span> <strong style="color:#10b981;">-${Number(giamGia).toLocaleString('vi-VN')} ₫</strong>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-                            <span>Phí vận chuyển:</span> <strong style="color:#000;">${Number(phiShip).toLocaleString('vi-VN')} ₫</strong>
+                            <span>Voucher:</span> <strong style="color:#10b981;">-${this.formatCurrency(giamGia)}</strong>
                         </div>
                         <div style="display:flex; justify-content:space-between; font-size:13px; margin-top:15px; border-top:2px solid #000; padding-top:15px;">
                             <span style="font-weight:800; text-transform:uppercase;">TỔNG THANH TOÁN:</span>
-                            <strong style="color:#2563eb; font-size:15px;">${Number(tongTien).toLocaleString('vi-VN')} ₫</strong>
+                            <strong style="color:#2563eb; font-size:15px;">${this.formatCurrency(tongTien)}</strong>
                         </div>`;
 
                 if (tienHoan > 0) {
@@ -1106,24 +1156,48 @@
                     sBoxHtml += `
                         <div style="display:flex; justify-content:space-between; font-size:13px; margin-top:12px; padding-top:12px; border-top:1px dashed #ccc;">
                             <span style="font-weight:700; color:#059669; text-transform:uppercase; font-size:11px;">Tiền hoàn đổi/trả:</span>
-                            <strong style="color:#10b981; font-size:15px;">-${Number(tienHoan).toLocaleString('vi-VN')} ₫</strong>
+                            <strong style="color:#10b981; font-size:15px;">-${this.formatCurrency(tienHoan)}</strong>
                         </div>
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:12px; border-top:2px dashed #dc2626;">
                             <span style="font-weight:900; font-size:14px; text-transform:uppercase; color:#dc2626;">Thực nhận:</span>
-                            <strong style="color:#dc2626; font-size:20px;">${Number(tienThucNhan).toLocaleString('vi-VN')} ₫</strong>
+                            <strong style="color:#dc2626; font-size:20px;">${this.formatCurrency(tienThucNhan)}</strong>
                         </div>`;
                 }
-
                 sBoxHtml += `</div>`;
-                document.getElementById('viewSummaryBox').innerHTML = sBoxHtml;
-                document.getElementById('viewSummaryBox').style.float = 'none';
+                setHtml('viewSummaryBox', sBoxHtml);
 
+                const listTT = hd.lichSuThanhToan || [];
+                let tblThanhToanHtml = listTT.length > 0 ? listTT.map(tt => {
+                    let hienThiMaGD = (tt.maGiaoDich && tt.maGiaoDich !== 'N/A') ? tt.maGiaoDich : '<span style="color:#aaa; font-style:italic;">Không có</span>';
+                    return `
+                    <tr>
+                        <td style="color:#666;">${tt.ngayThanhToan || ''}</td>
+                        <td style="font-family:monospace; color:#2563eb;">${hienThiMaGD}</td>
+                        <td>${this.formatPayment(tt.phuongThuc, isStorePickup || hd.loaiHoaDon === 0)}</td>
+                        <td>${tt.loaiThanhToan === 'THANH_TOAN' ? 'Thanh toán' : 'Hoàn tiền'}</td>
+                        <td style="font-weight:700; color:#dc2626;">${this.formatCurrency(Number(tt.soTien || 0))}</td>
+                        <td>${tt.trangThai === 'THANH_CONG' ? '<span style="color:#10b981; font-weight:700;">Thành công</span>' : '<span style="color:#ef4444; font-weight:700;">Thất bại / Chờ</span>'}</td>
+                    </tr>`;
+                }).join('') : `<tr><td colspan="6" style="text-align:center; padding:20px; font-style:italic; color:#999;">Chưa có giao dịch</td></tr>`;
+                setHtml('viewLichSuThanhToan', tblThanhToanHtml);
+
+                const listLS = hd.lichSuThaoTac || [];
+                let tblLichSuHtml = listLS.length > 0 ? listLS.map(ls => `
+                    <tr>
+                        <td style="color:#666;">${ls.ngayTao || ''}</td>
+                        <td style="font-weight:600; color:#111;"><i class="bi bi-person"></i> ${ls.nguoiThaoTac || ''}</td>
+                        <td style="font-style:italic; color:#555;">${ls.ghiChu || ''}</td>
+                        <td><span class="badge-status" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1;">${ls.trangThai || ''}</span></td>
+                    </tr>`).join('') : `<tr><td colspan="4" style="text-align:center; padding:20px; font-style:italic; color:#999;">Chưa có lịch sử</td></tr>`;
+                setHtml('viewLichSuThaoTac', tblLichSuHtml);
+
+                // THAO TÁC RENDER TIMELINE VÀ MỞ DRAWER
                 const isPos = hd.loaiHoaDon === 0;
-                document.getElementById('cardTimeline').style.display = isPos ? 'none' : 'block';
-                document.getElementById('cardActions').style.display  = 'block';
+                setDisp('cardTimeline', isPos ? 'none' : 'block');
+                setDisp('cardActions', 'block');
 
                 if (!isPos) {
-                    this.renderTimeline(hd.trangThaiMa);
+                    this.renderTimeline(hd.trangThaiMa, isStorePickup ? 'NHAN_TAI_CUA_HANG' : 'GIAO_TAN_NOI');
                     this.renderActions(hd);
                 } else {
                     this.renderPosActions(hd);
@@ -1132,27 +1206,38 @@
                 document.getElementById('drawer').classList.add('show');
                 document.getElementById('overlay').classList.add('show');
             } catch (err) {
-                console.error("Lỗi:", err);
-                if (typeof window.toast === 'function') window.toast("Lỗi tải chi tiết đơn hàng", "error");
+                console.error("====== LỖI TRÌNH DUYỆT JAVASCRIPT ======", err);
+                if (typeof window.toast === 'function') window.toast("Lỗi tải dữ liệu, hãy ấn F12 xem Console!", "error");
             } finally {
                 if (window.hideLoading) window.hideLoading();
             }
         },
 
-        renderTimeline: function(currentMa) {
-            let steps = [
-                { ma: 'CHO_XAC_NHAN', icon: 'bi-wallet2',     label: 'Chờ xác nhận' },
-                { ma: 'CHO_GIAO',     icon: 'bi-box-seam',    label: 'Đang chuẩn bị' },
-                { ma: 'DANG_GIAO',    icon: 'bi-truck',        label: 'Đang giao hàng' },
-                { ma: 'HOAN_THANH',   icon: 'bi-check-circle', label: 'Hoàn thành' }
-            ];
+        // 🌟 ĐÃ FIX: RENDER TIMELINE THÔNG MINH DỰA TRÊN LOẠI GIAO HÀNG KHỚP MÃ DB
+        renderTimeline: function(currentMa, hinhThucGiaoHang) {
+            let steps = [];
 
-            if (currentMa === 'CHO_THANH_TOAN') {
-                steps[0] = { ma: 'CHO_THANH_TOAN', icon: 'bi-credit-card', label: 'Chờ TT Online' };
+            if (hinhThucGiaoHang === 'NHAN_TAI_CUA_HANG') {
+                steps = [
+                    { ma: 'CHO_XAC_NHAN', icon: 'bi-wallet2',     label: 'Chờ xác nhận' },
+                    { ma: 'CHO_KHACH_LAY',icon: 'bi-box-seam',    label: 'Chờ khách đến lấy' },
+                    { ma: 'HOAN_THANH',   icon: 'bi-check-circle',label: 'Hoàn thành' }
+                ];
+                if (currentMa === 'CHO_THANH_TOAN') steps[0] = { ma: 'CHO_THANH_TOAN', icon: 'bi-credit-card', label: 'Chờ TT Online' };
+                if (currentMa === 'DA_XAC_NHAN') steps[0] = { ma: 'DA_XAC_NHAN', icon: 'bi-box-arrow-in-down', label: 'Đang xử lý (Gói hàng)' };
+            } else {
+                steps = [
+                    { ma: 'CHO_XAC_NHAN',        icon: 'bi-wallet2',     label: 'Chờ xác nhận' },
+                    { ma: 'CHO_GIAO_VAN_CHUYEN', icon: 'bi-box-seam',    label: 'Chờ Shipper lấy' },
+                    { ma: 'DANG_GIAO_HANG',      icon: 'bi-truck',       label: 'Đang giao hàng' },
+                    { ma: 'HOAN_THANH',          icon: 'bi-check-circle',label: 'Hoàn thành' }
+                ];
+                if (currentMa === 'CHO_THANH_TOAN') steps[0] = { ma: 'CHO_THANH_TOAN', icon: 'bi-credit-card', label: 'Chờ TT Online' };
+                if (currentMa === 'DA_XAC_NHAN') steps[0] = { ma: 'DA_XAC_NHAN', icon: 'bi-box-arrow-in-down', label: 'Đang xử lý (Gói hàng)' };
             }
 
             let html = '';
-            if (currentMa === 'DA_HUY') {
+            if (['DA_HUY', 'GIAO_THAT_BAI', 'TU_CHOI_TRA_HANG', 'DANG_HOAN_HANG', 'DA_HOAN_HANG'].includes(currentMa)) {
                 html = steps.map(s => `
                     <div class="th-step pending">
                         <div class="th-icon"><i class="${s.icon}"></i></div>
@@ -1160,14 +1245,14 @@
                     </div>`).join('');
                 html += `
                     <div class="th-step">
-                        <div class="th-icon" style="background:#dc3545; border-color:#f8d7da;"><i class="bi bi-x-lg"></i></div>
-                        <div class="th-label" style="color:#dc3545;">ĐÃ HỦY</div>
+                        <div class="th-icon" style="background:#ef4444; border-color:#fecaca;"><i class="bi bi-x-lg"></i></div>
+                        <div class="th-label" style="color:#dc2626;">${this.getStatusBadge({ma: currentMa, ten: currentMa})}</div>
                     </div>`;
             } else {
                 let isPassed = true;
                 html = steps.map(s => {
                     let cls = '', timeStr = '';
-                    if (s.ma === currentMa) { cls = '';        timeStr = 'Đang xử lý'; isPassed = false; }
+                    if (s.ma === currentMa) { cls = '';        timeStr = 'Đang ở bước này'; isPassed = false; }
                     else if (isPassed)      { cls = '';        timeStr = 'Đã hoàn tất'; }
                     else                    { cls = 'pending'; timeStr = ''; }
                     return `
@@ -1187,16 +1272,16 @@
             const currentMa  = hd.trangThaiMa;
             const paymentMethod = hd.phuongThucThanhToan ? hd.phuongThucThanhToan.toUpperCase() : '';
 
-            if (currentMa === 'DA_HUY' || currentMa === 'HOAN_THANH' || currentMa === 'DA_DOI' || currentMa === 'DA_TRA') {
+            // 🌟 ĐÃ FIX: Điều kiện ẩn hành động mở rộng dựa trên các mã kết thúc quy trình mới
+            if (currentMa === 'DA_HUY' || currentMa === 'HOAN_THANH' || currentMa === 'DA_DOI' || currentMa === 'DA_TRA' || currentMa === 'GIAO_THAT_BAI' || currentMa === 'DA_HOAN_HANG' || currentMa === 'TU_CHOI_TRA_HANG') {
                 footer.innerHTML = `<div style="width:100%; text-align:center; font-weight:700; color:#888; padding:10px 0;">Đơn hàng đã đóng.</div>`;
                 return;
             }
 
-            // 🌟 ĐÃ SỬA BUG 1: Chỉ hiện nút HỦY ĐƠN khi ở trạng thái CHO_XAC_NHAN hoặc CHO_THANH_TOAN
             if (currentMa === 'CHO_XAC_NHAN' || currentMa === 'CHO_THANH_TOAN') {
                 const btnHuy = document.createElement('button');
                 btnHuy.className = 'btn btn-secondary';
-                btnHuy.style.cssText = 'flex:1; color:#dc3545; border-color:#dc3545; height:38px !important; border-radius:4px;';
+                btnHuy.style.cssText = 'flex:1; color:#dc2626; border-color:#dc2626; height:44px !important; border-radius:4px; font-size:12px;';
                 btnHuy.innerHTML = '<i class="bi bi-x-lg"></i> HỦY ĐƠN';
                 btnHuy.onclick = () => this.huyDon(hd.id);
                 footer.appendChild(btnHuy);
@@ -1205,7 +1290,7 @@
             if (currentMa === 'CHO_XAC_NHAN' && paymentMethod === 'CHUYEN_KHOAN') {
                 const btnReqPay = document.createElement('button');
                 btnReqPay.className = 'btn';
-                btnReqPay.style.cssText = 'flex:1.5; background:#f59e0b; color:#fff; height:38px !important; border:none; border-radius:4px;';
+                btnReqPay.style.cssText = 'flex:1.5; background:#f59e0b; color:#fff; height:44px !important; border:none; border-radius:4px; font-size:12px;';
                 btnReqPay.innerHTML = '<i class="bi bi-bell-fill"></i> YÊU CẦU TT LẠI';
                 btnReqPay.onclick = () => this.requestPayment(hd.id);
                 footer.appendChild(btnReqPay);
@@ -1214,14 +1299,24 @@
             if (currentMa !== 'CHO_THANH_TOAN') {
                 const btnNext = document.createElement('button');
                 btnNext.className = 'btn';
-                btnNext.style.cssText = 'flex:2; background:#000; color:#fff; height:38px !important; border:none; border-radius:4px;';
-                btnNext.innerHTML = 'XÁC NHẬN BƯỚC TIẾP THEO <i class="bi bi-arrow-right"></i>';
+                btnNext.style.cssText = 'flex:2; background:#2563eb; color:#fff; height:44px !important; border:none; border-radius:4px; font-size:12px;';
+
+                // 🌟 ĐÃ FIX: Điều kiện hiển thị tên nút dựa trên mã DB chuẩn
+                let nextActionText = "XÁC NHẬN BƯỚC TIẾP THEO";
+                if(currentMa === 'CHO_XAC_NHAN') nextActionText = "DUYỆT & TIẾN HÀNH ĐÓNG GÓI";
+                if(currentMa === 'DA_XAC_NHAN') nextActionText = hd.hinhThucGiaoHang === 'NHAN_TAI_CUA_HANG' ? "ĐÃ GÓI XONG - CHỜ KHÁCH LẤY" : "ĐÃ GÓI XONG - GIAO CHO SHIPPER";
+                if(currentMa === 'CHO_GIAO_VAN_CHUYEN') nextActionText = "SHIPPER ĐANG ĐI GIAO";
+                if(currentMa === 'DANG_GIAO_HANG' || currentMa === 'CHO_KHACH_LAY') nextActionText = "XÁC NHẬN GIAO THÀNH CÔNG";
+                if(currentMa === 'YEU_CAU_TRA_HANG') nextActionText = "CHẤP NHẬN TRẢ HÀNG";
+                if(currentMa === 'DANG_HOAN_HANG') nextActionText = "XÁC NHẬN ĐÃ NHẬN HÀNG HOÀN";
+
+                btnNext.innerHTML = `${nextActionText} <i class="bi bi-arrow-right"></i>`;
                 btnNext.onclick = () => this.nextStatus(hd.id);
                 footer.appendChild(btnNext);
             } else {
                 const waitMsg = document.createElement('div');
-                waitMsg.style.cssText = 'flex:2; display:flex; align-items:center; justify-content:center; font-size:11px; color:#f59e0b; font-weight:800; background:#fef3c7; border-radius:4px;';
-                waitMsg.innerHTML = '<i class="bi bi-hourglass-split" style="margin-right:5px;"></i> CHỜ KHÁCH THANH TOÁN ONLINE';
+                waitMsg.style.cssText = 'flex:2; display:flex; align-items:center; justify-content:center; font-size:12px; color:#b45309; font-weight:800; background:#fefce8; border:1px solid #fde047; border-radius:4px; height:44px;';
+                waitMsg.innerHTML = '<i class="bi bi-hourglass-split" style="margin-right:8px;"></i> CHỜ KHÁCH THANH TOÁN ONLINE';
                 footer.appendChild(waitMsg);
             }
         },
@@ -1231,8 +1326,8 @@
             footer.innerHTML = '';
             const currentMa = hd.trangThaiMa;
 
-            if (currentMa !== 'HOAN_THANH' && currentMa !== 'DA_HUY' && currentMa !== 'DA_DOI' && currentMa !== 'DA_TRA') {
-                footer.innerHTML = `<div style="width:100%; text-align:center; font-weight:700; color:#888; padding:10px 0;">Hóa đơn tại quầy đang chờ thanh toán.</div>`;
+            if (!['HOAN_THANH', 'DA_HUY', 'DA_DOI', 'DA_TRA', 'TU_CHOI_TRA_HANG', 'DA_HOAN_HANG'].includes(currentMa)) {
+                footer.innerHTML = `<div style="width:100%; text-align:center; font-weight:700; color:#888; padding:10px 0;">Hóa đơn tại quầy đang chờ xử lý thanh toán.</div>`;
             } else {
                 footer.innerHTML = `<div style="width:100%; text-align:center; font-weight:700; color:#888; padding:10px 0;">Hóa đơn tại quầy đã đóng.</div>`;
             }
@@ -1251,7 +1346,6 @@
                             body: JSON.stringify({ ghiChu: "Admin chuyển trạng thái" })
                         });
 
-                        // 🌟 ĐÃ SỬA BUG 2: Hiển thị lỗi chuẩn từ Backend
                         if (!res.ok) {
                             const errData = await res.json();
                             throw new Error(errData.message || "Chuyển trạng thái thất bại");
@@ -1312,7 +1406,6 @@
                             body: JSON.stringify({ ghiChu: reason })
                         });
 
-                        // 🌟 ĐÃ SỬA BUG 2: Hiển thị lỗi chuẩn từ Backend (đặc biệt khi chặn đơn VNPay/MoMo)
                         if (!res.ok) {
                             const errData = await res.json();
                             throw new Error(errData.message || "Hủy đơn thất bại");

@@ -66,4 +66,29 @@ public interface KhuyenMaiRepository extends JpaRepository<KhuyenMai, Integer> {
             "AND km.ngayBatDau <= CURRENT_TIMESTAMP " +
             "AND km.ngayKetThuc >= CURRENT_TIMESTAMP")
     List<KhuyenMai> findActiveKhuyenMaiBySanPhamId(@org.springframework.data.repository.query.Param("spId") Integer spId);
+
+    @Query("SELECT DISTINCT k FROM KhuyenMai k " +
+            "JOIN KhuyenMaiSanPham kmsp ON k.id = kmsp.idKhuyenMai " +
+            "WHERE kmsp.idSanPhamChiTiet IN :idSanPhamChiTiets " +
+            "AND k.trangThai = true " +
+            "AND k.id != :khuyenMaiId " +
+            "AND (k.ngayBatDau <= :ngayKetThuc AND k.ngayKetThuc >= :ngayBatDau)")
+    List<KhuyenMai> checkTrungLichSku(
+            @org.springframework.data.repository.query.Param("idSanPhamChiTiets") List<Integer> idSanPhamChiTiets,
+            @org.springframework.data.repository.query.Param("ngayBatDau") java.time.LocalDateTime ngayBatDau,
+            @org.springframework.data.repository.query.Param("ngayKetThuc") java.time.LocalDateTime ngayKetThuc,
+            @org.springframework.data.repository.query.Param("khuyenMaiId") Integer khuyenMaiId
+    );
+
+    @Query("SELECT k FROM KhuyenMai k " +
+            "JOIN KhuyenMaiSanPham kmsp ON k.id = kmsp.idKhuyenMai " +
+            "WHERE (kmsp.idSanPhamChiTiet = :skuId OR kmsp.idSanPham = :productId) " +
+            "AND k.trangThai = true " +
+            "AND :now BETWEEN k.ngayBatDau AND k.ngayKetThuc " +
+            "ORDER BY k.giaTri DESC") // Ưu tiên lấy đợt sale giảm sâu nhất nếu bị trùng
+    List<KhuyenMai> findActivePromotionsForSku(
+            @org.springframework.data.repository.query.Param("productId") Integer productId,
+            @org.springframework.data.repository.query.Param("skuId") Integer skuId,
+            @org.springframework.data.repository.query.Param("now") java.time.LocalDateTime now
+    );
 }

@@ -1,4 +1,4 @@
-package com.example.bee.dtos.request;
+package com.example.bee.dto.request;
 
 import java.math.BigDecimal;
 

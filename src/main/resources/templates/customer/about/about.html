@@ -79,6 +79,15 @@
         .ab-policy-label { font-size:13px; font-weight:500; color:white; line-height:1.3; }
         .ab-policy-sub { font-size:11px; color:rgba(255,255,255,0.55); margin-top:2px; }
 
+        /* ── ANCHOR HELPER ── */
+        .ab-scroll-anchor {
+            display: block;
+            position: relative;
+            top: -90px; /* offset for fixed header */
+            visibility: hidden;
+            pointer-events: none;
+        }
+
         /* ── VALUES ── */
         .ab-values { padding:80px 60px; background:var(--white); border-bottom:1px solid var(--border); }
         .ab-section-eyebrow {
@@ -202,6 +211,8 @@
     </div>
 
     <!-- POLICY STRIP -->
+    <!-- Anchor: Giao hàng -->
+    <span id="ab-anchor-giao-hang" class="ab-scroll-anchor"></span>
     <div class="ab-policy">
         <div class="ab-policy-item">
             <div class="ab-policy-icon">
@@ -222,6 +233,8 @@
             </div>
         </div>
         <div class="ab-policy-item">
+            <!-- Anchor: Đổi trả -->
+            <span id="ab-anchor-doi-tra" class="ab-scroll-anchor"></span>
             <div class="ab-policy-icon">
                 <svg viewBox="0 0 24 24" stroke-width="1.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
             </div>
@@ -242,6 +255,8 @@
     </div>
 
     <!-- VALUES -->
+    <!-- Anchor: Vải tự nhiên -->
+    <span id="ab-anchor-vai-tu-nhien" class="ab-scroll-anchor"></span>
     <div class="ab-values">
         <div class="ab-reveal">
             <div class="ab-section-eyebrow">Cam kết của chúng tôi</div>
@@ -273,6 +288,8 @@
     </div>
 
     <!-- FAQ -->
+    <!-- Anchor: FAQ -->
+    <span id="ab-anchor-faq" class="ab-scroll-anchor"></span>
     <div class="ab-faq">
         <div class="ab-faq-grid">
             <div class="ab-faq-left ab-reveal">
@@ -302,7 +319,8 @@
                     </div>
                 </div>
 
-                <div class="ab-faq-item">
+                <!-- Anchor inline cho Đổi trả FAQ -->
+                <div class="ab-faq-item" id="ab-faq-doi-tra">
                     <button class="ab-faq-q" onclick="abToggleFaq(this)">
                         Chính sách đổi trả như thế nào?
                         <span class="ab-faq-icon"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-width="2"/></svg></span>
@@ -312,7 +330,8 @@
                     </div>
                 </div>
 
-                <div class="ab-faq-item">
+                <!-- Anchor inline cho Giao hàng FAQ -->
+                <div class="ab-faq-item" id="ab-faq-giao-hang">
                     <button class="ab-faq-q" onclick="abToggleFaq(this)">
                         Giao hàng mất bao lâu? Có giao toàn quốc không?
                         <span class="ab-faq-icon"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-width="2"/></svg></span>
@@ -362,12 +381,10 @@
         function abToggleFaq(btn) {
             const answer = btn.nextElementSibling;
             const isOpen = btn.classList.contains('open');
-            // Đóng tất cả trước
             document.querySelectorAll('#about-section .ab-faq-q.open').forEach(b => {
                 b.classList.remove('open');
                 b.nextElementSibling.classList.remove('open');
             });
-            // Nếu chưa mở thì mở
             if (!isOpen) {
                 btn.classList.add('open');
                 answer.classList.add('open');
@@ -400,6 +417,34 @@
                         if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add('visible');
                     });
                 }, 80);
+
+                // Xử lý pending scroll từ footer nav
+                if (window._pendingAboutScroll) {
+                    const t = window._pendingAboutScroll;
+                    window._pendingAboutScroll = null;
+                    setTimeout(() => window.AboutApp.scrollTo(t), 300);
+                }
+            },
+
+            scrollTo(target) {
+                const anchors = {
+                    'doi-tra':      { anchor: '#ab-anchor-doi-tra',      faq: '#ab-faq-doi-tra .ab-faq-q' },
+                    'giao-hang':    { anchor: '#ab-anchor-giao-hang',     faq: '#ab-faq-giao-hang .ab-faq-q' },
+                    'vai-tu-nhien': { anchor: '#ab-anchor-vai-tu-nhien',  faq: null },
+                    'faq':          { anchor: '#ab-anchor-faq',           faq: null },
+                };
+                const cfg = anchors[target];
+                if (!cfg) return;
+
+                const el = document.querySelector(cfg.anchor);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                if (cfg.faq) {
+                    setTimeout(() => {
+                        const btn = document.querySelector(cfg.faq);
+                        if (btn && !btn.classList.contains('open')) btn.click();
+                    }, 600);
+                }
             }
         };
     </script>

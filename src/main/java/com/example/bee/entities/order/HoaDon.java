@@ -1,14 +1,17 @@
 package com.example.bee.entities.order;
 
+import com.example.bee.constants.PhuongThucThanhToan;
 import com.example.bee.entities.customer.KhachHang;
 import com.example.bee.entities.promotion.MaGiamGia;
 import com.example.bee.entities.staff.NhanVien;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "hoa_don")
@@ -118,5 +121,21 @@ public class HoaDon {
         if (this.yeuCauDoiTras == null) return false;
         return this.yeuCauDoiTras.stream()
                 .anyMatch(yc -> "HOAN_THANH".equals(yc.getTrangThai()));
+    }
+
+    @OneToMany(mappedBy = "hoaDon")
+    @JsonIgnoreProperties("hoaDon")
+    private List<ThanhToan> thanhToans;
+
+    @Transient
+    public String getPhuongThucThanhToan() {
+        if (this.thanhToans != null && !this.thanhToans.isEmpty()) {
+            return this.thanhToans.get(0).getPhuongThuc();
+        }
+        // Dùng class Constants thay vì gõ chữ cứng
+        if (this.loaiHoaDon != null && this.loaiHoaDon == 0) {
+            return PhuongThucThanhToan.TIEN_MAT;
+        }
+        return PhuongThucThanhToan.COD;
     }
 }
