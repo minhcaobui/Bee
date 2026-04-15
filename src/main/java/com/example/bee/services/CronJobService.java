@@ -40,7 +40,7 @@ public class CronJobService {
      * Cú pháp Cron: Giây - Phút - Giờ - Ngày - Tháng - Thứ
      * "0 0 2 * * ?" nghĩa là: Chạy vào đúng 02:00:00 sáng, mỗi ngày.
      */
-    @Scheduled(fixedDelay = 1800000)
+    @Scheduled(cron = "0 0 2 * * ?")
     public void donDepTonKhoTamGiu() {
         System.out.println("[CRONJOB - " + LocalDateTime.now() + "] Đang dọn dẹp hàng bị giam tại POS...");
         sanPhamChiTietRepository.resetAllSoLuongTamGiu();
@@ -60,54 +60,61 @@ public class CronJobService {
 
         TrangThaiHoaDon trangThaiHuy = trangThaiHoaDonRepository.findByMa("DA_HUY");
 
-        if (trangThaiHuy == null) return;
+        if (trangThaiHuy == null) {
+            System.out.println("[CRONJOB] Lỗi: Không tìm thấy trạng thái DA_HUY trong hệ thống.");
+            return;
+        }
 
-        List<HoaDon> danhSachHoaDon = hoaDonRepository.findAll();
+        // 🔴 ĐÃ TỐI ƯU: Database tự lọc và chỉ trả về đúng những đơn "CHO_THANH_TOAN" và đã quá hạn 15 phút
+        List<HoaDon> danhSachHoaDonViPham = hoaDonRepository.findByTrangThaiHoaDon_MaAndNgayTaoBefore("CHO_THANH_TOAN", timeLimit);
         int count = 0;
 
-        for (HoaDon hd : danhSachHoaDon) {
-            if (hd.getTrangThaiHoaDon() != null
-                    && "CHO_THANH_TOAN".equals(hd.getTrangThaiHoaDon().getMa())
-                    && hd.getNgayTao() != null
-                    && hd.getNgayTao().before(timeLimit)) {
-
-                List<HoaDonChiTiet> chiTiets = hoaDonChiTietRepository.findByHoaDon_Id(hd.getId());
-                for (HoaDonChiTiet ct : chiTiets) {
-                    SanPhamChiTiet spct = ct.getSanPhamChiTiet();
-                    if (spct != null) {
-                        spct.setSoLuong(spct.getSoLuong() + ct.getSoLuong());
-                        sanPhamChiTietRepository.save(spct);
-                    }
+        for (HoaDon hd : danhSachHoaDonViPham) {
+            // 1. Hoàn lại số lượng tồn kho
+            List<HoaDonChiTiet> chiTiets = hoaDonChiTietRepository.findByHoaDon_Id(hd.getId());
+            for (HoaDonChiTiet ct : chiTiets) {
+                SanPhamChiTiet spct = ct.getSanPhamChiTiet();
+                if (spct != null) {
+                    spct.setSoLuong(spct.getSoLuong() + ct.getSoLuong());
+                    sanPhamChiTietRepository.save(spct);
                 }
-                if (hd.getMaGiamGia() != null) {
-                    com.example.bee.entities.promotion.MaGiamGia voucher = hd.getMaGiamGia();
-                    int luotMoi = voucher.getLuotSuDung() - 1;
-                    if (luotMoi >= 0) {
-                        voucher.setLuotSuDung(luotMoi);
-                        if (!voucher.getTrangThai() && voucher.getNgayKetThuc().isAfter(java.time.LocalDateTime.now())) {
-                            voucher.setTrangThai(true);
-                        }
-                        maGiamGiaRepo.save(voucher);
-                    }
-                }
-
-                hd.setTrangThaiHoaDon(trangThaiHuy);
-                String ghiChuCu = hd.getGhiChu() != null ? hd.getGhiChu() : "";
-                hd.setGhiChu(ghiChuCu + " [Hệ thống tự động hủy do quá hạn thanh toán 15 phút]");
-                hoaDonRepository.save(hd);
-
-                LichSuHoaDon ls = new LichSuHoaDon();
-                ls.setHoaDon(hd);
-                ls.setTrangThaiHoaDon(trangThaiHuy);
-                ls.setGhiChu("Hệ thống tự động hủy đơn hàng và hoàn tồn kho do quá 15 phút không thanh toán.");
-                ls.setNgayTao(new java.util.Date());
-                lichSuHoaDonRepository.save(ls);
-                count++;
             }
+
+            // 2. Hoàn lại lượt sử dụng Mã giảm giá (nếu có)
+            if (hd.getMaGiamGia() != null) {
+                com.example.bee.entities.promotion.MaGiamGia voucher = hd.getMaGiamGia();
+                int luotMoi = voucher.getLuotSuDung() - 1;
+                if (luotMoi >= 0) {
+                    voucher.setLuotSuDung(luotMoi);
+                    // Kích hoạt lại Voucher nếu nó bị tắt do vừa hết lượt dùng
+                    if (!voucher.getTrangThai() && voucher.getNgayKetThuc().isAfter(java.time.LocalDateTime.now())) {
+                        voucher.setTrangThai(true);
+                    }
+                    maGiamGiaRepo.save(voucher);
+                }
+            }
+
+            // 3. Đổi trạng thái hóa đơn thành ĐÃ HỦY
+            hd.setTrangThaiHoaDon(trangThaiHuy);
+            String ghiChuCu = hd.getGhiChu() != null ? hd.getGhiChu() : "";
+            hd.setGhiChu(ghiChuCu + " [Hệ thống tự động hủy do quá hạn thanh toán 15 phút]");
+            hoaDonRepository.save(hd);
+
+            // 4. Lưu lịch sử hóa đơn
+            LichSuHoaDon ls = new LichSuHoaDon();
+            ls.setHoaDon(hd);
+            ls.setTrangThaiHoaDon(trangThaiHuy);
+            ls.setGhiChu("Hệ thống tự động hủy đơn hàng và hoàn tồn kho do quá 15 phút không thanh toán.");
+            ls.setNgayTao(new java.util.Date());
+            lichSuHoaDonRepository.save(ls);
+
+            count++;
         }
 
         if (count > 0) {
-            System.out.println("[CRONJOB] Đã hủy tự động và hoàn kho thành công " + count + " đơn hàng.");
+            System.out.println("[CRONJOB] Đã hủy tự động và hoàn kho thành công " + count + " đơn hàng bị treo.");
+        } else {
+            System.out.println("[CRONJOB] Không có đơn hàng treo nào cần xử lý.");
         }
     }
 }

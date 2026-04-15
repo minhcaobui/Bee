@@ -20,23 +20,19 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final TaiKhoanRepository taiKhoanRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String tenDangNhap) throws UsernameNotFoundException {
-        // Đồng bộ hàm tìm kiếm theo tiếng Việt (dùng findByTenDangNhap thay vì findByLoginIdentifier)
-        TaiKhoan taiKhoan = taiKhoanRepository.findByTenDangNhap(tenDangNhap)
+    public UserDetails loadUserByUsername(String loginIdentifier) throws UsernameNotFoundException {
+        TaiKhoan taiKhoan = taiKhoanRepository.findByLoginIdentifier(loginIdentifier)
                 .orElseThrow(() -> new UsernameNotFoundException("Tài khoản không tồn tại"));
-
         if (taiKhoan.getTrangThai() != null && !taiKhoan.getTrangThai()) {
             throw new DisabledException("Tài khoản của bạn đã bị khóa!");
         }
-
-        String maVaiTro = taiKhoan.getVaiTro().getMa();
-        SimpleGrantedAuthority quyen = new SimpleGrantedAuthority(maVaiTro);
-
+        String roleCode = taiKhoan.getVaiTro().getMa();
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority(roleCode);
         return new User(
                 taiKhoan.getTenDangNhap(),
                 taiKhoan.getMatKhau(),
                 true, true, true, true,
-                Collections.singletonList(quyen)
+                Collections.singletonList(authority)
         );
     }
 }

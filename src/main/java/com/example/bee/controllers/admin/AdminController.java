@@ -62,7 +62,7 @@ public class AdminController {
 
     @GetMapping("/reviews")
     public String reviews() {
-        return "admin/reviews";
+        return "admin/product/reviews";
     }
 
     @GetMapping("/returns")

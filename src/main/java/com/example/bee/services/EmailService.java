@@ -14,14 +14,14 @@ public class EmailService {
     private final JavaMailSender mailSender;
 
     @Async
-    public void guiEmailXacNhanDonHang(HoaDon hoaDon, String emailKhachHang) {
+    public void sendOrderConfirmationEmail(HoaDon hoaDon, String emailKhachHang) {
         if (emailKhachHang == null || emailKhachHang.trim().isEmpty()) {
             return;
         }
         try {
-            SimpleMailMessage tinNhan = new SimpleMailMessage();
-            tinNhan.setTo(emailKhachHang);
-            tinNhan.setSubject("BEEMATE - Xác nhận đơn hàng #" + hoaDon.getMa());
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(emailKhachHang);
+            message.setSubject("BEEMATE - Xác nhận đơn hàng #" + hoaDon.getMa());
 
             // 1. Lấy tên người nhận từ ThongTinGiaoHang (JSON) hoặc KhachHang
             String tenNguoiNhan = "Khách hàng";
@@ -44,7 +44,7 @@ public class EmailService {
             }
 
             // 3. Xây dựng nội dung Email
-            String noiDung = "Xin chào " + tenNguoiNhan + ",\n\n"
+            String text = "Xin chào " + tenNguoiNhan + ",\n\n"
                     + "Cảm ơn bạn đã mua sắm tại BeeMate! Đơn hàng của bạn đã được ghi nhận thành công.\n\n"
                     + "📦 MÃ ĐƠN HÀNG: " + hoaDon.getMa() + "\n"
                     + "📍 Địa chỉ nhận hàng: " + diaChiGiaoHang + "\n"
@@ -52,8 +52,8 @@ public class EmailService {
                     + "Chúng tôi sẽ sớm liên hệ để cập nhật thông tin và giao hàng cho bạn.\n\n"
                     + "Trân trọng,\nĐội ngũ BeeMate.";
 
-            tinNhan.setText(noiDung);
-            mailSender.send(tinNhan);
+            message.setText(text);
+            mailSender.send(message);
 
         } catch (Exception e) {
             System.err.println("Lỗi khi gửi email xác nhận đơn hàng: " + e.getMessage());

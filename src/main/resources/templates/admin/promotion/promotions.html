@@ -63,12 +63,13 @@
         /* Drawer */
         .overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 999; display: none; }
         .overlay.show { display: block; }
-        .drawer { position: fixed; top: 0; right: -600px; width: 600px; height: 100vh; background: #fff; border-left: 1px solid var(--gray-200); z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1); }
+        /* Đã điều chỉnh width từ 600px lên 850px và right từ -600px sang -850px */
+        .drawer { position: fixed; top: 0; right: -850px; width: 850px; height: 100vh; background: #fff; border-left: 1px solid var(--gray-200); z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1); }
         .drawer.show { right: 0; }
         .drawer-header { padding: 15px 20px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center;}
         .drawer-title { font-size: 15px; font-weight: 800; text-transform: uppercase; margin: 0; }
-        .drawer-body { flex: 1; padding: 20px; overflow-y: auto; }
-        .drawer-footer { padding: 15px 20px; border-top: 1px solid var(--gray-200); display: flex; gap: 10px; background: #fafafa;}
+        .drawer-body { flex: 1; padding: 20px 30px; overflow-y: auto; }
+        .drawer-footer { padding: 15px 30px; border-top: 1px solid var(--gray-200); display: flex; gap: 10px; background: #fafafa;}
 
         /* Form & Switch */
         .form-group { margin-bottom: 18px; }
@@ -106,11 +107,16 @@
         @keyframes beeToastSlideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
         /* Product Select Box */
-        .product-select-box { border: 1px solid var(--gray-200); border-radius: 4px; height: 250px; overflow-y: auto; background: #fff; margin-top: 5px;}
+        .product-select-box { border: 1px solid var(--gray-200); border-radius: 4px; height: 350px; overflow-y: auto; background: #fff; margin-top: 5px;}
         .product-table { width: 100%; border-collapse: collapse; }
         .product-table th { position: sticky; top: 0; background: #fafafa; padding: 10px; text-align: left; font-size: 11px; font-weight: 800; border-bottom: 1px solid var(--gray-200); z-index: 1;}
         .product-table td { padding: 10px; border-bottom: 1px solid var(--gray-200); font-size: 13px; }
         .empty-state { text-align: center; padding: 40px; color: #888; font-size: 13px; font-style: italic;}
+
+        /* Product & SKU Row Styles */
+        .prod-row td { background: #fafafa; border-bottom: 2px solid #e4e4e7; }
+        .sku-row td { background: #fff; border-bottom: 1px dashed #eee; }
+        .sku-row:last-child td { border-bottom: none; }
 
         /* Progress Bar */
         .qty-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: help; min-width: 140px; padding: 5px 0; }
@@ -129,46 +135,20 @@
            RESPONSIVE MOBILE CHO TRANG KHUYẾN MÃI & VOUCHER
            ========================================================================== */
         @media (max-width: 768px) {
-            /* Thanh Header & Tabs */
             .actions-bar { flex-direction: column; align-items: stretch; gap: 15px; padding-bottom: 10px; }
             .tabs { width: 100%; border-bottom: 1px solid var(--gray-200); margin-bottom: 0; }
-
-            /* Khung tìm kiếm ngoài màn hình chính */
             .search-wrapper { flex-direction: column; align-items: stretch; }
             .filter-select { width: 100%; }
             .btn-reset { width: 100% !important; margin-top: 5px; }
-
-            /* Khung Drawer (Slide Panel Thêm/Sửa) */
             .drawer { width: 100% !important; right: -100% !important; }
             .drawer.show { right: 0 !important; }
-
-            /* Chuyển các cặp Input xếp ngang thành dọc (Dựa vào cấu trúc flex inline) */
             .drawer-body > div[style*="display: flex; gap: 15px"],
-            #voucherFields > div[style*="display: flex"] {
-                flex-direction: column !important;
-                gap: 12px !important;
-            }
+            #voucherFields > div[style*="display: flex"] { flex-direction: column !important; gap: 12px !important; }
             .drawer-body > div[style*="display: flex"] > *,
-            #voucherFields > div[style*="display: flex"] > * {
-                flex: none !important;
-                width: 100% !important;
-            }
-
-            /* Tìm kiếm sản phẩm trong Drawer Sale */
-            .form-group > div[style*="display:flex; justify-content:space-between"] {
-                flex-direction: column;
-                align-items: stretch !important;
-                gap: 10px;
-            }
-            .form-group > div[style*="display:flex; justify-content:space-between"] .search-box {
-                width: 100% !important;
-            }
-            #selectedCount {
-                align-self: flex-start;
-                margin-bottom: 5px;
-            }
-
-            /* Phân trang */
+            #voucherFields > div[style*="display: flex"] > * { flex: none !important; width: 100% !important; }
+            .form-group > div[style*="display:flex; justify-content:space-between"] { flex-direction: column; align-items: stretch !important; gap: 10px; }
+            .form-group > div[style*="display:flex; justify-content:space-between"] .search-box { width: 100% !important; }
+            #selectedCount { align-self: flex-start; margin-bottom: 5px; }
             .pagination-wrapper { flex-direction: column; gap: 10px; align-items: center; }
         }
     </style>
@@ -180,7 +160,6 @@
             <button class="tab active" data-tab="voucher" onclick="window.PromotionApp.switchTab('voucher')" id="tabVoucher">
                 <i class="bi bi-ticket-perforated-fill"></i> MÃ GIẢM GIÁ (Voucher)
             </button>
-
             <button class="tab" data-tab="sale" onclick="window.PromotionApp.switchTab('sale')" id="tabSale">
                 <i class="bi bi-tags-fill"></i> ĐỢT KHUYẾN MÃI (Sale)
             </button>
@@ -211,8 +190,7 @@
 
     <div class="table-wrapper">
         <table>
-            <thead id="thead">
-            </thead>
+            <thead id="thead"></thead>
             <tbody id="tbody"></tbody>
         </table>
     </div>
@@ -243,8 +221,7 @@
         <div style="display: flex; gap: 15px;">
             <div class="form-group" style="flex: 1;">
                 <label class="form-label">Loại giảm</label>
-                <select id="kmLoai" class="form-input" style="cursor: pointer;" onchange="window.PromotionApp.handleTypeChange()">
-                </select>
+                <select id="kmLoai" class="form-input" style="cursor: pointer;" onchange="window.PromotionApp.handleTypeChange()"></select>
             </div>
             <div class="form-group" style="flex: 1;">
                 <label class="form-label">Giá trị giảm <span style="color:red">*</span></label>
@@ -305,22 +282,22 @@
         </div>
 
         <div id="saleFields">
-            <h5 style="font-weight:800; margin: 25px 0 15px 0; font-size:13px; color:#000;">2. CHỌN SẢN PHẨM ÁP DỤNG SALE</h5>
+            <h5 style="font-weight:800; margin: 25px 0 15px 0; font-size:13px; color:#000;">2. CHỌN SẢN PHẨM / SKU ÁP DỤNG</h5>
             <div class="form-group">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                     <div class="search-box" style="width: 60%;">
                         <i class="bi bi-search"></i>
-                        <input type="text" id="productSearchDrawer" class="form-input" placeholder="Tìm sản phẩm..." style="padding-left: 32px;" oninput="window.PromotionApp.filterProducts(this.value)">
+                        <input type="text" id="productSearchDrawer" class="form-input" placeholder="Tìm tên hoặc mã SP/SKU..." style="padding-left: 32px;" oninput="window.PromotionApp.filterProducts(this.value)">
                     </div>
-                    <span style="color:#2563eb; font-size:12px; font-weight:700;" id="selectedCount">(Đã chọn: 0)</span>
+                    <span style="color:#2563eb; font-size:12px; font-weight:700;" id="selectedCount">(Đã chọn: 0 SP)</span>
                 </div>
                 <div class="product-select-box">
                     <table class="product-table">
                         <thead>
                         <tr>
                             <th style="width:40px; text-align: center;"><input type="checkbox" id="checkAll" style="width:14px; height:14px; cursor:pointer;"></th>
-                            <th>MÃ SP</th>
-                            <th>TÊN SẢN PHẨM</th>
+                            <th>MÃ SP / SKU</th>
+                            <th>TÊN SẢN PHẨM / PHÂN LOẠI</th>
                         </tr>
                         </thead>
                         <tbody id="productTableBody"></tbody>
@@ -371,7 +348,7 @@
         }, 3500);
     };
 
-    window.toastConfirm = function (title, message, onConfirm) {
+    window.toastConfirm = function (title, message, onConfirm, onCancel) {
         let container = document.getElementById('beeToastHost');
         if (!container) {
             container = document.createElement('div');
@@ -407,6 +384,7 @@
         el.querySelector('#toastCancel').onclick = () => {
             el.classList.add('hiding');
             setTimeout(() => el.remove(), 300);
+            if(onCancel) onCancel();
         };
     };
 
@@ -414,7 +392,9 @@
         state: {
             activeTab: 'voucher',
             page: 0, size: 10, totalPages: 0, q: '', trangThai: '',
-            editingId: null, products: [], selectedProductIds: []
+            editingId: null,
+            products: [], filteredProducts: [],
+            selectedProductIds: [], selectedSkuIds: []
         },
 
         init: function () {
@@ -430,10 +410,16 @@
 
             document.getElementById('checkAll').onclick = (e) => {
                 if (document.getElementById('checkAll').disabled) return;
-                document.querySelectorAll('.product-check').forEach(chk => {
-                    chk.checked = e.target.checked;
-                    this.toggleProductSelection(parseInt(chk.value), e.target.checked);
+                const isChecked = e.target.checked;
+                this.state.filteredProducts.forEach(p => {
+                    if (isChecked) {
+                        if (!this.state.selectedProductIds.includes(p.id)) this.state.selectedProductIds.push(p.id);
+                    } else {
+                        this.state.selectedProductIds = [];
+                        this.state.selectedSkuIds = [];
+                    }
                 });
+                this.renderProductSelectionTable(this.state.filteredProducts);
             };
         },
 
@@ -489,17 +475,14 @@
             try {
                 const res = await fetch(url);
                 const data = await res.json();
-
                 if(activeTab === 'sale') this.renderSaleTable(data.content || []);
                 else this.renderVoucherTable(data.content || []);
-
                 this.renderPagination(data);
             } catch (e) {
                 window.toast("Hệ thống gặp sự cố khi tải danh sách dữ liệu.", "error");
             }
         },
 
-        // 🌟 ÁP DỤNG PHÂN TRANG ... ĐỒNG BỘ
         renderPagination: function(data) {
             this.state.totalPages = data.totalPages || 0;
             const container = document.getElementById('paginationContainer');
@@ -510,7 +493,6 @@
             }
 
             let html = `<div class="pagination-info">Hiển thị ${data.numberOfElements}/${data.totalElements} bản ghi</div><div class="pagination">`;
-
             html += `<button class="page-number" ${this.state.page === 0 ? 'disabled' : ''} onclick="window.PromotionApp.changePage(${this.state.page - 1})"><i class="bi bi-chevron-left"></i></button>`;
 
             const current = this.state.page + 1;
@@ -544,9 +526,7 @@
                     html += `<button class="page-number ${activeClass}" onclick="window.PromotionApp.changePage(${pageIndex})">${i}</button>`;
                 }
             }
-
             html += `<button class="page-number" ${this.state.page === this.state.totalPages - 1 ? 'disabled' : ''} onclick="window.PromotionApp.changePage(${this.state.page + 1})"><i class="bi bi-chevron-right"></i></button></div>`;
-
             container.innerHTML = html;
         },
 
@@ -586,7 +566,6 @@
 
             tbody.innerHTML = list.map((item, index) => {
                 const fm = new Intl.NumberFormat('vi-VN');
-
                 let typeLabel = '';
                 if (item.loaiGiamGia === 'PERCENT') typeLabel = '<span class="badge-type">Phần trăm</span>';
                 else if (item.loaiGiamGia === 'FREESHIP') typeLabel = '<span class="badge-type" style="background:#dbeafe; color:#2563eb;"><i class="bi bi-truck"></i> Freeship</span>';
@@ -642,7 +621,6 @@
             const isVoucher = this.state.activeTab === 'voucher';
 
             if (!keepValue) { input.value = ''; }
-
             if (type === 'PERCENT') {
                 input.placeholder = "Ví dụ: 10 (%)";
                 document.getElementById('groupMaxGiam').style.display = isVoucher ? 'block' : 'none';
@@ -658,10 +636,11 @@
         openDrawer: function (mode) {
             this.state.editingId = null;
             this.state.selectedProductIds = [];
+            this.state.selectedSkuIds = [];
             this.setFormState(false);
 
             const isSale = this.state.activeTab === 'sale';
-            document.getElementById('drawerTitle').innerText = isSale ? "THÊM ĐỢT SALE (SẢN PHẨM)" : "THÊM VOUCHER MỚI";
+            document.getElementById('drawerTitle').innerText = isSale ? "THÊM ĐỢT SALE (SẢN PHẨM & SKU)" : "THÊM VOUCHER MỚI";
 
             const typeSelect = document.getElementById('kmLoai');
             if (isSale) {
@@ -675,6 +654,7 @@
             document.getElementById('voucherFields').style.display = isSale ? 'none' : 'block';
             document.getElementById('productSearchDrawer').style.display = isSale ? 'block' : 'none';
             document.getElementById('checkAll').style.display = isSale ? 'inline-block' : 'none';
+            document.getElementById('checkAll').checked = false;
 
             ['kmMa','kmTen','kmGiaTri','vGiaTriToiDa','vDieuKien','vSoLuong','kmNgayBatDau','kmNgayKetThuc'].forEach(id => {
                 const el = document.getElementById(id);
@@ -683,8 +663,8 @@
             document.getElementById('kmCongDon').checked = true;
 
             if (isSale) {
-                this.renderProductSelectionTable(this.state.products);
-                document.getElementById('selectedCount').innerText = '(Đã chọn: 0)';
+                this.state.filteredProducts = [...this.state.products];
+                this.renderProductSelectionTable(this.state.filteredProducts);
             }
 
             document.getElementById('drawer').classList.add('show');
@@ -724,7 +704,6 @@
                 document.getElementById('kmGiaTri').value = giaTri ? new Intl.NumberFormat('en-US').format(giaTri) : '';
 
                 this.handleTypeChange(true);
-
                 const formatTime = (t) => t ? t.substring(0, 16) : '';
                 document.getElementById('kmNgayBatDau').value = formatTime(item.ngayBatDau);
                 document.getElementById('kmNgayKetThuc').value = formatTime(item.ngayKetThuc);
@@ -738,8 +717,10 @@
                     document.getElementById('checkAll').style.display = 'inline-block';
 
                     this.state.selectedProductIds = data.productIds || [];
-                    document.getElementById('selectedCount').innerText = `(Đã chọn: ${this.state.selectedProductIds.length})`;
-                    this.renderProductSelectionTable(this.state.products);
+                    this.state.selectedSkuIds = data.skuIds || [];
+
+                    this.state.filteredProducts = [...this.state.products];
+                    this.renderProductSelectionTable(this.state.filteredProducts);
                 } else {
                     document.getElementById('saleFields').style.display = 'none';
                     document.getElementById('voucherFields').style.display = 'block';
@@ -768,7 +749,6 @@
             } catch(e) { window.toast("Truy xuất thông tin thất bại.", "error"); }
         },
 
-        // 🌟 BỔ SUNG TOAST CONFIRM KHI LƯU
         saveItem: async function () {
             const formatDateTime = (val) => {
                 if (!val) return null;
@@ -794,8 +774,8 @@
             if (new Date(ngayKetThuc) <= new Date(ngayBatDau)) { window.toast('Kết thúc phải sau Bắt đầu.', 'warning'); return; }
             if (giaTriRaw === null) { window.toast('Vui lòng nhập định mức chiết khấu.', 'warning'); return; }
 
-            if(isSale && this.state.selectedProductIds.length === 0) {
-                window.toast('Bạn chưa chọn sản phẩm nào để áp dụng Sale!', 'warning');
+            if(isSale && this.state.selectedProductIds.length === 0 && this.state.selectedSkuIds.length === 0) {
+                window.toast('Bạn chưa chọn sản phẩm hoặc phân loại (SKU) nào để áp dụng Sale!', 'warning');
                 return;
             }
 
@@ -815,14 +795,13 @@
                     payload.loai = loaiRaw;
                     payload.giaTri = giaTriRaw;
                     payload.idSanPhams = this.state.selectedProductIds;
+                    payload.idSanPhamChiTiets = this.state.selectedSkuIds; // BẮT BUỘC ĐẨY LÊN API
                     payload.choPhepCongDon = true;
                 } else {
                     payload.maCode = document.getElementById('kmMa').value.trim();
-
                     if (loaiRaw === 'PERCENT') payload.loaiGiamGia = 'PERCENT';
                     else if (loaiRaw === 'FREESHIP') payload.loaiGiamGia = 'FREESHIP';
                     else payload.loaiGiamGia = 'FIXED';
-
                     payload.giaTriGiamGia = giaTriRaw;
                     payload.giaTriGiamGiaToiDa = (loaiRaw === 'PERCENT') ? cleanMoney('vGiaTriToiDa', null) : null;
                     payload.dieuKien = cleanMoney('vDieuKien', 0);
@@ -865,7 +844,7 @@
             document.querySelectorAll('#drawer input, #drawer select').forEach(el => el.disabled = disabled);
             document.getElementById('btnSave').style.display = disabled ? 'none' : 'block';
             document.getElementById('checkAll').disabled = disabled;
-            document.querySelectorAll('.product-check').forEach(chk => chk.disabled = disabled);
+            document.querySelectorAll('.product-check, .sku-check').forEach(chk => chk.disabled = disabled);
         },
 
         openView: async function(id) {
@@ -875,11 +854,21 @@
             document.getElementById('drawerTitle').innerText = isSale ? "CHI TIẾT ĐỢT SALE" : "CHI TIẾT VOUCHER";
 
             if (isSale) {
-                const selectedOnly = this.state.products.filter(p => this.state.selectedProductIds.includes(p.id));
+                // Chỉ render ra những dòng đang được tick
+                const selectedOnly = this.state.products.map(p => {
+                    const isProdSelected = this.state.selectedProductIds.includes(p.id);
+                    const selectedSkus = p.skus ? p.skus.filter(s => this.state.selectedSkuIds.includes(s.id) || isProdSelected) : [];
+
+                    if (isProdSelected || selectedSkus.length > 0) {
+                        return { ...p, skus: selectedSkus };
+                    }
+                    return null;
+                }).filter(p => p !== null);
+
                 this.renderProductSelectionTable(selectedOnly);
                 document.getElementById('productSearchDrawer').style.display = 'none';
                 document.getElementById('checkAll').style.display = 'none';
-                document.getElementById('selectedCount').innerText = `(Sản phẩm áp dụng: ${selectedOnly.length})`;
+                document.getElementById('selectedCount').innerText = `(Chỉ hiển thị các mục đang áp dụng)`;
             }
         },
 
@@ -887,7 +876,6 @@
             const originalState = !el.checked;
             const isSale = this.state.activeTab === 'sale';
 
-            // 🌟 ĐÃ FIX: Gọi window.toastConfirm thay vì this.toastConfirm
             window.toastConfirm("Đổi trạng thái", "Xác nhận thay đổi trạng thái kích hoạt của chương trình này?", async () => {
                     const endpoint = isSale ? `/api/khuyen-mai/${id}/trang-thai` : `/api/vouchers/${id}/trang-thai`;
                     const parent = el.closest('.switch-sm');
@@ -903,18 +891,15 @@
                             this.loadData();
                         } else {
                             window.toast(data.message || "Lỗi cập nhật.", 'error');
-                            el.checked = originalState; // Hoàn tác lại trạng thái cũ trên UI nếu lỗi
+                            el.checked = originalState;
                         }
                     } catch (e) {
                         window.toast("Lỗi kết nối.", "error");
-                        el.checked = originalState; // Hoàn tác lại trạng thái cũ trên UI nếu lỗi mạng
+                        el.checked = originalState;
                     }
                     finally { parent.classList.remove('loading'); }
                 },
-                () => {
-                    // 🌟 ĐÃ FIX: Nếu người dùng bấm Hủy (Cancel) thì hoàn tác lại cái nút switch ngay lập tức
-                    el.checked = originalState;
-                }
+                () => { el.checked = originalState; }
             );
         },
 
@@ -928,22 +913,80 @@
         resetFilters: function() { this.state.q=''; this.state.trangThai=''; document.getElementById('search').value=''; document.getElementById('fTrangThaiFilter').value=''; this.loadData(); },
         closeDrawer: function () { document.getElementById('drawer').classList.remove('show'); document.getElementById('overlay').classList.remove('show'); },
 
-        loadProducts: async function () { try { const res = await fetch('/api/khuyen-mai/san-pham'); this.state.products = await res.json(); } catch(e){} },
+        loadProducts: async function () {
+            try {
+                const res = await fetch('/api/khuyen-mai/san-pham');
+                this.state.products = await res.json();
+                this.state.filteredProducts = [...this.state.products];
+            } catch(e){}
+        },
+
         filterProducts: function(key) {
             const low = key.toLowerCase();
-            this.renderProductSelectionTable(this.state.products.filter(p => p.ma.toLowerCase().includes(low) || p.ten.toLowerCase().includes(low)));
+            this.state.filteredProducts = this.state.products.filter(p => {
+                const matchProduct = p.ma.toLowerCase().includes(low) || p.ten.toLowerCase().includes(low);
+                const matchSku = p.skus && p.skus.some(s => s.sku.toLowerCase().includes(low) || s.ten.toLowerCase().includes(low));
+                return matchProduct || matchSku;
+            });
+            this.renderProductSelectionTable(this.state.filteredProducts);
         },
+
+        // Render phân cấp Sản phẩm -> SKU
         renderProductSelectionTable: function (data) {
-            document.getElementById('productTableBody').innerHTML = data.map(p => `<tr>
-                <td style="text-align:center;"><input type="checkbox" class="product-check" style="width:14px; height:14px; cursor:pointer;" value="${p.id}" ${this.state.selectedProductIds.includes(p.id)?'checked':''} onchange="window.PromotionApp.toggleProductSelection(${p.id}, this.checked)"></td>
-                <td style="font-weight:800; color:#555;">${p.ma}</td>
-                <td style="font-weight:600;">${p.ten}</td>
-            </tr>`).join('');
+            let html = '';
+            data.forEach(p => {
+                const isProdChecked = this.state.selectedProductIds.includes(p.id);
+                html += `<tr class="prod-row">
+                    <td style="text-align:center;"><input type="checkbox" class="product-check" style="width:14px; height:14px; cursor:pointer;" value="${p.id}" ${isProdChecked?'checked':''} onchange="window.PromotionApp.toggleSelection(${p.id}, this.checked, 'PRODUCT')"></td>
+                    <td style="font-weight:800; color:#000;">${p.ma}</td>
+                    <td style="font-weight:700;">${p.ten}</td>
+                </tr>`;
+
+                if (p.skus && p.skus.length > 0) {
+                    p.skus.forEach(sku => {
+                        const isSkuChecked = this.state.selectedSkuIds.includes(sku.id);
+                        // Khi Sản phẩm được tick -> SKU tự động được tick theo và disable để tránh người dùng chọn lộn xộn
+                        const disabledState = isProdChecked ? 'disabled checked' : '';
+                        const actuallyChecked = isProdChecked || isSkuChecked ? 'checked' : '';
+
+                        html += `<tr class="sku-row">
+                            <td style="text-align:center;"><input type="checkbox" class="sku-check" style="width:12px; height:12px; cursor:pointer;" value="${sku.id}" ${actuallyChecked} ${disabledState} onchange="window.PromotionApp.toggleSelection(${sku.id}, this.checked, 'SKU')"></td>
+                            <td style="padding-left: 25px; font-size: 12px; color: #666;">↳ ${sku.sku}</td>
+                            <td style="font-size: 12px; color: #666;">Phân loại: <span style="font-weight:600;">${sku.ten}</span></td>
+                        </tr>`;
+                    });
+                }
+            });
+            document.getElementById('productTableBody').innerHTML = html;
+            this.updateSelectedCount();
         },
-        toggleProductSelection: function (id, checked) {
-            if(checked) { if (!this.state.selectedProductIds.includes(id)) this.state.selectedProductIds.push(id); }
-            else { this.state.selectedProductIds = this.state.selectedProductIds.filter(x => x !== id); }
-            document.getElementById('selectedCount').innerText = `(Đã chọn: ${this.state.selectedProductIds.length})`;
+
+        toggleSelection: function (id, checked, type) {
+            if (type === 'PRODUCT') {
+                if (checked) {
+                    if (!this.state.selectedProductIds.includes(id)) this.state.selectedProductIds.push(id);
+                } else {
+                    this.state.selectedProductIds = this.state.selectedProductIds.filter(x => x !== id);
+                }
+                // Nếu đổi trạng thái sản phẩm thì render lại nguyên bảng để khóa/mở các checkbox SKU con
+                this.renderProductSelectionTable(this.state.filteredProducts);
+            } else {
+                if (checked) {
+                    if (!this.state.selectedSkuIds.includes(id)) this.state.selectedSkuIds.push(id);
+                } else {
+                    this.state.selectedSkuIds = this.state.selectedSkuIds.filter(x => x !== id);
+                }
+                this.updateSelectedCount();
+            }
+        },
+
+        updateSelectedCount: function() {
+            const pCount = this.state.selectedProductIds.length;
+            const sCount = this.state.selectedSkuIds.length;
+            let text = `(Đã chọn: ${pCount} Sản phẩm`;
+            if (sCount > 0) text += `, ${sCount} SKU lẻ`;
+            text += `)`;
+            document.getElementById('selectedCount').innerText = text;
         }
     };
 

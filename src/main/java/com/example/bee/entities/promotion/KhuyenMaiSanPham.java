@@ -24,4 +24,7 @@ public class KhuyenMaiSanPham {
 
     @Column(name = "id_san_pham")
     private Integer idSanPham;
+
+    @Column(name = "id_san_pham_chi_tiet")
+    private Integer idSanPhamChiTiet;
 }

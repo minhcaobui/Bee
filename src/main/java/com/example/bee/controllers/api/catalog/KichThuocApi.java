@@ -1,52 +1,113 @@
 package com.example.bee.controllers.api.catalog;
 
 import com.example.bee.entities.catalog.KichThuoc;
-import com.example.bee.services.KichThuocService;
+import com.example.bee.repositories.catalog.KichThuocRepository;
+import com.example.bee.repositories.products.SanPhamChiTietRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/kich-thuoc")
 @RequiredArgsConstructor
 public class KichThuocApi {
 
-    private final KichThuocService kichThuocService;
+    private final SanPhamChiTietRepository sanPhamChiTietRepository;
+    private final KichThuocRepository kichThuocRepository;
 
-    @GetMapping
-    public Page<KichThuoc> layDanhSach(@RequestParam(required = false) String q,
-                                       @RequestParam(required = false) Boolean trangThai,
-                                       @RequestParam(defaultValue = "0") int page,
-                                       @RequestParam(defaultValue = "10") int size) {
-        return kichThuocService.layDanhSach(q, trangThai, page, size);
+    private String generateMa() {
+        String timeStr = String.valueOf(System.currentTimeMillis());
+        return "KT" + timeStr.substring(timeStr.length() - 5);
     }
 
-    @GetMapping("/hoat-dong")
-    public ResponseEntity<List<KichThuoc>> layTatCaHoatDong() {
-        return ResponseEntity.ok(kichThuocService.layTatCaHoatDong());
+    @GetMapping
+    public Page<KichThuoc> list(@RequestParam(required = false) String q,
+                                @RequestParam(required = false) Boolean trangThai,
+                                @RequestParam(defaultValue = "0") int page,
+                                @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        return kichThuocRepository.search(q, trangThai, pageable);
+    }
+
+    @GetMapping("/all-active")
+    public ResponseEntity<List<KichThuoc>> getAllActive() {
+        return ResponseEntity.ok(kichThuocRepository.findByTrangThaiTrue());
     }
 
     @GetMapping("/{id}")
-    public KichThuoc layChiTiet(@PathVariable Integer id) {
-        return kichThuocService.layChiTiet(id);
+    public KichThuoc getDetail(@PathVariable Integer id) {
+        return kichThuocRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy dữ liệu!"));
     }
 
     @PostMapping
-    public ResponseEntity<KichThuoc> taoMoi(@Valid @RequestBody KichThuoc body) {
-        return ResponseEntity.ok(kichThuocService.taoMoi(body));
+    public ResponseEntity<KichThuoc> create(@Valid @RequestBody KichThuoc body) {
+        String ten = body.getTen() != null ? body.getTen().trim() : "";
+        String ma = (body.getMa() == null || body.getMa().trim().isEmpty())
+                ? generateMa()
+                : body.getMa().trim().toUpperCase();
+        if (ma.length() > 20 || !ma.matches("^[A-Z0-9_]*$")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã max 20, cho phép dấu '_'");
+        }
+        if (ten.isEmpty() || ten.length() > 100)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên size max 100!");
+        if (kichThuocRepository.existsByTenIgnoreCase(ten))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Size này có rồi!");
+        if (kichThuocRepository.existsByMaIgnoreCase(ma))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã size bị trùng!");
+        KichThuoc entity = new KichThuoc();
+        entity.setMa(ma);
+        entity.setTen(ten);
+        entity.setTrangThai(body.getTrangThai() != null ? body.getTrangThai() : true);
+        return ResponseEntity.ok(kichThuocRepository.save(entity));
     }
 
     @PutMapping("/{id}")
-    public KichThuoc capNhat(@PathVariable Integer id, @Valid @RequestBody KichThuoc body) {
-        return kichThuocService.capNhat(id, body);
+    public KichThuoc update(@PathVariable Integer id, @Valid @RequestBody KichThuoc body) {
+        KichThuoc entity = kichThuocRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        String newTen = body.getTen() != null ? body.getTen().trim() : "";
+        if (newTen.isEmpty() || newTen.length() > 100)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên size max 100!");
+        if (!entity.getTen().equalsIgnoreCase(newTen) && kichThuocRepository.existsByTenIgnoreCase(newTen)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Trùng tên size!");
+        }
+        Boolean newTrangThai = body.getTrangThai();
+        if (newTrangThai != null && !newTrangThai && Boolean.TRUE.equals(entity.getTrangThai())) {
+            boolean isUsed = sanPhamChiTietRepository.existsByKichThuoc_IdAndTrangThaiTrue(id);
+            if (isUsed) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Không thể ngừng hoạt động! Đang có sản phẩm sử dụng kích thước này.");
+            }
+        }
+
+        entity.setTen(newTen);
+        entity.setTrangThai(newTrangThai != null ? newTrangThai : entity.getTrangThai());
+        return kichThuocRepository.save(entity);
     }
 
     @PatchMapping("/{id}/trang-thai")
-    public ResponseEntity<?> doiTrangThai(@PathVariable Integer id) {
-        return kichThuocService.doiTrangThai(id);
+    public ResponseEntity<?> toggleStatus(@PathVariable Integer id) {
+        KichThuoc kichThuoc = kichThuocRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if (kichThuoc.getTrangThai() != null && kichThuoc.getTrangThai() == true) {
+            boolean isUsed = sanPhamChiTietRepository.existsByKichThuoc_IdAndTrangThaiTrue(id);
+            if (isUsed) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "message", "Không thể tắt size này! Đang có sản phẩm chi tiết sử dụng kích thước này."
+                ));
+            }
+        }
+        kichThuoc.setTrangThai(!kichThuoc.getTrangThai());
+        kichThuocRepository.save(kichThuoc);
+        return ResponseEntity.ok().build();
     }
 }

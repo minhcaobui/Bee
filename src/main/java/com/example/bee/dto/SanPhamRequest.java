@@ -1,4 +1,4 @@
-package com.example.bee.dtos;
+package com.example.bee.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

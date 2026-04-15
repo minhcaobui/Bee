@@ -1,4 +1,4 @@
-package com.example.bee.dtos;
+package com.example.bee.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -20,4 +20,6 @@ public class PromotionRequest {
     private Boolean choPhepCongDon = false;
     private Boolean trangThai = true;
     private List<Integer> idSanPhams;
+    private List<Integer> idSanPhamChiTiets;
+
 }

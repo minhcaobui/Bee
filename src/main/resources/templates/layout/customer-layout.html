@@ -4,160 +4,294 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Beemate</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cstyle%3Epath%7Bfill%3A%231A1A1A%7D%40media(prefers-color-scheme%3Adark)%7Bpath%7Bfill%3A%23F7F5F2%7D%7D%3C%2Fstyle%3E%3Cpath d='M244.26,92.26a11.5,11.5,0,0,0-4-6.42A76.08,76.08,0,0,0,183.08,64h-3.41A60.27,60.27,0,0,0,128,24,60.27,60.27,0,0,0,76.33,64H72.92a76.08,76.08,0,0,0-57.22,21.84,11.5,11.5,0,0,0-4,6.42,12.09,12.09,0,0,0,2.19,9.45A76,76,0,0,0,60,128a76,76,0,0,0-46.07,26.29,12.09,12.09,0,0,0-2.19,9.45,11.5,11.5,0,0,0,4,6.42A76.08,76.08,0,0,0,72.92,192h5.51A59.5,59.5,0,0,0,128,232a59.5,59.5,0,0,0,49.57-40h5.51a76.08,76.08,0,0,0,57.22-21.84,11.5,11.5,0,0,0,4,6.42,12.09,12.09,0,0,0-2.19-9.45A76,76,0,0,0,196,128a76,76,0,0,0,46.07-26.29A12.09,12.09,0,0,0,244.26,92.26ZM144,206.11A36.19,36.19,0,0,1,128,208a36.19,36.19,0,0,1-16-1.89V168h32Zm0-62.11H112V112h32Zm-49.8-63.53a76.35,76.35,0,0,0,17.8,11.83v21.88a36,36,0,0,1-16,33.82Zm67.6,0a36,36,0,0,1,16,33.82V126.18A76.35,76.35,0,0,0,161.8,80.47ZM128,48a36.19,36.19,0,0,1,16,1.89V72H112V49.89A36.19,36.19,0,0,1,128,48ZM39.5,108.57A52,52,0,0,1,72.92,88h2.62a98,98,0,0,1-10.74,24H36A52.17,52.17,0,0,1,39.5,108.57Zm33.42,63.43A52,52,0,0,1,39.5,147.43,52.17,52.17,0,0,1,36,128H64.8a98,98,0,0,1,10.74,24H72.92ZM183.08,168h-2.62a98,98,0,0,1-10.74-24H220a52.17,52.17,0,0,1-3.5,19.43A52,52,0,0,1,183.08,168Zm33.42-36.57A52,52,0,0,1,183.08,88h2.62a98,98,0,0,1,10.74,24H220A52.17,52.17,0,0,1,216.5,131.43Z'%2F%3E%3C%2Fsvg%3E">    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cstyle%3Epath%7Bfill%3A%231A1A1A%7D%40media(prefers-color-scheme%3Adark)%7Bpath%7Bfill%3A%23F7F5F2%7D%7D%3C%2Fstyle%3E%3Cpath d='M244.26,92.26a11.5,11.5,0,0,0-4-6.42A76.08,76.08,0,0,0,183.08,64h-3.41A60.27,60.27,0,0,0,128,24,60.27,60.27,0,0,0,76.33,64H72.92a76.08,76.08,0,0,0-57.22,21.84,11.5,11.5,0,0,0-4,6.42,12.09,12.09,0,0,0,2.19,9.45A76,76,0,0,0,60,128a76,76,0,0,0-46.07,26.29,12.09,12.09,0,0,0-2.19,9.45,11.5,11.5,0,0,0,4,6.42A76.08,76.08,0,0,0,72.92,192h5.51A59.5,59.5,0,0,0,128,232a59.5,59.5,0,0,0,49.57-40h5.51a76.08,76.08,0,0,0,57.22-21.84,11.5,11.5,0,0,0,4,6.42,12.09,12.09,0,0,0-2.19-9.45A76,76,0,0,0,196,128a76,76,0,0,0,46.07-26.29A12.09,12.09,0,0,0,244.26,92.26ZM144,206.11A36.19,36.19,0,0,1,128,208a36.19,36.19,0,0,1-16-1.89V168h32Zm0-62.11H112V112h32Zm-49.8-63.53a76.35,76.35,0,0,0,17.8,11.83v21.88a36,36,0,0,1-16,33.82Zm67.6,0a36,36,0,0,1,16,33.82V126.18A76.35,76.35,0,0,0,161.8,80.47ZM128,48a36.19,36.19,0,0,1,16,1.89V72H112V49.89A36.19,36.19,0,0,1,128,48ZM39.5,108.57A52,52,0,0,1,72.92,88h2.62a98,98,0,0,1-10.74,24H36A52.17,52.17,0,0,1,39.5,108.57Zm33.42,63.43A52,52,0,0,1,39.5,147.43,52.17,52.17,0,0,1,36,128H64.8a98,98,0,0,1,10.74,24H72.92ZM183.08,168h-2.62a98,98,0,0,1-10.74-24H220a52.17,52.17,0,0,1-3.5,19.43A52,52,0,0,1,183.08,168Zm33.42-36.57A52,52,0,0,1,183.08,88h2.62a98,98,0,0,1,10.74,24H220A52.17,52.17,0,0,1,216.5,131.43Z'%2F%3E%3C%2Fsvg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
+        /* ── TOKENS ── */
         :root {
-            --bg: #F7F5F2; --white: #FFFFFF; --text: #1A1A1A;
-            --muted: #8A8A8A; --accent: #3D5A4C; --accent-light: #5a7d6c;
+            --bg: #F7F5F2;
+            --white: #FFFFFF;
+            --text: #1A1A1A;
+            --muted: #8A8A8A;
+            --accent: #3D5A4C;
+            --accent-light: #A8C2B5;
+            --footer-bg: #24332C;
             --card-shadow: 0 2px 20px rgba(0,0,0,0.06);
             --card-shadow-hover: 0 8px 40px rgba(0,0,0,0.12);
-
-            /* 🌟 2. KHAI BÁO BIẾN FONT CHỮ CHUNG TẠI ĐÂY */
             --main-font: 'DM Sans', sans-serif;
         }
 
-        * { margin:0; padding:0; box-sizing:border-box; }
-        html { scroll-behavior:smooth; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { background: var(--bg); color: var(--text); font-weight: 400; overflow-x: hidden; font-family: var(--main-font); }
 
-        /* Chỉnh lại body (Bỏ phần khai báo font cũ đi) */
-        body { background:var(--bg); color:var(--text); font-weight:400; overflow-x:hidden; font-family: var(--main-font); }
+        /* ── HEADER ── */
+        #site-header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: var(--bg); transition: background .4s ease, box-shadow .4s ease;
+        }
+        #site-header.scrolled {
+            background: rgba(247,245,242,0.98);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 2px 20px rgba(0,0,0,.05);
+        }
 
-        /*.cursor { width:10px; height:10px; background:var(--accent); border-radius:50%; position:fixed; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); transition:transform .1s ease,width .3s ease,height .3s ease,background .3s ease; }*/
-        /*.cursor-ring { width:36px; height:36px; border:1px solid var(--accent); border-radius:50%; position:fixed; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); transition:transform .18s ease,width .3s ease,height .3s ease,opacity .3s ease; opacity:.5; }*/
+        /* ── NAV ── */
+        nav {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            padding: 0 60px; height: 68px;
+        }
 
-        #site-header { position:fixed; top:0; left:0; right:0; z-index:100; background:var(--bg); transition:background .4s ease,box-shadow .4s ease; }
-        #site-header.scrolled { background:rgba(247,245,242,0.98); backdrop-filter:blur(12px); box-shadow:0 2px 20px rgba(0,0,0,.05); }
-        nav { display:flex; align-items:center; justify-content:space-between; padding:20px 60px; }
-        .logo { font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:600; letter-spacing:.12em; color:var(--text); text-decoration:none; text-transform:uppercase; flex:1; }
-        .logo span { color:var(--accent); }
-        .nav-links { display:flex; gap:40px; list-style:none; justify-content:center; flex:2; }
-        .nav-links a { font-size:13px; letter-spacing:.08em; color:var(--text); text-decoration:none; font-weight:400; text-transform:uppercase; position:relative; padding-bottom:2px; }
-        .nav-links a::after { content:''; position:absolute; bottom:0; left:0; width:0; height:1px; background:var(--accent); transition:width .3s ease; }
-        .nav-links a:hover::after { width:100%; }
-        .nav-actions { display:flex; gap:24px; align-items:center; justify-content:flex-end; flex:1; }
-        .cart-icon { position:relative; cursor:none; }
-        .cart-badge { position:absolute; top:-6px; right:-6px; width:16px; height:16px; background:var(--accent); border-radius:50%; font-size:9px; color:white; display:none; align-items:center; justify-content:center; font-weight:500; }
+        .logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 26px; font-weight: 600;
+            letter-spacing: .12em; color: var(--text);
+            text-decoration: none; text-transform: uppercase; flex: 1;
+        }
+        .logo span { color: var(--accent); }
 
-        /* NOTIFICATION & POPUP */
-        .notif-wrap { position:relative; cursor:none; }
-        .notif-bell-btn { background:none; border:none; cursor:none; color:var(--text); display:flex; align-items:center; padding:0; line-height:1; }
-        .notif-bell-btn i { font-size:17px; }
-        .notif-badge { position:absolute; top:-6px; right:-6px; width:16px; height:16px; background:#c08060; border-radius:50%; font-size:9px; color:white; display:flex; align-items:center; justify-content:center; font-weight:500; font-family:'DM Sans',sans-serif; pointer-events:none; transition:opacity .3s,transform .3s; }
-        .notif-dropdown { position:absolute; top:calc(100% + 16px); right:-12px; width:360px; background:var(--white); box-shadow:0 8px 40px rgba(0,0,0,.12); z-index:200; opacity:0; transform:translateY(-8px); pointer-events:none; transition:opacity .25s ease,transform .25s ease; border-radius: 4px; }
-        .notif-dropdown.open { opacity:1; transform:translateY(0); pointer-events:all; }
-        .notif-dropdown::before { content:''; position:absolute; top:-6px; right:18px; width:12px; height:12px; background:var(--white); transform:rotate(45deg); box-shadow:-2px -2px 5px rgba(0,0,0,.04); }
-        .notif-header { padding:18px 20px 14px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(0,0,0,.06); }
-        .notif-header-title { font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--text); font-weight:600; }
+        .nav-links {
+            display: flex; gap: 40px; list-style: none;
+            justify-content: center; flex: 2;
+        }
+        .nav-links a {
+            font-size: 12px; letter-spacing: .1em; color: var(--text);
+            text-decoration: none; font-weight: 400; text-transform: uppercase;
+            position: relative; padding-bottom: 3px;
+        }
+        .nav-links a::after {
+            content: ''; position: absolute; bottom: 0; left: 0;
+            width: 0; height: 1px; background: var(--accent);
+            transition: width .3s ease;
+        }
+        .nav-links a:hover::after { width: 100%; }
+
+        /* ── NAV ACTIONS ── */
+        .nav-actions {
+            display: flex; align-items: center;
+            justify-content: flex-end; flex: 1; gap: 0;
+        }
+
+        /* Utility group: search + track */
+        .nav-util-group {
+            display: flex; align-items: center; gap: 20px; padding-right: 20px;
+        }
+
+        /* Divider */
+        .nav-divider {
+            width: 1px; height: 18px;
+            background: rgba(0,0,0,0.12); margin-right: 20px; flex-shrink: 0;
+        }
+
+        /* Account group: user + bell + cart */
+        .nav-account-group {
+            display: flex; align-items: center; gap: 20px;
+        }
+
+        .nav-icon-btn {
+            background: none; border: none; cursor: pointer;
+            color: var(--text); font-size: 17px;
+            display: flex; align-items: center; padding: 0;
+            transition: color .2s ease;
+        }
+        .nav-icon-btn:hover { color: var(--accent); }
+
+        /* Cart */
+        .cart-icon { position: relative; cursor: pointer; }
+        .cart-icon i { font-size: 19px; color: var(--text); transition: color .2s; }
+        .cart-icon:hover i { color: var(--accent); }
+        .cart-badge {
+            position: absolute; top: -6px; right: -7px;
+            width: 16px; height: 16px; background: var(--accent);
+            border-radius: 50%; font-size: 9px; color: white;
+            display: none; align-items: center; justify-content: center; font-weight: 500;
+        }
+
+        /* Notification */
+        .notif-wrap { position: relative; }
+        .notif-bell-btn {
+            background: none; border: none; cursor: pointer;
+            color: var(--text); display: flex; align-items: center;
+            padding: 0; font-size: 17px; transition: color .2s;
+        }
+        .notif-bell-btn:hover { color: var(--accent); }
+        .notif-badge {
+            position: absolute; top: -6px; right: -6px;
+            width: 16px; height: 16px; background: #c08060;
+            border-radius: 50%; font-size: 9px; color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 500; font-family: var(--main-font);
+            pointer-events: none; transition: opacity .3s, transform .3s;
+        }
+
+        /* Notif dropdown */
+        .notif-dropdown {
+            position: absolute; top: calc(100% + 16px); right: -12px;
+            width: 360px; background: var(--white);
+            box-shadow: 0 8px 40px rgba(0,0,0,.12); z-index: 200;
+            opacity: 0; transform: translateY(-8px); pointer-events: none;
+            transition: opacity .25s ease, transform .25s ease; border-radius: 4px;
+        }
+        .notif-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: all; }
+        .notif-dropdown::before {
+            content: ''; position: absolute; top: -6px; right: 18px;
+            width: 12px; height: 12px; background: var(--white);
+            transform: rotate(45deg); box-shadow: -2px -2px 5px rgba(0,0,0,.04);
+        }
+        .notif-header {
+            padding: 18px 20px 14px;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid rgba(0,0,0,.06);
+        }
+        .notif-header-title { font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--text); font-weight: 600; }
         .notif-header-actions { display: flex; gap: 12px; }
-        .notif-action-btn { font-size:10px; color:var(--muted); background:none; border:none; cursor:pointer; letter-spacing:.05em; font-family:'DM Sans',sans-serif; text-transform: uppercase; font-weight:500; transition:color .2s; }
-        .notif-action-btn:hover { color:var(--text); }
+        .notif-action-btn {
+            font-size: 10px; color: var(--muted); background: none; border: none;
+            cursor: pointer; letter-spacing: .05em; font-family: var(--main-font);
+            text-transform: uppercase; font-weight: 500; transition: color .2s;
+        }
+        .notif-action-btn:hover { color: var(--text); }
         .notif-action-btn.delete-all:hover { color: #dc2626; }
-        .notif-tabs { display:flex; border-bottom:1px solid rgba(0,0,0,.06); }
-        .notif-tab { flex:1; padding:10px 0; font-size:11px; letter-spacing:.1em; text-transform:uppercase; background:none; border:none; font-family:'DM Sans',sans-serif; color:var(--muted); font-weight:500; cursor:pointer; border-bottom:2px solid transparent; transition:color .2s,border-color .2s; position:relative; bottom:-1px; }
-        .notif-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
-        .notif-list { max-height:360px; overflow-y:auto; }
-        .notif-list::-webkit-scrollbar { width:4px; }
-        .notif-list::-webkit-scrollbar-thumb { background:rgba(0,0,0,.15); border-radius:4px; }
-        .notif-item { display:flex; gap:14px; align-items:flex-start; padding:16px 20px; border-bottom:1px solid rgba(0,0,0,.04); cursor:pointer; transition:background .2s; position:relative; }
-        .notif-item:hover { background:rgba(0,0,0,.02); }
-        .notif-item.unread { background:rgba(61,90,76,.04); }
-        .notif-item.unread::after { content:''; position:absolute; left:8px; top:50%; transform:translateY(-50%); width:6px; height:6px; border-radius:50%; background:var(--accent); }
-        .notif-icon { width:38px; height:38px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:15px; }
-        .notif-icon.order   { background:rgba(61,90,76,.1);  color:var(--accent); }
-        .notif-icon.voucher { background:rgba(192,128,96,.1); color:#c08060; }
-        .notif-icon.event   { background:rgba(26,26,26,.07);  color:var(--text); }
-        .notif-body { flex:1; min-width:0; padding-right: 20px; }
-        .notif-body-title { font-size:13px; font-weight:600; color:var(--text); margin-bottom:4px; line-height:1.35; }
-        .notif-body-desc { font-size:12px; color:var(--muted); font-weight:400; line-height:1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .notif-time { font-size:10px; color:var(--muted); letter-spacing:.04em; margin-top:6px; }
-        .notif-delete-btn { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; border-radius: 50%; background: none; border: none; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: all 0.2s; }
+        .notif-tabs { display: flex; border-bottom: 1px solid rgba(0,0,0,.06); }
+        .notif-tab {
+            flex: 1; padding: 10px 0; font-size: 11px; letter-spacing: .1em;
+            text-transform: uppercase; background: none; border: none;
+            font-family: var(--main-font); color: var(--muted); font-weight: 500;
+            cursor: pointer; border-bottom: 2px solid transparent;
+            transition: color .2s, border-color .2s; position: relative; bottom: -1px;
+        }
+        .notif-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+        .notif-list { max-height: 360px; overflow-y: auto; }
+        .notif-list::-webkit-scrollbar { width: 4px; }
+        .notif-list::-webkit-scrollbar-thumb { background: rgba(0,0,0,.15); border-radius: 4px; }
+        .notif-item {
+            display: flex; gap: 14px; align-items: flex-start;
+            padding: 16px 20px; border-bottom: 1px solid rgba(0,0,0,.04);
+            cursor: pointer; transition: background .2s; position: relative;
+        }
+        .notif-item:hover { background: rgba(0,0,0,.02); }
+        .notif-item.unread { background: rgba(61,90,76,.04); }
+        .notif-item.unread::after {
+            content: ''; position: absolute; left: 8px; top: 50%;
+            transform: translateY(-50%); width: 6px; height: 6px;
+            border-radius: 50%; background: var(--accent);
+        }
+        .notif-icon { width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+        .notif-icon.order   { background: rgba(61,90,76,.1);  color: var(--accent); }
+        .notif-icon.voucher { background: rgba(192,128,96,.1); color: #c08060; }
+        .notif-icon.event   { background: rgba(26,26,26,.07);  color: var(--text); }
+        .notif-body { flex: 1; min-width: 0; padding-right: 20px; }
+        .notif-body-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; line-height: 1.35; }
+        .notif-body-desc { font-size: 12px; color: var(--muted); font-weight: 400; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .notif-time { font-size: 10px; color: var(--muted); letter-spacing: .04em; margin-top: 6px; }
+        .notif-delete-btn {
+            position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
+            width: 28px; height: 28px; border-radius: 50%;
+            background: none; border: none; color: var(--muted);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: all 0.2s;
+        }
         .notif-item:hover .notif-delete-btn { opacity: 1; }
         .notif-delete-btn:hover { background: #fee2e2; color: #dc2626; }
-        .notif-empty { padding:60px 20px; text-align:center; font-size:13px; color:var(--muted); font-weight:400; display:none; }
-        .notif-empty i { font-size:32px; display:block; margin-bottom:12px; opacity:.3; }
+        .notif-empty { padding: 60px 20px; text-align: center; font-size: 13px; color: var(--muted); font-weight: 400; display: none; }
+        .notif-empty i { font-size: 32px; display: block; margin-bottom: 12px; opacity: .3; }
 
-        /* MỚI: CSS CHO POPUP CHI TIẾT */
-        .notif-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10500; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); animation: fadeIn 0.2s ease;}
-        .notif-modal { background: #fff; width: 420px; max-width: 90%; border-radius: 6px; padding: 32px 24px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2); transform: scale(0.95); opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; }
+        /* ── NOTIF MODAL ── */
+        .notif-modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            z-index: 10500; display: none; align-items: center; justify-content: center;
+            backdrop-filter: blur(3px);
+        }
+        .notif-modal {
+            background: #fff; width: 420px; max-width: 90%; border-radius: 6px;
+            padding: 32px 24px; text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            transform: scale(0.95); opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
         .notif-modal.open { transform: scale(1); opacity: 1; }
         .notif-modal-icon { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 20px; }
-        .notif-modal-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 600; color: var(--text); margin-bottom: 12px; }
+        .notif-modal-title { font-family: var(--main-font); font-size: 16px; font-weight: 600; margin-bottom: 10px; }
         .notif-modal-desc { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; }
         .notif-modal-time { font-size: 11px; color: #aaa; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 0.05em; }
-        .notif-modal-action { display: inline-block; padding: 14px 32px; background: var(--accent); color: #fff; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; border-radius: 4px; text-decoration: none; cursor: pointer; border: none; transition: 0.3s; }
+        .notif-modal-action {
+            display: inline-block; padding: 14px 32px; background: var(--accent);
+            color: #fff; font-size: 12px; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.1em; border-radius: 4px; text-decoration: none;
+            cursor: pointer; border: none; transition: 0.3s;
+        }
         .notif-modal-action:hover { background: #2c4238; }
-        .notif-modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 20px; color: var(--muted); cursor: pointer; transition: 0.2s; }
+        .notif-modal-close {
+            position: absolute; top: 16px; right: 16px;
+            background: none; border: none; font-size: 20px;
+            color: var(--muted); cursor: pointer; transition: 0.2s;
+        }
         .notif-modal-close:hover { color: var(--text); }
 
-        .page-selector { display:flex; gap:20px; padding:0 60px; border-top:1px solid rgba(0,0,0,.06); border-bottom:1px solid rgba(0,0,0,.06); background:var(--bg); }
-        .page-tab { padding:16px 24px 16px 0; font-size:12px; letter-spacing:.1em; text-transform:uppercase; border:none; background:none; font-family:'DM Sans',sans-serif; color:var(--muted); font-weight:500; border-bottom:2px solid transparent; transition:color .2s ease,border-color .2s ease; display:flex; align-items:center; gap:8px; text-decoration:none; }
-        .page-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
-        .page-tab:hover { color:var(--text); }
+        /* ── PAGE SELECTOR ── */
+        .page-selector {
+            display: flex; padding: 0 60px;
+            border-top: 1px solid rgba(0,0,0,.06);
+            border-bottom: 1px solid rgba(0,0,0,.06);
+            background: var(--bg);
+        }
+        .page-tab {
+            padding: 13px 0; margin-right: 36px;
+            font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+            border: none; background: none; font-family: var(--main-font);
+            color: var(--muted); font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: color .2s ease, border-color .2s ease;
+            display: flex; align-items: center; gap: 8px;
+            text-decoration: none; white-space: nowrap;
+        }
+        .page-tab i { font-size: 13px; }
+        .page-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+        .page-tab:hover { color: var(--text); }
 
-        #content-area { padding-top:0; min-height:100vh; transition:opacity .2s ease; }
-        /* Xóa background:transparent cũ, thay bằng nền mờ để nổi bật con ong ở giữa */
+        /* ── GLOBAL LOADER ── */
         #globalLoader {
-            position: fixed; inset: 0; background: rgba(247, 245, 242, 0.85); backdrop-filter: blur(4px);
-            z-index: 99999; display: flex; align-items: center; justify-content: center;
+            position: fixed; inset: 0; background: rgba(247,245,242,0.85);
+            backdrop-filter: blur(4px); z-index: 99999;
+            display: flex; align-items: center; justify-content: center;
             opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
         }
         #globalLoader.show { opacity: 1; pointer-events: all; }
-
-        /* Tùy chỉnh kích thước con ong */
         .bee-loader-svg { width: 50px; height: 50px; }
-
-        /* Kỹ thuật vẽ nét SVG (Line Drawing Animation) */
         .bee-loader-svg path {
-            fill: transparent; /* Bỏ màu nền ban đầu */
-            stroke: var(--accent); /* Đặt màu nét vẽ là màu xanh rêu */
-            stroke-width: 4; /* Độ dày của nét */
-            stroke-dasharray: 2000; /* Phân mảnh nét vẽ (để dài hơn chu vi hình) */
-            stroke-dashoffset: 2000; /* Đẩy nét vẽ ra khỏi hình */
+            fill: transparent; stroke: var(--accent); stroke-width: 4;
+            stroke-dasharray: 2000; stroke-dashoffset: 2000;
             animation: drawBee 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
-
-        /* Vòng lặp: Vẽ nét -> Đổ màu -> Xóa đi làm lại */
         @keyframes drawBee {
-            0% { stroke-dashoffset: 2000; fill: transparent; }
+            0%  { stroke-dashoffset: 2000; fill: transparent; }
             60% { stroke-dashoffset: 0; fill: transparent; }
             80% { stroke-dashoffset: 0; fill: var(--accent); }
-            100% { stroke-dashoffset: 0; fill: var(--accent); opacity: 0; }
-        }@keyframes loadProgress { 0%{width:0;margin-left:0} 50%{width:100%;margin-left:0} 100%{width:0;margin-left:100%} }
-
-        .cart-toast { position:fixed; bottom:100px; right:40px; background:var(--text); color:white; padding:20px 28px; display:flex; align-items:center; gap:16px; font-size:13px; transform:translateY(100px); opacity:0; transition:transform .4s ease,opacity .4s ease; z-index:9999; pointer-events:none; max-width:320px; }
-        .cart-toast.show { transform:translateY(0); opacity:1; pointer-events:all; }
-        .toast-icon { width:32px; height:32px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-        .toast-icon svg { width:16px; height:16px; stroke:white; fill:none; }
-
-        footer { background:var(--text); color:rgba(255,255,255,.7); padding:80px 60px 40px; }
-        .footer-top { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:60px; margin-bottom:60px; }
-        .footer-brand { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:300; color:white; margin-bottom:16px; }
-        .footer-brand span { color:var(--accent-light); }
-        .footer-desc { font-size:14px; line-height:1.8; font-weight:300; max-width:280px; color:rgba(255,255,255,.5); }
-        .footer-col-title { font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:white; font-weight:500; margin-bottom:20px; }
-        .footer-links { list-style:none; }
-        .footer-links li { margin-bottom:12px; }
-        .footer-links a { font-size:14px; color:rgba(255,255,255,.5); text-decoration:none; font-weight:300; transition:color .2s ease; }
-        .footer-links a:hover { color:white; }
-        .footer-bottom { padding-top:32px; border-top:1px solid rgba(255,255,255,.08); display:flex; justify-content:space-between; align-items:center; }
-        .footer-copy { font-size:12px; color:rgba(255,255,255,.35); font-weight:300; }
-        .footer-socials { display:flex; gap:20px; }
-        .footer-socials a { font-size:12px; letter-spacing:.1em; color:rgba(255,255,255,.4); text-decoration:none; text-transform:uppercase; transition:color .2s ease; cursor:none; }
-        .footer-socials a:hover { color:var(--accent-light); }
-
-        @keyframes cartBounce {
-            0% { transform: scale(1); }
-            40% { transform: scale(1.3) translateY(-3px); }
-            60% { transform: scale(0.9); }
-            80% { transform: scale(1.15); }
-            100% { transform: scale(1); }
-        }
-        .cart-icon.bounce i, .cart-icon.bounce .cart-badge {
-            animation: cartBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            100%{ stroke-dashoffset: 0; fill: var(--accent); opacity: 0; }
         }
 
+        /* ── TOAST ── */
+        .cart-toast {
+            position: fixed; bottom: 100px; right: 40px;
+            background: var(--text); color: white;
+            padding: 20px 28px; display: flex; align-items: center; gap: 16px;
+            font-size: 13px; transform: translateY(100px); opacity: 0;
+            transition: transform .4s ease, opacity .4s ease;
+            z-index: 9999; pointer-events: none; max-width: 320px;
+        }
+        .cart-toast.show { transform: translateY(0); opacity: 1; pointer-events: all; }
+        .toast-icon {
+            width: 32px; height: 32px; background: var(--accent);
+            border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; flex-shrink: 0;
+        }
+        .toast-icon svg { width: 16px; height: 16px; stroke: white; fill: none; }
+
+        /* ── BACK TO TOP ── */
         #back-to-top {
             position: fixed; bottom: 30px; right: 30px;
             width: 44px; height: 44px; background: var(--text); color: white;
@@ -169,213 +303,396 @@
         #back-to-top.show { opacity: 1; transform: translateY(0); pointer-events: all; }
         #back-to-top:hover { background: var(--accent); transform: translateY(-4px); }
 
-        @media (max-width:900px) {
-            nav { padding:20px 24px; }
-            .page-selector { padding:0 24px; }
-            .footer-top { grid-template-columns:1fr 1fr; }
-            .notif-dropdown { right:-60px; width:300px; }
+        /* ── CART BOUNCE ── */
+        @keyframes cartBounce {
+            0%  { transform: scale(1); }
+            40% { transform: scale(1.3) translateY(-3px); }
+            60% { transform: scale(0.9); }
+            80% { transform: scale(1.15); }
+            100%{ transform: scale(1); }
+        }
+        .cart-icon.bounce i,
+        .cart-icon.bounce .cart-badge {
+            animation: cartBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        @media (max-width: 768px) {
-            nav {
-                padding: 16px 20px;
-            }
-            .nav-links {
-                display: none; /* Ẩn menu ngang, sau này có thể làm hamburger */
-            }
-            .logo {
-                font-size: 22px;
-            }
-            .nav-actions {
-                gap: 16px;
-            }
-            .page-selector {
-                padding: 0 16px;
-                gap: 0;
-                overflow-x: auto;
-                scrollbar-width: none;
-            }
-            .page-selector::-webkit-scrollbar {
-                display: none;
-            }
-            .page-tab {
-                padding: 14px 16px 14px 0;
-                font-size: 11px;
-                white-space: nowrap;
-            }
-            .footer-top {
-                grid-template-columns: 1fr;
-                gap: 32px;
-            }
-            footer {
-                padding: 48px 24px 32px;
-            }
-            .footer-bottom {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 16px;
-            }
-            .notif-dropdown {
-                width: 280px;
-                right: -80px;
-            }
-            .cart-toast {
-                right: 16px;
-                left: 16px;
-                bottom: 80px;
-                max-width: unset;
-            }
+        /* ── HAMBURGER ── */
+        .hamburger-btn {
+            display: none; flex-direction: column; gap: 5px;
+            background: none; border: none; cursor: pointer; padding: 4px;
         }
-
-        @media (max-width: 375px) {
-            nav {
-                padding: 14px 16px;
-            }
-            .logo {
-                font-size: 20px;
-            }
-            .nav-actions {
-                gap: 12px;
-            }
-            .page-tab {
-                font-size: 10px;
-                padding: 12px 12px 12px 0;
-            }
-            #bee-chat-window {
-                width: calc(100vw - 24px);
-                right: 12px;
-                bottom: 80px;
-            }
-            #bee-chat-btn {
-                right: 70px;
-                bottom: 24px;
-            }
-            #back-to-top {
-                bottom: 24px;
-                right: 24px;
-            }
+        .hamburger-btn span {
+            display: block; width: 22px; height: 1.5px;
+            background: var(--text); transition: all 0.3s ease; border-radius: 2px;
         }
+        .hamburger-btn.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+        .hamburger-btn.open span:nth-child(2) { opacity: 0; }
+        .hamburger-btn.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
 
+        /* ── MOBILE DRAWER ── */
+        .mobile-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+            z-index: 998; opacity: 0; pointer-events: none;
+            transition: opacity 0.3s; backdrop-filter: blur(2px);
+        }
+        .mobile-overlay.show { opacity: 1; pointer-events: all; }
 
-        /*body.cursor-ready,*/
-        /*body.cursor-ready a,*/
-        /*body.cursor-ready button,*/
-        /*body.cursor-ready [style*="cursor:none"],*/
-        /*body.cursor-ready .logo,*/
-        /*body.cursor-ready .nav-links a,*/
-        /*body.cursor-ready .cart-icon,*/
-        /*body.cursor-ready .notif-bell-btn {*/
-        /*    cursor: none;*/
-        /*}*/
+        .mobile-drawer {
+            position: fixed; top: 0; right: -100%; width: 280px; height: 100%;
+            background: var(--white); z-index: 999;
+            transition: right 0.35s cubic-bezier(0.4,0,0.2,1);
+            display: flex; flex-direction: column;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.08);
+        }
+        .mobile-drawer.show { right: 0; }
+        .mobile-drawer-head {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 24px; border-bottom: 1px solid rgba(0,0,0,0.06);
+        }
+        .mobile-drawer-nav {
+            flex: 1;
+            padding: 8px 0;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: stretch;
+        }
+        .mobile-nav-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 15px 24px; font-size: 14px; color: var(--text);
+            text-decoration: none; font-weight: 400;
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+            transition: background 0.2s, color 0.2s;
+        }
+        .mobile-nav-item:hover { background: rgba(61,90,76,0.05); color: var(--accent); }
+        .mobile-nav-item i { width: 18px; color: var(--accent); font-size: 14px; text-align: center; }
 
-        /* ══════════════════════════════════════════
-   FOOTER OPTIMIZED (DEEP FOREST THEME)
-   ══════════════════════════════════════════ */
+        .mobile-drawer-footer {
+            padding: 16px 24px; border-top: 1px solid rgba(0,0,0,0.06);
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .mobile-drawer-action {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px; background: rgba(61,90,76,0.06);
+            border: none; border-radius: 8px; font-family: var(--main-font);
+            font-size: 13px; color: var(--text); cursor: pointer; font-weight: 500;
+            transition: background 0.2s;
+        }
+        .mobile-drawer-action:hover { background: rgba(61,90,76,0.12); }
+        .mobile-drawer-action i { color: var(--accent); width: 16px; text-align: center; }
+
+        /* ── CONTENT ── */
+        #content-area { padding-top: 0; min-height: 100vh; transition: opacity .2s ease; }
+
+        /* ══════════════════════════════
+           FOOTER
+        ══════════════════════════════ */
         footer {
-            background: #24332C; /* Xanh rêu đậm đồng bộ dự án */
-            color: rgba(255,255,255,0.7);
-            padding: 80px 60px 40px;
+            background: var(--footer-bg);
+            color: rgba(255,255,255,0.65);
             font-family: var(--main-font);
         }
 
-        .footer-top {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 60px;
-            margin-bottom: 60px;
+        .footer-inner {
+            align-content: center;
+            margin: 0 auto;
+            padding: 72px 60px 0;
+        }
+
+        .footer-grid {
+            display: flex;
+            justify-content: space-between;
+            gap: 40px;
+            padding-bottom: 48px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
         }
 
         .footer-brand {
             font-family: 'Cormorant Garamond', serif;
-            font-size: 32px;
-            font-weight: 500;
-            color: #FFFFFF;
-            margin-bottom: 16px;
+            font-size: 30px; font-weight: 500;
+            color: #fff; margin-bottom: 14px;
         }
-
-        .footer-brand span { color: #A8C2B5; } /* Màu xanh nhạt tạo điểm nhấn */
+        .footer-brand span { color: var(--accent-light); }
 
         .footer-desc {
-            font-size: 14px;
-            line-height: 1.8;
-            font-weight: 300;
-            max-width: 300px;
-            color: rgba(255,255,255,0.5);
+            font-size: 13.5px; line-height: 1.85;
+            font-weight: 300; color: rgba(255,255,255,0.45);
+            max-width: 280px;
+        }
+
+        .footer-contact {
+            margin-top: 24px;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .footer-contact-row {
+            display: flex; align-items: flex-start; gap: 10px;
+            font-size: 13px; color: rgba(255,255,255,0.45);
+        }
+        .footer-contact-row i {
+            color: var(--accent-light); margin-top: 2px; flex-shrink: 0; font-size: 13px;
         }
 
         .footer-col-title {
-            font-family: 'Cormorant Garamond', serif; /* Dùng font Garamond cho đồng bộ */
-            font-size: 18px;
-            letter-spacing: 0.05em;
-            color: #FFFFFF;
-            font-weight: 600;
-            margin-bottom: 24px;
-            position: relative;
+            font-family: var(--main-font);
+            font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+            color: rgba(255,255,255,0.9); font-weight: 600; margin-bottom: 20px;
+            position: relative; padding-bottom: 12px;
         }
-
-        /* Thêm gạch chân nhỏ dưới tiêu đề cho tinh tế */
         .footer-col-title::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 0;
-            width: 20px;
-            height: 1px;
-            background: #A8C2B5;
+            content: ''; position: absolute; bottom: 0; left: 0;
+            width: 18px; height: 1px; background: var(--accent-light);
         }
 
         .footer-links { list-style: none; }
-        .footer-links li { margin-bottom: 12px; }
-
+        .footer-links li { margin-bottom: 11px; }
         .footer-links a {
-            font-size: 14px;
-            color: rgba(255,255,255,0.5);
-            text-decoration: none;
-            font-weight: 400;
-            transition: all 0.3s ease;
+            font-size: 13.5px; color: rgba(255,255,255,0.45);
+            text-decoration: none; font-weight: 300;
+            transition: color 0.25s ease, padding-left 0.25s ease;
+            display: inline-block;
         }
+        .footer-links a:hover { color: #fff; padding-left: 4px; }
 
-        .footer-links a:hover {
-            color: #FFFFFF;
-            padding-left: 5px; /* Hiệu ứng dịch nhẹ khi hover */
-        }
-
-        .footer-bottom {
-            padding-top: 32px;
-            border-top: 1px solid rgba(255,255,255,0.08);
+        /* Policy strip */
+        .footer-policy {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding: 28px 0;
         }
 
+        .footer-policy-item {
+            display: flex; align-items: center; gap: 12px;
+            padding-right: 16px;
+        }
+        .footer-policy-item + .footer-policy-item {
+            border-left: 1px solid rgba(255,255,255,0.07);
+            padding-left: 16px;
+        }
+        .footer-policy-item i { color: var(--accent-light); font-size: 15px; flex-shrink: 0; }
+        .footer-policy-label {
+            font-size: 12px; font-weight: 500; color: #fff; line-height: 1.3;
+        }
+        .footer-policy-sub {
+            font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 2px;
+        }
+
+        /* Bottom bar */
+        .footer-bottom {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 22px 0;
+        }
         .footer-copy { font-size: 12px; color: rgba(255,255,255,0.3); font-weight: 300; }
+        .footer-top-link {
+            font-size: 11px; color: rgba(255,255,255,0.3);
+            text-decoration: none; letter-spacing: 0.08em; text-transform: uppercase;
+            display: flex; align-items: center; gap: 6px;
+            transition: color 0.2s;
+        }
+        .footer-top-link:hover { color: var(--accent-light); }
+        .footer-top-link i { font-size: 10px; }
 
-        .footer-socials { display: flex; gap: 24px; }
-        .footer-socials a {
-            font-size: 12px;
-            letter-spacing: 0.1em;
-            color: rgba(255,255,255,0.4);
-            text-decoration: none;
-            text-transform: uppercase;
-            transition: color 0.2s ease;
-            cursor: none;
+        /* ══ RESPONSIVE ══ */
+
+        /* Tablet */
+        @media (max-width: 900px) {
+            nav { padding: 0 24px; }
+            .page-selector { padding: 0 24px; }
+            .footer-inner { padding: 56px 32px 0; }
+            .footer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; }
+            .footer-desc { max-width: 100%; }
+            .footer-policy { grid-template-columns: 1fr 1fr; gap: 20px 0; }
+            .footer-policy-item + .footer-policy-item {
+                border-left: none; padding-left: 0;
+            }
+            .footer-policy-item:nth-child(2n) {
+                border-left: 1px solid rgba(255,255,255,0.07);
+                padding-left: 20px;
+            }
+            .notif-dropdown { right: -60px; width: 300px; }
         }
 
-        .footer-socials a:hover { color: #A8C2B5; }
-
-        /* Responsive cho Mobile */
+        /* Mobile */
         @media (max-width: 768px) {
-            footer { padding: 60px 24px 30px; }
-            .footer-top { grid-template-columns: 1fr; gap: 40px; }
-            .footer-brand { font-size: 26px; }
+            nav { height: 60px; padding: 0 20px; }
+            .logo { font-size: 22px; }
+            .nav-links { display: none; }
+
+            .nav-util-group { display: none; }
+            .nav-divider { display: none; }
+            .nav-user-btn { display: none; }
+
+            .hamburger-btn { display: flex; }
+
+            .page-selector {
+                padding: 0 16px; gap: 0;
+                overflow-x: auto; scrollbar-width: none;
+            }
+            .page-selector::-webkit-scrollbar { display: none; }
+            .page-tab {
+                flex: 1; justify-content: center; text-align: center;
+                flex-direction: column; padding: 10px 6px;
+                font-size: 9.5px; letter-spacing: .06em; gap: 4px;
+                margin-right: 0;
+            }
+            .page-tab i { font-size: 16px; }
+
+            /* Footer */
+            .footer-inner { padding: 36px 20px 0; }
+            .footer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px 16px; padding-bottom: 28px; }
+            .footer-grid > div:nth-child(1),
+            .footer-grid > div:nth-child(4) {
+                grid-column: 1 / -1;
+            }
+            .footer-col-title { margin-bottom: 14px; }
+            .footer-links li { margin-bottom: 8px; }
+            .footer-policy {
+                display: none;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+                padding: 16px 0;
+                text-align: center;
+            }
+            .footer-desc { max-width: 100%; }
+
+            .notif-dropdown { width: 280px; right: -80px; }
+            .cart-toast { right: 16px; left: 16px; bottom: 80px; max-width: unset; }
         }
 
+        @media (max-width: 375px) {
+            nav { padding: 0 16px; }
+            .logo { font-size: 20px; }
+            .page-tab { font-size: 9px; padding: 10px 4px; }
+        }
+
+        /* ── CHAT ── */
+        #bee-chat-btn {
+            position: fixed; bottom: 30px; right: 90px;
+            width: 44px; height: 44px; background: var(--accent);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 9000; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease;
+        }
+        #bee-chat-btn:hover { transform: translateY(-4px); }
+        #bee-chat-window {
+            position: fixed; bottom: 90px; right: 30px;
+            width: 340px; height: 480px; background: var(--white);
+            border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            display: none; flex-direction: column; z-index: 9998; overflow: hidden;
+            font-family: var(--main-font); border: 1px solid rgba(0,0,0,0.05);
+        }
+        #bee-chat-window.show { display: flex; animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .chat-header {
+            background: var(--accent); color: white;
+            padding: 16px 20px; display: flex; align-items: center;
+            justify-content: space-between; font-weight: 500; font-size: 14px; letter-spacing: 0.05em;
+        }
+        .chat-header .title { display: flex; align-items: center; gap: 10px; }
+        .chat-header .close-btn { cursor: pointer; font-size: 18px; transition: opacity 0.2s; }
+        .chat-header .close-btn:hover { opacity: 0.7; }
+        .chat-body {
+            flex: 1; padding: 16px; overflow-y: auto;
+            display: flex; flex-direction: column; gap: 12px; background: #fafafa;
+        }
+        .chat-body::-webkit-scrollbar { width: 4px; }
+        .chat-body::-webkit-scrollbar-thumb { background: rgba(0,0,0,.15); border-radius: 4px; }
+        .chat-msg {
+            max-width: 85%; padding: 12px 16px; border-radius: 12px;
+            font-size: 13px; line-height: 1.5; word-wrap: break-word;
+        }
+        .chat-msg.bot {
+            background: white; color: var(--text); align-self: flex-start;
+            border-bottom-left-radius: 2px; box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+        .chat-msg.user {
+            background: var(--accent); color: white; align-self: flex-end;
+            border-bottom-right-radius: 2px; box-shadow: 0 2px 5px rgba(61,90,76,0.2);
+        }
+        .chat-footer {
+            padding: 12px 16px; background: white;
+            border-top: 1px solid #eee; display: flex; gap: 10px; align-items: center;
+        }
+        .chat-footer input {
+            flex: 1; padding: 10px 16px; border: 1px solid #ddd;
+            border-radius: 20px; outline: none; font-family: var(--main-font);
+            font-size: 13px; transition: border-color 0.2s;
+        }
+        .chat-footer input:focus { border-color: var(--accent); }
+        .chat-footer button {
+            background: none; border: none; color: var(--accent);
+            cursor: pointer; font-size: 18px; display: flex; align-items: center;
+            justify-content: center; padding: 5px; transition: transform 0.2s;
+        }
+        .chat-footer button:hover { transform: scale(1.1); }
+        .typing-indicator {
+            display: none; align-self: flex-start;
+            background: white; padding: 10px 16px; border-radius: 12px;
+            border-bottom-left-radius: 2px; font-size: 12px; color: var(--muted);
+            font-style: italic; box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .global-track-info-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+            background: #f9f9fa; padding: 20px; border: 1px solid rgba(0,0,0,0.05);
+            font-size: 13px; line-height: 1.6; margin-bottom: 20px;
+        }
+        .global-track-status {
+            padding: 6px 14px; font-size: 10px; letter-spacing: 0.1em;
+            text-transform: uppercase; font-weight: 700; display: inline-block; text-align: center;
+        }
+        .global-track-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .global-track-table th {
+            text-align: left; padding: 12px 0; font-size: 11px;
+            letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+        }
+        .global-track-table td { padding: 16px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
+
+        @media (max-width: 600px) {
+            .global-track-info-grid { grid-template-columns: 1fr; }
+            .global-track-table { display: block; overflow-x: auto; white-space: nowrap; }
+            #bee-chat-btn { right: 82px; bottom: 24px; }
+            #back-to-top { bottom: 24px; right: 24px; }
+            #bee-chat-window { width: calc(100vw - 24px); right: 12px; bottom: 80px; }
+        }
+
+        .notif-modal-action,
+        .mobile-drawer-action,
+        #trackInputRow button,
+        #searchPopular button {
+            border-radius: 6px !important;
+            transition: all 0.2s ease;
+        }
+
+        #trackResultContainer {
+            border-radius: 8px;
+        }
+        .global-track-status {
+            border-radius: 4px;
+        }
+
+        #searchResultList img,
+        .global-track-table img {
+            border-radius: 4px;
+        }
+
+        #searchResultList > div > div:first-child {
+            border-radius: 4px;
+            overflow: hidden;
+        }
     </style>
 </head>
 <body>
 
-<!--<div class="cursor" id="cursor"></div>-->
-<!--<div class="cursor-ring" id="cursorRing"></div>-->
 <div id="globalLoader">
     <svg viewBox="0 0 256 256" class="bee-loader-svg">
         <path d="M244.26,92.26a11.5,11.5,0,0,0-4-6.42A76.08,76.08,0,0,0,183.08,64h-3.41A60.27,60.27,0,0,0,128,24,60.27,60.27,0,0,0,76.33,64H72.92a76.08,76.08,0,0,0-57.22,21.84,11.5,11.5,0,0,0-4,6.42,12.09,12.09,0,0,0,2.19,9.45A76,76,0,0,0,60,128a76,76,0,0,0-46.07,26.29,12.09,12.09,0,0,0-2.19,9.45,11.5,11.5,0,0,0,4,6.42A76.08,76.08,0,0,0,72.92,192h5.51A59.5,59.5,0,0,0,128,232a59.5,59.5,0,0,0,49.57-40h5.51a76.08,76.08,0,0,0,57.22-21.84,11.5,11.5,0,0,0,4,6.42,12.09,12.09,0,0,0-2.19-9.45A76,76,0,0,0,196,128a76,76,0,0,0,46.07-26.29A12.09,12.09,0,0,0,244.26,92.26ZM144,206.11A36.19,36.19,0,0,1,128,208a36.19,36.19,0,0,1-16-1.89V168h32Zm0-62.11H112V112h32Zm-49.8-63.53a76.35,76.35,0,0,0,17.8,11.83v21.88a36,36,0,0,1-16,33.82Zm67.6,0a36,36,0,0,1,16,33.82V126.18A76.35,76.35,0,0,0,161.8,80.47ZM128,48a36.19,36.19,0,0,1,16,1.89V72H112V49.89A36.19,36.19,0,0,1,128,48ZM39.5,108.57A52,52,0,0,1,72.92,88h2.62a98,98,0,0,1-10.74,24H36A52.17,52.17,0,0,1,39.5,108.57Zm33.42,63.43A52,52,0,0,1,39.5,147.43,52.17,52.17,0,0,1,36,128H64.8a98,98,0,0,1,10.74,24H72.92ZM183.08,168h-2.62a98,98,0,0,1-10.74-24H220a52.17,52.17,0,0,1-3.5,19.43A52,52,0,0,1,183.08,168Zm33.42-36.57A52,52,0,0,1,183.08,88h2.62a98,98,0,0,1,10.74,24H220A52.17,52.17,0,0,1,216.5,131.43Z"></path>
@@ -384,31 +701,50 @@
 
 <div class="cart-toast" id="cartToast">
     <div class="toast-icon"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg></div>
-    <div><strong>Đã thêm vào giỏ hàng</strong><div style="font-size:12px;opacity:.7;margin-top:2px" id="cartToastDesc">Sản phẩm đã được cập nhật</div></div>
+    <div>
+        <strong>Đã thêm vào giỏ hàng</strong>
+        <div style="font-size:12px;opacity:.7;margin-top:2px" id="cartToastDesc">Sản phẩm đã được cập nhật</div>
+    </div>
 </div>
 
+<!-- ═══════════════ HEADER ═══════════════ -->
 <div id="site-header">
     <nav>
         <a href="#home" class="logo">Bee<span>mate</span></a>
+
         <ul class="nav-links">
             <li><a href="#home?scroll=new-arrivals">Mới về</a></li>
             <li><a href="#about">About Beemate</a></li>
             <li><a href="#sale">Sale</a></li>
         </ul>
+
         <div class="nav-actions">
+            <!-- Utility: search + track (ẩn trên mobile) -->
+            <div class="nav-util-group">
+                <button class="nav-icon-btn" onclick="openSearch()" title="Tìm kiếm">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+                <button class="nav-icon-btn" onclick="openGlobalTrack()" title="Tra cứu đơn hàng">
+                    <i class="fa-solid fa-truck-fast"></i>
+                </button>
+            </div>
 
-            <div class="nav-actions">
-                <i class="fa-solid fa-magnifying-glass" style="font-size:17px;color:var(--text);cursor:none" onclick="openSearch()"></i>
+            <!-- Divider (ẩn trên mobile) -->
+            <div class="nav-divider"></div>
 
-                <i class="fa-solid fa-truck-fast" style="font-size:17px;color:var(--text);cursor:none" onclick="openGlobalTrack()" title="Tra cứu đơn hàng"></i>
+            <!-- Account: user + bell + cart -->
+            <div class="nav-account-group">
+                <!-- User (ẩn trên mobile) -->
+                <button class="nav-icon-btn nav-user-btn" onclick="location.hash='#account'" title="Tài khoản">
+                    <i class="fa-solid fa-user"></i>
+                </button>
 
-                <i class="fa-solid fa-user" style="font-size:17px;color:var(--text);cursor:none" onclick="location.hash='#account'"></i>
-
+                <!-- Bell -->
                 <div class="notif-wrap" id="notifWrap">
                     <button class="notif-bell-btn" onclick="toggleNotif(event)">
                         <i class="fa-solid fa-bell"></i>
                     </button>
-                    <div class="notif-badge" id="notifBadge" style="display: none;">0</div>
+                    <div class="notif-badge" id="notifBadge" style="display:none;">0</div>
                     <div class="notif-dropdown" id="notifDropdown">
                         <div class="notif-header">
                             <span class="notif-header-title">Thông báo</span>
@@ -422,88 +758,169 @@
                             <button class="notif-tab" onclick="switchNotifTab(this,'order')">Đơn hàng</button>
                             <button class="notif-tab" onclick="switchNotifTab(this,'voucher')">Voucher</button>
                         </div>
-
                         <div class="notif-list" id="notifList"></div>
-
                         <div class="notif-empty" id="notifEmpty">
                             <i class="fa-regular fa-bell-slash"></i>Bạn không có thông báo nào
                         </div>
                     </div>
                 </div>
 
+                <!-- Cart -->
                 <div class="cart-icon" onclick="location.hash='#cart'">
-                    <i class="fa-solid fa-bag-shopping" style="font-size:19px;color:var(--text)"></i>
+                    <i class="fa-solid fa-bag-shopping"></i>
                     <div class="cart-badge" id="cart-badge-count">0</div>
                 </div>
+
+                <!-- Hamburger (chỉ mobile) -->
+                <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMobileMenu()" aria-label="Menu">
+                    <span></span><span></span><span></span>
+                </button>
             </div>
+        </div>
     </nav>
+
+    <!-- Page tabs -->
     <div class="page-selector" id="pageSelector">
-        <a href="#home"    class="page-tab" data-tab="home">
+        <a href="#home" class="page-tab" data-tab="home">
             <i class="fa-solid fa-house"></i> Trang chủ
         </a>
-        <a href="#shop"    class="page-tab" data-tab="shop">
+        <a href="#shop" class="page-tab" data-tab="shop">
             <i class="fa-solid fa-shirt"></i> Sản phẩm
         </a>
-        <a href="#sale"    class="page-tab" data-tab="sale">
+        <a href="#sale" class="page-tab" data-tab="sale">
             <i class="fa-solid fa-tag"></i> Sale
         </a>
-        <a href="#about"   class="page-tab" data-tab="about">
-            <i class="fa-solid fa-leaf"></i> About
-        </a>
-        <a href="#account" class="page-tab" data-tab="account">
-            <i class="fa-solid fa-user"></i> Tài khoản
-        </a>
+    </div>
+</div>
+
+<!-- Mobile overlay + drawer -->
+<div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+<div class="mobile-drawer" id="mobileDrawer">
+    <div class="mobile-drawer-head">
+        <a href="#home" class="logo" style="font-size:22px;" onclick="closeMobileMenu()">Bee<span>mate</span></a>
+        <button onclick="closeMobileMenu()" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+    <div class="mobile-drawer-nav">
+        <a href="#home?scroll=new-arrivals" onclick="closeMobileMenu()" class="mobile-nav-item"><i class="fa-solid fa-star"></i> Mới về</a>
+        <a href="#sale"    onclick="closeMobileMenu()" class="mobile-nav-item"><i class="fa-solid fa-tag"></i> Sale</a>
+        <a href="#about"   onclick="closeMobileMenu()" class="mobile-nav-item"><i class="fa-solid fa-leaf"></i> About Beemate</a>
+        <a href="#account" onclick="closeMobileMenu()" class="mobile-nav-item"><i class="fa-solid fa-user"></i> Tài khoản</a>
+    </div>
+    <div class="mobile-drawer-footer">
+        <button class="mobile-drawer-action" onclick="closeMobileMenu(); openSearch()">
+            <i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm sản phẩm
+        </button>
+        <button class="mobile-drawer-action" onclick="closeMobileMenu(); openGlobalTrack()">
+            <i class="fa-solid fa-truck-fast"></i> Tra cứu đơn hàng
+        </button>
     </div>
 </div>
 
 <main id="content-area"></main>
 
+<!-- ═══════════════ FOOTER ═══════════════ -->
 <footer>
-    <div class="footer-top">
-        <div>
-            <div class="footer-brand">BEE<span>MATE</span></div>
-            <p class="footer-desc">Trang phục tự nhiên cho những người yêu sự thoải mái trong từng hơi thở.</p>
+    <div class="footer-inner">
+
+        <!-- Top grid -->
+        <div class="footer-grid">
+            <!-- Brand -->
+            <div>
+                <div class="footer-brand">BEE<span>MATE</span></div>
+                <p class="footer-desc">Trang phục tự nhiên — linen, cotton, bamboo. May kỹ từng đường chỉ, thiết kế cho người mặc thật.</p>
+                <div class="footer-contact">
+                    <div class="footer-contact-row">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <span>14 phố Trịnh Văn Bô, Nam Từ Liêm, Hà Nội</span>
+                    </div>
+                    <div class="footer-contact-row">
+                        <i class="fa-solid fa-clock"></i>
+                        <span>Phản hồi trong 2 giờ (giờ hành chính)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Khám phá -->
+            <div>
+                <div class="footer-col-title">Khám phá</div>
+                <ul class="footer-links">
+                    <li><a href="#shop">Tất cả sản phẩm</a></li>
+                    <li><a href="#sale">Sale</a></li>
+                    <li><a href="#home?scroll=new-arrivals">Mới về</a></li>
+                    <li><a href="#about">Về Beemate</a></li>
+                </ul>
+            </div>
+
+            <!-- Chính sách -->
+            <div>
+                <div class="footer-col-title">Chính sách</div>
+                <ul class="footer-links">
+                    <li><a href="#about" onclick="setTimeout(()=>document.querySelector('.ab-faq-item:nth-child(3) .ab-faq-q')?.click(),400)">Đổi trả trong 7 ngày</a></li>
+                    <li><a href="#about" onclick="setTimeout(()=>document.querySelector('.ab-faq-item:nth-child(4) .ab-faq-q')?.click(),400)">Giao hàng toàn quốc</a></li>
+                    <li><a href="#about" onclick="setTimeout(()=>document.querySelector('.ab-faq-item:nth-child(1) .ab-faq-q')?.click(),400)">Vải tự nhiên 100%</a></li>
+                    <li><a href="#about">Câu hỏi thường gặp</a></li>
+                </ul>
+            </div>
+
+            <!-- Liên hệ -->
+            <div>
+                <div class="footer-col-title">Liên hệ</div>
+                <ul class="footer-links">
+                    <li><a href="https://zalo.me/beemate" target="_blank" rel="noopener">Zalo: nhắn trực tiếp</a></li>
+                    <li><a href="https://facebook.com/beemate.vn" target="_blank" rel="noopener">Facebook Beemate</a></li>
+                    <li><a href="https://instagram.com/beemate.vn" target="_blank" rel="noopener">Instagram</a></li>
+                    <li><a href="https://shopee.vn/beemate" target="_blank" rel="noopener">Shopee</a></li>
+                    <li><a href="https://tiktok.com/@beemate.vn" target="_blank" rel="noopener">TikTok</a></li>
+                </ul>
+            </div>
         </div>
-        <div>
-            <div class="footer-col-title">Khám phá</div>
-            <ul class="footer-links">
-                <li><a href="#shop">Tất cả sản phẩm</a></li>
-                <li><a href="#shop">Ưu đãi theo mùa</a></li>
-                <li><a href="#sale">Sale</a></li>
-            </ul>
+
+        <!-- Policy strip -->
+        <div class="footer-policy">
+            <div class="footer-policy-item">
+                <i class="fa-solid fa-bag-shopping"></i>
+                <div>
+                    <div class="footer-policy-label">Mua không cần đăng nhập</div>
+                    <div class="footer-policy-sub">Đặt hàng nhanh, không rào cản</div>
+                </div>
+            </div>
+            <div class="footer-policy-item">
+                <i class="fa-solid fa-truck-fast"></i>
+                <div>
+                    <div class="footer-policy-label">Giao hàng trong 48h</div>
+                    <div class="footer-policy-sub">Nội thành &amp; toàn quốc</div>
+                </div>
+            </div>
+            <div class="footer-policy-item">
+                <i class="fa-solid fa-rotate-left"></i>
+                <div>
+                    <div class="footer-policy-label">Đổi trả trong 7 ngày</div>
+                    <div class="footer-policy-sub">Miễn phí nếu lỗi từ Beemate</div>
+                </div>
+            </div>
+            <div class="footer-policy-item">
+                <i class="fa-solid fa-leaf"></i>
+                <div>
+                    <div class="footer-policy-label">Vải tự nhiên 100%</div>
+                    <div class="footer-policy-sub">Linen · Cotton · Bamboo</div>
+                </div>
+            </div>
         </div>
-        <div>
-            <div class="footer-col-title">Hỗ trợ</div>
-            <ul class="footer-links">
-                <li><a href="#">Hướng dẫn chọn size</a></li>
-                <li><a href="#">Chính sách đổi trả</a></li>
-                <li><a href="#">Vận chuyển</a></li>
-                <li><a href="#">Liên hệ</a></li>
-            </ul>
-        </div>
-        <div>
-            <div class="footer-col-title">Câu chuyện</div>
-            <ul class="footer-links">
-                <li><a href="#">Về Beemate</a></li>
-                <li><a href="#">Vải & Chất liệu</a></li>
-                <li><a href="#">Cam kết xanh</a></li>
-                <li><a href="#">Blog</a></li>
-            </ul>
+
+        <!-- Bottom bar -->
+        <div class="footer-bottom">
+            <div class="footer-copy">© 2026 Beemate. Handmade with care in Vietnam.</div>
         </div>
     </div>
-    <div class="footer-bottom">
-        <div class="footer-copy">© 2026 Beemate. Handmade with care in Vietnam.</div>
-        <div class="footer-socials">
-            <a href="#">Instagram</a>
-            <a href="#">TikTok</a>
-            <a href="#">Shopee</a>
-            <a href="#">Lazada</a>
-        </div>
-    </div>
-    <button id="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
-        <i class="fa-solid fa-arrow-up"></i>
-    </button>
 </footer>
+
+<button id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <i class="fa-solid fa-arrow-up"></i>
+</button>
+
+<!-- ═══════════════ NOTIF MODAL ═══════════════ -->
 <div class="notif-modal-overlay" id="notifDetailOverlay" onclick="if(event.target === this) window.NotificationApp.closePopup()">
     <div class="notif-modal" id="notifDetailModal">
         <button class="notif-modal-close" onclick="window.NotificationApp.closePopup()"><i class="fa-solid fa-xmark"></i></button>
@@ -514,14 +931,13 @@
         <button class="notif-modal-action" id="notifPopBtn" onclick="window.NotificationApp.navigateFromPopup()">XEM CHI TIẾT</button>
     </div>
 </div>
+
 <script src="/js/customer-router.js"></script>
 <script>
-    /* ── TOÀN CỤC: QUẢN LÝ THÔNG BÁO API ── */
+    /* ── NOTIFICATION APP ── */
     window.NotificationApp = {
         notifications: [],
         currentPopNotif: null,
-
-
 
         init: async function() { await this.fetchData(); },
         fetchData: async function() {
@@ -533,35 +949,24 @@
             } catch(e) {}
         },
 
-
-
         render: function() {
             const list = document.getElementById('notifList');
             const badge = document.getElementById('notifBadge');
             const empty = document.getElementById('notifEmpty');
-
             if (!list) return;
             if (!this.notifications || this.notifications.length === 0) {
-                list.innerHTML = '';
-                empty.style.display = 'block';
-                if(badge) badge.style.display = 'none';
-                return;
+                list.innerHTML = ''; empty.style.display = 'block';
+                if(badge) badge.style.display = 'none'; return;
             }
-
             empty.style.display = 'none';
-            let html = '';
-            let unreadCount = 0;
-
+            let html = ''; let unreadCount = 0;
             this.notifications.forEach(n => {
                 if (!n.daDoc) unreadCount++;
                 let iconClass = 'event'; let iconHtml = '<i class="fa-solid fa-bell"></i>';
                 let typeStr = n.loaiThongBao ? n.loaiThongBao.toLowerCase() : 'event';
-
                 if (typeStr.includes('order') || typeStr.includes('don_hang')) { iconClass = 'order'; iconHtml = '<i class="fa-solid fa-truck-fast"></i>'; }
                 else if (typeStr.includes('voucher') || typeStr.includes('khuyen_mai')) { iconClass = 'voucher'; iconHtml = '<i class="fa-solid fa-ticket"></i>'; }
-
                 const unreadClass = n.daDoc ? '' : 'unread';
-
                 html += `
                     <div class="notif-item ${unreadClass}" data-notif-type="${iconClass}" onclick="window.NotificationApp.openPopup(${n.id}, this)">
                         <div class="notif-icon ${iconClass}">${iconHtml}</div>
@@ -573,20 +978,16 @@
                         <button class="notif-delete-btn" onclick="window.NotificationApp.deleteNotif(event, ${n.id})" title="Xóa thông báo">
                             <i class="fa-regular fa-trash-can"></i>
                         </button>
-                    </div>
-                `;
+                    </div>`;
             });
             list.innerHTML = html;
             this.updateBadgeOnly(unreadCount);
         },
 
-        /* --- XỬ LÝ CLICK & MỞ POPUP --- */
         openPopup: async function(id, el) {
             const notif = this.notifications.find(n => n.id === id);
             if (!notif) return;
             this.currentPopNotif = notif;
-
-            // 1. Nếu chưa đọc -> Gọi API cập nhật và trừ số lượng Badge
             if (!notif.daDoc) {
                 try {
                     await fetch(`/api/thong-bao/${id}/read`, { method: 'PUT' });
@@ -595,27 +996,17 @@
                     this.updateBadgeOnly();
                 } catch(e) {}
             }
-
-            // 2. Đổ dữ liệu vào Popup
             let typeStr = notif.loaiThongBao ? notif.loaiThongBao.toLowerCase() : '';
-            let iconClass = 'event'; let iconHtml = '<i class="fa-solid fa-bell"></i>';
-            let btnText = 'ĐÓNG';
-
-            if (typeStr.includes('order')) {
-                iconClass = 'order'; iconHtml = '<i class="fa-solid fa-box-open"></i>'; btnText = 'ĐI ĐẾN ĐƠN HÀNG';
-            } else if (typeStr.includes('voucher')) {
-                iconClass = 'voucher'; iconHtml = '<i class="fa-solid fa-tags"></i>'; btnText = 'SĂN SALE NGAY';
-            }
-
+            let iconClass = 'event'; let iconHtml = '<i class="fa-solid fa-bell"></i>'; let btnText = 'ĐÓNG';
+            if (typeStr.includes('order')) { iconClass = 'order'; iconHtml = '<i class="fa-solid fa-box-open"></i>'; btnText = 'ĐI ĐẾN ĐƠN HÀNG'; }
+            else if (typeStr.includes('voucher')) { iconClass = 'voucher'; iconHtml = '<i class="fa-solid fa-tags"></i>'; btnText = 'SĂN SALE NGAY'; }
             document.getElementById('notifPopIcon').className = `notif-modal-icon notif-icon ${iconClass}`;
             document.getElementById('notifPopIcon').innerHTML = iconHtml;
             document.getElementById('notifPopTitle').innerText = notif.tieuDe;
             document.getElementById('notifPopDesc').innerText = notif.noiDung;
             document.getElementById('notifPopTime').innerText = new Date(notif.ngayTao).toLocaleString('vi-VN');
             document.getElementById('notifPopBtn').innerText = btnText;
-
-            // 3. Hiển thị Popup
-            closeNotif(); // Đóng menu dropdown
+            closeNotif();
             document.getElementById('notifDetailOverlay').style.display = 'flex';
             setTimeout(() => document.getElementById('notifDetailModal').classList.add('open'), 10);
         },
@@ -626,31 +1017,21 @@
             this.currentPopNotif = null;
         },
 
-        /* --- XỬ LÝ CHUYỂN HƯỚNG (ĐÚNG TRANG ĐÍCH) --- */
         navigateFromPopup: function() {
             if (!this.currentPopNotif) return;
             const typeStr = this.currentPopNotif.loaiThongBao ? this.currentPopNotif.loaiThongBao.toLowerCase() : '';
-
             this.closePopup();
-
             if (typeStr.includes('order')) {
                 window.location.hash = '#account';
-                setTimeout(() => {
-                    if(window.AccountApp) window.AccountApp.switchPanel('orders');
-                }, 300);
-            } else if (typeStr.includes('voucher')) {
-                window.location.hash = '#shop';
-            }
+                setTimeout(() => { if(window.AccountApp) window.AccountApp.switchPanel('orders'); }, 300);
+            } else if (typeStr.includes('voucher')) { window.location.hash = '#shop'; }
         },
 
         deleteNotif: async function(e, id) {
             e.stopPropagation();
             try {
                 const res = await fetch(`/api/thong-bao/${id}`, { method: 'DELETE' });
-                if (res.ok) {
-                    this.notifications = this.notifications.filter(n => n.id !== id);
-                    this.render();
-                }
+                if (res.ok) { this.notifications = this.notifications.filter(n => n.id !== id); this.render(); }
             } catch(err) {}
         },
 
@@ -658,10 +1039,7 @@
             if(!confirm('Bạn có chắc chắn muốn xóa toàn bộ thông báo?')) return;
             try {
                 const res = await fetch('/api/thong-bao/delete-all', { method: 'DELETE' });
-                if (res.ok) {
-                    this.notifications = [];
-                    this.render();
-                }
+                if (res.ok) { this.notifications = []; this.render(); }
             } catch(err) {}
         },
 
@@ -700,31 +1078,19 @@
         }
     };
 
+    /* ── SCROLL ── */
     window.addEventListener('scroll', () => {
         document.getElementById('site-header').classList.toggle('scrolled', window.scrollY > 20);
         const btt = document.getElementById('back-to-top');
-        if (btt) { if (window.scrollY > 400) btt.classList.add('show'); else btt.classList.remove('show'); }
+        if (btt) { btt.classList.toggle('show', window.scrollY > 400); }
     });
 
-    // const cursor = document.getElementById('cursor');
-    // const cursorRing = document.getElementById('cursorRing');
-    // document.addEventListener('mousemove', e => {
-    //     cursor.style.left = e.clientX + 'px';
-    //     cursor.style.top = e.clientY + 'px';
-    //     setTimeout(() => {
-    //         cursorRing.style.left = e.clientX + 'px';
-    //         cursorRing.style.top = e.clientY + 'px';
-    //     }, 60);
-    //     document.body.classList.add('cursor-ready');
-    // });
-
-    let toastTimeout;
+    /* ── TOAST ── */
     window.showToast = function(message, type = 'success') {
         const toast = document.getElementById('cartToast');
         const toastIcon = toast.querySelector('.toast-icon');
         const toastTitle = toast.querySelector('strong');
         const toastDesc = document.getElementById('cartToastDesc');
-
         if (type === 'warning') {
             toastIcon.style.background = '#c08060';
             toastIcon.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2" style="width:16px;height:16px;stroke:white;fill:none;"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>';
@@ -741,13 +1107,13 @@
         if (type === 'success') { if (window.updateCartBadge) window.updateCartBadge(); }
     };
 
+    /* ── HASH ── */
     window.addEventListener('hashchange', () => {
         const hash = window.location.hash.slice(1).split('?')[0] || 'home';
-        document.querySelectorAll('.page-tab').forEach(t =>
-            t.classList.toggle('active', t.dataset.tab === hash)
-        );
+        document.querySelectorAll('.page-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === hash));
     });
 
+    /* ── INIT ── */
     document.addEventListener('DOMContentLoaded', () => {
         if(window.updateCartBadge) window.updateCartBadge();
         window.dispatchEvent(new Event('hashchange'));
@@ -761,6 +1127,7 @@
     }
     window.addEventListener('resize', adjustContentPadding);
 
+    /* ── NOTIF DROPDOWN ── */
     function toggleNotif(e) { e.stopPropagation(); document.getElementById('notifDropdown').classList.toggle('open'); }
     function closeNotif() { document.getElementById('notifDropdown').classList.remove('open'); }
     document.addEventListener('click', e => { if (!document.getElementById('notifWrap').contains(e.target)) closeNotif(); });
@@ -776,7 +1143,7 @@
         document.getElementById('notifEmpty').style.display = visible === 0 ? 'block' : 'none';
     }
 
-    /* ── 🌟 NÂNG CẤP TÌM KIẾM THẬT TỪ DATABASE 🌟 ── */
+    /* ── SEARCH ── */
     window.openSearch = function() {
         closeNotif();
         const o = document.getElementById('searchOverlay');
@@ -808,93 +1175,469 @@
         const input = document.getElementById('searchInput');
         if (input) { input.value=val; input.focus(); handleSearchInput(val); }
     };
-
-    // GỌI API ĐỂ LẤY DỮ LIỆU TÌM KIẾM
     window.handleSearchInput = function(val) {
         const cb = document.getElementById('searchClearBtn');
         const pop = document.getElementById('searchPopular');
         const res = document.getElementById('searchResults');
         const lst = document.getElementById('searchResultList');
-
         if (cb) cb.style.display = val.length ? 'block' : 'none';
-        if (!val.trim()) {
-            if(pop) pop.style.display='';
-            if(res) res.style.display='none';
-            return;
-        }
+        if (!val.trim()) { if(pop) pop.style.display=''; if(res) res.style.display='none'; return; }
         if (pop) pop.style.display='none';
         if (res) res.style.display='';
-
         lst.innerHTML = '<div style="font-size:14px;color:var(--muted);font-weight:300;padding:16px 0">Đang tìm kiếm...</div>';
-
-        // Debounce chống spam API
         clearTimeout(window.searchTimeout);
         window.searchTimeout = setTimeout(async () => {
             try {
-                // Gọi API lấy dữ liệu sản phẩm đang kinh doanh
                 const response = await fetch(`/api/products?q=${encodeURIComponent(val)}&trangThai=true&page=0&size=5`);
                 const data = await response.json();
-
-                // Lọc bỏ những sản phẩm đang làm nháp (chưa có biến thể)
                 let filtered = data.content || data;
-                filtered = filtered.filter(p => {
-                    const variants = p.chiTietSanPhams || p.chiTietSanPhamList || p.bienThes || p.skus || [];
-                    return variants.length > 0;
-                });
-
-                if (!filtered || filtered.length === 0) {
-                    lst.innerHTML = '<div style="font-size:14px;color:var(--muted);font-weight:300;padding:16px 0">Không tìm thấy sản phẩm phù hợp.</div>';
-                    return;
-                }
-
+                filtered = filtered.filter(p => { const variants = p.chiTietSanPhams || p.chiTietSanPhamList || p.bienThes || p.skus || []; return variants.length > 0; });
+                if (!filtered || filtered.length === 0) { lst.innerHTML = '<div style="font-size:14px;color:var(--muted);font-weight:300;padding:16px 0">Không tìm thấy sản phẩm phù hợp.</div>'; return; }
                 const regex = new RegExp(`(${val})`, "gi");
                 lst.innerHTML = filtered.map(p => {
-                    const highlightedName = p.ten.replace(regex, '<span style="color: var(--accent); font-weight: 600; background: rgba(61,90,76,0.1); padding: 0 2px; border-radius: 2px;">$1</span>');
-
-                    // Lấy ảnh chính
+                    const highlightedName = p.ten.replace(regex, '<span style="color:var(--accent);font-weight:600;background:rgba(61,90,76,0.1);padding:0 2px;border-radius:2px;">$1</span>');
                     let imgUrl = p.hinhAnhs && p.hinhAnhs.length > 0 ? p.hinhAnhs[0].url : 'https://placehold.co/44x56?text=SP';
-                    if (imgUrl.includes('res.cloudinary.com')) {
-                        imgUrl = imgUrl.replace('/image/upload/', '/image/upload/c_fill,w_44,h_56,f_auto,q_auto/');
-                    }
-
-                    // Lấy giá
+                    if (imgUrl.includes('res.cloudinary.com')) imgUrl = imgUrl.replace('/image/upload/', '/image/upload/c_fill,w_44,h_56,f_auto,q_auto/');
                     const variants = p.chiTietSanPhams || p.chiTietSanPhamList || p.bienThes || p.skus || [];
                     const minPrice = variants.length > 0 ? Math.min(...variants.map(v => v.giaBan || 0)) : (p.giaBan || 0);
                     const priceText = minPrice > 0 ? new Intl.NumberFormat('vi-VN').format(minPrice) + ' ₫' : 'Đang cập nhật';
-
                     return `<div style="display:flex;align-items:center;gap:20px;padding:14px 0;border-bottom:1px solid rgba(0,0,0,.06);cursor:pointer" onclick="closeSearch();location.hash='#detail?id=${p.id}'">
                         <div style="width:44px;height:56px;flex-shrink:0;background:#f4f4f5"><img src="${imgUrl}" style="width:100%;height:100%;object-fit:cover;"></div>
-                        <div style="font-family:'Cormorant Garamond',serif;font-size:18px;flex:1">${highlightedName}</div>
+                        <div style="font-size:18px;flex:1">${highlightedName}</div>
                         <div style="font-size:13px;color:var(--muted)">${priceText}</div>
                     </div>`;
                 }).join('');
-
-            } catch(e) {
-                lst.innerHTML = '<div style="font-size:14px;color:var(--muted);font-weight:300;padding:16px 0">Lỗi trong quá trình tìm kiếm.</div>';
-            }
+            } catch(e) { lst.innerHTML = '<div style="font-size:14px;color:var(--muted);font-weight:300;padding:16px 0">Lỗi trong quá trình tìm kiếm.</div>'; }
         }, 400);
     };
-    document.addEventListener('keydown', e => { if (e.key==='Escape') closeSearch(); });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            closeSearch();
+            if(typeof closeGlobalTrack === 'function') closeGlobalTrack();
+            if(typeof closeMobileMenu === 'function') closeMobileMenu();
+        }
+    });
+
+    /* ── MOBILE MENU ── */
+    function toggleMobileMenu() {
+        const drawer = document.getElementById('mobileDrawer');
+        const overlay = document.getElementById('mobileOverlay');
+        const btn = document.getElementById('hamburgerBtn');
+        if (drawer.classList.contains('show')) { closeMobileMenu(); }
+        else { drawer.classList.add('show'); overlay.classList.add('show'); btn.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    }
+    function closeMobileMenu() {
+        document.getElementById('mobileDrawer').classList.remove('show');
+        document.getElementById('mobileOverlay').classList.remove('show');
+        document.getElementById('hamburgerBtn').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    /* ── TRACK ── */
+    window.openGlobalTrack = function() {
+        if(typeof closeNotif === 'function') closeNotif();
+        const o = document.getElementById('trackOverlay');
+        o.style.opacity='1'; o.style.pointerEvents='all';
+        ['trackLabel','trackInputRow','trackResultContainer'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.style.opacity='1'; el.style.transform='translateY(0)'; }
+        });
+        setTimeout(() => document.getElementById('trackInput')?.focus(), 200);
+        document.body.style.overflow='hidden';
+    };
+    window.closeGlobalTrack = function() {
+        const o = document.getElementById('trackOverlay');
+        o.style.opacity='0'; o.style.pointerEvents='none';
+        ['trackLabel','trackInputRow','trackResultContainer'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.style.opacity='0'; el.style.transform='translateY(16px)'; }
+        });
+        document.body.style.overflow='';
+        setTimeout(() => { document.getElementById('trackInput').value=''; document.getElementById('trackResultContainer').style.display='none'; }, 400);
+    };
+    window.executeGlobalTrack = async function() {
+        const ma = document.getElementById('trackInput').value.trim();
+        const resultDiv = document.getElementById('trackResultContainer');
+
+        if (!ma) {
+            if (window.showToast) window.showToast('Vui lòng nhập mã đơn hàng!', 'error');
+            else alert('Vui lòng nhập mã đơn hàng!');
+            return;
+        }
+
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0;">Đang tra cứu hệ thống...</div>';
+
+        // --- Các hàm hỗ trợ format nội bộ ---
+        const formatCurrency = (num) => new Intl.NumberFormat('vi-VN').format(num || 0) + ' ₫';
+
+        const getStatusConfig = (statusCode) => {
+            const map = {
+                'CHO_XAC_NHAN': { label: 'Chờ xác nhận', cssClass: 'status-CHO_XAC_NHAN' },
+                'CHO_THANH_TOAN': { label: 'Chờ thanh toán', cssClass: 'status-CHO_THANH_TOAN' },
+                'DA_XAC_NHAN': { label: 'Đã xác nhận / Đang xử lý', cssClass: 'status-CHO_GIAO' },
+                'CHO_GIAO_VAN_CHUYEN': { label: 'Chờ giao cho đơn vị vận chuyển', cssClass: 'status-CHO_GIAO' },
+                'DANG_GIAO_HANG': { label: 'Đang giao hàng', cssClass: 'status-DANG_GIAO' },
+                'CHO_KHACH_LAY': { label: 'Chờ khách đến lấy (Tại cửa hàng)', cssClass: 'status-CHO_GIAO' },
+                'HOAN_THANH': { label: 'Hoàn thành', cssClass: 'status-HOAN_THANH' },
+                'DA_HUY': { label: 'Đã hủy', cssClass: 'status-DA_HUY' },
+                'GIAO_THAT_BAI': { label: 'Giao hàng thất bại', cssClass: 'status-DA_HUY' },
+                'DANG_HOAN_HANG': { label: 'Đang hoàn hàng về kho', cssClass: 'status-CHO_XAC_NHAN' },
+                'DA_HOAN_HANG': { label: 'Đã nhận lại hàng hoàn', cssClass: 'status-DA_HUY' },
+                // Các trạng thái fallback hoặc mở rộng
+                'CHO_GIAO': { label: 'Chờ lấy hàng', cssClass: 'status-CHO_GIAO' },
+                'DANG_GIAO': { label: 'Đang giao hàng', cssClass: 'status-DANG_GIAO' },
+                'YEU_CAU_TRA_HANG': { label: 'Yêu cầu trả hàng', cssClass: 'status-CHO_XAC_NHAN' },
+                'TU_CHOI_TRA_HANG': { label: 'Từ chối trả hàng', cssClass: 'status-DA_HUY' },
+                'DA_HOAN_TIEN': { label: 'Đã hoàn tiền', cssClass: 'status-HOAN_THANH' },
+                'DA_TRA': { label: 'Đã trả', cssClass: 'status-DA_TRA' }
+            };
+            return map[statusCode] || { label: statusCode || 'Trạng thái', cssClass: 'status-CHO_XAC_NHAN' };
+        };
+
+        // Đã thêm tham số isPickup để phân biệt loại đơn hàng
+        const getPaymentMethodDisplay = (method, isPickup) => {
+            if (!method) return 'Chưa xác định';
+            const m = method.toUpperCase();
+            if (m === 'TIEN_MAT') return 'Tiền mặt';
+            if (m === 'MOMO') return 'Ví MoMo';
+            if (m === 'VNPAY') return 'VNPay';
+            if (m === 'CHUYEN_KHOAN') return 'Chuyển khoản QR';
+            // Nếu là COD và đơn hàng là dạng Nhận tại cửa hàng/Tại quầy -> Đổi hiển thị
+            if (m === 'COD') return isPickup ? 'Thanh toán tại cửa hàng' : 'Thanh toán khi nhận hàng (COD)';
+            return method;
+        };
+
+        const generateTimelineHTML = (currentStatus) => {
+            if (['DA_HUY', 'GIAO_THAT_BAI', 'TU_CHOI_TRA_HANG', 'DANG_HOAN_HANG', 'DA_HOAN_HANG'].includes(currentStatus)) {
+                return `<div style="color:#c03c3c; font-size:13px; font-weight:600; padding: 10px 0;"><i class="fa-solid fa-circle-xmark"></i> ${getStatusConfig(currentStatus).label}.</div>`;
+            }
+            if (currentStatus === 'YEU_CAU_TRA_HANG') return `<div style="color:#d97706; font-size:13px; font-weight:600; padding: 10px 0;"><i class="fa-solid fa-rotate-left"></i> Đang yêu cầu trả hàng.</div>`;
+            if (currentStatus === 'DA_HOAN_TIEN') return `<div style="color:#059669; font-size:13px; font-weight:600; padding: 10px 0;"><i class="fa-solid fa-money-bill-transfer"></i> Đã hoàn tiền thành công.</div>`;
+
+            // Đã cập nhật đúng mã Database
+            const steps = [
+                { code: 'CHO_XAC_NHAN', label: 'ĐẶT HÀNG' },
+                { code: 'CHO_GIAO_VAN_CHUYEN', label: 'CHUẨN BỊ' },
+                { code: 'DANG_GIAO_HANG', label: 'GIAO HÀNG' },
+                { code: 'HOAN_THANH', label: 'THÀNH CÔNG' }
+            ];
+
+            let curIdx = steps.findIndex(s => s.code === currentStatus);
+            if (currentStatus === 'CHO_THANH_TOAN') curIdx = 0;
+            if (currentStatus === 'DA_XAC_NHAN') curIdx = 1;
+            if (currentStatus === 'CHO_GIAO') curIdx = 1;
+            if (currentStatus === 'CHO_KHACH_LAY') curIdx = 2;
+            if (currentStatus === 'DANG_GIAO') curIdx = 2;
+            if (currentStatus === 'HOAN_THANH') curIdx = 3;
+
+            let html = '<div style="display:flex; align-items:flex-start;">';
+            steps.forEach((s, idx) => {
+                let cls = '';
+                if (currentStatus === 'HOAN_THANH' || idx < curIdx) cls = 'done';
+                else if (idx === curIdx) cls = 'current';
+
+                let lineBg = (cls === 'done') ? 'var(--accent)' : 'rgba(0,0,0,0.1)';
+                let dotBg = (cls === 'done') ? 'var(--accent)' : (cls === 'current' ? 'white' : 'var(--bg)');
+                let dotBorder = (cls === 'done') ? 'var(--accent)' : (cls === 'current' ? '#4338ca' : 'rgba(0,0,0,0.1)');
+                let svgStroke = (cls === 'done') ? 'white' : (cls === 'current' ? '#4338ca' : 'var(--muted)');
+                let labelColor = (cls === 'done') ? 'var(--accent)' : (cls === 'current' ? '#4338ca' : 'var(--muted)');
+                let labelWeight = (cls === 'done' || cls === 'current') ? '500' : '400';
+
+                html += `
+                <div style="display:flex; flex-direction:column; align-items:center; gap:8px; flex:1; position:relative;">
+                    ${idx < steps.length - 1 ? `<div style="position:absolute; top:13px; left:calc(50% + 14px); width:calc(100% - 28px); height:1px; background:${lineBg}; z-index:0;"></div>` : ''}
+                    <div style="width:28px; height:28px; border-radius:50%; border:2px solid ${dotBorder}; background:${dotBg}; display:flex; align-items:center; justify-content:center; z-index:1; position:relative; transition: 0.3s;">
+                        <svg viewBox="0 0 24 24" style="width:12px; height:12px; stroke:${svgStroke}; fill:none; stroke-width:2;"><path d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                    <div style="font-size:10px; letter-spacing:0.06em; color:${labelColor}; text-transform:uppercase; text-align:center; font-weight:${labelWeight};">${s.label}</div>
+                </div>`;
+            });
+            return html + '</div>';
+        };
+
+        try {
+            const res = await fetch('/api/hoa-don/tra-cuu/' + ma);
+            const contentType = res.headers.get("content-type");
+
+            if (!res.ok || !contentType || !contentType.includes("application/json")) {
+                resultDiv.innerHTML = '<div style="color:#c03c3c; text-align:center; font-size:13px; padding: 20px;">Không tìm thấy đơn hàng hoặc mã không hợp lệ!</div>';
+                return;
+            }
+
+            const data = await res.json();
+
+            // 🌟 Lấy trạng thái
+            const currentStatus = data.trangThaiMa || (data.trangThaiHoaDon ? data.trangThaiHoaDon.ma : 'UNDEFINED');
+            const statusObj = getStatusConfig(currentStatus);
+            const giaTamThoi = data.giaTamThoi || 0;
+
+            let isStorePickup = (data.hinhThucGiaoHang === 'NHAN_TAI_CUA_HANG') ||
+                (data.loaiHoaDon === 1 && data.phiVanChuyen === 0 && giaTamThoi < 5000000) ||
+                (data.diaChiGiaoHang && data.diaChiGiaoHang.toLowerCase().includes('nhận tại cửa hàng'));
+
+            let loaiGiaoHangHtml = '';
+            if (data.loaiHoaDon === 0) {
+                loaiGiaoHangHtml = `<span style="font-size: 10px; font-weight: 700; color: #0369a1; background: #e0f2fe; padding: 4px 10px; border-radius: 4px; margin-left: 12px; letter-spacing: 0.05em; vertical-align: middle;"><i class="fa-solid fa-shop"></i> TẠI QUẦY</span>`;
+            } else if (isStorePickup) {
+                loaiGiaoHangHtml = `<span style="font-size: 10px; font-weight: 700; color: #6d28d9; background: #f3e8ff; padding: 4px 10px; border-radius: 4px; margin-left: 12px; letter-spacing: 0.05em; vertical-align: middle;"><i class="fa-solid fa-store"></i> NHẬN TẠI CỬA HÀNG</span>`;
+            } else {
+                loaiGiaoHangHtml = `<span style="font-size: 10px; font-weight: 700; color: #a16207; background: #fefce8; padding: 4px 10px; border-radius: 4px; margin-left: 12px; letter-spacing: 0.05em; vertical-align: middle;"><i class="fa-solid fa-truck"></i> GIAO TẬN NƠI</span>`;
+            }
+
+            let timelineHtml = '';
+            if (data.loaiHoaDon !== 0 && !isStorePickup) {
+                timelineHtml = `
+                <div style="margin-top: 24px; padding-bottom: 30px; border-bottom: 1px solid rgba(0,0,0,0.06); margin-bottom: 30px;">
+                    ${generateTimelineHTML(currentStatus)}
+                </div>`;
+            }
+
+            let headerHtml = `
+        <div style="display: flex; align-items: center; flex-wrap: wrap; font-size:18px; font-weight:600; font-family:'Cormorant Garamond', serif;">
+            Chi tiết Đơn hàng #${data.ma}
+            ${loaiGiaoHangHtml}
+            <span style="background:${statusObj.cssClass.includes('CHO_THANH_TOAN') ? '#fef3c7' : statusObj.cssClass.includes('CHO_XAC_NHAN') ? '#e0e7ff' : statusObj.cssClass.includes('HOAN_THANH') ? '#d1fae5' : statusObj.cssClass.includes('HUY') ? '#fee2e2' : '#f3f4f6'}; color:${statusObj.cssClass.includes('CHO_THANH_TOAN') ? '#d97706' : statusObj.cssClass.includes('CHO_XAC_NHAN') ? '#4338ca' : statusObj.cssClass.includes('HOAN_THANH') ? '#059669' : statusObj.cssClass.includes('HUY') ? '#dc2626' : '#4b5563'}; padding: 4px 12px; border-radius: 4px; margin-left: 10px; font-size: 10px; text-transform:uppercase; font-weight:700; letter-spacing:0.1em; border: 1px solid rgba(0,0,0,0.05); font-family: 'DM Sans', sans-serif;">${statusObj.label}</span>
+        </div>
+        ${timelineHtml}
+        `;
+
+            const formatDateTime = (dateStr) => {
+                if (!dateStr || String(dateStr).trim() === '' || String(dateStr).toLowerCase() === 'null') return null;
+                const d = new Date(dateStr);
+                if (isNaN(d.getTime())) return dateStr;
+                const pad = n => n < 10 ? '0' + n : n;
+                return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+            };
+
+            const tenKhach = data.tenKhachHang || data.tenNguoiNhan || (data.khachHang ? data.khachHang.hoTen : 'Khách hàng');
+            let rawPhone = data.sdtNhan || data.sdtKhachHang || (data.khachHang ? data.khachHang.soDienThoai : null);
+            const sdtKhach = (rawPhone && String(rawPhone).toLowerCase() !== 'undefined' && String(rawPhone).toLowerCase() !== 'null') ? rawPhone : '---';
+
+            let rawAddress = data.diaChiGiaoHang || data.diaChiNhan || data.diaChiNguoiNhan;
+            let diaChiKhachHtml = '';
+            if (data.loaiHoaDon === 0) {
+                diaChiKhachHtml = `<p><strong>Địa chỉ:</strong> <span style="color:var(--muted); font-style:italic;">Mua trực tiếp tại cửa hàng</span></p>`;
+            } else {
+                diaChiKhachHtml = `<p><strong>Địa chỉ:</strong> ${(rawAddress && String(rawAddress).toLowerCase() !== 'undefined' && String(rawAddress).toLowerCase() !== 'null') ? rawAddress : '---'}</p>`;
+            }
+
+            const ghiChu = (data.ghiChu && String(data.ghiChu).trim() !== '' && String(data.ghiChu).toLowerCase() !== 'null') ? data.ghiChu : 'Không có ghi chú';
+
+            let deliveryInfoHtml = '';
+            if (data.loaiHoaDon === 0) {
+                deliveryInfoHtml = `<p><strong>Hình thức:</strong> <span style="color:#2563eb; font-weight:600;">Mua trực tiếp tại quầy</span></p>`;
+            } else {
+                if (isStorePickup) {
+                    deliveryInfoHtml = `
+                    <p><strong>Hình thức:</strong> <span style="color:#d97706; font-weight:600;"><i class="fa-solid fa-store"></i> Nhận tại cửa hàng</span></p>
+                    <p><strong>Ngày hẹn lấy:</strong> ${formatDateTime(data.ngayHenLayHang) || 'Chưa xác định'}</p>
+                    ${data.ngayHangSanSang ? `<p style="color:#10b981; font-size:14px; margin-top:8px;"><i class="fa-solid fa-box-check"></i> <strong>ĐÃ CHUẨN BỊ XONG LÚC:</strong> ${formatDateTime(data.ngayHangSanSang)}</p>` : '<p style="color:#f59e0b; font-style:italic; font-size:12px; margin-top:8px;"><i class="fa-solid fa-hourglass-half"></i> Cửa hàng đang chuẩn bị sản phẩm...</p>'}
+                `;
+                } else {
+                    deliveryInfoHtml = `
+                    <p><strong>Hình thức:</strong> <span style="color:#2563eb; font-weight:600;"><i class="fa-solid fa-truck"></i> Giao hàng tận nơi</span></p>
+                    <p><strong>Dự kiến nhận:</strong> <span style="color:#10b981; font-weight:600;">${formatDateTime(data.ngayNhanHangDuKien) || 'Đang chờ đơn vị vận chuyển'}</span></p>
+                `;
+                }
+            }
+
+            let maGDHtml = '';
+            if (data.lichSuThanhToan && data.lichSuThanhToan.length > 0) {
+                const gdThanhCong = data.lichSuThanhToan.find(tt => tt.trangThai === 'THANH_CONG');
+                if (gdThanhCong && gdThanhCong.maGiaoDich && gdThanhCong.maGiaoDich !== 'N/A') {
+                    maGDHtml = `<p><strong>Mã giao dịch:</strong> <span style="font-family:monospace; color:#059669; font-weight:bold;">${gdThanhCong.maGiaoDich}</span></p>`;
+                }
+            }
+
+            let infoGridHtml = `
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; padding: 20px; background: #fafafa; border: 1px solid rgba(0,0,0,0.05); font-size: 13px; line-height: 1.6;">
+                <div>
+                    <label style="font-size: 10px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 8px; font-weight:600;"><i class="fa-solid fa-location-dot"></i> Thông tin nhận hàng</label>
+                    <p><strong>Người nhận:</strong> ${tenKhach}</p>
+                    <p><strong>Số điện thoại:</strong> ${sdtKhach}</p>
+                    ${diaChiKhachHtml}
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1);">
+                        ${deliveryInfoHtml}
+                    </div>
+                </div>
+                <div>
+                    <label style="font-size: 10px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 8px; font-weight:600;"><i class="fa-solid fa-receipt"></i> Thanh toán & Hóa đơn</label>
+                    <p><strong>Ngày đặt hàng:</strong> ${formatDateTime(data.ngayTao) || '---'}</p>
+                    <p><strong>Ngày thanh toán:</strong> ${formatDateTime(data.ngayThanhToan) || '<span style="color:#dc2626;">Chưa thanh toán</span>'}</p>
+                    <p><strong>Phương thức TT:</strong> ${getPaymentMethodDisplay(data.phuongThucThanhToan, isStorePickup || data.loaiHoaDon === 0)}</p>
+                    ${maGDHtml}
+                    <p style="margin-top:8px;"><strong>Ghi chú:</strong> <span style="font-style: italic; color: #888;">${ghiChu}</span></p>
+                </div>
+            </div>
+        `;
+
+            let dsSanPhamHtml = '';
+            let calculatedGiaTamThoi = 0;
+            const dsSanPham = data.chiTiets || [];
+
+            if (dsSanPham.length > 0) {
+                dsSanPhamHtml = `
+                <div style="overflow-x:auto; margin-top:15px; border-top:1px dashed rgba(0,0,0,0.1); padding-top:15px;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead>
+                            <tr>
+                                <th style="padding: 12px 0; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid rgba(0,0,0,0.08);">Sản phẩm</th>
+                                <th style="text-align:center; padding: 12px 0; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid rgba(0,0,0,0.08);">Đơn giá</th>
+                                <th style="text-align:center; padding: 12px 0; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid rgba(0,0,0,0.08);">SL</th>
+                                <th style="text-align:right; padding: 12px 0; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid rgba(0,0,0,0.08);">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+                dsSanPham.forEach(item => {
+                    const spct = item.sanPhamChiTiet || item.chiTietSanPham || {};
+                    const hinhAnh = item.hinhAnh || spct.hinhAnh || 'https://placehold.co/60x80';
+                    const tenSP = item.tenSanPham || (spct.sanPham ? spct.sanPham.ten : 'Sản phẩm Beemate');
+                    const phanLoai = item.thuocTinh || (spct.mauSac && spct.kichThuoc ? `${spct.mauSac.ten} - ${spct.kichThuoc.ten}` : 'Mặc định');
+                    const sku = item.sku || item.maSanPhamChiTiet || item.maSku || spct.sku || spct.maSanPhamChiTiet || spct.ma || 'N/A';
+                    const giaBan = item.giaBan || item.giaTien || 0;
+                    const sl = item.soLuong || 1;
+                    const donGiaGoc = item.donGia || giaBan;
+
+                    calculatedGiaTamThoi += (giaBan * sl);
+
+                    let priceDisplayHtml = '';
+                    if (donGiaGoc > giaBan) {
+                        priceDisplayHtml = `<div style="color:var(--muted); text-decoration:line-through; font-size:11px; margin-bottom:2px;">${formatCurrency(donGiaGoc)}</div>
+                                        <div style="font-weight:600; color:var(--accent);">${formatCurrency(giaBan)}</div>`;
+                    } else {
+                        priceDisplayHtml = `${formatCurrency(giaBan)}`;
+                    }
+
+                    dsSanPhamHtml += `
+                    <tr>
+                        <td style="padding: 16px 0; border-bottom: 1px solid rgba(0,0,0,0.05);">
+                            <div style="display:flex;align-items:flex-start; cursor:pointer;" onclick="closeGlobalTrack(); window.location.hash='#detail?id=${item.idSanPham || (spct.sanPham ? spct.sanPham.id : '')}'; window.location.reload();">
+                                <img src="${hinhAnh}" style="margin-top:4px; width: 60px; height: 80px; object-fit: cover; margin-right:15px; border: 1px solid rgba(0,0,0,0.05);">
+                                <div style="flex:1;">
+                                    <div style="font-family:'Cormorant Garamond', serif; font-size: 17px; font-weight:500; color:var(--text); transition:0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text)'">${tenSP}</div>
+                                    <div style="color:var(--muted); font-size: 12px; margin-top:2px;">SKU: <span style="font-weight:500; color:var(--text);">${sku}</span></div>
+                                    <div style="color:var(--muted); font-size: 12px; margin-top:2px;">Phân loại: <span style="font-weight:500; color:var(--text);">${phanLoai}</span></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="text-align:center; vertical-align:top; padding-top:20px; font-size:13px; border-bottom: 1px solid rgba(0,0,0,0.05);">${priceDisplayHtml}</td>
+                        <td style="text-align:center; vertical-align:top; padding-top:20px; font-size:13px; border-bottom: 1px solid rgba(0,0,0,0.05);">${sl}</td>
+                        <td style="text-align:right; vertical-align:top; padding-top:20px; font-size:13px; font-weight:600; color:var(--accent); border-bottom: 1px solid rgba(0,0,0,0.05);">${formatCurrency(giaBan * sl)}</td>
+                    </tr>
+                `;
+                });
+                dsSanPhamHtml += `</tbody></table></div>`;
+            }
+
+            const phiShip = data.phiVanChuyen || 0;
+            const tongTien = data.giaTong || data.tongTien || 0;
+            const currentGiaTamThoi = data.giaTamThoi || calculatedGiaTamThoi;
+            const giamGiaVoucher = data.giaTriKhuyenMai || data.tienGiamVoucher || 0;
+
+            const maVoucherStr = (data.maVoucher && data.maVoucher !== 'Không áp dụng') ? data.maVoucher : (data.maGiamGia ? data.maGiamGia.maCode : '');
+            let giamGiaText = maVoucherStr ? `Voucher giảm giá (${maVoucherStr})` : 'Voucher giảm giá';
+
+            let giamGiaHtmlGuest = giamGiaVoucher > 0 ? `
+            <div style="display:flex; justify-content:space-between; font-size:13px;">
+                <span style="color:var(--muted);">${giamGiaText}</span>
+                <span style="color:#10b981; font-weight:500;">-${formatCurrency(giamGiaVoucher)}</span>
+            </div>
+        ` : '';
+
+            let phiShipHtmlGuest = (data.loaiHoaDon === 0 || isStorePickup) ? '' : `
+            <div style="display:flex; justify-content:space-between; font-size:13px;">
+                <span style="color:var(--muted);">Phí vận chuyển</span>
+                <span style="font-weight:500; color:var(--text);">${phiShip > 0 ? formatCurrency(phiShip) : 'Miễn phí'}</span>
+            </div>
+        `;
+
+            // 🌟 Điều hướng an toàn với các nút thao tác vì Script của Account có thể chưa load ở Trang chủ
+            let actionButtonsHtml = '';
+            const jsSafeRedirect = `
+            window.location.hash = '#account';
+            setTimeout(() => {
+                const input = document.getElementById('guestOrderCode');
+                if(input) { input.value = '${data.ma}'; }
+                if(window.AccountApp) { window.AccountApp.guestTrackOrder(); }
+            }, 500);
+            closeGlobalTrack();
+        `;
+
+            if (currentStatus === 'CHO_XAC_NHAN' || currentStatus === 'CHO_THANH_TOAN') {
+                actionButtonsHtml += `<button onclick="${jsSafeRedirect}" style="padding:10px 20px; color:#dc2626; border:1px solid rgba(220,38,38,0.2); background:rgba(220,38,38,0.05); margin-right:10px; font-size:11px; text-transform:uppercase; letter-spacing:0.1em; cursor:pointer; border-radius:0px; font-family:'DM Sans', sans-serif;"><i class="fa-solid fa-xmark"></i> Hủy đơn</button>`;
+            }
+
+            if (['HOAN_THANH', 'DA_HUY', 'GIAO_THAT_BAI'].includes(currentStatus)) {
+                actionButtonsHtml += `<button onclick="${jsSafeRedirect}" style="padding:10px 20px; background:#fff; color:var(--text); border:1px solid var(--text); margin-right:10px; font-size:11px; text-transform:uppercase; letter-spacing:0.1em; cursor:pointer; border-radius:0px; font-family:'DM Sans', sans-serif;"><i class="fa-solid fa-cart-plus"></i> Mua lại đơn này</button>`;
+            }
+
+            if (currentStatus === 'CHO_THANH_TOAN' && data.phuongThucThanhToan && data.phuongThucThanhToan.toUpperCase() !== 'COD') {
+                actionButtonsHtml += `<button onclick="${jsSafeRedirect}" style="padding:10px 24px; background:var(--accent); color:#fff; border:none; font-size:11px; text-transform:uppercase; letter-spacing:0.1em; cursor:pointer; border-radius:0px; font-family:'DM Sans', sans-serif;"><i class="fa-solid fa-wallet"></i> THANH TOÁN NGAY</button>`;
+            }
+
+            let finalHtml = `
+            ${headerHtml}
+            ${infoGridHtml}
+            ${dsSanPhamHtml}
+            <div style="border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 20px; margin-top: 10px; display:flex; flex-direction:column; align-items:flex-end;">
+                <div style="width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 12px; text-align: left;">
+                    <div style="display:flex; justify-content:space-between; font-size:13px;">
+                        <span style="color:var(--muted);">Tạm tính hàng</span>
+                        <span style="font-weight:500; color:var(--text);">${formatCurrency(currentGiaTamThoi)}</span>
+                    </div>
+                    ${phiShipHtmlGuest}
+                    ${giamGiaHtmlGuest}
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding-top:16px; border-top:2px solid var(--text);">
+                        <span style="font-weight:600; font-size:14px; text-transform:uppercase; color:var(--text);">TỔNG CỘNG</span>
+                        <span style="font-weight:800; font-size:24px; color:var(--accent);">${formatCurrency(tongTien)}</span>
+                    </div>
+                </div>
+
+                ${actionButtonsHtml ? `
+                <div style="margin-top: 24px; display: flex; flex-direction: column; align-items: flex-end; width: 100%;">
+                    <div style="font-size:11px; color:#c08060; text-align:right; margin-bottom:12px; font-style:italic;">* Chuyển hướng đến trang Quản lý tài khoản để thực hiện các thao tác Mua lại, Hủy đơn hoặc Thanh toán</div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;">${actionButtonsHtml}</div>
+                </div>` : ''}
+            </div>
+        `;
+
+            resultDiv.innerHTML = finalHtml;
+
+        } catch (error) {
+            console.error(error);
+            resultDiv.innerHTML = '<div style="color:#c03c3c; text-align:center; font-size:13px; padding: 20px;">Lỗi kết nối máy chủ! Vui lòng thử lại sau.</div>';
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.CartHelper && typeof window.CartHelper.updateBadge === 'function') window.CartHelper.updateBadge();
+    });
+
+    setInterval(() => { if(window.NotificationApp) window.NotificationApp.fetchData(); }, 30000);
 </script>
 
+<!-- ═══════════════ SEARCH OVERLAY ═══════════════ -->
 <div id="searchOverlay" style="position:fixed;inset:0;z-index:9000;background:rgba(247,245,242,0.97);backdrop-filter:blur(16px);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s ease;">
-    <button onclick="closeSearch()" style="position:absolute;top:28px;right:48px;background:none;border:none;cursor:none;font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:10px;transition:color .2s" onmouseenter="this.style.color='var(--text)'" onmouseleave="this.style.color='var(--muted)'">Đóng <i class="fa-solid fa-xmark"></i></button>
+    <button onclick="closeSearch()" style="position:absolute;top:28px;right:48px;background:none;border:none;cursor:pointer;font-family:var(--main-font);font-size:11px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:10px;transition:color .2s" onmouseenter="this.style.color='var(--text)'" onmouseleave="this.style.color='var(--muted)'">Đóng <i class="fa-solid fa-xmark"></i></button>
     <div style="width:100%;max-width:680px;padding:0 24px">
         <div id="searchLabel" style="font-size:11px;letter-spacing:.25em;color:var(--accent);text-transform:uppercase;font-weight:500;margin-bottom:20px;display:flex;align-items:center;gap:10px;opacity:0;transform:translateY(12px);transition:opacity .4s ease .1s,transform .4s ease .1s"><span style="width:20px;height:1px;background:var(--accent);display:inline-block"></span>Tìm kiếm</div>
         <div id="searchInputRow" style="display:flex;align-items:center;border-bottom:1.5px solid var(--text);padding-bottom:16px;gap:16px;opacity:0;transform:translateY(16px);transition:opacity .4s ease .15s,transform .4s ease .15s">
             <i class="fa-solid fa-magnifying-glass" style="font-size:20px;color:var(--muted);flex-shrink:0"></i>
-            <input id="searchInput" type="text" placeholder="Bạn đang tìm gì? Ví dụ: áo linen, oversize..." autocomplete="off" style="flex:1;border:none;background:none;font-family:'Cormorant Garamond',serif;font-size:clamp(24px,4vw,40px);font-weight:300;color:var(--text);outline:none" oninput="handleSearchInput(this.value)">
-            <button id="searchClearBtn" onclick="clearSearch()" style="display:none;background:none;border:none;cursor:none;color:var(--muted)"><i class="fa-solid fa-xmark" style="font-size:18px"></i></button>
+            <input id="searchInput" type="text" placeholder="Bạn đang tìm gì? Ví dụ: áo linen, oversize..." autocomplete="off" style="flex:1;border:none;background:none;font-size:clamp(24px,4vw,40px);font-weight:300;color:var(--text);outline:none" oninput="handleSearchInput(this.value)">
+            <button id="searchClearBtn" onclick="clearSearch()" style="display:none;background:none;border:none;cursor:pointer;color:var(--muted)"><i class="fa-solid fa-xmark" style="font-size:18px"></i></button>
         </div>
         <div id="searchSuggestions" style="margin-top:40px;opacity:0;transform:translateY(16px);transition:opacity .4s ease .2s,transform .4s ease .2s">
             <div id="searchPopular">
                 <div style="font-size:10px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:16px">Tìm kiếm phổ biến</div>
                 <div style="display:flex;flex-wrap:wrap;gap:10px">
-                    <button onclick="setSearch('Áo linen')" style="padding:10px 20px;background:none;border:1px solid rgba(0,0,0,.1);font-family:'DM Sans',sans-serif;font-size:12px;letter-spacing:.08em;color:var(--muted);cursor:none;text-transform:uppercase" onmouseenter="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseleave="this.style.borderColor='rgba(0,0,0,.1)';this.style.color='var(--muted)'">Áo linen</button>
-                    <button onclick="setSearch('Oversize')" style="padding:10px 20px;background:none;border:1px solid rgba(0,0,0,.1);font-family:'DM Sans',sans-serif;font-size:12px;letter-spacing:.08em;color:var(--muted);cursor:none;text-transform:uppercase" onmouseenter="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseleave="this.style.borderColor='rgba(0,0,0,.1)';this.style.color='var(--muted)'">Oversize</button>
-                    <button onclick="setSearch('Cotton')" style="padding:10px 20px;background:none;border:1px solid rgba(0,0,0,.1);font-family:'DM Sans',sans-serif;font-size:12px;letter-spacing:.08em;color:var(--muted);cursor:none;text-transform:uppercase" onmouseenter="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseleave="this.style.borderColor='rgba(0,0,0,.1)';this.style.color='var(--muted)'">Cotton</button>
-                    <button onclick="setSearch('Áo sơ mi')" style="padding:10px 20px;background:none;border:1px solid rgba(0,0,0,.1);font-family:'DM Sans',sans-serif;font-size:12px;letter-spacing:.08em;color:var(--muted);cursor:none;text-transform:uppercase" onmouseenter="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseleave="this.style.borderColor='rgba(0,0,0,.1)';this.style.color='var(--muted)'">Áo sơ mi</button>
-                    <button onclick="setSearch('Sale')" style="padding:10px 20px;background:none;border:1px solid rgba(0,0,0,.1);font-family:'DM Sans',sans-serif;font-size:12px;letter-spacing:.08em;color:var(--muted);cursor:none;text-transform:uppercase" onmouseenter="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseleave="this.style.borderColor='rgba(0,0,0,.1)';this.style.color='var(--muted)'">Sale</button>
+                    <button onclick="setSearch('Áo linen')" style="padding:10px 20px;background:none;border:1px solid rgba(0,0,0,.1);font-family:var(--main-font);font-size:12px;letter-spacing:.08em;color:var(--muted);cursor:pointer;text-transform:uppercase" onmouseenter="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseleave="this.style.borderColor='rgba(0,0,0,.1)';this.style.color='var(--muted)'">Áo linen</button>
+                    <button onclick="setSearch('Oversize')" style="padding:10px 20px;background:none;border:1px solid rgba(0,0,0,.1);font-family:var(--main-font);font-size:12px;letter-spacing:.08em;color:var(--muted);cursor:pointer;text-transform:uppercase" onmouseenter="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseleave="this.style.borderColor='rgba(0,0,0,.1)';this.style.color='var(--muted)'">Oversize</button>
+                    <button onclick="setSearch('Cotton')" style="padding:10px 20px;background:none;border:1px solid rgba(0,0,0,.1);font-family:var(--main-font);font-size:12px;letter-spacing:.08em;color:var(--muted);cursor:pointer;text-transform:uppercase" onmouseenter="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseleave="this.style.borderColor='rgba(0,0,0,.1)';this.style.color='var(--muted)'">Cotton</button>
+                    <button onclick="setSearch('Áo sơ mi')" style="padding:10px 20px;background:none;border:1px solid rgba(0,0,0,.1);font-family:var(--main-font);font-size:12px;letter-spacing:.08em;color:var(--muted);cursor:pointer;text-transform:uppercase" onmouseenter="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseleave="this.style.borderColor='rgba(0,0,0,.1)';this.style.color='var(--muted)'">Áo sơ mi</button>
+                    <button onclick="setSearch('Sale')" style="padding:10px 20px;background:none;border:1px solid rgba(0,0,0,.1);font-family:var(--main-font);font-size:12px;letter-spacing:.08em;color:var(--muted);cursor:pointer;text-transform:uppercase" onmouseenter="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseleave="this.style.borderColor='rgba(0,0,0,.1)';this.style.color='var(--muted)'">Sale</button>
                 </div>
             </div>
             <div id="searchResults" style="display:none">
@@ -905,60 +1648,21 @@
     </div>
 </div>
 
-<style>
-    .global-track-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background: #f9f9fa; padding: 20px; border: 1px solid rgba(0,0,0,0.05); font-size: 13px; line-height: 1.6; border-radius: 0; margin-bottom: 20px; }
-    .global-track-status { padding: 6px 14px; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; border-radius: 0; display: inline-block; text-align: center; }
-    .global-track-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-    .global-track-table th { text-align: left; padding: 12px 0; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid rgba(0,0,0,0.08); }
-    .global-track-table td { padding: 16px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
-
-    /* Responsive cho màn hình nhỏ */
-    @media (max-width: 600px) {
-        .global-track-info-grid { grid-template-columns: 1fr !important; gap: 15px !important; padding: 15px !important; }
-        #trackResultContainer { padding: 15px !important; }
-        .global-track-table { display: block; width: 100%; overflow-x: auto; white-space: nowrap; }
-    }
-</style>
-
-<div id="trackOverlay" style="position:fixed;inset:0;z-index:9000;background:rgba(247,245,242,0.97);backdrop-filter:blur(16px);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s ease; overflow-y:auto; padding: 60px 0;">
-    <button onclick="closeGlobalTrack()" style="position:fixed;top:28px;right:48px;background:none;border:none;cursor:none;font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:10px;transition:color .2s;z-index:9001;">Đóng <i class="fa-solid fa-xmark"></i></button>
-    <div style="width:100%;max-width:720px;padding:0 24px; margin: auto;">
+<!-- ═══════════════ TRACK OVERLAY ═══════════════ -->
+<div id="trackOverlay" style="position:fixed;inset:0;z-index:9000;background:rgba(247,245,242,0.97);backdrop-filter:blur(16px);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s ease;overflow-y:auto;padding:60px 0;">
+    <button onclick="closeGlobalTrack()" style="position:fixed;top:28px;right:48px;background:none;border:none;cursor:pointer;font-family:var(--main-font);font-size:11px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:10px;transition:color .2s;z-index:9001;">Đóng <i class="fa-solid fa-xmark"></i></button>
+    <div style="width:100%;max-width:720px;padding:0 24px;margin:auto;">
         <div id="trackLabel" style="font-size:11px;letter-spacing:.25em;color:var(--accent);text-transform:uppercase;font-weight:500;margin-bottom:20px;display:flex;align-items:center;gap:10px;opacity:0;transform:translateY(12px);transition:opacity .4s ease .1s,transform .4s ease .1s"><span style="width:20px;height:1px;background:var(--accent);display:inline-block"></span>Tra cứu đơn hàng</div>
         <div id="trackInputRow" style="display:flex;align-items:center;border-bottom:1.5px solid var(--text);padding-bottom:16px;gap:16px;opacity:0;transform:translateY(16px);transition:opacity .4s ease .15s,transform .4s ease .15s">
             <i class="fa-solid fa-box-open" style="font-size:20px;color:var(--muted);flex-shrink:0"></i>
-            <input id="trackInput" type="text" placeholder="Nhập mã đơn hàng..." autocomplete="off" style="flex:1;border:none;background:none;font-family:'Cormorant Garamond',serif;font-size:clamp(24px,4vw,32px);font-weight:300;color:var(--text);outline:none" onkeypress="if(event.key==='Enter') executeGlobalTrack()">
-            <button onclick="executeGlobalTrack()" style="background:var(--accent);color:white;border:none;padding:12px 28px;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;border-radius:0;">Tra cứu</button>
+            <input id="trackInput" type="text" placeholder="Nhập mã đơn hàng..." autocomplete="off" style="flex:1;border:none;background:none;font-size:clamp(24px,4vw,32px);font-weight:300;color:var(--text);outline:none" onkeypress="if(event.key==='Enter') executeGlobalTrack()">
+            <button onclick="executeGlobalTrack()" style="background:var(--accent);color:white;border:none;padding:12px 28px;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;">Tra cứu</button>
         </div>
-        <div id="trackResultContainer" style="margin-top:40px;opacity:0;transform:translateY(16px);transition:opacity .4s ease .2s,transform .4s ease .2s; display:none; background: #fff; padding: 24px; border: 1px solid rgba(0,0,0,0.05); box-shadow: 0 10px 30px rgba(0,0,0,0.02);">
-        </div>
+        <div id="trackResultContainer" style="margin-top:40px;opacity:0;transform:translateY(16px);transition:opacity .4s ease .2s,transform .4s ease .2s;display:none;background:#fff;padding:24px;border:1px solid rgba(0,0,0,0.05);box-shadow:0 10px 30px rgba(0,0,0,0.02);"></div>
     </div>
 </div>
 
-<style>
-    /* CSS Tùy chỉnh khung chat */
-    #bee-chat-btn { position: fixed; bottom: 30px; right: 90px; width: 44px; height: 44px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 9000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: transform 0.3s ease; }
-    #bee-chat-btn:hover { transform: translateY(-4px); }
-    #bee-chat-window { position: fixed; bottom: 90px; right: 30px; width: 340px; height: 480px; background: var(--white); border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); display: none; flex-direction: column; z-index: 9998; overflow: hidden; font-family: var(--main-font); border: 1px solid rgba(0,0,0,0.05); }
-    #bee-chat-window.show { display: flex; animation: slideUp 0.3s ease; }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    .chat-header { background: var(--accent); color: white; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; font-weight: 500; font-size: 14px; letter-spacing: 0.05em; }
-    .chat-header .title { display: flex; align-items: center; gap: 10px; }
-    .chat-header .close-btn { cursor: pointer; font-size: 18px; transition: opacity 0.2s; }
-    .chat-header .close-btn:hover { opacity: 0.7; }
-    .chat-body { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background: #fafafa; }
-    .chat-body::-webkit-scrollbar { width: 4px; }
-    .chat-body::-webkit-scrollbar-thumb { background: rgba(0,0,0,.15); border-radius: 4px; }
-    .chat-msg { max-width: 85%; padding: 12px 16px; border-radius: 12px; font-size: 13px; line-height: 1.5; word-wrap: break-word; }
-    .chat-msg.bot { background: white; color: var(--text); align-self: flex-start; border-bottom-left-radius: 2px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.03); }
-    .chat-msg.user { background: var(--accent); color: white; align-self: flex-end; border-bottom-right-radius: 2px; box-shadow: 0 2px 5px rgba(61,90,76,0.2); }
-    .chat-footer { padding: 12px 16px; background: white; border-top: 1px solid #eee; display: flex; gap: 10px; align-items: center; }
-    .chat-footer input { flex: 1; padding: 10px 16px; border: 1px solid #ddd; border-radius: 20px; outline: none; font-family: var(--main-font); font-size: 13px; transition: border-color 0.2s; }
-    .chat-footer input:focus { border-color: var(--accent); }
-    .chat-footer button { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; padding: 5px; transition: transform 0.2s; }
-    .chat-footer button:hover { transform: scale(1.1); }
-    .typing-indicator { display: none; align-self: flex-start; background: white; padding: 10px 16px; border-radius: 12px; border-bottom-left-radius: 2px; font-size: 12px; color: var(--muted); font-style: italic; box-shadow: 0 2px 5px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.03); }
-</style>
-
+<!-- ═══════════════ CHAT ═══════════════ -->
 <div id="bee-chat-btn" onclick="toggleChat()">
     <svg width="24" height="24" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
         <ellipse cx="32" cy="38" rx="18" ry="14" fill="white" opacity="0.95"/>
@@ -1004,203 +1708,33 @@
     function toggleChat() {
         const chatWin = document.getElementById('bee-chat-window');
         chatWin.classList.toggle('show');
-        if (chatWin.classList.contains('show')) {
-            setTimeout(() => document.getElementById('chat-input').focus(), 100);
-        }
+        if (chatWin.classList.contains('show')) setTimeout(() => document.getElementById('chat-input').focus(), 100);
     }
-
-    function handleChatKeyPress(e) {
-        if (e.key === 'Enter') {
-            sendMessage();
-        }
-    }
-
+    function handleChatKeyPress(e) { if (e.key === 'Enter') sendMessage(); }
     async function sendMessage() {
         const inputField = document.getElementById('chat-input');
         const message = inputField.value.trim();
         if (!message) return;
-
         inputField.value = '';
         const chatBody = document.getElementById('chat-body');
         const typingIndicator = document.getElementById('typing-indicator');
-
-        const userMsgHtml = `<div class="chat-msg user">${message}</div>`;
-        typingIndicator.insertAdjacentHTML('beforebegin', userMsgHtml);
+        typingIndicator.insertAdjacentHTML('beforebegin', `<div class="chat-msg user">${message}</div>`);
         chatBody.scrollTop = chatBody.scrollHeight;
-
         typingIndicator.style.display = 'block';
-
         try {
-            const response = await fetch('/api/chatbot/ask', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: message })
-            });
-
+            const response = await fetch('/api/chatbot/ask', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({message}) });
             const data = await response.json();
             typingIndicator.style.display = 'none';
-
-            // 🌟 BỔ SUNG BƯỚC GIẢI MÃ HTML TẠI ĐÂY
             let decoder = document.createElement('textarea');
             decoder.innerHTML = data.reply;
-            let finalReply = decoder.value;
-
-            // In câu trả lời đã được giải mã ra màn hình
-            const botMsgHtml = `<div class="chat-msg bot">${finalReply}</div>`;
-            typingIndicator.insertAdjacentHTML('beforebegin', botMsgHtml);
+            typingIndicator.insertAdjacentHTML('beforebegin', `<div class="chat-msg bot">${decoder.value}</div>`);
             chatBody.scrollTop = chatBody.scrollHeight;
-
         } catch (error) {
             typingIndicator.style.display = 'none';
-            const errorMsgHtml = `<div class="chat-msg bot">Xin lỗi cậu, mạng đang hơi lag xíu, cậu chờ mình một lát rồi nhắn lại nhé!</div>`;
-            typingIndicator.insertAdjacentHTML('beforebegin', errorMsgHtml);
+            typingIndicator.insertAdjacentHTML('beforebegin', `<div class="chat-msg bot">Xin lỗi cậu, mạng đang hơi lag xíu, cậu chờ mình một lát rồi nhắn lại nhé!</div>`);
             chatBody.scrollTop = chatBody.scrollHeight;
         }
     }
-
-    window.openGlobalTrack = function() {
-        if(typeof closeNotif === 'function') closeNotif();
-        const o = document.getElementById('trackOverlay');
-        o.style.opacity='1'; o.style.pointerEvents='all';
-        ['trackLabel','trackInputRow','trackResultContainer'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) { el.style.opacity='1'; el.style.transform='translateY(0)'; }
-        });
-        setTimeout(() => document.getElementById('trackInput')?.focus(), 200);
-        document.body.style.overflow='hidden';
-    };
-
-    window.closeGlobalTrack = function() {
-        const o = document.getElementById('trackOverlay');
-        o.style.opacity='0'; o.style.pointerEvents='none';
-        ['trackLabel','trackInputRow','trackResultContainer'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) { el.style.opacity='0'; el.style.transform='translateY(16px)'; }
-        });
-        document.body.style.overflow='';
-        setTimeout(() => {
-            document.getElementById('trackInput').value = '';
-            document.getElementById('trackResultContainer').style.display = 'none';
-        }, 400);
-    };
-
-    window.executeGlobalTrack = async function() {
-        const ma = document.getElementById('trackInput').value.trim();
-        const resultDiv = document.getElementById('trackResultContainer');
-        if (!ma) return;
-
-        resultDiv.style.display = 'block';
-        resultDiv.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0;">Đang tra cứu hệ thống...</div>';
-
-        // Helper functions nội bộ
-        const fmtCcy = (n) => new Intl.NumberFormat('vi-VN').format(n || 0) + ' ₫';
-        const getStt = (code) => {
-            const map = {
-                'CHO_THANH_TOAN': { lbl: 'Chờ thanh toán', bg: '#fef3c7', col: '#d97706' },
-                'CHO_XAC_NHAN': { lbl: 'Chờ xác nhận', bg: '#e0e7ff', col: '#4338ca' },
-                'CHO_GIAO': { lbl: 'Chờ lấy hàng', bg: '#f3f4f6', col: '#4b5563' },
-                'DANG_GIAO': { lbl: 'Đang giao hàng', bg: '#dbeafe', col: '#2563eb' },
-                'HOAN_THANH': { lbl: 'Hoàn thành', bg: '#d1fae5', col: '#059669' },
-                'DA_HUY': { lbl: 'Đã hủy', bg: '#fee2e2', col: '#dc2626' }
-            };
-            return map[code] || { lbl: code || 'Không rõ', bg: '#f3f4f6', col: '#4b5563' };
-        };
-        const getPay = (m) => ({ 'TIEN_MAT': 'Tiền mặt', 'MOMO': 'Ví MoMo', 'VNPAY': 'VNPay', 'CHUYEN_KHOAN': 'Chuyển khoản QR', 'COD': 'Thanh toán khi nhận hàng (COD)' }[m] || m || 'N/A');
-
-        try {
-            const res = await fetch('/api/hoa-don/tra-cuu/' + ma);
-            const ct = res.headers.get("content-type");
-            if (!res.ok || !ct || !ct.includes("application/json")) {
-                resultDiv.innerHTML = '<div style="color:#c03c3c; text-align:center; font-size:13px; padding:20px 0;">Không tìm thấy thông tin cho mã đơn hàng này.</div>';
-                return;
-            }
-
-            const data = await res.json();
-            const maStt = (data.trangThaiHoaDon && data.trangThaiHoaDon.ma) ? data.trangThaiHoaDon.ma : '';
-            const stt = getStt(maStt);
-            const tongTien = data.tongTien || data.giaTong || 0;
-            let tamTinh = 0;
-
-            let spHtml = '';
-            if (data.chiTiets && data.chiTiets.length > 0) {
-                spHtml = `<table class="global-track-table"><thead><tr><th>Sản phẩm</th><th style="text-align:center">Đơn giá</th><th style="text-align:center">SL</th><th style="text-align:right">Thành tiền</th></tr></thead><tbody>`;
-                data.chiTiets.forEach(item => {
-                    const gia = item.giaBan || 0; const sl = item.soLuong || 1; tamTinh += (gia * sl);
-                    spHtml += `<tr>
-                    <td>
-                        <div style="display:flex;align-items:flex-start;gap:12px;">
-                            <img src="${item.hinhAnh || 'https://placehold.co/60x80'}" style="width:50px;height:65px;object-fit:cover;border-radius:0;">
-                            <div>
-                                <div style="font-family:'Cormorant Garamond', serif; font-size:15px; font-weight:500;">${item.tenSanPham || 'Sản phẩm'}</div>
-                                <div style="color:var(--muted); font-size:11px; margin-top:4px;">SKU: <span style="color:var(--text); font-weight:500;">${item.sku || 'N/A'}</span></div>
-                                <div style="color:var(--muted); font-size:11px; margin-top:2px;">Phân loại: <span style="color:var(--text); font-weight:500;">${item.thuocTinh || 'Mặc định'}</span></div>
-                            </div>
-                        </div>
-                    </td>
-                    <td style="text-align:center; font-size:12px;">${fmtCcy(gia)}</td>
-                    <td style="text-align:center; font-size:12px;">${sl}</td>
-                    <td style="text-align:right; font-size:12px; font-weight:600; color:var(--accent);">${fmtCcy(gia * sl)}</td>
-                </tr>`;
-                });
-                spHtml += `</tbody></table>`;
-            }
-
-            const phiShip = data.phiVanChuyen || 0;
-            let giamGia = (tamTinh + phiShip) - tongTien;
-            if (giamGia < 0) giamGia = data.giaTriKhuyenMai || 0;
-
-            resultDiv.innerHTML = `
-            <div style="margin-bottom: 25px; display:flex; align-items:center; justify-content:space-between;">
-                <span style="font-size:18px; font-weight:600; font-family:'Cormorant Garamond',serif;">Đơn hàng #${data.ma}</span>
-                <span class="global-track-status" style="background:${stt.bg}; color:${stt.col};">${stt.lbl}</span>
-            </div>
-
-            <div class="global-track-info-grid">
-                <div>
-                    <div style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; font-weight: 600;">Thông tin khách hàng</div>
-                    <div><strong>Người nhận:</strong> ${data.tenNguoiNhan || data.tenKhachHang || 'Khách hàng'}</div>
-                    <div><strong>SĐT:</strong> ${data.sdtKhachHang || '---'}</div>
-                    <div><strong>Địa chỉ:</strong> ${data.diaChiGiaoHang || '---'}</div>
-                </div>
-                <div>
-                    <div style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; font-weight: 600;">Thông tin hóa đơn</div>
-                    <div><strong>Ngày đặt:</strong> ${data.ngayTao || '---'}</div>
-                    <div><strong>Thanh toán:</strong> ${getPay(data.phuongThucThanhToan)}</div>
-                    <div><strong>Ghi chú:</strong> <span style="font-style: italic; color: #888;">${data.ghiChu || 'Không'}</span></div>
-                </div>
-            </div>
-
-            ${spHtml}
-
-            <div style="border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 20px; display:flex; justify-content:flex-end;">
-                <div style="width: 100%; max-width: 300px; display: flex; flex-direction: column; gap: 10px;">
-                    <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Tổng tiền hàng</span><span style="font-weight:500;">${fmtCcy(tamTinh)}</span></div>
-                    <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Phí vận chuyển</span><span style="font-weight:500;">${phiShip > 0 ? fmtCcy(phiShip) : 'Miễn phí'}</span></div>
-                    <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:var(--muted);">Giảm giá</span><span style="color:#10b981; font-weight:500;">-${fmtCcy(giamGia)}</span></div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; padding-top:16px; border-top:1px dashed rgba(0,0,0,0.1);">
-                        <span style="font-weight:600; font-size:14px; text-transform:uppercase;">Thành tiền</span>
-                        <span style="font-weight:700; font-size:22px; color:var(--accent);">${fmtCcy(tongTien)}</span>
-                    </div>
-                </div>
-            </div>
-        `;
-        } catch (e) {
-            resultDiv.innerHTML = '<div style="color:#c03c3c; text-align:center; font-size:13px; padding:20px 0;">Hệ thống đang bận, vui lòng thử lại sau!</div>';
-        }
-    };
-    document.addEventListener('DOMContentLoaded', () => {
-        if (window.CartHelper && typeof window.CartHelper.updateBadge === 'function') {
-            window.CartHelper.updateBadge();
-        }
-    });
-    // Thêm sự kiện đóng overlay khi nhấn phím Esc
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') { if(typeof closeGlobalTrack === 'function') closeGlobalTrack(); } });
-    setInterval(() => {
-        if(typeof fetchNotifications === 'function') {
-            fetchNotifications();
-        }
-    }, 30000);
 </script>
-
 </body>
 </html>

@@ -511,7 +511,6 @@
         }
     </style>
 
-    <!-- ══════════════════════ HERO ══════════════════════ -->
     <div class="sale-hero reveal">
         <div class="sale-hero-left">
             <div class="sale-hero-eyebrow">Ưu đãi đặc biệt</div>
@@ -525,7 +524,6 @@
             <p class="sale-hero-desc">
                 Beemate không sale vì hàng không bán được — mà vì chúng tôi muốn nhiều người hơn được mặc những chiếc áo tốt. Đợt sale này kết thúc khi hết hàng.
             </p>
-            <!-- Countdown (filled by JS from API) -->
             <div id="saleCountdownWrap">
                 <div class="sale-promo-label" id="salePromoLabel" style="display:none;">Đợt khuyến mãi</div>
                 <div class="sale-promo-name" id="salePromoName" style="display:none;"></div>
@@ -540,10 +538,8 @@
         </div>
     </div>
 
-    <!-- ══════════════════════ VOUCHERS ══════════════════════ -->
     <div class="sale-vouchers-section" id="saleVouchersSection" style="display:none;"></div>
 
-    <!-- ══════════════════════ FILTER BAR ══════════════════════ -->
     <div class="sale-filter-bar">
         <div class="sale-filter-tabs" id="saleFilterTabs">
             <button class="sale-filter-tab active" data-pct="all" onclick="SaleApp.filterTab(this)">
@@ -578,7 +574,6 @@
         </div>
     </div>
 
-    <!-- ADVANCED PANEL -->
     <div class="sale-adv-panel" id="saleAdvPanel">
         <div class="sale-adv-inner">
             <div class="sale-adv-group">
@@ -599,12 +594,10 @@
         </div>
     </div>
 
-    <!-- ══════════════════════ PRODUCTS SECTION ══════════════════════ -->
     <section class="sale-products-section" id="saleProductsSection">
         <div id="sale-qa-backdrop" onclick="SaleApp.closeAllSelections()"></div>
         <div id="sale-qs-modal"></div>
 
-        <!-- Empty state -->
         <div class="sale-empty" id="saleEmpty">
             <svg viewBox="0 0 24 24" stroke-width="1"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/><line x1="3" y1="3" x2="21" y2="21"/></svg>
             <h3 class="use-display">Chưa có sản phẩm sale</h3>
@@ -616,7 +609,6 @@
         </div>
 
         <div class="sale-products-grid" id="saleProductsGrid">
-            <!-- Skeleton placeholders -->
             <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line short"></div><div class="skeleton-line medium"></div><div class="skeleton-line price"></div></div></div>
             <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line short"></div><div class="skeleton-line medium"></div><div class="skeleton-line price"></div></div></div>
             <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line short"></div><div class="skeleton-line medium"></div><div class="skeleton-line price"></div></div></div>
@@ -635,7 +627,6 @@
         </div>
     </section>
 
-    <!-- ══════════════════════ DELIVERY MODAL ══════════════════════ -->
     <div class="delivery-modal-overlay" id="saleDeliveryModalOverlay" onclick="if(event.target===this)SaleApp.closeDeliveryModal()">
         <div class="delivery-modal">
             <div class="dm-header">
@@ -777,6 +768,12 @@
             function pad(n) { return String(n).padStart(2, '0'); }
             function isNew(p) { return p.ngayTao && (new Date() - new Date(p.ngayTao)) / 864e5 <= 7; }
             function getStock(p) { const v = p.chiTietSanPhams||p.chiTietSanPhamList||p.bienThes||p.skus||[]; return v.reduce((s,x)=>s+(x.soLuong||0),0); }
+
+            function getAvailableStock(variant) {
+                if (!variant) return 0;
+                if (variant.soLuongKhaDung !== undefined) return variant.soLuongKhaDung;
+                return Math.max(0, variant.soLuong - (variant.soLuongTamGiu || 0));
+            }
 
             function prices(p) {
                 const v = p.chiTietSanPhams||p.chiTietSanPhamList||p.bienThes||p.skus||[];
@@ -1139,18 +1136,20 @@
         <div class="qs-opts" id="s-qs-colors-${p.id}"></div>
         <div class="qs-lbl">Kích cỡ</div>
         <div class="qs-opts" id="s-qs-sizes-${p.id}"></div>
+        <div class="qs-price prod-price" id="s-qs-price-${p.id}">${priceHtml}</div>
+        <div id="s-qs-stock-${p.id}" class="stock-status" style="margin-bottom: 8px;"></div>
         <div class="qs-qty-selector" onclick="event.stopPropagation()">
             <button class="qs-qty-btn" onclick="SaleApp.changeQsQty(${p.id},'s-qty-${p.id}',-1,event)"><i class="fa-solid fa-minus"></i></button>
             <input type="number" id="s-qty-${p.id}" class="qs-qty-input" value="1" min="1" onchange="SaleApp.validateQsQty(${p.id},'s-qty-${p.id}',event)">
             <button class="qs-qty-btn" onclick="SaleApp.changeQsQty(${p.id},'s-qty-${p.id}',1,event)"><i class="fa-solid fa-plus"></i></button>
         </div>
         <div class="qs-actions">
-            <button class="qs-btn ghost" onclick="SaleApp.confirmAdd(${p.id},event,false,'s-qty-${p.id}')">Thêm giỏ</button>
-            <button class="qs-btn primary" onclick="SaleApp.confirmAdd(${p.id},event,true,'s-qty-${p.id}')">Mua ngay</button>
+            <button class="qs-btn ghost" id="s-qs-add-${p.id}" onclick="SaleApp.confirmAdd(${p.id},event,false,'s-qty-${p.id}')">Thêm giỏ</button>
+            <button class="qs-btn primary" id="s-qs-buy-${p.id}" onclick="SaleApp.confirmAdd(${p.id},event,true,'s-qty-${p.id}')">Mua ngay</button>
         </div>
         <button class="qs-wishlist${liked?' liked':''}" id="s-qs-wish-${p.id}" onclick="SaleApp.toggleWishlist(${p.id})">
             <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-            ${liked ? 'Đã yêu thích' : 'Thêm vào yêu thích'}
+            <span>${liked ? 'Đã yêu thích' : 'Thêm vào yêu thích'}</span>
         </button>
     </div>
 
@@ -1192,6 +1191,68 @@
                 });
                 const sizeEl = document.getElementById(`${prefix}qs-sizes-${productId}`);
                 if (sizeEl) sizeEl.innerHTML = sHtml;
+
+                updateQsPrice(productId, sel.sku, prefix);
+            }
+
+            function updateQsPrice(productId, sku, prefix) {
+                const priceEl = document.getElementById(`${prefix}qs-price-${productId}`);
+                const stockEl = document.getElementById(`${prefix}qs-stock-${productId}`);
+                const btnAdd = document.getElementById(`${prefix}qs-add-${productId}`);
+                const btnBuy = document.getElementById(`${prefix}qs-buy-${productId}`);
+                const qtyInput = document.getElementById(`${prefix}qty-${productId}`);
+
+                if (!priceEl) return;
+
+                if (!sku) {
+                    const product = state.allSaleProducts.find(p => p.id === productId);
+                    if (product) {
+                        const {minOrig, minSale, hasSale} = prices(product);
+                        const pct = Math.round((1 - minSale / minOrig) * 100);
+                        const savedK = (minOrig - minSale) >= 1000 ? Math.round((minOrig - minSale)/1000) + 'k' : fmt(minOrig - minSale);
+                        priceEl.innerHTML = hasSale ? `<span class="price-sale">${fmt(minSale)}</span><span class="price-orig">${fmt(minOrig)}</span><span class="price-save">Tiết kiệm ${savedK}</span>` : `<span class="price-normal">${fmt(minOrig)}</span>`;
+                    }
+                    if(stockEl) { stockEl.innerHTML = 'Vui lòng chọn Kích cỡ'; stockEl.className = 'stock-status'; }
+                    if(qtyInput) qtyInput.disabled = true;
+                    if(btnAdd) btnAdd.disabled = true;
+                    if(btnBuy) btnBuy.disabled = true;
+                    if(tempSel[productId]) tempSel[productId].currentStock = 0;
+                    return;
+                }
+
+                const cur = sku.giaSauKhuyenMai || sku.giaBan || 0, orig = sku.giaBan || 0;
+                if (cur < orig && cur > 0) {
+                    const pct = Math.round((1 - cur / orig) * 100);
+                    const savedK = (orig - cur) >= 1000 ? Math.round((orig - cur)/1000) + 'k' : fmt(orig - cur);
+                    priceEl.innerHTML = `<span class="price-sale">${fmt(cur)}</span><span class="price-orig">${fmt(orig)}</span><span class="price-save">Tiết kiệm ${savedK}</span>`;
+                } else {
+                    priceEl.innerHTML = `<span class="price-normal">${fmt(orig)}</span>`;
+                }
+
+                const availableStock = getAvailableStock(sku);
+                if(tempSel[productId]) tempSel[productId].currentStock = availableStock;
+
+                if(stockEl) {
+                    if (availableStock > 10) {
+                        stockEl.innerHTML = `<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;vertical-align:middle;margin-right:4px;flex-shrink:0"><path d="M5 13l4 4L19 7"/></svg> Còn hàng <span class="stock-badge good">${availableStock} sản phẩm</span>`;
+                        stockEl.className = 'stock-status';
+                        if(qtyInput) qtyInput.disabled = false;
+                        if(btnAdd) { btnAdd.disabled = false; btnAdd.innerText = 'THÊM GIỎ'; }
+                        if(btnBuy) btnBuy.disabled = false;
+                    } else if (availableStock > 0) {
+                        stockEl.innerHTML = `⚠️ Sắp hết hàng <span class="stock-badge warning">Chỉ còn ${availableStock} sản phẩm</span>`;
+                        stockEl.className = 'stock-status low';
+                        if(qtyInput) qtyInput.disabled = false;
+                        if(btnAdd) { btnAdd.disabled = false; btnAdd.innerText = 'THÊM GIỎ'; }
+                        if(btnBuy) btnBuy.disabled = false;
+                    } else {
+                        stockEl.innerHTML = `❌ Đã hết hàng`;
+                        stockEl.className = 'stock-status out';
+                        if(qtyInput) qtyInput.disabled = true;
+                        if(btnAdd) { btnAdd.disabled = true; btnAdd.innerText = 'HẾT HÀNG'; }
+                        if(btnBuy) btnBuy.disabled = true;
+                    }
+                }
             }
 
             /* ── Animations ── */
@@ -1286,17 +1347,15 @@
                     const product = state.allSaleProducts.find(p => p.id === productId);
                     if (!product) return;
                     try {
-                        if (!product._variantsFetched) {
-                            const res = await fetch('/api/products/' + productId + '/variants');
-                            if (!res.ok) throw new Error();
-                            const variants = await res.json();
-                            if (!variants?.length) { window.showToast('Sản phẩm đang cập nhật kho', 'warning'); return; }
-                            product.chiTietSanPhams = variants;
-                            product._variantsFetched = true;
-                        }
+                        const res = await fetch('/api/products/' + productId + '/variants');
+                        if (!res.ok) throw new Error();
+                        const variants = await res.json();
+                        if (!variants?.length) { window.showToast('Sản phẩm đang cập nhật kho', 'warning'); return; }
+                        product.chiTietSanPhams = variants;
+                        product._variantsFetched = true;
                         document.getElementById('sale-card-' + productId).classList.add('show-selection');
                         document.getElementById('sale-qa-backdrop').classList.add('show');
-                        tempSel[productId] = { colorId: null, sizeId: null, sku: null };
+                        tempSel[productId] = { colorId: null, sizeId: null, sku: null, currentStock: 0 };
                         renderSelOpts(productId, 's-');
                     } catch { window.showToast('Không thể kết nối máy chủ', 'warning'); }
                 },
@@ -1315,16 +1374,17 @@
                         }
                     } else { tempSel[productId].sizeId = attrId; }
                     const sku = skus.find(s => s.mauSac.id === tempSel[productId].colorId && s.kichThuoc.id === tempSel[productId].sizeId);
-                    if (sku) tempSel[productId].sku = sku;
+                    if (sku) { tempSel[productId].sku = sku; } else { tempSel[productId].sku = null; }
                     renderSelOpts(productId, prefix || 's-');
                 },
 
                 changeQsQty(productId, inputId, delta, event) {
                     if (event) event.stopPropagation();
                     const input = document.getElementById(inputId); if (!input) return;
-                    let newVal = Math.max(1, (parseInt(input.value)||1) + delta);
+                    let val = parseInt(input.value) || 1;
+                    let newVal = Math.max(1, val + delta);
                     const sel = tempSel[productId];
-                    if (sel?.sku && newVal > sel.sku.soLuong) { window.showToast?.(`Chỉ còn ${sel.sku.soLuong} sản phẩm!`,'warning'); newVal=sel.sku.soLuong; }
+                    if (sel?.currentStock && newVal > sel.currentStock) { window.showToast?.(`Chỉ còn ${sel.currentStock} sản phẩm!`,'warning'); newVal=sel.currentStock; }
                     input.value = newVal;
                 },
 
@@ -1333,7 +1393,7 @@
                     const input = document.getElementById(inputId); if (!input) return;
                     let val = parseInt(input.value); if (isNaN(val)||val<1) val=1;
                     const sel = tempSel[productId];
-                    if (sel?.sku && val > sel.sku.soLuong) { window.showToast?.(`Chỉ còn ${sel.sku.soLuong} sản phẩm!`,'warning'); val=sel.sku.soLuong; }
+                    if (sel?.currentStock && val > sel.currentStock) { window.showToast?.(`Chỉ còn ${sel.currentStock} sản phẩm!`,'warning'); val=sel.currentStock; }
                     input.value = val;
                 },
 
@@ -1346,7 +1406,7 @@
                     if (!sel?.colorId && !sel?.sizeId) { window.showToast('Vui lòng chọn màu sắc và kích cỡ', 'warning'); return; }
                     if (!sel.colorId) { window.showToast('Bạn chưa chọn màu sắc', 'warning'); return; }
                     if (!sel.sizeId) { window.showToast('Bạn chưa chọn kích cỡ', 'warning'); return; }
-                    if (!sel.sku) { window.showToast('Phiên bản này đang hết hàng', 'warning'); return; }
+                    if (!sel.sku || getAvailableStock(sel.sku) <= 0) { window.showToast('Phiên bản này đang hết hàng', 'warning'); return; }
 
                     const inputQty = parseInt(document.getElementById(inputId)?.value) || 1;
                     const sku = sel.sku;
