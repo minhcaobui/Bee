@@ -4,14 +4,14 @@
             --accent:       #3D5A4C;
             --accent-light: #4d7060;
             --white:        #FFFFFF;
-            --bg:           #F7F5F2;
+            --bg:           transparent;
             --text:         #1A1A1A;
             --muted:        #8A8A8A;
             --border:       rgba(0,0,0,0.08);
-            --shadow-sm:    0 2px 16px rgba(61,90,76,0.07);
-            --shadow-md:    0 8px 40px rgba(61,90,76,0.13);
+            --shadow-sm:    0 2px 16px rgba(0,0,0,0.04);
+            --shadow-md:    0 10px 40px rgba(0,0,0,0.06);
             min-height: 100vh;
-            background: var(--bg);
+            background: transparent;
             font-family: 'DM Sans', sans-serif;
         }
 
@@ -66,7 +66,14 @@
         /* ── POLICY STRIP ── */
         .ab-policy {
             background: var(--accent);
-            display: grid; grid-template-columns: repeat(4, 1fr);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            margin: -40px 60px 0;
+            position: relative;
+            z-index: 10;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+            overflow: hidden;
         }
         .ab-policy-item {
             padding: 26px 28px;
@@ -101,12 +108,29 @@
             font-size:clamp(28px,3.5vw,44px); font-weight:300; line-height:1.1; margin-bottom:48px;
         }
         .ab-section-title em { font-style:italic; }
-        .ab-values-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:var(--border); }
-        .ab-value-card {
-            background:var(--bg); padding:44px 36px;
-            transition:background .3s; position:relative; overflow:hidden;
+        .ab-values-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            background: transparent;
         }
-        .ab-value-card:hover { background:var(--white); }
+
+        .ab-value-card {
+            background: var(--white);
+            padding: 44px 36px;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            transition: all .3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ab-value-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--accent-light);
+        }
         .ab-value-card::before {
             content:attr(data-num); position:absolute; top:20px; right:28px;
             font-family:'Cormorant Garamond',serif; font-size:72px; font-weight:300;
@@ -126,8 +150,22 @@
         .ab-faq-left { position:sticky; top:100px; }
         .ab-faq-desc { font-size:14px; color:var(--muted); line-height:1.8; font-weight:300; margin-top:16px; }
         .ab-faq-list { display:flex; flex-direction:column; }
-        .ab-faq-item { border-bottom:1px solid var(--border); }
-        .ab-faq-item:first-child { border-top:1px solid var(--border); }
+        .ab-faq-item {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 16px; /* FAQ dùng 16px cho thanh thoát */
+            margin-bottom: 16px; /* Khoảng cách giữa các câu hỏi */
+            padding: 0 24px;
+            transition: all 0.3s ease;
+        }
+
+        .ab-faq-item:hover {
+            border-color: var(--accent);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Xóa cái viền cũ đi vì mình đã dùng khung card */
+        .ab-faq-item:first-child { border-top: 1px solid var(--border); }
         .ab-faq-q {
             width:100%; background:none; border:none; padding:20px 0;
             display:flex; align-items:center; justify-content:space-between; gap:16px;
@@ -151,21 +189,61 @@
         .ab-faq-a-inner strong { color:var(--text); font-weight:500; }
 
         /* ── CTA ── */
-        .ab-cta { padding:80px 60px; background:var(--white); display:grid; grid-template-columns:1fr auto; align-items:center; gap:40px; }
-        .ab-cta-title { font-family:'Cormorant Garamond',serif; font-size:clamp(28px,4vw,52px); font-weight:300; line-height:1.1; }
+        .ab-cta {
+            margin: 0 60px 80px; /* Thêm lề hai bên cho giống card */
+            padding: 60px;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 24px; /* Ép góc bo 24px */
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 40px;
+            box-shadow: var(--shadow-md);
+        }        .ab-cta-title { font-family:'Cormorant Garamond',serif; font-size:clamp(28px,4vw,52px); font-weight:300; line-height:1.1; }
         .ab-cta-title em { font-style:italic; color:var(--accent); }
         .ab-cta-sub { font-size:13px; color:var(--muted); margin-top:12px; line-height:1.7; font-weight:300; }
+        /* ── NÚT CTA CUỐI TRANG (ĐÃ BO GÓC + HIỆU ỨNG) ── */
         .ab-cta-btn {
-            display:inline-flex; align-items:center; gap:12px;
-            background:var(--accent); color:white;
-            padding:18px 40px; border:none; cursor:pointer;
-            font-size:12px; letter-spacing:0.14em; text-transform:uppercase;
-            font-family:'DM Sans',sans-serif; font-weight:500;
-            transition:background .3s; white-space:nowrap; flex-shrink:0;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--accent);
+            color: white;
+            padding: 18px 40px;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 600; /* Cho chữ đậm hơn tí nhìn cho chắc chắn */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            flex-shrink: 0;
+
+            /* ĐÂY LÀ CHỖ ÔNG CẦN: Bo góc và đổ bóng */
+            border-radius: 12px; /* Hoặc var(--radius-xl) nếu ông đã định nghĩa */
+            box-shadow: 0 4px 12px rgba(61, 90, 76, 0.2);
         }
-        .ab-cta-btn:hover { background:var(--accent-light); }
-        .ab-cta-btn svg { width:14px; height:14px; stroke:white; fill:none; transition:transform .3s; }
-        .ab-cta-btn:hover svg { transform:translateX(4px); }
+
+        .ab-cta-btn:hover {
+            background: var(--accent-light);
+            transform: translateY(-3px); /* Nhích nhẹ lên khi di chuột */
+            box-shadow: 0 8px 20px rgba(61, 90, 76, 0.3);
+        }
+
+        .ab-cta-btn svg {
+            width: 14px;
+            height: 14px;
+            stroke: white;
+            fill: none;
+            transition: transform 0.3s ease;
+        }
+
+        .ab-cta-btn:hover svg {
+            transform: translateX(5px); /* Mũi tên chạy ra một chút */
+        }
 
         /* ── RESPONSIVE ── */
         @media (max-width:1024px) {

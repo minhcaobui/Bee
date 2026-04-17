@@ -87,4 +87,5 @@ public class SanPham {
         this.ngaySua = new Date();
     }
 
+    @Transient private Integer soLuotBan;
 }

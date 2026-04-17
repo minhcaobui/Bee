@@ -23,4 +23,12 @@ public interface HoaDonChiTietRepository extends JpaRepository<HoaDonChiTiet, In
     List<HoaDonChiTiet> findByHoaDon(HoaDon hoaDon);
 
     List<HoaDonChiTiet> findByHoaDon_Id(Integer id);
+
+    @Query("SELECT spct.sanPham.id, SUM(ct.soLuong) " +
+            "FROM HoaDonChiTiet ct " +
+            "JOIN ct.sanPhamChiTiet spct " +
+            "JOIN ct.hoaDon hd " +
+            "WHERE TRIM(hd.trangThaiHoaDon.ma) = 'HOAN_THANH' " +
+            "GROUP BY spct.sanPham.id")
+    List<Object[]> countTotalSoldPerProduct();
 }

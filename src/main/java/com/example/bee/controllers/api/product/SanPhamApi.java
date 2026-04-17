@@ -7,6 +7,7 @@ import com.example.bee.entities.product.SanPham;
 import com.example.bee.entities.product.SanPhamChiTiet;
 import com.example.bee.entities.promotion.KhuyenMai;
 import com.example.bee.repositories.catalog.*;
+import com.example.bee.repositories.order.HoaDonChiTietRepository;
 import com.example.bee.repositories.products.SanPhamChiTietRepository;
 import com.example.bee.repositories.products.SanPhamRepository;
 import com.example.bee.repositories.promotion.KhuyenMaiRepository;
@@ -42,6 +43,7 @@ public class SanPhamApi {
     private final MauSacRepository mauSacRepo;
     private final KichThuocRepository kichThuocRepo;
     private final KhuyenMaiRepository khuyenMaiRepo;
+    private final HoaDonChiTietRepository hoaDonChiTietRepo;
 
     @GetMapping
     public Page<SanPham> list(
@@ -57,7 +59,18 @@ public class SanPhamApi {
         Page<SanPham> pageResult = sanPhamrepo.search(q, trangThai, idDanhMuc, idHang, idChatLieu, pageable);
         LocalDateTime now = LocalDateTime.now();
 
+        List<Object[]> totalSoldList = hoaDonChiTietRepo.countTotalSoldPerProduct();
+        Map<Integer, Integer> soldMap = new HashMap<>();
+        for (Object[] row : totalSoldList) {
+            Integer productId = (Integer) row[0];
+            Long total = (Long) row[1]; // SUM() trong JPQL trả về Long
+            soldMap.put(productId, total.intValue());
+        }
+
         for (SanPham sp : pageResult.getContent()) {
+
+            sp.setSoLuotBan(soldMap.getOrDefault(sp.getId(), 0));
+
             if (sp.getChiTietSanPhams() != null) {
                 for (SanPhamChiTiet spct : sp.getChiTietSanPhams()) {
                     BigDecimal giaGoc = spct.getGiaBan() != null ? spct.getGiaBan() : BigDecimal.ZERO;

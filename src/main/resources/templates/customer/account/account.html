@@ -4,44 +4,103 @@
 
         /* ── MÀN HÌNH CHƯA ĐĂNG NHẬP (GUEST VIEW) ── */
         #guest-view { display: none; padding: 100px 20px; animation: fadeIn 0.5s ease; }
-        .guest-container { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; max-width: 800px; margin: 0 auto; background: var(--white); padding: 60px 40px; border: 1px solid rgba(0,0,0,0.06); border-radius: 0px; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
-        .guest-icon { width: 72px; height: 72px; border-radius: 50%; background: rgba(61,90,76,0.06); color: var(--accent); display: flex; align-items: center; justify-content: center; margin-bottom: 24px; }
+        .guest-container { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; max-width: 800px; margin: 0 auto; background: var(--white); padding: 60px 40px; border: 1px solid rgba(0,0,0,0.06); border-radius: var(--radius-xl); box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
+        .guest-icon { width: 72px; height: 72px; border-radius: var(--radius-full); background: rgba(61,90,76,0.06); color: var(--accent); display: flex; align-items: center; justify-content: center; margin-bottom: 24px; }
         .guest-icon svg { width: 32px; height: 32px; stroke: currentColor; fill: none; }
-        .guest-title { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 400; margin-bottom: 12px; }
+        .guest-title { font-family: 'DM Sans', sans-serif; font-size: 32px; font-weight: 400; margin-bottom: 12px; }
         .guest-desc { font-size: 14px; color: var(--muted); font-weight: 300; margin-bottom: 36px; line-height: 1.6; }
         .guest-actions { display: flex; gap: 16px; width: 100%; justify-content: center; flex-wrap: wrap;}
-        .guest-btn-login { padding: 14px 32px; background: var(--text); color: white; border: none; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: 0.3s; text-decoration: none; border-radius: 0px;}
+        .guest-btn-login { padding: 14px 32px; background: var(--text); color: white; border: none; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: 0.3s; text-decoration: none; border-radius: var(--radius-md); }
         .guest-btn-login:hover { background: var(--accent); }
-        .guest-btn-shop { padding: 14px 32px; background: transparent; color: var(--text); border: 1px solid rgba(0,0,0,0.2); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: 0.3s; text-decoration: none; border-radius: 0px;}
+        .guest-btn-shop { padding: 14px 32px; background: transparent; color: var(--text); border: 1px solid rgba(0,0,0,0.2); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: 0.3s; text-decoration: none; border-radius: var(--radius-md); }
         .guest-btn-shop:hover { border-color: var(--text); }
 
         /* ── MÀN HÌNH ĐÃ ĐĂNG NHẬP (ACCOUNT VIEW) ── */
         #account-view { display: none; }
-        .account-layout { display: grid; grid-template-columns: 260px 1fr; gap: 0; min-height: 80vh; }
+        /* 1. Container bao ngoài để căn giữa toàn bộ */
+        .account-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+            /* Ý tưởng về nền: Sử dụng gradient nhẹ hoặc màu hạt dẻ mờ cho sang */
+            background: radial-gradient(circle at top left, #f8f9fa 0%, #e9ecef 100%);
+        }
 
+        /* 2. Thẻ Card chính - Ranh giới không được vượt quá */
+        .account-layout {
+            width: 100%;
+            max-width: 1250px; /* Giới hạn chiều ngang nhỉnh hơn sidebar 1 chút như mày muốn */
+            height: 85vh; /* Giới hạn chiều cao */
+            display: grid;
+            grid-template-columns: 300px 1fr; /* Cố định sidebar 300px */
+            background: var(--white);
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 24px; /* Bo góc to nhìn cho hiện đại */
+            box-shadow: 0 30px 60px rgba(0,0,0,0.06);
+            overflow: hidden; /* Đảm bảo nội dung ko tràn ra ngoài bo góc */
+            margin: 0 auto;
+        }
+
+        /* 3. Sidebar cố định (Chuẩn mực của mày) */
+        .account-sidebar {
+            height: 100%;
+            background: #fff;
+            border-right: 1px solid rgba(0,0,0,0.06); /* Đường kẻ dọc phân chia giữa sidebar và content */
+            padding: 40px 0;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* 4. Vùng nội dung được phép cuộn */
+        .account-content {
+            height: 100%;
+            overflow-y: auto; /* Chỉ cho phép cuộn dọc ở đây */
+            padding: 40px 60px;
+            background: #ffffff;
+        }
+
+        /* 5. Custom thanh cuộn (Line cuộn nhỏ tinh tế) */
+        .account-content::-webkit-scrollbar {
+            width: 4px; /* Độ rộng nhỏ như mày muốn */
+        }
+
+        .account-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .account-content::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.1); /* Màu line nhạt */
+            border-radius: 10px;
+        }
+
+        .account-content::-webkit-scrollbar-thumb:hover {
+            background: var(--accent); /* Hiện màu khi di chuột vào */
+        }
         /* ==================== DELIVERY MODAL (POPUP CHỌN GIAO HÀNG) ==================== */
         .delivery-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); animation: fadeIn 0.3s ease; }
-        .delivery-modal { width: 100%; max-width: 480px; background: #fff; border-radius: 2px; padding: 30px; box-shadow: 0 15px 50px rgba(0,0,0,0.2); transform: scale(0.95); opacity: 0; transition: all 0.3s ease; }
+        .delivery-modal { width: 100%; max-width: 480px; background: #fff; border-radius: var(--radius-xl); padding: 30px; box-shadow: 0 15px 50px rgba(0,0,0,0.2); transform: scale(0.95); opacity: 0; transition: all 0.3s ease; }
         .delivery-modal.open { transform: scale(1); opacity: 1; }
         .dm-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 20px; }
         .dm-title { font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
         .dm-close-btn { background: none; border: none; cursor: pointer; color: var(--muted); padding: 4px; transition: color 0.2s; }
         .dm-close-btn:hover { color: var(--text); }
         .dm-close-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; }
-        .dm-option { display: flex; align-items: center; gap: 16px; padding: 18px; border: 1px solid rgba(0,0,0,0.08); cursor: pointer; transition: 0.3s; border-radius: 2px; background: #fafafa; margin-bottom: 12px; }
+        .dm-option { display: flex; align-items: center; gap: 16px; padding: 18px; border: 1px solid rgba(0,0,0,0.08); cursor: pointer; transition: 0.3s; border-radius: var(--radius-md); background: #fafafa; margin-bottom: 12px; }
         .dm-option:hover { border-color: var(--accent); background: #fff; box-shadow: 0 2px 16px rgba(61,90,76,0.07); }
         .dm-label { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
         .dm-desc { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
 
         /* Sidebar */
-        .account-sidebar { background: var(--white); border-right: 1px solid rgba(0,0,0,0.07); padding: 60px 0; position: sticky; top: 125px; height: fit-content; }
+        .account-sidebar { background: var(--white); border-right: 1px solid rgba(0,0,0,0.07); padding: 60px 0; height: fit-content; }
         .account-user { padding: 0 36px 40px; border-bottom: 1px solid rgba(0,0,0,0.07); margin-bottom: 28px; }
         .account-avatar-wrap { position: relative; width: 64px; margin-bottom: 16px; }
-        .account-avatar { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(160deg, #e8ddd1, #c4b49d); display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 300; color: var(--accent); overflow: hidden; }
-        .account-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-        .account-avatar-edit { position: absolute; bottom: 0; right: 0; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); border: 2px solid var(--white); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .account-avatar { width: 64px; height: 64px; border-radius: var(--radius-full); background: linear-gradient(160deg, #e8ddd1, #c4b49d); display: flex; align-items: center; justify-content: center; font-family: 'DM Sans', sans-serif; font-size: 24px; font-weight: 300; color: var(--accent); overflow: hidden; }
+        .account-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-full); }
+        .account-avatar-edit { position: absolute; bottom: 0; right: 0; width: 22px; height: 22px; border-radius: var(--radius-full); background: var(--accent); border: 2px solid var(--white); display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .account-avatar-edit svg { width: 10px; height: 10px; stroke: white; fill: none; }
-        .account-user-name { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; margin-bottom: 4px; }
+        .account-user-name { font-family: 'DM Sans', sans-serif; font-size: 20px; font-weight: 400; margin-bottom: 4px; }
         .account-user-email { font-size: 12px; color: var(--muted); font-weight: 300; }
         .account-user-since { font-size: 11px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 8px; font-weight: 400; }
         .account-nav { list-style: none; }
@@ -55,16 +114,16 @@
         .account-logout-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
 
         /* Panels */
-        .account-content { padding: 60px; }
+        .account-content { padding: 40px; }
         .account-panel { display: none; }
         .account-panel.active { display: block; animation: fadeIn 0.4s ease; }
         .account-panel-title { font-family: 'DM Sans', sans-serif; font-size: 32px; margin-bottom: 8px; }
         .account-panel-subtitle { font-size: 13px; color: var(--muted);  margin-bottom: 48px; }
 
         /* Overview */
-        .account-overview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: rgba(0,0,0,0.06); margin-bottom: 52px; }
-        .account-stat-card { background: var(--white); padding: 32px 28px; }
-        .account-stat-num { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 300; color: var(--accent); line-height: 1; margin-bottom: 8px; }
+        .account-overview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; background: none; margin-bottom: 52px; }
+        .account-stat-card { background: var(--white); padding: 32px 28px; border-radius: var(--radius-lg); border: 1px solid var(--border); }
+        .account-stat-num { font-family: 'DM Sans', sans-serif; font-size: 40px; font-weight: 300; color: var(--accent); line-height: 1; margin-bottom: 8px; }
         .account-stat-label { font-size: 12px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
         .account-recent-title { font-size: 11px; letter-spacing: 0.2em; color: var(--accent); text-transform: uppercase; font-weight: 500; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
         .account-recent-title::before { content:''; width:20px; height:1px; background:var(--accent); }
@@ -75,7 +134,7 @@
         .account-order-total { font-size: 15px; font-weight: 400; text-align: right; }
 
         /* 🌟 CSS BADGE TRẠNG THÁI ĐỒNG BỘ */
-        .account-order-status { padding: 6px 14px; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; border-radius: 0px; display: inline-block; text-align: center; }
+        .account-order-status { padding: 6px 14px; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; border-radius: var(--radius-md); display: inline-block; text-align: center; }
         .status-CHO_THANH_TOAN { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
         .status-CHO_XAC_NHAN { background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; }
         .status-CHO_GIAO { background: #f3f4f6; color: #4b5563; border: 1px solid #e5e7eb; }
@@ -84,12 +143,73 @@
         .status-DA_HUY { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
 
         /* Orders */
-        .orders-filter-bar { display: flex; gap: 0; margin-bottom: 32px; border-bottom: 1px solid rgba(0,0,0,0.08); }
-        .orders-filter-tab { padding: 12px 20px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border: none; background: none; font-family: 'DM Sans', sans-serif; color: var(--muted); font-weight: 400; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; position: relative; bottom: -1px; white-space: nowrap; }
-        .orders-filter-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
-        .orders-filter-tab:hover { color: var(--text); }
+        /* --- 1. ẨN THANH CUỘN NGANG VÀ LÀM ĐẸP TAB --- */
+        .orders-filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 0; /* Reset lại để dùng padding của sticky header */
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: none; /* Ẩn cho Firefox */
+            -ms-overflow-style: none; /* Ẩn cho IE/Edge */
+        }
 
-        .account-order-card { background: var(--white); border: 1px solid rgba(0,0,0,0.07); margin-bottom: 16px; overflow: hidden; border-radius: 0px; }
+        /* Ẩn thanh cuộn cho Chrome/Safari */
+        .orders-filter-bar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .orders-filter-tab {
+            padding: 12px 15px;
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--muted);
+            font-weight: 500;
+            position: relative; /* Để làm base cho line ::after */
+            transition: color 0.3s;
+        }
+
+        /* 🌟 LINE NGANG NHỎ GỌN VÀ TINH TẾ */
+        .orders-filter-tab::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0; /* Mặc định không hiển thị */
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        .orders-filter-tab.active {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .orders-filter-tab.active::after {
+            width: 25px; /* Độ dài line khi active - mày có thể chỉnh to nhỏ tùy ý ở đây */
+        }
+
+        /* --- 2. CỐ ĐỊNH PHẦN ĐẦU (STICKY HEADER) --- */
+        .orders-sticky-header {
+            position: sticky;
+            top: -40px; /* Bù trừ cho padding-top của .account-content (40px) */
+            background: #fff;
+            z-index: 10;
+            margin: -40px -40px 24px -40px; /* Kéo tràn ra mép container */
+            padding: 40px 40px 15px 40px; /* Padding nội bộ để nội dung không dính lề */
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 10px 20px -10px rgba(0,0,0,0.03); /* Đổ bóng nhẹ khi cuộn */
+        }
+
+        .account-order-card { background: var(--white); border: 1px solid rgba(0,0,0,0.07); margin-bottom: 16px; overflow: hidden; border-radius: var(--radius-md); }
         .account-order-card-header { display: flex; justify-content: space-between; align-items: flex-start; padding: 24px 28px; border-bottom: 1px solid rgba(0,0,0,0.06); background: #fcfcfc;}
         .order-header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
         .order-timeline { padding: 24px 28px; border-bottom: 1px solid rgba(0,0,0,0.06); }
@@ -101,7 +221,7 @@
             width: calc(100% - 28px); height: 1px; background: rgba(0,0,0,0.1); z-index: 0;
         }
         .order-timeline-step.done:not(:last-child)::after { background: var(--accent); }
-        .order-step-dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.1); background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 1; position: relative; transition: 0.3s; }
+        .order-step-dot { width: 28px; height: 28px; border-radius: var(--radius-full); border: 2px solid rgba(0,0,0,0.1); background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 1; position: relative; transition: 0.3s; }
         .order-step-dot svg { width: 12px; height: 12px; stroke: var(--muted); fill: none; transition: 0.3s; }
         .order-timeline-step.done .order-step-dot { background: var(--accent); border-color: var(--accent); }
         .order-timeline-step.done .order-step-dot svg { stroke: white; }
@@ -114,28 +234,28 @@
         .account-order-card-footer { display: flex; justify-content: space-between; align-items: center; padding: 20px 28px; background: #fafafa; }
         .order-total-text { font-size: 14px; color: var(--text); font-weight: 500; }
         .order-total-text strong { color: var(--accent); font-weight: 700; font-size: 18px; margin-left: 8px;}
-        .account-reorder-btn { font-size: 11px; letter-spacing: 0.1em; color: var(--accent); text-transform: uppercase; background: none; border: 1px solid rgba(0,0,0,0.2); padding: 10px 20px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 600; transition: background 0.2s, color 0.2s, border-color 0.2s; border-radius: 0px; text-decoration:none;}
+        .account-reorder-btn { font-size: 11px; letter-spacing: 0.1em; color: var(--accent); text-transform: uppercase; background: none; border: 1px solid rgba(0,0,0,0.2); padding: 10px 20px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 600; transition: background 0.2s, color 0.2s, border-color 0.2s; border-radius: var(--radius-md); text-decoration:none;}
         .account-reorder-btn:hover { background: var(--text); color: var(--accent); border-color: var(--text); }
 
         /* Profile */
-        .profile-avatar-section { display: flex; align-items: center; gap: 28px; padding: 28px 32px; background: var(--white); border: 1px solid rgba(0,0,0,0.07); margin-bottom: 40px; max-width: 640px; border-radius: 0px; }
-        .profile-avatar-big { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(160deg, #e8ddd1, #c4b49d); display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 300; color: var(--accent); flex-shrink: 0; overflow: hidden; }
+        .profile-avatar-section { display: flex; align-items: center; gap: 28px; padding: 28px 32px; background: var(--white); border: 1px solid rgba(0,0,0,0.07); margin-bottom: 40px; max-width: 640px; border-radius: var(--radius-md); }
+        .profile-avatar-big { width: 80px; height: 80px; border-radius: var(--radius-full); background: linear-gradient(160deg, #e8ddd1, #c4b49d); display: flex; align-items: center; justify-content: center; font-family: 'DM Sans', sans-serif; font-size: 30px; font-weight: 300; color: var(--accent); flex-shrink: 0; overflow: hidden; }
         .profile-avatar-big img { width: 100%; height: 100%; object-fit: cover; }
-        .profile-avatar-name { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; margin-bottom: 4px; }
+        .profile-avatar-name { font-family: 'DM Sans', sans-serif; font-size: 22px; font-weight: 400; margin-bottom: 4px; }
         .profile-avatar-sub { font-size: 12px; color: var(--muted); font-weight: 300; margin-bottom: 14px; }
-        .profile-avatar-upload { font-size: 11px; letter-spacing: 0.1em; color: var(--accent); text-transform: uppercase; background: none; border: 1px solid var(--accent); padding: 9px 18px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 400; transition: background 0.2s, color 0.2s; display: inline-block; border-radius: 0px; }
+        .profile-avatar-upload { font-size: 11px; letter-spacing: 0.1em; color: var(--accent); text-transform: uppercase; background: none; border: 1px solid var(--accent); padding: 9px 18px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 400; transition: background 0.2s, color 0.2s; display: inline-block; border-radius: var(--radius-md); }
         .profile-avatar-upload:hover { background: var(--accent); color: white; }
 
         .account-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 640px; margin-bottom: 32px; }
         .account-form-field { display: flex; flex-direction: column; gap: 8px; }
         .account-form-field.full { grid-column: span 2; }
         .account-form-label { font-size: 10px; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; font-weight: 400; }
-        .account-form-input { padding: 13px 16px; border: 1px solid rgba(0,0,0,0.1); background: var(--white); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 300; color: var(--text); outline: none; transition: border-color 0.2s; border-radius: 0px; width: 100%;}
+        .account-form-input { padding: 13px 16px; border: 1px solid rgba(0,0,0,0.1); background: var(--white); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 300; color: var(--text); outline: none; transition: border-color 0.2s; border-radius: var(--radius-md); width: 100%;}
         .account-form-input:focus { border-color: var(--accent); }
         .account-form-input:disabled { background: rgba(0,0,0,0.03); color: var(--muted); cursor: not-allowed; border-color: rgba(0,0,0,0.05); }
         select.account-form-input { appearance: auto; cursor: pointer; }
 
-        .account-form-save { padding: 15px 40px; background: var(--accent); color: white; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 400; transition: background 0.2s; border-radius: 0px; }
+        .account-form-save { padding: 15px 40px; background: var(--accent); color: white; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 400; transition: background 0.2s; border-radius: var(--radius-md); }
         .account-form-save:hover { background: var(--accent-light); }
         .account-section-divider { width: 100%; height: 1px; background: rgba(0,0,0,0.07); margin: 48px 0; max-width: 640px; }
 
@@ -144,12 +264,12 @@
         .toggle-pw-btn { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--muted); display: flex; align-items: center; opacity: 0.5; transition: opacity 0.2s; }
         .toggle-pw-btn:hover { opacity: 1; }
         .toggle-pw-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; }
-        .password-strength { height: 3px; background: rgba(0,0,0,0.08); margin-top: 8px; border-radius: 0px; overflow: hidden; }
+        .password-strength { height: 3px; background: rgba(0,0,0,0.08); margin-top: 8px; border-radius: var(--radius-md); overflow: hidden; }
         .password-strength-bar { height: 100%; width: 0; transition: width 0.3s, background 0.3s; }
         .password-strength-label { font-size: 11px; color: var(--muted); margin-top: 6px; letter-spacing: 0.06em; }
 
         /* SỔ ĐỊA CHỈ */
-        .address-card { border: 1px solid rgba(0,0,0,0.1); border-radius: 0px; padding: 20px; margin-bottom: 16px; background: var(--white); position: relative; max-width: 640px;}
+        .address-card { border: 1px solid rgba(0,0,0,0.1); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px; background: var(--white); position: relative; max-width: 640px;}
         .address-card.default { border-color: var(--accent); background: rgba(61,90,76,0.02); }
         .addr-name-phone { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
         .addr-detail { font-size: 13px; color: var(--text); margin-bottom: 4px; line-height: 1.5; }
@@ -159,52 +279,52 @@
         .addr-action-btn:hover { color: #2c4238; }
         .addr-action-btn.delete { color: #c03c3c; }
         .addr-action-btn.delete:hover { color: #902c2c; }
-        .addr-badge-default { position: absolute; top: 20px; right: 20px; font-size: 10px; background: rgba(61,90,76,0.1); color: var(--accent); padding: 4px 8px; border-radius: 0px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em; }
+        .addr-badge-default { position: absolute; top: 20px; right: 20px; font-size: 10px; background: rgba(61,90,76,0.1); color: var(--accent); padding: 4px 8px; border-radius: var(--radius-md); text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em; }
 
         /* MODAL ĐỊA CHỈ */
         .acc-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); animation: fadeIn 0.3s ease; }
-        .acc-modal { width: 100%; max-width: 540px; background: #fff; border-radius: 0px; padding: 32px; box-shadow: 0 15px 50px rgba(0,0,0,0.2); transform: translateY(20px); opacity: 0; transition: all 0.3s ease; max-height: 90vh; overflow-y: auto; }
+        .acc-modal { width: 100%; max-width: 540px; background: #fff; border-radius: var(--radius-xl); padding: 32px; box-shadow: 0 15px 50px rgba(0,0,0,0.2); transform: translateY(20px); opacity: 0; transition: all 0.3s ease; max-height: 90vh; overflow-y: auto; }
         .acc-modal.open { transform: translateY(0); opacity: 1; }
-        .acc-modal-header { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 400; margin-bottom: 24px; display:flex; justify-content:space-between; align-items:center; }
+        .acc-modal-header { font-family: 'DM Sans', sans-serif; font-size: 24px; font-weight: 400; margin-bottom: 24px; display:flex; justify-content:space-between; align-items:center; }
         .acc-modal-close { background: none; border: none; cursor: pointer; color: var(--muted); padding: 4px; }
         .acc-modal-close svg { width: 24px; height: 24px; stroke: currentColor; fill: none; }
         .acc-modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(0,0,0,0.08); }
-        .btn-cancel { padding: 12px 24px; background: none; border: 1px solid rgba(0,0,0,0.2); border-radius: 0px; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: 'DM Sans', sans-serif;}
-        .btn-save { padding: 12px 24px; background: var(--accent); color: white; border: none; border-radius: 0px; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: 'DM Sans', sans-serif;}
+        .btn-cancel { padding: 12px 24px; background: none; border: 1px solid rgba(0,0,0,0.2); border-radius: var(--radius-md); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: 'DM Sans', sans-serif;}
+        .btn-save { padding: 12px 24px; background: var(--accent); color: white; border: none; border-radius: var(--radius-md); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: 'DM Sans', sans-serif;}
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* ── CSS BỔ SUNG CHO CHI TIẾT ĐƠN HÀNG ── */
         .btn-back-orders { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); cursor: pointer; margin-bottom: 32px; border: none; background: none; transition: color 0.2s; padding: 0; }
         .btn-back-orders:hover { color: var(--text); }
-        .detail-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 48px; padding: 32px; background: var(--white); border: 1px solid rgba(0,0,0,0.07); }
+        .detail-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 48px; padding: 32px; background: var(--white); border: 1px solid rgba(0,0,0,0.07); border-radius: var(--radius-lg); }
         .detail-info-item label { font-size: 10px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 8px; }
         .detail-info-item p { font-size: 14px; color: var(--text); line-height: 1.6;}
         .detail-product-table { width: 100%; border-collapse: collapse; margin-bottom: 40px; }
         .detail-product-table th { text-align: left; padding: 16px 0; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid rgba(0,0,0,0.08); }
         .detail-product-table td { padding: 20px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .detail-prod-img { width: 60px; aspect-ratio: 3/4; object-fit: cover; border-radius: 0px; margin-right: 15px; border: 1px solid rgba(0,0,0,0.05);}
+        .detail-prod-img { width: 60px; aspect-ratio: 3/4; object-fit: cover; border-radius: var(--radius-md); margin-right: 15px; border: 1px solid rgba(0,0,0,0.05);}
 
         .guest-divider { margin: 35px 0 25px; width: 100%; display: flex; align-items: center; text-align: center; color: var(--muted); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; }
         .guest-divider::before, .guest-divider::after { content: ''; flex: 1; border-bottom: 1px solid rgba(0,0,0,0.08); }
         .guest-divider:not(:empty)::before { margin-right: 15px; }
         .guest-divider:not(:empty)::after { margin-left: 15px; }
         .guest-track-wrap { width: 100%; display: flex; gap: 10px; margin-bottom: 10px; }
-        .guest-track-input { flex: 1; padding: 14px 16px; border: 1px solid rgba(0,0,0,0.1); outline: none; font-family: 'DM Sans', sans-serif; font-size: 13px; border-radius: 0px; transition: border-color 0.2s;}
+        .guest-track-input { flex: 1; padding: 14px 16px; border: 1px solid rgba(0,0,0,0.1); outline: none; font-family: 'DM Sans', sans-serif; font-size: 13px; border-radius: var(--radius-md); transition: border-color 0.2s;}
         .guest-track-input:focus { border-color: var(--accent); }
-        .guest-track-btn { padding: 0 24px; background: var(--accent); color: white; border: none; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: 0.3s; border-radius: 0px; }
+        .guest-track-btn { padding: 0 24px; background: var(--accent); color: white; border: none; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: 0.3s; border-radius: var(--radius-md); }
         .guest-track-btn:hover { background: #2c4238; }
-        .guest-track-result { width: 100%; text-align: left; display: none; background: var(--white); border: 1px solid rgba(0,0,0,0.07); padding: 24px; border-radius: 0px; margin-top: 15px; animation: fadeIn 0.4s ease; box-shadow: 0 5px 15px rgba(0,0,0,0.02);}
+        .guest-track-result { width: 100%; text-align: left; display: none; background: var(--white); border: 1px solid rgba(0,0,0,0.07); padding: 24px; border-radius: var(--radius-lg); margin-top: 15px; animation: fadeIn 0.4s ease; box-shadow: 0 5px 15px rgba(0,0,0,0.02);}
 
         /* ── CSS POPUP ĐÁNH GIÁ SẢN PHẨM ── */
         .review-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
-        .review-modal { background: #fff; width: 450px; max-width: 90%; border-radius: 0px; padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); position: relative; }
-        .review-modal-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; margin-bottom: 20px; text-align: center; }
+        .review-modal { background: #fff; width: 450px; max-width: 90%; border-radius: var(--radius-md); padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); position: relative; }
+        .review-modal-title { font-family: 'DM Sans', sans-serif; font-size: 24px; margin-bottom: 20px; text-align: center; }
         .star-select { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; font-size: 24px; cursor: pointer; color: #ccc; }
         .star-select i.active { color: #f59e0b; }
-        .review-textarea { width: 100%; height: 100px; border: 1px solid rgba(0,0,0,0.1); border-radius: 0px; padding: 12px; font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; resize: none; margin-bottom: 16px; }
+        .review-textarea { width: 100%; height: 100px; border: 1px solid rgba(0,0,0,0.1); border-radius: var(--radius-md); padding: 12px; font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; resize: none; margin-bottom: 16px; }
         .review-textarea:focus { border-color: var(--accent); }
-        .review-img-upload-btn { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text); background: #f4f4f5; padding: 8px 16px; border-radius: 0px; cursor: pointer; margin-bottom: 16px; transition: 0.2s; }
+        .review-img-upload-btn { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text); background: #f4f4f5; padding: 8px 16px; border-radius: var(--radius-md); cursor: pointer; margin-bottom: 16px; transition: 0.2s; }
         .review-img-upload-btn:hover { background: #e4e4e7; }
         .review-img-previews { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
 
@@ -218,6 +338,8 @@
             transition: box-shadow .35s, transform .3s;
             display: flex; flex-direction: column;
             animation: fadeIn 0.4s ease-out forwards;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
         }
         #panel-wishlist .product-card:hover { box-shadow: 0 8px 40px rgba(61,90,76,0.13); transform: translateY(-2px); z-index: 2; }
 
@@ -270,7 +392,7 @@
 
         #panel-wishlist .heart-btn {
             position: absolute; top: 10px; right: 10px; z-index: 4;
-            width: 34px; height: 34px; border-radius: 50%;
+            width: 34px; height: 34px; border-radius: var(--radius-full);
             background: rgba(255,245,245,0.95); border: none; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
             opacity: 1; transform: scale(1);
@@ -286,17 +408,17 @@
 
         #panel-wishlist .product-info { padding: 14px 16px 18px; flex-grow: 1; display: flex; flex-direction: column; }
         #panel-wishlist .product-name {
-            font-family: 'Cormorant Garamond', serif !important;
+            font-family: 'DM Sans', sans-serif;
             font-size: 17px; font-weight: 400; line-height: 1.2; margin-bottom: 10px;
         }
         #panel-wishlist .prod-swatches { display: flex; align-items: center; gap: 4px; margin-bottom: 8px; }
         #panel-wishlist .swatch-dot {
-            width: 14px; height: 14px; border-radius: 50%;
+            width: 14px; height: 14px; border-radius: var(--radius-full);
             box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); flex-shrink: 0; display: inline-block;
         }
         #panel-wishlist .swatch-more {
             font-size: 9px; color: var(--muted); font-weight: 500; letter-spacing: 0.05em;
-            padding: 2px 6px; border: 1px solid rgba(0,0,0,0.08); border-radius: 0px; margin-left: 2px;
+            padding: 2px 6px; border: 1px solid rgba(0,0,0,0.08); border-radius: var(--radius-md); margin-left: 2px;
         }
         #panel-wishlist .prod-price { display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
         #panel-wishlist .price-sale { font-size: 14px; color: var(--accent); font-weight: 600; }
@@ -305,7 +427,7 @@
 
         /* Cảnh báo dành riêng cho Staff */
         .staff-banner {
-            background: #fef2f2; border: 1px solid #fca5a5; border-radius: 0px;
+            background: #fef2f2; border: 1px solid #fca5a5; border-radius: var(--radius-md);
             padding: 15px; margin-bottom: 30px; display: flex; align-items: center; gap: 15px;
         }
 
@@ -325,7 +447,7 @@
 
         /* Vuông góc luôn hình ảnh sản phẩm trong danh sách */
         .detail-prod-img {
-            border-radius: 0 !important;
+            border-radius: var(--radius-md);
         }
 
         /* ── RESPONSIVE TẤT CẢ CHO MOBILE ── */
@@ -349,6 +471,7 @@
                 border-left: none;
                 border-bottom: 2px solid transparent;
                 background: none !important;
+                border-radius: var(--radius-md);
             }
             .account-nav-btn.active {
                 border-bottom-color: var(--accent);
@@ -457,7 +580,7 @@
 
         /* Modal Đăng xuất Style đồng bộ (Dùng trong confirmAction) */
         .modal-confirm-accent {
-            font-family: 'Cormorant Garamond', serif !important;
+            font-family: 'DM Sans', sans-serif ;
         }
         .btn-modal-confirm {
             padding: 14px 24px;
@@ -466,7 +589,7 @@
             border: none;
             cursor: pointer;
             flex: 1;
-            border-radius: 0px;
+            border-radius: var(--radius-md);
             font-family: 'DM Sans', sans-serif;
             font-size: 12px;
             letter-spacing: 0.1em;
@@ -490,39 +613,39 @@
             cursor: pointer;
             font-family: 'DM Sans', sans-serif;
             transition: 0.2s;
-            border-radius: 0px;
+            border-radius: var(--radius-md);
             text-decoration: none;
         }
         .btn-global-track-new:hover { background: #2c4238; }
 
     </style>
     <div class="qr-modal-overlay" id="accQrModalOverlay" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 10000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); animation: fadeIn 0.3s ease;">
-        <div class="qr-modal" style="background: #fff; width: 420px; max-width: 90%; border-radius: 0px; padding: 32px 24px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2);">
-            <h3 style="font-family:'Cormorant Garamond',serif; font-size:28px; margin-bottom:8px; font-weight:600;">Thanh toán đơn hàng</h3>
+        <div class="qr-modal" style="background: #fff; width: 420px; max-width: 90%; border-radius: var(--radius-md); padding: 32px 24px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2);">
+            <h3 style="font-family: 'DM Sans', sans-serif; font-size:28px; margin-bottom:8px; font-weight:600;">Thanh toán đơn hàng</h3>
             <p style="font-size:13px; color:var(--muted); margin-bottom:20px;">Vui lòng mở ứng dụng ngân hàng và quét mã QR dưới đây để hoàn tất thanh toán.</p>
 
-            <img src="" id="accQrImage" style="width: 220px; height: 220px; margin: 15px auto; border: 1px solid rgba(0,0,0,0.1); border-radius: 0px; padding: 10px; display: block;" alt="Mã QR Chuyển Khoản">
+            <img src="" id="accQrImage" style="width: 220px; height: 220px; margin: 15px auto; border: 1px solid rgba(0,0,0,0.1); border-radius: var(--radius-md); padding: 10px; display: block;" alt="Mã QR Chuyển Khoản">
 
-            <div style="font-size: 14px; margin-bottom: 24px; text-align: left; background: #f9f9fa; padding: 20px; border-radius: 0px; border: 1px solid rgba(0,0,0,0.05);">
+            <div style="font-size: 14px; margin-bottom: 24px; text-align: left; background: #f9f9fa; padding: 20px; border-radius: var(--radius-md); border: 1px solid rgba(0,0,0,0.05);">
                 <div style="margin-bottom: 8px; display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(0,0,0,0.05); padding-bottom: 8px;"><span>Ngân hàng:</span> <strong id="accQrBankName" style="color: var(--text); font-weight: 600;">MB Bank</strong></div>
                 <div style="margin-bottom: 8px; display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(0,0,0,0.05); padding-bottom: 8px;"><span>Số tài khoản:</span> <strong id="accQrAccountNo" style="color: var(--text); font-weight: 600;">0988123456</strong></div>
                 <div style="margin-bottom: 8px; display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(0,0,0,0.05); padding-bottom: 8px;"><span>Chủ tài khoản:</span> <strong id="accQrAccountName" style="color: var(--text); font-weight: 600;">NGUYEN VAN HOANG</strong></div>
                 <div style="margin-bottom: 8px; display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(0,0,0,0.05); padding-bottom: 8px;"><span>Số tiền:</span> <strong id="accQrAmount" style="color:#dc2626; font-size:16px; font-weight: 600;">0 ₫</strong></div>
                 <div style="display: flex; justify-content: space-between;"><span>Nội dung CK:</span> <strong id="accQrContent" style="color:var(--accent); font-weight: 600;"></strong></div>
             </div>
-            <button id="btnAccQrDone" style="padding: 16px 24px; background: var(--accent); color: white; border: none; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: 0px; width: 100%; transition: 0.3s;">Tôi đã chuyển khoản xong</button>
+            <button id="btnAccQrDone" style="padding: 16px 24px; background: var(--accent); color: white; border: none; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: var(--radius-md); width: 100%; transition: 0.3s;">Tôi đã chuyển khoản xong</button>
         </div>
     </div>
 
     <div class="acc-modal-overlay" id="otpModalOverlay" style="display:none; z-index: 10001; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px);">
         <div class="acc-modal" style="width: 100%; max-width: 420px; background: #fff; padding: 32px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2); transform: translateY(0); opacity: 1;">
-            <h4 style="color: var(--accent); font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 600; margin-bottom: 10px;">
+            <h4 style="color: var(--accent); font-family: 'DM Sans', sans-serif; font-size: 26px; font-weight: 600; margin-bottom: 10px;">
                 <i class="bi bi-envelope-check-fill" style="display: block; font-size: 36px; margin-bottom: 12px; color: #10b981;"></i>
                 Xác Thực Email
             </h4>
             <p id="otpMessage" style="font-size: 13px; color: var(--muted); margin-bottom: 25px; line-height: 1.5;">Hệ thống đang gửi mã xác thực đến Email...</p>
             <div id="otpInputGroup" style="display: none;">
-                <input type="text" id="inpOtpCode" style="width: 100%; text-align: center; letter-spacing: 15px; font-size: 24px; font-weight: bold; margin-bottom: 24px; height: 50px; background: #f9f9f9; border: 1px solid rgba(0,0,0,0.1); border-radius: 0px; outline: none;" placeholder="------" maxlength="6">
+                <input type="text" id="inpOtpCode" style="width: 100%; text-align: center; letter-spacing: 15px; font-size: 24px; font-weight: bold; margin-bottom: 24px; height: 50px; background: #f9f9f9; border: 1px solid rgba(0,0,0,0.1); border-radius: var(--radius-md); outline: none;" placeholder="------" maxlength="6">
                 <div style="display: flex; gap: 12px;">
                     <button class="btn-cancel" style="flex: 1;" onclick="document.getElementById('otpModalOverlay').style.display='none'">Hủy Bỏ</button>
                     <button class="btn-save" style="flex: 1;" onclick="window.AccountApp.verifyOtpAndSave()">Xác Nhận</button>
@@ -551,8 +674,8 @@
             <div id="guestOrderResult" class="guest-track-result"></div>
         </div>
     </div>
-
-    <div class="account-layout" id="account-view">
+    <div class="account-container">
+        <div class="account-layout" id="account-view">
         <div class="account-sidebar">
             <div class="account-user">
                 <div class="account-avatar-wrap">
@@ -606,6 +729,7 @@
             </div>
 
             <div class="account-panel" id="panel-orders">
+                <div class="orders-sticky-header">
                 <div class="account-panel-title">Đơn hàng của tôi</div>
                 <div class="account-panel-subtitle">Lịch sử và trạng thái tất cả đơn hàng.</div>
 
@@ -618,19 +742,20 @@
                         <button class="orders-filter-tab" data-filter="DANG_GIAO_HANG">Đang giao</button>
                         <button class="orders-filter-tab" data-filter="HOAN_THANH">Đã giao</button>
                         <button class="orders-filter-tab" data-filter="DA_HUY">Đã huỷ</button>
-                        <button class="orders-filter-tab" data-filter="HOAN_TRA">Hoàn / Trả hàng</button>
                     </div>
 
                     <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
                         <div style="position: relative; flex: 1; min-width: 250px; max-width: 350px;">
                             <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted);"></i>
-                            <input type="text" id="myOrderSearch" placeholder="Tìm mã hóa đơn, tên sản phẩm..." class="account-form-input" style="padding-left: 36px; width: 100%; border-radius: 4px;" oninput="window.AccountApp.handleInstantSearch()">
+                            <input type="text" id="myOrderSearch" placeholder="Tìm mã hóa đơn, tên sản phẩm..." class="account-form-input" style="padding-left: 36px; width: 100%; border-radius: var(--radius-md);;" oninput="window.AccountApp.handleInstantSearch()">
                         </div>
                     </div>
                 </div>
 
+                </div>
+
                 <div id="ordersContainer"></div>
-                <div id="myOrdersPagination" style="display: flex; justify-content: center; gap: 6px; margin-top: 24px; flex-wrap: wrap;"></div>
+                <div id="myOrdersPagination" style="display: flex; justify-content: center; gap: 6px; margin-top: 24px; flex-wrap: wrap; padding-bottom: 40px;"></div>
             </div>
 
             <div class="account-panel" id="panel-wishlist">
@@ -641,7 +766,7 @@
                     <button id="btnWishlistToggle" onclick="window.AccountApp.toggleWishlistDisplay()"
                             style="padding:13px 40px; background:transparent; color:var(--text); border:1px solid rgba(0,0,0,0.15);
                font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600; letter-spacing:0.12em;
-               text-transform:uppercase; cursor:pointer; border-radius:0px; transition:0.2s;
+               text-transform:uppercase; cursor:pointer; border-radius: var(--radius-md); transition:0.2s;
                display:inline-flex; align-items:center; gap:8px;">
                         <i class="fa-solid fa-angles-down" id="wishlistToggleIcon"></i>
                         <span id="wishlistToggleText">Xem thêm</span>
@@ -687,7 +812,7 @@
                     </div>
                 </div>
 
-                <div style="font-family:'Cormorant Garamond',serif;font-size:22px;margin-bottom:8px">Thông tin cơ bản</div>
+                <div style="font-family: 'DM Sans', sans-serif;font-size:22px;margin-bottom:8px">Thông tin cơ bản</div>
 
                 <div class="account-form-grid">
                     <div class="account-form-field full">
@@ -737,14 +862,14 @@
                 <div class="account-section-divider" id="addressDivider1"></div>
 
                 <div id="addressBookHeaderWrap" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; max-width:640px;">
-                    <div style="font-family:'Cormorant Garamond',serif;font-size:22px;">Sổ địa chỉ</div>
-                    <button onclick="window.AccountApp.openAddressModal()" style="padding: 12px 24px; background: var(--accent); color: white; border: none; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; border-radius: 0px; font-family: 'DM Sans', sans-serif; transition: background 0.2s;" onmouseover="this.style.background='#2c4238'" onmouseout="this.style.background='var(--accent)'">+ Thêm địa chỉ mới</button>
+                    <div style="font-family: 'DM Sans', sans-serif;font-size:22px;">Sổ địa chỉ</div>
+                    <button onclick="window.AccountApp.openAddressModal()" style="padding: 12px 24px; background: var(--accent); color: white; border: none; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; border-radius: var(--radius-md); font-family: 'DM Sans', sans-serif; transition: background 0.2s;" onmouseover="this.style.background='#2c4238'" onmouseout="this.style.background='var(--accent)'">+ Thêm địa chỉ mới</button>
                 </div>
                 <div id="addressBookContainer" style="max-width:640px; margin-bottom:48px;"></div>
 
                 <div class="account-section-divider" id="addressDivider2"></div>
 
-                <div style="font-family:'Cormorant Garamond',serif;font-size:22px;margin-bottom:8px">Đổi mật khẩu</div>
+                <div style="font-family: 'DM Sans', sans-serif;font-size:22px;margin-bottom:8px">Đổi mật khẩu</div>
                 <div class="account-form-grid">
                     <div class="account-form-field full">
                         <label class="account-form-label">Mật khẩu hiện tại</label>
@@ -775,6 +900,7 @@
 
         </div>
     </div>
+    </div>
 
     <div class="acc-modal-overlay" id="accAddressModalOverlay" onclick="if(event.target === this) window.AccountApp.closeAddressModal()">
         <div class="acc-modal" id="accAddressModal">
@@ -804,7 +930,7 @@
 
     <div class="review-modal-overlay" id="accReviewModalOverlay" onclick="if(event.target===this) window.AccountApp.closeReviewModal()">
         <div class="review-modal">
-            <button class="review-modal-close" onclick="window.AccountApp.closeReviewModal()" style="position: absolute; right: 15px; top: 15px; background: none; border: none; font-size: 20px; cursor: pointer; color: #888;"><i class="fa-solid fa-xmark"></i></button>
+            <button class="review-modal-close" onclick="window.AccountApp.closeReviewModal()" style="position: absolute; right: 15px; top: 15px; background: none; font-size: 20px; cursor: pointer; color: #888;"><i class="fa-solid fa-xmark"></i></button>
             <div class="review-modal-title" id="reviewModalTitleText" style="margin-bottom:5px;">Viết đánh giá</div>
             <div id="reviewModalProductName" style="text-align:center; font-size:14px; font-weight:500; margin-bottom:4px;"></div>
             <div id="reviewModalProductType" style="text-align:center; font-size:12px; color:var(--muted); margin-bottom:20px;"></div>
@@ -826,7 +952,7 @@
             <div style="font-size:10px; color:#c08060; margin-bottom:10px; display:none;" id="editReviewImgWarning">* Lưu ý: Thêm ảnh mới sẽ ghi đè lên các ảnh cũ trước đó của bạn.</div>
             <div class="review-img-previews" id="accReviewImagePreviews"></div>
 
-            <button id="btnSubmitAccReview" style="width: 100%; padding: 14px; background: var(--accent); color: white; border: none; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: 0px;" onclick="window.AccountApp.submitReview()">GỬI ĐÁNH GIÁ</button>
+            <button id="btnSubmitAccReview" style="width: 100%; padding: 14px; background: var(--accent); color: white; border: none; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border-radius: var(--radius-md);" onclick="window.AccountApp.submitReview()">GỬI ĐÁNH GIÁ</button>
         </div>
     </div>
     <div class="delivery-modal-overlay" id="deliveryModalOverlay" onclick="if(event.target === this) window.AccountApp.closeDeliveryModal()">
@@ -1024,12 +1150,12 @@
 
             showAccountNotification: function(title, message, isError = false) {
                 let toast = document.createElement('div');
-                toast.style.cssText = `position:fixed; bottom:20px; right:20px; background:${isError ? '#c03c3c' : '#1a1a1a'}; color:#fff; padding:16px 24px; border-radius:0px; z-index:10000; display:flex; align-items:center; gap:16px; animation: accSlideInUp 0.3s ease forwards; font-family:"DM Sans", sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,0.2);`;
+                toast.style.cssText = `position:fixed; bottom:20px; right:20px; background:${isError ? '#c03c3c' : '#1a1a1a'}; color:#fff; padding:16px 24px; border-radius: var(--radius-md); z-index:10000; display:flex; align-items:center; gap:16px; animation: accSlideInUp 0.3s ease forwards; font-family:"DM Sans", sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,0.2);`;
 
                 let icon = isError ? '<svg style="width:14px;height:14px;stroke:#fff;fill:none;" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 6L6 18M6 6l12 12"/></svg>' : '<svg style="width:14px;height:14px;stroke:#4ade80;fill:none;" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>';
 
                 toast.innerHTML =
-                    `<div style="width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">${icon}</div>` +
+                    `<div style="width:24px;height:24px;border-radius: var(--radius-full);background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">${icon}</div>` +
                     `<div><div style="font-size:13px;font-weight:500;margin-bottom:2px;">${title}</div><div style="font-size:11px;color:rgba(255,255,255,0.7);">${message}</div></div>`;
 
                 if (!document.getElementById('acc-toast-styles')) {
@@ -1235,15 +1361,15 @@
                 overlay.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:10000; display:flex; align-items:center; justify-content:center; animation:fadeIn 0.3s ease; backdrop-filter:blur(3px);';
 
                 const modal = document.createElement('div');
-                modal.style.cssText = 'background:var(--white); padding:32px 32px 40px; border-radius:0px; border: 1px solid rgba(0,0,0,0.1); max-width:400px; width:90%; text-align:center; box-shadow:0 20px 40px rgba(0,0,0,0.15); transform:translateY(20px); animation:accSlideUp 0.3s ease forwards; position: relative;';
+                modal.style.cssText = 'background:var(--white); padding:32px 32px 40px; border-radius: var(--radius-xl); border: 1px solid rgba(0,0,0,0.1); max-width:400px; width:90%; text-align:center; box-shadow:0 20px 40px rgba(0,0,0,0.15); transform:translateY(20px); animation:accSlideUp 0.3s ease forwards; position: relative;';
 
                 modal.innerHTML =
                     `<div style="margin-bottom: 20px;">${iconHtml}</div>` +
-                    `<h3 style="font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:600; margin-bottom:12px; color:var(--text);">${title}</h3>` +
+                    `<h3 style="font-family: 'DM Sans', sans-serif; font-size:28px; font-weight:600; margin-bottom:12px; color:var(--text);">${title}</h3>` +
                     `<p style="font-size:14px; color:var(--muted); margin-bottom:32px; line-height: 1.5;">${message}</p>` +
                     `<div style="display:flex; gap:12px; justify-content:center;">` +
-                    `<button id="btn-cancel-action" style="padding:14px 24px; background:#f4f4f5; border:1px solid rgba(0,0,0,0.05); color: var(--text); cursor:pointer; flex:1; border-radius:0px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; transition:0.2s;" onmouseover="this.style.background='#e4e4e7'" onmouseout="this.style.background='#f4f4f5'">Để sau</button>` +
-                    `<button id="btn-execute-action" style="padding:14px 24px; background:${btnColor}; color:white; border:none; cursor:pointer; flex:1; border-radius:0px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; transition:0.2s; box-shadow: 0 4px 12px ${btnColor}40;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">${confirmBtnText}</button>` +
+                    `<button id="btn-cancel-action" style="padding:14px 24px; background:#f4f4f5; border:1px solid rgba(0,0,0,0.05); color: var(--text); cursor:pointer; flex:1; border-radius: var(--radius-md); font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; transition:0.2s;" onmouseover="this.style.background='#e4e4e7'" onmouseout="this.style.background='#f4f4f5'">Để sau</button>` +
+                    `<button id="btn-execute-action" style="padding:14px 24px; background:${btnColor}; color:white; border:none; cursor:pointer; flex:1; border-radius: var(--radius-md); font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; transition:0.2s; box-shadow: 0 4px 12px ${btnColor}40;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">${confirmBtnText}</button>` +
                     `</div>`;
 
                 overlay.appendChild(modal);
@@ -1348,8 +1474,8 @@
                     const url = URL.createObjectURL(file);
                     container.innerHTML += `
                         <div style="position:relative; width:60px; height:60px;">
-                            <img src="${url}" style="width:100%; height:100%; object-fit:cover; border-radius:0px;">
-                            <button onclick="window.AccountApp.removeFile(${index})" style="position:absolute; top:-5px; right:-5px; background:#ef4444; color:white; border:none; border-radius:50%; width:16px; height:16px; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center;">x</button>
+                            <img src="${url}" style="width:100%; height:100%; object-fit:cover; border-radius: var(--radius-md);">
+                            <button onclick="window.AccountApp.removeFile(${index})" style="position:absolute; top:-5px; right:-5px; background:#ef4444; color:white; border:none; border-radius: var(--radius-full); width:16px; height:16px; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center;">x</button>
                         </div>
                     `;
                 });
@@ -1437,11 +1563,11 @@
 
                     let loaiGiaoHangHtml = '';
                     if (data.loaiHoaDon === 0) {
-                        loaiGiaoHangHtml = `<span style="font-size: 10px; font-weight: 700; color: #0369a1; background: #e0f2fe; padding: 4px 10px; border-radius: 4px; margin-left: 12px; letter-spacing: 0.05em; vertical-align: middle;"><i class="bi bi-shop"></i> TẠI QUẦY</span>`;
+                        loaiGiaoHangHtml = `<span style="font-size: 10px; font-weight: 700; color: #0369a1; background: #e0f2fe; padding: 4px 10px; border-radius: var(--radius-sm); margin-left: 12px; letter-spacing: 0.05em; vertical-align: middle;"><i class="bi bi-shop"></i> TẠI QUẦY</span>`;
                     } else if (isStorePickup) {
-                        loaiGiaoHangHtml = `<span style="font-size: 10px; font-weight: 700; color: #6d28d9; background: #f3e8ff; padding: 4px 10px; border-radius: 4px; margin-left: 12px; letter-spacing: 0.05em; vertical-align: middle;"><i class="bi bi-bag-check"></i> NHẬN TẠI CỬA HÀNG</span>`;
+                        loaiGiaoHangHtml = `<span style="font-size: 10px; font-weight: 700; color: #6d28d9; background: #f3e8ff; padding: 4px 10px; border-radius: var(--radius-sm); margin-left: 12px; letter-spacing: 0.05em; vertical-align: middle;"><i class="bi bi-bag-check"></i> NHẬN TẠI CỬA HÀNG</span>`;
                     } else {
-                        loaiGiaoHangHtml = `<span style="font-size: 10px; font-weight: 700; color: #a16207; background: #fefce8; padding: 4px 10px; border-radius: 4px; margin-left: 12px; letter-spacing: 0.05em; vertical-align: middle;"><i class="bi bi-truck"></i> GIAO TẬN NƠI</span>`;
+                        loaiGiaoHangHtml = `<span style="font-size: 10px; font-weight: 700; color: #a16207; background: #fefce8; padding: 4px 10px; border-radius: var(--radius-sm); margin-left: 12px; letter-spacing: 0.05em; vertical-align: middle;"><i class="bi bi-truck"></i> GIAO TẬN NƠI</span>`;
                     }
 
                     // 🌟 ĐÃ FIX: Tự động sinh Timeline HTML không cần query ID cũ để tránh lỗi Null
@@ -1571,7 +1697,7 @@
                                 let imgList = existingReview.danhSachHinhAnhList || (existingReview.danhSachHinhAnh ? existingReview.danhSachHinhAnh.split(',') : []);
                                 if (imgList.length > 0) {
                                     imgList.forEach(url => {
-                                        if (url.trim()) imgsHtml += `<img src="${url.trim()}" style="width:40px;height:40px;object-fit:cover;border-radius:0px;border:1px solid #eee;margin-right:6px;" onclick="event.stopPropagation(); window.open(this.src, '_blank')">`;
+                                        if (url.trim()) imgsHtml += `<img src="${url.trim()}" style="width:40px;height:40px;object-fit:cover;border-radius: var(--radius-md);border:1px solid #eee;margin-right:6px;" onclick="event.stopPropagation(); window.open(this.src, '_blank')">`;
                                     });
                                 }
 
@@ -1580,7 +1706,7 @@
                                     : `<button onclick="window.AccountApp.openReviewModal(${detailId}, '${pName}', '${pl}', true)" style="background:none; border:none; color:var(--accent); font-size:11px; font-weight:500; cursor:pointer; text-decoration:underline; padding:0;">Sửa đánh giá</button>`;
 
                                 reviewSectionHtml = `
-                                    <div style="margin-top:12px; background:rgba(0,0,0,0.02); padding:12px; border-radius:0px; border:1px solid rgba(0,0,0,0.04); width:100%;" onclick="event.stopPropagation()">
+                                    <div style="margin-top:12px; background:rgba(0,0,0,0.02); padding:12px; border-radius: var(--radius-md); border:1px solid rgba(0,0,0,0.04); width:100%;" onclick="event.stopPropagation()">
                                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                                             <span style="color:#f59e0b; font-size:12px; letter-spacing:2px;">${starsHtml}</span>
                                             ${editBtnHtml}
@@ -1589,7 +1715,7 @@
                                         <div style="display:flex; flex-wrap:wrap;">${imgsHtml}</div>
                                     </div>`;
                             } else {
-                                reviewSectionHtml = `<div style="margin-top:10px;"><button onclick="event.stopPropagation(); window.AccountApp.openReviewModal(${detailId}, '${pName}', '${pl}', false)" style="background:none; color:var(--accent); border:1px solid var(--accent); padding:6px 16px; font-size:10px; font-weight: 500; text-transform:uppercase; letter-spacing:0.1em; border-radius:0px; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='var(--accent)'; this.style.color='#fff'" onmouseout="this.style.background='none'; this.style.color='var(--accent)'"><i class="fa-solid fa-pen-nib"></i> Viết đánh giá</button></div>`;
+                                reviewSectionHtml = `<div style="margin-top:10px;"><button onclick="event.stopPropagation(); window.AccountApp.openReviewModal(${detailId}, '${pName}', '${pl}', false)" style="background:none; color:var(--accent); border:1px solid var(--accent); padding:6px 16px; font-size:10px; font-weight: 500; text-transform:uppercase; letter-spacing:0.1em; border-radius: var(--radius-md); cursor:pointer; transition:0.2s;" onmouseover="this.style.background='var(--accent)'; this.style.color='#fff'" onmouseout="this.style.background='none'; this.style.color='var(--accent)'"><i class="fa-solid fa-pen-nib"></i> Viết đánh giá</button></div>`;
                             }
                         }
 
@@ -1598,7 +1724,7 @@
                                 <div style="display:flex;align-items:flex-start; cursor:pointer;" onclick="window.location.href='/customer#detail?id=${pId}'; window.location.reload();">
                                     <img src="${item.hinhAnh || 'https://placehold.co/60x80'}" class="detail-prod-img" style="margin-top:4px;">
                                     <div style="flex:1;">
-                                        <div style="font-family:'Cormorant Garamond', serif; font-size: 17px; font-weight:500; transition:color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text)'">${pName}</div>
+                                        <div style="font-family:'DM Sans', sans-serif; font-size: 17px; font-weight:500; transition:color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text)'">${pName}</div>
                                         <div style="color:var(--muted); font-size: 12px; margin-top:2px;">SKU: <span style="font-weight:500; color:var(--text);">${sku}</span></div>
                                         <div style="color:var(--muted); font-size: 12px; margin-top:2px;">Phân loại: <span style="font-weight:500; color:var(--text);">${pl}</span></div>
                                         ${reviewSectionHtml}
@@ -1665,7 +1791,7 @@
                     }
 
                     if (currentStatus === 'CHO_THANH_TOAN' && data.phuongThucThanhToan && data.phuongThucThanhToan.toUpperCase() !== 'COD') {
-                        actionButtonsHtml += `<button onclick="window.AccountApp.repayOrder(${data.id}, ${tongTien}, '${data.phuongThucThanhToan}', '${data.ma}')" class="account-form-save" style="border-radius:0px; padding:10px 24px;"><i class="bi bi-wallet2"></i> THANH TOÁN NGAY</button>`;
+                        actionButtonsHtml += `<button onclick="window.AccountApp.repayOrder(${data.id}, ${tongTien}, '${data.phuongThucThanhToan}', '${data.ma}')" class="account-form-save" style="border-radius: var(--radius-md); padding:10px 24px;"><i class="bi bi-wallet2"></i> THANH TOÁN NGAY</button>`;
                     }
 
                     if (actionButtonsHtml !== '') {
@@ -1788,7 +1914,7 @@
                 document.getElementById('statWishlist').innerText = wishlist.length;
 
                 if (wishlist.length === 0) {
-                    container.innerHTML = '<div style="grid-column:1/-1; padding:60px 40px; text-align:center; color:var(--muted); border:1px dashed rgba(0,0,0,0.1); border-radius:0px; font-size:13px;">Bạn chưa có sản phẩm yêu thích nào.</div>';
+                    container.innerHTML = '<div style="grid-column:1/-1; padding:60px 40px; text-align:center; color:var(--muted); border:1px dashed rgba(0,0,0,0.1); border-radius: var(--radius-md); font-size:13px;">Bạn chưa có sản phẩm yêu thích nào.</div>';
                     container.style.display = 'block';
                     document.getElementById('wishlistShowMoreWrap').style.display = 'none';
                     return;
@@ -1799,10 +1925,11 @@
 
                 const fmt = n => new Intl.NumberFormat('vi-VN').format(n || 0) + ' ₫';
                 const colorHexMap = {
-                    'đen':'#1a1a1a','trắng':'#ffffff','be':'#c4b49d','xanh dương':'#4682b4',
-                    'rêu':'#3D5A4C','nâu':'#a0856a','xám':'#888888','đỏ':'#e74c3c',
-                    'hồng':'#f472b6','vàng':'#f5c518','cam':'#f97316','tím':'#a855f7',
-                    'xanh lá':'#15803d','kem':'#fef3c7','ghi':'#c5cfc7','navy':'#1d4ed8'
+                    'trắng':'#ffffff','đen':'#1a1a1a','xám':'#9ca3af','ghi':'#d1cfc9',
+                    'be':'#c4b49d','kem':'#fef3c7','nâu':'#92400e','rêu':'#3D5A4C',
+                    'đỏ':'#dc2626','hồng':'#f472b6','xanh biển':'#3b82f6','xanh dương':'#3b82f6',
+                    'vàng':'#eab308','cam':'#f97316','xanh lá':'#16a34a','tím':'#a855f7',
+                    'xanh lam':'#3b82f6'
                 };
                 const getHex = name => {
                     if (!name) return '#ccc';
@@ -1895,7 +2022,7 @@
 
                 <button title="Bỏ yêu thích"
                         onclick="event.stopPropagation(); window.AccountApp.removeFromWishlist(${p.id})"
-                        style="position:absolute;top:10px;right:10px;z-index:4;width:34px;height:34px;border-radius:50%;
+                        style="position:absolute;top:10px;right:10px;z-index:4;width:34px;height:34px;border-radius: var(--radius-full);
                                background:rgba(255,245,245,0.95);border:none;cursor:pointer;
                                display:flex;align-items:center;justify-content:center;
                                box-shadow:0 2px 10px rgba(0,0,0,0.12);transition:background .2s,transform .2s;"
@@ -1909,7 +2036,7 @@
 
             <div style="padding:14px 16px 18px;flex-grow:1;display:flex;flex-direction:column;">
                 <div style="font-size:9px;letter-spacing:0.18em;color:var(--accent);text-transform:uppercase;font-weight:600;margin-bottom:4px;">BEEMATE</div>
-                <div style="font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:400;line-height:1.2;margin-bottom:10px;">${p.ten}</div>
+                <div style="font-family: 'DM Sans', sans-serif;font-size:17px;font-weight:400;line-height:1.2;margin-bottom:10px;">${p.ten}</div>
                 ${swatchesHtml}
                 <div style="display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;margin-top:auto;">${priceHtml}</div>
             </div>
@@ -1991,9 +2118,9 @@
                     container.innerHTML = `
             <div style="padding: 60px 20px; text-align: center; border: 1px dashed rgba(0,0,0,0.1); background: var(--white);">
                 <i class="fa-solid fa-box-open" style="font-size: 48px; color: var(--muted); margin-bottom: 16px; opacity: 0.3;"></i>
-                <div style="font-family:'Cormorant Garamond',serif; font-size: 20px; margin-bottom: 8px;">Bạn chưa có đơn hàng nào</div>
+                <div style="font-family: 'DM Sans', sans-serif; font-size: 20px; margin-bottom: 8px;">Bạn chưa có đơn hàng nào</div>
                 <div style="font-size: 13px; color: var(--muted); margin-bottom: 24px;">Hãy khám phá các sản phẩm của Beemate ngay hôm nay.</div>
-                <a href="/#shop" style="display:inline-block; padding:12px 28px; background:var(--accent); color:white; text-decoration:none; font-size:12px; text-transform:uppercase; letter-spacing:0.1em; border-radius:0px; transition:0.2s;" onmouseover="this.style.background='#2c4238'" onmouseout="this.style.background='var(--accent)'">Mua sắm ngay</a>
+                <a href="/#shop" style="display:inline-block; padding:12px 28px; background:var(--accent); color:white; text-decoration:none; font-size:12px; text-transform:uppercase; letter-spacing:0.1em; border-radius: var(--radius-md); transition:0.2s;" onmouseover="this.style.background='#2c4238'" onmouseout="this.style.background='var(--accent)'">Mua sắm ngay</a>
             </div>`;
                     if (paginationContainer) paginationContainer.innerHTML = '';
                     return;
@@ -2069,7 +2196,7 @@
                     }
 
                     let accordionBtn = `<button class="btn-accordion-toggle" onclick="event.stopPropagation(); window.AccountApp.toggleOrderQuickDetails(this, ${ord.id})" title="Xem nhanh dòng tiền"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M6 9l6 6 6-6"/></svg></button>`;
-                    let actionButtons = accordionBtn + `<button onclick="window.AccountApp.viewOrderDetail(${ord.id})" style="padding: 10px 20px; background: var(--accent); color: white; border: none; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: 0.2s; border-radius: 0px;" onmouseover="this.style.background='#2c4238'" onmouseout="this.style.background='var(--accent)'">Xem Chi Tiết</button>`;
+                    let actionButtons = accordionBtn + `<button onclick="window.AccountApp.viewOrderDetail(${ord.id})" style="padding: 10px 20px; background: var(--accent); color: white; border: none; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: 0.2s; border-radius: var(--radius-md);" onmouseover="this.style.background='#2c4238'" onmouseout="this.style.background='var(--accent)'">Xem Chi Tiết</button>`;
 
                     let firstItemHtml = '';
                     if (ord.chiTiets && ord.chiTiets.length > 0) {
@@ -2082,9 +2209,9 @@
 
                         firstItemHtml = `
                 <div style="display:flex; align-items:center; padding: 20px 28px; border-bottom: 1px solid rgba(0,0,0,0.06); background: #fff; cursor: pointer;" onclick="window.AccountApp.viewOrderDetail(${ord.id})">
-                    <img src="${hinhAnh}" style="width: 50px; height: 65px; object-fit: cover; border-radius: 0px; margin-right: 16px; border: 1px solid rgba(0,0,0,0.05);">
+                    <img src="${hinhAnh}" style="width: 50px; height: 65px; object-fit: cover; border-radius: var(--radius-md); margin-right: 16px; border: 1px solid rgba(0,0,0,0.05);">
                     <div style="flex: 1;">
-                        <div style="font-family:'Cormorant Garamond', serif; font-size: 16px; font-weight: 500; color: var(--text);">${tenSP}</div>
+                        <div style="font-family:'DM Sans', sans-serif; font-size: 16px; font-weight: 500; color: var(--text);">${tenSP}</div>
                         <div style="font-size: 12px; color: var(--muted); margin-top: 4px;">Phân loại: ${phanLoai} | SL: ${sl}</div>
                         ${moreItemsText}
                     </div>
@@ -2096,13 +2223,13 @@
 
                     let giamGiaHtml = giamGia > 0 ? `<div class="quick-detail-row"><span>Giảm giá voucher${maVoucherStr}:</span> <span style="color:#10b981;">-${this.formatCurrency(giamGia)}</span></div>` : '';
 
-                    html += `<div class="account-order-card" data-status="${ord.trangThaiMa}" style="border-radius: 0px;">
+                    html += `<div class="account-order-card" data-status="${ord.trangThaiMa}" style="border-radius: var(--radius-md);">
             <div class="account-order-card-header">
                 <div>
                     <div class="account-order-id" style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">#${ord.ma} ${loaiGiaoHangHtml}</div>
                     <div class="account-order-meta" style="margin-top: 4px;">${ord.ngayTao}</div>
                 </div>
-                <span class="account-order-status ${statusObj.cssClass}" style="border-radius: 0px;">${statusObj.label}</span>
+                <span class="account-order-status ${statusObj.cssClass}" style="border-radius: var(--radius-md);">${statusObj.label}</span>
             </div>
 
             ${firstItemHtml}
@@ -2481,7 +2608,7 @@
                 if (this.state.isStaff) return;
                 const container = document.getElementById('addressBookContainer');
                 if(this.state.addresses.length === 0) {
-                    container.innerHTML = '<div style="text-align:center; padding:30px; border:1px dashed rgba(0,0,0,0.1); border-radius:0px; color:var(--muted); font-size:13px;">Bạn chưa lưu địa chỉ giao hàng nào.</div>';
+                    container.innerHTML = '<div style="text-align:center; padding:30px; border:1px dashed rgba(0,0,0,0.1); border-radius: var(--radius-md); color:var(--muted); font-size:13px;">Bạn chưa lưu địa chỉ giao hàng nào.</div>';
                     return;
                 }
 
@@ -3216,7 +3343,7 @@
                                         <div style="display:flex;align-items:flex-start; cursor:pointer;" onclick="window.location.href='/customer#detail?id=${item.idSanPham || (spct.sanPham ? spct.sanPham.id : '')}'; window.location.reload();">
                                             <img src="${hinhAnh}" class="detail-prod-img" style="margin-top:4px; width: 60px; height: 80px; object-fit: cover;">
                                             <div style="flex:1;">
-                                                <div style="font-family:'Cormorant Garamond', serif; font-size: 17px; font-weight:500; transition:color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text)'">${tenSP}</div>
+                                                <div style="font-family:'DM Sans', sans-serif; font-size: 17px; font-weight:500; transition:color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text)'">${tenSP}</div>
                                                 <div style="color:var(--muted); font-size: 12px; margin-top:2px;">SKU: <span style="font-weight:500; color:var(--text);">${sku}</span></div>
                                                 <div style="color:var(--muted); font-size: 12px; margin-top:2px;">Phân loại: <span style="font-weight:500; color:var(--text);">${phanLoai}</span></div>
                                             </div>
@@ -3263,7 +3390,7 @@
                     }
 
                     if (currentStatus === 'CHO_THANH_TOAN' && data.phuongThucThanhToan && data.phuongThucThanhToan.toUpperCase() !== 'COD') {
-                        actionButtonsHtml += `<button onclick="window.AccountApp.guestRepayOrder(${data.id}, ${tongTien}, '${data.phuongThucThanhToan}', '${data.ma}')" class="account-form-save" style="border-radius:0px; padding:10px 24px;"><i class="bi bi-wallet2"></i> THANH TOÁN NGAY</button>`;
+                        actionButtonsHtml += `<button onclick="window.AccountApp.guestRepayOrder(${data.id}, ${tongTien}, '${data.phuongThucThanhToan}', '${data.ma}')" class="account-form-save" style="border-radius: var(--radius-md); padding:10px 24px;"><i class="bi bi-wallet2"></i> THANH TOÁN NGAY</button>`;
                     }
 
                     // Đóng thẻ table

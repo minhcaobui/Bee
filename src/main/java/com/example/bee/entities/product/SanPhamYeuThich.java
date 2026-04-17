@@ -17,10 +17,10 @@ public class SanPhamYeuThich {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "tai_khoan_id")
+    @Column(name = "id_tai_khoan")
     private Integer taiKhoanId;
 
-    @Column(name = "san_pham_id")
+    @Column(name = "id_san_pham")
     private Integer sanPhamId;
 
     @Column(name = "ngay_tao")
