@@ -24,7 +24,7 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
             "LEFT JOIN h.khachHang kh " +
             "LEFT JOIN h.nhanVien nv " +
             "LEFT JOIN h.trangThaiHoaDon tt " +
-            "WHERE TRIM(tt.ma) NOT IN ('HOAN_THANH', 'DA_HUY', 'DA_DOI', 'DA_TRA') " +
+            "WHERE TRIM(tt.ma) NOT IN ('HOAN_THANH', 'DA_HUY', 'GIAO_THAT_BAI', 'DA_HOAN_HANG', 'TU_CHOI_TRA_HANG') " +
             "AND (:q IS NULL OR LOWER(h.ma) LIKE LOWER(CONCAT('%', :q, '%')) OR LOWER(kh.hoTen) LIKE LOWER(CONCAT('%', :q, '%')) OR LOWER(CAST(h.thongTinGiaoHang AS string)) LIKE LOWER(CONCAT('%', :q, '%'))) " +
             "AND (:statusId IS NULL OR tt.id = :statusId) " +
             "AND (:loaiHoaDon IS NULL OR h.loaiHoaDon = :loaiHoaDon) " +
@@ -44,7 +44,7 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
             "LEFT JOIN h.khachHang kh " +
             "LEFT JOIN h.nhanVien nv " +
             "LEFT JOIN h.trangThaiHoaDon tt " +
-            "WHERE TRIM(tt.ma) IN ('HOAN_THANH', 'DA_HUY', 'DA_DOI', 'DA_TRA') " +
+            "WHERE TRIM(tt.ma) IN ('HOAN_THANH', 'DA_HUY', 'GIAO_THAT_BAI', 'DA_HOAN_HANG', 'TU_CHOI_TRA_HANG') " +
             "AND (:q IS NULL OR LOWER(h.ma) LIKE LOWER(CONCAT('%', :q, '%')) OR LOWER(kh.hoTen) LIKE LOWER(CONCAT('%', :q, '%')) OR LOWER(CAST(h.thongTinGiaoHang AS string)) LIKE LOWER(CONCAT('%', :q, '%'))) " +
             "AND (:statusId IS NULL OR tt.id = :statusId) " +
             "AND (:nhanVienId IS NULL OR nv.id = :nhanVienId) " +

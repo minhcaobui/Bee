@@ -3,124 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <title>BEE ADMIN - QUẢN LÝ HÓA ĐƠN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <style>
         /* ==========================================================================
-           CORE STYLES
+           1. CORE SYSTEM STYLE (PHONG CÁCH QUẢN TRỊ - ENTERPRISE ADMIN)
            ========================================================================== */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --black: #000; --white: #fff; --gray-100: #f4f4f5; --gray-200: #e4e4e7; --gray-300: #d4d4d8; --font-size: 13px; }
-        body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--black); font-size: var(--font-size); line-height: 1.5; }
-        .container { max-width: 100%; padding: 20px 30px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
+        :root {
+            --bg-admin: #f0f2f5;
+            --panel-bg: #ffffff;
+            --border-color: #d9d9d9;
+            --border-light: #f0f0f0;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
 
-        .actions-bar { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--gray-200); margin-bottom: 20px; padding-bottom: 0; }
-        .tabs { display: flex; gap: 30px; margin-bottom: 0; border: none; }
-        .tab { font-size: 13px; font-weight: 700; color: #888; padding: 0 0 12px 0; cursor: pointer; text-transform: uppercase; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
-        .tab.active { color: #000; border-bottom-color: #000; }
+            --primary: #1677ff;
+            --primary-hover: #0958d9;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
 
-        .btn { font-size: 11px; font-weight: 800; text-transform: uppercase; height: 34px !important; padding: 0 16px !important; background: #000; color: #fff; border: 1px solid #000; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 4px; line-height: 1; transition: 0.2s; }
-        .btn:hover { background: #333; }
-        .btn-secondary { background: #fff; color: #000; border: 1px solid var(--gray-300); }
-        .btn-secondary:hover { background: var(--gray-100); border-color: #000; }
-        .btn-icon { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--gray-200); background: #fff; cursor: pointer; border-radius: 4px; margin-left: 4px; transition: 0.2s; color: #555; }
-        .btn-icon:hover { border-color: #000; background: #000; color: #fff; }
+            --radius: 6px;
+            --font-size: 13px;
+        }
+
+        body {
+            font-family: 'Be Vietnam Pro', 'Inter', sans-serif;
+            background: var(--bg-admin);
+            color: var(--text-main);
+            font-size: var(--font-size);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+        .container { max-width: 100%; padding: 20px 24px; }
+
+        /* TABS */
+        .actions-bar { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; padding-bottom: 0; }
+        .tabs { display: flex; gap: 24px; margin-bottom: 0; border: none; }
+        .tab { font-size: 14px; font-weight: 600; color: var(--text-muted); padding: 0 0 12px 0; cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
+        .tab:hover { color: var(--primary); }
+        .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 700; }
+
+        /* BUTTONS */
+        .btn {
+            font-size: 13px;
+            font-weight: 600;
+            height: 36px !important;
+            padding: 0 16px !important;
+            background: var(--primary);
+            color: #fff;
+            border: 1px solid var(--primary);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border-radius: var(--radius);
+            line-height: 1;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 0 rgba(0,0,0,0.04);
+        }
+        .btn:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+
+        .btn-secondary { background: #fff; color: var(--text-main); border: 1px solid var(--border-color); box-shadow: 0 2px 0 rgba(0,0,0,0.02); }
+        .btn-secondary:hover { color: var(--primary); border-color: var(--primary); background: #fff; }
+
+        .btn-danger { background: #fff; color: var(--danger); border: 1px solid var(--danger); }
+        .btn-danger:hover { background: var(--danger); color: #fff; }
+
+        .btn-icon {
+            width: 32px; height: 32px;
+            display: inline-flex; align-items: center; justify-content: center;
+            border: 1px solid var(--border-color);
+            background: #fff; cursor: pointer; border-radius: var(--radius);
+            margin-left: 4px; transition: 0.2s; color: var(--text-muted);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .btn-icon:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-icon.btn-danger:hover { border-color: var(--danger); color: var(--danger); background: #fef2f2; }
 
         /* BẢNG DỮ LIỆU */
-        .table-wrapper { border: 1px solid var(--gray-200); width: 100%; overflow-x: auto; }
+        .table-wrapper { border: 1px solid var(--border-color); width: 100%; overflow-x: auto; background: var(--panel-bg); border-radius: var(--radius); box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
         table { width: 100%; border-collapse: collapse; min-width: 1100px; }
-        thead th { text-align: left; padding: 12px 15px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #666; background: #fafafa; border-bottom: 1px solid var(--gray-200); white-space: nowrap;}
-        tbody td { padding: 10px 15px; border-bottom: 1px solid var(--gray-200); font-size: 13px; vertical-align: middle; }
-        tbody tr:hover { background: var(--gray-100); }
+        thead th { text-align: left; padding: 12px 16px; font-size: 12px; font-weight: 600; color: var(--text-muted); background: #fafafa; border-bottom: 1px solid var(--border-light); white-space: nowrap; }
+        tbody td { padding: 12px 16px; border-bottom: 1px solid var(--border-light); font-size: 13px; vertical-align: middle; color: var(--text-main); }
+        tbody tr:hover { background: #f8fafc; cursor: pointer; }
 
-        .badge-type { font-size: 10px; padding: 4px 6px; border-radius: 4px; font-weight: 800; text-transform: uppercase; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; border: 1px solid transparent;}
+        .badge-type { font-size: 11px; padding: 4px 8px; border-radius: 4px; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; border: 1px solid transparent;}
         .type-pos { background: #e0f2fe; color: #0369a1; border-color: #bae6fd; }
         .type-online-home { background: #fefce8; color: #a16207; border-color: #fde047; }
         .type-online-store { background: #f3e8ff; color: #6d28d9; border-color: #ddd6fe; }
 
-        .badge-status { padding: 5px 10px; border-radius: 4px; font-size: 10px; font-weight: 800; text-transform: uppercase; color: #fff; white-space: nowrap; display: inline-block; }
+        .badge-status { padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; color: #fff; white-space: nowrap; display: inline-block; }
 
         /* KHU VỰC TÌM KIẾM & BỘ LỌC */
-        .search-section { background: #f8f9fa; padding: 18px 20px; border: 1px solid var(--gray-200); border-radius: 4px; margin-bottom: 20px; }
+        .search-section { background: var(--panel-bg); padding: 16px 20px; border: 1px solid var(--border-color); border-radius: var(--radius); margin-bottom: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
         .filter-row-1 { display: grid; gap: 16px; align-items: end; }
         .filter-row-2 { display: grid; gap: 16px; align-items: end; margin-top: 14px; }
         .filter-row-1.online-mode  { grid-template-columns: 2fr 1fr 1fr 1.5fr auto; }
         .filter-row-1.history-mode { grid-template-columns: 2.5fr 1fr 1fr 1fr; }
         .filter-row-2.history-mode { grid-template-columns: 1.5fr 2fr auto; }
 
-        .filter-group { display: flex; flex-direction: column; gap: 5px; }
-        .filter-label { font-size: 11px; font-weight: 800; color: #444; text-transform: uppercase; margin-bottom: 2px; }
+        .filter-group { display: flex; flex-direction: column; gap: 6px; }
+        .filter-label { font-size: 12px; font-weight: 600; color: var(--text-main); }
 
         input[type="text"], input[type="date"], select {
-            height: 40px; padding: 0 12px; border: 1px solid var(--gray-300); border-radius: 4px;
-            font-family: inherit; font-size: 13px; outline: none; width: 100%; background: #fff; transition: 0.2s;
+            height: 36px; padding: 0 12px; border: 1px solid var(--border-color); border-radius: var(--radius);
+            font-family: inherit; font-size: 13px; outline: none; width: 100%; background: #fff; transition: all 0.3s;
         }
-        input:focus, select:focus { border-color: #000; }
+        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.2); }
 
         .date-range-wrapper { display: flex; align-items: center; gap: 8px; }
-        .date-sep { font-size: 11px; color: #bbb; flex-shrink: 0; display: none; }
+        .date-sep { font-size: 12px; color: var(--text-muted); flex-shrink: 0; display: none; }
         .date-to-wrap { display: none; flex: 1; }
         .date-to-wrap.visible { display: flex; }
-        .btn-group-filter { display: flex; gap: 8px; height: 40px; }
+        .btn-group-filter { display: flex; gap: 8px; height: 36px; }
 
         /* NV SEARCH DROPDOWN */
         .nv-search-wrap { position: relative; }
-        .nv-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid var(--gray-300); border-top: none; border-radius: 0 0 4px 4px; z-index: 100; max-height: 160px; overflow-y: auto; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .nv-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 6px 6px; z-index: 100; max-height: 180px; overflow-y: auto; display: none; box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
         .nv-dropdown.open { display: block; }
-        .nv-item { padding: 10px 12px; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; }
-        .nv-item:hover { background: #f4f4f5; }
-        .nv-item.selected { font-weight: 700; }
+        .nv-item { padding: 10px 12px; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f0f0f0; color: var(--text-main); }
+        .nv-item:hover { background: #f8fafc; color: var(--primary); }
+        .nv-item.selected { font-weight: 600; background: #f0f5ff; color: var(--primary); }
         .nv-clear { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #999; font-size: 16px; display: none; }
         .nv-clear.show { display: block; }
+        .nv-clear:hover { color: var(--danger); }
 
         /* PHÂN TRANG */
-        .pagination-wrapper { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; }
-        .pagination-info { font-size: 11px; font-weight: 800; color: #888; text-transform: uppercase; }
-        .pagination { display: flex; gap: 5px; }
-        .page-number { min-width: 28px; height: 28px; font-size: 12px; font-weight: 700; background: transparent; border: 1px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; border-radius: 2px;}
-        .page-number:hover:not(:disabled) { background: #eee; }
-        .page-number.active { background: #000; color: #fff; }
-        .page-number:disabled { opacity: 0.4; cursor: not-allowed; }
+        .pagination-wrapper { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; }
+        .pagination-info { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+        .pagination { display: flex; gap: 6px; }
+        .page-number { min-width: 30px; height: 30px; font-size: 13px; font-weight: 500; background: #fff; border: 1px solid var(--border-color); color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; border-radius: 4px;}
+        .page-number:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+        .page-number.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+        .page-number:disabled { opacity: 0.5; cursor: not-allowed; background: #f5f5f5; }
 
-        .highlight-order { background-color: #f1f5f9 !important; outline: 1.5px solid #000 !important; animation: subtleBlink 1.2s infinite ease-in-out; }
-        @keyframes subtleBlink { 0%, 100% { background-color: #f1f5f9; } 50% { background-color: #ffffff; } }
+        .highlight-order { background-color: #f0f5ff !important; transition: background-color 1s; animation: subtleBlink 1.5s infinite ease-in-out; }
+        @keyframes subtleBlink { 0%, 100% { background-color: #f0f5ff; } 50% { background-color: #ffffff; } }
 
         /* DRAWER (NGĂN KÉO HIỂN THỊ CHI TIẾT ĐƠN) */
-        .drawer { position: fixed; top: 0; right: -900px; width: 900px; height: 100vh; background: #f4f4f5; border-left: 1px solid var(--gray-200); z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -5px 0 20px rgba(0,0,0,0.1); }
+        .drawer { position: fixed; top: 0; right: -900px; width: 900px; height: 100vh; background: var(--bg-admin); border-left: 1px solid var(--border-color); z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.1); }
         .drawer.show { right: 0; }
-        .drawer-header { padding: 15px 20px; background: #fff; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; }
-        .drawer-title { font-size: 15px; font-weight: 800; text-transform: uppercase; margin: 0; }
-        .drawer-body { flex: 1; padding: 20px; overflow-y: auto; }
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
-        .overlay.show { display: block; }
+        .drawer-header { padding: 16px 24px; background: #fff; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; }
+        .drawer-title { font-size: 16px; font-weight: 700; margin: 0; color: var(--text-main); }
+        .drawer-body { flex: 1; padding: 24px; overflow-y: auto; }
 
-        .detail-card { border: 1px solid var(--gray-200); border-radius: 4px; margin-bottom: 15px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-        .detail-card-header { background: #f8f9fa; padding: 10px 15px; font-size: 13px; font-weight: 800; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; gap: 8px; color: #333; }
-        .detail-card-body { padding: 15px; }
+        .detail-card { border: 1px solid var(--border-color); border-radius: var(--radius); margin-bottom: 16px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.02); overflow: hidden; }
+        .detail-card-header { background: #fafafa; padding: 12px 16px; font-size: 13px; font-weight: 600; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; gap: 8px; color: var(--text-main); }
+        .detail-card-body { padding: 16px; }
 
         .timeline-horizontal { display: flex; justify-content: space-between; position: relative; padding: 20px 0 10px 0; }
-        .timeline-horizontal::before { content: ''; position: absolute; top: 35px; left: 10%; right: 10%; height: 2px; background: #2563eb; z-index: 1; transition: 0.3s; }
+        .timeline-horizontal::before { content: ''; position: absolute; top: 35px; left: 10%; right: 10%; height: 2px; background: var(--primary); z-index: 1; transition: 0.3s; }
         .th-step { position: relative; z-index: 2; text-align: center; flex: 1; }
-        .th-icon { width: 32px; height: 32px; background: #2563eb; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 16px; border: 4px solid #dbeafe; transition: 0.3s; }
-        .th-step.pending .th-icon { background: #fff; color: #adb5bd; border-color: #e9ecef; }
-        .th-label { font-size: 11px; font-weight: 800; color: #2563eb; text-transform: uppercase;}
-        .th-step.pending .th-label { color: #888; font-weight: 600; }
-        .th-time { font-size: 10px; color: #666; margin-top: 4px; font-weight: 500;}
+        .th-icon { width: 32px; height: 32px; background: var(--primary); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 16px; border: 4px solid #e6f4ff; transition: 0.3s; }
+        .th-step.pending .th-icon { background: #fff; color: var(--text-muted); border-color: var(--border-light); border-width: 2px; width: 30px; height: 30px; margin-top: 1px; }
+        .th-label { font-size: 12px; font-weight: 600; color: var(--primary); }
+        .th-step.pending .th-label { color: var(--text-muted); font-weight: 500; }
+        .th-time { font-size: 11px; color: var(--text-muted); margin-top: 4px; font-weight: 400;}
 
         /* BẢNG LỊCH SỬ THAO TÁC & THANH TOÁN */
-        .history-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-        .history-table th { background: #f8f9fa; color: #555; padding: 8px 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; border-bottom: 1px solid #ddd; }
-        .history-table td { padding: 10px 12px; border-bottom: 1px dashed #eee; vertical-align: top; }
+        .history-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .history-table th { background: #fafafa; color: var(--text-muted); padding: 10px 12px; font-size: 12px; font-weight: 600; border-bottom: 1px solid var(--border-light); }
+        .history-table td { padding: 12px; border-bottom: 1px dashed var(--border-light); vertical-align: top; color: var(--text-main); }
         .history-table tr:last-child td { border-bottom: none; }
 
-        /* BEE TOAST CUSTOM */
-        #beeToastHost { position: fixed; top: 30px; right: 30px; z-index: 999999; display: flex; flex-direction: column; gap: 15px; pointer-events: none; }
-        .bee-toast-box { min-width: 320px; max-width: 400px; padding: 18px 24px; border-radius: 8px; background: #fff; color: #000; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2); display: flex; align-items: flex-start; gap: 14px; border-left: 6px solid #000; animation: beeToastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; transition: all 0.3s ease; pointer-events: auto; }
-        .bee-toast-box.success { border-left-color: #10b981; }
-        .bee-toast-box.error { border-left-color: #ef4444; }
-        .bee-toast-box.warning { border-left-color: #f59e0b; }
-        .bee-toast-box.hiding { transform: translateX(120%); opacity: 0; margin-top: -80px; }
+        /* ==========================================================================
+           TOAST & MODALS CHUẨN ADMIN (Đồng bộ file POS)
+           ========================================================================== */
+        .overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45); z-index: 10000; backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; }
+        .card { padding: 24px; width: 380px; background: #fff; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
 
-        @keyframes beeToastSlideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .toast-container { position: fixed; top: 30px; right: 30px; z-index: 10002; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+        .custom-toast { display: flex; align-items: center; background: #fff; padding: 12px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); min-width: 250px; max-width: 350px; border-left: 4px solid var(--primary); animation: slideInRight 0.3s forwards; pointer-events: auto; }
+        .custom-toast.toast-success { border-left-color: var(--success); }
+        .custom-toast.toast-success .toast-icon { color: var(--success); }
+        .custom-toast.toast-error { border-left-color: var(--danger); }
+        .custom-toast.toast-error .toast-icon { color: var(--danger); }
+        .custom-toast.toast-warning { border-left-color: var(--warning); }
+        .custom-toast.toast-warning .toast-icon { color: var(--warning); }
+        .custom-toast.toast-info { border-left-color: var(--primary); }
+        .custom-toast.toast-info .toast-icon { color: var(--primary); }
+        .toast-icon { font-size: 18px; margin-right: 12px; }
+        .toast-msg { flex-grow: 1; font-size: 13px; font-weight: 500; color: var(--text-main); line-height: 1.4;}
+        .toast-close { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; margin-left: 10px; }
+        .toast-close:hover { color: var(--danger); }
+
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
 
         /* RESPONSIVE */
         @media (max-width: 768px) {
@@ -140,6 +212,8 @@
             .th-step { display: flex; align-items: center; text-align: left; gap: 15px; width: 100%; }
             .th-icon { margin: 0; }
             .th-time { margin-top: 0; margin-left: auto; }
+            .toast-container { top: 10px; right: 10px; left: 10px; }
+            .custom-toast { min-width: 100%; max-width: 100%; }
         }
     </style>
 </head>
@@ -148,10 +222,10 @@
     <div class="actions-bar">
         <nav class="tabs">
             <button class="tab active" onclick="OrderApp.switchTab('don-hang')" id="tabDonHang">
-                <i class="bi bi-box-seam-fill"></i> ĐƠN CHỜ XỬ LÝ
+                <i class="bi bi-box-seam"></i> Đơn chờ xử lý
             </button>
             <button class="tab" onclick="OrderApp.switchTab('lich-su')" id="tabLichSu">
-                <i class="bi bi-clock-history"></i> LỊCH SỬ HÓA ĐƠN
+                <i class="bi bi-clock-history"></i> Lịch sử hóa đơn
             </button>
         </nav>
     </div>
@@ -171,8 +245,8 @@
 <div class="overlay" id="overlay" onclick="OrderApp.closeDrawer()"></div>
 <aside class="drawer" id="drawer">
     <div class="drawer-header">
-        <h3 class="drawer-title">CHI TIẾT ĐƠN HÀNG: <span id="viewMaHD" style="color:#2563eb;"></span></h3>
-        <button class="btn-icon" onclick="OrderApp.closeDrawer()" style="border:none;"><i class="bi bi-x-lg"></i></button>
+        <h3 class="drawer-title">CHI TIẾT ĐƠN HÀNG: <span id="viewMaHD" style="color:var(--primary);"></span></h3>
+        <button class="btn-icon" onclick="OrderApp.closeDrawer()" style="border:none; box-shadow:none;"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="drawer-body" id="drawerBody">
 
@@ -187,17 +261,17 @@
             <div class="detail-card-header"><i class="bi bi-info-circle"></i> Thông tin hóa đơn cơ bản</div>
             <div class="detail-card-body" style="display:grid; grid-template-columns:1fr 1fr; gap:20px; font-size:13px; line-height:1.8;">
                 <div>
-                    <div><span style="color:#666;">Ngày tạo:</span> <span id="viewNgayTao" style="font-weight:600;"></span></div>
-                    <div><span style="color:#666;">Trạng thái hiện tại:</span> <strong id="viewTrangThaiText"></strong></div>
-                    <div><span style="color:#666;">Phân loại đơn:</span> <span id="viewLoaiDon" style="font-weight:600;"></span></div>
-                    <div id="divNgayGiaoNhan" style="display: none;"><span style="color:#2563eb; font-weight: 800;" id="lblNgayGiaoNhan">Ngày dự kiến:</span> <span id="viewNgayGiaoNhan" style="font-weight:800; color: #2563eb;"></span></div>
-                    <div id="divNgayHangSanSang" style="display: none;"><span style="color:#10b981; font-weight: 800;">Hàng sẵn sàng lúc:</span> <span id="viewNgayHangSanSang" style="font-weight:800; color: #10b981;"></span></div>
+                    <div><span style="color:var(--text-muted);">Ngày tạo:</span> <span id="viewNgayTao" style="font-weight:600;"></span></div>
+                    <div><span style="color:var(--text-muted);">Trạng thái hiện tại:</span> <strong id="viewTrangThaiText"></strong></div>
+                    <div><span style="color:var(--text-muted);">Phân loại đơn:</span> <span id="viewLoaiDon" style="font-weight:600;"></span></div>
+                    <div id="divNgayGiaoNhan" style="display: none;"><span style="color:var(--primary); font-weight: 600;" id="lblNgayGiaoNhan">Ngày dự kiến:</span> <span id="viewNgayGiaoNhan" style="font-weight:600; color: var(--primary);"></span></div>
+                    <div id="divNgayHangSanSang" style="display: none;"><span style="color:var(--success); font-weight: 600;">Hàng sẵn sàng lúc:</span> <span id="viewNgayHangSanSang" style="font-weight:600; color: var(--success);"></span></div>
                 </div>
                 <div>
-                    <div><span style="color:#666;">Địa chỉ nhận:</span> <span id="viewDiaChi" style="font-weight:600;"></span></div>
-                    <div><span style="color:#666;">Khách hàng:</span> <span id="viewKhachHang" style="font-weight:600; color:#2563eb;"></span></div>
-                    <div><span style="color:#666;">SĐT Khách hàng:</span> <span id="viewSDTKhach" style="font-weight:600;"></span></div>
-                    <div><span style="color:#666;">Mã Voucher áp dụng:</span> <span id="viewMaVoucher" style="font-weight:600; background:#fefce8; border:1px dashed #fde047; padding:2px 6px; border-radius:4px; color:#a16207;"></span></div>
+                    <div><span style="color:var(--text-muted);">Địa chỉ nhận:</span> <span id="viewDiaChi" style="font-weight:500;"></span></div>
+                    <div><span style="color:var(--text-muted);">Khách hàng:</span> <span id="viewKhachHang" style="font-weight:600; color:var(--primary);"></span></div>
+                    <div><span style="color:var(--text-muted);">SĐT Khách hàng:</span> <span id="viewSDTKhach" style="font-weight:600;"></span></div>
+                    <div><span style="color:var(--text-muted);">Mã Voucher áp dụng:</span> <span id="viewMaVoucher" style="font-weight:600; background:#fefce8; border:1px dashed #fde047; padding:2px 6px; border-radius:4px; color:#a16207;"></span></div>
                 </div>
             </div>
         </div>
@@ -205,14 +279,14 @@
         <div class="detail-card">
             <div class="detail-card-header"><i class="bi bi-box-seam"></i> Danh sách sản phẩm</div>
             <div class="detail-card-body">
-                <div id="viewProductList" style="border:1px solid #eee; border-radius:4px; margin-bottom:15px; overflow-x:auto;"></div>
-                <div id="viewSummaryBox" style="font-size:12px; line-height:2.2; max-width:320px; float:right;"></div>
+                <div id="viewProductList" style="border:1px solid var(--border-light); border-radius:4px; margin-bottom:16px; overflow-x:auto;"></div>
+                <div id="viewSummaryBox" style="font-size:13px; line-height:2.2; max-width:320px; float:right;"></div>
                 <div style="clear:both;"></div>
             </div>
         </div>
 
         <div class="detail-card" id="cardThanhToan">
-            <div class="detail-card-header"><i class="bi bi-credit-card-fill"></i> Lịch sử giao dịch / Thanh toán</div>
+            <div class="detail-card-header"><i class="bi bi-credit-card"></i> Lịch sử giao dịch / Thanh toán</div>
             <div class="detail-card-body" style="padding:0; overflow-x: auto;">
                 <table class="history-table">
                     <thead>
@@ -247,9 +321,9 @@
             </div>
         </div>
 
-        <div class="detail-card" id="cardExtraInfo" style="border-color: #f59e0b;">
+        <div class="detail-card" id="cardExtraInfo" style="border-color: #fcd34d;">
             <div class="detail-card-header" style="background: #fffbeb; color: #b45309; border-bottom-color: #fde68a;">
-                <i class="bi bi-exclamation-square-fill"></i> Ghi chú của khách hàng
+                <i class="bi bi-exclamation-square"></i> Ghi chú của khách hàng
             </div>
             <div class="detail-card-body" style="font-size:13px; line-height:1.8;">
                 <span id="viewGhiChu" style="font-weight:500; font-style:italic;">Không có ghi chú</span>
@@ -258,87 +332,108 @@
 
         <div class="detail-card" id="cardActions">
             <div class="detail-card-header"><i class="bi bi-pencil-square"></i> Bảng điều khiển trạng thái</div>
-            <div class="detail-card-body" id="drawerFooter" style="display:flex; gap:10px;"></div>
+            <div class="detail-card-body" id="drawerFooter" style="display:flex; gap:12px;"></div>
         </div>
 
     </div>
 </aside>
 
+<div class="toast-container" id="toastHost"></div>
+
+<div id="genericConfirmOverlay" class="overlay">
+    <div class="card">
+        <h4 id="genericConfirmTitle" style="margin-bottom:16px; font-size:15px; font-weight: 600; display: flex; align-items: center; gap: 8px;"></h4>
+        <div id="genericConfirmMsg" style="margin-bottom:24px; color:var(--text-muted); font-size: 13px;"></div>
+        <div style="display:flex; justify-content:flex-end; gap:12px;">
+            <button id="btnGenericCancel" class="btn btn-secondary">Hủy</button>
+            <button id="btnGenericOk" class="btn btn-primary">Đồng ý</button>
+        </div>
+    </div>
+</div>
+
+<div id="genericPromptOverlay" class="overlay">
+    <div class="card" style="width: 400px;">
+        <h4 id="genericPromptTitle" style="margin-bottom:12px; font-size:15px; font-weight: 600; display: flex; align-items: center; gap: 8px;"></h4>
+        <div id="genericPromptMsg" style="margin-bottom:12px; color:var(--text-muted); font-size: 13px;"></div>
+        <input type="text" id="genericPromptInput" style="width: 100%; height: 38px; border: 1px solid var(--border-color); border-radius: var(--radius); padding: 0 12px; margin-bottom: 24px; font-family: inherit; font-size: 13px; outline: none; transition: 0.3s;">
+        <div style="display:flex; justify-content:flex-end; gap:12px;">
+            <button id="btnGenericPromptCancel" class="btn btn-secondary">Hủy</button>
+            <button id="btnGenericPromptOk" class="btn btn-danger">Xác nhận</button>
+        </div>
+    </div>
+</div>
+
 <script>
     // ========================================================================
-    // TOAST & DIALOG SYSTEM
+    // TOAST & DIALOG SYSTEM (ĐỒNG BỘ LAYOUT CHUNG)
     // ========================================================================
-    window.toast = function (message, type = 'success') {
-        let container = document.getElementById('beeToastHost');
-        if (!container) {
-            container = document.createElement('div'); container.id = 'beeToastHost'; document.body.appendChild(container);
+    window.toast = function(message, type = 'success') {
+        let toastHost = document.getElementById('toastHost');
+        if (!toastHost || toastHost.parentElement !== document.body) {
+            if (toastHost) toastHost.remove();
+            toastHost = document.createElement('div');
+            toastHost.id = 'toastHost';
+            toastHost.className = 'toast-container';
+            document.body.appendChild(toastHost);
         }
-        const el = document.createElement('div');
-        el.className = `bee-toast-box ${type}`;
-        const prefix = type === 'success' ? 'THÀNH CÔNG' : (type === 'error' ? 'LỖI' : 'THÔNG BÁO');
-        const color = type === 'success' ? '#10b981' : (type === 'error' ? '#ef4444' : '#f59e0b');
-        const icon = type === 'success' ? 'bi-check-circle-fill' : (type === 'error' ? 'bi-x-circle-fill' : 'bi-exclamation-triangle-fill');
-        el.innerHTML = `
-            <i class="bi ${icon}" style="color:${color}; font-size:22px; margin-top:2px;"></i>
-            <div style="display: flex; flex-direction: column; flex: 1;">
-                <span style="font-weight:800; font-size:12px; text-transform: uppercase; margin-bottom: 4px; color:${color}">${prefix}</span>
-                <span style="font-weight:500; font-size:13px; color:#333; line-height: 1.4;">${message}</span>
-            </div>
-            <i class="bi bi-x-lg" style="cursor: pointer; margin-left: 10px; font-size: 18px; color:#999; transition: 0.2s;" onmouseover="this.style.color='#000'" onmouseout="this.style.color='#999'" onclick="this.parentElement.remove()"></i>
+        toastHost.innerHTML = '';
+        const toast = document.createElement('div');
+        toast.className = `custom-toast toast-${type}`;
+        let iconClass = 'bi-check-circle-fill';
+        if (type === 'error') iconClass = 'bi-x-circle-fill';
+        else if (type === 'warning') iconClass = 'bi-exclamation-triangle-fill';
+        else if (type === 'info') iconClass = 'bi-info-circle-fill';
+        toast.innerHTML = `
+            <i class="bi ${iconClass} toast-icon"></i>
+            <span class="toast-msg">${message}</span>
+            <button class="toast-close" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>
         `;
-        container.appendChild(el);
-        setTimeout(() => { if (el.parentNode) { el.classList.add('hiding'); setTimeout(() => el.remove(), 300); } }, 3500);
+        toastHost.appendChild(toast);
+        setTimeout(() => { toast.style.animation = 'slideOutRight 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3500);
     };
 
-    window.toastConfirm = function (title, message, onConfirm) {
-        let container = document.getElementById('beeToastHost');
-        if (!container) { container = document.createElement('div'); container.id = 'beeToastHost'; document.body.appendChild(container); }
-        const el = document.createElement('div');
-        el.className = `bee-toast-box warning`;
-        el.style.flexDirection = 'column'; el.style.alignItems = 'stretch';
-        el.innerHTML = `
-            <div style="display: flex; gap: 12px; align-items: flex-start; width: 100%;">
-                <i class="bi bi-question-circle-fill" style="color:#f59e0b; font-size:24px; margin-top:2px;"></i>
-                <div style="display:flex; flex-direction:column; flex:1;">
-                    <span style="font-weight:800; font-size:13px; text-transform:uppercase; margin-bottom:6px; color:#000;">${title}</span>
-                    <span style="font-weight:500; font-size:13px; color:#555; line-height: 1.5;">${message}</span>
-                </div>
-            </div>
-            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px; border-top: 1px dashed #eee; padding-top: 12px;">
-                <button class="btn btn-secondary" id="toastCancel" style="height: 32px; font-size: 11px; padding: 0 16px; border-radius: 4px;">HỦY BỎ</button>
-                <button class="btn" id="toastOk" style="height: 32px; font-size: 11px; padding: 0 16px; border-radius: 4px;">XÁC NHẬN</button>
-            </div>
-        `;
-        container.appendChild(el);
-        el.querySelector('#toastOk').onclick = () => { el.classList.add('hiding'); setTimeout(() => el.remove(), 300); if(onConfirm) onConfirm(); };
-        el.querySelector('#toastCancel').onclick = () => { el.classList.add('hiding'); setTimeout(() => el.remove(), 300); };
+    window.confirmDialog = function(title, message, onConfirmCallback) {
+        let overlay = document.getElementById('genericConfirmOverlay');
+        if (!overlay || overlay.parentElement !== document.body) { document.body.appendChild(overlay); }
+        document.getElementById('genericConfirmTitle').innerHTML = `<i class="bi bi-question-circle" style="color: var(--primary); font-size: 18px;"></i> ${title}`;
+        document.getElementById('genericConfirmMsg').innerHTML = message;
+        overlay.style.display = 'flex';
+
+        const btnOk = document.getElementById('btnGenericOk');
+        const btnCancel = document.getElementById('btnGenericCancel');
+
+        btnOk.onclick = null; btnCancel.onclick = null;
+        btnOk.onclick = function() { overlay.style.display = 'none'; if (typeof onConfirmCallback === 'function') onConfirmCallback(); };
+        btnCancel.onclick = function() { overlay.style.display = 'none'; };
     };
 
-    window.toastPrompt = function (title, placeholder, onConfirm) {
-        let container = document.getElementById('beeToastHost');
-        if (!container) { container = document.createElement('div'); container.id = 'beeToastHost'; document.body.appendChild(container); }
-        const el = document.createElement('div');
-        el.className = `bee-toast-box warning`;
-        el.style.flexDirection = 'column'; el.style.alignItems = 'stretch';
-        el.innerHTML = `
-            <div style="display: flex; gap: 12px; align-items: flex-start; width: 100%;">
-                <i class="bi bi-pencil-square" style="color:#dc2626; font-size:24px; margin-top:2px;"></i>
-                <div style="display:flex; flex-direction:column; flex:1; width: 100%;">
-                    <span style="font-weight:800; font-size:13px; text-transform:uppercase; margin-bottom:10px; color:#000;">${title}</span>
-                    <input type="text" class="toast-dialog-input" id="dgInput" placeholder="${placeholder}" style="width: 100%; height: 40px; border: 1px solid #ccc; border-radius: 4px; padding: 0 12px; outline: none; font-size: 13px; font-family: inherit;">
-                </div>
-            </div>
-            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px; border-top: 1px dashed #eee; padding-top: 12px;">
-                <button class="btn btn-secondary" id="toastCancel" style="height: 34px; font-size: 11px; padding: 0 16px; border-radius: 4px;">ĐÓNG</button>
-                <button class="btn" id="toastOk" style="height: 34px; font-size: 11px; padding: 0 16px; border-radius: 4px; background:#dc2626; color:#fff; border:none;">XÁC NHẬN</button>
-            </div>
-        `;
-        container.appendChild(el);
-        const input = el.querySelector('#dgInput');
+    window.promptDialog = function(title, message, placeholder, onConfirmCallback) {
+        let overlay = document.getElementById('genericPromptOverlay');
+        if (!overlay || overlay.parentElement !== document.body) { document.body.appendChild(overlay); }
+        document.getElementById('genericPromptTitle').innerHTML = `<i class="bi bi-pencil-square" style="color: var(--danger); font-size: 18px;"></i> ${title}`;
+        document.getElementById('genericPromptMsg').innerHTML = message;
+
+        const input = document.getElementById('genericPromptInput');
+        input.placeholder = placeholder;
+        input.value = '';
+
+        overlay.style.display = 'flex';
         setTimeout(() => input.focus(), 100);
-        el.querySelector('#toastOk').onclick = () => { const val = input.value.trim(); el.classList.add('hiding'); setTimeout(() => el.remove(), 300); onConfirm(val); };
-        el.querySelector('#toastCancel').onclick = () => { el.classList.add('hiding'); setTimeout(() => el.remove(), 300); };
-        input.addEventListener('keypress', (e) => { if (e.key === 'Enter') el.querySelector('#toastOk').click(); });
+
+        const btnOk = document.getElementById('btnGenericPromptOk');
+        const btnCancel = document.getElementById('btnGenericPromptCancel');
+
+        btnOk.onclick = null; btnCancel.onclick = null;
+
+        const confirmAction = () => {
+            const val = input.value.trim();
+            overlay.style.display = 'none';
+            if (typeof onConfirmCallback === 'function') onConfirmCallback(val);
+        };
+
+        btnOk.onclick = confirmAction;
+        btnCancel.onclick = function() { overlay.style.display = 'none'; };
+        input.onkeydown = function(e) { if(e.key === 'Enter') confirmAction(); };
     };
 
     // ========================================================================
@@ -351,32 +446,22 @@
         const pad = n => n < 10 ? '0' + n : n;
         return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
     };
-    const formatVNDateOnly = (dateStr) => {
-        if (!dateStr) return '';
-        const d = new Date(dateStr);
-        if (isNaN(d.getTime())) return dateStr;
-        const pad = n => n < 10 ? '0' + n : n;
-        return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
-    };
 
     const getStatusBadge = (tt) => {
-        if (!tt) return '<span class="badge-status" style="background:#9ca3af;">N/A</span>';
+        if (!tt) return '<span class="badge-status" style="background:var(--text-muted);">N/A</span>';
         const id = tt.id;
         const ten = tt.ten;
         const ma = tt.ma;
 
-        if (ma === 'HOAN_THANH' || id === 6 || ten === 'Hoàn thành') return `<span class="badge-status" style="background:#10b981;">Hoàn thành</span>`;
-        if (ma === 'DA_HUY' || id === 7 || ten === 'Đã hủy') return `<span class="badge-status" style="background:#ef4444;">Đã hủy</span>`;
-        if (ma === 'GIAO_THAT_BAI' || ten === 'Giao thất bại') return `<span class="badge-status" style="background:#ef4444;">Giao thất bại</span>`;
+        if (ma === 'HOAN_THANH' || id === 6 || ten === 'Hoàn thành') return `<span class="badge-status" style="background:var(--success);">Hoàn thành</span>`;
+        if (ma === 'DA_HUY' || id === 7 || ten === 'Đã hủy') return `<span class="badge-status" style="background:var(--danger);">Đã hủy</span>`;
+        if (ma === 'GIAO_THAT_BAI' || ten === 'Giao thất bại') return `<span class="badge-status" style="background:var(--danger);">Giao thất bại</span>`;
         if (ma === 'DA_HOAN_HANG' || ten === 'Đã nhận hoàn hàng') return `<span class="badge-status" style="background:#f43f5e;">Đã hoàn hàng</span>`;
-        if (ma === 'TU_CHOI_TRA_HANG') return `<span class="badge-status" style="background:#dc2626;">Từ chối trả hàng</span>`;
+        if (ma === 'TU_CHOI_TRA_HANG') return `<span class="badge-status" style="background:var(--danger);">Từ chối trả hàng</span>`;
 
-        if (ma === 'CHO_THANH_TOAN' || id === 1 || ten === 'Chờ thanh toán') return `<span class="badge-status" style="background:#f59e0b;">Chờ thanh toán</span>`;
-        if (ma === 'DANG_GIAO_HANG' || ten.includes('Đang giao')) return `<span class="badge-status" style="background:#3b82f6;">Đang giao hàng</span>`;
+        if (ma === 'CHO_THANH_TOAN' || id === 1 || ten === 'Chờ thanh toán') return `<span class="badge-status" style="background:var(--warning);">Chờ thanh toán</span>`;
+        if (ma === 'DANG_GIAO_HANG' || ten.includes('Đang giao')) return `<span class="badge-status" style="background:var(--primary);">Đang giao hàng</span>`;
         if (ma === 'CHO_GIAO_VAN_CHUYEN' || ten === 'Chờ giao cho đơn vị vận chuyển') return `<span class="badge-status" style="background:#0ea5e9;">Chờ giao cho DV VC</span>`;
-
-        if (ma === 'DA_DOI' || id === 12 || ten === 'Đã đổi') return `<span class="badge-status" style="background:#8b5cf6;">Đã đổi</span>`;
-        if (ma === 'DA_TRA' || id === 13 || ten === 'Đã trả') return `<span class="badge-status" style="background:#ec4899;">Đã trả</span>`;
 
         if (ma === 'DANG_HOAN_HANG') return `<span class="badge-status" style="background:#8b5cf6;">Đang hoàn hàng về kho</span>`;
         if (ma === 'YEU_CAU_TRA_HANG') return `<span class="badge-status" style="background:#f97316;">Yêu cầu trả hàng</span>`;
@@ -396,37 +481,36 @@
         _nvSelectedId: null,
         _statusList: [],
 
-        // 🌟 BỔ SUNG HÀM FORMAT TIỀN BỊ THIẾU
         formatCurrency: function(num) {
             return new Intl.NumberFormat('vi-VN').format(num || 0) + ' ₫';
         },
 
         formatPayment: function(method, isStorePickup = false) {
-            if (!method) return '<span style="color:#555;"><i class="bi bi-credit-card"></i> Khác</span>';
+            if (!method) return '<span style="color:var(--text-muted);"><i class="bi bi-credit-card"></i> Khác</span>';
             const cleanStr = method.trim();
             const upperStr = cleanStr.toUpperCase();
 
             let text = cleanStr;
             let icon = 'bi-credit-card';
-            let color = '#555';
+            let color = 'var(--text-muted)';
 
-            if (upperStr === 'TIEN_MAT') { icon = 'bi-cash'; color = '#10b981'; text = 'Tiền mặt'; }
+            if (upperStr === 'TIEN_MAT') { icon = 'bi-cash'; color = 'var(--success)'; text = 'Tiền mặt'; }
             else if (upperStr === 'MOMO') { icon = 'bi-wallet2'; color = '#a50064'; text = 'Ví MoMo'; }
             else if (upperStr === 'VNPAY') { icon = 'bi-wallet2'; color = '#005ba9'; text = 'VNPay'; }
             else if (upperStr === 'CHUYEN_KHOAN') { icon = 'bi-bank'; color = '#5e5e5e'; text = 'Chuyển khoản'; }
             else if (upperStr === 'COD') {
                 if (isStorePickup) {
-                    icon = 'bi-shop'; // Đổi icon thành cửa hàng
-                    color = '#d97706'; // Đổi màu cam
+                    icon = 'bi-shop';
+                    color = 'var(--warning)';
                     text = 'Thanh toán tại cửa hàng';
                 } else {
                     icon = 'bi-truck';
-                    color = '#3b82f6';
+                    color = 'var(--primary)';
                     text = 'COD (Giao hàng)';
                 }
             }
 
-            return `<span style="color: ${color}; font-weight: 600; display: flex; align-items: center; gap: 4px;"><i class="bi ${icon}"></i> ${text}</span>`;
+            return `<span style="color: ${color}; font-weight: 600; display: flex; align-items: center; gap: 6px;"><i class="bi ${icon}"></i> ${text}</span>`;
         },
 
         renderFilterSection: function() {
@@ -447,8 +531,8 @@
 
             const resetBtnHtml = `
                 <div class="btn-group-filter">
-                    <button class="btn btn-secondary" onclick="OrderApp.resetFilters()" style="height: 40px !important;">
-                        <i class="bi bi-arrow-counterclockwise"></i> LÀM MỚI
+                    <button class="btn btn-secondary" onclick="OrderApp.resetFilters()" style="height: 36px !important;">
+                        <i class="bi bi-arrow-counterclockwise"></i> Làm mới
                     </button>
                 </div>`;
 
@@ -458,7 +542,7 @@
                         <div class="filter-group">
                             <label class="filter-label">Tìm kiếm</label>
                             <div style="position:relative;">
-                                <i class="bi bi-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#999; font-size:14px;"></i>
+                                <i class="bi bi-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:14px;"></i>
                                 <input type="text" id="search" placeholder="Mã đơn, tên KH, SĐT..."
                                     style="padding-left:36px;" oninput="OrderApp.handleSearch(this.value)">
                             </div>
@@ -486,7 +570,7 @@
                         <div class="filter-group">
                             <label class="filter-label">Tìm kiếm</label>
                             <div style="position:relative;">
-                                <i class="bi bi-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#999; font-size:14px;"></i>
+                                <i class="bi bi-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:14px;"></i>
                                 <input type="text" id="search" placeholder="Mã đơn, tên KH, SĐT..."
                                     style="padding-left:36px;" oninput="OrderApp.handleSearch(this.value)">
                             </div>
@@ -546,9 +630,9 @@
 
             const filteredStatuses = this._statusList.filter(s => {
                 if (isHistory) {
-                    return s.ma === 'HOAN_THANH' || s.ma === 'DA_HUY' || s.ma === 'DA_DOI' || s.ma === 'DA_TRA' || s.ma === 'GIAO_THAT_BAI' || s.ma === 'DA_HOAN_HANG' || s.ma === 'TU_CHOI_TRA_HANG';
+                    return s.ma === 'HOAN_THANH' || s.ma === 'DA_HUY' || s.ma === 'GIAO_THAT_BAI' || s.ma === 'DA_HOAN_HANG' || s.ma === 'TU_CHOI_TRA_HANG';
                 } else {
-                    return !(s.ma === 'HOAN_THANH' || s.ma === 'DA_HUY' || s.ma === 'DA_DOI' || s.ma === 'DA_TRA' || s.ma === 'GIAO_THAT_BAI' || s.ma === 'DA_HOAN_HANG' || s.ma === 'TU_CHOI_TRA_HANG');
+                    return !(s.ma === 'HOAN_THANH' || s.ma === 'DA_HUY' || s.ma === 'GIAO_THAT_BAI' || s.ma === 'DA_HOAN_HANG' || s.ma === 'TU_CHOI_TRA_HANG');
                 }
             });
 
@@ -606,7 +690,6 @@
 
         loadFilterOptions: async function() {
             try {
-                // 🌟 FIX MÃ TRẠNG THÁI KHỚP DB
                 this._statusList = [
                     { id: 1, ma: 'CHO_XAC_NHAN', ten: 'Chờ xác nhận' },
                     { id: 2, ma: 'CHO_THANH_TOAN', ten: 'Chờ thanh toán' },
@@ -616,8 +699,6 @@
                     { id: 6, ma: 'CHO_KHACH_LAY', ten: 'Chờ khách đến lấy' },
                     { id: 7, ma: 'HOAN_THANH', ten: 'Hoàn thành' },
                     { id: 8, ma: 'DA_HUY', ten: 'Đã hủy' },
-                    { id: 9, ma: 'DA_TRA', ten: 'Đã trả' },
-                    { id: 10, ma: 'DA_DOI', ten: 'Đã đổi' },
                     { id: 11, ma: 'GIAO_THAT_BAI', ten: 'Giao thất bại' },
                     { id: 12, ma: 'DANG_HOAN_HANG', ten: 'Đang hoàn hàng về kho' },
                     { id: 13, ma: 'DA_HOAN_HANG', ten: 'Đã nhận lại hàng hoàn' },
@@ -692,9 +773,9 @@
                 ? filtered.map(n =>
                     `<div class="nv-item ${this._nvSelectedId == n.id ? 'selected' : ''}"
                         onmousedown="OrderApp.selectNhanVien(${n.id}, '${n.hoTen.replace(/'/g,"\\'")}')">
-                        <i class="bi bi-person" style="margin-right:6px; color:#666;"></i>${n.hoTen}
+                        <i class="bi bi-person" style="margin-right:8px; color:var(--text-muted);"></i>${n.hoTen}
                     </div>`).join('')
-                : `<div class="nv-item" style="color:#aaa; cursor:default;">Không tìm thấy</div>`;
+                : `<div class="nv-item" style="color:var(--text-muted); cursor:default;">Không tìm thấy</div>`;
             dd.classList.add('open');
         },
 
@@ -796,7 +877,6 @@
                     size:                this.state.size
                 };
 
-                // Thêm tham số sắp xếp theo Tab
                 if (this.state.activeTab === 'lich-su') {
                     paramsObj.sort = 'ngayCapNhat,desc';
                 } else {
@@ -894,7 +974,7 @@
             const highlightId = sessionStorage.getItem('highlightOrderId');
 
             if (!list || list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="${cols}" style="text-align:center; padding:50px; color:#888; font-style:italic;">Không tìm thấy dữ liệu phù hợp</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="${cols}" style="text-align:center; padding:60px 20px; color:var(--text-muted);"><i class="bi bi-inbox" style="font-size:32px; display:block; margin-bottom:12px; opacity:0.5;"></i>Không tìm thấy dữ liệu phù hợp</td></tr>`;
                 return;
             }
 
@@ -907,23 +987,17 @@
                 const tenKhach = tenThongTinGH || hd.tenNguoiNhan || (hd.khachHang ? hd.khachHang.hoTen : 'Khách vãng lai');
                 const sdtKhach = sdtThongTinGH || hd.sdtNhan || (hd.khachHang ? hd.khachHang.soDienThoai : '');
 
-                const tenNhanVien = hd.nhanVien  ? hd.nhanVien.hoTen  : '<span style="color:#aaa; font-style:italic;">Hệ thống</span>';
+                const tenNhanVien = hd.nhanVien  ? hd.nhanVien.hoTen  : '<span style="color:var(--text-muted); font-style:italic;">Hệ thống</span>';
 
                 const rawMethod = hd.phuongThucThanhToan || (hd.loaiHoaDon === 0 ? 'TIEN_MAT' : 'COD');
 
-                // Sử dụng toLocaleString thay cho formatCurrency nếu không chắc chắn (để dự phòng)
                 let tongTienHD = hd.giaTong || 0;
-                let tongTienDisplay = `<div style="font-weight:700; color:#dc2626;">${tongTienHD.toLocaleString('vi-VN')} ₫</div>`;
+                let tongTienDisplay = `<div style="font-weight:600; color:var(--danger);">${tongTienHD.toLocaleString('vi-VN')} ₫</div>`;
 
                 let tienHoan = hd.tienHoan || 0;
-                if (!tienHoan && hd.yeuCauDoiTras) {
-                    hd.yeuCauDoiTras.forEach(yc => {
-                        if (yc.trangThai === 'HOAN_THANH' && yc.soTienHoan) tienHoan += yc.soTienHoan;
-                    });
-                }
 
                 if (tienHoan > 0) {
-                    tongTienDisplay += `<div style="font-size:11px; color:#10b981; font-weight:600; margin-top:2px;" title="Đã hoàn lại tiền cho khách">(- Hoàn: ${tienHoan.toLocaleString('vi-VN')} ₫)</div>`;
+                    tongTienDisplay += `<div style="font-size:11px; color:var(--success); font-weight:600; margin-top:4px;" title="Đã hoàn lại tiền cho khách">(- Hoàn: ${tienHoan.toLocaleString('vi-VN')} ₫)</div>`;
                 }
 
                 const ngayTaoVN   = formatVNTime(hd.ngayTao);
@@ -934,10 +1008,7 @@
 
                 const trangThaiBadge = getStatusBadge(hd.trangThaiHoaDon);
 
-                let maDonHtml = `<div style="font-weight:800; color:#555;">${hd.ma}</div>`;
-                if (hd.coDoiTra) {
-                    maDonHtml += `<div style="margin-top: 4px; display: inline-block; font-size: 9px; font-weight: 800; background: #f59e0b; color: #fff; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;" title="Đơn hàng này đã có sản phẩm bị đổi hoặc trả">CÓ ĐỔI / TRẢ</div>`;
-                }
+                let maDonHtml = `<div style="font-weight:700; color:var(--primary);">${hd.ma}</div>`;
 
                 let trContent = `
                     <td style="text-align:center;">${startSTT + idx}</td>
@@ -945,17 +1016,15 @@
                     <td style="font-weight:600;">${tenKhach}</td>
                     <td>${sdtKhach}</td>`;
 
-                if (isHistory) trContent += `<td style="font-weight:600; color:#555;">${tenNhanVien}</td>`;
+                if (isHistory) trContent += `<td style="font-weight:500;">${tenNhanVien}</td>`;
 
                 trContent += `<td>${tongTienDisplay}</td>`;
 
-                // 🌟 Lấy thuộc tính giao hàng để sửa logic Thanh Toán
                 const giaTamThoi = hd.giaTamThoi || 0;
                 let isStorePickup = (hd.hinhThucGiaoHang === 'NHAN_TAI_CUA_HANG') ||
                     (hd.loaiHoaDon === 1 && hd.phiVanChuyen === 0 && giaTamThoi < 5000000) ||
                     (hd.diaChiGiaoHang && hd.diaChiGiaoHang.toLowerCase().includes('nhận tại cửa hàng'));
 
-                // 🌟 GỌI HÀM getPaymentMethodDisplay VỚI THAM SỐ isStorePickup
                 const hinhThucTT = this.formatPayment(rawMethod, isStorePickup || hd.loaiHoaDon === 0);
 
                 if (isHistory) trContent += `<td>${hinhThucTT}</td>`;
@@ -973,12 +1042,12 @@
 
                 let btnHuyHtml = '';
                 if (hd.trangThaiHoaDon && (hd.trangThaiHoaDon.ma === 'CHO_XAC_NHAN' || hd.trangThaiHoaDon.ma === 'CHO_THANH_TOAN')) {
-                    btnHuyHtml = `<button class="btn-icon btn-danger" title="Hủy đơn" onclick="OrderApp.huyDon(${hd.id})"><i class="bi bi-x-circle"></i></button>`;
+                    btnHuyHtml = `<button class="btn-icon btn-danger" title="Hủy đơn" onclick="OrderApp.huyDon(${hd.id})"><i class="bi bi-x-lg"></i></button>`;
                 }
 
                 trContent += `
                     <td>${loaiDonHtml}</td>
-                    <td style="font-size:12px; color:#888;">${timeToDisplay}</td>
+                    <td style="font-size:12px; color:var(--text-muted);">${timeToDisplay}</td>
                     <td style="text-align:center;">${trangThaiBadge}</td>
                     <td style="text-align:right; white-space: nowrap;">
                         <button class="btn-icon" title="Xem chi tiết" onclick="OrderApp.openDetail(${hd.id})"><i class="bi bi-eye"></i></button>
@@ -1005,16 +1074,13 @@
         openDetail: async function(id) {
             if (window.showLoading) window.showLoading();
             try {
-                console.log("Đang gọi API chi tiết cho ID:", id);
                 const res = await fetch(`/api/hoa-don/${id}`);
                 if (!res.ok) {
                     const errTxt = await res.text();
                     throw new Error("Lỗi API: " + res.status + " " + errTxt);
                 }
                 const hd = await res.json();
-                console.log("Dữ liệu nhận được từ Java:", hd);
 
-                // HÀM GÁN TEXT AN TOÀN CHỐNG CRASH
                 const setTxt = (elementId, value) => {
                     const el = document.getElementById(elementId);
                     if(el) el.innerText = value;
@@ -1035,7 +1101,6 @@
                 setTxt('viewTrangThaiText', (hd.trangThaiTen || '').toUpperCase());
                 setTxt('viewMaVoucher', hd.maVoucher || 'Không áp dụng');
 
-                // 🌟 FIX ĐỊA CHỈ & HÌNH THỨC GIAO HÀNG
                 const giaTamThoi = hd.giaTamThoi || 0;
                 let isStorePickup = (hd.hinhThucGiaoHang === 'NHAN_TAI_CUA_HANG') ||
                     (hd.loaiHoaDon === 1 && hd.phiVanChuyen === 0 && giaTamThoi < 5000000) ||
@@ -1046,13 +1111,13 @@
 
                 if (hd.loaiHoaDon === 0) {
                     setHtml('viewLoaiDon', `<span class="badge-type type-pos"><i class="bi bi-shop"></i> BÁN TẠI QUẦY</span>`);
-                    setHtml('viewDiaChi', `<span style="color:var(--muted); font-style:italic;">Mua trực tiếp tại cửa hàng</span>`);
+                    setHtml('viewDiaChi', `<span style="color:var(--text-muted); font-style:italic;">Mua trực tiếp tại cửa hàng</span>`);
                     setDisp('divNgayGiaoNhan', 'none');
                     setDisp('divNgayHangSanSang', 'none');
                 } else {
                     if (isStorePickup) {
                         setHtml('viewLoaiDon', `<span class="badge-type type-online-store"><i class="bi bi-bag-check"></i> ONLINE (LẤY TẠI QUẦY)</span>`);
-                        setHtml('viewDiaChi', `<span style="color:var(--muted); font-style:italic;">Khách ghé cửa hàng nhận hàng</span>`);
+                        setHtml('viewDiaChi', `<span style="color:var(--text-muted); font-style:italic;">Khách ghé cửa hàng nhận hàng</span>`);
 
                         setTxt('lblNgayGiaoNhan', "Ngày khách hẹn lấy:");
                         setTxt('viewNgayGiaoNhan', hd.ngayHenLayHang ? formatVNTime(hd.ngayHenLayHang) : 'Chưa xác định');
@@ -1085,47 +1150,32 @@
                 setTxt('viewGhiChu', (hd.ghiChu && String(hd.ghiChu).trim() !== '') ? hd.ghiChu : "Không có ghi chú");
                 setTxt('viewNgayThanhToan', hd.ngayThanhToan ? hd.ngayThanhToan : "Chưa thanh toán");
 
-                // 🌟 SỬ DỤNG formatPayment CÓ TRUYỀN isStorePickup
                 const rawMethod = hd.phuongThucThanhToan || (hd.loaiHoaDon === 0 ? 'TIEN_MAT' : 'COD');
                 setHtml('viewPTTT', this.formatPayment(rawMethod, isStorePickup || hd.loaiHoaDon === 0));
 
-                // BẢNG SẢN PHẨM
                 const listSP = hd.chiTiets || [];
                 let productHtml = listSP.length > 0 ? listSP.map(item => {
                     const giaGoc = Number(item.donGia) || 0;
                     const giaBan = Number(item.giaBan) || 0;
-                    const soLuongTra = item.soLuongTra || 0;
                     const soLuong = item.soLuong || 1;
 
-                    let priceDisplay = `<span style="color:#dc2626; font-weight:700;">${giaBan.toLocaleString('vi-VN')} ₫</span>`;
-                    if (giaGoc > giaBan) priceDisplay += ` <span style="text-decoration:line-through; color:#999; font-size:11px; margin-left:8px;">-${giaGoc.toLocaleString('vi-VN')} ₫</span>`;
-
-                    let traBadge = ''; let opacity = '1';
-                    if (soLuongTra > 0) {
-                        if (soLuongTra >= soLuong) {
-                            opacity = '0.5';
-                            traBadge = `<div style="margin-top:6px; display:inline-block; font-size:10px; font-weight:700; background:transparent; color:#f87171; padding:3px 8px; border-radius:3px; border:1px solid #fca5a5;">ĐÃ TRẢ LẠI KHO</div>`;
-                        } else {
-                            traBadge = `<div style="margin-top:6px; display:inline-block; font-size:10px; font-weight:700; background:transparent; color:#f59e0b; padding:3px 8px; border-radius:3px; border:1px solid #fcd34d;">ĐÃ TRẢ ${soLuongTra}/${soLuong} SP</div>`;
-                        }
-                    }
+                    let priceDisplay = `<span style="color:var(--danger); font-weight:700;">${giaBan.toLocaleString('vi-VN')} ₫</span>`;
+                    if (giaGoc > giaBan) priceDisplay += ` <span style="text-decoration:line-through; color:var(--text-muted); font-size:11px; margin-left:8px;">-${giaGoc.toLocaleString('vi-VN')} ₫</span>`;
 
                     return `
-                    <div style="display:flex; align-items:flex-start; padding:12px 0; border-bottom:1px dashed #eee; opacity: ${opacity};">
+                    <div style="display:flex; align-items:flex-start; padding:12px 0; border-bottom:1px dashed var(--border-light);">
                         <img src="${item.hinhAnh || 'https://placehold.co/60x60'}" onerror="this.src='https://placehold.co/60x60'"
-                            style="width:60px; height:60px; object-fit:cover; border-radius:4px; margin-right:12px; border:1px solid #f0f0f0;">
+                            style="width:50px; height:50px; object-fit:cover; border-radius:4px; margin-right:12px; border:1px solid var(--border-color);">
                         <div style="flex:1; line-height:1.6;">
-                            <div style="font-weight:700; color:#111; font-size:13px;">${item.tenSanPham || 'Sản phẩm'}</div>
-                            <div style="color:#666; font-size:12px;">${item.sku || 'N/A'} | ${item.thuocTinh || ''} <span style="font-weight:700; color:#000;">x${soLuong}</span></div>
-                            <div style="font-size:12.5px;">Đơn giá: ${priceDisplay}</div>
-                            ${traBadge}
+                            <div style="font-weight:600; color:var(--text-main); font-size:13px;">${item.tenSanPham || 'Sản phẩm'}</div>
+                            <div style="color:var(--text-muted); font-size:12px;">${item.sku || 'N/A'} | ${item.thuocTinh || ''} <span style="font-weight:700; color:var(--primary); margin-left:8px;">x${soLuong}</span></div>
+                            <div style="font-size:12.5px; margin-top: 4px;">Đơn giá: ${priceDisplay}</div>
                         </div>
                     </div>`;
-                }).join('') : `<div style="text-align:center; padding:20px; color:#999; border:1px dashed #ccc; font-style:italic;">Không có dữ liệu sản phẩm</div>`;
+                }).join('') : `<div style="text-align:center; padding:20px; color:var(--text-muted); font-style:italic;">Không có dữ liệu sản phẩm</div>`;
 
                 setHtml('viewProductList', productHtml);
 
-                // TỔNG TIỀN
                 const phiShip = Number(hd.phiVanChuyen) || 0;
                 const tongTien = Number(hd.tongTien) || 0;
                 let giamGia = (giaTamThoi + phiShip) - tongTien;
@@ -1134,33 +1184,33 @@
 
                 let phiShipRowHtml = (hd.loaiHoaDon === 0 || isStorePickup) ? '' : `
                     <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-                        <span>Phí vận chuyển:</span> <strong style="color:#000;">${phiShip > 0 ? this.formatCurrency(phiShip) : 'Miễn phí'}</strong>
+                        <span>Phí vận chuyển:</span> <strong style="color:var(--text-main);">${phiShip > 0 ? this.formatCurrency(phiShip) : 'Miễn phí'}</strong>
                     </div>`;
 
                 let sBoxHtml = `
-                    <div style="width:100%; font-size:13px; color:#333;">
+                    <div style="width:100%; font-size:13px; color:var(--text-main);">
                         <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-                            <span>Tiền hàng:</span> <strong style="color:#000;">${this.formatCurrency(giaTamThoi)}</strong>
+                            <span>Tiền hàng:</span> <strong style="color:var(--text-main);">${this.formatCurrency(giaTamThoi)}</strong>
                         </div>
                         ${phiShipRowHtml}
                         <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-                            <span>Voucher:</span> <strong style="color:#10b981;">-${this.formatCurrency(giamGia)}</strong>
+                            <span>Voucher:</span> <strong style="color:var(--success);">-${this.formatCurrency(giamGia)}</strong>
                         </div>
-                        <div style="display:flex; justify-content:space-between; font-size:13px; margin-top:15px; border-top:2px solid #000; padding-top:15px;">
-                            <span style="font-weight:800; text-transform:uppercase;">TỔNG THANH TOÁN:</span>
-                            <strong style="color:#2563eb; font-size:15px;">${this.formatCurrency(tongTien)}</strong>
+                        <div style="display:flex; justify-content:space-between; font-size:13px; margin-top:16px; border-top:1px solid var(--border-color); padding-top:16px;">
+                            <span style="font-weight:700; text-transform:uppercase;">TỔNG THANH TOÁN:</span>
+                            <strong style="color:var(--primary); font-size:16px;">${this.formatCurrency(tongTien)}</strong>
                         </div>`;
 
                 if (tienHoan > 0) {
                     const tienThucNhan = giaTamThoi - tienHoan;
                     sBoxHtml += `
-                        <div style="display:flex; justify-content:space-between; font-size:13px; margin-top:12px; padding-top:12px; border-top:1px dashed #ccc;">
-                            <span style="font-weight:700; color:#059669; text-transform:uppercase; font-size:11px;">Tiền hoàn đổi/trả:</span>
-                            <strong style="color:#10b981; font-size:15px;">-${this.formatCurrency(tienHoan)}</strong>
+                        <div style="display:flex; justify-content:space-between; font-size:13px; margin-top:12px; padding-top:12px; border-top:1px dashed var(--border-color);">
+                            <span style="font-weight:600; color:var(--success); font-size:12px;">Tiền hoàn đổi/trả:</span>
+                            <strong style="color:var(--success); font-size:14px;">-${this.formatCurrency(tienHoan)}</strong>
                         </div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:12px; border-top:2px dashed #dc2626;">
-                            <span style="font-weight:900; font-size:14px; text-transform:uppercase; color:#dc2626;">Thực nhận:</span>
-                            <strong style="color:#dc2626; font-size:20px;">${this.formatCurrency(tienThucNhan)}</strong>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:12px; border-top:1px dashed var(--danger);">
+                            <span style="font-weight:700; font-size:14px; text-transform:uppercase; color:var(--danger);">Thực nhận:</span>
+                            <strong style="color:var(--danger); font-size:18px;">${this.formatCurrency(tienThucNhan)}</strong>
                         </div>`;
                 }
                 sBoxHtml += `</div>`;
@@ -1168,30 +1218,29 @@
 
                 const listTT = hd.lichSuThanhToan || [];
                 let tblThanhToanHtml = listTT.length > 0 ? listTT.map(tt => {
-                    let hienThiMaGD = (tt.maGiaoDich && tt.maGiaoDich !== 'N/A') ? tt.maGiaoDich : '<span style="color:#aaa; font-style:italic;">Không có</span>';
+                    let hienThiMaGD = (tt.maGiaoDich && tt.maGiaoDich !== 'N/A') ? tt.maGiaoDich : '<span style="color:var(--text-muted); font-style:italic;">Không có</span>';
                     return `
                     <tr>
-                        <td style="color:#666;">${tt.ngayThanhToan || ''}</td>
-                        <td style="font-family:monospace; color:#2563eb;">${hienThiMaGD}</td>
+                        <td style="color:var(--text-muted);">${tt.ngayThanhToan || ''}</td>
+                        <td style="font-family:monospace; font-weight:600; color:var(--primary);">${hienThiMaGD}</td>
                         <td>${this.formatPayment(tt.phuongThuc, isStorePickup || hd.loaiHoaDon === 0)}</td>
                         <td>${tt.loaiThanhToan === 'THANH_TOAN' ? 'Thanh toán' : 'Hoàn tiền'}</td>
-                        <td style="font-weight:700; color:#dc2626;">${this.formatCurrency(Number(tt.soTien || 0))}</td>
-                        <td>${tt.trangThai === 'THANH_CONG' ? '<span style="color:#10b981; font-weight:700;">Thành công</span>' : '<span style="color:#ef4444; font-weight:700;">Thất bại / Chờ</span>'}</td>
+                        <td style="font-weight:700; color:var(--danger);">${this.formatCurrency(Number(tt.soTien || 0))}</td>
+                        <td>${tt.trangThai === 'THANH_CONG' ? '<span class="badge-status" style="background:var(--success);">Thành công</span>' : '<span class="badge-status" style="background:var(--danger);">Thất bại/Chờ</span>'}</td>
                     </tr>`;
-                }).join('') : `<tr><td colspan="6" style="text-align:center; padding:20px; font-style:italic; color:#999;">Chưa có giao dịch</td></tr>`;
+                }).join('') : `<tr><td colspan="6" style="text-align:center; padding:20px; font-style:italic; color:var(--text-muted);">Chưa có giao dịch</td></tr>`;
                 setHtml('viewLichSuThanhToan', tblThanhToanHtml);
 
                 const listLS = hd.lichSuThaoTac || [];
                 let tblLichSuHtml = listLS.length > 0 ? listLS.map(ls => `
                     <tr>
-                        <td style="color:#666;">${ls.ngayTao || ''}</td>
-                        <td style="font-weight:600; color:#111;"><i class="bi bi-person"></i> ${ls.nguoiThaoTac || ''}</td>
-                        <td style="font-style:italic; color:#555;">${ls.ghiChu || ''}</td>
+                        <td style="color:var(--text-muted);">${ls.ngayTao || ''}</td>
+                        <td style="font-weight:600;"><i class="bi bi-person" style="color:var(--text-muted);"></i> ${ls.nguoiThaoTac || ''}</td>
+                        <td style="color:var(--text-muted);">${ls.ghiChu || ''}</td>
                         <td><span class="badge-status" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1;">${ls.trangThai || ''}</span></td>
-                    </tr>`).join('') : `<tr><td colspan="4" style="text-align:center; padding:20px; font-style:italic; color:#999;">Chưa có lịch sử</td></tr>`;
+                    </tr>`).join('') : `<tr><td colspan="4" style="text-align:center; padding:20px; font-style:italic; color:var(--text-muted);">Chưa có lịch sử thao tác</td></tr>`;
                 setHtml('viewLichSuThaoTac', tblLichSuHtml);
 
-                // THAO TÁC RENDER TIMELINE VÀ MỞ DRAWER
                 const isPos = hd.loaiHoaDon === 0;
                 setDisp('cardTimeline', isPos ? 'none' : 'block');
                 setDisp('cardActions', 'block');
@@ -1206,14 +1255,12 @@
                 document.getElementById('drawer').classList.add('show');
                 document.getElementById('overlay').classList.add('show');
             } catch (err) {
-                console.error("====== LỖI TRÌNH DUYỆT JAVASCRIPT ======", err);
-                if (typeof window.toast === 'function') window.toast("Lỗi tải dữ liệu, hãy ấn F12 xem Console!", "error");
+                if (typeof window.toast === 'function') window.toast("Lỗi tải dữ liệu đơn hàng!", "error");
             } finally {
                 if (window.hideLoading) window.hideLoading();
             }
         },
 
-        // 🌟 ĐÃ FIX: RENDER TIMELINE THÔNG MINH DỰA TRÊN LOẠI GIAO HÀNG KHỚP MÃ DB
         renderTimeline: function(currentMa, hinhThucGiaoHang) {
             let steps = [];
 
@@ -1245,8 +1292,8 @@
                     </div>`).join('');
                 html += `
                     <div class="th-step">
-                        <div class="th-icon" style="background:#ef4444; border-color:#fecaca;"><i class="bi bi-x-lg"></i></div>
-                        <div class="th-label" style="color:#dc2626;">${this.getStatusBadge({ma: currentMa, ten: currentMa})}</div>
+                        <div class="th-icon" style="background:var(--danger); border-color:#fecaca;"><i class="bi bi-x-lg"></i></div>
+                        <div class="th-label" style="color:var(--danger);">${this.getStatusBadge({ma: currentMa, ten: currentMa})}</div>
                     </div>`;
             } else {
                 let isPassed = true;
@@ -1267,22 +1314,21 @@
         },
 
         renderActions: function(hd) {
-            const footer    = document.getElementById('drawerFooter');
+            const footer = document.getElementById('drawerFooter');
             footer.innerHTML = '';
-            const currentMa  = hd.trangThaiMa;
+            const currentMa = hd.trangThaiMa;
             const paymentMethod = hd.phuongThucThanhToan ? hd.phuongThucThanhToan.toUpperCase() : '';
 
-            // 🌟 ĐÃ FIX: Điều kiện ẩn hành động mở rộng dựa trên các mã kết thúc quy trình mới
             if (currentMa === 'DA_HUY' || currentMa === 'HOAN_THANH' || currentMa === 'DA_DOI' || currentMa === 'DA_TRA' || currentMa === 'GIAO_THAT_BAI' || currentMa === 'DA_HOAN_HANG' || currentMa === 'TU_CHOI_TRA_HANG') {
-                footer.innerHTML = `<div style="width:100%; text-align:center; font-weight:700; color:#888; padding:10px 0;">Đơn hàng đã đóng.</div>`;
+                footer.innerHTML = `<div style="width:100%; text-align:center; font-weight:500; color:var(--text-muted); padding:10px 0;">Đơn hàng đã đóng, không thể thay đổi trạng thái.</div>`;
                 return;
             }
 
             if (currentMa === 'CHO_XAC_NHAN' || currentMa === 'CHO_THANH_TOAN') {
                 const btnHuy = document.createElement('button');
                 btnHuy.className = 'btn btn-secondary';
-                btnHuy.style.cssText = 'flex:1; color:#dc2626; border-color:#dc2626; height:44px !important; border-radius:4px; font-size:12px;';
-                btnHuy.innerHTML = '<i class="bi bi-x-lg"></i> HỦY ĐƠN';
+                btnHuy.style.cssText = 'flex:1; color:var(--danger); border-color:var(--danger);';
+                btnHuy.innerHTML = '<i class="bi bi-x-lg"></i> Hủy đơn';
                 btnHuy.onclick = () => this.huyDon(hd.id);
                 footer.appendChild(btnHuy);
             }
@@ -1290,33 +1336,32 @@
             if (currentMa === 'CHO_XAC_NHAN' && paymentMethod === 'CHUYEN_KHOAN') {
                 const btnReqPay = document.createElement('button');
                 btnReqPay.className = 'btn';
-                btnReqPay.style.cssText = 'flex:1.5; background:#f59e0b; color:#fff; height:44px !important; border:none; border-radius:4px; font-size:12px;';
-                btnReqPay.innerHTML = '<i class="bi bi-bell-fill"></i> YÊU CẦU TT LẠI';
+                btnReqPay.style.cssText = 'flex:1.5; background:var(--warning); border-color:var(--warning);';
+                btnReqPay.innerHTML = '<i class="bi bi-bell"></i> Yêu cầu TT lại';
                 btnReqPay.onclick = () => this.requestPayment(hd.id);
                 footer.appendChild(btnReqPay);
             }
 
             if (currentMa !== 'CHO_THANH_TOAN') {
                 const btnNext = document.createElement('button');
-                btnNext.className = 'btn';
-                btnNext.style.cssText = 'flex:2; background:#2563eb; color:#fff; height:44px !important; border:none; border-radius:4px; font-size:12px;';
+                btnNext.className = 'btn btn-primary';
+                btnNext.style.cssText = 'flex:2;';
 
-                // 🌟 ĐÃ FIX: Điều kiện hiển thị tên nút dựa trên mã DB chuẩn
-                let nextActionText = "XÁC NHẬN BƯỚC TIẾP THEO";
-                if(currentMa === 'CHO_XAC_NHAN') nextActionText = "DUYỆT & TIẾN HÀNH ĐÓNG GÓI";
-                if(currentMa === 'DA_XAC_NHAN') nextActionText = hd.hinhThucGiaoHang === 'NHAN_TAI_CUA_HANG' ? "ĐÃ GÓI XONG - CHỜ KHÁCH LẤY" : "ĐÃ GÓI XONG - GIAO CHO SHIPPER";
-                if(currentMa === 'CHO_GIAO_VAN_CHUYEN') nextActionText = "SHIPPER ĐANG ĐI GIAO";
-                if(currentMa === 'DANG_GIAO_HANG' || currentMa === 'CHO_KHACH_LAY') nextActionText = "XÁC NHẬN GIAO THÀNH CÔNG";
-                if(currentMa === 'YEU_CAU_TRA_HANG') nextActionText = "CHẤP NHẬN TRẢ HÀNG";
-                if(currentMa === 'DANG_HOAN_HANG') nextActionText = "XÁC NHẬN ĐÃ NHẬN HÀNG HOÀN";
+                let nextActionText = "Tiếp tục";
+                if(currentMa === 'CHO_XAC_NHAN') nextActionText = "Duyệt & Đóng gói";
+                if(currentMa === 'DA_XAC_NHAN') nextActionText = hd.hinhThucGiaoHang === 'NHAN_TAI_CUA_HANG' ? "Đã gói xong - Chờ lấy" : "Đã gói xong - Giao Shipper";
+                if(currentMa === 'CHO_GIAO_VAN_CHUYEN') nextActionText = "Shipper đang đi giao";
+                if(currentMa === 'DANG_GIAO_HANG' || currentMa === 'CHO_KHACH_LAY') nextActionText = "Xác nhận giao thành công";
+                if(currentMa === 'YEU_CAU_TRA_HANG') nextActionText = "Chấp nhận trả hàng";
+                if(currentMa === 'DANG_HOAN_HANG') nextActionText = "Xác nhận nhận hàng hoàn";
 
                 btnNext.innerHTML = `${nextActionText} <i class="bi bi-arrow-right"></i>`;
                 btnNext.onclick = () => this.nextStatus(hd.id);
                 footer.appendChild(btnNext);
             } else {
                 const waitMsg = document.createElement('div');
-                waitMsg.style.cssText = 'flex:2; display:flex; align-items:center; justify-content:center; font-size:12px; color:#b45309; font-weight:800; background:#fefce8; border:1px solid #fde047; border-radius:4px; height:44px;';
-                waitMsg.innerHTML = '<i class="bi bi-hourglass-split" style="margin-right:8px;"></i> CHỜ KHÁCH THANH TOÁN ONLINE';
+                waitMsg.style.cssText = 'flex:2; display:flex; align-items:center; justify-content:center; font-size:12px; color:#b45309; font-weight:600; background:#fefce8; border:1px solid #fde047; border-radius:var(--radius); height:36px;';
+                waitMsg.innerHTML = '<i class="bi bi-hourglass-split" style="margin-right:8px;"></i> CHỜ KHÁCH TT ONLINE';
                 footer.appendChild(waitMsg);
             }
         },
@@ -1327,16 +1372,16 @@
             const currentMa = hd.trangThaiMa;
 
             if (!['HOAN_THANH', 'DA_HUY', 'DA_DOI', 'DA_TRA', 'TU_CHOI_TRA_HANG', 'DA_HOAN_HANG'].includes(currentMa)) {
-                footer.innerHTML = `<div style="width:100%; text-align:center; font-weight:700; color:#888; padding:10px 0;">Hóa đơn tại quầy đang chờ xử lý thanh toán.</div>`;
+                footer.innerHTML = `<div style="width:100%; text-align:center; font-weight:500; color:var(--text-muted); padding:10px 0;">Hóa đơn tại quầy đang chờ xử lý thanh toán.</div>`;
             } else {
-                footer.innerHTML = `<div style="width:100%; text-align:center; font-weight:700; color:#888; padding:10px 0;">Hóa đơn tại quầy đã đóng.</div>`;
+                footer.innerHTML = `<div style="width:100%; text-align:center; font-weight:500; color:var(--text-muted); padding:10px 0;">Hóa đơn tại quầy đã đóng.</div>`;
             }
         },
 
         nextStatus: function(id) {
-            window.toastConfirm(
-                "XÁC NHẬN TRẠNG THÁI",
-                "Chuyển đơn hàng sang bước tiếp theo trong quy trình xử lý?",
+            window.confirmDialog(
+                "Xác nhận trạng thái",
+                "Bạn có chắc chắn muốn chuyển đơn hàng này sang bước tiếp theo không?",
                 async () => {
                     try {
                         if (window.showLoading) window.showLoading();
@@ -1345,13 +1390,8 @@
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ ghiChu: "Admin chuyển trạng thái" })
                         });
-
-                        if (!res.ok) {
-                            const errData = await res.json();
-                            throw new Error(errData.message || "Chuyển trạng thái thất bại");
-                        }
-
-                        window.toast("Chuyển trạng thái thành công!", "success");
+                        if (!res.ok) throw new Error("Chuyển trạng thái thất bại");
+                        window.toast("Cập nhật trạng thái thành công!", "success");
                         this.loadData();
                         this.openDetail(id);
                     } catch (err) {
@@ -1364,22 +1404,16 @@
         },
 
         requestPayment: function(id) {
-            window.toastConfirm(
-                "YÊU CẦU THANH TOÁN LẠI",
-                "Chuyển trạng thái đơn hàng về 'Chờ thanh toán' để khách hàng có thể thao tác thanh toán lại?",
+            window.confirmDialog(
+                "Yêu cầu thanh toán lại",
+                "Chuyển trạng thái đơn hàng về 'Chờ thanh toán' để khách hàng thao tác lại?",
                 async () => {
                     try {
                         if (window.showLoading) window.showLoading();
                         const res = await fetch(`/api/hoa-don/${id}/request-payment`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' }
+                            method: 'POST', headers: { 'Content-Type': 'application/json' }
                         });
-
-                        if (!res.ok) {
-                            const errData = await res.json();
-                            throw new Error(errData.message || "Thao tác thất bại");
-                        }
-
+                        if (!res.ok) throw new Error("Thao tác thất bại");
                         window.toast("Đã chuyển về trạng thái Chờ thanh toán!", "success");
                         this.loadData();
                         this.openDetail(id);
@@ -1393,9 +1427,10 @@
         },
 
         huyDon: function(id) {
-            window.toastPrompt(
-                "HỦY HÓA ĐƠN",
-                "Nhập lý do hủy (Tùy chọn)...",
+            window.promptDialog(
+                "Hủy hóa đơn",
+                "Vui lòng nhập lý do hủy đơn hàng này (Tùy chọn):",
+                "Nhập lý do hủy...",
                 async (reason) => {
                     if (!reason) reason = "Admin hủy đơn";
                     try {
@@ -1405,12 +1440,7 @@
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ ghiChu: reason })
                         });
-
-                        if (!res.ok) {
-                            const errData = await res.json();
-                            throw new Error(errData.message || "Hủy đơn thất bại");
-                        }
-
+                        if (!res.ok) throw new Error("Hủy đơn thất bại");
                         window.toast("Đã hủy đơn hàng!", "success");
                         this.closeDrawer();
                         this.loadData();
@@ -1431,6 +1461,11 @@
 
     window.OrderApp = OrderApp;
     window.initOrders = function() { OrderApp.init(); };
+
+    // Khởi chạy khi load trang trực tiếp (trường hợp standalone)
+    document.addEventListener('DOMContentLoaded', () => {
+        if(document.getElementById('tabDonHang')) OrderApp.init();
+    });
 </script>
 </body>
 </html>

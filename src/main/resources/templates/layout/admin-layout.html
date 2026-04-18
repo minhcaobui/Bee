@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>BEE ADMIN</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cstyle%3Epath%7Bfill%3A%231A1A1A%7D%40media(prefers-color-scheme%3Adark)%7Bpath%7Bfill%3A%23F7F5F2%7D%7D%3C%2Fstyle%3E%3Cpath d='M244.26,92.26a11.5,11.5,0,0,0-4-6.42A76.08,76.08,0,0,0,183.08,64h-3.41A60.27,60.27,0,0,0,128,24,60.27,60.27,0,0,0,76.33,64H72.92a76.08,76.08,0,0,0-57.22,21.84,11.5,11.5,0,0,0-4,6.42,12.09,12.09,0,0,0,2.19,9.45A76,76,0,0,0,60,128a76,76,0,0,0-46.07,26.29,12.09,12.09,0,0,0-2.19,9.45,11.5,11.5,0,0,0,4,6.42A76.08,76.08,0,0,0,72.92,192h5.51A59.5,59.5,0,0,0,128,232a59.5,59.5,0,0,0,49.57-40h5.51a76.08,76.08,0,0,0,57.22-21.84,11.5,11.5,0,0,0,4-6.42,12.09,12.09,0,0,0-2.19-9.45A76,76,0,0,0,196,128a76,76,0,0,0,46.07-26.29A12.09,12.09,0,0,0,244.26,92.26ZM144,206.11A36.19,36.19,0,0,1,128,208a36.19,36.19,0,0,1-16-1.89V168h32Zm0-62.11H112V112h32Zm-49.8-63.53a76.35,76.35,0,0,0,17.8,11.83v21.88a36,36,0,0,1-16,33.82Zm67.6,0a36,36,0,0,1,16,33.82V126.18A76.35,76.35,0,0,0,161.8,80.47ZM128,48a36.19,36.19,0,0,1,16,1.89V72H112V49.89A36.19,36.19,0,0,1,128,48ZM39.5,108.57A52,52,0,0,1,72.92,88h2.62a98,98,0,0,1-10.74,24H36A52.17,52.17,0,0,1,39.5,108.57Zm33.42,63.43A52,52,0,0,1,39.5,147.43,52.17,52.17,0,0,1,36,128H64.8a98,98,0,0,1,10.74,24H72.92ZM183.08,168h-2.62a98,98,0,0,1-10.74-24H220a52.17,52.17,0,0,1-3.5,19.43A52,52,0,0,1,183.08,168Zm33.42-36.57A52,52,0,0,1,183.08,88h2.62a98,98,0,0,1,10.74,24H220A52.17,52.17,0,0,1,216.5,131.43Z'%2F%3E%3C%2Fsvg%3E">
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link rel="stylesheet" th:href="@{/css/layout/admin-layout.css}">
 </head>
@@ -15,7 +15,7 @@
 
     <aside id="main-sidebar">
         <div class="brand">
-            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" viewBox="0 0 256 256" style="margin-right: 2px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#ffffff" viewBox="0 0 256 256" style="margin-right: 4px;">
                 <path d="M244.26,92.26a11.5,11.5,0,0,0-4-6.42A76.08,76.08,0,0,0,183.08,64h-3.41A60.27,60.27,0,0,0,128,24,60.27,60.27,0,0,0,76.33,64H72.92a76.08,76.08,0,0,0-57.22,21.84,11.5,11.5,0,0,0-4,6.42,12.09,12.09,0,0,0,2.19,9.45A76,76,0,0,0,60,128a76,76,0,0,0-46.07,26.29,12.09,12.09,0,0,0-2.19,9.45,11.5,11.5,0,0,0,4,6.42A76.08,76.08,0,0,0,72.92,192h5.51A59.5,59.5,0,0,0,128,232a59.5,59.5,0,0,0,49.57-40h5.51a76.08,76.08,0,0,0,57.22-21.84,11.5,11.5,0,0,0,4-6.42,12.09,12.09,0,0,0-2.19-9.45A76,76,0,0,0,196,128a76,76,0,0,0,46.07-26.29A12.09,12.09,0,0,0,244.26,92.26ZM144,206.11A36.19,36.19,0,0,1,128,208a36.19,36.19,0,0,1-16-1.89V168h32Zm0-62.11H112V112h32Zm-49.8-63.53a76.35,76.35,0,0,0,17.8,11.83v21.88a36,36,0,0,1-16,33.82Zm67.6,0a36,36,0,0,1,16,33.82V126.18A76.35,76.35,0,0,0,161.8,80.47ZM128,48a36.19,36.19,0,0,1,16,1.89V72H112V49.89A36.19,36.19,0,0,1,128,48ZM39.5,108.57A52,52,0,0,1,72.92,88h2.62a98,98,0,0,1-10.74,24H36A52.17,52.17,0,0,1,39.5,108.57Zm33.42,63.43A52,52,0,0,1,39.5,147.43,52.17,52.17,0,0,1,36,128H64.8a98,98,0,0,1,10.74,24H72.92ZM183.08,168h-2.62a98,98,0,0,1-10.74-24H220a52.17,52.17,0,0,1-3.5,19.43A52,52,0,0,1,183.08,168Zm33.42-36.57A52,52,0,0,1,183.08,88h2.62a98,98,0,0,1,10.74,24H220A52.17,52.17,0,0,1,216.5,131.43Z"></path>
             </svg>
             <span>BEE ADMIN</span>
@@ -24,35 +24,35 @@
             <div class="sidebar-label">TỔNG QUAN</div>
 
             <a href="#dashboard" class="sidebar-item" sec:authorize="hasAuthority('ROLE_ADMIN')">
-                <i class="bi bi-grid-fill"></i> <span>DASHBOARD</span>
+                <i class="bi bi-grid-fill"></i> <span>Dashboard</span>
             </a>
 
-            <a href="#pos" class="sidebar-item"><i class="bi bi-pc-display-horizontal"></i> <span>BÁN HÀNG TẠI QUẦY</span></a>
+            <a href="#pos" class="sidebar-item"><i class="bi bi-pc-display-horizontal"></i> <span>Bán Hàng Tại Quầy</span></a>
 
             <div class="sidebar-label">QUẢN LÝ NGHIỆP VỤ</div>
-            <a href="#orders" class="sidebar-item"><i class="bi bi-receipt-cutoff"></i> <span>QUẢN LÝ HÓA ĐƠN</span></a>
+            <a href="#orders" class="sidebar-item"><i class="bi bi-receipt-cutoff"></i> <span>Quản Lý Hóa Đơn</span></a>
 
-            <a href="#catalogs" class="sidebar-item"><i class="bi bi-layers-fill"></i> <span>QUẢN LÝ THUỘC TÍNH</span></a>
-            <a href="#products" class="sidebar-item"><i class="bi bi-box-seam-fill"></i> <span>QUẢN LÝ SẢN PHẨM</span></a>
-            <a href="#promotions" class="sidebar-item"><i class="bi bi-ticket-perforated-fill"></i> <span>CHƯƠNG TRÌNH KHUYẾN MÃI</span></a>
-            <a href="#customers" class="sidebar-item"><i class="bi bi-people-fill"></i> <span>HỒ SƠ KHÁCH HÀNG</span></a>
-            <a href="#reviews" class="sidebar-item"><i class="bi bi-star-fill"></i> <span>ĐÁNH GIÁ SẢN PHẨM</span></a>
+            <a href="#catalogs" class="sidebar-item"><i class="bi bi-layers-fill"></i> <span>Quản Lý Thuộc Tính</span></a>
+            <a href="#products" class="sidebar-item"><i class="bi bi-box-seam-fill"></i> <span>Quản Lý Sản Phẩm</span></a>
+            <a href="#promotions" class="sidebar-item"><i class="bi bi-ticket-perforated-fill"></i> <span>Chương Trình Khuyến Mãi</span></a>
+            <a href="#customers" class="sidebar-item"><i class="bi bi-people-fill"></i> <span>Hồ Sơ Khách Hàng</span></a>
+            <a href="#reviews" class="sidebar-item"><i class="bi bi-star-fill"></i> <span>Đánh Giá Sản Phẩm</span></a>
 
             <a href="#staff" class="sidebar-item" sec:authorize="hasAuthority('ROLE_ADMIN')">
-                <i class="bi bi-person-badge-fill"></i> <span>QUẢN LÝ NHÂN VIÊN</span>
+                <i class="bi bi-person-badge-fill"></i> <span>Quản Lý Nhân Viên</span>
             </a>
 
             <div class="sidebar-label">HỆ THỐNG</div>
-            <a href="#profiles" class="sidebar-item"><i class="bi bi-person-bounding-box"></i> <span>TÀI KHOẢN CÁ NHÂN</span></a>
+            <a href="#profiles" class="sidebar-item"><i class="bi bi-person-bounding-box"></i> <span>Tài Khoản Cá Nhân</span></a>
 
             <div class="sidebar-label">CỬA HÀNG ONLINE</div>
             <a href="/customer" class="sidebar-item" target="_blank">
-                <i class="bi bi-globe"></i> <span>XEM TRANG KHÁCH HÀNG</span>
+                <i class="bi bi-globe"></i> <span>Xem Trang Khách Hàng</span>
             </a>
         </div>
 
         <div class="sidebar-user-panel" onclick="window.location.hash='profiles'" title="Vào trang cá nhân">
-            <img th:src="${loggedInUser != null && loggedInUser.hinhAnh != null ? loggedInUser.hinhAnh : 'https://ui-avatars.com/api/?name=' + (loggedInUser != null ? loggedInUser.hoTen : 'Admin') + '&background=000&color=fff&size=64&font-size=0.4&bold=true'}"
+            <img th:src="${loggedInUser != null && loggedInUser.hinhAnh != null ? loggedInUser.hinhAnh : 'https://ui-avatars.com/api/?name=' + (loggedInUser != null ? loggedInUser.hoTen : 'Admin') + '&background=2563eb&color=fff&size=64&font-size=0.4&bold=true'}"
                  class="user-mini-avatar" alt="Avatar">
             <div class="user-mini-info">
                 <div class="user-mini-name" th:text="${loggedInUser != null ? loggedInUser.hoTen : 'Chưa đăng nhập'}">
@@ -77,7 +77,7 @@
                 <button class="toggle-btn" onclick="toggleSidebar()">
                     <i class="bi bi-list"></i>
                 </button>
-                <h2 id="pageTitle" style="font-size:14px; font-weight:800; letter-spacing: 0.5px; text-transform: uppercase;">DASHBOARD</h2>
+                <h2 id="pageTitle" style="font-size:14px; font-weight:700; letter-spacing: 0.5px; text-transform: uppercase;">DASHBOARD</h2>
             </div>
             <div class="header-right">
                 <div class="header-clock">
@@ -86,7 +86,7 @@
                 <div class="header-action-container">
                     <button class="icon-btn" onclick="handleNotifClick()">
                         <i class="bi bi-bell-fill"></i>
-                        <span id="notif-badge" style="position:absolute; top:8px; right:8px; width:10px; height:10px; background:#ef4444; border-radius:50%; border:2px solid #fff; display:none;"></span>
+                        <span id="notif-badge" style="position:absolute; top:8px; right:8px; width:10px; height:10px; background:var(--red-primary); border-radius:50%; border:2px solid #fff; display:none;"></span>
                     </button>
                     <div id="notif-dropdown" class="dropdown-menu">
                         <div class="dropdown-header">THÔNG BÁO MỚI</div>
@@ -106,20 +106,35 @@
 </div>
 
 <div id="confirmOverlay" class="overlay">
-    <div class="card" style="padding:24px; width:360px; background:#fff; border:1px solid var(--gray-200); border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,0.15);">
-        <h4 style="margin-bottom:12px; font-size:14px; font-weight: 800; display: flex; align-items: center; gap: 8px;"><i class="bi bi-box-arrow-right" style="color: #dc2626; font-size: 18px;"></i> XÁC NHẬN ĐĂNG XUẤT</h4>
-        <div id="confirmMsg" style="margin-bottom:24px; color:#555; font-size: 13px; font-weight: 500; line-height: 1.5; text-transform: none;">Bạn có chắc chắn muốn thoát khỏi phiên làm việc hiện tại không? Hệ thống sẽ yêu cầu đăng nhập lại ở lần sau.</div>
+    <div class="card" style="padding:24px; width:360px; background:#fff; border:1px solid var(--border); border-radius: var(--border-radius); box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
+        <h4 style="margin-bottom:12px; font-size:15px; font-weight: 700; display: flex; align-items: center; gap: 8px;"><i class="bi bi-box-arrow-right" style="color: var(--red-primary); font-size: 18px;"></i> Xác Nhận Đăng Xuất</h4>
+        <div id="confirmMsg" style="margin-bottom:24px; color:var(--sub); font-size: 13px; font-weight: 500; line-height: 1.5;">Bạn có chắc chắn muốn thoát khỏi phiên làm việc hiện tại không? Hệ thống sẽ yêu cầu đăng nhập lại ở lần sau.</div>
         <div style="display:flex; justify-content:flex-end; gap:10px;">
-            <button onclick="document.getElementById('confirmOverlay').style.display='none'" class="btn btn-secondary" style="height: 36px !important;">HỦY BỎ</button>
-            <button onclick="executeLogout()" class="btn btn-primary" style="background: #dc2626; border-color: #dc2626; color: #fff; height: 36px !important;">ĐĂNG XUẤT NGAY</button>
+            <button onclick="document.getElementById('confirmOverlay').style.display='none'" class="btn btn-secondary">HỦY BỎ</button>
+            <button onclick="executeLogout()" class="btn btn-danger">ĐĂNG XUẤT NGAY</button>
+        </div>
+    </div>
+</div>
+
+<div id="genericConfirmOverlay" class="overlay" style="display: none;">
+    <div class="card" style="padding:24px; width:360px; background:#fff; border:1px solid var(--border); border-radius: var(--border-radius); box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
+        <h4 id="genericConfirmTitle" style="margin-bottom:12px; font-size:15px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+            <i class="bi bi-question-circle" style="color: var(--primary); font-size: 18px;"></i> XÁC NHẬN
+        </h4>
+        <div id="genericConfirmMsg" style="margin-bottom:24px; color:var(--sub); font-size: 13px; font-weight: 500; line-height: 1.5;">
+            Bạn có chắc chắn muốn thực hiện hành động này?
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+            <button id="btnGenericCancel" class="btn btn-secondary">HỦY BỎ</button>
+            <button id="btnGenericOk" class="btn btn-primary">ĐỒNG Ý</button>
         </div>
     </div>
 </div>
 
 <div class="loader-overlay" id="globalLoader">
     <div class="loader-content">
-        <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #000; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px;"></div>
-        <div class="loader-text" style="font-size: 12px; font-weight: 800; letter-spacing: 1px;">ĐANG XỬ LÝ...</div>
+        <div style="width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top: 3px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 15px;"></div>
+        <div class="loader-text" style="font-size: 12px; font-weight: 700; color: var(--text-main); letter-spacing: 1px;">ĐANG XỬ LÝ...</div>
     </div>
 </div>
 
@@ -148,53 +163,13 @@
     };
 
     window.showNoPermissionToast = function() {
-        if(typeof window.toast === 'function') {
+        if (typeof window.toast === 'function') {
             window.toast("Bạn chỉ có quyền xem, không được phép thao tác ở mục này!", "error");
         } else {
             alert("Bạn chỉ có quyền xem, không được phép thao tác ở mục này!");
         }
     };
-
-    function executeLogout() {
-        const logoutForm = document.getElementById('logoutForm');
-        if (logoutForm) logoutForm.submit();
-        else window.location.href = '/logout';
-    }
-
-    // Ghi đè hàm toggleSidebar để hỗ trợ xử lý cả Desktop và Mobile
-    window.toggleSidebar = function() {
-        const sidebar = document.getElementById('main-sidebar');
-        const overlay = document.getElementById('sidebar-overlay');
-
-        if (window.innerWidth <= 768) {
-            // Trên điện thoại: Trượt menu ra/vào và hiện overlay
-            sidebar.classList.toggle('mobile-open');
-            if (overlay) overlay.classList.toggle('show');
-            // Xoá class collapsed nếu có để tránh lỗi hiển thị
-            sidebar.classList.remove('collapsed');
-        } else {
-            // Trên máy tính: Thu nhỏ menu như bình thường
-            sidebar.classList.toggle('collapsed');
-            sidebar.classList.remove('mobile-open');
-            if (overlay) overlay.classList.remove('show');
-        }
-    };
-
-    // Tự động đóng menu trên điện thoại khi người dùng bấm chọn một mục
-    document.querySelectorAll('.sidebar-item').forEach(item => {
-        item.addEventListener('click', () => {
-            if (window.innerWidth <= 768) {
-                document.getElementById('main-sidebar').classList.remove('mobile-open');
-                const overlay = document.getElementById('sidebar-overlay');
-                if (overlay) overlay.classList.remove('show');
-            }
-        });
-    });
 </script>
-
-<style>
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-</style>
 
 </body>
 </html>

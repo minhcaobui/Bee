@@ -54,8 +54,6 @@ public class HoaDonApi {
     private final ThongBaoRepository thongBaoRepository;
     private final MaGiamGiaRepository maGiamGiaRepo;
 
-    private final YeuCauDoiTraRepository ycRepo;
-    private final ChiTietDoiTraRepository ctRepo;
     private final ThanhToanRepository thanhToanRepo;
 
     private final com.example.bee.repositories.cart.GioHangRepository gioHangRepository;
@@ -144,30 +142,7 @@ public class HoaDonApi {
             HoaDon hd = hdRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
             List<HoaDonChiTiet> listHdct = hdctRepo.findByHoaDonId(id);
 
-            Map<Integer, Integer> returnedItems = new HashMap<>();
             Date ngayCapNhatCuoi = hd.getNgayThanhToan();
-            BigDecimal tongTienHoan = BigDecimal.ZERO;
-
-            List<YeuCauDoiTra> ycs = ycRepo.findAll().stream()
-                    .filter(y -> y.getHoaDon() != null && y.getHoaDon().getId().equals(id) && "HOAN_THANH".equals(y.getTrangThai()))
-                    .collect(Collectors.toList());
-
-            for (YeuCauDoiTra yc : ycs) {
-                if (ngayCapNhatCuoi == null || (yc.getNgayXuLy() != null && yc.getNgayXuLy().after(ngayCapNhatCuoi))) {
-                    ngayCapNhatCuoi = yc.getNgayXuLy();
-                }
-                if (yc.getSoTienHoan() != null) {
-                    tongTienHoan = tongTienHoan.add(yc.getSoTienHoan());
-                }
-                List<ChiTietDoiTra> cts = ctRepo.findByYeuCauDoiTraId(yc.getId());
-                for (ChiTietDoiTra ct : cts) {
-                    if(ct.getHoaDonChiTiet() != null) {
-                        Integer hdctId = ct.getHoaDonChiTiet().getId();
-                        returnedItems.put(hdctId, returnedItems.getOrDefault(hdctId, 0) + ct.getSoLuong());
-                    }
-                }
-            }
-
             BigDecimal tongTienHangThucTe = BigDecimal.ZERO;
             List<Map<String, Object>> chiTietResponses = new ArrayList<>();
 
@@ -179,7 +154,6 @@ public class HoaDonApi {
                 }
 
                 Integer soLuong = ct.getSoLuong() != null ? ct.getSoLuong() : 0;
-                Integer soLuongTra = returnedItems.getOrDefault(ct.getId(), 0);
 
                 tongTienHangThucTe = tongTienHangThucTe.add(giaBan.multiply(BigDecimal.valueOf(soLuong)));
 
@@ -195,14 +169,12 @@ public class HoaDonApi {
                         itemMap.put("tenSanPham", ct.getSanPhamChiTiet().getSanPham().getTen());
                     }
                     if (ct.getSanPhamChiTiet().getKichThuoc() != null && ct.getSanPhamChiTiet().getMauSac() != null) {
-                        // Sửa thành định dạng MauSac - KichThuoc để thống nhất với API traCuuNhanh và JS
                         itemMap.put("thuocTinh", ct.getSanPhamChiTiet().getMauSac().getTen() + " - " + ct.getSanPhamChiTiet().getKichThuoc().getTen());
                     }
                 }
                 itemMap.put("soLuong", soLuong);
                 itemMap.put("donGia", donGia);
                 itemMap.put("giaBan", giaBan);
-                itemMap.put("soLuongTra", soLuongTra);
 
                 chiTietResponses.add(itemMap);
             }
@@ -337,7 +309,6 @@ public class HoaDonApi {
             response.put("phiVanChuyen", phiShip);
             response.put("tienGiamVoucher", voucherCalculated);
             response.put("tongTien", tongPhaiTra);
-            response.put("tienHoan", tongTienHoan);
             response.put("chiTiets", chiTietResponses);
 
             response.put("giaTamThoi", hd.getGiaTamThoi() != null ? hd.getGiaTamThoi() : tongTienHangThucTe);
@@ -529,7 +500,7 @@ public class HoaDonApi {
             return ResponseEntity.badRequest().body(Map.of("message", "Đơn hàng đã được thanh toán trực tuyến. Vui lòng liên hệ Hotline CSKH để yêu cầu hủy và hoàn tiền!"));
         }
 
-        if ("HOAN_THANH".equals(currentStatus) || "DANG_GIAO".equals(currentStatus) || "DA_TRA".equals(currentStatus) || "DA_DOI".equals(currentStatus)) {
+        if ("HOAN_THANH".equals(currentStatus) || "DANG_GIAO".equals(currentStatus) || "DANG_GIAO_HANG".equals(currentStatus) || "CHO_KHACH_LAY".equals(currentStatus)) {
             return ResponseEntity.badRequest().body(Map.of("message", "Không thể hủy đơn hàng đã giao hoặc đang giao!"));
         }
         if (!"CHO_XAC_NHAN".equals(currentStatus) && !"CHO_THANH_TOAN".equals(currentStatus)) {
@@ -858,20 +829,6 @@ public class HoaDonApi {
             return ResponseEntity.notFound().build();
         }
 
-        Map<Integer, Integer> returnedItems = new HashMap<>();
-        BigDecimal tongTienHoan = BigDecimal.ZERO;
-        List<YeuCauDoiTra> ycs = ycRepo.findAll().stream().filter(y -> y.getHoaDon().getId().equals(hoaDon.getId()) && "HOAN_THANH".equals(y.getTrangThai())).collect(Collectors.toList());
-        for (YeuCauDoiTra yc : ycs) {
-            if (yc.getSoTienHoan() != null) {
-                tongTienHoan = tongTienHoan.add(yc.getSoTienHoan());
-            }
-            List<ChiTietDoiTra> cts = ctRepo.findByYeuCauDoiTraId(yc.getId());
-            for (ChiTietDoiTra ct : cts) {
-                Integer hdctId = ct.getHoaDonChiTiet().getId();
-                returnedItems.put(hdctId, returnedItems.getOrDefault(hdctId, 0) + ct.getSoLuong());
-            }
-        }
-
         SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         SimpleDateFormat sdfDate = new java.text.SimpleDateFormat("dd/MM/yyyy");
 
@@ -960,7 +917,6 @@ public class HoaDonApi {
         result.put("giaTong", hoaDon.getGiaTong());
         result.put("tongTien", hoaDon.getGiaTong());
         result.put("phiVanChuyen", hoaDon.getPhiVanChuyen());
-        result.put("tienHoan", tongTienHoan);
 
         BigDecimal voucherCalculated = hoaDon.getGiaTriKhuyenMai() != null ? hoaDon.getGiaTriKhuyenMai() : BigDecimal.ZERO;
         result.put("giaTamThoi", hoaDon.getGiaTamThoi());
@@ -973,7 +929,6 @@ public class HoaDonApi {
             result.put("maVoucher", "Không áp dụng");
         }
 
-        // Đã sửa thành findByHoaDonId để đảm bảo độ tương thích tuyệt đối của Spring Data JPA
         java.util.List<com.example.bee.entities.order.HoaDonChiTiet> danhSachChiTiet = hdctRepo.findByHoaDonId(hoaDon.getId());
         java.util.List<java.util.Map<String, Object>> listChiTiet = new java.util.ArrayList<>();
         if (danhSachChiTiet != null && !danhSachChiTiet.isEmpty()) {
@@ -990,7 +945,6 @@ public class HoaDonApi {
                 }
                 item.put("donGia", donGia);
                 item.put("giaBan", giaBan);
-                item.put("soLuongTra", returnedItems.getOrDefault(hdct.getId(), 0));
 
                 if (hdct.getSanPhamChiTiet() != null) {
                     item.put("sku", hdct.getSanPhamChiTiet().getSku());
