@@ -4,62 +4,115 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản Lý Khách Hàng</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
     <style>
         /* ==========================================================================
-           CORE STYLES
+           CORE STYLES (ĐỒNG BỘ CORPORATE SAAS DESIGN)
            ========================================================================== */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --black: #000; --white: #fff; --gray-100: #f4f4f5; --gray-200: #e4e4e7; --gray-300: #d4d4d8; --success-color: #10b981; --font-size: 13px; }
-        body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--black); font-size: var(--font-size); line-height: 1.5; }
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
+        :root {
+            --bg: #f8fafc;
+            --panel: #ffffff;
+            --gray-100: #f8fafc;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --text-main: #0f172a;
+            --sub: #64748b;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --border-radius: 4px;
+        }
+
+        body {
+            font-family: 'Be Vietnam Pro', 'Inter', sans-serif;
+            background: var(--panel);
+            color: var(--text-main);
+            font-size: 13px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
         .container { max-width: 100%; padding: 20px 30px; }
 
+        /* Actions Bar & Tabs */
         .actions-bar { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--gray-200); margin-bottom: 20px; padding-bottom: 0; }
         .tabs { display: flex; gap: 30px; margin-bottom: 0; border: none; }
-        .tab { font-size: 13px; font-weight: 700; color: #888; padding: 0 0 12px 0; cursor: default; text-transform: uppercase; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; display: flex; align-items: center; gap: 6px; }
-        .tab.active { color: #000; border-bottom-color: #000; }
+        .tab { font-size: 13px; font-weight: 600; color: var(--sub); padding: 0 0 12px 0; cursor: default; text-transform: uppercase; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; display: flex; align-items: center; gap: 6px; }
+        .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
 
-        .btn { font-size: 11px; font-weight: 800; text-transform: uppercase; height: 34px !important; padding: 0 16px !important; background: #000; color: #fff; border: 1px solid #000; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 4px; transition: 0.2s; }
-        .btn:hover { background: #333; }
-        .btn-secondary { background: #fff; color: #000; border: 1px solid var(--gray-300); }
-        .btn-secondary:hover { background: var(--gray-100); border-color: #000; }
-        .btn-danger { background: #fff; color: #dc2626; border: 1px solid #dc2626; }
-        .btn-danger:hover { background: #dc2626; color: #fff; }
-        .btn-icon { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--gray-200); background: #fff; cursor: pointer; border-radius: 4px; margin-left: 4px; transition: 0.2s; color: #555;}
-        .btn-icon:hover { border-color: #000; background: #000; color: #fff; }
+        /* Buttons */
+        .btn { font-size: 12px; font-weight: 600; text-transform: uppercase; height: 36px !important; padding: 0 16px !important; background: var(--text-main); color: #ffffff; border: 1px solid transparent; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: var(--border-radius); transition: all 0.2s ease; letter-spacing: 0.5px;}
+        .btn:hover { background: #1e293b; }
+        .btn-primary { background: var(--primary); color: #ffffff; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-secondary { background: var(--panel); color: var(--text-main); border: 1px solid var(--gray-200); }
+        .btn-secondary:hover { background: var(--gray-100); border-color: var(--gray-300); }
+        .btn-danger { background: var(--panel); color: var(--danger-color); border: 1px solid #fca5a5; }
+        .btn-danger:hover { background: var(--danger-color); color: #ffffff; border-color: var(--danger-color); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        .search-section { background: #f8f9fa; padding: 18px 20px; border: 1px solid var(--gray-200); border-radius: 4px; margin-bottom: 20px; }
+        .btn-icon { width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--gray-200); background: #ffffff; cursor: pointer; border-radius: var(--border-radius); margin-left: 4px; transition: 0.2s; color: var(--sub);}
+        .btn-icon:hover { border-color: var(--gray-300); background: var(--gray-100); color: var(--text-main); }
+
+        /* Search Section */
+        .search-section { background: var(--gray-100); padding: 16px 20px; border: 1px solid var(--gray-200); border-radius: var(--border-radius); margin-bottom: 20px; }
         .search-wrapper { display: flex; gap: 12px; align-items: center; width: 100%; }
         .search-box { position: relative; flex: 1; }
-        .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 14px; pointer-events: none; }
-        .search-input { width: 100%; padding: 8px 12px 8px 36px !important; font-size: 13px; border: 1px solid var(--gray-300); outline: none; background: #fff; height: 40px; border-radius: 4px; transition: 0.2s;}
-        .filter-select { padding: 8px 12px; font-size: 13px; border: 1px solid var(--gray-300); outline: none; background: #fff; height: 40px; border-radius: 4px; min-width: 180px; transition: 0.2s; cursor: pointer;}
-        .btn-reset { height: 40px !important; width: 40px !important; padding: 0 !important; justify-content: center; font-size: 16px; background: #fff; border: 1px solid var(--gray-300); color: #555; border-radius: 4px; transition: 0.2s;}
-        .btn-reset:hover { background: #f4f4f5; border-color: #000; color: #000; }
-        .search-input:focus, .filter-select:focus { border-color: #000; }
+        .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--sub); font-size: 14px; pointer-events: none; }
+        .search-input { width: 100%; padding: 8px 12px 8px 36px !important; font-size: 13px; border: 1px solid var(--gray-200); outline: none; background: #ffffff; height: 38px; border-radius: var(--border-radius); transition: all 0.2s ease; color: var(--text-main); font-family: inherit;}
+        .filter-select { padding: 8px 12px; font-size: 13px; border: 1px solid var(--gray-200); outline: none; background: #ffffff; height: 38px; border-radius: var(--border-radius); min-width: 180px; transition: all 0.2s ease; cursor: pointer; color: var(--text-main); font-family: inherit;}
+        .btn-reset { height: 38px !important; width: 38px !important; padding: 0 !important; justify-content: center; font-size: 16px; background: #ffffff; border: 1px solid var(--gray-200); color: var(--sub); border-radius: var(--border-radius); transition: 0.2s;}
+        .btn-reset:hover { background: var(--gray-100); border-color: var(--gray-300); color: var(--text-main); }
+        .search-input:focus, .filter-select:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1); }
 
-        .table-wrapper { border: 1px solid var(--gray-200); width: 100%; overflow-x: auto; background: #fff;}
+        /* Table */
+        .table-wrapper { border: 1px solid var(--gray-200); width: 100%; overflow-x: auto; background: #ffffff; border-radius: var(--border-radius); }
         table { width: 100%; border-collapse: collapse; min-width: 1000px; }
-        thead th { text-align: left; padding: 12px 15px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #666; background: #fafafa; border-bottom: 1px solid var(--gray-200); white-space: nowrap; }
-        tbody td { padding: 10px 15px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; font-size: 13px; word-wrap: break-word; }
+        thead th { text-align: left; padding: 12px 15px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--sub); background: var(--gray-100); border-bottom: 1px solid var(--gray-200); white-space: nowrap; position: sticky; top: 0; z-index: 10;}
+        tbody td { padding: 10px 15px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; font-size: 13px; word-wrap: break-word; color: var(--text-main);}
         tbody tr:hover { background: var(--gray-100); }
 
-        .badge-status { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; text-transform: uppercase; color: #fff; white-space: nowrap; display: inline-block; }
+        /* BADGE TRẠNG THÁI CHỮ (BỔ SUNG CSS BỊ THIẾU) */
+        .badge-status { padding: 6px 12px; border-radius: var(--border-radius); font-size: 11px; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; border: 1px solid transparent; cursor: pointer; transition: 0.2s;}
+        .badge-status:hover { opacity: 0.8; }
+        .badge-active { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
+        .badge-inactive { background: var(--gray-100); color: var(--sub); border-color: var(--gray-200); }
 
+        /* Pagination Đồng Bộ */
         .pagination-wrapper { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; }
-        .pagination-info { font-size: 11px; font-weight: 800; color: #888; text-transform: uppercase; }
-        .pagination { display: flex; gap: 5px; }
-        .page-number { min-width: 28px; height: 28px; font-size: 12px; font-weight: 700; background: transparent; border: 1px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 2px; transition: 0.2s;}
-        .page-number:hover:not(:disabled) { background: #eee; }
-        .page-number.active { background: #000; color: #fff; }
+        .pagination-info { font-size: 12px; font-weight: 600; color: var(--sub); text-transform: uppercase; }
+        .pagination { display: flex; gap: 4px; }
+        .page-number { min-width: 32px; height: 32px; font-size: 12px; font-weight: 600; background: transparent; border: 1px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: var(--border-radius); transition: 0.2s; color: var(--text-main);}
+        .page-number:hover:not(:disabled) { background: var(--gray-100); border-color: var(--gray-200);}
+        .page-number.active { background: var(--primary); color: #ffffff; border-color: var(--primary);}
         .page-number:disabled { opacity: 0.4; cursor: not-allowed; }
 
+        /* Switch Toggle */
+        .switch-wrapper { display: flex; align-items: center; gap: 10px; }
+        .switch-square { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .switch-square input { opacity: 0; width: 0; height: 0; }
+        .slider-square { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--gray-300); transition: .3s; border-radius: 4px; }
+        .slider-square:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 2px; }
+        input:checked + .slider-square { background-color: var(--primary); }
+        input:checked + .slider-square:before { transform: translateX(20px); }
+
+        .switch-sm { position: relative; display: inline-block; width: 34px; height: 18px; }
+        .switch-sm input { opacity: 0; width: 0; height: 0; }
+        .slider-sm { position: absolute; cursor: pointer; inset: 0; background-color: var(--gray-300); transition: .3s; border-radius: 20px; }
+        .slider-sm:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider-sm { background-color: var(--primary); }
+        input:checked + .slider-sm:before { transform: translateX(16px); }
+        .switch-sm.loading { opacity: 0.5; pointer-events: none; }
+
         /* DRAWER CHÍNH */
-        .overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 999; display: none; }
-        .overlay.show { display: block; }
-        .drawer { position: fixed; top: 0; right: -1000px; width: 600px; height: 100vh; background: #fff; border-left: 1px solid var(--gray-200); z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1); }
+        .cm-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); z-index: 999; display: none; backdrop-filter: blur(2px);}
+        .cm-overlay.show { display: block; }
+        .drawer { position: fixed; top: 0; right: -1000px; width: 600px; height: 100vh; background: #ffffff; border-left: 1px solid var(--gray-200); z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -4px 0 24px rgba(0, 0, 0, 0.08); }
         .drawer.show { right: 0; }
         .drawer.wide { width: 900px; }
 
@@ -68,99 +121,96 @@
         #pwdDrawer.show { right: 0; }
         #pwdOverlay { z-index: 1040; }
 
-        .drawer-header { padding: 15px 20px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center;}
-        .drawer-title { font-size: 15px; font-weight: 800; text-transform: uppercase; margin: 0; }
-        .drawer-body { flex: 1; padding: 20px; overflow-y: auto; background: #fdfdfd; }
-        .drawer-footer { padding: 15px 20px; border-top: 1px solid var(--gray-200); display: flex; gap: 10px; background: #fff;}
+        .drawer-header { padding: 16px 24px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; background: var(--gray-100);}
+        .drawer-title { font-size: 14px; font-weight: 700; text-transform: uppercase; margin: 0; color: var(--text-main);}
+        .drawer-body { flex: 1; padding: 24px; overflow-y: auto; background: var(--panel); }
+        .drawer-footer { padding: 16px 24px; border-top: 1px solid var(--gray-200); display: flex; gap: 10px; background: var(--gray-100);}
 
         /* Form Elements */
-        .form-group { margin-bottom: 18px; }
-        .form-label { font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; display: block; color: #444; }
-        .form-input, .form-select, .form-textarea { width: 100%; padding: 0 12px; font-size: 13px; border: 1px solid var(--gray-300); outline: none; border-radius: 4px; background: #fff; height: 40px; font-family: inherit;}
-        .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #000; }
-        .form-input:disabled { background: #f9f9f9; color: #555; cursor: not-allowed; border-color: #eee; }
-
-        .switch-wrapper { display: flex; align-items: center; gap: 10px; }
-        .switch-square { position: relative; display: inline-block; width: 44px; height: 24px; }
-        .switch-square input { opacity: 0; width: 0; height: 0; }
-        .slider-square { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 4px; }
-        .slider-square:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 2px; }
-        input:checked + .slider-square { background-color: #000; }
-        input:checked + .slider-square:before { transform: translateX(20px); }
-
-        .switch-sm { position: relative; display: inline-block; width: 34px; height: 18px; }
-        .switch-sm input { opacity: 0; width: 0; height: 0; }
-        .slider-sm { position: absolute; cursor: pointer; inset: 0; background-color: #ccc; transition: .3s; border-radius: 20px; }
-        .slider-sm:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%; }
-        input:checked + .slider-sm { background-color: #000; }
-        input:checked + .slider-sm:before { transform: translateX(16px); }
-
-        /* BEE TOAST CUSTOM */
-        #beeToastHost { position: fixed; top: 30px; right: 30px; z-index: 999999; display: flex; flex-direction: column; gap: 15px; pointer-events: none; }
-        .bee-toast-box { min-width: 320px; max-width: 400px; padding: 18px 24px; border-radius: 8px; background: #fff; color: #000; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2); display: flex; align-items: flex-start; gap: 14px; border-left: 6px solid #000; animation: beeToastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; transition: all 0.3s ease; pointer-events: auto; }
-        .bee-toast-box.success { border-left-color: #10b981; }
-        .bee-toast-box.error { border-left-color: #ef4444; }
-        .bee-toast-box.warning { border-left-color: #f59e0b; }
-        .bee-toast-box.info { border-left-color: #2563eb; }
-        .bee-toast-box.hiding { transform: translateX(120%); opacity: 0; margin-top: -80px; }
-        @keyframes beeToastSlideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .form-group { margin-bottom: 20px; }
+        .form-label { font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; display: block; color: var(--sub); }
+        .form-input, .form-select, .form-textarea { width: 100%; padding: 0 12px; font-size: 13px; border: 1px solid var(--gray-200); outline: none; border-radius: var(--border-radius); background: #ffffff; height: 38px; font-family: inherit; color: var(--text-main); transition: all 0.2s ease;}
+        .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);}
+        .form-input:disabled, .form-select:disabled { background: var(--gray-100); color: var(--sub); cursor: not-allowed; border-color: var(--gray-200); }
 
         /* CUSTOM RIÊNG KHÁCH HÀNG */
-        .upload-area { width: 100px; height: 100px; border-radius: 50%; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; margin: 0 auto 10px; transition: 0.2s; background: #fafafa; }
-        .upload-area:hover { border-color: #000; background: #fff; }
+        .upload-area { width: 100px; height: 100px; border-radius: 50%; border: 2px dashed var(--gray-300); display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; margin: 0 auto 10px; transition: 0.2s; background: var(--gray-100); }
+        .upload-area:hover { border-color: var(--primary); background: #ffffff; }
         .upload-area img { width: 100%; height: 100%; object-fit: cover; display: none; }
-        .upload-area i { font-size: 24px; color: #ccc; }
-        .upload-area.disabled { cursor: not-allowed; border-color: #eee; background: #f9f9f9; pointer-events: none; }
+        .upload-area i { font-size: 24px; color: var(--sub); }
+        .upload-area.disabled { cursor: not-allowed; border-color: var(--gray-200); background: var(--gray-100); pointer-events: none; }
 
-        .drawer-tabs { display: flex; border-bottom: 1px solid #eee; margin-bottom: 20px; gap: 20px; overflow-x: auto; white-space: nowrap;}
-        .drawer-tab { padding-bottom: 10px; font-size: 12px; font-weight: 800; text-transform: uppercase; color: #888; cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; }
-        .drawer-tab.active { color: #000; border-bottom-color: #000; }
-        .drawer-tab:hover { color: #000; }
+        .drawer-tabs { display: flex; border-bottom: 1px solid var(--gray-200); margin-bottom: 24px; gap: 24px; overflow-x: auto; white-space: nowrap;}
+        .drawer-tab { padding-bottom: 10px; font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--sub); cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; }
+        .drawer-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .drawer-tab:hover { color: var(--text-main); }
 
-        .addr-card { border: 1px solid #eee; padding: 12px; border-radius: 4px; margin-bottom: 10px; background: #fff; position: relative; transition: 0.2s; }
-        .addr-card:hover { border-color: #ccc; }
-        .addr-card.default { border: 1px solid #000; background: #fafafa; }
-        .addr-tag { font-size: 9px; font-weight: 800; background: #000; color: #fff; padding: 2px 6px; border-radius: 2px; text-transform: uppercase; margin-left: 5px; }
-        .addr-actions { position: absolute; top: 10px; right: 10px; display: flex; gap: 5px; }
+        .addr-card { border: 1px solid var(--gray-200); padding: 16px; border-radius: var(--border-radius); margin-bottom: 12px; background: #ffffff; position: relative; transition: 0.2s; }
+        .addr-card:hover { border-color: var(--gray-300); box-shadow: 0 2px 8px rgba(0,0,0,0.05);}
+        .addr-card.default { border: 1px solid var(--primary); background: #eff6ff; }
+        .addr-tag { font-size: 10px; font-weight: 700; background: var(--primary); color: #ffffff; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; margin-left: 8px; }
+        .addr-actions { position: absolute; top: 16px; right: 16px; display: flex; gap: 8px; }
 
         /* MỚI CHO ORDER & PRODUCT SUB-TABS */
-        .sub-table-container { background: #fff; border: 1px solid #eee; border-radius: 4px; padding: 15px; }
+        .sub-table-container { background: #ffffff; border: 1px solid var(--gray-200); border-radius: var(--border-radius); padding: 20px; }
 
-        .expand-btn { cursor: pointer; color: #666; font-size: 16px; padding: 5px; border-radius: 50%; transition: 0.2s; }
-        .expand-btn:hover { background: #eee; color: #000; }
+        .expand-btn { cursor: pointer; color: var(--sub); font-size: 16px; padding: 6px; border-radius: 50%; transition: 0.2s; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px;}
+        .expand-btn:hover { background: var(--gray-100); color: var(--text-main); }
         .expand-btn.open { transform: rotate(180deg); }
 
-        .order-detail-row { display: none; background: #fdfdfd;}
+        .order-detail-row { display: none; background: var(--gray-100);}
         .order-detail-row.show { display: table-row; }
-        .order-detail-content { padding: 15px 20px !important; border-left: 3px solid #2563eb; }
-        .detail-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #eee; border-radius: 4px; overflow: hidden;}
-        .detail-table th { background: #f9f9f9; padding: 8px 12px; font-size: 11px; font-weight: 700; color: #555; text-transform: uppercase; border-bottom: 1px solid #eee;}
-        .detail-table td { padding: 8px 12px; font-size: 12px; border-bottom: 1px solid #eee;}
+        .order-detail-content { padding: 20px !important; border-left: 4px solid var(--primary); }
+        .detail-table { width: 100%; border-collapse: collapse; background: #ffffff; border: 1px solid var(--gray-200); border-radius: var(--border-radius); overflow: hidden;}
+        .detail-table th { background: var(--gray-100); padding: 10px 12px; font-size: 11px; font-weight: 700; color: var(--sub); text-transform: uppercase; border-bottom: 1px solid var(--gray-200);}
+        .detail-table td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid var(--gray-200); color: var(--text-main);}
 
-        .product-img-sm { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid #eee; }
-        .flex-center { display: flex; align-items: center; gap: 10px; }
+        .product-img-sm { width: 44px; height: 44px; object-fit: cover; border-radius: var(--border-radius); border: 1px solid var(--gray-200); }
+        .flex-center { display: flex; align-items: center; gap: 12px; }
+
+        /* ==========================================================================
+           CSS BỔ SUNG CHO TOAST VÀ CONFIRM (ĐẢM BẢO LUÔN HIỂN THỊ TRÊN CÙNG)
+           Y HỆT NHƯ TRANG PRODUCTS.HTML
+           ========================================================================== */
+        #genericConfirmOverlay, #toastHost, .toast-container { z-index: 2147483647 !important; }
+
+        #toastHost, .toast-container { position: fixed !important; top: 30px !important; right: 20px !important; display: flex; flex-direction: column; gap: 12px; pointer-events: none; overflow: visible !important;}
+        .custom-toast { display: flex; align-items: center; background: #ffffff; padding: 12px 16px; border-radius: var(--border-radius); box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 280px; max-width: 380px; border: 1px solid var(--gray-200); border-left: 4px solid var(--primary); animation: slideInRight 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; pointer-events: auto;}
+
+        .custom-toast.toast-success { border-left-color: #10b981; }
+        .custom-toast.toast-success .toast-icon { color: #10b981; }
+        .custom-toast.toast-error { border-left-color: #ef4444; }
+        .custom-toast.toast-error .toast-icon { color: #ef4444; }
+        .custom-toast.toast-warning { border-left-color: #f59e0b; }
+        .custom-toast.toast-warning .toast-icon { color: #f59e0b; }
+        .custom-toast.toast-info { border-left-color: #3b82f6; }
+        .custom-toast.toast-info .toast-icon { color: #3b82f6; }
+
+        .toast-icon { font-size: 18px; margin-right: 12px; }
+        .toast-msg { flex-grow: 1; font-size: 13px; font-weight: 500; color: var(--text-main); line-height: 1.4; }
+        .toast-close { background: none; border: none; color: var(--sub); cursor: pointer; font-size: 18px; margin-left: 10px; padding: 0; transition: color 0.2s; }
+        .toast-close:hover { color: var(--text-main); }
+
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
 
         /* ==========================================================================
            RESPONSIVE MOBILE CHO TRANG KHÁCH HÀNG
            ========================================================================== */
         @media (max-width: 768px) {
-            /* 1. Thanh Header & Tabs */
             .actions-bar { flex-direction: column; align-items: stretch; gap: 15px; padding-bottom: 10px; }
             .tabs { width: 100%; border-bottom: 1px solid var(--gray-200); margin-bottom: 0; }
 
-            /* 2. Khung tìm kiếm ngoài màn hình chính */
             .search-wrapper { flex-direction: column; align-items: stretch; }
             .filter-select { width: 100%; }
             .btn-reset { width: 100% !important; margin-top: 5px; }
 
-            /* 3. Khung Drawer (Slide Panel Thêm/Sửa) */
             .drawer { width: 100% !important; right: -100% !important; }
             .drawer.show { right: 0 !important; }
             .drawer.wide { width: 100% !important; }
             #pwdDrawer { width: 100% !important; right: -100% !important; }
             #pwdDrawer.show { right: 0 !important; }
 
-            /* 4. Chuyển các cặp Input xếp ngang thành dọc (Dựa vào inline CSS) */
             #tabContentInfo div[style*="display: flex"],
             #defaultAddressGroup div[style*="display: flex"],
             #tabContentOrder div[style*="display: flex"] {
@@ -174,12 +224,10 @@
                 width: 100% !important;
             }
 
-            /* 5. Xử lý các thành phần con bên trong Drawer */
             .drawer-tabs { padding-bottom: 8px; }
             .drawer-tabs::-webkit-scrollbar { height: 3px; }
             .sub-table-container { padding: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch;}
 
-            /* 6. Phân trang */
             .pagination-wrapper { flex-direction: column; gap: 10px; align-items: center; }
         }
     </style>
@@ -193,7 +241,7 @@
                 <i class="bi bi-people-fill"></i> QUẢN LÝ KHÁCH HÀNG
             </div>
         </nav>
-        <button class="btn" id="btnAdd" onclick="window.CustomerApp.openDrawer('create')">
+        <button class="btn btn-primary" id="btnAdd" onclick="window.CustomerApp.openDrawer('create')">
             <i class="bi bi-plus-lg"></i> THÊM MỚI
         </button>
     </div>
@@ -238,11 +286,11 @@
     <div id="paginationContainer" class="pagination-wrapper"></div>
 </div>
 
-<div class="overlay" id="overlay" onclick="window.CustomerApp.closeDrawer()"></div>
+<div class="cm-overlay" id="overlay" onclick="window.CustomerApp.closeDrawer()"></div>
 <aside class="drawer" id="drawer">
     <div class="drawer-header">
         <h3 class="drawer-title" id="drawerTitle">THÊM MỚI KHÁCH HÀNG</h3>
-        <button class="btn-icon" onclick="window.CustomerApp.closeDrawer()" style="border:none;"><i class="bi bi-x-lg"></i></button>
+        <button class="btn-icon" onclick="window.CustomerApp.closeDrawer()" style="border:none; box-shadow:none;"><i class="bi bi-x-lg"></i></button>
     </div>
 
     <div class="drawer-body">
@@ -261,17 +309,17 @@
                     <img id="imgPreview" alt="Avatar">
                     <i class="bi bi-camera" id="iconUpload"></i>
                 </div>
-                <div id="uploadHint" style="text-align: center; font-size: 11px; color: #888; margin-bottom: 20px;">Nhấn để tải ảnh đại diện</div>
+                <div id="uploadHint" style="text-align: center; font-size: 11px; color: var(--sub); margin-bottom: 20px;">Nhấn để tải ảnh đại diện</div>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Họ và Tên <span style="color:red" class="required-star">*</span></label>
+                <label class="form-label">Họ và Tên <span style="color:var(--danger-color)" class="required-star">*</span></label>
                 <input id="inpName" class="form-input" placeholder="Nhập họ tên...">
             </div>
 
             <div style="display: flex; gap: 15px;">
                 <div class="form-group" style="flex: 1;">
-                    <label class="form-label">Số điện thoại <span style="color:red" class="required-star">*</span></label>
+                    <label class="form-label">Số điện thoại <span style="color:var(--danger-color)" class="required-star">*</span></label>
                     <input id="inpPhone" class="form-input" placeholder="09xxxxxxxx">
                 </div>
                 <div class="form-group" style="flex: 1;">
@@ -300,12 +348,12 @@
                         <input type="checkbox" id="inpStatus" checked>
                         <span class="slider-square"></span>
                     </label>
-                    <span style="font-size: 13px; font-weight: 700;">Kích hoạt tài khoản</span>
+                    <span style="font-size: 13px; font-weight: 600;">Kích hoạt tài khoản</span>
                 </div>
             </div>
 
-            <div id="defaultAddressGroup" style="border-top: 1px dashed #ccc; margin-top: 20px; padding-top: 15px;">
-                <h5 style="font-size: 12px; font-weight: 800; margin-bottom: 10px; color: #555; text-transform: uppercase;">Địa chỉ (Có thể bỏ qua nếu mua tại quầy)</h5>
+            <div id="defaultAddressGroup" style="border-top: 1px dashed var(--gray-300); margin-top: 20px; padding-top: 15px;">
+                <h5 style="font-size: 12px; font-weight: 700; margin-bottom: 12px; color: var(--sub); text-transform: uppercase;">Địa chỉ (Có thể bỏ qua nếu mua tại quầy)</h5>
 
                 <div style="display: flex; gap: 10px; margin-bottom: 15px;">
                     <select id="inpCity" class="form-select" onchange="window.CustomerApp.Address.loadDistricts(this.value, 'inpDist', 'inpWard')">
@@ -325,8 +373,8 @@
         </div>
 
         <div id="tabContentAddr" style="display: none;">
-            <div id="subAddressForm" style="display: none; background: #f9f9f9; padding: 15px; border: 1px solid #ccc; margin-bottom: 15px; border-radius: 4px;">
-                <div style="font-weight: 800; font-size: 12px; margin-bottom: 15px; text-transform: uppercase;">Thêm địa chỉ mới</div>
+            <div id="subAddressForm" style="display: none; background: var(--gray-100); padding: 20px; border: 1px solid var(--gray-200); margin-bottom: 20px; border-radius: var(--border-radius);">
+                <div style="font-weight: 700; font-size: 13px; margin-bottom: 16px; text-transform: uppercase; color: var(--text-main);">Thêm địa chỉ mới</div>
                 <div class="form-group">
                     <select id="subCity" class="form-select" onchange="window.CustomerApp.Address.loadDistricts(this.value, 'subDist', 'subWard')">
                         <option value="">-- Chọn Tỉnh / TP --</option>
@@ -344,13 +392,13 @@
                 </div>
                 <div class="form-group"><input id="subDetail" class="form-input" placeholder="Chi tiết (Số nhà, đường...)"></div>
                 <div style="display: flex; gap: 10px;">
-                    <button class="btn" style="height: 38px !important; flex:1;" onclick="window.CustomerApp.saveSubAddress()">LƯU LẠI</button>
-                    <button class="btn btn-secondary" style="height: 38px !important; flex:1;" onclick="document.getElementById('subAddressForm').style.display='none'">HỦY BỎ</button>
+                    <button class="btn btn-primary" style="height: 40px !important; flex:1;" onclick="window.CustomerApp.saveSubAddress()">LƯU LẠI</button>
+                    <button class="btn btn-secondary" style="height: 40px !important; flex:1;" onclick="document.getElementById('subAddressForm').style.display='none'">HỦY BỎ</button>
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h5 style="font-size: 13px; font-weight: 800; color:#888;">DANH SÁCH ĐỊA CHỈ</h5>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h5 style="font-size: 13px; font-weight: 700; color:var(--sub); text-transform: uppercase; margin: 0;">DANH SÁCH ĐỊA CHỈ</h5>
                 <button class="btn btn-secondary" id="btnShowAddAddress" onclick="window.CustomerApp.showAddAddressForm()">
                     <i class="bi bi-plus-lg"></i> Thêm mới
                 </button>
@@ -361,7 +409,7 @@
 
         <div id="tabContentOrder" style="display: none;">
             <div class="sub-table-container">
-                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <div style="display: flex; gap: 12px; margin-bottom: 20px;">
                     <div class="search-box" style="flex:2">
                         <i class="bi bi-search"></i>
                         <input type="text" class="search-input" id="searchOrder" placeholder="Mã đơn hàng..." oninput="window.CustomerApp.handleSubSearch('order', this.value)">
@@ -379,10 +427,10 @@
                 <table style="min-width: 100%;">
                     <thead>
                     <tr>
-                        <th style="width: 30px;"></th>
+                        <th style="width: 40px; text-align: center;"></th>
                         <th>MÃ HĐ</th>
                         <th>NGÀY TẠO</th>
-                        <th>TỔNG TIỀN</th>
+                        <th style="text-align: right;">TỔNG TIỀN</th>
                         <th style="text-align: center;">TRẠNG THÁI</th>
                     </tr>
                     </thead>
@@ -415,8 +463,8 @@
                     <tr>
                         <th>MÃ VOUCHER</th>
                         <th>TÊN VOUCHER</th>
-                        <th>GIẢM GIÁ</th>
-                        <th>ĐƠN ÁP DỤNG</th>
+                        <th style="text-align: right;">GIẢM GIÁ</th>
+                        <th style="text-align: center;">ĐƠN ÁP DỤNG</th>
                         <th>NGÀY SỬ DỤNG</th>
                     </tr>
                     </thead>
@@ -430,25 +478,25 @@
 
     <div class="drawer-footer">
         <button class="btn btn-secondary" style="flex: 1; height: 40px !important;" onclick="window.CustomerApp.closeDrawer()">THOÁT</button>
-        <button class="btn" style="flex: 1; height: 40px !important;" id="btnSave" onclick="window.CustomerApp.saveCustomer()">LƯU THÔNG TIN</button>
+        <button class="btn btn-primary" style="flex: 1; height: 40px !important;" id="btnSave" onclick="window.CustomerApp.saveCustomer()">LƯU THÔNG TIN</button>
     </div>
 </aside>
 
-<div class="overlay" id="pwdOverlay" onclick="window.CustomerApp.closePwdDrawer()"></div>
+<div class="cm-overlay" id="pwdOverlay" onclick="window.CustomerApp.closePwdDrawer()"></div>
 <aside class="drawer" id="pwdDrawer">
     <div class="drawer-header">
         <h3 class="drawer-title">ĐỔI MẬT KHẨU</h3>
-        <button class="btn-icon" onclick="window.CustomerApp.closePwdDrawer()" style="border:none;"><i class="bi bi-x-lg"></i></button>
+        <button class="btn-icon" onclick="window.CustomerApp.closePwdDrawer()" style="border:none; box-shadow:none;"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="drawer-body">
         <div style="text-align: center; margin-bottom: 25px;">
-            <div style="width: 80px; height: 80px; background: #eff6ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
-                <i class="bi bi-shield-lock-fill" style="font-size: 40px; color: #2563eb;"></i>
+            <div style="width: 80px; height: 80px; background: #eff6ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                <i class="bi bi-shield-lock-fill" style="font-size: 36px; color: var(--primary);"></i>
             </div>
-            <p style="font-size: 13px; color: #555; line-height: 1.6;">Thiết lập mật khẩu đăng nhập mới cho khách hàng<br><strong id="pwdCustomerName" style="color: #000; font-size: 14px;"></strong></p>
+            <p style="font-size: 13px; color: var(--sub); line-height: 1.6;">Thiết lập mật khẩu đăng nhập mới cho khách hàng<br><strong id="pwdCustomerName" style="color: var(--text-main); font-size: 14px;"></strong></p>
         </div>
         <div class="form-group">
-            <label class="form-label">Mật khẩu mới <span style="color:red">*</span></label>
+            <label class="form-label">Mật khẩu mới <span style="color:var(--danger-color)">*</span></label>
             <div class="search-box">
                 <i class="bi bi-key"></i>
                 <input type="text" id="inpNewPassword" class="form-input" style="padding-left: 36px;" placeholder="Nhập ít nhất 6 ký tự...">
@@ -457,84 +505,27 @@
     </div>
     <div class="drawer-footer">
         <button class="btn btn-secondary" style="flex: 1; height: 40px !important;" onclick="window.CustomerApp.closePwdDrawer()">HỦY</button>
-        <button class="btn" style="flex: 1; height: 40px !important; background: #2563eb; border-color: #2563eb;" id="btnSavePwd" onclick="window.CustomerApp.saveNewPassword()">XÁC NHẬN ĐỔI</button>
+        <button class="btn btn-primary" style="flex: 1; height: 40px !important;" id="btnSavePwd" onclick="window.CustomerApp.saveNewPassword()">XÁC NHẬN ĐỔI</button>
     </div>
 </aside>
 
-<div id="beeToastHost"></div>
-
 <script>
-    /* ========================================================================
-       TOAST & DIALOG SYSTEM
-       ======================================================================== */
-    window.toast = function (message, type = 'success') {
-        let container = document.getElementById('beeToastHost');
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'beeToastHost';
-            document.body.appendChild(container);
-        }
-
-        const el = document.createElement('div');
-        el.className = `bee-toast-box ${type}`;
-        const prefix = type === 'success' ? 'THÀNH CÔNG' : (type === 'error' ? 'LỖI' : 'THÔNG BÁO');
-        const color = type === 'success' ? '#10b981' : (type === 'error' ? '#ef4444' : '#f59e0b');
-        const icon = type === 'success' ? 'bi-check-circle-fill' : (type === 'error' ? 'bi-x-circle-fill' : 'bi-exclamation-triangle-fill');
-
-        el.innerHTML = `
-            <i class="bi ${icon}" style="color:${color}; font-size:22px; margin-top:2px;"></i>
-            <div style="display: flex; flex-direction: column; flex: 1;">
-                <span style="font-weight:800; font-size:12px; text-transform: uppercase; margin-bottom: 4px; color:${color}">${prefix}</span>
-                <span style="font-weight:500; font-size:13px; color:#333; line-height: 1.4;">${message}</span>
-            </div>
-            <i class="bi bi-x-lg" style="cursor: pointer; margin-left: 10px; font-size: 18px; color:#999; transition: 0.2s;" onmouseover="this.style.color='#000'" onmouseout="this.style.color='#999'" onclick="this.parentElement.remove()"></i>
-        `;
-        container.appendChild(el);
-        setTimeout(() => { if (el.parentNode) { el.classList.add('hiding'); setTimeout(() => el.remove(), 300); } }, 3500);
-    };
-
-    window.toastConfirm = function (title, message, onConfirm, onCancel) {
-        let container = document.getElementById('beeToastHost');
-        if (!container) { container = document.createElement('div'); container.id = 'beeToastHost'; document.body.appendChild(container); }
-
-        const el = document.createElement('div');
-        el.className = `bee-toast-box warning`;
-        el.style.flexDirection = 'column'; el.style.alignItems = 'stretch';
-
-        el.innerHTML = `
-            <div style="display: flex; gap: 12px; align-items: flex-start; width: 100%;">
-                <i class="bi bi-question-circle-fill" style="color:#f59e0b; font-size:24px; margin-top:2px;"></i>
-                <div style="display:flex; flex-direction:column; flex:1;">
-                    <span style="font-weight:800; font-size:13px; text-transform:uppercase; margin-bottom:6px; color:#000;">${title}</span>
-                    <span style="font-weight:500; font-size:13px; color:#555; line-height: 1.5;">${message}</span>
-                </div>
-            </div>
-            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px; border-top: 1px dashed #eee; padding-top: 12px;">
-                <button class="btn btn-secondary" id="toastCancel" style="height: 32px; font-size: 11px; padding: 0 16px; border-radius: 4px;">HỦY BỎ</button>
-                <button class="btn" id="toastOk" style="height: 32px; font-size: 11px; padding: 0 16px; border-radius: 4px;">XÁC NHẬN</button>
-            </div>
-        `;
-        container.appendChild(el);
-
-        el.querySelector('#toastOk').onclick = () => { el.classList.add('hiding'); setTimeout(() => el.remove(), 300); if(onConfirm) onConfirm(); };
-        el.querySelector('#toastCancel').onclick = () => { el.classList.add('hiding'); setTimeout(() => el.remove(), 300); if(onCancel) onCancel(); };
-    };
-
     const getStatusBadge = (tt) => {
-        if (!tt) return '<span class="badge-status" style="background:#9ca3af;">N/A</span>';
+        if (!tt) return '<span class="badge-status" style="background:var(--gray-300); color:var(--text-main);">N/A</span>';
         const ma = typeof tt === 'object' ? tt.ma : tt;
         const ten = typeof tt === 'object' ? tt.ten : tt;
 
-        if (ma === 'HOAN_THANH') return `<span class="badge-status" style="background:#10b981;">HOÀN THÀNH</span>`;
-        if (ma === 'DA_HUY') return `<span class="badge-status" style="background:#ef4444;">ĐÃ HỦY</span>`;
+        if (ma === 'HOAN_THANH') return `<span class="badge-status" style="background:var(--success-color);">HOÀN THÀNH</span>`;
+        if (ma === 'DA_HUY') return `<span class="badge-status" style="background:var(--danger-color);">ĐÃ HỦY</span>`;
         if (ma === 'CHO_THANH_TOAN') return `<span class="badge-status" style="background:#f59e0b;">CHỜ THANH TOÁN</span>`;
         if (ma === 'CHO_XAC_NHAN') return `<span class="badge-status" style="background:#f59e0b;">CHỜ XÁC NHẬN</span>`;
-        if (ma === 'DANG_GIAO' || ma === 'CHO_GIAO') return `<span class="badge-status" style="background:#3b82f6;">${(ten || ma).toUpperCase()}</span>`;
+        if (ma === 'DANG_GIAO' || ma === 'CHO_GIAO') return `<span class="badge-status" style="background:var(--primary);">${(ten || ma).toUpperCase()}</span>`;
         return `<span class="badge-status" style="background:#6366f1;">${(ten || ma).toUpperCase()}</span>`;
     };
 
     // --- MAIN APP ---
     window.CustomerApp = {
+        initialized: false,
         state: {
             page: 0, size: 10, totalPages: 0, q: '', status: '', editingId: null, isViewMode: false, activePwdId: null,
             subParams: {
@@ -545,7 +536,6 @@
         },
 
         Address: {
-            // 🌟 KHAI BÁO TOKEN GHN CỦA BẠN Ở ĐÂY
             ghnToken: '5c6b4e08-f30a-11f0-9c2d-8ebaf800da9f',
 
             async loadProvinces(selectId) {
@@ -600,7 +590,6 @@
                     });
                     const result = await res.json();
                     if (result.code === 200) {
-                        // 💡 GHN dùng WardCode (thường là Chuỗi/String) thay vì ID số nguyên
                         wardSelect.innerHTML = '<option value="">-- Chọn Phường / Xã --</option>' +
                             result.data.map(w => `<option value="${w.WardCode}" data-name="${w.WardName}">${w.WardName}</option>`).join('');
                         wardSelect.disabled = false;
@@ -630,14 +619,16 @@
         },
 
         init() {
+            if (this.initialized) return;
             this.loadData();
             this.Address.loadProvinces('inpCity');
             this.Address.loadProvinces('subCity');
+            this.initialized = true;
         },
 
         async loadData() {
             const tbody = document.getElementById('tbody');
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px; color:#888;">Đang tải dữ liệu...</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px; color:var(--sub);">Đang tải dữ liệu...</td></tr>`;
             try {
                 const res = await fetch(`/api/khach-hang?page=${this.state.page}&size=${this.state.size}&q=${this.state.q}&trangThai=${this.state.status}`);
                 const data = await res.json();
@@ -645,28 +636,33 @@
                 this.renderTable(data.content);
                 this.renderPagination(data, 'paginationContainer', 'window.CustomerApp.changePage');
             } catch (e) {
-                window.toast('Hệ thống gặp sự cố khi tải danh sách.', 'error');
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px; color:red;">Lỗi tải dữ liệu!</td></tr>`;
+                if (typeof window.toast === 'function') window.toast('Hệ thống gặp sự cố khi tải danh sách.', 'error');
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px; color:var(--danger-color);">Lỗi tải dữ liệu!</td></tr>`;
             }
         },
 
         renderTable(list) {
             const tbody = document.getElementById('tbody');
             if(!list || list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 40px; color:#888; font-style:italic;">Không tìm thấy dữ liệu</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 40px; color:var(--sub); font-style:italic;">Không tìm thấy dữ liệu</td></tr>`;
                 return;
             }
             tbody.innerHTML = list.map((item, index) => {
                 const stt = (this.state.page * this.state.size) + index + 1;
-                const toggleHtml = `<label class="switch-sm"><input type="checkbox" ${item.trangThai ? 'checked' : ''} onchange="window.CustomerApp.quickToggle(${item.id}, this)"><span class="slider-sm"></span></label>`;
+
+                // ĐÃ SỬA THÀNH BADGE CHỮ
+                const badgeClass = item.trangThai ? 'badge-active' : 'badge-inactive';
+                const badgeText = item.trangThai ? 'Đang hoạt động' : 'Ngừng hoạt động';
+                const statusHtml = `<span class="badge-status ${badgeClass}" onclick="window.CustomerApp.quickToggle(${item.id}, ${item.trangThai})">${badgeText}</span>`;
+
                 return `
                     <tr>
                         <td style="text-align:center;">${stt}</td>
-                        <td style="font-weight:800; color:#555;">${item.ma}</td>
-                        <td><span style="font-weight: 700; color: #000; font-size: 13px;">${item.hoTen}</span></td>
-                        <td><div style="font-weight:700;">${item.soDienThoai || '---'}</div><div style="font-size:12px; color:#666;">${item.email || ''}</div></td>
+                        <td style="font-weight:700; color:var(--text-main);">${item.ma}</td>
+                        <td><span style="font-weight: 600; color: var(--text-main); font-size: 13px;">${item.hoTen}</span></td>
+                        <td><div style="font-weight:600;">${item.soDienThoai || '---'}</div><div style="font-size:12px; color:var(--sub);">${item.email || ''}</div></td>
                         <td>${item.gioiTinh ? item.gioiTinh : '---'}</td>
-                        <td style="text-align:center;">${toggleHtml}</td>
+                        <td style="text-align:center;">${statusHtml}</td>
                         <td style="text-align:right; white-space: nowrap;">
                             <button class="btn-icon" title="Đổi mật khẩu" onclick="window.CustomerApp.openChangePassword(${item.id}, '${item.hoTen.replace(/'/g, "\\'")}')"><i class="bi bi-key"></i></button>
                             <button class="btn-icon" title="Xem chi tiết" onclick="window.CustomerApp.openEdit(${item.id}, true)"><i class="bi bi-eye"></i></button>
@@ -726,24 +722,26 @@
         },
         async saveNewPassword() {
             const newPwd = document.getElementById('inpNewPassword').value.trim();
-            if(newPwd.length < 6) { window.toast("Mật khẩu phải có ít nhất 6 ký tự!", "warning"); return; }
-            window.toastConfirm("Xác nhận đổi mật khẩu", "Bạn có chắc chắn muốn thay đổi mật khẩu cho khách hàng này?", async () => {
-                const btn = document.getElementById('btnSavePwd');
-                const oldText = btn.innerHTML;
-                btn.innerHTML = 'ĐANG XỬ LÝ...'; btn.disabled = true;
-                try {
-                    const res = await fetch(`/api/khach-hang/${this.state.activePwdId}/doi-mat-khau`, {
-                        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ matKhauMoi: newPwd })
-                    });
-                    if (res.ok) { window.toast('Đổi mật khẩu thành công.', 'success'); this.closePwdDrawer(); }
-                    else {
-                        let errorMsg = 'Hệ thống từ chối yêu cầu.';
-                        try { const err = await res.json(); errorMsg = err.message || err.error || errorMsg; } catch(e) {}
-                        window.toast(errorMsg, 'error');
-                    }
-                } catch (e) { window.toast('Sự cố đường truyền mạng.', 'error'); }
-                finally { btn.innerHTML = oldText; btn.disabled = false; }
-            }, () => {});
+            if(newPwd.length < 6) { if(typeof window.toast === 'function') window.toast("Mật khẩu phải có ít nhất 6 ký tự!", "warning"); return; }
+            if(typeof window.confirmDialog === 'function') {
+                window.confirmDialog("XÁC NHẬN ĐỔI MẬT KHẨU", "Bạn có chắc chắn muốn thay đổi mật khẩu cho khách hàng này?", async () => {
+                    const btn = document.getElementById('btnSavePwd');
+                    const oldText = btn.innerHTML;
+                    btn.innerHTML = 'ĐANG XỬ LÝ...'; btn.disabled = true;
+                    try {
+                        const res = await fetch(`/api/khach-hang/${this.state.activePwdId}/doi-mat-khau`, {
+                            method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ matKhauMoi: newPwd })
+                        });
+                        if (res.ok) { if(typeof window.toast === 'function') window.toast('Đổi mật khẩu thành công.', 'success'); this.closePwdDrawer(); }
+                        else {
+                            let errorMsg = 'Hệ thống từ chối yêu cầu.';
+                            try { const err = await res.json(); errorMsg = err.message || err.error || errorMsg; } catch(e) {}
+                            if(typeof window.toast === 'function') window.toast(errorMsg, 'error');
+                        }
+                    } catch (e) { if(typeof window.toast === 'function') window.toast('Sự cố đường truyền mạng.', 'error'); }
+                    finally { btn.innerHTML = oldText; btn.disabled = false; }
+                }, () => {});
+            }
         },
 
         setFormState(isDisabled) {
@@ -791,7 +789,6 @@
             document.getElementById('drawerTabs').style.display = 'flex';
             document.getElementById('defaultAddressGroup').style.display = 'none';
 
-            // Ẩn hiện các tab con dựa vào mode (Chỉ Xem Chi Tiết mới thấy Lịch sử mua)
             document.getElementById('tabTitleOrder').style.display = isViewMode ? 'block' : 'none';
             document.getElementById('tabTitleProduct').style.display = isViewMode ? 'block' : 'none';
             document.getElementById('tabTitleVoucher').style.display = isViewMode ? 'block' : 'none';
@@ -824,10 +821,9 @@
 
                 document.getElementById('drawer').classList.add('show');
                 document.getElementById('overlay').classList.add('show');
-            } catch(e) { window.toast('Không thể truy xuất thông tin khách hàng.', 'error'); }
+            } catch(e) { if(typeof window.toast === 'function') window.toast('Không thể truy xuất thông tin khách hàng.', 'error'); }
         },
 
-        // 🌟 XỬ LÝ CHUYỂN TAB VÀ THU PHÓNG DRAWER
         switchDrawerTab(tabName) {
             document.querySelectorAll('.drawer-tab').forEach(t => t.classList.remove('active'));
             ['Info', 'Addr', 'Order', 'Product', 'Voucher'].forEach(t => document.getElementById(`tabContent${t}`).style.display = 'none');
@@ -835,10 +831,10 @@
             const drawer = document.getElementById('drawer');
 
             if(tabName === 'info' || tabName === 'address') {
-                drawer.classList.remove('wide'); // Thu hẹp lại
+                drawer.classList.remove('wide');
                 document.getElementById('btnSave').style.display = this.state.isViewMode ? 'none' : 'block';
             } else {
-                drawer.classList.add('wide'); // Phình to ra để hiển thị bảng
+                drawer.classList.add('wide');
                 document.getElementById('btnSave').style.display = 'none';
             }
 
@@ -864,14 +860,10 @@
             }
         },
 
-        // =======================================================================
-        // TAB 1: ĐƠN HÀNG ĐÃ MUA
-        // =======================================================================
         async loadCustomerOrders() {
             const tbody = document.getElementById('subOrderBody');
             tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">Đang tải dữ liệu...</td></tr>`;
             try {
-                // 🌟 GỌI API LẤY ĐƠN HÀNG CỦA RIÊNG KHÁCH HÀNG NÀY
                 const url = `/api/khach-hang/${this.state.editingId}/hoa-don?page=${this.state.subParams.order.page}&size=${this.state.subParams.order.size}&q=${this.state.subParams.order.q}&statusId=${this.state.subParams.order.status}`;
                 const res = await fetch(url);
                 const data = await res.json();
@@ -879,7 +871,7 @@
                 this.state.subParams.order.totalPages = data.totalPages || 0;
 
                 if(!content || content.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 30px; color:#888; font-style:italic;">Khách hàng này chưa có đơn hàng nào phù hợp</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 30px; color:var(--sub); font-style:italic;">Khách hàng này chưa có đơn hàng nào phù hợp</td></tr>`;
                     document.getElementById('pagiOrder').innerHTML = '';
                     return;
                 }
@@ -891,16 +883,16 @@
                         <td style="text-align:center;">
                             <i class="bi bi-chevron-down expand-btn" id="icon-order-${hd.id}" onclick="window.CustomerApp.toggleOrderDetail(${hd.id})"></i>
                         </td>
-                        <td style="font-weight:800; color:#555;">${hd.ma}</td>
-                        <td style="font-size:12px; color:#888;">${new Date(hd.ngayTao).toLocaleString('vi-VN')}</td>
-                        <td style="font-weight:700; color:#dc2626;">${(hd.giaTong || 0).toLocaleString('vi-VN')} ₫</td>
+                        <td style="font-weight:700; color:var(--text-main);">${hd.ma}</td>
+                        <td style="font-size:12px; color:var(--sub);">${new Date(hd.ngayTao).toLocaleString('vi-VN')}</td>
+                        <td style="font-weight:700; color:var(--danger-color); text-align:right;">${(hd.giaTong || 0).toLocaleString('vi-VN')} ₫</td>
                         <td style="text-align:center;">${statusBadge}</td>
                     </tr>
                     <tr class="order-detail-row" id="detail-row-${hd.id}">
                         <td colspan="5" class="order-detail-content">
-                            <div style="font-size:11px; font-weight:800; margin-bottom:8px; color:#2563eb;"><i class="bi bi-cart"></i> CHI TIẾT SẢN PHẨM TRONG ĐƠN</div>
+                            <div style="font-size:11px; font-weight:700; margin-bottom:12px; color:var(--primary); text-transform:uppercase;"><i class="bi bi-cart"></i> Chi tiết sản phẩm trong đơn</div>
                             <table class="detail-table">
-                                <thead><tr><th>Sản Phẩm</th><th>Phân loại</th><th>Số lượng</th><th>Đơn giá</th><th>Thành tiền</th></tr></thead>
+                                <thead><tr><th>Sản Phẩm</th><th>Phân loại</th><th>Số lượng</th><th style="text-align:right;">Đơn giá</th><th style="text-align:right;">Thành tiền</th></tr></thead>
                                 <tbody id="detail-body-${hd.id}"><tr><td colspan="5" style="text-align:center; padding:10px;">Đang tải...</td></tr></tbody>
                             </table>
                         </td>
@@ -910,7 +902,7 @@
 
                 this.renderPagination(data, 'pagiOrder', 'window.CustomerApp.changeSubPageOrder', this.state.subParams.order.page);
             } catch(e) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color:red;">Lỗi truy xuất dữ liệu!</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color:var(--danger-color);">Lỗi truy xuất dữ liệu!</td></tr>`;
             }
         },
 
@@ -940,17 +932,17 @@
                             <td>
                                 <div class="flex-center">
                                     <img src="${ct.hinhAnh || 'https://placehold.co/40x40'}" class="product-img-sm" onerror="this.src='https://placehold.co/40x40'">
-                                    <div><div style="font-weight:700;">${ct.tenSanPham}</div><div style="font-size:10px; color:#888;">SKU: ${ct.sku || 'N/A'}</div></div>
+                                    <div><div style="font-weight:600; color:var(--text-main);">${ct.tenSanPham}</div><div style="font-size:10px; color:var(--sub);">SKU: ${ct.sku || 'N/A'}</div></div>
                                 </div>
                             </td>
-                            <td><span style="background:#f4f4f5; padding:2px 6px; border-radius:2px; font-weight:600; color:#555;">${ct.thuocTinh}</span></td>
-                            <td style="font-weight:700;">x${ct.soLuong}</td>
-                            <td>${(ct.giaBan || 0).toLocaleString('vi-VN')} ₫</td>
-                            <td style="font-weight:700; color:#dc2626;">${((ct.giaBan || 0) * (ct.soLuong || 1)).toLocaleString('vi-VN')} ₫</td>
+                            <td><span style="background:var(--gray-100); padding:2px 6px; border-radius:2px; font-weight:600; color:var(--sub); border:1px solid var(--gray-200);">${ct.thuocTinh}</span></td>
+                            <td style="font-weight:600; color:var(--text-main);">x${ct.soLuong}</td>
+                            <td style="text-align:right;">${(ct.giaBan || 0).toLocaleString('vi-VN')} ₫</td>
+                            <td style="font-weight:600; color:var(--danger-color); text-align:right;">${((ct.giaBan || 0) * (ct.soLuong || 1)).toLocaleString('vi-VN')} ₫</td>
                         </tr>
                     `).join('');
                 } catch(e) {
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Lỗi tải dữ liệu</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--danger-color);">Lỗi tải dữ liệu</td></tr>`;
                 }
             }
         },
@@ -961,9 +953,6 @@
         changeSubPageProduct: function(p) { this.state.subParams.product.page = p; this.loadCustomerProducts(); },
         changeSubPageVoucher: function(p) { this.state.subParams.voucher.page = p; this.loadCustomerVouchers(); },
 
-        // =======================================================================
-        // TAB 2: SẢN PHẨM ĐÃ MUA
-        // =======================================================================
         async loadCustomerProducts() {
             const tbody = document.getElementById('subProductBody');
             tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 20px;">Đang tải dữ liệu...</td></tr>`;
@@ -974,7 +963,7 @@
                 this.state.subParams.product.totalPages = data.totalPages || 0;
 
                 if(!content || content.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 30px; color:#888; font-style:italic;">Khách hàng chưa mua sản phẩm nào</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 30px; color:var(--sub); font-style:italic;">Khách hàng chưa mua sản phẩm nào</td></tr>`;
                     document.getElementById('pagiProduct').innerHTML = '';
                     return;
                 }
@@ -988,25 +977,22 @@
                                 <div class="flex-center">
                                     <img src="${img}" class="product-img-sm" onerror="this.src='https://placehold.co/40x40'">
                                     <div>
-                                        <div style="font-weight:700; font-size:13px; color:#000;">${spct.sanPham.ten}</div>
-                                        <div style="font-size:10px; color:#888; text-transform:uppercase;">Phân loại: ${spct.mauSac.ten} - ${spct.kichThuoc.ten}</div>
+                                        <div style="font-weight:600; font-size:13px; color:var(--text-main);">${spct.sanPham.ten}</div>
+                                        <div style="font-size:11px; color:var(--sub); margin-top:2px;">Phân loại: ${spct.mauSac.ten} - ${spct.kichThuoc.ten}</div>
                                     </div>
                                 </div>
                             </td>
-                            <td style="text-align:center; font-weight:800; font-size:14px;">${item.soLuongMua}</td>
-                            <td style="text-align:right; font-weight:800; color:#dc2626; font-size:14px;">${item.tongTienChi.toLocaleString('vi-VN')} ₫</td>
+                            <td style="text-align:center; font-weight:700; font-size:13px; color:var(--text-main);">${item.soLuongMua}</td>
+                            <td style="text-align:right; font-weight:700; color:var(--danger-color); font-size:13px;">${item.tongTienChi.toLocaleString('vi-VN')} ₫</td>
                         </tr>
                     `;
                 }).join('');
                 this.renderPagination(data, 'pagiProduct', 'window.CustomerApp.changeSubPageProduct', this.state.subParams.product.page);
             } catch(e) {
-                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:red; padding:20px;">Lỗi truy xuất dữ liệu!</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--danger-color); padding:20px;">Lỗi truy xuất dữ liệu!</td></tr>`;
             }
         },
 
-        // =======================================================================
-        // TAB 3: VOUCHER ĐÃ DÙNG
-        // =======================================================================
         async loadCustomerVouchers() {
             const tbody = document.getElementById('subVoucherBody');
             tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">Đang tải dữ liệu...</td></tr>`;
@@ -1017,158 +1003,160 @@
                 this.state.subParams.voucher.totalPages = data.totalPages || 0;
 
                 if(!content || content.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 30px; color:#888; font-style:italic;">Khách hàng chưa sử dụng voucher nào</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 30px; color:var(--sub); font-style:italic;">Khách hàng chưa sử dụng voucher nào</td></tr>`;
                     document.getElementById('pagiVoucher').innerHTML = '';
                     return;
                 }
 
                 tbody.innerHTML = content.map(v => `
                     <tr>
-                        <td style="font-weight:800; color:#555;">${v.maVoucher}</td>
-                        <td style="font-weight:600; color:#000;">${v.tenVoucher}</td>
-                        <td style="font-weight:800; color:#10b981;">-${(v.giamGia || 0).toLocaleString('vi-VN')} ₫</td>
-                        <td>
-                            <span style="color:#555; font-weight:700;">${v.maDonHang}</span>
+                        <td style="font-weight:700; color:var(--text-main);">${v.maVoucher}</td>
+                        <td style="font-weight:600; color:var(--text-main);">${v.tenVoucher}</td>
+                        <td style="font-weight:700; color:var(--success-color); text-align:right;">-${(v.giamGia || 0).toLocaleString('vi-VN')} ₫</td>
+                        <td style="text-align:center;">
+                            <span style="color:var(--sub); font-weight:600;">${v.maDonHang}</span>
                         </td>
-                        <td style="font-size:12px; color:#666;">
+                        <td style="font-size:12px; color:var(--sub);">
                             ${v.ngaySuDung}
                         </td>
                     </tr>
                 `).join('');
                 this.renderPagination(data, 'pagiVoucher', 'window.CustomerApp.changeSubPageVoucher', this.state.subParams.voucher.page);
             } catch(e) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red; padding:20px;">Lỗi truy xuất dữ liệu!</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--danger-color); padding:20px;">Lỗi truy xuất dữ liệu!</td></tr>`;
             }
         },
 
         async saveCustomer() {
-            // 🌟 ĐÃ FIX: Lấy dữ liệu và gán biến gọn gàng
             const nameInput = document.getElementById('inpName').value.trim();
             const phoneInput = document.getElementById('inpPhone').value.trim();
             const emailInput = document.getElementById('inpEmail').value.trim();
 
-            // 🌟 ĐÃ FIX: Chặn lỗi bằng Regex ngay trên giao diện cho siêu mượt
             if (!nameInput || !phoneInput) {
-                window.toast('Vui lòng nhập đầy đủ Tên và Số điện thoại!', 'warning');
+                if(typeof window.toast === 'function') window.toast('Vui lòng nhập đầy đủ Tên và Số điện thoại!', 'warning');
                 return;
             }
             if (!/^0[0-9]{9}$/.test(phoneInput)) {
-                window.toast('Số điện thoại phải đủ 10 số và bắt đầu bằng số 0!', 'warning');
+                if(typeof window.toast === 'function') window.toast('Số điện thoại phải đủ 10 số và bắt đầu bằng số 0!', 'warning');
                 document.getElementById('inpPhone').focus();
                 return;
             }
             if (emailInput && !/^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$/.test(emailInput)) {
-                window.toast('Email không đúng định dạng!', 'warning');
+                if(typeof window.toast === 'function') window.toast('Email không đúng định dạng!', 'warning');
                 document.getElementById('inpEmail').focus();
                 return;
             }
 
-            window.toastConfirm("Xác nhận lưu", "Bạn có chắc chắn muốn lưu thông tin khách hàng này vào hệ thống?", async () => {
-                const btn = document.getElementById('btnSave');
-                btn.innerHTML = 'ĐANG XỬ LÝ...'; btn.disabled = true;
+            if(typeof window.confirmDialog === 'function') {
+                window.confirmDialog("XÁC NHẬN LƯU", "Bạn có chắc chắn muốn lưu thông tin khách hàng này vào hệ thống?", async () => {
+                    const btn = document.getElementById('btnSave');
+                    btn.innerHTML = 'ĐANG XỬ LÝ...'; btn.disabled = true;
 
-                const payload = {
-                    hoTen: nameInput,
-                    soDienThoai: phoneInput,
-                    email: emailInput,
-                    ngaySinh: document.getElementById('inpDob').value,
-                    gioiTinh: document.getElementById('inpGender').value === 'true',
-                    trangThai: document.getElementById('inpStatus').checked
-                };
+                    const payload = {
+                        hoTen: nameInput,
+                        soDienThoai: phoneInput,
+                        email: emailInput,
+                        ngaySinh: document.getElementById('inpDob').value,
+                        gioiTinh: document.getElementById('inpGender').value === 'true',
+                        trangThai: document.getElementById('inpStatus').checked
+                    };
 
-                const fileInput = document.getElementById('inpFile');
-                if (fileInput.files[0]) {
-                    try {
-                        const formData = new FormData();
-                        formData.append('file', fileInput.files[0]);
-                        const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData });
-                        const uploadData = await uploadRes.json();
-                        if (uploadRes.ok && uploadData.url) { payload.hinhAnh = uploadData.url; }
-                        else { window.toast('Upload ảnh thất bại.', 'error'); btn.innerHTML = 'LƯU THÔNG TIN'; btn.disabled = false; return; }
-                    } catch(e) { window.toast('Lỗi kết nối khi upload ảnh.', 'error'); btn.innerHTML = 'LƯU THÔNG TIN'; btn.disabled = false; return; }
-                }
-
-                if (!this.state.editingId) {
-                    payload.tinhThanhPho = window.CustomerApp.Address.getText('inpCity') || 'Chưa cập nhật';
-                    payload.maTinh = window.CustomerApp.Address.getValue('inpCity') || null;
-                    payload.quanHuyen = window.CustomerApp.Address.getText('inpDist') || 'Chưa cập nhật';
-                    payload.maHuyen = window.CustomerApp.Address.getValue('inpDist') || null;
-                    payload.phuongXa = window.CustomerApp.Address.getText('inpWard') || 'Chưa cập nhật';
-                    payload.maXa = window.CustomerApp.Address.getValue('inpWard') || null;
-                    payload.diaChiChiTiet = document.getElementById('inpDetail').value.trim() || 'Mua tại cửa hàng';
-                }
-
-                try {
-                    const method = this.state.editingId ? 'PUT' : 'POST';
-                    const url = this.state.editingId ? `/api/khach-hang/${this.state.editingId}` : '/api/khach-hang';
-                    const res = await fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-
-                    if (res.ok) {
-                        // 🌟 ĐÃ FIX: Thông báo rõ ràng Mật khẩu mặc định cho Admin
-                        if (!this.state.editingId) {
-                            window.toast('Tạo mới thành công! Mật khẩu đăng nhập mặc định là: 123456', 'success');
-                        } else {
-                            window.toast('Cập nhật thông tin thành công.', 'success');
-                        }
-                        this.closeDrawer();
-                        this.loadData();
-                    } else {
-                        let errorMsg = 'Yêu cầu không thể hoàn tất.';
-                        try { const err = await res.json(); errorMsg = err.message || err.error || errorMsg; } catch (errJson) {}
-                        window.toast(errorMsg, 'error');
+                    const fileInput = document.getElementById('inpFile');
+                    if (fileInput.files[0]) {
+                        try {
+                            const formData = new FormData();
+                            formData.append('file', fileInput.files[0]);
+                            const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData });
+                            const uploadData = await uploadRes.json();
+                            if (uploadRes.ok && uploadData.url) { payload.hinhAnh = uploadData.url; }
+                            else { if(typeof window.toast === 'function') window.toast('Upload ảnh thất bại.', 'error'); btn.innerHTML = 'LƯU THÔNG TIN'; btn.disabled = false; return; }
+                        } catch(e) { if(typeof window.toast === 'function') window.toast('Lỗi kết nối khi upload ảnh.', 'error'); btn.innerHTML = 'LƯU THÔNG TIN'; btn.disabled = false; return; }
                     }
-                } catch(e) { window.toast('Mất kết nối với máy chủ.', 'error'); }
-                finally { btn.innerHTML = 'LƯU THÔNG TIN'; btn.disabled = false; }
-            });
+
+                    if (!this.state.editingId) {
+                        payload.tinhThanhPho = window.CustomerApp.Address.getText('inpCity') || 'Chưa cập nhật';
+                        payload.maTinh = window.CustomerApp.Address.getValue('inpCity') || null;
+                        payload.quanHuyen = window.CustomerApp.Address.getText('inpDist') || 'Chưa cập nhật';
+                        payload.maHuyen = window.CustomerApp.Address.getValue('inpDist') || null;
+                        payload.phuongXa = window.CustomerApp.Address.getText('inpWard') || 'Chưa cập nhật';
+                        payload.maXa = window.CustomerApp.Address.getValue('inpWard') || null;
+                        payload.diaChiChiTiet = document.getElementById('inpDetail').value.trim() || 'Mua tại cửa hàng';
+                    }
+
+                    try {
+                        const method = this.state.editingId ? 'PUT' : 'POST';
+                        const url = this.state.editingId ? `/api/khach-hang/${this.state.editingId}` : '/api/khach-hang';
+                        const res = await fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+
+                        if (res.ok) {
+                            if (!this.state.editingId) {
+                                if(typeof window.toast === 'function') window.toast('Tạo mới thành công! Mật khẩu đăng nhập mặc định là: 123456', 'success');
+                            } else {
+                                if(typeof window.toast === 'function') window.toast('Cập nhật thông tin thành công.', 'success');
+                            }
+                            this.closeDrawer();
+                            this.loadData();
+                        } else {
+                            let errorMsg = 'Yêu cầu không thể hoàn tất.';
+                            try { const err = await res.json(); errorMsg = err.message || err.error || errorMsg; } catch (errJson) {}
+                            if(typeof window.toast === 'function') window.toast(errorMsg, 'error');
+                        }
+                    } catch(e) { if(typeof window.toast === 'function') window.toast('Mất kết nối với máy chủ.', 'error'); }
+                    finally { btn.innerHTML = 'LƯU THÔNG TIN'; btn.disabled = false; }
+                });
+            }
         },
 
-        async quickToggle(id, el) {
-            const originalState = !el.checked;
-            const actionText = originalState ? "Kích hoạt lại" : "Đình chỉ";
-            window.toastConfirm("Thay đổi trạng thái", `Bạn có chắc chắn muốn ${actionText} tài khoản khách hàng này không?`, async () => {
-                    const parent = el.closest('.switch-sm');
-                    try {
-                        parent.classList.add('loading');
-                        const res = await fetch(`/api/khach-hang/${id}/trang-thai`, { method: 'PATCH' });
-                        if(res.ok) { window.toast('Cập nhật trạng thái thành công.', 'success'); }
-                        else { window.toast('Hệ thống từ chối yêu cầu thay đổi.', 'error'); el.checked = originalState; }
-                    } catch(e) { window.toast('Sự cố đường truyền.', 'error'); el.checked = originalState; }
-                    finally { parent.classList.remove('loading'); }
-                }, () => { el.checked = originalState; }
-            );
+        async quickToggle(id, currentState) {
+            const actionText = currentState ? "Ngừng hoạt động" : "Hoạt động";
+            if(typeof window.confirmDialog === 'function') {
+                window.confirmDialog("THAY ĐỔI TRẠNG THÁI", `Xác nhận chuyển trạng thái tài khoản khách hàng này thành <b>${actionText}</b>?`, async () => {
+                        try {
+                            const res = await fetch(`/api/khach-hang/${id}/trang-thai`, { method: 'PATCH' });
+                            if(res.ok) {
+                                if(typeof window.toast === 'function') window.toast('Cập nhật trạng thái thành công.', 'success');
+                                this.loadData();
+                            } else {
+                                if(typeof window.toast === 'function') window.toast('Hệ thống từ chối yêu cầu thay đổi.', 'error');
+                            }
+                        } catch(e) {
+                            if(typeof window.toast === 'function') window.toast('Sự cố đường truyền.', 'error');
+                        }
+                    }
+                );
+            }
         },
 
         async loadAddressList() {
             const container = document.getElementById('addressListContainer');
-            container.innerHTML = '<div style="text-align:center; padding:20px;">Đang xử lý dữ liệu...</div>';
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--sub);">Đang xử lý dữ liệu...</div>';
             try {
                 const res = await fetch(`/api/khach-hang/${this.state.editingId}/dia-chi`);
                 const list = await res.json();
-                if(list.length === 0) { container.innerHTML = '<div style="text-align:center; color:#888; padding:20px; font-style:italic;">Khách hàng chưa cung cấp địa chỉ</div>'; return; }
+                if(list.length === 0) { container.innerHTML = '<div style="text-align:center; color:var(--sub); padding:20px; font-style:italic;">Khách hàng chưa cung cấp địa chỉ</div>'; return; }
 
                 container.innerHTML = list.map(addr => {
                     const showActions = !this.state.isViewMode;
-                    const defaultBtn = (!addr.laMacDinh && showActions) ? `<button class="btn btn-secondary" style="height:26px !important; font-size:10px; padding:0 8px !important;" onclick="window.CustomerApp.setDefaultAddress(${addr.id})">Đặt mặc định</button>` : '';
-                    const deleteBtn = showActions ? `<button class="btn btn-danger" style="height:26px !important; font-size:10px; padding:0 8px !important;" onclick="window.CustomerApp.deleteAddress(${addr.id})">Xóa</button>` : '';
+                    const defaultBtn = (!addr.laMacDinh && showActions) ? `<button class="btn btn-secondary" style="height:28px !important; font-size:10px; padding:0 8px !important;" onclick="window.CustomerApp.setDefaultAddress(${addr.id})">Đặt mặc định</button>` : '';
+                    const deleteBtn = showActions ? `<button class="btn btn-danger" style="height:28px !important; font-size:10px; padding:0 8px !important;" onclick="window.CustomerApp.deleteAddress(${addr.id})">Xóa</button>` : '';
 
                     return `
                     <div class="addr-card ${addr.laMacDinh ? 'default' : ''}">
-                        <div style="font-weight:700; font-size:13px; margin-bottom:4px; color:#000;">
+                        <div style="font-weight:700; font-size:13px; margin-bottom:6px; color:var(--text-main);">
                             ${addr.hoTenNhan || ''} | ${addr.sdtNhan || ''}
                             ${addr.laMacDinh ? '<span class="addr-tag">Mặc định</span>' : ''}
                         </div>
-                        <div style="font-size:12px; color:#555; margin-bottom:4px;">${addr.diaChiChiTiet}</div>
-                        <div style="font-size:11px; color:#888;">${addr.phuongXa}, ${addr.quanHuyen}, ${addr.tinhThanhPho}</div>
+                        <div style="font-size:12px; color:var(--sub); margin-bottom:4px;">${addr.diaChiChiTiet}</div>
+                        <div style="font-size:12px; color:var(--sub);">${addr.phuongXa}, ${addr.quanHuyen}, ${addr.tinhThanhPho}</div>
                         <div class="addr-actions">${defaultBtn} ${deleteBtn}</div>
                     </div>
                 `}).join('');
-            } catch(e) { container.innerHTML = '<div style="text-align:center; color:red; padding:20px;">Lỗi truy xuất sổ địa chỉ</div>'; }
+            } catch(e) { container.innerHTML = '<div style="text-align:center; color:var(--danger-color); padding:20px;">Lỗi truy xuất sổ địa chỉ</div>'; }
         },
 
         showAddAddressForm() { document.getElementById('subAddressForm').style.display = 'block'; document.getElementById('subCity').focus(); },
 
         async saveSubAddress() {
-            // 🌟 BỔ SUNG LẤY MÃ TỈNH HUYỆN XÃ Ở ĐÂY
             const payload = {
                 tinhThanhPho: window.CustomerApp.Address.getText('subCity'),
                 maTinh: window.CustomerApp.Address.getValue('subCity'),
@@ -1179,37 +1167,41 @@
                 diaChiChiTiet: document.getElementById('subDetail').value.trim()
             };
 
-            if(!payload.tinhThanhPho || !payload.diaChiChiTiet) { window.toast('Vui lòng cung cấp khu vực và chi tiết số nhà.', 'warning'); return; }
+            if(!payload.tinhThanhPho || !payload.diaChiChiTiet) { if(typeof window.toast === 'function') window.toast('Vui lòng cung cấp khu vực và chi tiết số nhà.', 'warning'); return; }
             try {
                 const res = await fetch(`/api/khach-hang/${this.state.editingId}/dia-chi`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
                 if(res.ok) {
-                    window.toast('Bổ sung địa chỉ thành công.', 'success');
+                    if(typeof window.toast === 'function') window.toast('Bổ sung địa chỉ thành công.', 'success');
                     document.getElementById('subAddressForm').style.display = 'none';
                     document.querySelectorAll('#subAddressForm input').forEach(i => i.value='');
                     this.Address.reset('subCity', 'subDist', 'subWard');
                     this.loadAddressList();
-                } else { window.toast('Lỗi phát sinh khi lưu địa chỉ.', 'error'); }
-            } catch(e) { window.toast('Không thể kết nối với máy chủ.', 'error'); }
+                } else { if(typeof window.toast === 'function') window.toast('Lỗi phát sinh khi lưu địa chỉ.', 'error'); }
+            } catch(e) { if(typeof window.toast === 'function') window.toast('Không thể kết nối với máy chủ.', 'error'); }
         },
 
         async setDefaultAddress(addrId) {
-            window.toastConfirm("Đặt làm mặc định", "Xác nhận thiết lập địa chỉ này làm mặc định cho các đơn hàng?", async () => {
-                try {
-                    const res = await fetch(`/api/khach-hang/dia-chi/${addrId}/mac-dinh`, { method: 'PUT' });
-                    if(res.ok) { window.toast('Cập nhật địa chỉ mặc định thành công.', 'success'); this.loadAddressList(); }
-                    else { window.toast('Không thể thay đổi thiết lập mặc định.', 'error'); }
-                } catch(e) { window.toast('Sự cố kết nối mạng.', 'error'); }
-            }, () => {});
+            if(typeof window.confirmDialog === 'function') {
+                window.confirmDialog("ĐẶT ĐỊA CHỈ MẶC ĐỊNH", "Xác nhận thiết lập địa chỉ này làm mặc định cho các đơn hàng?", async () => {
+                    try {
+                        const res = await fetch(`/api/khach-hang/dia-chi/${addrId}/mac-dinh`, { method: 'PUT' });
+                        if(res.ok) { if(typeof window.toast === 'function') window.toast('Cập nhật địa chỉ mặc định thành công.', 'success'); this.loadAddressList(); }
+                        else { if(typeof window.toast === 'function') window.toast('Không thể thay đổi thiết lập mặc định.', 'error'); }
+                    } catch(e) { if(typeof window.toast === 'function') window.toast('Sự cố kết nối mạng.', 'error'); }
+                }, () => {});
+            }
         },
 
         async deleteAddress(addrId) {
-            window.toastConfirm("Cảnh báo xóa", "Bạn có chắc chắn muốn xóa vĩnh viễn địa chỉ này khỏi hệ thống?", async () => {
-                try {
-                    const res = await fetch(`/api/khach-hang/dia-chi/${addrId}`, { method: 'DELETE' });
-                    if(res.ok) { window.toast('Xóa địa chỉ thành công.', 'success'); this.loadAddressList(); }
-                    else { const err = await res.json(); window.toast(err.message || 'Hệ thống từ chối xóa địa chỉ này.', 'error'); }
-                } catch(e) { window.toast('Sự cố kết nối mạng.', 'error'); }
-            }, () => {});
+            if(typeof window.confirmDialog === 'function') {
+                window.confirmDialog("XÓA ĐỊA CHỈ", "Bạn có chắc chắn muốn xóa vĩnh viễn địa chỉ này khỏi hệ thống?", async () => {
+                    try {
+                        const res = await fetch(`/api/khach-hang/dia-chi/${addrId}`, { method: 'DELETE' });
+                        if(res.ok) { if(typeof window.toast === 'function') window.toast('Xóa địa chỉ thành công.', 'success'); this.loadAddressList(); }
+                        else { const err = await res.json(); if(typeof window.toast === 'function') window.toast(err.message || 'Hệ thống từ chối xóa địa chỉ này.', 'error'); }
+                    } catch(e) { if(typeof window.toast === 'function') window.toast('Sự cố kết nối mạng.', 'error'); }
+                }, () => {});
+            }
         },
 
         closeDrawer() { document.getElementById('drawer').classList.remove('show', 'wide'); document.getElementById('overlay').classList.remove('show'); },
@@ -1233,8 +1225,26 @@
         resetFilters() { clearTimeout(this.timeout); document.getElementById('search').value = ''; document.getElementById('fStatus').value = ''; this.state.q = ''; this.state.status = ''; this.loadData(); }
     };
 
-    window.CustomerApp.init();
-</script>
+    /* ==========================================================================
+       GIẢI PHÁP KHỞI TẠO BÁM ĐUỔI (FIX 100% LỖI KHÔNG TẢI ĐƯỢC JS QUA ROUTER)
+       ========================================================================== */
+    let initAttempts = 0;
 
+    function bootCustomerApp() {
+        if (window.CustomerApp && window.CustomerApp.initialized) return;
+
+        if (document.getElementById('btnAdd')) {
+            window.CustomerApp.init();
+        }
+        else if (initAttempts < 40) {
+            initAttempts++;
+            setTimeout(bootCustomerApp, 50);
+        }
+    }
+
+    bootCustomerApp();
+    document.addEventListener("DOMContentLoaded", bootCustomerApp);
+
+</script>
 </body>
 </html>

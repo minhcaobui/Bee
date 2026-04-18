@@ -27,11 +27,11 @@ public class DanhGia {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "tai_khoan_id")
+    @JoinColumn(name = "id_tai_khoan")
     private TaiKhoan taiKhoan;
 
     @ManyToOne
-    @JoinColumn(name = "san_pham_id")
+    @JoinColumn(name = "id_san_pham")
     private SanPham sanPham;
 
     @Column(name = "so_sao")
@@ -50,14 +50,14 @@ public class DanhGia {
     private LocalDateTime ngayTao = LocalDateTime.now();
 
     @ManyToOne
-    @JoinColumn(name = "hoa_don_chi_tiet_id")
+    @JoinColumn(name = "id_hoa_don_chi_tiet")
     private HoaDonChiTiet hoaDonChiTiet;
 
     @Column(name = "da_sua")
     private Boolean daSua = false;
 
     @ManyToOne
-    @JoinColumn(name = "nhan_vien_tra_loi_id")
+    @JoinColumn(name = "id_nhan_vien_tra_loi")
     private NhanVien nhanVienTraLoi;
 
     @Column(name = "noi_dung_tra_loi", columnDefinition = "NVARCHAR(MAX)")

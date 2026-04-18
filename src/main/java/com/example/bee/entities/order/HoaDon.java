@@ -104,26 +104,6 @@ public class HoaDon {
     }
 
     @OneToMany(mappedBy = "hoaDon")
-    @com.fasterxml.jackson.annotation.JsonIgnore
-    private java.util.List<com.example.bee.entities.order.YeuCauDoiTra> yeuCauDoiTras;
-
-    @Transient
-    public java.math.BigDecimal getTienHoan() {
-        if (this.yeuCauDoiTras == null) return java.math.BigDecimal.ZERO;
-        return this.yeuCauDoiTras.stream()
-                .filter(yc -> "HOAN_THANH".equals(yc.getTrangThai()) && yc.getSoTienHoan() != null)
-                .map(com.example.bee.entities.order.YeuCauDoiTra::getSoTienHoan)
-                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
-    }
-
-    @Transient
-    public boolean isCoDoiTra() {
-        if (this.yeuCauDoiTras == null) return false;
-        return this.yeuCauDoiTras.stream()
-                .anyMatch(yc -> "HOAN_THANH".equals(yc.getTrangThai()));
-    }
-
-    @OneToMany(mappedBy = "hoaDon")
     @JsonIgnoreProperties("hoaDon")
     private List<ThanhToan> thanhToans;
 

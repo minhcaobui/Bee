@@ -4,162 +4,272 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>POS | Bee Admin</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
         /* ==========================================================================
-           1. CORE SYSTEM STYLE (ĐỒNG BỘ BEEMATE ADMIN)
+           1. CORE SYSTEM STYLE (ĐỒNG BỘ CORPORATE SAAS ADMIN)
            ========================================================================== */
         * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
-        :root { --gray-100: #f4f4f5; --gray-200: #e4e4e7; --gray-300: #d4d4d8; --text: #09090b; --border-radius: 4px; }
-        body { font-family: 'Inter', sans-serif; background: #fff; color: var(--text); font-size: 13px; line-height: 1.5; overflow: hidden; }
+        :root {
+            --gray-100: #f8fafc;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --text-main: #0f172a;
+            --sub: #64748b;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --border-radius: 4px; /* Góc bo sắc nét */
+        }
 
-        /* BUTTONS */
-        .btn { font-size: 11px; font-weight: 800; text-transform: uppercase; height: 34px; padding: 0 16px; background: #000; color: #fff; border: 1px solid #000; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: var(--border-radius); transition: 0.2s; letter-spacing: 0.5px;}
-        .btn:hover { background: #333; }
-        .btn-secondary { background: #fff; color: #000; border: 1px solid var(--gray-300); }
-        .btn-secondary:hover { background: var(--gray-100); border-color: #000; }
-        .btn-danger { background: #fff; color: #dc2626; border: 1px solid #dc2626; }
-        .btn-danger:hover { background: #dc2626; color: #fff; }
-        .btn-primary { background: #2563eb; border-color: #2563eb; color: #fff; }
-        .btn-primary:hover { background: #1d4ed8; border-color: #1d4ed8; }
+        body {
+            font-family: 'Be Vietnam Pro', 'Inter', sans-serif;
+            background: #ffffff;
+            color: var(--text-main);
+            font-size: 13px;
+            line-height: 1.5;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+
+        /* BUTTONS - CORPORATE STYLE */
+        .btn {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            height: 36px;
+            padding: 0 16px;
+            background: #0f172a; /* Slate tối, nghiêm túc */
+            color: #ffffff;
+            border: 1px solid transparent;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border-radius: var(--border-radius);
+            transition: all 0.2s ease;
+            letter-spacing: 0.5px;
+        }
+        .btn:hover {
+            background: #1e293b;
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            color: var(--text-main);
+            border: 1px solid var(--gray-200);
+        }
+        .btn-secondary:hover {
+            background: var(--gray-100);
+            border-color: var(--gray-300);
+        }
+
+        .btn-danger {
+            background: #ffffff;
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+        }
+        .btn-danger:hover {
+            background: #dc2626;
+            color: #ffffff;
+            border-color: #dc2626;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #ffffff;
+        }
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
         .btn.w-100 { width: 100%; }
 
         /* ICON BUTTON STANDARD */
-        .btn-icon { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--gray-200); background: #fff; cursor: pointer; border-radius: var(--border-radius); transition: 0.2s; color: #555; }
-        .btn-icon:hover { border-color: #000; background: #000; color: #fff; }
+        .btn-icon {
+            width: 34px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--gray-200);
+            background: #ffffff;
+            cursor: pointer;
+            border-radius: var(--border-radius);
+            transition: all 0.2s ease;
+            color: var(--sub);
+        }
+        .btn-icon:hover {
+            border-color: var(--gray-300);
+            background: var(--gray-100);
+            color: var(--text-main);
+        }
 
-        /* INPUTS */
-        input[type="text"], input[type="number"], .filter-select { width: 100%; padding: 0 12px; height: 34px; font-size: 13px; font-family: 'Inter', sans-serif; border: 1px solid var(--gray-300); background: #fff; border-radius: var(--border-radius); transition: 0.2s; }
-        input[type="text"]:focus, input[type="number"]:focus, .filter-select:focus { border-color: #000; }
+        /* INPUTS - SHARP FOCUS EFFECT */
+        input[type="text"], input[type="number"], .filter-select {
+            width: 100%;
+            padding: 0 12px;
+            height: 36px;
+            font-size: 13px;
+            font-family: inherit;
+            border: 1px solid var(--gray-200);
+            background: #ffffff;
+            border-radius: var(--border-radius);
+            transition: all 0.2s ease;
+            color: var(--text-main);
+        }
+        input[type="text"]:focus, input[type="number"]:focus, .filter-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
         .text-end { text-align: right; }
 
-        /* 🌟 CSS ẨN MŨI TÊN CỦA Ô NHẬP SỐ LƯỢNG */
+        /* CSS ẨN MŨI TÊN CỦA Ô NHẬP SỐ LƯỢNG */
         .qty-input::-webkit-inner-spin-button,
         .qty-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        .qty-input { -moz-appearance: textfield; text-align: center; font-weight: 700; height: 28px !important; padding: 0 !important; width: 40px !important;}
+        .qty-input { -moz-appearance: textfield; text-align: center; font-weight: 600; height: 28px !important; padding: 0 !important; width: 40px !important;}
 
         /* TABS */
         .tabs { display: flex; gap: 20px; border-bottom: 1px solid var(--gray-200); margin-bottom: 0; }
-        .tab { font-size: 12px; font-weight: 800; color: #888; padding: 12px 0; cursor: pointer; text-transform: uppercase; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: 0.2s; }
-        .tab:hover { color: #000; }
-        .tab.active { color: #000; border-bottom-color: #000; }
+        .tab { font-size: 12px; font-weight: 700; color: var(--sub); padding: 12px 0; cursor: pointer; text-transform: uppercase; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: 0.2s; }
+        .tab:hover { color: var(--text-main); }
+        .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
 
         /* TABLE */
-        .table-wrapper { border: 1px solid var(--gray-200); background: #fff; overflow-y: auto; flex: 1; position: relative; border-radius: 4px; }
+        .table-wrapper { border: 1px solid var(--gray-200); background: #ffffff; overflow-y: auto; flex: 1; position: relative; border-radius: var(--border-radius); }
         table { width: 100%; border-collapse: collapse; }
-        thead th { text-align: left; padding: 12px 15px; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #666; background: #fafafa; border-bottom: 1px solid var(--gray-200); position: sticky; top: 0; z-index: 10; white-space: nowrap; }
+        thead th { text-align: left; padding: 12px 15px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--sub); background: var(--gray-100); border-bottom: 1px solid var(--gray-200); position: sticky; top: 0; z-index: 10; white-space: nowrap; }
         tbody td { padding: 10px 15px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; font-size: 13px; font-weight: 500; }
         tbody tr:hover { background: var(--gray-100); cursor: pointer; }
 
         /* ==========================================================================
            2. POS LAYOUT (45% - 55%)
            ========================================================================== */
-        .pos-wrapper { padding: 15px; height: 100vh; display: flex; flex-direction: column; background: #f4f4f5; }
-        .pos-layout { display: flex; flex: 1; width: 100%; background: #fff; border: 1px solid var(--gray-200); overflow: hidden; border-radius: 6px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);}
+        .pos-wrapper { padding: 15px; height: 100vh; display: flex; flex-direction: column; background: var(--gray-100); }
+        .pos-layout { display: flex; flex: 1; width: 100%; background: #ffffff; border: 1px solid var(--gray-200); overflow: hidden; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);}
 
-        .panel-left { width: 45%; display: flex; flex-direction: column; border-right: 1px solid var(--gray-200); background: #fff; z-index: 2; }
+        .panel-left { width: 45%; display: flex; flex-direction: column; border-right: 1px solid var(--gray-200); background: #ffffff; z-index: 2; }
         .panel-right { width: 55%; display: flex; flex-direction: column; background: #fafafa; padding: 20px; }
 
-        .panel-header { height: 54px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--gray-200); padding: 0 15px; background: #fff; }
+        .panel-header { height: 54px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--gray-200); padding: 0 15px; background: #ffffff; }
 
-        /* STATUS BAR MỚI */
-        .status-bar { background: #fff8eb; border-bottom: 1px solid var(--gray-200); padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; flex-shrink: 0; font-weight: 600;}
-        .badge { padding: 4px 8px; border-radius: 4px; font-weight: 800; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .bg-warning { background: #f59e0b; color: #fff; }
-        .bg-secondary { background: #6b7280; color: #fff; }
+        /* STATUS BAR */
+        .status-bar { background: #fefce8; border-bottom: 1px solid var(--gray-200); padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; flex-shrink: 0; font-weight: 600;}
+        .badge { padding: 4px 8px; border-radius: var(--border-radius); font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .bg-warning { background: #f59e0b; color: #ffffff; }
+        .bg-secondary { background: var(--sub); color: #ffffff; }
 
-        .customer-card { padding: 15px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; background: #fff; }
+        .customer-card { padding: 15px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; background: #ffffff; }
 
-        .payment-footer { background: #fff; border-top: 2px solid #000; padding: 20px 15px; flex-shrink: 0; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05); }
-        .summary-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 13px; color: #555; align-items: center; font-weight: 600;}
-        .summary-row.main { margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--gray-300); color: #000; }
-        .total-money { font-size: 22px; font-weight: 900; color: #000; }
-        .btn-pay-big { width: 100%; height: 48px !important; margin-top: 15px; font-size: 14px; background: #000; border: none; font-weight: 800; border-radius: 4px;}
-        .btn-pay-big:hover { background: #222; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.15);}
+        .payment-footer { background: #ffffff; border-top: 1px solid var(--gray-200); padding: 20px 15px; flex-shrink: 0; box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.02); }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 13px; color: var(--sub); align-items: center; font-weight: 500;}
+        .summary-row.main { margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--gray-200); color: var(--text-main); }
+        .total-money { font-size: 20px; font-weight: 700; color: var(--text-main); }
 
-        .search-bar-wrapper { background: #fff; border: 1px solid var(--gray-200); padding: 12px; margin-bottom: 15px; border-radius: var(--border-radius); display: flex; gap: 10px; align-items: center; }
+        /* NÚT THANH TOÁN KHỔ LỚN NGHIÊM TÚC */
+        .btn-pay-big {
+            width: 100%;
+            height: 44px !important;
+            margin-top: 15px;
+            font-size: 13px;
+            background: #0f172a;
+            border: none;
+            color: #ffffff;
+            font-weight: 700;
+            border-radius: var(--border-radius);
+            transition: all 0.2s ease;
+        }
+        .btn-pay-big:hover {
+            background: #1e293b;
+        }
 
-        /* VOUCHER CARD MỚI */
-        .voucher-card { border: 1px solid var(--gray-200); border-radius: 6px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; background: #fff; }
-        .voucher-card:hover { border-color: #000; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .voucher-card .v-code { font-weight: 800; font-size: 14px; color: #000; margin-bottom: 4px; }
-        .voucher-card .v-desc { font-size: 12px; color: #666; font-weight: 600; }
+        .search-bar-wrapper { background: #ffffff; border: 1px solid var(--gray-200); padding: 12px; margin-bottom: 15px; border-radius: var(--border-radius); display: flex; gap: 10px; align-items: center; }
+
+        /* VOUCHER CARD */
+        .voucher-card { border: 1px solid var(--gray-200); border-radius: var(--border-radius); padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; background: #ffffff; }
+        .voucher-card:hover { border-color: var(--gray-300); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .voucher-card .v-code { font-weight: 700; font-size: 14px; color: var(--text-main); margin-bottom: 4px; }
+        .voucher-card .v-desc { font-size: 12px; color: var(--sub); font-weight: 500; }
 
         /* ==========================================================================
-           3. MODAL CUSTOM & TOAST (ĐỒNG BỘ 100%)
+           3. MODAL CUSTOM & CSS TOAST (ĐỒNG BỘ LAYOUT CORPORATE)
            ========================================================================== */
-        .modal { position: fixed; inset: 0; z-index: 9999; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; }
+        .modal { position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; }
         .modal.show { display: flex; animation: fadeIn 0.2s ease-out; }
-        .modal-dialog { background: #fff; width: 440px; max-width: 90%; border: 1px solid var(--gray-300); box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2); border-radius: 6px; animation: slideUp 0.3s ease-out; overflow: hidden;}
+        .modal-dialog { background: #ffffff; width: 440px; max-width: 90%; border: 1px solid var(--gray-200); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); border-radius: 6px; animation: slideUp 0.2s ease-out; overflow: hidden;}
         .modal-dialog.modal-sm { width: 320px; padding: 0; }
-        .modal-header { padding: 18px 24px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; background: #fff;}
-        .modal-title { font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
-        .btn-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #888; display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; transition: 0.2s;}
+        .modal-header { padding: 16px 20px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; background: var(--gray-100);}
+        .modal-title { font-size: 13px; font-weight: 700; text-transform: uppercase; color: var(--text-main); }
+        .btn-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--sub); display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; transition: 0.2s;}
         .btn-close:before { content: "\F62A"; font-family: "bootstrap-icons"; }
-        .btn-close:hover { color: #000; background: #f4f4f5; border-radius: 4px; }
-        .modal-body { padding: 24px; }
-        .modal-footer { padding: 18px 24px; border-top: 1px solid var(--gray-200); display: flex; justify-content: flex-end; gap: 12px; background: #fafafa; }
+        .btn-close:hover { color: var(--text-main); background: var(--gray-200); border-radius: var(--border-radius); }
+        .modal-body { padding: 20px; }
+        .modal-footer { padding: 16px 20px; border-top: 1px solid var(--gray-200); display: flex; justify-content: flex-end; gap: 10px; background: var(--gray-100); }
 
-        /* BEE TOAST CUSTOM */
-        #beeToastHost { position: fixed; top: 30px; right: 30px; z-index: 999999; display: flex; flex-direction: column; gap: 15px; pointer-events: none; }
-        .bee-toast-box { min-width: 320px; max-width: 400px; padding: 18px 24px; border-radius: 8px; background: #fff; color: #000; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2); display: flex; align-items: flex-start; gap: 14px; border-left: 6px solid #000; animation: beeToastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; transition: all 0.3s ease; pointer-events: auto; }
-        .bee-toast-box.success { border-left-color: #10b981; }
-        .bee-toast-box.error { border-left-color: #ef4444; }
-        .bee-toast-box.warning { border-left-color: #f59e0b; }
-        .bee-toast-box.hiding { transform: translateX(120%); opacity: 0; margin-top: -80px; }
-
-        @keyframes beeToastSlideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #000; }
+        ::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: var(--border-radius); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--sub); }
 
         /* VOUCHER ENHANCEMENTS */
         .voucher-card { position: relative; transition: all 0.2s ease; }
-        .voucher-card.selected { border: 2px solid #2563eb !important; background-color: #eff6ff !important; }
-        .voucher-card.selected::before { content: 'ĐANG CHỌN'; position: absolute; top: -10px; right: -10px; background: #2563eb; color: #fff; font-size: 10px; padding: 4px 8px; border-radius: 4px; font-weight: 800; box-shadow: 0 2px 5px rgba(37,99,235,0.3); }
+        .voucher-card.selected { border: 1px solid var(--primary) !important; background-color: #eff6ff !important; }
+        .voucher-card.selected::before { content: 'ĐANG CHỌN'; position: absolute; top: -8px; right: -8px; background: var(--primary); color: #ffffff; font-size: 10px; padding: 4px 8px; border-radius: 4px; font-weight: 700; }
         .voucher-card.disabled-stack { background: #fafafa; }
+
+        /* CSS MỚI CHO TOAST & CONFIRM (ĐỒNG BỘ 100% GIAO DIỆN PHẲNG TRANG CHA) */
+        .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); z-index: 10000; backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; }
+        .card { padding: 24px; width: 360px; background: #ffffff; border: 1px solid var(--gray-200); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+        #toastHost, .toast-container { position: fixed !important; top: 30px !important; right: 20px !important; z-index: 2147483647 !important; display: flex; flex-direction: column; gap: 12px; pointer-events: none; overflow: visible !important;}
+        .custom-toast { display: flex; align-items: center; background: #ffffff; padding: 12px 16px; border-radius: var(--border-radius); box-shadow: 0 4px 12px rgba(0,0,0,0.08); min-width: 280px; max-width: 380px; border: 1px solid var(--gray-200); border-left: 4px solid var(--primary); animation: slideInRight 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; pointer-events: auto;}
+
+        .custom-toast.toast-success { border-left-color: #10b981; }
+        .custom-toast.toast-success .toast-icon { color: #10b981; }
+        .custom-toast.toast-error { border-left-color: #ef4444; }
+        .custom-toast.toast-error .toast-icon { color: #ef4444; }
+        .custom-toast.toast-warning { border-left-color: #f59e0b; }
+        .custom-toast.toast-warning .toast-icon { color: #f59e0b; }
+        .custom-toast.toast-info { border-left-color: #3b82f6; }
+        .custom-toast.toast-info .toast-icon { color: #3b82f6; }
+
+        .toast-icon { font-size: 18px; margin-right: 12px; }
+        .toast-msg { flex-grow: 1; font-size: 13px; font-weight: 500; color: var(--text-main); line-height: 1.4; }
+        .toast-close { background: none; border: none; color: var(--sub); cursor: pointer; font-size: 18px; margin-left: 10px; padding: 0; transition: color 0.2s; }
+        .toast-close:hover { color: var(--text-main); }
+
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
 
         /* ==========================================================================
            RESPONSIVE MOBILE CHO TRANG POS BÁN HÀNG TẠI QUẦY
            ========================================================================== */
         @media (max-width: 900px) {
-            body { overflow: auto; } /* Hủy chặn cuộn trang */
+            body { overflow: auto; }
             .pos-wrapper { height: auto; min-height: 100vh; padding: 10px; }
-
-            /* Bẻ khung POS layout từ ngang (row) thành dọc (column) */
             .pos-layout { flex-direction: column; box-shadow: none; border: none; background: transparent; gap: 15px;}
-
-            /* Đảo vị trí: Danh sách SP (panel-right) lên trên, Giỏ hàng (panel-left) xuống dưới */
-            .panel-right { width: 100%; order: 1; border: 1px solid var(--gray-200); border-radius: 6px; background: #fff; padding: 15px;}
-            .panel-left { width: 100%; order: 2; border: 1px solid var(--gray-200); border-radius: 6px; }
-
-            /* Đảm bảo thanh tìm kiếm sản phẩm bị đẩy xuống dọc nếu quá chật */
+            .panel-right { width: 100%; order: 1; border: 1px solid var(--gray-200); border-radius: var(--border-radius); background: #ffffff; padding: 15px;}
+            .panel-left { width: 100%; order: 2; border: 1px solid var(--gray-200); border-radius: var(--border-radius); }
             .search-bar-wrapper { flex-wrap: wrap; }
             .search-bar-wrapper > div { width: 100%; flex: unset; }
             .search-bar-wrapper .filter-select { width: calc(50% - 5px); flex: 1; }
-
-            /* Giỏ hàng cần có min-height để thấy rõ khi trống */
             .panel-left .table-wrapper { min-height: 250px; }
-
-            /* Điều chỉnh lại table để vuốt mượt mà trên đt */
             .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-
-            /* Tùy chỉnh Modal Thanh toán trên mobile */
             #payModal .modal-dialog { width: 100% !important; margin: 10px; }
             .payment-tabs { flex-direction: column; }
             .payment-tab { padding: 10px; }
             #transfer-section > div { flex-wrap: wrap; }
             .payment-option { width: 100%; flex: unset; height: 80px; }
-
-            /* Các Toast cảnh báo trôi lên trên để dễ thấy */
-            #beeToastHost { top: 10px; left: 10px; right: 10px; }
-            .bee-toast-box { min-width: 100%; max-width: 100%; }
+            .toast-container { top: 10px; right: 10px; left: 10px; }
+            .custom-toast { min-width: 100%; max-width: 100%; }
         }
     </style>
 </head>
@@ -181,26 +291,26 @@
 
             <div class="status-bar">
                 <div>Trạng thái: <span class="badge bg-secondary" id="invoiceStatus">Trống</span></div>
-                <div style="color: #dc2626; font-weight: 700;">
-                    <i class="bi bi-stopwatch"></i> Hủy tự động sau: <span id="invoiceCountdown" style="font-weight: 800; font-variant-numeric: tabular-nums;">--:--:--</span>
+                <div style="color: #dc2626; font-weight: 600;">
+                    <i class="bi bi-stopwatch"></i> Hủy tự động sau: <span id="invoiceCountdown" style="font-weight: 700; font-variant-numeric: tabular-nums;">--:--:--</span>
                 </div>
             </div>
 
             <div class="customer-card">
                 <div style="display:flex; align-items:center; gap:15px; flex:1; min-width:0;">
                     <div style="position:relative; flex-shrink:0;">
-                        <div style="width:40px; height:40px; background:#f4f4f5; border-radius:50%; display:flex; align-items:center; justify-content:center; border:1px solid var(--gray-200);">
-                            <i class="bi bi-person-fill" style="color:#666; font-size:20px;"></i>
+                        <div style="width:40px; height:40px; background:var(--gray-100); border-radius:50%; display:flex; align-items:center; justify-content:center; border:1px solid var(--gray-200);">
+                            <i class="bi bi-person-fill" style="color:var(--sub); font-size:20px;"></i>
                         </div>
                         <button onclick="PosApp.toggleCustomerSearch()" title="Đổi khách hàng"
-                                style="position:absolute; bottom:-2px; right:-2px; width:18px; height:18px; background:#000; border:none; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-                            <i class="bi bi-arrow-repeat" style="color:#fff; font-size:10px;"></i>
+                                style="position:absolute; bottom:-2px; right:-2px; width:18px; height:18px; background:var(--text-main); border:none; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <i class="bi bi-arrow-repeat" style="color:#ffffff; font-size:10px;"></i>
                         </button>
                     </div>
 
                     <div style="min-width:0;">
-                        <div style="font-weight:800; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color: #000;" id="customerName">KHÁCH VÃNG LAI</div>
-                        <div style="font-size:12px; color:#888; font-weight:600;" id="customerPhone">Khách lẻ</div>
+                        <div style="font-weight:700; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color: var(--text-main);" id="customerName">KHÁCH VÃNG LAI</div>
+                        <div style="font-size:12px; color:var(--sub); font-weight:500;" id="customerPhone">Khách lẻ</div>
                     </div>
                 </div>
 
@@ -216,13 +326,13 @@
 
             <div id="inlineCustomerSearch" style="display:none; padding:15px; border-bottom:1px solid var(--gray-200); background:#fafafa;">
                 <div style="position:relative; margin-bottom:8px;">
-                    <i class="bi bi-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#666; font-size:13px;"></i>
+                    <i class="bi bi-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--sub); font-size:13px;"></i>
                     <input type="text" placeholder="Nhập tên hoặc SĐT khách hàng..."
                            style="padding-left:36px; width:100%;"
                            oninput="PosApp.inlineSearchCustomer(this.value)">
                 </div>
-                <div id="inlineSearchResults" style="max-height:150px; overflow-y:auto; border:1px solid var(--gray-200); border-radius:4px; background:#fff;">
-                    <div style="padding:10px 15px; color:#999; font-size:12px; font-weight: 500;">Nhập để tìm kiếm...</div>
+                <div id="inlineSearchResults" style="max-height:150px; overflow-y:auto; border:1px solid var(--gray-200); border-radius:var(--border-radius); background:#ffffff;">
+                    <div style="padding:10px 15px; color:var(--sub); font-size:12px; font-weight: 500;">Nhập để tìm kiếm...</div>
                 </div>
             </div>
 
@@ -239,50 +349,55 @@
                     </thead>
                     <tbody id="cartBody"></tbody>
                 </table>
-                <div id="emptyCart" style="text-align: center; padding: 80px 20px; color: #999;">
+                <div id="emptyCart" style="text-align: center; padding: 80px 20px; color: var(--sub);">
                     <i class="bi bi-basket" style="font-size: 40px; margin-bottom: 15px; display: block; opacity: 0.3;"></i>
-                    <span style="font-size: 13px; font-weight: 600;">Hóa đơn chưa có sản phẩm nào</span>
+                    <span style="font-size: 13px; font-weight: 500;">Hóa đơn chưa có sản phẩm nào</span>
                 </div>
             </div>
 
             <div class="payment-footer">
                 <div style="display: flex; margin-bottom: 20px;">
-                    <input type="text" id="voucherInput" placeholder="Nhập hoặc chọn mã khuyến mãi..."
-                           style="border-radius: 4px 0 0 4px; border-right: none; height: 40px; flex: 1; font-weight: 700; font-size: 14px;">
+                    <input type="text" id="voucherInput" placeholder="Nhập mã khuyến mãi..."
+                           style="border-radius: var(--border-radius) 0 0 var(--border-radius); border-right: none; height: 38px; flex: 1; font-weight: 600; font-size: 13px;">
+
+                    <button class="btn btn-secondary" onclick="PosApp.autoApplyBestVoucher()" title="Tự động tìm mã giảm nhiều nhất"
+                            style="border-radius: 0; height: 38px !important; border-left: none; border-right: none; background: #eff6ff; color: var(--primary); padding: 0 12px !important; border-color: #bfdbfe;">
+                        <i class="bi bi-magic" style="font-size: 16px;"></i> AUTO
+                    </button>
 
                     <button class="btn btn-secondary" onclick="PosApp.openVoucherModal()" title="Mở danh sách mã"
-                            style="border-radius: 0; height: 40px !important; border-left: none; border-right: none; background: #fafafa; color: #000; padding: 0 16px !important;">
-                        <i class="bi bi-ticket-detailed" style="margin-right: 6px; font-size: 14px;"></i> CHỌN
+                            style="border-radius: 0; height: 38px !important; border-left: none; border-right: none; background: var(--gray-100); color: var(--text-main); padding: 0 12px !important;">
+                        <i class="bi bi-ticket-detailed" style="margin-right: 4px; font-size: 14px;"></i> CHỌN
                     </button>
 
                     <button class="btn" onclick="PosApp.applyVoucher()" title="Áp dụng mã"
-                            style="border-radius: 0 4px 4px 0; height: 40px !important; width: 50px !important; padding: 0 !important;">
+                            style="border-radius: 0 var(--border-radius) var(--border-radius) 0; height: 38px !important; width: 44px !important; padding: 0 !important;">
                         <i class="bi bi-check-lg" style="font-size: 20px;"></i>
                     </button>
                 </div>
 
                 <div class="summary-row">
                     <span>TẠM TÍNH</span>
-                    <span style="font-weight:800; color: #000; white-space: nowrap;" id="lblSubTotal">0&nbsp;₫</span>
+                    <span style="font-weight:600; color: var(--text-main); white-space: nowrap;" id="lblSubTotal">0&nbsp;₫</span>
                 </div>
                 <div class="summary-row">
                     <span>KHUYẾN MÃI</span>
-                    <span style="font-weight:800; color: #10b981; white-space: nowrap;" id="lblPromoDiscount">-0&nbsp;₫</span>
+                    <span style="font-weight:600; color: #10b981; white-space: nowrap;" id="lblPromoDiscount">-0&nbsp;₫</span>
                 </div>
                 <div class="summary-row">
                     <span style="display: flex; align-items: center; gap: 8px;">
                         VOUCHER
                         <i id="removeVoucherBtn" class="bi bi-x-circle-fill" style="cursor:pointer; display:none; color: #ef4444; font-size: 16px;" onclick="PosApp.removeVoucher()" title="Gỡ mã giảm giá"></i>
                     </span>
-                    <span style="font-weight:800; color: #10b981; white-space: nowrap;" id="lblVoucherDiscount">-0&nbsp;₫</span>
+                    <span style="font-weight:600; color: #10b981; white-space: nowrap;" id="lblVoucherDiscount">-0&nbsp;₫</span>
                 </div>
                 <div class="summary-row main">
-                    <span style="font-weight:800; font-size: 15px;">TỔNG TIỀN</span>
+                    <span style="font-weight:700; font-size: 14px;">TỔNG TIỀN</span>
                     <span class="total-money" id="lblTotal" style="white-space: nowrap;">0&nbsp;₫</span>
                 </div>
 
                 <button class="btn btn-pay-big" onclick="PosApp.openPayModal()">
-                    <i class="bi bi-credit-card-2-front-fill" style="margin-right: 8px; font-size: 18px;"></i> THANH TOÁN [F9]
+                    <i class="bi bi-credit-card-2-front-fill" style="margin-right: 8px; font-size: 16px;"></i> THANH TOÁN [F9]
                 </button>
             </div>
         </aside>
@@ -290,20 +405,30 @@
         <main class="panel-right">
             <div class="search-bar-wrapper">
                 <div style="position: relative; flex: 1;">
-                    <i class="bi bi-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #999; font-size: 15px;"></i>
-                    <input type="text" placeholder="Tìm kiếm sản phẩm (Tên, Mã, SKU)..."
-                           style="padding-left: 40px; border: 1px solid var(--gray-200); box-shadow: none; height: 40px; font-size: 14px;"
-                           onkeyup="PosApp.loadProducts(this.value)">
+                    <i class="bi bi-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--sub); font-size: 14px;"></i>
+
+                    <input type="text" id="productSearchInput" placeholder="Tìm kiếm sản phẩm (Tên, Mã, SKU)..."
+                           style="padding-left: 40px; padding-right: 35px; border: 1px solid var(--gray-200); box-shadow: none; height: 38px; font-size: 13px;"
+                           oninput="PosApp.handleProductSearch(this.value)">
+
+                    <i class="bi bi-x-circle-fill" id="clearProductSearchBtn"
+                       style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--gray-300); font-size: 16px; cursor: pointer; display: none; transition: 0.2s;"
+                       onmouseover="this.style.color='var(--sub)'" onmouseout="this.style.color='var(--gray-300)'"
+                       onclick="PosApp.clearProductSearch()" title="Xóa từ khóa"></i>
                 </div>
-                <select class="filter-select" style="width: 150px; height: 40px;">
+                <select class="filter-select" style="width: 150px; height: 38px;">
                     <option value="">Tất cả Màu Sắc</option>
                 </select>
-                <select class="filter-select" style="width: 150px; height: 40px;">
+                <select class="filter-select" style="width: 150px; height: 38px;">
                     <option value="">Tất cả Kích Thước</option>
                 </select>
+
+                <button class="btn btn-secondary" onclick="PosApp.resetFilters()" style="height: 38px !important; border-radius: var(--border-radius); padding: 0 12px; min-width: 40px;" title="Làm mới toàn bộ bộ lọc">
+                    <i class="bi bi-arrow-clockwise" style="font-size: 16px; margin: 0;"></i>
+                </button>
             </div>
 
-            <div class="table-wrapper" style="border-radius: 4px; border: 1px solid var(--gray-200);">
+            <div class="table-wrapper" style="border-radius: var(--border-radius); border: 1px solid var(--gray-200);">
                 <table>
                     <thead>
                     <tr>
@@ -321,8 +446,6 @@
     </div>
 </div>
 
-<div id="beeToastHost"></div>
-
 <div id="qtyModal" class="modal">
     <div class="modal-dialog modal-sm">
         <div class="modal-header">
@@ -330,25 +453,25 @@
             <button class="btn-close" onclick="PosApp.closeModal('qtyModal')"></button>
         </div>
         <div class="modal-body" style="padding: 24px;">
-            <p id="qtyModalDesc" style="font-size: 13px; color: #555; margin-bottom: 20px; font-weight: 600; line-height: 1.5;"></p>
+            <p id="qtyModalDesc" style="font-size: 13px; color: var(--sub); margin-bottom: 20px; font-weight: 500; line-height: 1.5;"></p>
             <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 20px;">
-                <button class="btn-icon" style="width: 40px; height: 40px; font-size: 20px; background: #f4f4f5;" onclick="document.getElementById('inpCustomQty').value = Math.max(1, parseInt(document.getElementById('inpCustomQty').value || 0) - 1)">-</button>
-                <input type="number" id="inpCustomQty" class="form-input" style="width: 100px; text-align: center; font-size: 24px; font-weight: 900; height: 40px; margin: 0 15px; border-color: #000; color: #2563eb;" value="1" onfocus="this.select()" onkeydown="if(event.key === 'Enter') PosApp.confirmCustomQty()">
-                <button class="btn-icon" style="width: 40px; height: 40px; font-size: 20px; background: #f4f4f5;" onclick="document.getElementById('inpCustomQty').value = parseInt(document.getElementById('inpCustomQty').value || 0) + 1">+</button>
+                <button class="btn-icon" style="width: 40px; height: 40px; font-size: 20px; background: var(--gray-100);" onclick="document.getElementById('inpCustomQty').value = Math.max(1, parseInt(document.getElementById('inpCustomQty').value || 0) - 1)">-</button>
+                <input type="number" id="inpCustomQty" class="form-input" style="width: 100px; text-align: center; font-size: 22px; font-weight: 700; height: 40px; margin: 0 15px; border: 1px solid var(--border); color: var(--primary); border-radius: var(--border-radius);" value="1" onfocus="this.select()" onkeydown="if(event.key === 'Enter') PosApp.confirmCustomQty()">
+                <button class="btn-icon" style="width: 40px; height: 40px; font-size: 20px; background: var(--gray-100);" onclick="document.getElementById('inpCustomQty').value = parseInt(document.getElementById('inpCustomQty').value || 0) + 1">+</button>
             </div>
-            <button class="btn btn-primary w-100" style="height: 44px !important; font-size: 13px;" id="btnConfirmQty" onclick="PosApp.confirmCustomQty()">XÁC NHẬN [ENTER]</button>
+            <button class="btn btn-primary w-100" style="height: 40px !important; font-size: 12px;" id="btnConfirmQty" onclick="PosApp.confirmCustomQty()">XÁC NHẬN [ENTER]</button>
         </div>
     </div>
 </div>
 
 <div id="voucherModal" class="modal">
-    <div class="modal-dialog" style="width: 480px; background: #f4f4f5;">
-        <div class="modal-header" style="background: #fff;">
-            <span class="modal-title"><i class="bi bi-ticket-perforated-fill" style="margin-right: 6px; color: #2563eb;"></i> CHỌN MÃ GIẢM GIÁ</span>
+    <div class="modal-dialog" style="width: 480px;">
+        <div class="modal-header">
+            <span class="modal-title"><i class="bi bi-ticket-perforated-fill" style="margin-right: 6px; color: var(--primary);"></i> CHỌN MÃ GIẢM GIÁ</span>
             <button class="btn-close" onclick="PosApp.closeModal('voucherModal')"></button>
         </div>
         <div class="modal-body" style="padding: 20px; max-height: 550px; overflow-y: auto;" id="voucherList">
-            <div style="text-align: center; color: #888; padding: 30px;">Đang tải danh sách mã...</div>
+            <div style="text-align: center; color: var(--sub); padding: 30px;">Đang tải danh sách mã...</div>
         </div>
     </div>
 </div>
@@ -359,7 +482,7 @@
             <span class="modal-title"><i class="bi bi-person-lines-fill" style="margin-right: 6px;"></i> THÔNG TIN KHÁCH</span>
             <button class="btn-close" onclick="PosApp.closeModal('customerModal')"></button>
         </div>
-        <div class="modal-body" style="padding:24px;">
+        <div class="modal-body" style="padding:20px;">
             <nav class="tabs" style="margin-bottom:16px;">
                 <button class="tab active" onclick="PosApp.switchCustTab('search')" id="tabSearchBtn">TÌM KIẾM</button>
                 <button class="tab" onclick="PosApp.switchCustTab('create')" id="tabCreateBtn">THÊM MỚI</button>
@@ -367,28 +490,28 @@
 
             <div id="paneSearch" style="display:flex; flex-direction:column; height:240px;">
                 <div style="position:relative; margin-bottom:12px; flex-shrink:0;">
-                    <i class="bi bi-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#666;"></i>
+                    <i class="bi bi-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--sub);"></i>
                     <input type="text" placeholder="Nhập tên hoặc số điện thoại..."
-                           style="padding-left:36px; height:40px; font-size:13px; width:100%; border: 1px solid var(--gray-300); border-radius: 4px; outline: none;"
+                           style="padding-left:36px; height:38px; font-size:13px; width:100%; border: 1px solid var(--gray-200); border-radius: var(--border-radius); outline: none;"
                            oninput="PosApp.searchCustomer(this.value)">
                 </div>
-                <div id="customerSearchResults" style="flex:1; border:1px solid var(--gray-200); border-radius:4px; overflow-y:auto;">
-                    <div style="padding:15px; color:#999; font-size:12px; text-align:center;">Nhập tên hoặc SĐT để tìm kiếm...</div>
+                <div id="customerSearchResults" style="flex:1; border:1px solid var(--gray-200); border-radius:var(--border-radius); overflow-y:auto;">
+                    <div style="padding:15px; color:var(--sub); font-size:12px; text-align:center;">Nhập tên hoặc SĐT để tìm kiếm...</div>
                 </div>
             </div>
 
             <div id="paneCreate" style="display:none; padding-top:10px;">
                 <div style="margin-bottom: 16px;">
-                    <label style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #555; margin-bottom: 6px; display: block;">Tên khách hàng *</label>
-                    <input type="text" id="newCustName" placeholder="Ví dụ: Nguyễn Văn A..." style="width:100%; border: 1px solid var(--gray-300); border-radius: 4px; padding: 0 12px; height: 40px; font-size: 13px; outline: none;">
+                    <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--sub); margin-bottom: 6px; display: block;">Tên khách hàng *</label>
+                    <input type="text" id="newCustName" placeholder="Ví dụ: Nguyễn Văn A..." oninput="this.value = this.value.replace(/[^a-zA-Z0-9À-ỹ\s]/g, ''); if(this.value !== clean) { this.value = clean; }" style="width:100%; border: 1px solid var(--gray-200); border-radius: var(--border-radius); padding: 0 12px; height: 38px; font-size: 13px; outline: none;">
                 </div>
                 <div style="margin-bottom: 24px;">
-                    <label style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #555; margin-bottom: 6px; display: block;">Số điện thoại *</label>
-                    <input type="text" id="newCustPhone" placeholder="Ví dụ: 0988123456..." style="width:100%; border: 1px solid var(--gray-300); border-radius: 4px; padding: 0 12px; height: 40px; font-size: 13px; outline: none;">
+                    <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--sub); margin-bottom: 6px; display: block;">Số điện thoại *</label>
+                    <input type="text" id="newCustPhone" placeholder="Ví dụ: 0988123456..." style="width:100%; border: 1px solid var(--gray-200); border-radius: var(--border-radius); padding: 0 12px; height: 38px; font-size: 13px; outline: none;">
                 </div>
 
-                <button class="btn w-100" onclick="PosApp.createNewCustomer()" style="height: 44px !important; font-size: 12px;">
-                    <i class="bi bi-person-plus-fill" style="font-size: 16px;"></i> LƯU & CHỌN NGAY
+                <button class="btn w-100" onclick="PosApp.createNewCustomer()" style="height: 40px !important; font-size: 12px;">
+                    <i class="bi bi-person-plus-fill" style="font-size: 14px;"></i> LƯU & CHỌN NGAY
                 </button>
             </div>
         </div>
@@ -396,28 +519,28 @@
 </div>
 
 <div id="payModal" class="modal">
-    <div class="modal-dialog" style="border-radius: 6px; width: 480px;">
+    <div class="modal-dialog" style="width: 480px;">
         <div class="modal-header">
-            <span class="modal-title" style="font-weight: 800; text-transform: uppercase; letter-spacing: 1px;"><i class="bi bi-wallet2" style="margin-right: 6px;"></i> XÁC NHẬN THANH TOÁN</span>
+            <span class="modal-title"><i class="bi bi-wallet2" style="margin-right: 6px; color: var(--primary);"></i> XÁC NHẬN THANH TOÁN</span>
             <button class="btn-close" onclick="PosApp.closeModal('payModal')"></button>
         </div>
 
         <div class="modal-body" style="padding: 24px;">
             <style>
-                .pos-fieldset { border: 1px solid var(--gray-300); border-radius: 4px; padding: 10px 15px 12px; margin-bottom: 18px; position: relative; background: #fff;}
-                .pos-legend { font-size: 10px; font-weight: 800; color: #555; text-transform: uppercase; letter-spacing: 0.5px; padding: 0 6px; width: auto; float: none; margin-bottom: 0; border: none; }
-                .pos-input-money { width: 100%; border: none; padding: 0; height: 36px; font-size: 26px; font-weight: 900; background: transparent; text-align: right; outline: none; font-family: inherit;}
-                .payment-tabs { display: flex; margin-bottom: 24px; border: 1px solid var(--gray-300); border-radius: 4px; overflow: hidden;}
-                .payment-tab { flex: 1; padding: 14px; border: none; background: #f4f4f5; font-size: 12px; font-weight: 800; text-transform: uppercase; cursor: pointer; transition: all 0.2s; outline: none;}
-                .payment-tab.active { background: #000; color: #fff; }
-                .payment-option { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100px; border: 1px solid var(--gray-300); border-radius: 4px; cursor: pointer; background: #fff; position: relative; transition: 0.2s;}
-                .payment-option.selected { border: 2px solid #2563eb !important; background: #eff6ff; }
-                .payment-option.selected::after { content: "\F26B"; font-family: "bootstrap-icons"; position: absolute; top: 6px; right: 6px; color: #2563eb; font-size: 18px; }
+                .pos-fieldset { border: 1px solid var(--gray-200); border-radius: var(--border-radius); padding: 10px 15px 12px; margin-bottom: 16px; position: relative; background: #ffffff;}
+                .pos-legend { font-size: 10px; font-weight: 700; color: var(--sub); text-transform: uppercase; letter-spacing: 0.5px; padding: 0 6px; width: auto; float: none; margin-bottom: 0; border: none; }
+                .pos-input-money { width: 100%; border: none; padding: 0; height: 36px; font-size: 24px; font-weight: 700; background: transparent; text-align: right; outline: none; font-family: inherit; color: var(--text-main);}
+                .payment-tabs { display: flex; margin-bottom: 20px; border: 1px solid var(--gray-200); border-radius: var(--border-radius); overflow: hidden;}
+                .payment-tab { flex: 1; padding: 12px; border: none; background: var(--gray-100); font-size: 12px; font-weight: 600; text-transform: uppercase; cursor: pointer; transition: all 0.2s; outline: none; color: var(--sub);}
+                .payment-tab.active { background: var(--text-main); color: #ffffff; }
+                .payment-option { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90px; border: 1px solid var(--gray-200); border-radius: var(--border-radius); cursor: pointer; background: #ffffff; position: relative; transition: 0.2s;}
+                .payment-option.selected { border: 1px solid var(--primary) !important; background: #eff6ff; }
+                .payment-option.selected::after { content: "\F26B"; font-family: "bootstrap-icons"; position: absolute; top: 6px; right: 6px; color: var(--primary); font-size: 16px; }
             </style>
 
-            <div style="text-align: center; margin-bottom: 24px; background: #fafafa; padding: 20px; border: 1px dashed var(--gray-300); border-radius: 4px;">
-                <div style="font-size: 12px; color: #666; font-weight: 800; text-transform: uppercase; margin-bottom: 5px;">TỔNG CẦN THANH TOÁN</div>
-                <div id="modalTotal" style="font-size: 42px; font-weight: 900; color: #000;">0 ₫</div>
+            <div style="text-align: center; margin-bottom: 20px; background: var(--gray-100); padding: 15px; border: 1px dashed var(--gray-300); border-radius: var(--border-radius);">
+                <div style="font-size: 11px; color: var(--sub); font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">TỔNG CẦN THANH TOÁN</div>
+                <div id="modalTotal" style="font-size: 36px; font-weight: 700; color: var(--text-main);">0 ₫</div>
             </div>
 
             <div class="payment-tabs">
@@ -431,39 +554,39 @@
                         <legend class="pos-legend">Tiền khách đưa</legend>
                         <div style="display: flex; align-items: center;">
                             <input type="text" class="pos-input-money" id="inpKhachDua" oninput="PosApp.calcChange()" placeholder="0">
-                            <span style="font-weight: 800; margin-left: 10px; font-size: 14px; color: #888;">VNĐ</span>
+                            <span style="font-weight: 600; margin-left: 10px; font-size: 13px; color: var(--sub);">VNĐ</span>
                         </div>
                     </fieldset>
 
                     <fieldset class="pos-fieldset" style="background: #fefce8; border-color: #fde047;">
                         <legend class="pos-legend" style="color: #a16207;">Tiền thừa trả lại</legend>
-                        <div id="lblTienThua" style="text-align: right; font-size: 24px; font-weight: 900; color: #000; height: 36px; line-height: 36px; white-space: nowrap;">0&nbsp;₫</div>
+                        <div id="lblTienThua" style="text-align: right; font-size: 24px; font-weight: 700; color: var(--text-main); height: 36px; line-height: 36px; white-space: nowrap;">0&nbsp;₫</div>
                     </fieldset>
                 </div>
 
                 <div id="transfer-section" style="display: none;">
-                    <div style="display: flex; gap: 12px; width: 100%; justify-content: space-between;">
+                    <div style="display: flex; gap: 10px; width: 100%; justify-content: space-between;">
                         <div class="payment-option selected" data-method="MOMO" onclick="PosApp.selectApp(this)">
-                            <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-MoMo-Square.png" style="width:32px; height:32px; object-fit:contain; margin-bottom:10px;">
-                            <span style="font-size: 11px; font-weight: 800;">VÍ MOMO</span>
+                            <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-MoMo-Square.png" style="width:28px; height:28px; object-fit:contain; margin-bottom:8px;">
+                            <span style="font-size: 11px; font-weight: 600;">VÍ MOMO</span>
                         </div>
                         <div class="payment-option" data-method="VNPAY" onclick="PosApp.selectApp(this)">
-                            <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Icon-VNPAY-QR.png" style="width:32px; height:32px; object-fit:contain; margin-bottom:10px;">
-                            <span style="font-size: 11px; font-weight: 800;">VNPAY</span>
+                            <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Icon-VNPAY-QR.png" style="width:28px; height:28px; object-fit:contain; margin-bottom:8px;">
+                            <span style="font-size: 11px; font-weight: 600;">VNPAY</span>
                         </div>
                         <div class="payment-option" data-method="CHUYEN_KHOAN" onclick="PosApp.selectApp(this)">
-                            <i class="bi bi-bank" style="font-size: 28px; color: #000; margin-bottom: 8px;"></i>
-                            <span style="font-size: 11px; font-weight: 800; text-align: center;">CHUYỂN KHOẢN</span>
+                            <i class="bi bi-bank" style="font-size: 24px; color: var(--text-main); margin-bottom: 6px;"></i>
+                            <span style="font-size: 11px; font-weight: 600; text-align: center;">CHUYỂN KHOẢN</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="modal-footer" style="padding: 18px 24px;">
-            <button class="btn btn-secondary" style="height: 44px !important; min-width: 100px; font-size: 12px;" onclick="PosApp.closeModal('payModal')">HỦY BỎ</button>
-            <button class="btn btn-primary" style="height: 44px !important; min-width: 180px; font-size: 13px; background: #000; border: none;" onclick="PosApp.finishOrder()">
-                <i class="bi bi-printer-fill" style="font-size: 16px;"></i> XÁC NHẬN & IN HÓA ĐƠN
+        <div class="modal-footer">
+            <button class="btn btn-secondary" style="height: 40px !important; min-width: 100px;" onclick="PosApp.closeModal('payModal')">HỦY BỎ</button>
+            <button class="btn btn-primary" style="height: 40px !important; min-width: 180px; background: var(--text-main); border: none;" onclick="PosApp.finishOrder()">
+                <i class="bi bi-printer-fill" style="font-size: 14px;"></i> XÁC NHẬN & IN HÓA ĐƠN
             </button>
         </div>
     </div>
@@ -471,58 +594,84 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // --- KHỞI TẠO TOAST ĐỒNG BỘ 100% ---
-    if (typeof window.toast === 'undefined') {
-        window.toast = function (message, type = 'success') {
-            let container = document.getElementById('beeToastHost');
-            if (!container) { container = document.createElement('div'); container.id = 'beeToastHost'; document.body.appendChild(container); }
-            const el = document.createElement('div');
-            el.className = `bee-toast-box ${type}`;
-            const prefix = type === 'success' ? 'THÀNH CÔNG' : (type === 'error' ? 'LỖI' : 'THÔNG BÁO');
-            const color = type === 'success' ? '#10b981' : (type === 'error' ? '#ef4444' : '#f59e0b');
-            const icon = type === 'success' ? 'bi-check-circle-fill' : (type === 'error' ? 'bi-x-circle-fill' : 'bi-exclamation-triangle-fill');
-            el.innerHTML = `
-                <i class="bi ${icon}" style="color:${color}; font-size:22px; margin-top:2px;"></i>
-                <div style="display: flex; flex-direction: column; flex: 1;">
-                    <span style="font-weight:800; font-size:12px; text-transform: uppercase; margin-bottom: 4px; color:${color}">${prefix}</span>
-                    <span style="font-weight:500; font-size:13px; color:#333; line-height: 1.4;">${message}</span>
-                </div>
-                <i class="bi bi-x-lg" style="cursor: pointer; margin-left: 10px; font-size: 18px; color:#999; transition: 0.2s;" onmouseover="this.style.color='#000'" onmouseout="this.style.color='#999'" onclick="this.parentElement.remove()"></i>
-            `;
-            container.appendChild(el);
-            setTimeout(() => { if (el.parentNode) { el.classList.add('hiding'); setTimeout(() => el.remove(), 300); } }, 3500);
-        };
-    }
-    if (typeof window.toastConfirm === 'undefined') {
-        window.toastConfirm = function (title, message, onConfirm, onCancel) {
-            let container = document.getElementById('beeToastHost');
-            if (!container) { container = document.createElement('div'); container.id = 'beeToastHost'; document.body.appendChild(container); }
-            const el = document.createElement('div');
-            el.className = `bee-toast-box warning`;
-            el.style.flexDirection = 'column'; el.style.alignItems = 'stretch';
-            el.innerHTML = `
-                <div style="display: flex; gap: 12px; align-items: flex-start; width: 100%;">
-                    <i class="bi bi-question-circle-fill" style="color:#f59e0b; font-size:24px; margin-top:2px;"></i>
-                    <div style="display:flex; flex-direction:column; flex:1;">
-                        <span style="font-weight:800; font-size:13px; text-transform:uppercase; margin-bottom:6px; color:#000;">${title}</span>
-                        <span style="font-weight:500; font-size:13px; color:#555; line-height: 1.5;">${message}</span>
+    /* =========================================
+       HÀM TOAST THÔNG BÁO (ĐỒNG BỘ TRANG CHA)
+       ========================================= */
+    window.toast = function(message, type = 'success') {
+        let toastHost = document.getElementById('toastHost');
+        if (!toastHost || toastHost.parentElement !== document.body) {
+            if (toastHost) toastHost.remove();
+            toastHost = document.createElement('div');
+            toastHost.id = 'toastHost';
+            toastHost.className = 'toast-container';
+            document.body.appendChild(toastHost);
+        }
+        toastHost.innerHTML = '';
+        const toast = document.createElement('div');
+        toast.className = `custom-toast toast-${type}`;
+
+        let iconClass = 'bi-check-circle-fill';
+        if (type === 'error') iconClass = 'bi-x-circle-fill';
+        else if (type === 'warning') iconClass = 'bi-exclamation-triangle-fill';
+        else if (type === 'info') iconClass = 'bi-info-circle-fill';
+
+        toast.innerHTML = `
+            <i class="bi ${iconClass} toast-icon"></i>
+            <span class="toast-msg">${message}</span>
+            <button class="toast-close" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>
+        `;
+        toastHost.appendChild(toast);
+        setTimeout(() => {
+            toast.style.animation = 'slideOutRight 0.3s forwards';
+            setTimeout(() => toast.remove(), 300);
+        }, 3500);
+    };
+
+    /* =========================================
+       HÀM MODAL XÁC NHẬN (ĐỒNG BỘ TRANG CHA)
+       ========================================= */
+    window.confirmDialog = function(title, message, onConfirmCallback) {
+        let overlay = document.getElementById('genericConfirmOverlay');
+        if (!overlay || overlay.parentElement !== document.body) {
+            if (overlay) overlay.remove();
+            overlay = document.createElement('div');
+            overlay.id = 'genericConfirmOverlay';
+            overlay.className = 'overlay';
+            overlay.style.display = 'none';
+            overlay.innerHTML = `
+                <div class="card">
+                    <h4 id="genericConfirmTitle" style="margin-bottom:12px; font-size:15px; font-weight: 700; display: flex; align-items: center; gap: 8px;"></h4>
+                    <div id="genericConfirmMsg" style="margin-bottom:24px; color:var(--sub); font-size: 13px; font-weight: 500; line-height: 1.5;"></div>
+                    <div style="display:flex; justify-content:flex-end; gap:10px;">
+                        <button id="btnGenericCancel" class="btn btn-secondary" style="height: 36px !important; padding: 0 16px;">HỦY BỎ</button>
+                        <button id="btnGenericOk" class="btn btn-primary" style="height: 36px !important; padding: 0 16px;">ĐỒNG Ý</button>
                     </div>
                 </div>
-                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px; border-top: 1px dashed #eee; padding-top: 12px;">
-                    <button class="btn btn-secondary" id="toastCancel" style="height: 32px !important; font-size: 11px; padding: 0 16px !important; border-radius: 4px;">HỦY BỎ</button>
-                    <button class="btn" id="toastOk" style="height: 32px !important; font-size: 11px; padding: 0 16px !important; border-radius: 4px; background: #ef4444; border-color: #ef4444; color: #fff;">XÁC NHẬN</button>
-                </div>
             `;
-            container.appendChild(el);
-            el.querySelector('#toastOk').onclick = () => { el.classList.add('hiding'); setTimeout(() => el.remove(), 300); if(onConfirm) onConfirm(); };
-            el.querySelector('#toastCancel').onclick = () => { el.classList.add('hiding'); setTimeout(() => el.remove(), 300); if(onCancel) onCancel(); };
+            document.body.appendChild(overlay);
+        }
+
+        const titleEl = document.getElementById('genericConfirmTitle');
+        const msgEl = document.getElementById('genericConfirmMsg');
+        const btnOk = document.getElementById('btnGenericOk');
+        const btnCancel = document.getElementById('btnGenericCancel');
+
+        titleEl.innerHTML = `<i class="bi bi-question-circle" style="color: var(--primary); font-size: 18px;"></i> ${title}`;
+        msgEl.innerHTML = message;
+        overlay.style.display = 'flex';
+
+        btnOk.onclick = null;
+        btnCancel.onclick = null;
+
+        btnOk.onclick = function() {
+            overlay.style.display = 'none';
+            if (typeof onConfirmCallback === 'function') onConfirmCallback();
         };
-    }
+        btnCancel.onclick = function() { overlay.style.display = 'none'; };
+    };
 
     const PosApp = {
         products: [], invoices: [], usedVoucherIds: [], activeInvoiceId: null, isCreating: false, countdownTimer: null,
-
-        // 🌟 BIẾN STATE CHO MODAL NHẬP SỐ LƯỢNG MỚI
         state: { qtyAction: null, qtySpctId: null },
 
         init: async function () {
@@ -542,6 +691,35 @@
             this.countdownTimer = setInterval(() => {
                 this.updateCountdown();
             }, 1000);
+        },
+
+        handleProductSearch: function(val) {
+            const btn = document.getElementById('clearProductSearchBtn');
+            if (btn) btn.style.display = val.length > 0 ? 'block' : 'none';
+            this.loadProducts(val);
+        },
+
+        clearProductSearch: function() {
+            const inp = document.getElementById('productSearchInput');
+            if (inp) inp.value = '';
+            const btn = document.getElementById('clearProductSearchBtn');
+            if (btn) btn.style.display = 'none';
+            this.loadProducts('');
+        },
+
+        resetFilters: function() {
+            const inp = document.getElementById('productSearchInput');
+            if (inp) inp.value = '';
+            const btn = document.getElementById('clearProductSearchBtn');
+            if (btn) btn.style.display = 'none';
+
+            const selects = document.querySelectorAll('.filter-select');
+            if (selects.length >= 2) {
+                selects[0].value = '';
+                selects[1].value = '';
+            }
+
+            this.loadProducts('');
         },
 
         updateCountdown: function() {
@@ -585,7 +763,7 @@
         openVoucherModal: async function() {
             this.openModal('voucherModal');
             const listEl = document.getElementById('voucherList');
-            listEl.innerHTML = '<div style="text-align: center; color: #888; padding: 30px;"><i class="bi bi-hourglass-split" style="font-size:24px; animation: spin 1s linear infinite;"></i><br><br>Đang tải danh sách mã giảm giá...</div>';
+            listEl.innerHTML = '<div style="text-align: center; color: var(--sub); padding: 30px;"><i class="bi bi-hourglass-split" style="font-size:24px; animation: spin 1s linear infinite;"></i><br><br>Đang tải danh sách mã giảm giá...</div>';
 
             try {
                 const res = await fetch('/api/vouchers/active');
@@ -610,7 +788,7 @@
             });
 
             if(!activeVouchers || activeVouchers.length === 0) {
-                listEl.innerHTML = '<div style="text-align: center; color: #888; padding: 40px; border: 1px dashed #ccc; border-radius: 4px;">Hiện tại không có mã giảm giá nào khả dụng</div>';
+                listEl.innerHTML = '<div style="text-align: center; color: var(--sub); padding: 40px; border: 1px dashed var(--gray-300); border-radius: var(--border-radius);">Hiện tại không có mã giảm giá nào khả dụng</div>';
                 return;
             }
 
@@ -636,7 +814,6 @@
                 const meetsStackCondition = isStackable || hasFullPriceItem;
                 const isSelected = (selectedCode === (v.maCode || v.code));
 
-                // 🌟 KIỂM TRA MÃ NÀY KHÁCH ĐÃ DÙNG CHƯA
                 const isUsed = this.usedVoucherIds && this.usedVoucherIds.includes(v.id);
 
                 const tongSL = v.soLuong || 0;
@@ -646,13 +823,13 @@
 
                 let opacity = '1';
                 let actionBtn = '';
-                let noteHtml = `<div style="font-size: 11px; color: #10b981; margin-top: 4px; font-weight:700;">Đơn tối thiểu: ${new Intl.NumberFormat('vi-VN').format(v.dieuKien)}&nbsp;₫</div>`;
+                let noteHtml = `<div style="font-size: 11px; color: #10b981; margin-top: 4px; font-weight:600;">Đơn tối thiểu: ${new Intl.NumberFormat('vi-VN').format(v.dieuKien)}&nbsp;₫</div>`;
                 let cardClass = 'voucher-card';
 
                 if (isUsed) {
                     cardClass += ' disabled-stack';
                     opacity = '0.6';
-                    actionBtn = `<button disabled class="btn btn-secondary" style="color:#a1a1aa; cursor:not-allowed;">ĐÃ DÙNG</button>`;
+                    actionBtn = `<button disabled class="btn btn-secondary" style="color:var(--gray-300); cursor:not-allowed;">ĐÃ DÙNG</button>`;
                     noteHtml += `<div style="font-size: 11px; color: #ef4444; margin-top: 2px; font-style:italic;">(Khách hàng đã dùng mã này)</div>`;
                 } else if (isSelected) {
                     cardClass += ' selected';
@@ -660,14 +837,14 @@
                 } else if (!meetsStackCondition) {
                     cardClass += ' disabled-stack';
                     opacity = '0.6';
-                    actionBtn = `<span style="font-size:10px; color:#ef4444; font-weight:800; background:#fee2e2; padding:6px 10px; border-radius:4px; text-transform:uppercase; text-align:center; display:inline-block;">Chỉ SP Nguyên Giá</span>`;
+                    actionBtn = `<span style="font-size:10px; color:#ef4444; font-weight:700; background:#fee2e2; padding:6px 10px; border-radius:4px; text-transform:uppercase; text-align:center; display:inline-block;">Chỉ SP Nguyên Giá</span>`;
                     noteHtml += `<div style="font-size: 11px; color: #ef4444; margin-top: 2px; font-style:italic;">(Cần ít nhất 1 SP không giảm giá)</div>`;
                 } else if (isEligible) {
                     actionBtn = `<button class="btn btn-primary" onclick="PosApp.selectVoucher('${v.maCode || v.code}')">DÙNG MÃ</button>`;
                 } else {
                     const thieu = v.dieuKien - totalAfterSale;
                     opacity = '0.6';
-                    actionBtn = `<span style="font-size:10px; color:#ef4444; font-weight:800; background:#fee2e2; padding:6px 10px; border-radius:4px; text-transform:uppercase; text-align:center; display:inline-block;">Chưa đủ ĐK</span>`;
+                    actionBtn = `<span style="font-size:10px; color:#ef4444; font-weight:700; background:#fee2e2; padding:6px 10px; border-radius:4px; text-transform:uppercase; text-align:center; display:inline-block;">Chưa đủ ĐK</span>`;
                     noteHtml += `<div style="font-size: 11px; color: #ef4444; margin-top: 2px; font-style:italic;">(Mua thêm ${new Intl.NumberFormat('vi-VN').format(thieu)}&nbsp;₫)</div>`;
                 }
 
@@ -685,21 +862,21 @@
                 return `
                 <div class="${cardClass}" style="opacity: ${opacity}; display: flex; align-items: stretch; padding: 16px;">
                     <div style="display:flex; align-items:center; gap: 15px; flex: 1; padding-right: 15px;">
-                        <div style="width: 56px; height: 56px; background: #000; color: #fff; border-radius: 6px; display: flex; align-items:center; justify-content:center; flex-direction:column; flex-shrink:0;">
-                            <i class="bi bi-ticket-perforated" style="font-size: 24px; margin-bottom: -5px;"></i>
+                        <div style="width: 50px; height: 50px; background: var(--text-main); color: #ffffff; border-radius: var(--border-radius); display: flex; align-items:center; justify-content:center; flex-direction:column; flex-shrink:0;">
+                            <i class="bi bi-ticket-perforated" style="font-size: 20px;"></i>
                         </div>
                         <div style="flex: 1;">
-                            <div class="v-code" style="font-size: 14px; font-weight: 900; color: #000;">${v.maCode || v.code}</div>
-                            <div class="v-desc" style="font-weight:600; font-size: 12px; margin-bottom: 2px; color: #555;">${v.ten}</div>
+                            <div class="v-code" style="font-size: 13px; font-weight: 700; color: var(--text-main);">${v.maCode || v.code}</div>
+                            <div class="v-desc" style="font-weight:500; font-size: 12px; margin-bottom: 2px; color: var(--sub);">${v.ten}</div>
 
-                            <div style="font-size: 12px; color: #d97706; font-weight: 800;">${discountLabel}</div>
+                            <div style="font-size: 12px; color: var(--primary); font-weight: 700;">${discountLabel}</div>
                             ${noteHtml}
-                            ${!isStackable ? `<div style="font-size:11px; color:#f59e0b; margin-top:2px; font-weight:700;"><i class="bi bi-info-circle-fill"></i> Không áp dụng riêng cho SP đang Sale</div>` : ''}
+                            ${!isStackable ? `<div style="font-size:11px; color:#f59e0b; margin-top:2px; font-weight:600;"><i class="bi bi-info-circle-fill"></i> Không áp dụng riêng cho SP đang Sale</div>` : ''}
 
-                            <div style="width: 100%; height: 6px; background: #e4e4e7; border-radius: 10px; margin-top: 10px; overflow: hidden;">
-                                <div style="height: 100%; border-radius: 10px; transition: width 0.3s; width: ${phanTram}%; background: ${energyColor}"></div>
+                            <div style="width: 100%; height: 4px; background: var(--gray-200); border-radius: 4px; margin-top: 10px; overflow: hidden;">
+                                <div style="height: 100%; border-radius: 4px; transition: width 0.3s; width: ${phanTram}%; background: ${energyColor}"></div>
                             </div>
-                            <div style="font-size: 11px; color: #71717a; margin-top: 4px; display: flex; justify-content: space-between; font-weight: 700;">
+                            <div style="font-size: 11px; color: var(--sub); margin-top: 4px; display: flex; justify-content: space-between; font-weight: 600;">
                                 <span>Đã dùng: ${daDung}/${tongSL}</span>
                                 <span style="color:${energyColor}">${phanTram.toFixed(0)}%</span>
                             </div>
@@ -740,7 +917,6 @@
                 const res = await fetch('/api/pos/vouchers/apply', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    // 🌟 BỔ SUNG: TRUYỀN THÊM customerId ĐỂ BACKEND NHẬN DIỆN VÀ CHẶN LẠI NẾU ĐÃ DÙNG
                     body: JSON.stringify({ code: code, cart: inv.cart, customerId: inv.customerId })
                 });
                 const data = await res.json();
@@ -757,6 +933,104 @@
                 this.closeModal('voucherModal');
                 window.toast("ÁP DỤNG MÃ THÀNH CÔNG", "success");
             } catch (e) { window.toast("LỖI KẾT NỐI", "error"); }
+        },
+
+        autoApplyBestVoucher: async function() {
+            const inv = this.getCurrentInvoice();
+            if (!inv || !inv.cart || inv.cart.length === 0) {
+                window.toast("Giỏ hàng trống, chưa thể tính toán mã ưu đãi!", "warning");
+                return;
+            }
+
+            // Hiệu ứng loading cho nút Auto
+            const btnAuto = document.querySelector('button[onclick="PosApp.autoApplyBestVoucher()"]');
+            const originalBtnHtml = btnAuto.innerHTML;
+            btnAuto.innerHTML = '<i class="bi bi-hourglass-split spin"></i>';
+            btnAuto.disabled = true;
+
+            try {
+                // Lấy danh sách toàn bộ voucher đang active từ Backend
+                const res = await fetch('/api/vouchers/active');
+                if(!res.ok) throw new Error();
+                const vouchers = await res.json();
+
+                // Tính toán sơ bộ tổng tiền của giỏ hàng hiện tại (giống logic trong updateTotal)
+                let totalAfterSale = 0;
+                let tongTienNguyenGia = 0;
+
+                inv.cart.forEach(i => {
+                    const giaGoc = Number(i.originalPrice) || Number(i.price);
+                    const giaBan = Number(i.price);
+                    const qty = Number(i.qty);
+                    const lineTotal = giaBan * qty;
+
+                    totalAfterSale += lineTotal;
+                    if (giaBan >= giaGoc) {
+                        tongTienNguyenGia += lineTotal;
+                    }
+                });
+
+                let bestVoucher = null;
+                let maxDiscountAmount = 0;
+
+                // Duyệt qua từng voucher để tìm ra cái trừ đi nhiều tiền nhất
+                vouchers.forEach(v => {
+                    // Bỏ qua các mã không hợp lệ (hết hạn, hết lượt, đã dùng)
+                    if (v.trangThai === false) return;
+                    if (v.soLuong !== undefined && v.luotSuDung !== undefined && v.soLuong <= v.luotSuDung) return;
+                    if (v.ngayKetThuc && new Date(v.ngayKetThuc) < new Date()) return;
+                    if (this.usedVoucherIds && this.usedVoucherIds.includes(v.id)) return;
+
+                    // Kiểm tra điều kiện đơn tối thiểu
+                    if (totalAfterSale < v.dieuKien) return;
+
+                    const isStackable = (v.choPhepCongDon === true || v.choPhepCongDon === 1 || v.choPhepCongDon === 'true');
+                    const type = (v.loaiGiamGia || '').toUpperCase();
+                    const isFreeship = type === 'FREESHIP';
+
+                    // Nếu mã không cho phép cộng dồn với hàng Sale, mà giỏ không có hàng nguyên giá -> Bỏ qua
+                    if (!isStackable && !isFreeship && tongTienNguyenGia === 0) return;
+
+                    let baseForVoucher = (isStackable || isFreeship) ? totalAfterSale : tongTienNguyenGia;
+                    let calcDiscount = 0;
+                    const giaTriVoucher = Number(v.giaTriGiamGia);
+
+                    // Thuật toán tính số tiền thực tế được giảm của mã này
+                    if (type.includes('PERCENT') || type.includes('%') || type.includes('PHẦN TRĂM')) {
+                        calcDiscount = (baseForVoucher * giaTriVoucher) / 100;
+                        if (v.giaTriGiamGiaToiDa && calcDiscount > Number(v.giaTriGiamGiaToiDa)) {
+                            calcDiscount = Number(v.giaTriGiamGiaToiDa); // Chặn trần tối đa
+                        }
+                    } else {
+                        calcDiscount = giaTriVoucher;
+                        if (calcDiscount > baseForVoucher) {
+                            calcDiscount = baseForVoucher;
+                        }
+                    }
+
+                    // Lưu lại mã có số tiền giảm cao nhất
+                    if (calcDiscount > maxDiscountAmount) {
+                        maxDiscountAmount = calcDiscount;
+                        bestVoucher = v;
+                    }
+                });
+
+                // Kết luận
+                if (bestVoucher && maxDiscountAmount > 0) {
+                    document.getElementById('voucherInput').value = bestVoucher.maCode || bestVoucher.code;
+                    await this.applyVoucher();
+                    window.toast(`Đã tự động chọn mã tiết kiệm được ${new Intl.NumberFormat('vi-VN').format(maxDiscountAmount)}₫`, "success");
+                } else {
+                    window.toast("Hiện chưa có mã giảm giá nào đủ điều kiện cho đơn này", "info");
+                }
+
+            } catch(e) {
+                window.toast("Lỗi khi tìm mã tự động", "error");
+            } finally {
+                // Trả lại nút Auto như cũ
+                btnAuto.innerHTML = originalBtnHtml;
+                btnAuto.disabled = false;
+            }
         },
 
         updateTotal: function () {
@@ -878,7 +1152,8 @@
                         }
 
                         window.toast("THANH TOÁN MOMO THÀNH CÔNG VÀ ĐÃ LƯU DB!", "success");
-                        await this.loadProducts(document.querySelector('input[placeholder*="Tìm kiếm sản phẩm"]').value);
+                        const currentSearch = document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '';
+                        await this.loadProducts(currentSearch);
                         this.renderTabs();
                         this.renderCart();
 
@@ -931,7 +1206,8 @@
                         }
 
                         window.toast("THANH TOÁN VNPAY THÀNH CÔNG VÀ ĐÃ LƯU DB!", "success");
-                        await this.loadProducts(document.querySelector('input[placeholder*="Tìm kiếm sản phẩm"]').value);
+                        const currentSearch = document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '';
+                        await this.loadProducts(currentSearch);
                         this.renderTabs();
                         this.renderCart();
 
@@ -986,9 +1262,9 @@
                 const sizeSel = document.querySelectorAll('.filter-select')[1];
                 colorSel.innerHTML = '<option value="">Tất cả Màu Sắc</option>' + data.colors.map(c => `<option value="${c.id}">${c.ten.toUpperCase()}</option>`).join('');
                 sizeSel.innerHTML = '<option value="">Tất cả Kích Thước</option>' + data.sizes.map(s => `<option value="${s.id}">${s.ten.toUpperCase()}</option>`).join('');
-                const searchInp = document.querySelector('input[placeholder*="Tìm kiếm sản phẩm"]');
-                colorSel.onchange = () => this.loadProducts(searchInp.value);
-                sizeSel.onchange = () => this.loadProducts(searchInp.value);
+                const searchInp = document.getElementById('productSearchInput');
+                colorSel.onchange = () => this.loadProducts(searchInp ? searchInp.value : '');
+                sizeSel.onchange = () => this.loadProducts(searchInp ? searchInp.value : '');
             } catch (e) {}
         },
 
@@ -1011,7 +1287,7 @@
         renderProducts: function (list) {
             const tbody = document.getElementById('productBody');
             if(!list || list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 40px; color:#888;">Không tìm thấy sản phẩm phù hợp</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 40px; color:var(--sub);">Không tìm thấy sản phẩm phù hợp</td></tr>`;
                 return;
             }
             tbody.innerHTML = list.map(p => {
@@ -1020,21 +1296,20 @@
 
                 const hasPromo = p.giaSauKhuyenMai && p.giaSauKhuyenMai < p.giaBan;
                 const displayPrice = hasPromo
-                    ? `<span style="text-decoration:line-through; color:#999; font-size:11px; display:block; margin-bottom:2px; white-space:nowrap;">${new Intl.NumberFormat('vi-VN').format(p.giaBan)}&nbsp;₫</span>
-                       <span style="color:#dc2626; font-size: 13px; white-space:nowrap;">${new Intl.NumberFormat('vi-VN').format(p.giaSauKhuyenMai)}&nbsp;₫</span>`
-                    : `<span style="font-size: 13px; white-space:nowrap;">${new Intl.NumberFormat('vi-VN').format(p.giaBan)}&nbsp;₫</span>`;
+                    ? `<span style="text-decoration:line-through; color:var(--sub); font-size:11px; display:block; margin-bottom:2px; white-space:nowrap;">${new Intl.NumberFormat('vi-VN').format(p.giaBan)}&nbsp;₫</span>
+                       <span style="color:#dc2626; font-size: 13px; font-weight:600; white-space:nowrap;">${new Intl.NumberFormat('vi-VN').format(p.giaSauKhuyenMai)}&nbsp;₫</span>`
+                    : `<span style="font-size: 13px; font-weight:600; white-space:nowrap;">${new Intl.NumberFormat('vi-VN').format(p.giaBan)}&nbsp;₫</span>`;
                 return `
                 <tr onclick="PosApp.addToCart(${p.id})">
-                    <td style="text-align:center; padding: 8px;"><img src="${p.hinhAnh || 'https://placehold.co/40'}" style="width: 44px; height: 44px; border-radius: 4px; border: 1px solid var(--gray-200); object-fit: cover;"></td>
-                    <td><div style="font-weight:800; color: #000; font-size: 13px; margin-bottom: 2px;">${p.sanPham.ten}</div><div style="font-size:11px; color:#666; font-weight:600;"><span style="color:#1d4ed8;">${p.sku}</span> • ${p.mauSac.ten} - ${p.kichThuoc.ten}</div></td>
-                    <td style="text-align:right; font-weight:800; white-space:nowrap;">${displayPrice}</td>
-                    <td style="text-align:center; font-weight:900; color:#2563eb; font-size:14px;">${realStock}</td>
-                    <td style="text-align:center;" onclick="PosApp.promptAddQty(${p.id}, event)"><button class="btn-icon" style="border-color:#2563eb; color:#2563eb;" title="Nhập số lượng..."><i class="bi bi-cart-plus-fill"></i></button></td>
+                    <td style="text-align:center; padding: 8px;"><img src="${p.hinhAnh || 'https://placehold.co/40'}" style="width: 44px; height: 44px; border-radius: var(--border-radius); border: 1px solid var(--gray-200); object-fit: cover;"></td>
+                    <td><div style="font-weight:700; color: var(--text-main); font-size: 13px; margin-bottom: 2px;">${p.sanPham.ten}</div><div style="font-size:11px; color:var(--sub); font-weight:500;"><span style="color:var(--primary); font-weight:600;">${p.sku}</span> • ${p.mauSac.ten} - ${p.kichThuoc.ten}</div></td>
+                    <td style="text-align:right;">${displayPrice}</td>
+                    <td style="text-align:center; font-weight:700; color:var(--text-main); font-size:13px;">${realStock}</td>
+                    <td style="text-align:center;" onclick="PosApp.promptAddQty(${p.id}, event)"><button class="btn-icon" style="border-color:var(--primary); color:var(--primary);" title="Nhập số lượng..."><i class="bi bi-cart-plus-fill"></i></button></td>
                 </tr>`;
             }).join('');
         },
 
-        // 🌟 MỞ POPUP NHẬP SỐ LƯỢNG THÊM (ADD)
         promptAddQty: function(spctId, e) {
             if (e) e.stopPropagation();
             if (!this.activeInvoiceId) { window.toast("VUI LÒNG TẠO HÓA ĐƠN TRƯỚC", "warning"); return; }
@@ -1045,15 +1320,14 @@
             this.state.qtyAction = 'add';
             this.state.qtySpctId = spctId;
 
-            document.getElementById('qtyModalTitle').innerHTML = '<i class="bi bi-cart-plus-fill" style="margin-right: 6px; color: #2563eb;"></i> THÊM VÀO GIỎ';
-            document.getElementById('qtyModalDesc').innerHTML = `Nhập số lượng cho sản phẩm: <br><strong style="color:#000;">${product.sanPham.ten}</strong>`;
+            document.getElementById('qtyModalTitle').innerHTML = '<i class="bi bi-cart-plus-fill" style="margin-right: 6px; color: var(--primary);"></i> THÊM VÀO GIỎ';
+            document.getElementById('qtyModalDesc').innerHTML = `Nhập số lượng cho sản phẩm: <br><strong style="color:var(--text-main);">${product.sanPham.ten}</strong>`;
             document.getElementById('inpCustomQty').value = 1;
 
             this.openModal('qtyModal');
             setTimeout(() => document.getElementById('inpCustomQty').select(), 100);
         },
 
-        // 🌟 MỞ POPUP NHẬP SỐ LƯỢNG XÓA (REMOVE)
         promptRemoveQty: function(spctId) {
             const inv = this.getCurrentInvoice();
             if (!inv) return;
@@ -1064,14 +1338,13 @@
             this.state.qtySpctId = spctId;
 
             document.getElementById('qtyModalTitle').innerHTML = '<i class="bi bi-trash3-fill" style="margin-right: 6px; color: #dc2626;"></i> BỎ SẢN PHẨM';
-            document.getElementById('qtyModalDesc').innerHTML = `Sản phẩm: <strong style="color:#000;">${item.name}</strong><br>Đang có trong giỏ: <strong style="color:#dc2626;">${item.qty}</strong> cái.<br>Nhập số lượng muốn bớt:`;
-            document.getElementById('inpCustomQty').value = item.qty; // Mặc định xóa hết
+            document.getElementById('qtyModalDesc').innerHTML = `Sản phẩm: <strong style="color:var(--text-main);">${item.name}</strong><br>Đang có trong giỏ: <strong style="color:#dc2626;">${item.qty}</strong> cái.<br>Nhập số lượng muốn bớt:`;
+            document.getElementById('inpCustomQty').value = item.qty;
 
             this.openModal('qtyModal');
             setTimeout(() => document.getElementById('inpCustomQty').select(), 100);
         },
 
-        // 🌟 XÁC NHẬN SỐ LƯỢNG TỪ POPUP
         confirmCustomQty: async function() {
             const inputVal = document.getElementById('inpCustomQty').value;
             const qty = parseInt(inputVal);
@@ -1122,13 +1395,16 @@
             document.getElementById('voucherInput').value = inv && inv.voucher ? (inv.voucher.maCode || inv.voucher.code || '') : '';
         },
 
-        // 🌟 BỎ QUA POPUP XÁC NHẬN, GỌI THẲNG HÀM forceDelete()
         promptDelete: function () {
             if (!this.getCurrentInvoice()) {
                 window.toast("CHƯA CHỌN ĐƠN HOẶC HÓA ĐƠN ĐÃ BỊ XÓA", "warning");
                 return;
             }
-            this.forceDelete();
+            window.confirmDialog(
+                "XÓA HÓA ĐƠN CHỜ",
+                "Bạn có chắc chắn muốn xóa hóa đơn này không? Các sản phẩm trong giỏ sẽ được hoàn lại kho.",
+                () => { PosApp.forceDelete(); }
+            );
         },
 
         syncCartWithServer: async function() {
@@ -1147,7 +1423,6 @@
             } catch (e) {}
         },
 
-        // 🌟 ĐÃ SỬA: Tham số thứ 2 là số lượng cần thêm (mặc định là 1)
         addToCart: async function (spctId, qtyToAdd = 1) {
             if (!this.activeInvoiceId) { window.toast("VUI LÒNG TẠO HÓA ĐƠN TRƯỚC", "warning"); return; }
 
@@ -1177,7 +1452,9 @@
                     attr: `${product.mauSac.ten} - ${product.kichThuoc.ten}`, qty: qtyToAdd
                 });
             }
-            this.saveState(); this.renderCart(); this.loadProducts("");
+            this.saveState(); this.renderCart();
+            const currentSearch = document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '';
+            this.loadProducts(currentSearch);
             window.toast(`Đã thêm ${qtyToAdd} sản phẩm vào giỏ!`, "success");
         },
 
@@ -1186,7 +1463,6 @@
             const item = inv.cart.find(i => i.id === spctId);
             if (!item) return;
 
-            // Nếu người dùng nhập số xóa lớn hơn số đang có thì chỉ trừ đi số đang có
             let actualDelta = delta;
             if (delta === -999 || (delta < 0 && Math.abs(delta) >= item.qty)) {
                 actualDelta = -item.qty;
@@ -1211,7 +1487,9 @@
             } else {
                 item.qty = newQty;
             }
-            this.saveState(); this.renderCart(); this.loadProducts("");
+            this.saveState(); this.renderCart();
+            const currentSearch = document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '';
+            this.loadProducts(currentSearch);
         },
 
         setQty: async function (spctId, val) {
@@ -1241,22 +1519,23 @@
             item.qty = newQty;
             this.saveState();
             this.renderCart();
-            this.loadProducts("");
+            const currentSearch = document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '';
+            this.loadProducts(currentSearch);
         },
 
         searchCustomer: async function(val) {
             const resultBox = document.getElementById('customerSearchResults');
-            if (val.length < 2) { resultBox.innerHTML = '<div style="color:#999;font-size:12px;padding:15px;text-align:center;">Nhập tên hoặc SĐT để tìm kiếm...</div>'; return; }
+            if (val.length < 2) { resultBox.innerHTML = '<div style="color:var(--sub);font-size:12px;padding:15px;text-align:center;">Nhập tên hoặc SĐT để tìm kiếm...</div>'; return; }
             try{
                 const res = await fetch(`/api/pos/customers/search?q=${val}`);
                 const data = await res.json();
-                if (data.length === 0) { resultBox.innerHTML = '<div style="color:#999;font-size:12px;padding:15px;text-align:center;">Không tìm thấy khách hàng</div>'; return; }
+                if (data.length === 0) { resultBox.innerHTML = '<div style="color:var(--sub);font-size:12px;padding:15px;text-align:center;">Không tìm thấy khách hàng</div>'; return; }
                 resultBox.innerHTML = data.map(c => `
                     <div style="padding:12px 15px; border-bottom:1px solid var(--gray-200); cursor:pointer; transition: 0.2s;"
-                         onmouseover="this.style.background='#f4f4f5'" onmouseout="this.style.background=''"
+                         onmouseover="this.style.background='var(--gray-100)'" onmouseout="this.style.background=''"
                          onclick="PosApp.selectCustomer('${c.hoTen}', '${c.soDienThoai}', ${c.id})">
-                        <div style="font-weight:800; font-size: 13px; color: #000; margin-bottom: 2px;">${c.hoTen.toUpperCase()}</div>
-                        <div style="font-size:12px; color:#666; font-weight: 600;">${c.soDienThoai}</div>
+                        <div style="font-weight:700; font-size: 13px; color: var(--text-main); margin-bottom: 2px;">${c.hoTen.toUpperCase()}</div>
+                        <div style="font-size:12px; color:var(--sub); font-weight: 500;">${c.soDienThoai}</div>
                     </div>`).join('');
             }catch(e){}
         },
@@ -1273,7 +1552,6 @@
                 inv = this.getCurrentInvoice();
             }
 
-            // 🌟 Lấy danh sách Voucher đã dùng của KH này
             try {
                 const usedRes = await fetch(`/api/pos/customers/${id}/used-vouchers`);
                 if (usedRes.ok) this.usedVoucherIds = await usedRes.json();
@@ -1356,7 +1634,6 @@
                 return;
             }
 
-            // 🌟 ĐÃ SỬA LỖI 1: Chỉ truyền 2 tham số là finalMethod và total
             this.executeFinishOrder(finalMethod, total);
         },
 
@@ -1366,7 +1643,7 @@
 
             const payload = {
                 customerId: inv.customerId,
-                amount: total,         // 🌟 ĐÃ SỬA LỖI 2: Đổi chữ 'total' thành 'amount' để khớp với Backend
+                amount: total,
                 method: finalMethod,
                 cart: inv.cart,
                 voucherId: inv.voucher ? inv.voucher.id : null
@@ -1396,7 +1673,8 @@
                     this.activeInvoiceId = this.invoices.length > 0 ? this.invoices[0].id : null;
 
                     this.saveState();
-                    await this.loadProducts("");
+                    const currentSearch = document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '';
+                    await this.loadProducts(currentSearch);
                     this.renderTabs();
                     this.renderCart();
 
@@ -1420,22 +1698,22 @@
 
             const overlay = document.createElement('div');
             overlay.id = 'qrOverlayWindow';
-            overlay.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:10000; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px);';
+            overlay.style.cssText = 'position:fixed; inset:0; background:rgba(15,23,42,0.5); z-index:10000; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(2px);';
             overlay.innerHTML = `
-                <div style="background:#fff; width:440px; max-width:90%; border-radius:6px; padding:32px 24px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.2); position: relative;">
-                    <button style="position:absolute; top:15px; right:15px; background:none; border:none; font-size:24px; cursor:pointer; color:#888;" onclick="this.parentElement.parentElement.remove()">&times;</button>
-                    <h3 style="font-size:20px; margin-bottom:8px; font-weight:800; text-transform:uppercase; color: #2563eb;"><i class="bi bi-qr-code-scan" style="margin-right: 6px;"></i> Quét Mã Chuyển Khoản</h3>
-                    <p style="font-size:13px; color:#666; margin-bottom:20px; font-weight: 500;">Vui lòng hướng dẫn khách hàng quét mã QR dưới đây để thanh toán.</p>
-                    <img src="${qrUrl}" style="width:240px; height:240px; margin:15px auto; border:1px solid var(--gray-200); border-radius:6px; padding:10px; display:block; background: #fff;">
-                    <div style="font-size:13px; margin-bottom:24px; text-align:left; background:#fafafa; padding:20px; border-radius:4px; border:1px solid var(--gray-200);">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px dashed var(--gray-200); padding-bottom:8px;"><span>Ngân hàng:</span> <strong>${bank}</strong></div>
-                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px dashed var(--gray-200); padding-bottom:8px;"><span>Số tài khoản:</span> <strong>${acc}</strong></div>
-                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px dashed var(--gray-200); padding-bottom:8px;"><span>Chủ tài khoản:</span> <strong>${name}</strong></div>
-                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px dashed var(--gray-200); padding-bottom:8px;"><span>Số tiền:</span> <strong style="color:#dc2626; font-size:16px; white-space: nowrap;">${new Intl.NumberFormat('vi-VN').format(amount)}&nbsp;₫</strong></div>
-                        <div style="display:flex; justify-content:space-between;"><span>Nội dung CK:</span> <strong style="color:#2563eb;">${info}</strong></div>
+                <div style="background:#ffffff; width:440px; max-width:90%; border-radius:var(--border-radius); padding:24px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.1); position: relative;">
+                    <button style="position:absolute; top:12px; right:12px; background:none; border:none; font-size:24px; cursor:pointer; color:var(--sub); width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:var(--border-radius); transition:0.2s;" onmouseover="this.style.background='var(--gray-200)'; this.style.color='var(--text-main)'" onmouseout="this.style.background='none'; this.style.color='var(--sub)'" onclick="this.parentElement.parentElement.remove()">&times;</button>
+                    <h3 style="font-size:16px; margin-bottom:8px; font-weight:700; text-transform:uppercase; color: var(--primary);"><i class="bi bi-qr-code-scan" style="margin-right: 6px;"></i> Quét Mã Chuyển Khoản</h3>
+                    <p style="font-size:13px; color:var(--sub); margin-bottom:20px; font-weight: 500;">Vui lòng hướng dẫn khách hàng quét mã QR dưới đây để thanh toán.</p>
+                    <img src="${qrUrl}" style="width:240px; height:240px; margin:15px auto; border:1px solid var(--gray-200); border-radius:var(--border-radius); padding:10px; display:block; background: #ffffff;">
+                    <div style="font-size:13px; margin-bottom:24px; text-align:left; background:var(--gray-100); padding:20px; border-radius:var(--border-radius); border:1px solid var(--gray-200);">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px dashed var(--gray-200); padding-bottom:8px;"><span>Ngân hàng:</span> <strong style="color:var(--text-main);">${bank}</strong></div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px dashed var(--gray-200); padding-bottom:8px;"><span>Số tài khoản:</span> <strong style="color:var(--text-main);">${acc}</strong></div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px dashed var(--gray-200); padding-bottom:8px;"><span>Chủ tài khoản:</span> <strong style="color:var(--text-main);">${name}</strong></div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px dashed var(--gray-200); padding-bottom:8px;"><span>Số tiền:</span> <strong style="color:#dc2626; font-size:15px; white-space: nowrap;">${new Intl.NumberFormat('vi-VN').format(amount)}&nbsp;₫</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Nội dung CK:</span> <strong style="color:var(--primary);">${info}</strong></div>
                     </div>
 
-                    <button id="qrConfirmBtn" style="padding:16px 24px; background:#10b981; color:white; border:none; font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; cursor:pointer; border-radius:4px; width:100%; transition:0.2s;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'" onclick="PosApp.executeFinishOrder('${finalMethod}', ${amount})">
+                    <button id="qrConfirmBtn" style="padding:14px 24px; background:var(--text-main); color:#ffffff; border:none; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; cursor:pointer; border-radius:var(--border-radius); width:100%; transition:0.2s;" onmouseover="this.style.background='#1e293b'" onmouseout="this.style.background='var(--text-main)'" onclick="PosApp.executeFinishOrder('${finalMethod}', ${amount})">
                         <i class="bi bi-check-circle-fill"></i> ĐÃ NHẬN TIỀN & IN HÓA ĐƠN
                     </button>
                 </div>
@@ -1465,7 +1743,8 @@
                 this.activeInvoiceId = this.invoices.length > 0 ? this.invoices[0].id : null;
             }
             this.saveState();
-            await this.loadProducts("");
+            const currentSearch = document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '';
+            await this.loadProducts(currentSearch);
             this.renderTabs(); this.renderCart();
             window.toast("ĐÃ HỦY HÓA ĐƠN", "success");
         },
@@ -1598,7 +1877,7 @@
         renderTabs: function () {
             const container = document.getElementById('invoiceTabsContainer');
             if (this.invoices.length === 0) {
-                container.innerHTML = '<span style="color:#999; font-size:12px; font-weight: 600; padding:10px;">CHƯA CÓ HÓA ĐƠN</span>';
+                container.innerHTML = '<span style="color:var(--sub); font-size:12px; font-weight: 600; padding:10px;">CHƯA CÓ HÓA ĐƠN</span>';
                 return;
             }
             container.innerHTML = this.invoices.map(inv => `
@@ -1620,27 +1899,26 @@
             }
             document.getElementById('emptyCart').style.display = 'none';
 
-            // 🌟 ĐÃ SỬA: SỬA ĐƠN VỊ TIỀN VÀ THÊM NÚT XÓA BẰNG POPUP
             tbody.innerHTML = inv.cart.map(i => `
                 <tr>
                     <td style="padding-left: 20px;">
-                        <div style="font-weight: 800; color: #000; font-size: 13px; margin-bottom: 2px;">${i.name}</div>
-                        <div style="font-size: 11px; color: #666; font-weight: 600;">${i.attr}</div>
+                        <div style="font-weight: 700; color: var(--text-main); font-size: 13px; margin-bottom: 2px;">${i.name}</div>
+                        <div style="font-size: 11px; color: var(--sub); font-weight: 500;">${i.attr}</div>
                     </td>
-                    <td style="text-align:right; font-weight: 800; font-size: 13px; white-space: nowrap;">${new Intl.NumberFormat('vi-VN').format(Number(i.price))}&nbsp;₫</td>
+                    <td style="text-align:right; font-weight: 700; font-size: 13px; white-space: nowrap;">${new Intl.NumberFormat('vi-VN').format(Number(i.price))}&nbsp;₫</td>
                     <td style="text-align:center;">
                         <div style="display:flex; justify-content:center; align-items:center; gap:5px;">
-                            <button class="btn-icon" style="width:24px; height:24px;" onclick="PosApp.changeQty(${i.id}, -1)">-</button>
+                            <button class="btn-icon" style="width:24px; height:24px; background:var(--gray-100);" onclick="PosApp.changeQty(${i.id}, -1)">-</button>
 
                             <input type="number" class="qty-input" value="${i.qty}"
-                                   style="width: 40px; text-align: center; border: 1px solid var(--gray-300); border-radius: 4px; height: 24px; font-weight: 800; outline: none; background: #fafafa;"
+                                   style="width: 40px; text-align: center; border: 1px solid var(--gray-200); border-radius: var(--border-radius); height: 24px; font-weight: 600; outline: none; background: #ffffff;"
                                    onchange="PosApp.setQty(${i.id}, this.value)"
                                    onfocus="this.select()">
 
-                            <button class="btn-icon" style="width:24px; height:24px;" onclick="PosApp.changeQty(${i.id}, 1)">+</button>
+                            <button class="btn-icon" style="width:24px; height:24px; background:var(--gray-100);" onclick="PosApp.changeQty(${i.id}, 1)">+</button>
                         </div>
                     </td>
-                    <td style="text-align:right; padding-right: 20px; font-weight: 800; color: #dc2626; font-size: 14px; white-space: nowrap;">${new Intl.NumberFormat('vi-VN').format(Number(i.price) * Number(i.qty))}&nbsp;₫</td>
+                    <td style="text-align:right; padding-right: 20px; font-weight: 700; color: #dc2626; font-size: 13px; white-space: nowrap;">${new Intl.NumberFormat('vi-VN').format(Number(i.price) * Number(i.qty))}&nbsp;₫</td>
                     <td style="text-align:center; vertical-align: middle;">
                         <button class="btn-icon" style="border:none; color:#ef4444; background: #fee2e2;" onclick="PosApp.promptRemoveQty(${i.id})" title="Tùy chỉnh xóa"><i class="bi bi-trash3-fill"></i></button>
                     </td>
@@ -1681,30 +1959,25 @@
 
             if (!name || !phone) { window.toast("VUI LÒNG NHẬP ĐỦ THÔNG TIN", "warning"); return; }
 
-            // 🌟 1. KIỂM TRA ĐỊNH DẠNG TÊN (Chỉ chữ cái tiếng Việt và khoảng trắng, không số, không ký tự đặc biệt)
             const nameRegex = /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸỳỵýỷỹ\s]+$/;
             if (!nameRegex.test(name)) {
                 window.toast("Tên khách hàng không được chứa số hoặc ký tự đặc biệt!", "error");
                 return;
             }
 
-            // 🌟 2. KIỂM TRA ĐỊNH DẠNG SỐ ĐIỆN THOẠI (Bắt đầu bằng số 0, đủ 10 số)
             const phoneRegex = /^0\d{9}$/;
             if (!phoneRegex.test(phone)) {
                 window.toast("Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0!", "error");
                 return;
             }
 
-            // 🌟 3. BẬT CONFIRM BOX TRƯỚC KHI LƯU
-            window.toastConfirm("TẠO HỒ SƠ KHÁCH HÀNG", `Xác nhận tạo hồ sơ cho khách: <b>${name}</b> - <b>${phone}</b>?`, async () => {
+            window.confirmDialog("TẠO HỒ SƠ KHÁCH HÀNG", `Xác nhận tạo hồ sơ cho khách: <b>${name}</b> - <b>${phone}</b>?`, async () => {
                 try {
-                    // Kiểm tra trùng lặp SĐT trước
                     const checkRes = await fetch(`/api/pos/customers/search?q=${phone}`);
                     const existing = await checkRes.json();
                     const duplicate = existing.find(c => c.soDienThoai === phone);
                     if (duplicate) { window.toast(`SỐ ĐIỆN THOẠI NÀY ĐÃ TỒN TẠI TRONG HỆ THỐNG!`, "error"); return; }
 
-                    // Gọi API thêm mới
                     const res = await fetch('/api/pos/customers', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -1739,23 +2012,23 @@
             box.style.display = isHidden ? 'block' : 'none';
             if (isHidden) {
                 box.querySelector('input').focus();
-                document.getElementById('inlineSearchResults').innerHTML = '<div style="padding:15px; color:#999; font-size:12px; font-weight:500; text-align:center;">Nhập để tìm kiếm...</div>';
+                document.getElementById('inlineSearchResults').innerHTML = '<div style="padding:15px; color:var(--sub); font-size:12px; font-weight:500; text-align:center;">Nhập để tìm kiếm...</div>';
             }
         },
 
         inlineSearchCustomer: async function(val) {
             const box = document.getElementById('inlineSearchResults');
-            if (val.length < 2) { box.innerHTML = '<div style="padding:15px; color:#999; font-size:12px; font-weight:500; text-align:center;">Nhập để tìm kiếm...</div>'; return; }
+            if (val.length < 2) { box.innerHTML = '<div style="padding:15px; color:var(--sub); font-size:12px; font-weight:500; text-align:center;">Nhập để tìm kiếm...</div>'; return; }
             try{
                 const res = await fetch(`/api/pos/customers/search?q=${val}`);
                 const data = await res.json();
-                if (data.length === 0) { box.innerHTML = '<div style="padding:15px; color:#999; font-size:12px; font-weight:500; text-align:center;">Không tìm thấy</div>'; return; }
+                if (data.length === 0) { box.innerHTML = '<div style="padding:15px; color:var(--sub); font-size:12px; font-weight:500; text-align:center;">Không tìm thấy</div>'; return; }
                 box.innerHTML = data.map(c => `
                     <div style="padding:12px 15px; border-bottom:1px solid var(--gray-200); cursor:pointer; transition: 0.2s;"
-                         onmouseover="this.style.background='#f4f4f5'" onmouseout="this.style.background=''"
+                         onmouseover="this.style.background='var(--gray-100)'" onmouseout="this.style.background=''"
                          onclick="PosApp.selectCustomerInline('${c.hoTen}', '${c.soDienThoai}', ${c.id})">
-                        <div style="font-weight:800; font-size:13px; color:#000; margin-bottom: 2px;">${c.hoTen.toUpperCase()}</div>
-                        <div style="font-size:12px; color:#666; font-weight:600;">${c.soDienThoai}</div>
+                        <div style="font-weight:700; font-size:13px; color:var(--text-main); margin-bottom: 2px;">${c.hoTen.toUpperCase()}</div>
+                        <div style="font-size:12px; color:var(--sub); font-weight:500;">${c.soDienThoai}</div>
                     </div>`).join('');
             }catch(e){}
         },
@@ -1780,7 +2053,7 @@
             this.saveState(); this.renderTabs();
             document.getElementById('inlineCustomerSearch').style.display = 'none';
             window.toast("Đã chuyển về KHÁCH VÃNG LAI", "success");
-            this.usedVoucherIds = []; // 🌟 Xóa lịch sử khi là khách vãng lai
+            this.usedVoucherIds = [];
         },
     };
 
