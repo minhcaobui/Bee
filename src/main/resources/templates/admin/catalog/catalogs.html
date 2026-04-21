@@ -10,10 +10,13 @@
 
     <style>
         /* ==========================================================================
-           1. CORE STYLES (CORPORATE SAAS DESIGN)
+           CORE STYLES (ĐỒNG BỘ 100% VỚI PRODUCTS.HTML)
            ========================================================================== */
         * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
         :root {
+            /* TÙY CHỈNH ĐỘ CAO THANH MENU TRÊN CÙNG CỦA BẠN (ĐỂ DRAWER VỪA KHÍT) */
+            --layout-header-height: 70px;
+
             --bg: #f8fafc;
             --panel: #ffffff;
             --gray-100: #f8fafc;
@@ -28,17 +31,27 @@
             --border-radius: 4px;
         }
 
-        .ct-container { max-width: 100%; padding: 20px 30px; font-family: 'Be Vietnam Pro', 'Inter', sans-serif; background: var(--panel); color: var(--text-main); font-size: 13px; line-height: 1.5; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;}
+        body {
+            font-family: 'Be Vietnam Pro', 'Inter', sans-serif;
+            background: var(--panel);
+            color: var(--text-main);
+            font-size: 13px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+        .container { max-width: 100%; padding: 20px 30px; }
 
         /* Actions Bar & Tabs */
         .actions-bar { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--gray-200); margin-bottom: 20px; padding-bottom: 0; }
-        .tabs { display: flex; gap: 30px; margin-bottom: 0; border: none; }
+        .tabs { display: flex; gap: 30px; margin-bottom: 0; border: none; overflow-x: auto; }
+        .tabs::-webkit-scrollbar { display: none; }
         .tab { font-size: 13px; font-weight: 600; color: var(--sub); padding: 0 0 12px 0; cursor: pointer; text-transform: uppercase; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; display: flex; align-items: center; gap: 6px; transition: 0.2s;}
         .tab:hover { color: var(--text-main); }
         .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
 
         /* Buttons */
-        .btn { font-size: 12px; font-weight: 600; text-transform: uppercase; height: 36px !important; padding: 0 16px !important; background: var(--text-main); color: #ffffff; border: 1px solid transparent; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: var(--border-radius); transition: all 0.2s ease; letter-spacing: 0.5px;}
+        .btn { font-size: 12px; font-weight: 600; text-transform: uppercase; height: 36px !important; padding: 0 16px !important; background: #0f172a; color: #ffffff; border: 1px solid transparent; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: var(--border-radius); transition: all 0.2s ease; letter-spacing: 0.5px;}
         .btn:hover { background: #1e293b; }
         .btn-primary { background: var(--primary); color: #ffffff; }
         .btn-primary:hover { background: var(--primary-hover); }
@@ -46,35 +59,29 @@
         .btn-secondary:hover { background: var(--gray-100); border-color: var(--gray-300); }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        .btn-icon { width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--gray-200); background: #ffffff; cursor: pointer; border-radius: var(--border-radius); margin-left: 4px; transition: 0.2s; color: var(--sub);}
+        .btn-icon { width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--gray-200); background: #ffffff; cursor: pointer; border-radius: var(--border-radius); margin-left: 4px; color: var(--sub); transition: 0.2s;}
         .btn-icon:hover { border-color: var(--gray-300); background: var(--gray-100); color: var(--text-main); }
 
         /* Search Section */
-        .search-section { background: var(--gray-100); padding: 16px 20px; border: 1px solid var(--gray-200); border-radius: var(--border-radius); margin-bottom: 20px; }
-        .top-controls { display: flex; gap: 16px; width: 100%; align-items: center; }
-        .search-wrapper { flex: 1; }
-        .search-box-container { display: flex; width: 100%; }
+        .search-section { margin-bottom: 20px; background: var(--gray-100); padding: 16px 20px; border: 1px solid var(--gray-200); border-radius: var(--border-radius); }
+        .search-wrapper { display: flex; gap: 12px; align-items: center; width: 100%; }
         .search-box { position: relative; flex: 1; }
         .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--sub); font-size: 14px; pointer-events: none; }
 
-        .search-input { width: 100%; padding: 8px 12px 8px 36px !important; font-size: 13px; border: 1px solid var(--gray-200); outline: none; background: #ffffff; height: 38px; border-radius: var(--border-radius); transition: all 0.2s ease; font-family: inherit; color: var(--text-main);}
-        .filter-select { padding: 8px 12px; font-size: 13px; border: 1px solid var(--gray-200); outline: none; background: #ffffff; height: 38px; border-radius: var(--border-radius); min-width: 200px; transition: all 0.2s ease; cursor: pointer; font-family: inherit; color: var(--text-main);}
+        .search-input { width: 100%; padding: 8px 12px 8px 36px !important; font-size: 13px; border: 1px solid var(--gray-200); outline: none; background: #ffffff; height: 38px; border-radius: var(--border-radius); transition: all 0.2s ease; color: var(--text-main); font-family: inherit;}
+        .filter-select { padding: 8px 12px; font-size: 13px; border: 1px solid var(--gray-200); outline: none; background: #ffffff; height: 38px; border-radius: var(--border-radius); min-width: 180px; transition: all 0.2s ease; cursor: pointer; color: var(--text-main); font-family: inherit;}
+        .btn-reset { height: 38px !important; width: 38px !important; padding: 0 !important; justify-content: center; font-size: 16px; background: #ffffff; border: 1px solid var(--gray-200); color: var(--sub); border-radius: var(--border-radius); transition: 0.2s;}
+        .btn-reset:hover { background: var(--gray-100); border-color: var(--gray-300); color: var(--text-main); }
         .search-input:focus, .filter-select:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1); }
 
         /* Table */
-        .table-wrapper { border: 1px solid var(--gray-200); width: 100%; overflow-x: auto; background: #ffffff; border-radius: var(--border-radius); margin-top: 15px; }
-        .ct-table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        .ct-table thead th { text-align: left; padding: 12px 15px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--sub); background: var(--gray-100); border-bottom: 1px solid var(--gray-200); white-space: nowrap; position: sticky; top: 0; z-index: 10;}
-        .ct-table tbody td { padding: 10px 15px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; font-size: 13px; word-wrap: break-word; color: var(--text-main);}
-        .ct-table tbody tr:hover { background: var(--gray-100); }
+        .table-wrapper { border: 1px solid var(--gray-200); width: 100%; overflow-x: auto; background: #ffffff; border-radius: var(--border-radius); }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        thead th { text-align: left; padding: 12px 15px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--sub); background: var(--gray-100); border-bottom: 1px solid var(--gray-200); white-space: nowrap; position: sticky; top: 0; z-index: 10;}
+        tbody td { padding: 10px 15px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; font-size: 13px; word-wrap: break-word; color: var(--text-main);}
+        tbody tr:hover { background: var(--gray-100); }
 
-        /* BADGE TRẠNG THÁI CHỮ */
-        .badge-status { padding: 6px 12px; border-radius: var(--border-radius); font-size: 11px; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; border: 1px solid transparent; cursor: pointer; transition: 0.2s;}
-        .badge-status:hover { opacity: 0.8; }
-        .badge-active { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
-        .badge-inactive { background: var(--gray-100); color: var(--sub); border-color: var(--gray-200); }
-
-        /* Pagination Đồng Bộ */
+        /* Pagination */
         .pagination-wrapper { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; }
         .pagination-info { font-size: 12px; font-weight: 600; color: var(--sub); text-transform: uppercase; }
         .pagination { display: flex; gap: 4px; }
@@ -83,20 +90,52 @@
         .page-number.active { background: var(--primary); color: #ffffff; border-color: var(--primary);}
         .page-number:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        /* Form Checkbox Mới */
-        .checkbox-group { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; width: max-content; }
-        .checkbox-group input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
-        .checkbox-text { font-size: 13px; font-weight: 500; color: var(--text-main); }
+        /* BADGE TRẠNG THÁI CHỮ */
+        .badge-status { padding: 6px 12px; border-radius: var(--border-radius); font-size: 11px; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; border: 1px solid transparent; cursor: pointer; transition: 0.2s;}
+        .badge-status:hover { opacity: 0.8; }
+        .badge-active { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
+        .badge-inactive { background: var(--gray-100); color: var(--sub); border-color: var(--gray-200); }
 
-        /* DRAWER CHÍNH */
-        .ct-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); z-index: 999; display: none; backdrop-filter: blur(2px);}
-        .ct-overlay.show { display: block; }
-        .ct-drawer { position: fixed; top: 0; right: -1000px; width: 500px; height: 100vh; background: #ffffff; border-left: 1px solid var(--gray-200); z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -4px 0 24px rgba(0, 0, 0, 0.08); }
-        .ct-drawer.show { right: 0; }
+        /* ==========================================================================
+           CẤU HÌNH DRAWER NẰM GỌN TRONG LAYOUT, CÁCH HEADER 1 KHOẢNG
+           ========================================================================== */
+        .pd-overlay {
+            position: fixed;
+            top: var(--layout-header-height);
+            left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.4);
+            z-index: 999990;
+            display: none;
+            backdrop-filter: blur(2px);
+        }
+        .pd-overlay.show { display: block; }
+        .pd-overlay:not(.show) { display: none !important; pointer-events: none !important; }
 
-        .drawer-header { padding: 16px 24px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; background: var(--gray-100);}
-        .drawer-title { font-size: 14px; font-weight: 700; text-transform: uppercase; margin: 0; color: var(--text-main);}
-        .drawer-body { flex: 1; padding: 24px; overflow-y: auto; background: var(--panel); }
+        .drawer {
+            position: fixed;
+            top: var(--layout-header-height);
+            bottom: 0;
+            right: -100%;
+            height: calc(100vh - var(--layout-header-height));
+            max-height: calc(100vh - var(--layout-header-height));
+            background: #ffffff;
+            border-left: 1px solid var(--gray-200);
+            z-index: 999991;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: -4px 0 24px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 500px; /* Bề rộng chuẩn của trang Catalog */
+        }
+        .drawer.show { right: 0; }
+
+        .drawer-header { padding: 16px 24px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; background: var(--gray-100); flex-wrap: wrap; gap: 12px;}
+
+        /* CHỐNG TRÀN CHỮ ĐẨY NÚT BIẾN MẤT */
+        .drawer-title { font-size: 14px; font-weight: 700; text-transform: uppercase; margin: 0; color: var(--text-main); flex: 1; min-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px;}
+
+        .drawer-body { flex: 1; padding: 24px; overflow-y: auto; background: var(--panel);}
         .drawer-footer { padding: 16px 24px; border-top: 1px solid var(--gray-200); display: flex; gap: 10px; background: var(--gray-100);}
 
         /* Form Elements */
@@ -107,16 +146,22 @@
         .form-input:disabled { background: var(--gray-100); color: var(--sub); cursor: not-allowed; border-color: var(--gray-200); }
         .form-textarea { min-height: 100px; resize: vertical; padding: 12px; }
 
+        /* Form Checkbox Trạng Thái (Đồng bộ) */
+        .status-checkbox-group { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; width: max-content; }
+        .status-checkbox-group input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+        .status-checkbox-text { font-size: 13px; font-weight: 500; color: var(--text-main); }
+
         /* System Info Group */
         .sys-info-group { display: flex; gap: 15px; }
         .sys-info-item { flex: 1; margin-bottom: 0; }
 
         /* ==========================================================================
-           2. CSS BỔ SUNG CHO TOAST (GIÚP TOAST CỦA TRANG CHA HIỂN THỊ ĐƯỢC MÀU SẮC)
+           CSS BỔ SUNG CHO TOAST VÀ CONFIRM
            ========================================================================== */
-        #toastHost, .toast-container { position: fixed !important; top: 30px !important; right: 20px !important; z-index: 2147483647 !important; display: flex; flex-direction: column; gap: 12px; pointer-events: none; overflow: visible !important;}
-        .custom-toast { display: flex; align-items: center; background: #ffffff; padding: 12px 16px; border-radius: var(--border-radius); box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 280px; max-width: 380px; border: 1px solid var(--gray-200); border-left: 4px solid var(--primary); animation: slideInRight 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; pointer-events: auto;}
+        #genericConfirmOverlay, #toastHost, .toast-container { z-index: 2147483647 !important; }
 
+        #toastHost, .toast-container { position: fixed !important; top: 30px !important; right: 20px !important; display: flex; flex-direction: column; gap: 12px; pointer-events: none; overflow: visible !important;}
+        .custom-toast { display: flex; align-items: center; background: #ffffff; padding: 12px 16px; border-radius: var(--border-radius); box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 280px; max-width: 380px; border: 1px solid var(--gray-200); border-left: 4px solid var(--primary); animation: slideInRight 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; pointer-events: auto;}
         .custom-toast.toast-success { border-left-color: #10b981; }
         .custom-toast.toast-success .toast-icon { color: #10b981; }
         .custom-toast.toast-error { border-left-color: #ef4444; }
@@ -125,12 +170,10 @@
         .custom-toast.toast-warning .toast-icon { color: #f59e0b; }
         .custom-toast.toast-info { border-left-color: #3b82f6; }
         .custom-toast.toast-info .toast-icon { color: #3b82f6; }
-
         .toast-icon { font-size: 18px; margin-right: 12px; }
         .toast-msg { flex-grow: 1; font-size: 13px; font-weight: 500; color: var(--text-main); line-height: 1.4; }
         .toast-close { background: none; border: none; color: var(--sub); cursor: pointer; font-size: 18px; margin-left: 10px; padding: 0; transition: color 0.2s; }
         .toast-close:hover { color: var(--text-main); }
-
         @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes slideOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
 
@@ -138,21 +181,17 @@
            RESPONSIVE MOBILE
            ========================================================================== */
         @media (max-width: 768px) {
-            .actions-bar { flex-direction: column; align-items: stretch; gap: 15px; padding-bottom: 10px; }
-            .tabs { display: flex; overflow-x: auto; white-space: nowrap; padding-bottom: 5px; width: 100%; border-bottom: 1px solid var(--gray-200); }
-            .tabs::-webkit-scrollbar { height: 4px; }
-            .top-controls { flex-direction: column; align-items: stretch; gap: 10px; }
+            .search-wrapper { flex-direction: column; align-items: stretch; gap: 10px; }
             .filter-select { width: 100%; }
-            .ct-drawer { width: 100% !important; right: -100% !important; }
-            .ct-drawer.show { right: 0 !important; }
-            .sys-info-group { flex-direction: column; gap: 12px; }
             .pagination-wrapper { flex-direction: column; gap: 10px; align-items: center; }
-            .custom-toast { min-width: 100%; max-width: 100%; }
+            .drawer { width: 100% !important; right: -100% !important; max-width: 100% !important; }
+            .drawer.show { right: 0 !important; }
+            .sys-info-group { flex-direction: column; gap: 12px; }
         }
     </style>
 </head>
 <body>
-<div class="ct-container" id="catalogContainer">
+<div class="container" id="catalogContainer">
     <div class="actions-bar">
         <nav class="tabs" id="tabs">
             <button class="tab active" data-tab="danh-muc" data-has-desc="true">DANH MỤC</button>
@@ -165,27 +204,26 @@
     </div>
 
     <section class="search-section">
-        <div class="top-controls">
-            <div class="search-wrapper">
-                <div class="search-box-container">
-                    <div class="search-box">
-                        <i class="bi bi-search"></i>
-                        <input type="text" class="search-input" id="search"
-                               placeholder="Tìm tên hoặc mã thuộc tính..."
-                               oninput="window.CatalogApp && typeof window.CatalogApp.handleSearch === 'function' ? window.CatalogApp.handleSearch(this.value) : null">
-                    </div>
-                </div>
+        <div class="search-wrapper">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" class="search-input" id="search"
+                       placeholder="Tìm tên hoặc mã thuộc tính..."
+                       oninput="window.CatalogApp && typeof window.CatalogApp.handleSearch === 'function' ? window.CatalogApp.handleSearch(this.value) : null">
             </div>
             <select class="filter-select" id="fTrangThaiFilter">
-                <option value="">Tất cả trạng thái</option>
+                <option value="">-- Trạng thái --</option>
                 <option value="true">Đang sử dụng</option>
                 <option value="false">Ngừng sử dụng</option>
             </select>
+            <button class="btn-reset" onclick="window.CatalogApp.resetFilters()" title="Làm mới bộ lọc">
+                <i class="bi bi-arrow-counterclockwise"></i>
+            </button>
         </div>
     </section>
 
     <div class="table-wrapper">
-        <table class="ct-table">
+        <table>
             <thead id="thead"></thead>
             <tbody id="tbody"></tbody>
         </table>
@@ -194,54 +232,68 @@
     <div id="paginationContainer" class="pagination-wrapper"></div>
 </div>
 
-<div class="ct-overlay" id="ctOverlay"></div>
-<aside class="ct-drawer" id="ctDrawer">
-    <div class="drawer-header">
-        <h3 class="drawer-title" id="drawerTitle">THÊM MỚI</h3>
-        <button class="btn-icon" id="btnCloseIcon" style="border:none; box-shadow:none;"><i class="bi bi-x-lg"></i></button>
-    </div>
-    <div class="drawer-body">
-        <h5 style="font-weight:700; margin-bottom:16px; font-size:13px; color:var(--text-main); text-transform: uppercase;">1. Thông tin chung</h5>
-        <div class="form-group">
-            <label class="form-label">Mã thuộc tính <span style="font-weight:500; color:var(--sub); text-transform:none;">(Để trống tự sinh)</span></label>
-            <input id="fMa" class="form-input" placeholder="Mã tự động..." disabled>
+<div id="drawersContainer">
+    <div class="pd-overlay" id="overlay" onclick="window.CatalogApp.closeDrawer()"></div>
+    <aside class="drawer" id="mainDrawer">
+        <div class="drawer-header">
+            <h3 class="drawer-title" id="drawerTitle">THÊM MỚI</h3>
+            <button class="btn-icon" id="btnCloseIcon" style="border:none; box-shadow:none; flex-shrink: 0;"><i class="bi bi-x-lg"></i></button>
         </div>
-        <div class="form-group">
-            <label class="form-label">Tên thuộc tính <span style="color:var(--danger-color)">*</span> <span style="font-weight:500; color:var(--sub); text-transform:none;">(Tối đa 100 ký tự)</span></label>
-            <input id="fTen" class="form-input" placeholder="Nhập tên thuộc tính...">
-        </div>
-        <div class="form-group" id="groupMoTa">
-            <label class="form-label">Mô tả chi tiết</label>
-            <textarea id="fMoTa" class="form-textarea" placeholder="Nhập mô tả..."></textarea>
-        </div>
-        <div class="form-group" style="margin-top: 10px;">
-            <label class="form-label" style="margin-bottom: 12px;">Trạng thái</label>
-            <label class="checkbox-group">
-                <input type="checkbox" id="fTrangThai" checked>
-                <span class="checkbox-text">Đang sử dụng</span>
-            </label>
-        </div>
-        <div id="groupFullDetail" style="display: none; border-top: 1px dashed var(--gray-300); padding-top: 20px; margin-top: 20px;">
-            <h5 style="font-weight:700; margin-bottom:16px; font-size:13px; color:var(--text-main); text-transform: uppercase;">2. Thông tin hệ thống</h5>
-            <div class="sys-info-group">
-                <div class="form-group sys-info-item">
-                    <label class="form-label">Ngày tạo</label>
-                    <input id="fNgayTao" class="form-input" disabled>
-                </div>
-                <div class="form-group sys-info-item">
-                    <label class="form-label">Ngày sửa</label>
-                    <input id="fNgaySua" class="form-input" disabled>
+        <div class="drawer-body">
+            <h5 style="font-weight:700; margin-bottom:16px; font-size:13px; color:var(--text-main); text-transform: uppercase;">1. Thông tin chung</h5>
+            <div class="form-group">
+                <label class="form-label">Mã thuộc tính <span style="font-weight:500; color:var(--sub); text-transform:none;">(Để trống tự sinh)</span></label>
+                <input id="fMa" class="form-input" placeholder="Mã tự động..." disabled>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tên thuộc tính <span style="color:var(--danger-color)">*</span> <span style="font-weight:500; color:var(--sub); text-transform:none;">(Tối đa 100 ký tự)</span></label>
+                <input id="fTen" class="form-input" placeholder="Nhập tên thuộc tính...">
+            </div>
+            <div class="form-group" id="groupMoTa">
+                <label class="form-label">Mô tả chi tiết</label>
+                <textarea id="fMoTa" class="form-textarea" placeholder="Nhập mô tả..."></textarea>
+            </div>
+
+            <div class="form-group" style="margin-top: 10px;">
+                <label class="form-label" style="margin-bottom: 12px;">Trạng thái</label>
+                <label class="status-checkbox-group">
+                    <input type="checkbox" id="fTrangThai" checked>
+                    <span class="status-checkbox-text">Đang sử dụng</span>
+                </label>
+            </div>
+
+            <div id="groupFullDetail" style="display: none; border-top: 1px dashed var(--gray-300); padding-top: 20px; margin-top: 20px;">
+                <h5 style="font-weight:700; margin-bottom:16px; font-size:13px; color:var(--text-main); text-transform: uppercase;">2. Thông tin hệ thống</h5>
+                <div class="sys-info-group">
+                    <div class="form-group sys-info-item">
+                        <label class="form-label">Ngày tạo</label>
+                        <input id="fNgayTao" class="form-input" disabled>
+                    </div>
+                    <div class="form-group sys-info-item">
+                        <label class="form-label">Ngày sửa</label>
+                        <input id="fNgaySua" class="form-input" disabled>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="drawer-footer">
-        <button class="btn btn-secondary" id="btnClose" style="flex: 1; height: 40px !important;">THOÁT</button>
-        <button class="btn btn-primary" id="btnSave" style="flex: 1; height: 40px !important;">LƯU THÔNG TIN</button>
-    </div>
-</aside>
+        <div class="drawer-footer">
+            <button class="btn btn-secondary" id="btnClose" style="flex: 1; height: 40px !important;">THOÁT</button>
+            <button class="btn btn-primary" id="btnSave" style="flex: 1; height: 40px !important;">LƯU THÔNG TIN</button>
+        </div>
+    </aside>
+</div>
 
 <script>
+    /* ==========================================================================
+       GIẢI PHÁP ĐẨY TẤT CẢ DRAWER VÀ OVERLAY RA NGOÀI BODY ĐỂ TRÁNH BỊ LAYOUT CHE
+       ========================================================================== */
+    document.addEventListener("DOMContentLoaded", function() {
+        const drawersContainer = document.getElementById('drawersContainer');
+        if (drawersContainer && document.body) {
+            document.body.appendChild(drawersContainer);
+        }
+    });
+
     window.CatalogApp = {
         initialized: false, // Flag chống khởi tạo 2 lần chồng chéo
         state: {
@@ -286,15 +338,22 @@
             const btnCloseIcon = document.getElementById('btnCloseIcon');
             if(btnCloseIcon) btnCloseIcon.onclick = () => self.closeDrawer();
 
-            const overlay = document.getElementById('ctOverlay');
-            if(overlay) overlay.onclick = () => self.closeDrawer();
-
             const filter = document.getElementById('fTrangThaiFilter');
             if(filter) filter.onchange = (e) => {
                 self.state.trangThai = e.target.value;
                 self.state.page = 0;
                 self.loadData();
             };
+        },
+
+        resetFilters: function() {
+            clearTimeout(this.timeout);
+            this.state.q = '';
+            this.state.trangThai = '';
+            document.getElementById('search').value = '';
+            document.getElementById('fTrangThaiFilter').value = '';
+            this.state.page = 0;
+            this.loadData();
         },
 
         getTabName: function () {
@@ -358,7 +417,7 @@
 
                 return `<tr>
                     <td style="text-align:center;">${stt}</td>
-                    <td style="font-weight:700; color:var(--sub);">${item.ma || '—'}</td>
+                    <td style="font-weight:700; color:var(--text-main);">${item.ma || '—'}</td>
                     <td style="font-weight:600; color:var(--text-main);">${item.ten || '—'}</td>
                     ${extraCells}
                     <td style="text-align:center;">${statusHtml}</td>
@@ -492,13 +551,13 @@
             if (document.getElementById('groupMoTa')) {
                 document.getElementById('groupMoTa').style.display = this.state.hasDesc ? 'block' : 'none';
             }
-            document.getElementById('ctOverlay').classList.add('show');
-            document.getElementById('ctDrawer').classList.add('show');
+            document.getElementById('overlay').classList.add('show');
+            document.getElementById('mainDrawer').classList.add('show');
         },
 
         closeDrawer: function () {
-            document.getElementById('ctOverlay').classList.remove('show');
-            document.getElementById('ctDrawer').classList.remove('show');
+            document.getElementById('overlay').classList.remove('show');
+            document.getElementById('mainDrawer').classList.remove('show');
         },
 
         openEdit: async function (id) {

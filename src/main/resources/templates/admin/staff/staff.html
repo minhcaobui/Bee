@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Nhân Viên - BeeMate</title>
+    <title>Quản Lý Nhân Viên</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
@@ -14,6 +14,9 @@
            ========================================================================== */
         * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
         :root {
+            /* TÙY CHỈNH ĐỘ CAO THANH MENU TRÊN CÙNG CỦA BẠN (ĐỂ DRAWER VỪA KHÍT) */
+            --layout-header-height: 70px;
+
             --bg: #f8fafc;
             --panel: #ffffff;
             --gray-100: #f8fafc;
@@ -41,7 +44,8 @@
 
         /* Actions Bar & Tabs */
         .actions-bar { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--gray-200); margin-bottom: 20px; padding-bottom: 0; }
-        .tabs { display: flex; gap: 30px; margin-bottom: 0; border: none; }
+        .tabs { display: flex; gap: 30px; margin-bottom: 0; border: none; overflow-x: auto; white-space: nowrap;}
+        .tabs::-webkit-scrollbar { display: none; }
         .tab { font-size: 13px; font-weight: 600; color: var(--sub); padding: 0 0 12px 0; cursor: pointer; text-transform: uppercase; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; display: flex; align-items: center; gap: 6px; transition: 0.2s;}
         .tab:hover { color: var(--text-main); }
         .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
@@ -93,29 +97,12 @@
         .page-number.active { background: var(--primary); color: #ffffff; border-color: var(--primary);}
         .page-number:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        /* Switch Toggle (Dùng cho form) */
-        .switch-wrapper { display: flex; align-items: center; gap: 10px; }
-        .switch-square { position: relative; display: inline-block; width: 44px; height: 24px; }
-        .switch-square input { opacity: 0; width: 0; height: 0; }
-        .slider-square { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--gray-300); transition: .3s; border-radius: 4px; }
-        .slider-square:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 2px; }
-        input:checked + .slider-square { background-color: var(--primary); }
-        input:checked + .slider-square:before { transform: translateX(20px); }
-
-        .switch-sm { position: relative; display: inline-block; width: 34px; height: 18px; }
-        .switch-sm input { opacity: 0; width: 0; height: 0; }
-        .slider-sm { position: absolute; cursor: pointer; inset: 0; background-color: var(--gray-300); transition: .3s; border-radius: 20px; }
-        .slider-sm:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%; }
-        input:checked + .slider-sm { background-color: var(--primary); }
-        input:checked + .slider-sm:before { transform: translateX(16px); }
-        .switch-sm.loading { opacity: 0.5; pointer-events: none; }
-
-        /* DRAWER CHÍNH */
-        .nv-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); z-index: 999; display: none; backdrop-filter: blur(2px);}
+        /* CẤU HÌNH DRAWER NẰM GỌN TRONG LAYOUT, CÁCH HEADER 1 KHOẢNG */
+        .nv-overlay { position: fixed; inset: 0; top: var(--layout-header-height); background: rgba(15, 23, 42, 0.4); z-index: 999990; display: none; backdrop-filter: blur(2px);}
         .nv-overlay.show { display: block; }
         .nv-overlay:not(.show) { display: none !important; pointer-events: none !important; }
 
-        .drawer { position: fixed; top: 0; right: -1000px; width: 600px; height: 100vh; background: #ffffff; border-left: 1px solid var(--gray-200); z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -4px 0 24px rgba(0, 0, 0, 0.08); }
+        .drawer { position: fixed; top: var(--layout-header-height); bottom: 0; right: -1000px; width: 600px; max-width: 100%; height: calc(100vh - var(--layout-header-height)); max-height: calc(100vh - var(--layout-header-height)); background: #ffffff; border-left: 1px solid var(--gray-200); z-index: 999991; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -4px 0 24px rgba(0, 0, 0, 0.08); }
         .drawer.show { right: 0; }
         .drawer.wide { width: 900px; }
 
@@ -124,8 +111,13 @@
         #pwdDrawer.show { right: 0 !important; }
         #pwdOverlay { z-index: 1040; }
 
-        .drawer-header { padding: 16px 24px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; background: var(--gray-100);}
-        .drawer-title { font-size: 14px; font-weight: 700; text-transform: uppercase; margin: 0; color: var(--text-main);}
+        /* Drawer Chức vụ */
+        #roleOverlay { z-index: 999992; }
+        #roleDrawer { max-width: 600px; z-index: 999993; }
+        #roleDrawer.show { right: 0 !important; }
+
+        .drawer-header { padding: 16px 24px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; background: var(--gray-100); flex-wrap: wrap; gap: 12px;}
+        .drawer-title { font-size: 14px; font-weight: 700; text-transform: uppercase; margin: 0; color: var(--text-main); flex: 1; min-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px;}
         .drawer-body { flex: 1; padding: 24px; overflow-y: auto; background: var(--panel); }
         .drawer-footer { padding: 16px 24px; border-top: 1px solid var(--gray-200); display: flex; gap: 10px; background: var(--gray-100);}
 
@@ -136,6 +128,12 @@
         .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);}
         .form-input:disabled, .form-select:disabled { background: var(--gray-100); color: var(--sub); cursor: not-allowed; border-color: var(--gray-200); }
         .form-textarea { min-height: 100px; resize: vertical; padding: 12px; }
+
+        /* Form Checkbox Trạng Thái (Đồng bộ Catalogs) */
+        .v-checkbox { accent-color: var(--primary); cursor: pointer; }
+        .status-checkbox-group { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; width: max-content; margin-top: 10px;}
+        .status-checkbox-group input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+        .status-checkbox-text { font-size: 13px; font-weight: 600; color: var(--text-main); }
 
         .upload-area { width: 100px; height: 100px; border-radius: 50%; border: 2px dashed var(--gray-300); display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; margin: 0 auto 10px; transition: 0.2s; background: var(--gray-100); }
         .upload-area:hover { border-color: var(--primary); background: #ffffff; }
@@ -154,7 +152,6 @@
 
         /* ==========================================================================
            CSS BỔ SUNG CHO TOAST VÀ CONFIRM (ĐẢM BẢO LUÔN HIỂN THỊ TRÊN CÙNG)
-           Y HỆT NHƯ TRANG CUSTOMERS.HTML
            ========================================================================== */
         #genericConfirmOverlay, #toastHost, .toast-container { z-index: 2147483647 !important; }
 
@@ -190,7 +187,7 @@
             .filter-select { width: 100%; }
             .btn-reset { width: 100% !important; margin-top: 5px; }
             .pagination-wrapper { flex-direction: column; gap: 10px; align-items: center; }
-            .drawer, #roleDrawer { width: 100% !important; right: -100% !important; }
+            .drawer, #roleDrawer, #pwdDrawer { width: 100% !important; right: -100% !important; max-width: 100% !important;}
             .drawer.show { right: 0 !important; }
             .drawer-body > div[style*="display: flex"],
             #passwordBlock > div[style*="display: flex"] { flex-direction: column !important; gap: 12px !important; }
@@ -207,18 +204,14 @@
 <div class="container" id="staffContainer">
     <div class="actions-bar">
         <nav class="tabs">
-            <div class="tab active" id="tabNV" onclick="window.StaffApp.switchMainTab('nv')">
-                <i class="bi bi-person-badge-fill"></i> QUẢN LÝ NHÂN VIÊN
-            </div>
-            <div class="tab" id="tabCV" onclick="window.StaffApp.switchMainTab('cv')">
-                <i class="bi bi-briefcase-fill"></i> QUẢN LÝ CHỨC VỤ
-            </div>
+            <div class="tab active" id="tabNV" onclick="window.StaffApp.switchMainTab('nv')">QUẢN LÝ NHÂN VIÊN</div>
+            <div class="tab" id="tabCV" onclick="window.StaffApp.switchMainTab('cv')">QUẢN LÝ CHỨC VỤ</div>
         </nav>
         <button class="btn btn-primary" id="btnAddNV" onclick="window.StaffApp.openDrawer('add')">
-            <i class="bi bi-person-plus-fill"></i> THÊM NHÂN VIÊN
+            <i class="bi bi-plus-lg"></i> THÊM MỚI
         </button>
         <button class="btn btn-primary" id="btnAddCV" onclick="window.StaffApp.Role.openDrawer()" style="display: none;">
-            <i class="bi bi-plus-lg"></i> TẠO CHỨC VỤ MỚI
+            <i class="bi bi-plus-lg"></i> THÊM MỚI
         </button>
     </div>
 
@@ -294,152 +287,194 @@
     </div>
 </div>
 
-<div class="nv-overlay" id="overlay" onclick="window.StaffApp.closeDrawer()"></div>
-<aside class="drawer" id="drawer">
-    <div class="drawer-header">
-        <h3 class="drawer-title" id="drawerTitle">THIẾT LẬP HỒ SƠ</h3>
-        <button class="btn-icon" onclick="window.StaffApp.closeDrawer()" style="border:none; box-shadow:none;"><i class="bi bi-x-lg"></i></button>
-    </div>
+<div id="drawersContainer">
 
-    <div class="drawer-body">
-        <div class="drawer-tabs" id="drawerTabs">
-            <div class="drawer-tab active" onclick="window.StaffApp.switchDrawerTab('info')" id="tabInfo">THÔNG TIN CHUNG</div>
-            <div class="drawer-tab" onclick="window.StaffApp.switchDrawerTab('address')" id="tabAddr">ĐỊA CHỈ LIÊN HỆ</div>
+    <div class="nv-overlay" id="overlay" onclick="window.StaffApp.closeDrawer()"></div>
+    <aside class="drawer" id="drawer">
+        <div class="drawer-header">
+            <h3 class="drawer-title" id="drawerTitle">THIẾT LẬP HỒ SƠ</h3>
+            <button class="btn-icon" onclick="window.StaffApp.closeDrawer()" style="border:none; box-shadow:none; flex-shrink: 0;"><i class="bi bi-x-lg"></i></button>
         </div>
 
-        <div id="contentInfo">
-            <div id="avatarGroup">
-                <div class="upload-area" id="uploadArea" onclick="if(!window.StaffApp.state.isViewMode) document.getElementById('inpFile').click()">
-                    <input type="file" id="inpFile" hidden accept="image/*" onchange="window.StaffApp.previewImage(this)">
-                    <img id="imgPreview" alt="Avatar">
-                    <i class="bi bi-camera" id="iconUpload"></i>
-                </div>
-                <div id="uploadHint" style="text-align: center; font-size: 11px; color: var(--sub); margin-bottom: 20px;">Nhấn để tải ảnh đại diện</div>
+        <div class="drawer-body">
+            <div class="drawer-tabs" id="drawerTabs">
+                <div class="drawer-tab active" onclick="window.StaffApp.switchDrawerTab('info')" id="tabInfo">THÔNG TIN CHUNG</div>
+                <div class="drawer-tab" onclick="window.StaffApp.switchDrawerTab('address')" id="tabAddr">ĐỊA CHỈ LIÊN HỆ</div>
             </div>
 
-            <input type="hidden" id="nvId">
+            <div id="contentInfo">
+                <div id="avatarGroup">
+                    <div class="upload-area" id="uploadArea" onclick="if(!window.StaffApp.state.isViewMode) document.getElementById('inpFile').click()">
+                        <input type="file" id="inpFile" hidden accept="image/*" onchange="window.StaffApp.previewImage(this)">
+                        <img id="imgPreview" alt="Avatar">
+                        <i class="bi bi-camera" id="iconUpload"></i>
+                    </div>
+                    <div id="uploadHint" style="text-align: center; font-size: 11px; color: var(--sub); margin-bottom: 20px;">Nhấn để tải ảnh đại diện</div>
+                </div>
+
+                <input type="hidden" id="nvId">
+                <div class="form-group">
+                    <label class="form-label">Họ và Tên <span style="color:#ef4444" class="required-star">*</span></label>
+                    <input id="nvHoTen" class="form-input" placeholder="Nhập họ tên...">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Chức vụ <span style="color:#ef4444" class="required-star">*</span></label>
+                    <select id="nvChucVu" class="form-select">
+                        <option value="">-- Chọn chức vụ --</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 15px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Số điện thoại <span style="color:#ef4444" class="required-star">*</span></label>
+                        <input id="nvSdt" class="form-input" placeholder="09xxxxxxxx">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Email <span style="color:#ef4444" class="required-star">*</span></label>
+                        <input id="nvEmail" type="email" class="form-input" placeholder="Ví dụ: hoten@gmail.com">
+                    </div>
+                </div>
+
+                <div id="passwordBlock" style="display: none; background: var(--gray-100); border: 1px dashed var(--gray-300); padding: 15px; border-radius: var(--border-radius); margin-bottom: 15px;">
+                    <div style="display: flex; gap: 15px; width: 100%;">
+                        <div class="form-group" style="flex: 1; margin:0;">
+                            <label class="form-label">Đổi mật khẩu <span style="text-transform:none; font-weight:500; color:var(--sub);">(Bỏ trống nếu giữ nguyên)</span></label>
+                            <input type="password" id="nvPass" class="form-input" placeholder="Mật khẩu mới...">
+                        </div>
+                        <div class="form-group" style="flex: 1; margin:0;">
+                            <label class="form-label">Xác nhận mật khẩu</label>
+                            <input type="password" id="nvConfirmPass" class="form-input" placeholder="Nhập lại mật khẩu mới...">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 15px;">
+                    <div class="form-group" style="flex: 2;">
+                        <label class="form-label">Ngày sinh <span style="color:#ef4444" class="required-star">*</span></label>
+                        <div style="display: flex; gap: 5px;">
+                            <select id="nvDay" class="form-select" style="flex: 1;"><option value="">Ngày</option></select>
+                            <select id="nvMonth" class="form-select" style="flex: 1;"><option value="">Tháng</option></select>
+                            <select id="nvYear" class="form-select" style="flex: 1.5;"><option value="">Năm</option></select>
+                        </div>
+                        <input type="hidden" id="nvNgaySinh"> </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Giới tính</label>
+                        <select id="nvGender" class="form-select">
+                            <option value="Nam">Nam</option>
+                            <option value="Nữ">Nữ</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 10px;">
+                    <label class="form-label" style="margin-bottom: 12px;">Trạng thái tài khoản</label>
+                    <label class="status-checkbox-group">
+                        <input type="checkbox" id="nvTrangThai" checked>
+                        <span class="status-checkbox-text">Đang làm việc</span>
+                    </label>
+                </div>
+            </div>
+
+            <div id="contentAddr" style="display: none;">
+                <div id="addressViewer" style="padding: 15px 20px; background: var(--gray-100); border: 1px solid var(--gray-200); font-size: 13px; border-radius: var(--border-radius); display: flex; justify-content: space-between; align-items: center;">
+                    <div><i class="bi bi-geo-alt-fill" style="color: #ef4444; margin-right: 5px;"></i> <span id="txtFullAddr" style="font-weight: 600; color: var(--text-main);">Chưa cập nhật</span></div>
+                    <button id="btnEditAddr" class="btn btn-secondary" style="height: 30px !important; padding: 0 10px !important; border-color: var(--primary); color: var(--primary);" onclick="window.StaffApp.enableEditAddress()"><i class="bi bi-pencil"></i> CẬP NHẬT</button>
+                </div>
+
+                <div id="editAddrGroup" style="padding-top: 15px;">
+                    <label class="form-label">Thiết lập địa chỉ liên hệ <span style="color:#ef4444" class="required-star">*</span></label>
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <select id="inpCity" class="form-select" onchange="window.StaffApp.Address.loadDistricts(this.value, 'inpDist', 'inpWard')">
+                            <option value="">-- Chọn Tỉnh / TP --</option>
+                        </select>
+                        <select id="inpDist" class="form-select" onchange="window.StaffApp.Address.loadWards(this.value, 'inpWard')" disabled>
+                            <option value="">-- Chọn Quận / Huyện --</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <select id="inpWard" class="form-select" disabled style="flex:1">
+                            <option value="">-- Chọn Phường / Xã --</option>
+                        </select>
+                        <input id="inpDetail" class="form-input" style="flex: 1.5;" placeholder="Số nhà, đường... (Tùy chọn)">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="drawer-footer">
+            <button class="btn btn-secondary" style="flex: 1; height: 40px !important;" onclick="window.StaffApp.closeDrawer()">THOÁT</button>
+            <button class="btn btn-primary" style="flex: 1; height: 40px !important;" id="btnSave" onclick="window.StaffApp.processSave()">LƯU HỒ SƠ</button>
+        </div>
+    </aside>
+
+    <div class="nv-overlay" id="roleOverlay" onclick="window.StaffApp.Role.closeDrawer()"></div>
+    <aside class="drawer" id="roleDrawer">
+        <div class="drawer-header">
+            <h3 class="drawer-title" id="roleDrawerTitle">TẠO CHỨC VỤ MỚI</h3>
+            <button class="btn-icon" onclick="window.StaffApp.Role.closeDrawer()" style="border:none; box-shadow:none; flex-shrink: 0;"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="drawer-body">
+            <input type="hidden" id="cvId">
             <div class="form-group">
-                <label class="form-label">Họ và Tên <span style="color:#ef4444" class="required-star">*</span></label>
-                <input id="nvHoTen" class="form-input" placeholder="Nhập họ tên...">
+                <label class="form-label">Mã chức vụ <span style="text-transform:none; font-weight:500; color:var(--sub);">(Để trống sẽ tự tạo)</span></label>
+                <input type="text" id="cvMa" class="form-input" placeholder="Ví dụ: QUAN_LY, NV_KHO...">
             </div>
-
             <div class="form-group">
-                <label class="form-label">Chức vụ <span style="color:#ef4444" class="required-star">*</span></label>
-                <select id="nvChucVu" class="form-select">
-                    <option value="">-- Chọn chức vụ --</option>
-                </select>
+                <label class="form-label">Tên chức vụ <span style="color:#ef4444">*</span></label>
+                <input type="text" id="cvTen" class="form-input" placeholder="Ví dụ: Quản lý cửa hàng...">
             </div>
-
-            <div style="display: flex; gap: 15px;">
-                <div class="form-group" style="flex: 1;">
-                    <label class="form-label">Số điện thoại <span style="color:#ef4444" class="required-star">*</span></label>
-                    <input id="nvSdt" class="form-input" placeholder="09xxxxxxxx">
-                </div>
-                <div class="form-group" style="flex: 1;">
-                    <label class="form-label">Email <span style="color:#ef4444" class="required-star">*</span></label>
-                    <input id="nvEmail" type="email" class="form-input" placeholder="Ví dụ: hoten@gmail.com">
-                </div>
+            <div class="form-group">
+                <label class="form-label">Mô tả / Ghi chú <span style="color:#ef4444">*</span></label>
+                <textarea id="cvMoTa" class="form-textarea" style="height: 120px; padding: 12px; resize: none;" placeholder="Mô tả quyền hạn, nhiệm vụ của chức vụ này..."></textarea>
             </div>
+        </div>
+        <div class="drawer-footer">
+            <button class="btn btn-secondary" style="flex: 1; height: 40px !important;" onclick="window.StaffApp.Role.closeDrawer()">HỦY BỎ</button>
+            <button class="btn btn-primary" style="flex: 1; height: 40px !important;" id="btnSaveRole" onclick="window.StaffApp.Role.save()">LƯU CHỨC VỤ</button>
+        </div>
+    </aside>
 
-            <div id="passwordBlock" style="display: none; background: var(--gray-100); border: 1px dashed var(--gray-300); padding: 15px; border-radius: var(--border-radius); margin-bottom: 15px;">
-                <div style="display: flex; gap: 15px; width: 100%;">
-                    <div class="form-group" style="flex: 1; margin:0;">
-                        <label class="form-label">Đổi mật khẩu <span style="text-transform:none; font-weight:500; color:var(--sub);">(Bỏ trống nếu giữ nguyên)</span></label>
-                        <input type="password" id="nvPass" class="form-input" placeholder="Mật khẩu mới...">
-                    </div>
-                    <div class="form-group" style="flex: 1; margin:0;">
-                        <label class="form-label">Xác nhận mật khẩu</label>
-                        <input type="password" id="nvConfirmPass" class="form-input" placeholder="Nhập lại mật khẩu mới...">
-                    </div>
+    <div class="nv-overlay" id="pwdOverlay" onclick="window.StaffApp.closePwdDrawer()"></div>
+    <aside class="drawer" id="pwdDrawer">
+        <div class="drawer-header">
+            <h3 class="drawer-title">ĐỔI MẬT KHẨU</h3>
+            <button class="btn-icon" onclick="window.StaffApp.closePwdDrawer()" style="border:none; box-shadow:none; flex-shrink: 0;"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="drawer-body">
+            <div style="text-align: center; margin-bottom: 25px;">
+                <div style="width: 80px; height: 80px; background: #eff6ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                    <i class="bi bi-shield-lock-fill" style="font-size: 36px; color: var(--primary);"></i>
                 </div>
+                <p style="font-size: 13px; color: var(--sub); line-height: 1.6;">Thiết lập mật khẩu đăng nhập mới cho nhân viên<br><strong id="pwdCustomerName" style="color: var(--text-main); font-size: 14px;"></strong></p>
             </div>
-
-            <div style="display: flex; gap: 15px;">
-                <div class="form-group" style="flex: 2;">
-                    <label class="form-label">Ngày sinh <span style="color:#ef4444" class="required-star">*</span></label>
-                    <div style="display: flex; gap: 5px;">
-                        <select id="nvDay" class="form-select" style="flex: 1;"><option value="">Ngày</option></select>
-                        <select id="nvMonth" class="form-select" style="flex: 1;"><option value="">Tháng</option></select>
-                        <select id="nvYear" class="form-select" style="flex: 1.5;"><option value="">Năm</option></select>
-                    </div>
-                    <input type="hidden" id="nvNgaySinh"> </div>
-                <div class="form-group" style="flex: 1;">
-                    <label class="form-label">Giới tính</label>
-                    <select id="nvGender" class="form-select">
-                        <option value="Nam">Nam</option>
-                        <option value="Nữ">Nữ</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-group" id="statusGroup" style="margin-top: 10px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <label class="form-label" style="margin: 0;">Trạng thái:</label>
-                    <span style="font-size: 13px; font-weight: 600;" id="statusLabel" class="badge-status badge-active">ĐANG LÀM VIỆC</span>
+            <div class="form-group">
+                <label class="form-label">Mật khẩu mới <span style="color:var(--danger-color)">*</span></label>
+                <div class="search-box">
+                    <i class="bi bi-key"></i>
+                    <input type="text" id="inpNewPassword" class="form-input" style="padding-left: 36px;" placeholder="Nhập ít nhất 6 ký tự...">
                 </div>
             </div>
         </div>
-
-        <div id="contentAddr" style="display: none;">
-            <div id="addressViewer" style="padding: 15px 20px; background: var(--gray-100); border: 1px solid var(--gray-200); font-size: 13px; border-radius: var(--border-radius); display: flex; justify-content: space-between; align-items: center;">
-                <div><i class="bi bi-geo-alt-fill" style="color: #ef4444; margin-right: 5px;"></i> <span id="txtFullAddr" style="font-weight: 600; color: var(--text-main);">Chưa cập nhật</span></div>
-                <button id="btnEditAddr" class="btn btn-secondary" style="height: 30px !important; padding: 0 10px !important; border-color: var(--primary); color: var(--primary);" onclick="window.StaffApp.enableEditAddress()"><i class="bi bi-pencil"></i> CẬP NHẬT</button>
-            </div>
-
-            <div id="editAddrGroup" style="padding-top: 15px;">
-                <label class="form-label">Thiết lập địa chỉ liên hệ <span style="color:#ef4444" class="required-star">*</span></label>
-                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                    <select id="inpCity" class="form-select" onchange="window.StaffApp.Address.loadDistricts(this.value, 'inpDist', 'inpWard')">
-                        <option value="">-- Chọn Tỉnh / TP --</option>
-                    </select>
-                    <select id="inpDist" class="form-select" onchange="window.StaffApp.Address.loadWards(this.value, 'inpWard')" disabled>
-                        <option value="">-- Chọn Quận / Huyện --</option>
-                    </select>
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <select id="inpWard" class="form-select" disabled style="flex:1">
-                        <option value="">-- Chọn Phường / Xã --</option>
-                    </select>
-                    <input id="inpDetail" class="form-input" style="flex: 1.5;" placeholder="Số nhà, đường... (Tùy chọn)">
-                </div>
-            </div>
+        <div class="drawer-footer">
+            <button class="btn btn-secondary" style="flex: 1; height: 40px !important;" onclick="window.StaffApp.closePwdDrawer()">HỦY</button>
+            <button class="btn btn-primary" style="flex: 1; height: 40px !important;" id="btnSavePwd" onclick="window.StaffApp.saveNewPassword()">XÁC NHẬN ĐỔI</button>
         </div>
-    </div>
+    </aside>
 
-    <div class="drawer-footer">
-        <button class="btn btn-secondary" style="flex: 1; height: 40px !important;" onclick="window.StaffApp.closeDrawer()">THOÁT</button>
-        <button class="btn btn-primary" style="flex: 1; height: 40px !important;" id="btnSave" onclick="window.StaffApp.processSave()">LƯU HỒ SƠ</button>
-    </div>
-</aside>
-
-<div class="nv-overlay" id="roleOverlay" onclick="window.StaffApp.Role.closeDrawer()"></div>
-<aside class="drawer" id="roleDrawer">
-    <div class="drawer-header">
-        <h3 class="drawer-title" id="roleDrawerTitle">TẠO CHỨC VỤ MỚI</h3>
-        <button class="btn-icon" onclick="window.StaffApp.Role.closeDrawer()" style="border:none; box-shadow:none;"><i class="bi bi-x-lg"></i></button>
-    </div>
-    <div class="drawer-body">
-        <input type="hidden" id="cvId">
-        <div class="form-group">
-            <label class="form-label">Mã chức vụ <span style="text-transform:none; font-weight:500; color:var(--sub);">(Để trống sẽ tự tạo)</span></label>
-            <input type="text" id="cvMa" class="form-input" placeholder="Ví dụ: QUAN_LY, NV_KHO...">
-        </div>
-        <div class="form-group">
-            <label class="form-label">Tên chức vụ <span style="color:#ef4444">*</span></label>
-            <input type="text" id="cvTen" class="form-input" placeholder="Ví dụ: Quản lý cửa hàng...">
-        </div>
-        <div class="form-group">
-            <label class="form-label">Mô tả / Ghi chú <span style="color:#ef4444">*</span></label>
-            <textarea id="cvMoTa" class="form-textarea" style="height: 120px; padding: 12px; resize: none;" placeholder="Mô tả quyền hạn, nhiệm vụ của chức vụ này..."></textarea>
-        </div>
-    </div>
-    <div class="drawer-footer">
-        <button class="btn btn-secondary" style="flex: 1; height: 40px !important;" onclick="window.StaffApp.Role.closeDrawer()">HỦY BỎ</button>
-        <button class="btn btn-primary" style="flex: 1; height: 40px !important;" id="btnSaveRole" onclick="window.StaffApp.Role.save()">LƯU CHỨC VỤ</button>
-    </div>
-</aside>
+</div>
 
 <script>
+    /* ==========================================================================
+       GIẢI PHÁP ĐẨY TẤT CẢ DRAWER VÀ OVERLAY RA NGOÀI BODY ĐỂ TRÁNH BỊ LAYOUT CHE
+       ========================================================================== */
+    document.addEventListener("DOMContentLoaded", function() {
+        const drawersContainer = document.getElementById('drawersContainer');
+        if (drawersContainer && document.body) {
+            document.body.appendChild(drawersContainer);
+        }
+    });
+
     // --- MAIN APP ---
     window.StaffApp = {
         initialized: false,
@@ -762,7 +797,8 @@
 
                 const badgeClass = item.trangThai ? 'badge-active' : 'badge-inactive';
                 const badgeText = item.trangThai ? 'Đang làm việc' : 'Nghỉ việc';
-                const statusHtml = `<span class="badge-status ${badgeClass}" onclick="window.StaffApp.quickToggle(${item.id}, ${item.trangThai})">${badgeText}</span>`;
+                // ĐÃ SỬA: TRUYỀN THÊM EMAIL VÀO HÀM ĐỂ BẢO VỆ TÀI KHOẢN ADMIN
+                const statusHtml = `<span class="badge-status ${badgeClass}" onclick="window.StaffApp.quickToggle(${item.id}, ${item.trangThai}, '${item.email}')">${badgeText}</span>`;
 
                 return `
                 <tr>
@@ -778,6 +814,7 @@
                         ${statusHtml}
                     </td>
                     <td style="text-align:right; white-space: nowrap;">
+                        <button class="btn-icon" title="Đổi mật khẩu" onclick="window.StaffApp.openChangePassword(${item.id}, '${item.hoTen.replace(/'/g, "\\'")}')"><i class="bi bi-key"></i></button>
                         <button class="btn-icon" title="Xem chi tiết" onclick="window.StaffApp.openEdit(${item.id}, true)"><i class="bi bi-eye"></i></button>
                         <button class="btn-icon" title="Sửa hồ sơ" onclick="window.StaffApp.openEdit(${item.id}, false)"><i class="bi bi-pencil"></i></button>
                     </td>
@@ -817,8 +854,13 @@
 
         changePage(p) { this.state.page = p; this.loadData(); window.scrollTo({ top: 0, behavior: 'smooth' }); },
 
-        // CẬP NHẬT TRẠNG THÁI (BADGE CLICK)
-        async quickToggle(id, currentState) {
+        // ĐÃ SỬA: CHẶN VÔ HIỆU HOÁ TÀI KHOẢN ADMIN TRỰC TIẾP TỪ BẢNG
+        async quickToggle(id, currentState, email) {
+            if (email === 'admin@shop.com') {
+                if (typeof window.toast === 'function') window.toast("Tài khoản Quản trị tối cao (Admin) không được phép thay đổi trạng thái!", "error");
+                return;
+            }
+
             const actionText = currentState ? "nghỉ việc" : "đi làm lại";
             if (typeof window.confirmDialog === 'function') {
                 window.confirmDialog("XÁC NHẬN TRẠNG THÁI", `Bạn có chắc chắn muốn cho nhân viên này <b>${actionText}</b>?`, async () => {
@@ -834,6 +876,44 @@
             }
         },
 
+        openChangePassword(id, name) {
+            this.state.activePwdId = id;
+            document.getElementById('pwdCustomerName').innerText = name;
+            document.getElementById('inpNewPassword').value = '';
+            document.getElementById('pwdDrawer').classList.add('show');
+            document.getElementById('pwdOverlay').classList.add('show');
+        },
+
+        closePwdDrawer() {
+            document.getElementById('pwdDrawer').classList.remove('show');
+            document.getElementById('pwdOverlay').classList.remove('show');
+        },
+
+        async saveNewPassword() {
+            const newPwd = document.getElementById('inpNewPassword').value.trim();
+            if(newPwd.length < 6) { if(typeof window.toast === 'function') window.toast("Mật khẩu phải có ít nhất 6 ký tự!", "warning"); return; }
+            if(typeof window.confirmDialog === 'function') {
+                window.confirmDialog("XÁC NHẬN ĐỔI MẬT KHẨU", "Bạn có chắc chắn muốn thay đổi mật khẩu cho nhân viên này?", async () => {
+                    const btn = document.getElementById('btnSavePwd');
+                    const oldText = btn.innerHTML;
+                    btn.innerHTML = 'ĐANG XỬ LÝ...'; btn.disabled = true;
+                    try {
+                        // SỬ DỤNG API ĐỔI MẬT KHẨU CỦA ADMIN CHỈ ĐỊNH CHO NHÂN VIÊN
+                        const res = await fetch(`/api/nhan-vien/${this.state.activePwdId}/doi-mat-khau-admin`, {
+                            method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ matKhauMoi: newPwd })
+                        });
+                        if (res.ok) { if(typeof window.toast === 'function') window.toast('Đổi mật khẩu thành công.', 'success'); this.closePwdDrawer(); }
+                        else {
+                            let errorMsg = 'Hệ thống từ chối yêu cầu.';
+                            try { const err = await res.json(); errorMsg = err.message || err.error || errorMsg; } catch(e) {}
+                            if(typeof window.toast === 'function') window.toast(errorMsg, 'error');
+                        }
+                    } catch (e) { if(typeof window.toast === 'function') window.toast('Sự cố đường truyền mạng.', 'error'); }
+                    finally { btn.innerHTML = oldText; btn.disabled = false; }
+                }, () => {});
+            }
+        },
+
         openDrawer(mode) {
             this.state.editingId = null; this.state.isViewMode = false; this.state.originalEmail = '';
 
@@ -844,8 +924,7 @@
             document.getElementById('addressViewer').style.display = 'none';
             document.getElementById('editAddrGroup').style.display = 'block';
 
-            document.getElementById('statusLabel').innerText = "ĐANG LÀM VIỆC";
-            document.getElementById('statusLabel').className = "badge-status badge-active";
+            document.getElementById('nvTrangThai').checked = true;
 
             this.switchDrawerTab('info');
             this.resetForm();
@@ -887,8 +966,7 @@
 
                 document.getElementById('nvGender').value = d.gioiTinh;
 
-                document.getElementById('statusLabel').innerText = d.trangThai ? "ĐANG LÀM VIỆC" : "NGHỈ VIỆC";
-                document.getElementById('statusLabel').className = d.trangThai ? "badge-status badge-active" : "badge-status badge-inactive";
+                document.getElementById('nvTrangThai').checked = d.trangThai;
 
                 const img = document.getElementById('imgPreview');
                 const icon = document.getElementById('iconUpload');
@@ -994,7 +1072,7 @@
                     payload.append('ngaySinh', dob);
                     payload.append('gioiTinh', document.getElementById('nvGender').value);
                     payload.append('chucVuId', chucVu);
-                    payload.append('trangThai', "true"); // Mặc định là active khi tạo mới hoặc update info
+                    payload.append('trangThai', document.getElementById('nvTrangThai').checked);
 
                     let diaChiChiTiet = document.getElementById('inpDetail').value.trim();
                     if(addrDiv.style.display !== 'none' && city && dist && ward) {
@@ -1067,6 +1145,9 @@
         toggleInputs(v) {
             document.querySelectorAll('#drawer .form-input, #drawer .form-select').forEach(i => { i.disabled = v; });
             document.getElementById('btnSave').style.display = v ? 'none' : 'block';
+            const chk = document.getElementById('nvTrangThai');
+            if(chk) chk.disabled = v;
+
             const uploadArea = document.getElementById('uploadArea');
             if(v) {
                 uploadArea.classList.add('disabled'); document.getElementById('uploadHint').style.display = 'none';
@@ -1083,6 +1164,7 @@
             document.getElementById('imgPreview').src = ''; document.getElementById('imgPreview').style.display = 'none';
             document.getElementById('iconUpload').style.display = 'block';
             document.getElementById('nvChucVu').selectedIndex = 0;
+            document.getElementById('nvTrangThai').checked = true;
             this.Address.reset('inpCity', 'inpDist', 'inpWard');
             this.setDateDropdowns('');
         },

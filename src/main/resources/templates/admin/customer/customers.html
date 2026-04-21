@@ -14,6 +14,9 @@
            ========================================================================== */
         * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
         :root {
+            /* TÙY CHỈNH ĐỘ CAO THANH MENU TRÊN CÙNG CỦA BẠN (ĐỂ DRAWER VỪA KHÍT) */
+            --layout-header-height: 70px;
+
             --bg: #f8fafc;
             --panel: #ffffff;
             --gray-100: #f8fafc;
@@ -77,7 +80,7 @@
         tbody td { padding: 10px 15px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; font-size: 13px; word-wrap: break-word; color: var(--text-main);}
         tbody tr:hover { background: var(--gray-100); }
 
-        /* BADGE TRẠNG THÁI CHỮ (BỔ SUNG CSS BỊ THIẾU) */
+        /* BADGE TRẠNG THÁI CHỮ */
         .badge-status { padding: 6px 12px; border-radius: var(--border-radius); font-size: 11px; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; border: 1px solid transparent; cursor: pointer; transition: 0.2s;}
         .badge-status:hover { opacity: 0.8; }
         .badge-active { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
@@ -92,37 +95,49 @@
         .page-number.active { background: var(--primary); color: #ffffff; border-color: var(--primary);}
         .page-number:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        /* Switch Toggle */
-        .switch-wrapper { display: flex; align-items: center; gap: 10px; }
-        .switch-square { position: relative; display: inline-block; width: 44px; height: 24px; }
-        .switch-square input { opacity: 0; width: 0; height: 0; }
-        .slider-square { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--gray-300); transition: .3s; border-radius: 4px; }
-        .slider-square:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 2px; }
-        input:checked + .slider-square { background-color: var(--primary); }
-        input:checked + .slider-square:before { transform: translateX(20px); }
-
-        .switch-sm { position: relative; display: inline-block; width: 34px; height: 18px; }
-        .switch-sm input { opacity: 0; width: 0; height: 0; }
-        .slider-sm { position: absolute; cursor: pointer; inset: 0; background-color: var(--gray-300); transition: .3s; border-radius: 20px; }
-        .slider-sm:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%; }
-        input:checked + .slider-sm { background-color: var(--primary); }
-        input:checked + .slider-sm:before { transform: translateX(16px); }
-        .switch-sm.loading { opacity: 0.5; pointer-events: none; }
-
-        /* DRAWER CHÍNH */
-        .cm-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); z-index: 999; display: none; backdrop-filter: blur(2px);}
+        /* ==========================================================================
+           CẤU HÌNH DRAWER NẰM GỌN TRONG LAYOUT, CÁCH HEADER 1 KHOẢNG
+           ========================================================================== */
+        .cm-overlay {
+            position: fixed;
+            top: var(--layout-header-height);
+            left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.4);
+            z-index: 999990;
+            display: none;
+            backdrop-filter: blur(2px);
+        }
         .cm-overlay.show { display: block; }
-        .drawer { position: fixed; top: 0; right: -1000px; width: 600px; height: 100vh; background: #ffffff; border-left: 1px solid var(--gray-200); z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -4px 0 24px rgba(0, 0, 0, 0.08); }
+        .cm-overlay:not(.show) { display: none !important; pointer-events: none !important; }
+
+        .drawer {
+            position: fixed;
+            top: var(--layout-header-height);
+            bottom: 0;
+            right: -100%;
+            width: 100%;
+            max-width: 600px;
+            height: calc(100vh - var(--layout-header-height));
+            max-height: calc(100vh - var(--layout-header-height));
+            background: #ffffff;
+            border-left: 1px solid var(--gray-200);
+            z-index: 999991;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: -4px 0 24px rgba(0, 0, 0, 0.08);
+        }
         .drawer.show { right: 0; }
-        .drawer.wide { width: 900px; }
+        .drawer.wide { max-width: 900px; }
 
         /* Drawer Đổi Mật Khẩu (Nhỏ Hơn) */
-        #pwdDrawer { width: 450px; right: -450px; z-index: 1050; }
+        #pwdOverlay { z-index: 999994; }
+        #pwdDrawer { max-width: 450px; z-index: 999995; }
         #pwdDrawer.show { right: 0; }
-        #pwdOverlay { z-index: 1040; }
 
-        .drawer-header { padding: 16px 24px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; background: var(--gray-100);}
-        .drawer-title { font-size: 14px; font-weight: 700; text-transform: uppercase; margin: 0; color: var(--text-main);}
+        .drawer-header { padding: 16px 24px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; background: var(--gray-100); flex-wrap: wrap; gap: 12px;}
+        .drawer-title { font-size: 14px; font-weight: 700; text-transform: uppercase; margin: 0; color: var(--text-main); flex: 1; min-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px;}
+
         .drawer-body { flex: 1; padding: 24px; overflow-y: auto; background: var(--panel); }
         .drawer-footer { padding: 16px 24px; border-top: 1px solid var(--gray-200); display: flex; gap: 10px; background: var(--gray-100);}
 
@@ -132,6 +147,11 @@
         .form-input, .form-select, .form-textarea { width: 100%; padding: 0 12px; font-size: 13px; border: 1px solid var(--gray-200); outline: none; border-radius: var(--border-radius); background: #ffffff; height: 38px; font-family: inherit; color: var(--text-main); transition: all 0.2s ease;}
         .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);}
         .form-input:disabled, .form-select:disabled { background: var(--gray-100); color: var(--sub); cursor: not-allowed; border-color: var(--gray-200); }
+
+        /* Form Checkbox Trạng Thái (Đồng bộ) */
+        .status-checkbox-group { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; width: max-content; }
+        .status-checkbox-group input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+        .status-checkbox-text { font-size: 13px; font-weight: 600; color: var(--text-main); }
 
         /* CUSTOM RIÊNG KHÁCH HÀNG */
         .upload-area { width: 100px; height: 100px; border-radius: 50%; border: 2px dashed var(--gray-300); display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; margin: 0 auto 10px; transition: 0.2s; background: var(--gray-100); }
@@ -151,7 +171,7 @@
         .addr-tag { font-size: 10px; font-weight: 700; background: var(--primary); color: #ffffff; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; margin-left: 8px; }
         .addr-actions { position: absolute; top: 16px; right: 16px; display: flex; gap: 8px; }
 
-        /* MỚI CHO ORDER & PRODUCT SUB-TABS */
+        /* CHO ORDER & PRODUCT SUB-TABS */
         .sub-table-container { background: #ffffff; border: 1px solid var(--gray-200); border-radius: var(--border-radius); padding: 20px; }
 
         .expand-btn { cursor: pointer; color: var(--sub); font-size: 16px; padding: 6px; border-radius: 50%; transition: 0.2s; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px;}
@@ -170,7 +190,6 @@
 
         /* ==========================================================================
            CSS BỔ SUNG CHO TOAST VÀ CONFIRM (ĐẢM BẢO LUÔN HIỂN THỊ TRÊN CÙNG)
-           Y HỆT NHƯ TRANG PRODUCTS.HTML
            ========================================================================== */
         #genericConfirmOverlay, #toastHost, .toast-container { z-index: 2147483647 !important; }
 
@@ -237,9 +256,7 @@
 <div class="container">
     <div class="actions-bar">
         <nav class="tabs">
-            <div class="tab active">
-                <i class="bi bi-people-fill"></i> QUẢN LÝ KHÁCH HÀNG
-            </div>
+            <div class="tab active">QUẢN LÝ KHÁCH HÀNG</div>
         </nav>
         <button class="btn btn-primary" id="btnAdd" onclick="window.CustomerApp.openDrawer('create')">
             <i class="bi bi-plus-lg"></i> THÊM MỚI
@@ -286,230 +303,239 @@
     <div id="paginationContainer" class="pagination-wrapper"></div>
 </div>
 
-<div class="cm-overlay" id="overlay" onclick="window.CustomerApp.closeDrawer()"></div>
-<aside class="drawer" id="drawer">
-    <div class="drawer-header">
-        <h3 class="drawer-title" id="drawerTitle">THÊM MỚI KHÁCH HÀNG</h3>
-        <button class="btn-icon" onclick="window.CustomerApp.closeDrawer()" style="border:none; box-shadow:none;"><i class="bi bi-x-lg"></i></button>
-    </div>
-
-    <div class="drawer-body">
-        <div class="drawer-tabs" id="drawerTabs" style="display: none;">
-            <div class="drawer-tab active" onclick="window.CustomerApp.switchDrawerTab('info')" id="tabTitleInfo">THÔNG TIN CHUNG</div>
-            <div class="drawer-tab" onclick="window.CustomerApp.switchDrawerTab('address')" id="tabTitleAddr">SỔ ĐỊA CHỈ</div>
-            <div class="drawer-tab" onclick="window.CustomerApp.switchDrawerTab('order')" id="tabTitleOrder">ĐƠN HÀNG MUA</div>
-            <div class="drawer-tab" onclick="window.CustomerApp.switchDrawerTab('product')" id="tabTitleProduct">SẢN PHẨM ĐÃ MUA</div>
-            <div class="drawer-tab" onclick="window.CustomerApp.switchDrawerTab('voucher')" id="tabTitleVoucher">VOUCHER ĐÃ DÙNG</div>
+<div id="drawersContainer">
+    <div class="cm-overlay" id="overlay" onclick="window.CustomerApp.closeDrawer()"></div>
+    <aside class="drawer" id="drawer">
+        <div class="drawer-header">
+            <h3 class="drawer-title" id="drawerTitle">THÊM MỚI KHÁCH HÀNG</h3>
+            <button class="btn-icon" onclick="window.CustomerApp.closeDrawer()" style="border:none; box-shadow:none; flex-shrink: 0;"><i class="bi bi-x-lg"></i></button>
         </div>
 
-        <div id="tabContentInfo">
-            <div id="avatarUploadGroup">
-                <div class="upload-area" id="uploadArea" onclick="if(!window.CustomerApp.state.isViewMode) document.getElementById('inpFile').click()">
-                    <input type="file" id="inpFile" hidden accept="image/*" onchange="window.CustomerApp.previewImage(this)">
-                    <img id="imgPreview" alt="Avatar">
-                    <i class="bi bi-camera" id="iconUpload"></i>
-                </div>
-                <div id="uploadHint" style="text-align: center; font-size: 11px; color: var(--sub); margin-bottom: 20px;">Nhấn để tải ảnh đại diện</div>
+        <div class="drawer-body">
+            <div class="drawer-tabs" id="drawerTabs" style="display: none;">
+                <div class="drawer-tab active" onclick="window.CustomerApp.switchDrawerTab('info')" id="tabTitleInfo">THÔNG TIN CHUNG</div>
+                <div class="drawer-tab" onclick="window.CustomerApp.switchDrawerTab('address')" id="tabTitleAddr">SỔ ĐỊA CHỈ</div>
+                <div class="drawer-tab" onclick="window.CustomerApp.switchDrawerTab('order')" id="tabTitleOrder">ĐƠN HÀNG MUA</div>
+                <div class="drawer-tab" onclick="window.CustomerApp.switchDrawerTab('product')" id="tabTitleProduct">SẢN PHẨM ĐÃ MUA</div>
+                <div class="drawer-tab" onclick="window.CustomerApp.switchDrawerTab('voucher')" id="tabTitleVoucher">VOUCHER ĐÃ DÙNG</div>
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Họ và Tên <span style="color:var(--danger-color)" class="required-star">*</span></label>
-                <input id="inpName" class="form-input" placeholder="Nhập họ tên...">
-            </div>
-
-            <div style="display: flex; gap: 15px;">
-                <div class="form-group" style="flex: 1;">
-                    <label class="form-label">Số điện thoại <span style="color:var(--danger-color)" class="required-star">*</span></label>
-                    <input id="inpPhone" class="form-input" placeholder="09xxxxxxxx">
-                </div>
-                <div class="form-group" style="flex: 1;">
-                    <label class="form-label">Email</label>
-                    <input id="inpEmail" class="form-input" placeholder="email@example.com">
-                </div>
-            </div>
-
-            <div style="display: flex; gap: 15px;">
-                <div class="form-group" style="flex: 1;">
-                    <label class="form-label">Ngày sinh</label>
-                    <input id="inpDob" type="date" class="form-input">
-                </div>
-                <div class="form-group" style="flex: 1;">
-                    <label class="form-label">Giới tính</label>
-                    <select id="inpGender" class="form-select">
-                        <option value="true">Nam</option>
-                        <option value="false">Nữ</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-group" style="margin-top: 10px;">
-                <div class="switch-wrapper">
-                    <label class="switch-square">
-                        <input type="checkbox" id="inpStatus" checked>
-                        <span class="slider-square"></span>
-                    </label>
-                    <span style="font-size: 13px; font-weight: 600;">Kích hoạt tài khoản</span>
-                </div>
-            </div>
-
-            <div id="defaultAddressGroup" style="border-top: 1px dashed var(--gray-300); margin-top: 20px; padding-top: 15px;">
-                <h5 style="font-size: 12px; font-weight: 700; margin-bottom: 12px; color: var(--sub); text-transform: uppercase;">Địa chỉ (Có thể bỏ qua nếu mua tại quầy)</h5>
-
-                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                    <select id="inpCity" class="form-select" onchange="window.CustomerApp.Address.loadDistricts(this.value, 'inpDist', 'inpWard')">
-                        <option value="">-- Chọn Tỉnh / TP --</option>
-                    </select>
-                    <select id="inpDist" class="form-select" onchange="window.CustomerApp.Address.loadWards(this.value, 'inpWard')" disabled>
-                        <option value="">-- Chọn Quận / Huyện --</option>
-                    </select>
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <select id="inpWard" class="form-select" disabled style="flex:1">
-                        <option value="">-- Chọn Phường / Xã --</option>
-                    </select>
-                    <input id="inpDetail" class="form-input" style="flex: 1.5;" placeholder="Số nhà, đường...">
-                </div>
-            </div>
-        </div>
-
-        <div id="tabContentAddr" style="display: none;">
-            <div id="subAddressForm" style="display: none; background: var(--gray-100); padding: 20px; border: 1px solid var(--gray-200); margin-bottom: 20px; border-radius: var(--border-radius);">
-                <div style="font-weight: 700; font-size: 13px; margin-bottom: 16px; text-transform: uppercase; color: var(--text-main);">Thêm địa chỉ mới</div>
-                <div class="form-group">
-                    <select id="subCity" class="form-select" onchange="window.CustomerApp.Address.loadDistricts(this.value, 'subDist', 'subWard')">
-                        <option value="">-- Chọn Tỉnh / TP --</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <select id="subDist" class="form-select" onchange="window.CustomerApp.Address.loadWards(this.value, 'subWard')" disabled>
-                        <option value="">-- Chọn Quận / Huyện --</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <select id="subWard" class="form-select" disabled>
-                        <option value="">-- Chọn Phường / Xã --</option>
-                    </select>
-                </div>
-                <div class="form-group"><input id="subDetail" class="form-input" placeholder="Chi tiết (Số nhà, đường...)"></div>
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn btn-primary" style="height: 40px !important; flex:1;" onclick="window.CustomerApp.saveSubAddress()">LƯU LẠI</button>
-                    <button class="btn btn-secondary" style="height: 40px !important; flex:1;" onclick="document.getElementById('subAddressForm').style.display='none'">HỦY BỎ</button>
-                </div>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h5 style="font-size: 13px; font-weight: 700; color:var(--sub); text-transform: uppercase; margin: 0;">DANH SÁCH ĐỊA CHỈ</h5>
-                <button class="btn btn-secondary" id="btnShowAddAddress" onclick="window.CustomerApp.showAddAddressForm()">
-                    <i class="bi bi-plus-lg"></i> Thêm mới
-                </button>
-            </div>
-
-            <div id="addressListContainer"></div>
-        </div>
-
-        <div id="tabContentOrder" style="display: none;">
-            <div class="sub-table-container">
-                <div style="display: flex; gap: 12px; margin-bottom: 20px;">
-                    <div class="search-box" style="flex:2">
-                        <i class="bi bi-search"></i>
-                        <input type="text" class="search-input" id="searchOrder" placeholder="Mã đơn hàng..." oninput="window.CustomerApp.handleSubSearch('order', this.value)">
+            <div id="tabContentInfo">
+                <div id="avatarUploadGroup">
+                    <div class="upload-area" id="uploadArea" onclick="if(!window.CustomerApp.state.isViewMode) document.getElementById('inpFile').click()">
+                        <input type="file" id="inpFile" hidden accept="image/*" onchange="window.CustomerApp.previewImage(this)">
+                        <img id="imgPreview" alt="Avatar">
+                        <i class="bi bi-camera" id="iconUpload"></i>
                     </div>
-                    <select class="filter-select" id="statusOrder" style="flex:1" onchange="window.CustomerApp.handleSubFilter('order', this.value)">
-                        <option value="">-- Trạng thái --</option>
-                        <option value="CHO_THANH_TOAN">Chờ thanh toán</option>
-                        <option value="CHO_XAC_NHAN">Chờ xác nhận</option>
-                        <option value="DANG_GIAO">Đang giao</option>
-                        <option value="HOAN_THANH">Hoàn thành</option>
-                        <option value="DA_HUY">Đã hủy</option>
-                    </select>
+                    <div id="uploadHint" style="text-align: center; font-size: 11px; color: var(--sub); margin-bottom: 20px;">Nhấn để tải ảnh đại diện</div>
                 </div>
 
-                <table style="min-width: 100%;">
-                    <thead>
-                    <tr>
-                        <th style="width: 40px; text-align: center;"></th>
-                        <th>MÃ HĐ</th>
-                        <th>NGÀY TẠO</th>
-                        <th style="text-align: right;">TỔNG TIỀN</th>
-                        <th style="text-align: center;">TRẠNG THÁI</th>
-                    </tr>
-                    </thead>
-                    <tbody id="subOrderBody"></tbody>
-                </table>
-                <div id="pagiOrder" class="pagination-wrapper" style="justify-content: flex-end;"></div>
+                <div class="form-group">
+                    <label class="form-label">Họ và Tên <span style="color:var(--danger-color)" class="required-star">*</span></label>
+                    <input id="inpName" class="form-input" placeholder="Nhập họ tên...">
+                </div>
+
+                <div style="display: flex; gap: 15px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Số điện thoại <span style="color:var(--danger-color)" class="required-star">*</span></label>
+                        <input id="inpPhone" class="form-input" placeholder="09xxxxxxxx">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Email</label>
+                        <input id="inpEmail" class="form-input" placeholder="email@example.com">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 15px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Ngày sinh</label>
+                        <input id="inpDob" type="date" class="form-input">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Giới tính</label>
+                        <select id="inpGender" class="form-select">
+                            <option value="true">Nam</option>
+                            <option value="false">Nữ</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 10px;">
+                    <label class="status-checkbox-group">
+                        <input type="checkbox" id="inpStatus" checked>
+                        <span class="status-checkbox-text">Kích hoạt tài khoản</span>
+                    </label>
+                </div>
+
+                <div id="defaultAddressGroup" style="border-top: 1px dashed var(--gray-300); margin-top: 20px; padding-top: 15px;">
+                    <h5 style="font-size: 12px; font-weight: 700; margin-bottom: 12px; color: var(--sub); text-transform: uppercase;">Địa chỉ (Có thể bỏ qua nếu mua tại quầy)</h5>
+
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <select id="inpCity" class="form-select" onchange="window.CustomerApp.Address.loadDistricts(this.value, 'inpDist', 'inpWard')">
+                            <option value="">-- Chọn Tỉnh / TP --</option>
+                        </select>
+                        <select id="inpDist" class="form-select" onchange="window.CustomerApp.Address.loadWards(this.value, 'inpWard')" disabled>
+                            <option value="">-- Chọn Quận / Huyện --</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <select id="inpWard" class="form-select" disabled style="flex:1">
+                            <option value="">-- Chọn Phường / Xã --</option>
+                        </select>
+                        <input id="inpDetail" class="form-input" style="flex: 1.5;" placeholder="Số nhà, đường...">
+                    </div>
+                </div>
             </div>
+
+            <div id="tabContentAddr" style="display: none;">
+                <div id="subAddressForm" style="display: none; background: var(--gray-100); padding: 20px; border: 1px solid var(--gray-200); margin-bottom: 20px; border-radius: var(--border-radius);">
+                    <div style="font-weight: 700; font-size: 13px; margin-bottom: 16px; text-transform: uppercase; color: var(--text-main);">Thêm địa chỉ mới</div>
+                    <div class="form-group">
+                        <select id="subCity" class="form-select" onchange="window.CustomerApp.Address.loadDistricts(this.value, 'subDist', 'subWard')">
+                            <option value="">-- Chọn Tỉnh / TP --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select id="subDist" class="form-select" onchange="window.CustomerApp.Address.loadWards(this.value, 'subWard')" disabled>
+                            <option value="">-- Chọn Quận / Huyện --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select id="subWard" class="form-select" disabled>
+                            <option value="">-- Chọn Phường / Xã --</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><input id="subDetail" class="form-input" placeholder="Chi tiết (Số nhà, đường...)"></div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-primary" style="height: 40px !important; flex:1;" onclick="window.CustomerApp.saveSubAddress()">LƯU LẠI</button>
+                        <button class="btn btn-secondary" style="height: 40px !important; flex:1;" onclick="document.getElementById('subAddressForm').style.display='none'">HỦY BỎ</button>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h5 style="font-size: 13px; font-weight: 700; color:var(--sub); text-transform: uppercase; margin: 0;">DANH SÁCH ĐỊA CHỈ</h5>
+                    <button class="btn btn-secondary" id="btnShowAddAddress" onclick="window.CustomerApp.showAddAddressForm()">
+                        <i class="bi bi-plus-lg"></i> Thêm mới
+                    </button>
+                </div>
+
+                <div id="addressListContainer"></div>
+            </div>
+
+            <div id="tabContentOrder" style="display: none;">
+                <div class="sub-table-container">
+                    <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                        <div class="search-box" style="flex:2">
+                            <i class="bi bi-search"></i>
+                            <input type="text" class="search-input" id="searchOrder" placeholder="Mã đơn hàng..." oninput="window.CustomerApp.handleSubSearch('order', this.value)">
+                        </div>
+                        <select class="filter-select" id="statusOrder" style="flex:1" onchange="window.CustomerApp.handleSubFilter('order', this.value)">
+                            <option value="">-- Trạng thái --</option>
+                            <option value="CHO_THANH_TOAN">Chờ thanh toán</option>
+                            <option value="CHO_XAC_NHAN">Chờ xác nhận</option>
+                            <option value="DANG_GIAO">Đang giao</option>
+                            <option value="HOAN_THANH">Hoàn thành</option>
+                            <option value="DA_HUY">Đã hủy</option>
+                        </select>
+                    </div>
+
+                    <table style="min-width: 100%;">
+                        <thead>
+                        <tr>
+                            <th style="width: 40px; text-align: center;"></th>
+                            <th>MÃ HĐ</th>
+                            <th>NGÀY TẠO</th>
+                            <th style="text-align: right;">TỔNG TIỀN</th>
+                            <th style="text-align: center;">TRẠNG THÁI</th>
+                        </tr>
+                        </thead>
+                        <tbody id="subOrderBody"></tbody>
+                    </table>
+                    <div id="pagiOrder" class="pagination-wrapper" style="justify-content: flex-end;"></div>
+                </div>
+            </div>
+
+            <div id="tabContentProduct" style="display: none;">
+                <div class="sub-table-container">
+                    <table style="min-width: 100%;">
+                        <thead>
+                        <tr>
+                            <th>SẢN PHẨM</th>
+                            <th style="text-align: center;">SL MUA</th>
+                            <th style="text-align: right;">TỔNG TIỀN ĐÃ CHI</th>
+                        </tr>
+                        </thead>
+                        <tbody id="subProductBody"></tbody>
+                    </table>
+                    <div id="pagiProduct" class="pagination-wrapper" style="justify-content: flex-end;"></div>
+                </div>
+            </div>
+
+            <div id="tabContentVoucher" style="display: none;">
+                <div class="sub-table-container">
+                    <table style="min-width: 100%;">
+                        <thead>
+                        <tr>
+                            <th>MÃ VOUCHER</th>
+                            <th>TÊN VOUCHER</th>
+                            <th style="text-align: right;">GIẢM GIÁ</th>
+                            <th style="text-align: center;">ĐƠN ÁP DỤNG</th>
+                            <th>NGÀY SỬ DỤNG</th>
+                        </tr>
+                        </thead>
+                        <tbody id="subVoucherBody"></tbody>
+                    </table>
+                    <div id="pagiVoucher" class="pagination-wrapper" style="justify-content: flex-end;"></div>
+                </div>
+            </div>
+
         </div>
 
-        <div id="tabContentProduct" style="display: none;">
-            <div class="sub-table-container">
-                <table style="min-width: 100%;">
-                    <thead>
-                    <tr>
-                        <th>SẢN PHẨM</th>
-                        <th style="text-align: center;">SL MUA</th>
-                        <th style="text-align: right;">TỔNG TIỀN ĐÃ CHI</th>
-                    </tr>
-                    </thead>
-                    <tbody id="subProductBody"></tbody>
-                </table>
-                <div id="pagiProduct" class="pagination-wrapper" style="justify-content: flex-end;"></div>
+        <div class="drawer-footer">
+            <button class="btn btn-secondary" style="flex: 1; height: 40px !important;" onclick="window.CustomerApp.closeDrawer()">THOÁT</button>
+            <button class="btn btn-primary" style="flex: 1; height: 40px !important;" id="btnSave" onclick="window.CustomerApp.saveCustomer()">LƯU THÔNG TIN</button>
+        </div>
+    </aside>
+
+    <div class="cm-overlay" id="pwdOverlay" onclick="window.CustomerApp.closePwdDrawer()"></div>
+    <aside class="drawer" id="pwdDrawer">
+        <div class="drawer-header">
+            <h3 class="drawer-title">ĐỔI MẬT KHẨU</h3>
+            <button class="btn-icon" onclick="window.CustomerApp.closePwdDrawer()" style="border:none; box-shadow:none; flex-shrink: 0;"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="drawer-body">
+            <div style="text-align: center; margin-bottom: 25px;">
+                <div style="width: 80px; height: 80px; background: #eff6ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                    <i class="bi bi-shield-lock-fill" style="font-size: 36px; color: var(--primary);"></i>
+                </div>
+                <p style="font-size: 13px; color: var(--sub); line-height: 1.6;">Thiết lập mật khẩu đăng nhập mới cho khách hàng<br><strong id="pwdCustomerName" style="color: var(--text-main); font-size: 14px;"></strong></p>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Mật khẩu mới <span style="color:var(--danger-color)">*</span></label>
+                <div class="search-box">
+                    <i class="bi bi-key"></i>
+                    <input type="text" id="inpNewPassword" class="form-input" style="padding-left: 36px;" placeholder="Nhập ít nhất 6 ký tự...">
+                </div>
             </div>
         </div>
-
-        <div id="tabContentVoucher" style="display: none;">
-            <div class="sub-table-container">
-                <table style="min-width: 100%;">
-                    <thead>
-                    <tr>
-                        <th>MÃ VOUCHER</th>
-                        <th>TÊN VOUCHER</th>
-                        <th style="text-align: right;">GIẢM GIÁ</th>
-                        <th style="text-align: center;">ĐƠN ÁP DỤNG</th>
-                        <th>NGÀY SỬ DỤNG</th>
-                    </tr>
-                    </thead>
-                    <tbody id="subVoucherBody"></tbody>
-                </table>
-                <div id="pagiVoucher" class="pagination-wrapper" style="justify-content: flex-end;"></div>
-            </div>
+        <div class="drawer-footer">
+            <button class="btn btn-secondary" style="flex: 1; height: 40px !important;" onclick="window.CustomerApp.closePwdDrawer()">HỦY</button>
+            <button class="btn btn-primary" style="flex: 1; height: 40px !important;" id="btnSavePwd" onclick="window.CustomerApp.saveNewPassword()">XÁC NHẬN ĐỔI</button>
         </div>
-
-    </div>
-
-    <div class="drawer-footer">
-        <button class="btn btn-secondary" style="flex: 1; height: 40px !important;" onclick="window.CustomerApp.closeDrawer()">THOÁT</button>
-        <button class="btn btn-primary" style="flex: 1; height: 40px !important;" id="btnSave" onclick="window.CustomerApp.saveCustomer()">LƯU THÔNG TIN</button>
-    </div>
-</aside>
-
-<div class="cm-overlay" id="pwdOverlay" onclick="window.CustomerApp.closePwdDrawer()"></div>
-<aside class="drawer" id="pwdDrawer">
-    <div class="drawer-header">
-        <h3 class="drawer-title">ĐỔI MẬT KHẨU</h3>
-        <button class="btn-icon" onclick="window.CustomerApp.closePwdDrawer()" style="border:none; box-shadow:none;"><i class="bi bi-x-lg"></i></button>
-    </div>
-    <div class="drawer-body">
-        <div style="text-align: center; margin-bottom: 25px;">
-            <div style="width: 80px; height: 80px; background: #eff6ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
-                <i class="bi bi-shield-lock-fill" style="font-size: 36px; color: var(--primary);"></i>
-            </div>
-            <p style="font-size: 13px; color: var(--sub); line-height: 1.6;">Thiết lập mật khẩu đăng nhập mới cho khách hàng<br><strong id="pwdCustomerName" style="color: var(--text-main); font-size: 14px;"></strong></p>
-        </div>
-        <div class="form-group">
-            <label class="form-label">Mật khẩu mới <span style="color:var(--danger-color)">*</span></label>
-            <div class="search-box">
-                <i class="bi bi-key"></i>
-                <input type="text" id="inpNewPassword" class="form-input" style="padding-left: 36px;" placeholder="Nhập ít nhất 6 ký tự...">
-            </div>
-        </div>
-    </div>
-    <div class="drawer-footer">
-        <button class="btn btn-secondary" style="flex: 1; height: 40px !important;" onclick="window.CustomerApp.closePwdDrawer()">HỦY</button>
-        <button class="btn btn-primary" style="flex: 1; height: 40px !important;" id="btnSavePwd" onclick="window.CustomerApp.saveNewPassword()">XÁC NHẬN ĐỔI</button>
-    </div>
-</aside>
+    </aside>
+</div>
 
 <script>
+    /* ==========================================================================
+       GIẢI PHÁP ĐẨY TẤT CẢ DRAWER VÀ OVERLAY RA NGOÀI BODY ĐỂ TRÁNH BỊ LAYOUT CHE
+       ========================================================================== */
+    document.addEventListener("DOMContentLoaded", function() {
+        const drawersContainer = document.getElementById('drawersContainer');
+        if (drawersContainer && document.body) {
+            document.body.appendChild(drawersContainer);
+        }
+    });
+
     const getStatusBadge = (tt) => {
         if (!tt) return '<span class="badge-status" style="background:var(--gray-300); color:var(--text-main);">N/A</span>';
         const ma = typeof tt === 'object' ? tt.ma : tt;
@@ -650,7 +676,7 @@
             tbody.innerHTML = list.map((item, index) => {
                 const stt = (this.state.page * this.state.size) + index + 1;
 
-                // ĐÃ SỬA THÀNH BADGE CHỮ
+                // BADGE CHỮ
                 const badgeClass = item.trangThai ? 'badge-active' : 'badge-inactive';
                 const badgeText = item.trangThai ? 'Đang hoạt động' : 'Ngừng hoạt động';
                 const statusHtml = `<span class="badge-status ${badgeClass}" onclick="window.CustomerApp.quickToggle(${item.id}, ${item.trangThai})">${badgeText}</span>`;

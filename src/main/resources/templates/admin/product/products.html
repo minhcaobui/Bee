@@ -14,6 +14,9 @@
            ========================================================================== */
         * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
         :root {
+            /* TÙY CHỈNH ĐỘ CAO THANH MENU TRÊN CÙNG CỦA BẠN (ĐỂ DRAWER VỪA KHÍT) */
+            --layout-header-height: 70px;
+
             --bg: #f8fafc;
             --panel: #ffffff;
             --gray-100: #f8fafc;
@@ -91,16 +94,44 @@
         .badge-active { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
         .badge-inactive { background: var(--gray-100); color: var(--sub); border-color: var(--gray-200); }
 
-        /* Drawer */
-        /* ĐỔI TÊN CLASS THÀNH .pd-overlay ĐỂ CHỐNG XUNG ĐỘT HỆ THỐNG */
-        .pd-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); z-index: 999; display: none; backdrop-filter: blur(2px);}
+        /* ==========================================================================
+           CẤU HÌNH DRAWER NẰM GỌN TRONG LAYOUT, CÁCH HEADER 1 KHOẢNG
+           ========================================================================== */
+        .pd-overlay {
+            position: fixed;
+            top: var(--layout-header-height);
+            left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.4);
+            z-index: 999990;
+            display: none;
+            backdrop-filter: blur(2px);
+        }
         .pd-overlay.show { display: block; }
         .pd-overlay:not(.show) { display: none !important; pointer-events: none !important; }
 
-        .drawer { position: fixed; top: 0; right: -100%; height: 100vh; background: #ffffff; border-left: 1px solid var(--gray-200); z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -4px 0 24px rgba(0, 0, 0, 0.08); }
+        .drawer {
+            position: fixed;
+            top: var(--layout-header-height);
+            bottom: 0;
+            right: -100%;
+            height: calc(100vh - var(--layout-header-height));
+            max-height: calc(100vh - var(--layout-header-height));
+            background: #ffffff;
+            border-left: 1px solid var(--gray-200);
+            z-index: 999991;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: -4px 0 24px rgba(0, 0, 0, 0.08);
+            max-width: 100%;
+        }
         .drawer.show { right: 0; }
-        .drawer-header { padding: 16px 24px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; background: var(--gray-100);}
-        .drawer-title { font-size: 14px; font-weight: 700; text-transform: uppercase; margin: 0; color: var(--text-main);}
+
+        .drawer-header { padding: 16px 24px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; background: var(--gray-100); flex-wrap: wrap; gap: 12px;}
+
+        /* CHỐNG TRÀN CHỮ ĐẨY NÚT BIẾN MẤT */
+        .drawer-title { font-size: 14px; font-weight: 700; text-transform: uppercase; margin: 0; color: var(--text-main); flex: 1; min-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px;}
+
         .drawer-body { flex: 1; padding: 24px; overflow-y: auto; background: var(--panel);}
         .drawer-footer { padding: 16px 24px; border-top: 1px solid var(--gray-200); display: flex; gap: 10px; background: var(--gray-100);}
 
@@ -112,29 +143,27 @@
         .form-input:disabled { background: var(--gray-100); color: var(--sub); cursor: not-allowed; border-color: var(--gray-200); }
         .form-textarea { min-height: 100px; resize: vertical; padding: 12px; }
 
+        /* Nhóm Checkbox cho Màu / Size */
         .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; }
         .checkbox-item { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1px solid var(--gray-200); border-radius: var(--border-radius); cursor: pointer; font-size: 13px; font-weight: 500; background: var(--panel); transition: 0.2s; user-select: none; color: var(--text-main);}
         .checkbox-item:hover { border-color: var(--gray-300); background: var(--gray-100);}
         .checkbox-item input { display: none; }
         .checkbox-item.active { border-color: var(--primary); background: #eff6ff; color: var(--primary); font-weight: 600;}
 
-        /* Switch Toggle (Dùng cho form) */
-        .switch-wrapper { display: flex; align-items: center; gap: 10px; }
-        .switch-square { position: relative; display: inline-block; width: 44px; height: 24px; }
-        .switch-square input { opacity: 0; width: 0; height: 0; }
-        .slider-square { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--gray-300); transition: .3s; border-radius: 4px; }
-        .slider-square:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 2px; }
-        input:checked + .slider-square { background-color: var(--primary); }
-        input:checked + .slider-square:before { transform: translateX(20px); }
+        /* Form Checkbox Trạng Thái (Đồng bộ Catalogs) */
+        .status-checkbox-group { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; width: max-content; }
+        .status-checkbox-group input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+        .status-checkbox-text { font-size: 13px; font-weight: 500; color: var(--text-main); }
 
-        /* CSS RIÊNG SẢN PHẨM */
-        #mainDrawer { width: 600px; }
-        #variantDrawer { width: 900px; z-index: 1050; }
-        #vFormDrawer { width: 450px; z-index: 1101; }
-        #bulkDrawer { width: 850px; z-index: 1101; }
-        #stockDrawer { width: 400px; z-index: 1201; }
-        #vFormOverlay, #bulkOverlay { z-index: 1100; }
-        #stockOverlay { z-index: 1200; }
+        /* CSS RIÊNG SẢN PHẨM & CẤU HÌNH Z-INDEX SIÊU CAO CHO TỪNG LAYER DRAWER */
+        #mainDrawer { width: 100%; max-width: 600px; z-index: 999991; }
+        #variantDrawer { width: 100%; max-width: 900px; z-index: 999993; }
+        #vFormDrawer { width: 100%; max-width: 450px; z-index: 999995; }
+        #bulkDrawer { width: 100%; max-width: 850px; z-index: 999995; }
+        #stockDrawer { width: 100%; max-width: 400px; z-index: 999997; }
+
+        #vFormOverlay, #bulkOverlay { z-index: 999994; }
+        #stockOverlay { z-index: 999996; }
 
         .product-cell { display: flex; align-items: center; gap: 12px; }
         .product-img { width: 44px; height: 44px; border-radius: var(--border-radius); object-fit: cover; border: 1px solid var(--gray-200); background: var(--gray-100); }
@@ -174,7 +203,7 @@
         .v-checkbox { accent-color: var(--primary); width: 16px; height: 16px; cursor: pointer; }
 
         /* ==========================================================================
-           CSS BỔ SUNG CHO TOAST VÀ CONFIRM (ĐẢM BẢO LUÔN HIỂN THỊ TRÊN CÙNG)
+           CSS BỔ SUNG CHO TOAST VÀ CONFIRM
            ========================================================================== */
         #genericConfirmOverlay, #toastHost, .toast-container { z-index: 2147483647 !important; }
 
@@ -236,7 +265,7 @@
 <div class="container" id="productContainer">
     <div class="actions-bar">
         <nav class="tabs">
-            <div class="tab active"><i class="bi bi-box-seam-fill"></i> QUẢN LÝ SẢN PHẨM</div>
+            <div class="tab active">QUẢN LÝ SẢN PHẨM</div>
         </nav>
         <button class="btn btn-primary" id="btnAdd" onclick="ProductApp.openDrawer()">
             <i class="bi bi-plus-lg"></i> THÊM MỚI
@@ -286,7 +315,7 @@
 <aside class="drawer" id="mainDrawer">
     <div class="drawer-header">
         <h3 class="drawer-title" id="drawerTitle">THÊM MỚI SẢN PHẨM</h3>
-        <button class="btn-icon" onclick="ProductApp.closeDrawer()" style="border:none; box-shadow:none;"><i class="bi bi-x-lg"></i></button>
+        <button class="btn-icon" onclick="ProductApp.closeDrawer()" style="border:none; box-shadow:none; flex-shrink: 0;"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="drawer-body">
         <div class="form-group">
@@ -321,15 +350,15 @@
             <button class="btn btn-secondary" onclick="document.getElementById('fFile').click()" type="button" style="height: 38px !important;"><i class="bi bi-image"></i> CHỌN ẢNH</button>
             <div id="imagePreviewContainer"></div>
         </div>
-        <div class="form-group" style="margin-top: 20px;">
-            <div class="switch-wrapper">
-                <label class="switch-square">
-                    <input type="checkbox" id="fTrangThai" checked>
-                    <span class="slider-square"></span>
-                </label>
-                <span style="font-size: 13px; font-weight: 600;">Đang kinh doanh</span>
-            </div>
+
+        <div class="form-group" style="margin-top: 10px;">
+            <label class="form-label" style="margin-bottom: 12px;">Trạng thái</label>
+            <label class="status-checkbox-group">
+                <input type="checkbox" id="fTrangThai" checked>
+                <span class="status-checkbox-text">Đang kinh doanh</span>
+            </label>
         </div>
+
     </div>
     <div class="drawer-footer">
         <button class="btn btn-secondary" id="btnClose" style="flex:1; height: 40px !important;" onclick="ProductApp.closeDrawer()">THOÁT</button>
@@ -340,7 +369,7 @@
 <aside class="drawer" id="variantDrawer">
     <div class="drawer-header">
         <h3 class="drawer-title">CHI TIẾT: <span id="vTitle" style="color:var(--primary)"></span></h3>
-        <div style="display: flex; gap: 10px;">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; flex-shrink: 0; align-items: center;">
             <button class="btn btn-secondary" onclick="ProductApp.openAddVariantForm()"><i class="bi bi-plus-lg"></i> THÊM TỪNG SKU</button>
             <button class="btn btn-primary" onclick="ProductApp.openBulkDrawer()"><i class="bi bi-grid-3x3-gap-fill"></i> TẠO HÀNG LOẠT</button>
             <button class="btn-icon" onclick="ProductApp.closeVariantDrawer()" style="border:none; box-shadow:none;"><i class="bi bi-x-lg"></i></button>
@@ -407,7 +436,7 @@
 <aside class="drawer" id="bulkDrawer">
     <div class="drawer-header">
         <h3 class="drawer-title">TẠO BIẾN THỂ HÀNG LOẠT (MA TRẬN)</h3>
-        <button class="btn-icon" onclick="ProductApp.closeBulkDrawer()" style="border:none; box-shadow:none;"><i class="bi bi-x-lg"></i></button>
+        <button class="btn-icon" onclick="ProductApp.closeBulkDrawer()" style="border:none; box-shadow:none; flex-shrink: 0;"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="drawer-body">
         <div style="background: var(--gray-100); padding: 15px; border-radius: var(--border-radius); border: 1px solid var(--gray-200); margin-bottom: 20px;">
@@ -474,7 +503,7 @@
 <aside class="drawer" id="vFormDrawer">
     <div class="drawer-header">
         <h3 class="drawer-title" id="vFormTitle">THÊM BIẾN THỂ</h3>
-        <button class="btn-icon" onclick="ProductApp.closeVariantForm()" style="border:none; box-shadow:none;"><i class="bi bi-x-lg"></i></button>
+        <button class="btn-icon" onclick="ProductApp.closeVariantForm()" style="border:none; box-shadow:none; flex-shrink: 0;"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="drawer-body">
         <div style="display:flex; gap:15px; margin-bottom: 18px;">
@@ -511,7 +540,7 @@
 <aside class="drawer" id="stockDrawer">
     <div class="drawer-header">
         <h3 class="drawer-title">NHẬP THÊM KHO</h3>
-        <button class="btn-icon" onclick="ProductApp.closeStockForm()" style="border:none; box-shadow:none;"><i class="bi bi-x-lg"></i></button>
+        <button class="btn-icon" onclick="ProductApp.closeStockForm()" style="border:none; box-shadow:none; flex-shrink: 0;"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="drawer-body">
         <div style="background:var(--gray-100); padding:15px; border-radius:var(--border-radius); margin-bottom:20px; border:1px solid var(--gray-200);">
@@ -545,7 +574,7 @@
             overlay = document.createElement('div');
             overlay.id = 'productPromptOverlay';
             overlay.className = 'pd-overlay';
-            overlay.style.cssText = 'position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); z-index: 100000; backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center;';
+            overlay.style.cssText = 'position: fixed; top: var(--layout-header-height); left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.4); z-index: 1000000; backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center;';
             overlay.innerHTML = `
                 <div class="card" style="padding: 24px; width: 360px; background: #ffffff; border: 1px solid var(--gray-200); border-radius: var(--border-radius); box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
                     <h4 style="margin-bottom:12px; font-size:14px; font-weight: 700; display: flex; align-items: center; gap: 8px; color: var(--text-main);">
@@ -895,6 +924,7 @@
 
                 const badgeClass = v.trangThai ? 'badge-active' : 'badge-inactive';
                 const badgeText = v.trangThai ? 'Đang bán' : 'Ngừng bán';
+                const toggleHtmlVariant = `<span class="badge-status ${badgeClass}" onclick="ProductApp.quickToggleVariant(${v.id}, ${v.trangThai})">${badgeText}</span>`;
 
                 return `
                 <tr>
@@ -910,7 +940,7 @@
                     <td style="font-weight: 500;">${v.kichThuoc?.ten || '-'}</td>
                     <td style="font-weight: 600; color: var(--danger-color);">${v.giaBan.toLocaleString('en-US')} ₫</td>
                     <td style="text-align:center; font-weight: 600;">${v.soLuong}</td>
-                    <td style="text-align:center;"><span class="badge-status ${badgeClass}" onclick="ProductApp.quickToggleVariant(${v.id}, ${v.trangThai})">${badgeText}</span></td>
+                    <td style="text-align:center;">${toggleHtmlVariant}</td>
                     <td style="text-align:right;">
                         <button class="btn-icon" onclick="ProductApp.openStockForm(${v.id}, '${v.sku}', ${v.soLuong})" title="Nhập kho"><i class="bi bi-plus-lg"></i></button>
                         <button class="btn-icon" onclick="ProductApp.openEditVariant(${v.id})" title="Sửa SKU"><i class="bi bi-pencil"></i></button>

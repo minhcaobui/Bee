@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POS | Bee Admin</title>
+    <title>POS</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
@@ -15,6 +15,9 @@
            ========================================================================== */
         * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
         :root {
+            /* TÙY CHỈNH ĐỘ CAO THANH MENU TRÊN CÙNG CỦA BẠN */
+            --layout-header-height: 70px;
+
             --gray-100: #f8fafc;
             --gray-200: #e2e8f0;
             --gray-300: #cbd5e1;
@@ -149,9 +152,15 @@
         tbody tr:hover { background: var(--gray-100); cursor: pointer; }
 
         /* ==========================================================================
-           2. POS LAYOUT (45% - 55%)
+           2. POS LAYOUT VỪA KHÍT 100% CHIỀU CAO KHÔNG BỊ TRÀN
            ========================================================================== */
-        .pos-wrapper { padding: 15px; height: 100vh; display: flex; flex-direction: column; background: var(--gray-100); }
+        .pos-wrapper {
+            padding: 15px;
+            height: calc(100vh - var(--layout-header-height));
+            display: flex;
+            flex-direction: column;
+            background: var(--gray-100);
+        }
         .pos-layout { display: flex; flex: 1; width: 100%; background: #ffffff; border: 1px solid var(--gray-200); overflow: hidden; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);}
 
         .panel-left { width: 45%; display: flex; flex-direction: column; border-right: 1px solid var(--gray-200); background: #ffffff; z-index: 2; }
@@ -198,9 +207,19 @@
         .voucher-card .v-desc { font-size: 12px; color: var(--sub); font-weight: 500; }
 
         /* ==========================================================================
-           3. MODAL CUSTOM & CSS TOAST (ĐỒNG BỘ LAYOUT CORPORATE)
+           3. MODAL CUSTOM & CSS TOAST (ĐỒNG BỘ NẰM DƯỚI HEADER)
            ========================================================================== */
-        .modal { position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; }
+        .modal {
+            position: fixed;
+            inset: 0;
+            top: var(--layout-header-height); /* Thụt xuống dưới thanh menu */
+            z-index: 999990;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(2px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
         .modal.show { display: flex; animation: fadeIn 0.2s ease-out; }
         .modal-dialog { background: #ffffff; width: 440px; max-width: 90%; border: 1px solid var(--gray-200); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); border-radius: 6px; animation: slideUp 0.2s ease-out; overflow: hidden;}
         .modal-dialog.modal-sm { width: 320px; padding: 0; }
@@ -226,7 +245,17 @@
         .voucher-card.disabled-stack { background: #fafafa; }
 
         /* CSS MỚI CHO TOAST & CONFIRM (ĐỒNG BỘ 100% GIAO DIỆN PHẲNG TRANG CHA) */
-        .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); z-index: 10000; backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; }
+        .overlay {
+            position: fixed;
+            inset: 0;
+            top: var(--layout-header-height);
+            background: rgba(15, 23, 42, 0.4);
+            z-index: 999999;
+            backdrop-filter: blur(2px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
         .card { padding: 24px; width: 360px; background: #ffffff; border: 1px solid var(--gray-200); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
 
         #toastHost, .toast-container { position: fixed !important; top: 30px !important; right: 20px !important; z-index: 2147483647 !important; display: flex; flex-direction: column; gap: 12px; pointer-events: none; overflow: visible !important;}
@@ -446,154 +475,166 @@
     </div>
 </div>
 
-<div id="qtyModal" class="modal">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-header">
-            <span class="modal-title" id="qtyModalTitle">NHẬP SỐ LƯỢNG</span>
-            <button class="btn-close" onclick="PosApp.closeModal('qtyModal')"></button>
-        </div>
-        <div class="modal-body" style="padding: 24px;">
-            <p id="qtyModalDesc" style="font-size: 13px; color: var(--sub); margin-bottom: 20px; font-weight: 500; line-height: 1.5;"></p>
-            <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 20px;">
-                <button class="btn-icon" style="width: 40px; height: 40px; font-size: 20px; background: var(--gray-100);" onclick="document.getElementById('inpCustomQty').value = Math.max(1, parseInt(document.getElementById('inpCustomQty').value || 0) - 1)">-</button>
-                <input type="number" id="inpCustomQty" class="form-input" style="width: 100px; text-align: center; font-size: 22px; font-weight: 700; height: 40px; margin: 0 15px; border: 1px solid var(--border); color: var(--primary); border-radius: var(--border-radius);" value="1" onfocus="this.select()" onkeydown="if(event.key === 'Enter') PosApp.confirmCustomQty()">
-                <button class="btn-icon" style="width: 40px; height: 40px; font-size: 20px; background: var(--gray-100);" onclick="document.getElementById('inpCustomQty').value = parseInt(document.getElementById('inpCustomQty').value || 0) + 1">+</button>
+<div id="modalsContainer">
+    <div id="qtyModal" class="modal">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-header">
+                <span class="modal-title" id="qtyModalTitle">NHẬP SỐ LƯỢNG</span>
+                <button class="btn-close" onclick="PosApp.closeModal('qtyModal')"></button>
             </div>
-            <button class="btn btn-primary w-100" style="height: 40px !important; font-size: 12px;" id="btnConfirmQty" onclick="PosApp.confirmCustomQty()">XÁC NHẬN [ENTER]</button>
+            <div class="modal-body" style="padding: 24px;">
+                <p id="qtyModalDesc" style="font-size: 13px; color: var(--sub); margin-bottom: 20px; font-weight: 500; line-height: 1.5;"></p>
+                <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 20px;">
+                    <button class="btn-icon" style="width: 40px; height: 40px; font-size: 20px; background: var(--gray-100);" onclick="document.getElementById('inpCustomQty').value = Math.max(1, parseInt(document.getElementById('inpCustomQty').value || 0) - 1)">-</button>
+                    <input type="number" id="inpCustomQty" class="form-input" style="width: 100px; text-align: center; font-size: 22px; font-weight: 700; height: 40px; margin: 0 15px; border: 1px solid var(--gray-200); color: var(--primary); border-radius: var(--border-radius);" value="1" onfocus="this.select()" onkeydown="if(event.key === 'Enter') PosApp.confirmCustomQty()">
+                    <button class="btn-icon" style="width: 40px; height: 40px; font-size: 20px; background: var(--gray-100);" onclick="document.getElementById('inpCustomQty').value = parseInt(document.getElementById('inpCustomQty').value || 0) + 1">+</button>
+                </div>
+                <button class="btn btn-primary w-100" style="height: 40px !important; font-size: 12px;" id="btnConfirmQty" onclick="PosApp.confirmCustomQty()">XÁC NHẬN [ENTER]</button>
+            </div>
         </div>
     </div>
-</div>
 
-<div id="voucherModal" class="modal">
-    <div class="modal-dialog" style="width: 480px;">
-        <div class="modal-header">
-            <span class="modal-title"><i class="bi bi-ticket-perforated-fill" style="margin-right: 6px; color: var(--primary);"></i> CHỌN MÃ GIẢM GIÁ</span>
-            <button class="btn-close" onclick="PosApp.closeModal('voucherModal')"></button>
-        </div>
-        <div class="modal-body" style="padding: 20px; max-height: 550px; overflow-y: auto;" id="voucherList">
-            <div style="text-align: center; color: var(--sub); padding: 30px;">Đang tải danh sách mã...</div>
+    <div id="voucherModal" class="modal">
+        <div class="modal-dialog" style="width: 480px;">
+            <div class="modal-header">
+                <span class="modal-title"><i class="bi bi-ticket-perforated-fill" style="margin-right: 6px; color: var(--primary);"></i> CHỌN MÃ GIẢM GIÁ</span>
+                <button class="btn-close" onclick="PosApp.closeModal('voucherModal')"></button>
+            </div>
+            <div class="modal-body" style="padding: 20px; max-height: 550px; overflow-y: auto;" id="voucherList">
+                <div style="text-align: center; color: var(--sub); padding: 30px;">Đang tải danh sách mã...</div>
+            </div>
         </div>
     </div>
-</div>
 
-<div id="customerModal" class="modal">
-    <div class="modal-dialog" style="width:380px;">
-        <div class="modal-header">
-            <span class="modal-title"><i class="bi bi-person-lines-fill" style="margin-right: 6px;"></i> THÔNG TIN KHÁCH</span>
-            <button class="btn-close" onclick="PosApp.closeModal('customerModal')"></button>
-        </div>
-        <div class="modal-body" style="padding:20px;">
-            <nav class="tabs" style="margin-bottom:16px;">
-                <button class="tab active" onclick="PosApp.switchCustTab('search')" id="tabSearchBtn">TÌM KIẾM</button>
-                <button class="tab" onclick="PosApp.switchCustTab('create')" id="tabCreateBtn">THÊM MỚI</button>
-            </nav>
+    <div id="customerModal" class="modal">
+        <div class="modal-dialog" style="width:380px;">
+            <div class="modal-header">
+                <span class="modal-title"><i class="bi bi-person-lines-fill" style="margin-right: 6px;"></i> THÔNG TIN KHÁCH</span>
+                <button class="btn-close" onclick="PosApp.closeModal('customerModal')"></button>
+            </div>
+            <div class="modal-body" style="padding:20px;">
+                <nav class="tabs" style="margin-bottom:16px;">
+                    <button class="tab active" onclick="PosApp.switchCustTab('search')" id="tabSearchBtn">TÌM KIẾM</button>
+                    <button class="tab" onclick="PosApp.switchCustTab('create')" id="tabCreateBtn">THÊM MỚI</button>
+                </nav>
 
-            <div id="paneSearch" style="display:flex; flex-direction:column; height:240px;">
-                <div style="position:relative; margin-bottom:12px; flex-shrink:0;">
-                    <i class="bi bi-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--sub);"></i>
-                    <input type="text" placeholder="Nhập tên hoặc số điện thoại..."
-                           style="padding-left:36px; height:38px; font-size:13px; width:100%; border: 1px solid var(--gray-200); border-radius: var(--border-radius); outline: none;"
-                           oninput="PosApp.searchCustomer(this.value)">
+                <div id="paneSearch" style="display:flex; flex-direction:column; height:240px;">
+                    <div style="position:relative; margin-bottom:12px; flex-shrink:0;">
+                        <i class="bi bi-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--sub);"></i>
+                        <input type="text" placeholder="Nhập tên hoặc số điện thoại..."
+                               style="padding-left:36px; height:38px; font-size:13px; width:100%; border: 1px solid var(--gray-200); border-radius: var(--border-radius); outline: none;"
+                               oninput="PosApp.searchCustomer(this.value)">
+                    </div>
+                    <div id="customerSearchResults" style="flex:1; border:1px solid var(--gray-200); border-radius:var(--border-radius); overflow-y:auto;">
+                        <div style="padding:15px; color:var(--sub); font-size:12px; text-align:center;">Nhập tên hoặc SĐT để tìm kiếm...</div>
+                    </div>
                 </div>
-                <div id="customerSearchResults" style="flex:1; border:1px solid var(--gray-200); border-radius:var(--border-radius); overflow-y:auto;">
-                    <div style="padding:15px; color:var(--sub); font-size:12px; text-align:center;">Nhập tên hoặc SĐT để tìm kiếm...</div>
+
+                <div id="paneCreate" style="display:none; padding-top:10px;">
+                    <div style="margin-bottom: 16px;">
+                        <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--sub); margin-bottom: 6px; display: block;">Tên khách hàng *</label>
+                        <input type="text" id="newCustName" placeholder="Ví dụ: Nguyễn Văn A..." oninput="this.value = this.value.replace(/[^a-zA-Z0-9À-ỹ\s]/g, ''); if(this.value !== clean) { this.value = clean; }" style="width:100%; border: 1px solid var(--gray-200); border-radius: var(--border-radius); padding: 0 12px; height: 38px; font-size: 13px; outline: none;">
+                    </div>
+                    <div style="margin-bottom: 24px;">
+                        <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--sub); margin-bottom: 6px; display: block;">Số điện thoại *</label>
+                        <input type="text" id="newCustPhone" placeholder="Ví dụ: 0988123456..." style="width:100%; border: 1px solid var(--gray-200); border-radius: var(--border-radius); padding: 0 12px; height: 38px; font-size: 13px; outline: none;">
+                    </div>
+
+                    <button class="btn w-100" onclick="PosApp.createNewCustomer()" style="height: 40px !important; font-size: 12px;">
+                        <i class="bi bi-person-plus-fill" style="font-size: 14px;"></i> LƯU & CHỌN NGAY
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="payModal" class="modal">
+        <div class="modal-dialog" style="width: 480px;">
+            <div class="modal-header">
+                <span class="modal-title"><i class="bi bi-wallet2" style="margin-right: 6px; color: var(--primary);"></i> XÁC NHẬN THANH TOÁN</span>
+                <button class="btn-close" onclick="PosApp.closeModal('payModal')"></button>
+            </div>
+
+            <div class="modal-body" style="padding: 24px;">
+                <style>
+                    .pos-fieldset { border: 1px solid var(--gray-200); border-radius: var(--border-radius); padding: 10px 15px 12px; margin-bottom: 16px; position: relative; background: #ffffff;}
+                    .pos-legend { font-size: 10px; font-weight: 700; color: var(--sub); text-transform: uppercase; letter-spacing: 0.5px; padding: 0 6px; width: auto; float: none; margin-bottom: 0; border: none; }
+                    .pos-input-money { width: 100%; border: none; padding: 0; height: 36px; font-size: 24px; font-weight: 700; background: transparent; text-align: right; outline: none; font-family: inherit; color: var(--text-main);}
+                    .payment-tabs { display: flex; margin-bottom: 20px; border: 1px solid var(--gray-200); border-radius: var(--border-radius); overflow: hidden;}
+                    .payment-tab { flex: 1; padding: 12px; border: none; background: var(--gray-100); font-size: 12px; font-weight: 600; text-transform: uppercase; cursor: pointer; transition: all 0.2s; outline: none; color: var(--sub);}
+                    .payment-tab.active { background: var(--text-main); color: #ffffff; }
+                    .payment-option { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90px; border: 1px solid var(--gray-200); border-radius: var(--border-radius); cursor: pointer; background: #ffffff; position: relative; transition: 0.2s;}
+                    .payment-option.selected { border: 1px solid var(--primary) !important; background: #eff6ff; }
+                    .payment-option.selected::after { content: "\F26B"; font-family: "bootstrap-icons"; position: absolute; top: 6px; right: 6px; color: var(--primary); font-size: 16px; }
+                </style>
+
+                <div style="text-align: center; margin-bottom: 20px; background: var(--gray-100); padding: 15px; border: 1px dashed var(--gray-300); border-radius: var(--border-radius);">
+                    <div style="font-size: 11px; color: var(--sub); font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">TỔNG CẦN THANH TOÁN</div>
+                    <div id="modalTotal" style="font-size: 36px; font-weight: 700; color: var(--text-main);">0 ₫</div>
+                </div>
+
+                <div class="payment-tabs">
+                    <button class="payment-tab active" onclick="PosApp.switchPaymentMethod('cash', this)">Tiền mặt</button>
+                    <button class="payment-tab" onclick="PosApp.switchPaymentMethod('transfer', this)">Quét mã / C.Khoản</button>
+                </div>
+
+                <div style="min-height: 120px;">
+                    <div id="cash-section" style="display: block;">
+                        <fieldset class="pos-fieldset">
+                            <legend class="pos-legend">Tiền khách đưa</legend>
+                            <div style="display: flex; align-items: center;">
+                                <input type="text" class="pos-input-money" id="inpKhachDua" oninput="PosApp.calcChange()" placeholder="0">
+                                <span style="font-weight: 600; margin-left: 10px; font-size: 13px; color: var(--sub);">VNĐ</span>
+                            </div>
+                        </fieldset>
+
+                        <fieldset class="pos-fieldset" style="background: #fefce8; border-color: #fde047;">
+                            <legend class="pos-legend" style="color: #a16207;">Tiền thừa trả lại</legend>
+                            <div id="lblTienThua" style="text-align: right; font-size: 24px; font-weight: 700; color: var(--text-main); height: 36px; line-height: 36px; white-space: nowrap;">0&nbsp;₫</div>
+                        </fieldset>
+                    </div>
+
+                    <div id="transfer-section" style="display: none;">
+                        <div style="display: flex; gap: 10px; width: 100%; justify-content: space-between;">
+                            <div class="payment-option selected" data-method="MOMO" onclick="PosApp.selectApp(this)">
+                                <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-MoMo-Square.png" style="width:28px; height:28px; object-fit:contain; margin-bottom:8px;">
+                                <span style="font-size: 11px; font-weight: 600;">VÍ MOMO</span>
+                            </div>
+                            <div class="payment-option" data-method="VNPAY" onclick="PosApp.selectApp(this)">
+                                <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Icon-VNPAY-QR.png" style="width:28px; height:28px; object-fit:contain; margin-bottom:8px;">
+                                <span style="font-size: 11px; font-weight: 600;">VNPAY</span>
+                            </div>
+                            <div class="payment-option" data-method="CHUYEN_KHOAN" onclick="PosApp.selectApp(this)">
+                                <i class="bi bi-bank" style="font-size: 24px; color: var(--text-main); margin-bottom: 6px;"></i>
+                                <span style="font-size: 11px; font-weight: 600; text-align: center;">CHUYỂN KHOẢN</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div id="paneCreate" style="display:none; padding-top:10px;">
-                <div style="margin-bottom: 16px;">
-                    <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--sub); margin-bottom: 6px; display: block;">Tên khách hàng *</label>
-                    <input type="text" id="newCustName" placeholder="Ví dụ: Nguyễn Văn A..." oninput="this.value = this.value.replace(/[^a-zA-Z0-9À-ỹ\s]/g, ''); if(this.value !== clean) { this.value = clean; }" style="width:100%; border: 1px solid var(--gray-200); border-radius: var(--border-radius); padding: 0 12px; height: 38px; font-size: 13px; outline: none;">
-                </div>
-                <div style="margin-bottom: 24px;">
-                    <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--sub); margin-bottom: 6px; display: block;">Số điện thoại *</label>
-                    <input type="text" id="newCustPhone" placeholder="Ví dụ: 0988123456..." style="width:100%; border: 1px solid var(--gray-200); border-radius: var(--border-radius); padding: 0 12px; height: 38px; font-size: 13px; outline: none;">
-                </div>
-
-                <button class="btn w-100" onclick="PosApp.createNewCustomer()" style="height: 40px !important; font-size: 12px;">
-                    <i class="bi bi-person-plus-fill" style="font-size: 14px;"></i> LƯU & CHỌN NGAY
+            <div class="modal-footer">
+                <button class="btn btn-secondary" style="height: 40px !important; min-width: 100px;" onclick="PosApp.closeModal('payModal')">HỦY BỎ</button>
+                <button class="btn btn-primary" style="height: 40px !important; min-width: 180px; background: var(--text-main); border: none;" onclick="PosApp.finishOrder()">
+                    <i class="bi bi-printer-fill" style="font-size: 14px;"></i> XÁC NHẬN & IN HÓA ĐƠN
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<div id="payModal" class="modal">
-    <div class="modal-dialog" style="width: 480px;">
-        <div class="modal-header">
-            <span class="modal-title"><i class="bi bi-wallet2" style="margin-right: 6px; color: var(--primary);"></i> XÁC NHẬN THANH TOÁN</span>
-            <button class="btn-close" onclick="PosApp.closeModal('payModal')"></button>
-        </div>
-
-        <div class="modal-body" style="padding: 24px;">
-            <style>
-                .pos-fieldset { border: 1px solid var(--gray-200); border-radius: var(--border-radius); padding: 10px 15px 12px; margin-bottom: 16px; position: relative; background: #ffffff;}
-                .pos-legend { font-size: 10px; font-weight: 700; color: var(--sub); text-transform: uppercase; letter-spacing: 0.5px; padding: 0 6px; width: auto; float: none; margin-bottom: 0; border: none; }
-                .pos-input-money { width: 100%; border: none; padding: 0; height: 36px; font-size: 24px; font-weight: 700; background: transparent; text-align: right; outline: none; font-family: inherit; color: var(--text-main);}
-                .payment-tabs { display: flex; margin-bottom: 20px; border: 1px solid var(--gray-200); border-radius: var(--border-radius); overflow: hidden;}
-                .payment-tab { flex: 1; padding: 12px; border: none; background: var(--gray-100); font-size: 12px; font-weight: 600; text-transform: uppercase; cursor: pointer; transition: all 0.2s; outline: none; color: var(--sub);}
-                .payment-tab.active { background: var(--text-main); color: #ffffff; }
-                .payment-option { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90px; border: 1px solid var(--gray-200); border-radius: var(--border-radius); cursor: pointer; background: #ffffff; position: relative; transition: 0.2s;}
-                .payment-option.selected { border: 1px solid var(--primary) !important; background: #eff6ff; }
-                .payment-option.selected::after { content: "\F26B"; font-family: "bootstrap-icons"; position: absolute; top: 6px; right: 6px; color: var(--primary); font-size: 16px; }
-            </style>
-
-            <div style="text-align: center; margin-bottom: 20px; background: var(--gray-100); padding: 15px; border: 1px dashed var(--gray-300); border-radius: var(--border-radius);">
-                <div style="font-size: 11px; color: var(--sub); font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">TỔNG CẦN THANH TOÁN</div>
-                <div id="modalTotal" style="font-size: 36px; font-weight: 700; color: var(--text-main);">0 ₫</div>
-            </div>
-
-            <div class="payment-tabs">
-                <button class="payment-tab active" onclick="PosApp.switchPaymentMethod('cash', this)">Tiền mặt</button>
-                <button class="payment-tab" onclick="PosApp.switchPaymentMethod('transfer', this)">Quét mã / C.Khoản</button>
-            </div>
-
-            <div style="min-height: 120px;">
-                <div id="cash-section" style="display: block;">
-                    <fieldset class="pos-fieldset">
-                        <legend class="pos-legend">Tiền khách đưa</legend>
-                        <div style="display: flex; align-items: center;">
-                            <input type="text" class="pos-input-money" id="inpKhachDua" oninput="PosApp.calcChange()" placeholder="0">
-                            <span style="font-weight: 600; margin-left: 10px; font-size: 13px; color: var(--sub);">VNĐ</span>
-                        </div>
-                    </fieldset>
-
-                    <fieldset class="pos-fieldset" style="background: #fefce8; border-color: #fde047;">
-                        <legend class="pos-legend" style="color: #a16207;">Tiền thừa trả lại</legend>
-                        <div id="lblTienThua" style="text-align: right; font-size: 24px; font-weight: 700; color: var(--text-main); height: 36px; line-height: 36px; white-space: nowrap;">0&nbsp;₫</div>
-                    </fieldset>
-                </div>
-
-                <div id="transfer-section" style="display: none;">
-                    <div style="display: flex; gap: 10px; width: 100%; justify-content: space-between;">
-                        <div class="payment-option selected" data-method="MOMO" onclick="PosApp.selectApp(this)">
-                            <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-MoMo-Square.png" style="width:28px; height:28px; object-fit:contain; margin-bottom:8px;">
-                            <span style="font-size: 11px; font-weight: 600;">VÍ MOMO</span>
-                        </div>
-                        <div class="payment-option" data-method="VNPAY" onclick="PosApp.selectApp(this)">
-                            <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Icon-VNPAY-QR.png" style="width:28px; height:28px; object-fit:contain; margin-bottom:8px;">
-                            <span style="font-size: 11px; font-weight: 600;">VNPAY</span>
-                        </div>
-                        <div class="payment-option" data-method="CHUYEN_KHOAN" onclick="PosApp.selectApp(this)">
-                            <i class="bi bi-bank" style="font-size: 24px; color: var(--text-main); margin-bottom: 6px;"></i>
-                            <span style="font-size: 11px; font-weight: 600; text-align: center;">CHUYỂN KHOẢN</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal-footer">
-            <button class="btn btn-secondary" style="height: 40px !important; min-width: 100px;" onclick="PosApp.closeModal('payModal')">HỦY BỎ</button>
-            <button class="btn btn-primary" style="height: 40px !important; min-width: 180px; background: var(--text-main); border: none;" onclick="PosApp.finishOrder()">
-                <i class="bi bi-printer-fill" style="font-size: 14px;"></i> XÁC NHẬN & IN HÓA ĐƠN
-            </button>
-        </div>
-    </div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    /* ==========================================================================
+       ĐẨY CÁC MODAL RA NGOÀI BODY ĐỂ KHÔNG BỊ TRÀN HAY CHE KHUẤT BỞI LAYOUT
+       ========================================================================== */
+    document.addEventListener("DOMContentLoaded", function() {
+        const modalsContainer = document.getElementById('modalsContainer');
+        if (modalsContainer && document.body) {
+            document.body.appendChild(modalsContainer);
+        }
+    });
+
     /* =========================================
        HÀM TOAST THÔNG BÁO (ĐỒNG BỘ TRANG CHA)
        ========================================= */
@@ -637,7 +678,9 @@
             overlay = document.createElement('div');
             overlay.id = 'genericConfirmOverlay';
             overlay.className = 'overlay';
-            overlay.style.display = 'none';
+            // Cấu hình lại vị trí hiển thị để không bị đè menu (Đồng bộ CSS vàng)
+            overlay.style.cssText = 'position: fixed; top: var(--layout-header-height); left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.4); z-index: 999999; backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center;';
+
             overlay.innerHTML = `
                 <div class="card">
                     <h4 id="genericConfirmTitle" style="margin-bottom:12px; font-size:15px; font-weight: 700; display: flex; align-items: center; gap: 8px;"></h4>
@@ -1698,7 +1741,7 @@
 
             const overlay = document.createElement('div');
             overlay.id = 'qrOverlayWindow';
-            overlay.style.cssText = 'position:fixed; inset:0; background:rgba(15,23,42,0.5); z-index:10000; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(2px);';
+            overlay.style.cssText = 'position:fixed; top: var(--layout-header-height); inset:0; background:rgba(15,23,42,0.5); z-index:10000; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(2px);';
             overlay.innerHTML = `
                 <div style="background:#ffffff; width:440px; max-width:90%; border-radius:var(--border-radius); padding:24px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.1); position: relative;">
                     <button style="position:absolute; top:12px; right:12px; background:none; border:none; font-size:24px; cursor:pointer; color:var(--sub); width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:var(--border-radius); transition:0.2s;" onmouseover="this.style.background='var(--gray-200)'; this.style.color='var(--text-main)'" onmouseout="this.style.background='none'; this.style.color='var(--sub)'" onclick="this.parentElement.parentElement.remove()">&times;</button>
@@ -2022,13 +2065,13 @@
             try{
                 const res = await fetch(`/api/pos/customers/search?q=${val}`);
                 const data = await res.json();
-                if (data.length === 0) { box.innerHTML = '<div style="padding:15px; color:var(--sub); font-size:12px; font-weight:500; text-align:center;">Không tìm thấy</div>'; return; }
+                if (data.length === 0) { box.innerHTML = '<div style="padding:15px; color:var(--sub); font-size:12px; font-weight:500; text-align:center;">Không tìm thấy khách hàng</div>'; return; }
                 box.innerHTML = data.map(c => `
                     <div style="padding:12px 15px; border-bottom:1px solid var(--gray-200); cursor:pointer; transition: 0.2s;"
                          onmouseover="this.style.background='var(--gray-100)'" onmouseout="this.style.background=''"
                          onclick="PosApp.selectCustomerInline('${c.hoTen}', '${c.soDienThoai}', ${c.id})">
-                        <div style="font-weight:700; font-size:13px; color:var(--text-main); margin-bottom: 2px;">${c.hoTen.toUpperCase()}</div>
-                        <div style="font-size:12px; color:var(--sub); font-weight:500;">${c.soDienThoai}</div>
+                        <div style="font-weight:700; font-size: 13px; color: var(--text-main); margin-bottom: 2px;">${c.hoTen.toUpperCase()}</div>
+                        <div style="font-size:12px; color:var(--sub); font-weight: 500;">${c.soDienThoai}</div>
                     </div>`).join('');
             }catch(e){}
         },

@@ -13,6 +13,9 @@
            ========================================================================== */
         * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
         :root {
+            /* TÙY CHỈNH ĐỘ CAO THANH MENU TRÊN CÙNG CỦA BẠN (ĐỂ DRAWER VỪA KHÍT) */
+            --layout-header-height: 70px;
+
             --bg: #f8fafc;
             --panel: #ffffff;
             --gray-100: #f8fafc;
@@ -89,42 +92,58 @@
         .page-number.active { background: var(--primary); color: #ffffff; border-color: var(--primary);}
         .page-number:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        /* Drawer */
-        /* ĐỔI TÊN CLASS THÀNH .km-overlay ĐỂ CHỐNG XUNG ĐỘT HỆ THỐNG */
-        .km-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); z-index: 999; display: none; backdrop-filter: blur(2px);}
+        /* ==========================================================================
+           CẤU HÌNH DRAWER NẰM GỌN TRONG LAYOUT, CÁCH HEADER 1 KHOẢNG
+           ========================================================================== */
+        .km-overlay {
+            position: fixed;
+            top: var(--layout-header-height);
+            left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.4);
+            z-index: 999990;
+            display: none;
+            backdrop-filter: blur(2px);
+        }
         .km-overlay.show { display: block; }
         .km-overlay:not(.show) { display: none !important; pointer-events: none !important; }
 
-        .drawer { position: fixed; top: 0; right: -850px; width: 850px; height: 100vh; background: #ffffff; border-left: 1px solid var(--gray-200); z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -4px 0 24px rgba(0, 0, 0, 0.08); }
+        .drawer {
+            position: fixed;
+            top: var(--layout-header-height);
+            bottom: 0;
+            right: -100%;
+            width: 100%;
+            max-width: 850px;
+            height: calc(100vh - var(--layout-header-height));
+            max-height: calc(100vh - var(--layout-header-height));
+            background: #ffffff;
+            border-left: 1px solid var(--gray-200);
+            z-index: 999991;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: -4px 0 24px rgba(0, 0, 0, 0.08);
+        }
         .drawer.show { right: 0; }
-        .drawer-header { padding: 16px 24px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; background: var(--gray-100);}
-        .drawer-title { font-size: 14px; font-weight: 700; text-transform: uppercase; margin: 0; color: var(--text-main);}
+
+        .drawer-header { padding: 16px 24px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; background: var(--gray-100); flex-wrap: wrap; gap: 12px;}
+        .drawer-title { font-size: 14px; font-weight: 700; text-transform: uppercase; margin: 0; color: var(--text-main); flex: 1; min-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px;}
+
         .drawer-body { flex: 1; padding: 24px 30px; overflow-y: auto; background: var(--panel);}
         .drawer-footer { padding: 16px 30px; border-top: 1px solid var(--gray-200); display: flex; gap: 10px; background: var(--gray-100);}
 
-        /* Form & Switch */
+        /* Form Elements */
         .form-group { margin-bottom: 18px; }
         .form-label { font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 6px; display: block; color: var(--sub);}
         .form-input { width: 100%; padding: 0 12px; font-size: 13px; border: 1px solid var(--gray-200); outline: none; height: 38px; border-radius: var(--border-radius); font-family: inherit; color: var(--text-main); transition: 0.2s;}
         .form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1); }
         .form-input:disabled { background: var(--gray-100); color: var(--sub); cursor: not-allowed; border-color: var(--gray-200); }
 
-        .switch-wrapper { display: flex; align-items: center; gap: 10px; }
-        .switch-square { position: relative; display: inline-block; width: 44px; height: 24px; }
-        .switch-square input { opacity: 0; width: 0; height: 0; }
-        .slider-square { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--gray-300); transition: .3s; border-radius: 4px; }
-        .slider-square:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 2px; }
-        input:checked + .slider-square { background-color: var(--primary); }
-        input:checked + .slider-square:before { transform: translateX(20px); }
-
-        /* Quick Switch (Table) */
-        .switch-sm { position: relative; display: inline-block; width: 34px; height: 18px; }
-        .switch-sm input { opacity: 0; width: 0; height: 0; }
-        .slider-sm { position: absolute; cursor: pointer; inset: 0; background-color: var(--gray-300); transition: .3s; border-radius: 20px; }
-        .slider-sm:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%; }
-        input:checked + .slider-sm { background-color: var(--primary); }
-        input:checked + .slider-sm:before { transform: translateX(16px); }
-        .switch-sm.loading { opacity: 0.5; pointer-events: none; }
+        /* Form Checkbox Trạng Thái (Đồng bộ) */
+        .v-checkbox { accent-color: var(--primary); cursor: pointer; }
+        .status-checkbox-group { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; width: max-content; }
+        .status-checkbox-group input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+        .status-checkbox-text { font-size: 13px; font-weight: 500; color: var(--text-main); }
 
         /* Product Select Box */
         .product-select-box { border: 1px solid var(--gray-200); border-radius: var(--border-radius); height: 350px; overflow-y: auto; background: #ffffff; margin-top: 5px;}
@@ -153,7 +172,6 @@
 
         /* ==========================================================================
            CSS BỔ SUNG CHO TOAST VÀ CONFIRM (ĐẢM BẢO LUÔN HIỂN THỊ TRÊN CÙNG)
-           Y HỆT NHƯ TRANG PRODUCTS.HTML
            ========================================================================== */
         #genericConfirmOverlay, #toastHost, .toast-container { z-index: 2147483647 !important; }
 
@@ -175,9 +193,6 @@
         @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes slideOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
 
-        .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; }
-        .modal-card { padding: 24px; width: 360px; background: #ffffff; border: 1px solid var(--gray-200); border-radius: var(--border-radius); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-
         /* ==========================================================================
            RESPONSIVE MOBILE CHO TRANG KHUYẾN MÃI & VOUCHER
            ========================================================================== */
@@ -187,7 +202,7 @@
             .search-wrapper { flex-direction: column; align-items: stretch; }
             .filter-select { width: 100%; }
             .btn-reset { width: 100% !important; margin-top: 5px; }
-            .drawer { width: 100% !important; right: -100% !important; }
+            .drawer { width: 100% !important; right: -100% !important; max-width: 100% !important;}
             .drawer.show { right: 0 !important; }
             .drawer-body > div[style*="display: flex; gap: 15px"],
             #voucherFields > div[style*="display: flex"] { flex-direction: column !important; gap: 12px !important; }
@@ -206,12 +221,8 @@
 <div class="container" id="promotionContainer">
     <div class="actions-bar">
         <nav class="tabs">
-            <button class="tab active" data-tab="voucher" onclick="window.PromotionApp.switchTab('voucher')" id="tabVoucher">
-                <i class="bi bi-ticket-perforated-fill"></i> MÃ GIẢM GIÁ (Voucher)
-            </button>
-            <button class="tab" data-tab="sale" onclick="window.PromotionApp.switchTab('sale')" id="tabSale">
-                <i class="bi bi-tags-fill"></i> ĐỢT KHUYẾN MÃI (Sale)
-            </button>
+            <button class="tab active" data-tab="voucher" onclick="window.PromotionApp.switchTab('voucher')" id="tabVoucher">MÃ GIẢM GIÁ (Voucher)</button>
+            <button class="tab" data-tab="sale" onclick="window.PromotionApp.switchTab('sale')" id="tabSale">ĐỢT KHUYẾN MÃI (Sale)</button>
         </nav>
         <button class="btn btn-primary" id="btnAdd" onclick="window.PromotionApp.openDrawer('create')">
             <i class="bi bi-plus-lg"></i> THÊM MỚI
@@ -247,121 +258,128 @@
     <div id="paginationContainer" class="pagination-wrapper"></div>
 </div>
 
-<div class="km-overlay" id="overlay" onclick="window.PromotionApp.closeDrawer()"></div>
+<div id="drawersContainer">
+    <div class="km-overlay" id="overlay" onclick="window.PromotionApp.closeDrawer()"></div>
 
-<aside class="drawer" id="drawer">
-    <div class="drawer-header">
-        <h3 class="drawer-title" id="drawerTitle">THÊM MỚI</h3>
-        <button class="btn-icon" onclick="window.PromotionApp.closeDrawer()" style="border:none; box-shadow:none;"><i class="bi bi-x-lg"></i></button>
-    </div>
-    <div class="drawer-body">
-        <h5 style="font-weight:700; margin-bottom:15px; font-size:13px; color:var(--text-main);">1. THÔNG TIN CHUNG</h5>
-
-        <div class="form-group">
-            <label class="form-label" id="lblMa">Mã chương trình <span style="font-weight:500; color:var(--sub); text-transform:none;">(Tự động sinh nếu để trống)</span></label>
-            <input id="kmMa" class="form-input" maxlength="20" placeholder="VD: SALE50..." oninput="this.value = this.value.toUpperCase().replace(/\s/g, '')">
+    <aside class="drawer" id="drawer">
+        <div class="drawer-header">
+            <h3 class="drawer-title" id="drawerTitle">THÊM MỚI</h3>
+            <button class="btn-icon" onclick="window.PromotionApp.closeDrawer()" style="border:none; box-shadow:none; flex-shrink: 0;"><i class="bi bi-x-lg"></i></button>
         </div>
+        <div class="drawer-body">
+            <h5 style="font-weight:700; margin-bottom:15px; font-size:13px; color:var(--text-main);">1. THÔNG TIN CHUNG</h5>
 
-        <div class="form-group">
-            <label class="form-label">Tên hiển thị <span style="color:#ef4444">*</span></label>
-            <input id="kmTen" class="form-input" placeholder="Nhập tên chương trình/voucher...">
-        </div>
-
-        <div style="display: flex; gap: 15px;">
-            <div class="form-group" style="flex: 1;">
-                <label class="form-label">Loại giảm</label>
-                <select id="kmLoai" class="form-input" style="cursor: pointer;" onchange="window.PromotionApp.handleTypeChange()"></select>
+            <div class="form-group">
+                <label class="form-label" id="lblMa">Mã chương trình <span style="font-weight:500; color:var(--sub); text-transform:none;">(Tự động sinh nếu để trống)</span></label>
+                <input id="kmMa" class="form-input" maxlength="20" placeholder="VD: SALE50..." oninput="this.value = this.value.toUpperCase().replace(/\s/g, '')">
             </div>
-            <div class="form-group" style="flex: 1;">
-                <label class="form-label">Giá trị giảm <span style="color:#ef4444">*</span></label>
-                <input id="kmGiaTri" class="form-input" placeholder="VD: 10" oninput="window.PromotionApp.formatMoneyInput(this)">
-            </div>
-        </div>
 
-        <div id="voucherFields" style="display: none;">
-            <div class="form-group" id="groupMaxGiam" style="display: none;">
-                <label class="form-label">Giảm tối đa (VND) <span style="color:#ef4444">*</span></label>
-                <input id="vGiaTriToiDa" class="form-input" placeholder="VD: 100,000" oninput="window.PromotionApp.formatMoneyInput(this)">
+            <div class="form-group">
+                <label class="form-label">Tên hiển thị <span style="color:#ef4444">*</span></label>
+                <input id="kmTen" class="form-input" placeholder="Nhập tên chương trình/voucher...">
             </div>
 
             <div style="display: flex; gap: 15px;">
                 <div class="form-group" style="flex: 1;">
-                    <label class="form-label">Đơn tối thiểu <span style="color:#ef4444">*</span></label>
-                    <input id="vDieuKien" class="form-input" placeholder="VD: 200,000" oninput="window.PromotionApp.formatMoneyInput(this)">
+                    <label class="form-label">Loại giảm</label>
+                    <select id="kmLoai" class="form-input" style="cursor: pointer;" onchange="window.PromotionApp.handleTypeChange()"></select>
                 </div>
-                <div class="form-group" style="flex: 1; text-align: center">
-                    <label class="form-label">Số lượng phát hành <span style="color:#ef4444">*</span></label>
-                    <input id="vSoLuong" type="number" class="form-input" placeholder="VD: 100">
+                <div class="form-group" style="flex: 1;">
+                    <label class="form-label">Giá trị giảm <span style="color:#ef4444">*</span></label>
+                    <input id="kmGiaTri" class="form-input" placeholder="VD: 10" oninput="window.PromotionApp.formatMoneyInput(this)">
                 </div>
             </div>
 
-            <div class="form-group" style="margin-top: 20px; border-top: 1px dashed var(--gray-300); padding-top: 15px;">
-                <div class="switch-wrapper">
-                    <label class="switch-square">
-                        <input type="checkbox" id="kmCongDon" checked>
-                        <span class="slider-square"></span>
-                    </label>
-                    <span style="font-size: 13px; font-weight: 600;">Áp dụng chung với SP đang Sale</span>
+            <div id="voucherFields" style="display: none;">
+                <div class="form-group" id="groupMaxGiam" style="display: none;">
+                    <label class="form-label">Giảm tối đa (VND) <span style="color:#ef4444">*</span></label>
+                    <input id="vGiaTriToiDa" class="form-input" placeholder="VD: 100,000" oninput="window.PromotionApp.formatMoneyInput(this)">
                 </div>
-                <div style="margin-top:12px; font-size:12px; color:#d97706; background:#fefce8; padding:12px; border-radius:var(--border-radius); border:1px solid #fde047;">
-                    <i class="bi bi-info-circle-fill"></i> Tắt tùy chọn này nếu bạn muốn <b>Voucher chỉ áp dụng giảm thêm cho các sản phẩm Nguyên giá</b> (Tránh khách hàng lách luật giảm giá kép làm lỗ đơn hàng).
-                </div>
-            </div>
-        </div>
 
-        <div style="display: flex; gap: 15px; margin-top: 15px;">
-            <div class="form-group" style="flex: 1;">
-                <label class="form-label">Ngày bắt đầu <span style="color:#ef4444">*</span></label>
-                <input id="kmNgayBatDau" type="datetime-local" class="form-input">
-            </div>
-            <div class="form-group" style="flex: 1;">
-                <label class="form-label">Ngày kết thúc <span style="color:#ef4444">*</span></label>
-                <input id="kmNgayKetThuc" type="datetime-local" class="form-input">
-            </div>
-        </div>
-
-        <div class="form-group" style="margin-top: 10px;">
-            <div class="switch-wrapper">
-                <label class="switch-square">
-                    <input type="checkbox" id="kmTrangThai" checked>
-                    <span class="slider-square"></span>
-                </label>
-                <span style="font-size: 13px; font-weight: 600;">Kích hoạt kinh doanh</span>
-            </div>
-        </div>
-
-        <div id="saleFields">
-            <h5 style="font-weight:700; margin: 25px 0 15px 0; font-size:13px; color:var(--text-main);">2. CHỌN SẢN PHẨM / SKU ÁP DỤNG</h5>
-            <div class="form-group">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <div class="search-box" style="width: 60%;">
-                        <i class="bi bi-search"></i>
-                        <input type="text" id="productSearchDrawer" class="form-input" placeholder="Tìm tên hoặc mã SP/SKU..." style="padding-left: 32px;" oninput="window.PromotionApp.filterProducts(this.value)">
+                <div style="display: flex; gap: 15px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Đơn tối thiểu <span style="color:#ef4444">*</span></label>
+                        <input id="vDieuKien" class="form-input" placeholder="VD: 200,000" oninput="window.PromotionApp.formatMoneyInput(this)">
                     </div>
-                    <span style="color:var(--primary); font-size:12px; font-weight:600;" id="selectedCount">(Đã chọn: 0 SP)</span>
+                    <div class="form-group" style="flex: 1; text-align: center">
+                        <label class="form-label">Số lượng phát hành <span style="color:#ef4444">*</span></label>
+                        <input id="vSoLuong" type="number" class="form-input" placeholder="VD: 100">
+                    </div>
                 </div>
-                <div class="product-select-box">
-                    <table class="product-table">
-                        <thead>
-                        <tr>
-                            <th style="width:40px; text-align: center;"><input type="checkbox" id="checkAll" style="width:14px; height:14px; cursor:pointer;"></th>
-                            <th>MÃ SP / SKU</th>
-                            <th>TÊN SẢN PHẨM / PHÂN LOẠI</th>
-                        </tr>
-                        </thead>
-                        <tbody id="productTableBody"></tbody>
-                    </table>
+
+                <div class="form-group" style="margin-top: 20px; border-top: 1px dashed var(--gray-300); padding-top: 15px;">
+                    <label class="status-checkbox-group">
+                        <input type="checkbox" id="kmCongDon" checked>
+                        <span class="status-checkbox-text" style="font-weight: 600;">Áp dụng chung với SP đang Sale</span>
+                    </label>
+                    <div style="margin-top:12px; font-size:12px; color:#d97706; background:#fefce8; padding:12px; border-radius:var(--border-radius); border:1px solid #fde047;">
+                        <i class="bi bi-info-circle-fill"></i> Tắt tùy chọn này nếu bạn muốn <b>Voucher chỉ áp dụng giảm thêm cho các sản phẩm Nguyên giá</b> (Tránh khách hàng lách luật giảm giá kép làm lỗ đơn hàng).
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 15px; margin-top: 15px;">
+                <div class="form-group" style="flex: 1;">
+                    <label class="form-label">Ngày bắt đầu <span style="color:#ef4444">*</span></label>
+                    <input id="kmNgayBatDau" type="datetime-local" class="form-input">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label class="form-label">Ngày kết thúc <span style="color:#ef4444">*</span></label>
+                    <input id="kmNgayKetThuc" type="datetime-local" class="form-input">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 10px;">
+                <label class="status-checkbox-group">
+                    <input type="checkbox" id="kmTrangThai" checked>
+                    <span class="status-checkbox-text" style="font-weight: 600;">Kích hoạt kinh doanh</span>
+                </label>
+            </div>
+
+            <div id="saleFields">
+                <h5 style="font-weight:700; margin: 25px 0 15px 0; font-size:13px; color:var(--text-main);">2. CHỌN SẢN PHẨM / SKU ÁP DỤNG</h5>
+                <div class="form-group">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <div class="search-box" style="width: 60%;">
+                            <i class="bi bi-search"></i>
+                            <input type="text" id="productSearchDrawer" class="form-input" placeholder="Tìm tên hoặc mã SP/SKU..." style="padding-left: 32px;" oninput="window.PromotionApp.filterProducts(this.value)">
+                        </div>
+                        <span style="color:var(--primary); font-size:12px; font-weight:600;" id="selectedCount">(Đã chọn: 0 SP)</span>
+                    </div>
+                    <div class="product-select-box">
+                        <table class="product-table">
+                            <thead>
+                            <tr>
+                                <th style="width:40px; text-align: center;"><input type="checkbox" id="checkAll" class="v-checkbox" style="width:14px; height:14px; cursor:pointer;"></th>
+                                <th>MÃ SP / SKU</th>
+                                <th>TÊN SẢN PHẨM / PHÂN LOẠI</th>
+                            </tr>
+                            </thead>
+                            <tbody id="productTableBody"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="drawer-footer">
-        <button class="btn btn-secondary" id="btnClose" onclick="window.PromotionApp.closeDrawer()" style="flex: 1;">THOÁT</button>
-        <button class="btn btn-primary" id="btnSave" onclick="window.PromotionApp.saveItem()" style="flex: 1;">LƯU THIẾT LẬP</button>
-    </div>
-</aside>
+        <div class="drawer-footer">
+            <button class="btn btn-secondary" id="btnClose" onclick="window.PromotionApp.closeDrawer()" style="flex: 1;">THOÁT</button>
+            <button class="btn btn-primary" id="btnSave" onclick="window.PromotionApp.saveItem()" style="flex: 1;">LƯU THIẾT LẬP</button>
+        </div>
+    </aside>
+</div>
 
 <script>
+    /* ==========================================================================
+       GIẢI PHÁP ĐẨY TẤT CẢ DRAWER VÀ OVERLAY RA NGOÀI BODY ĐỂ TRÁNH BỊ LAYOUT CHE
+       ========================================================================== */
+    document.addEventListener("DOMContentLoaded", function() {
+        const drawersContainer = document.getElementById('drawersContainer');
+        if (drawersContainer && document.body) {
+            // Chuyển toàn bộ thẻ div chứa các drawer ra nằm trực tiếp dưới <body>
+            document.body.appendChild(drawersContainer);
+        }
+    });
+
     window.PromotionApp = {
         initialized: false,
         state: {
@@ -914,7 +932,7 @@
             data.forEach(p => {
                 const isProdChecked = this.state.selectedProductIds.includes(p.id);
                 html += `<tr class="prod-row">
-                    <td style="text-align:center;"><input type="checkbox" class="product-check" style="width:14px; height:14px; cursor:pointer;" value="${p.id}" ${isProdChecked?'checked':''} onchange="window.PromotionApp.toggleSelection(${p.id}, this.checked, 'PRODUCT')"></td>
+                    <td style="text-align:center;"><input type="checkbox" class="product-check v-checkbox" style="width:14px; height:14px; cursor:pointer;" value="${p.id}" ${isProdChecked?'checked':''} onchange="window.PromotionApp.toggleSelection(${p.id}, this.checked, 'PRODUCT')"></td>
                     <td style="font-weight:700; color:var(--text-main);">${p.ma}</td>
                     <td style="font-weight:600;">${p.ten}</td>
                 </tr>`;
@@ -927,7 +945,7 @@
                         const actuallyChecked = isProdChecked || isSkuChecked ? 'checked' : '';
 
                         html += `<tr class="sku-row">
-                            <td style="text-align:center;"><input type="checkbox" class="sku-check" style="width:12px; height:12px; cursor:pointer;" value="${sku.id}" ${actuallyChecked} ${disabledState} onchange="window.PromotionApp.toggleSelection(${sku.id}, this.checked, 'SKU')"></td>
+                            <td style="text-align:center;"><input type="checkbox" class="sku-check v-checkbox" style="width:12px; height:12px; cursor:pointer;" value="${sku.id}" ${actuallyChecked} ${disabledState} onchange="window.PromotionApp.toggleSelection(${sku.id}, this.checked, 'SKU')"></td>
                             <td style="padding-left: 25px; font-size: 12px; color: var(--sub);">↳ ${sku.sku}</td>
                             <td style="font-size: 12px; color: var(--sub);">Phân loại: <span style="font-weight:500; color:var(--text-main);">${sku.ten}</span></td>
                         </tr>`;

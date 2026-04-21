@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hồ Sơ Của Tôi - BeeMate</title>
+    <title>Hồ Sơ Của Tôi</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
@@ -105,12 +105,12 @@
         }
         #profile-page .toggle-pw-btn:hover { color: var(--text-main); }
 
-        /* ── Buttons ── */
+        /* ── Buttons (Đồng bộ chuẩn 36px) ── */
         #profile-page .btn {
-            font-size: 12px; font-weight: 600; text-transform: uppercase; height: 38px !important;
-            padding: 0 20px !important; background: var(--text-main); color: #ffffff; border: 1px solid transparent;
+            font-size: 12px; font-weight: 600; text-transform: uppercase; height: 36px !important;
+            padding: 0 16px !important; background: var(--text-main); color: #ffffff; border: 1px solid transparent;
             cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
-            gap: 8px; border-radius: var(--border-radius); transition: all 0.2s ease; letter-spacing: 0.5px;
+            gap: 6px; border-radius: var(--border-radius); transition: all 0.2s ease; letter-spacing: 0.5px;
         }
         #profile-page .btn:hover { background: #1e293b; }
         #profile-page .btn-primary { background: var(--primary); color: #ffffff; }
@@ -142,11 +142,10 @@
         .otp-code-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1); }
 
         /* ==========================================================================
-           CSS BỔ SUNG CHO TOAST VÀ CONFIRM (CHUẨN 100% Y HỆT TRANG KHÁCH HÀNG)
+           CSS BỔ SUNG CHO TOAST VÀ CONFIRM (CHUẨN 100% Y HỆT TRANG KHÁC)
            ========================================================================== */
         #genericConfirmOverlay, #toastHost, .toast-container { z-index: 2147483647 !important; }
 
-        /* LẦN NÀY LÀ TOP: 30PX CHUẨN XÁC, KHÔNG PHẢI 80PX NHƯ LÚC NÃY NỮA */
         #toastHost, .toast-container { position: fixed !important; top: 30px !important; right: 20px !important; display: flex; flex-direction: column; gap: 12px; pointer-events: none; overflow: visible !important;}
 
         .custom-toast { display: flex; align-items: center; background: #ffffff; padding: 12px 16px; border-radius: var(--border-radius); box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 280px; max-width: 380px; border: 1px solid var(--gray-200); border-left: 4px solid var(--primary); animation: slideInRight 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; pointer-events: auto;}
@@ -164,9 +163,6 @@
         .toast-close:hover { color: var(--text-main); }
         @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes slideOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
-
-        .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; }
-        .modal-card { padding: 24px; width: 360px; background: #ffffff; border: 1px solid var(--gray-200); border-radius: var(--border-radius); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
 
         /* ==========================================================================
            RESPONSIVE MOBILE CHO TRANG CÁ NHÂN
@@ -191,6 +187,7 @@
 
             /* Điều chỉnh Modal OTP */
             .modal-otp-box { padding: 24px !important; }
+            .custom-toast { min-width: 100%; max-width: 100%; }
         }
     </style>
 </head>
@@ -293,7 +290,7 @@
                     </div>
                 </div>
 
-                <button class="btn" id="btnSavePassword" onclick="ProfileApp.changePassword()" style="width:100%;">CẬP NHẬT MẬT KHẨU</button>
+                <button class="btn btn-primary" id="btnSavePassword" onclick="ProfileApp.changePassword()" style="width:100%;">CẬP NHẬT MẬT KHẨU</button>
             </div>
         </div>
     </div>
@@ -314,18 +311,24 @@
 </div>
 
 <script>
-    // --- MAIN APP ---
+    /* ==========================================================================
+       ĐẨY MODAL OTP RA NGOÀI BODY ĐỂ KHÔNG BỊ TRÀN HAY CHE KHUẤT BỞI LAYOUT
+       ========================================================================== */
+    (function() {
+        const otpModal = document.getElementById('otpModal');
+        if (otpModal && document.body) {
+            document.body.appendChild(otpModal);
+        }
+    })();
+
     // KHÔNG CÓ BẤT KỲ HTML HAY JS NÀO TẠO TOAST TRONG FILE NÀY NỮA, SẠCH 100% !!
 
     window.ProfileApp = {
         data: null,
+        initialized: false,
 
         init: async function() {
-            // Đưa OTP Modal ra thẳng <body> để chống bị CSS layout giam cầm
-            const otpModal = document.getElementById('otpModal');
-            if (otpModal && otpModal.parentElement !== document.body) {
-                document.body.appendChild(otpModal);
-            }
+            if (this.initialized) return;
 
             if (typeof window.showLoading === 'function') window.showLoading();
             try {
@@ -333,6 +336,7 @@
                 if (!res.ok) throw new Error("Chưa đăng nhập");
                 this.data = await res.json();
                 this.render();
+                this.initialized = true;
             } catch (err) {
                 console.error(err);
                 if (typeof window.toast === 'function') window.toast("Không thể tải thông tin hồ sơ", "error");
@@ -647,9 +651,26 @@
         }
     };
 
-    setTimeout(() => {
-        ProfileApp.init();
-    }, 50);
+    /* ==========================================================================
+       GIẢI PHÁP KHỞI TẠO BÁM ĐUỔI (FIX 100% LỖI KHÔNG TẢI ĐƯỢC JS QUA ROUTER)
+       ========================================================================== */
+    let initAttemptsProfile = 0;
+
+    function bootProfileApp() {
+        if (window.ProfileApp && window.ProfileApp.initialized) return;
+
+        if (document.getElementById('profile-page')) {
+            window.ProfileApp.init();
+        }
+        else if (initAttemptsProfile < 40) {
+            initAttemptsProfile++;
+            setTimeout(bootProfileApp, 50);
+        }
+    }
+
+    bootProfileApp();
+    document.addEventListener("DOMContentLoaded", bootProfileApp);
+
 </script>
 </body>
 </html>
