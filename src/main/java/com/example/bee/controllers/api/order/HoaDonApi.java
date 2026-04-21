@@ -214,7 +214,15 @@ public class HoaDonApi {
                 sdtNhan = hd.getKhachHang().getSoDienThoai();
             }
             response.put("sdtKhachHang", sdtNhan);
-            response.put("email", hd.getKhachHang() != null ? hd.getKhachHang().getEmail() : "");
+
+            // FIX EMAIL LẤY TỪ THÔNG TIN GIAO HÀNG
+            String emailNhan = "";
+            if (hd.getThongTinGiaoHang() != null && hd.getThongTinGiaoHang().getEmailNhan() != null && !hd.getThongTinGiaoHang().getEmailNhan().isEmpty()) {
+                emailNhan = hd.getThongTinGiaoHang().getEmailNhan();
+            } else if (hd.getKhachHang() != null && hd.getKhachHang().getEmail() != null) {
+                emailNhan = hd.getKhachHang().getEmail();
+            }
+            response.put("email", emailNhan);
 
             String rawGhiChu = hd.getGhiChu() != null ? hd.getGhiChu() : "";
             if (rawGhiChu.contains("[BUY_NOW]")) rawGhiChu = rawGhiChu.replace("[BUY_NOW]", "").trim();
@@ -581,6 +589,7 @@ public class HoaDonApi {
             ThongTinGiaoHang thongTin = ThongTinGiaoHang.builder()
                     .tenNguoiNhan(req.tenNguoiNhan)
                     .sdtNhan(req.soDienThoai)
+                    .emailNhan(req.email)
                     .diaChiChiTiet(req.diaChiGiaoHang)
                     .maTinh(req.maTinh)
                     .maHuyen(req.maHuyen)
@@ -867,7 +876,14 @@ public class HoaDonApi {
         }
         result.put("sdtKhachHang", sdtNhan);
 
-        result.put("email", hoaDon.getKhachHang() != null ? hoaDon.getKhachHang().getEmail() : "");
+        // FIX LẤY EMAIL TỪ THÔNG TIN GIAO HÀNG
+        String emailNhan = "";
+        if (hoaDon.getThongTinGiaoHang() != null && hoaDon.getThongTinGiaoHang().getEmailNhan() != null && !hoaDon.getThongTinGiaoHang().getEmailNhan().isEmpty()) {
+            emailNhan = hoaDon.getThongTinGiaoHang().getEmailNhan();
+        } else if (hoaDon.getKhachHang() != null && hoaDon.getKhachHang().getEmail() != null) {
+            emailNhan = hoaDon.getKhachHang().getEmail();
+        }
+        result.put("email", emailNhan);
 
         String diaChiGiaoHang = "";
         Integer maTinh = null;
@@ -1067,7 +1083,7 @@ public class HoaDonApi {
             String oId = hd.getMa() + "_" + rId;
             String amountStr = totalAmount.setScale(0, RoundingMode.HALF_UP).toString();
 
-            String onlineReturnUrl = "https://beemate.store//api/hoa-don/momo-callback";
+            String onlineReturnUrl = "https://beemate.store/api/hoa-don/momo-callback";
 
             String rawHash = "accessKey=" + accessKey.trim() + "&amount=" + amountStr + "&extraData=&ipnUrl=" + notifyUrl.trim() + "&orderId=" + oId + "&orderInfo=ThanhToan_Online_" + hd.getMa() + "&partnerCode=" + partnerCode.trim() + "&redirectUrl=" + onlineReturnUrl + "&requestId=" + rId + "&requestType=captureWallet";
             String signature = MomoSecurity.signHmacSHA256(rawHash, secretKey.trim());

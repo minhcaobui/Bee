@@ -1308,11 +1308,10 @@
 
             executeSubmitOrder: async function() {
                 this.closeConfirmModal();
-
                 const btnSubmit = document.getElementById('btn-submit-real');
                 btnSubmit.innerText = 'Đang xử lý...';
                 btnSubmit.disabled = true;
-
+                if (window.showLoading) window.showLoading();
                 let fullAddress = '';
                 let maTinhGuiGHN = null;
                 let maHuyenGuiGHN = null;
@@ -1452,6 +1451,7 @@
                         }
                     }
                     else if (paymentMethod === 'CHUYEN_KHOAN') {
+                        if (window.hideLoading) window.hideLoading();
                         const bankId = "MB";
                         const accountNo = "08101102004";
                         const accountName = "BUI CAO MINH";

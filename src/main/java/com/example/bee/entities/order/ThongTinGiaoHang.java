@@ -14,6 +14,7 @@ import java.io.Serializable;
 public class ThongTinGiaoHang implements Serializable {
     private String tenNguoiNhan;
     private String sdtNhan;
+    private String emailNhan;
     private String diaChiChiTiet;
 
     private Integer maTinh;

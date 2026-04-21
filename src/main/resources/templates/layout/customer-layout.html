@@ -1344,13 +1344,13 @@
                 let labelWeight = (cls === 'done' || cls === 'current') ? '500' : '400';
 
                 html += `
-                <div style="display:flex; flex-direction:column; align-items:center; gap:8px; flex:1; position:relative;">
-                    ${idx < steps.length - 1 ? `<div style="position:absolute; top:13px; left:calc(50% + 14px); width:calc(100% - 28px); height:1px; background:${lineBg}; z-index:0;"></div>` : ''}
-                    <div style="width:28px; height:28px; border-radius:50%; border:2px solid ${dotBorder}; background:${dotBg}; display:flex; align-items:center; justify-content:center; z-index:1; position:relative; transition: 0.3s;">
-                        <svg viewBox="0 0 24 24" style="width:12px; height:12px; stroke:${svgStroke}; fill:none; stroke-width:2;"><path d="M5 13l4 4L19 7"/></svg>
-                    </div>
-                    <div style="font-size:10px; letter-spacing:0.06em; color:${labelColor}; text-transform:uppercase; text-align:center; font-weight:${labelWeight};">${s.label}</div>
-                </div>`;
+            <div style="display:flex; flex-direction:column; align-items:center; gap:8px; flex:1; position:relative;">
+                ${idx < steps.length - 1 ? `<div style="position:absolute; top:13px; left:calc(50% + 14px); width:calc(100% - 28px); height:1px; background:${lineBg}; z-index:0;"></div>` : ''}
+                <div style="width:28px; height:28px; border-radius:50%; border:2px solid ${dotBorder}; background:${dotBg}; display:flex; align-items:center; justify-content:center; z-index:1; position:relative; transition: 0.3s;">
+                    <svg viewBox="0 0 24 24" style="width:12px; height:12px; stroke:${svgStroke}; fill:none; stroke-width:2;"><path d="M5 13l4 4L19 7"/></svg>
+                </div>
+                <div style="font-size:10px; letter-spacing:0.06em; color:${labelColor}; text-transform:uppercase; text-align:center; font-weight:${labelWeight};">${s.label}</div>
+            </div>`;
             });
             return html + '</div>';
         };
@@ -1387,19 +1387,19 @@
             let timelineHtml = '';
             if (data.loaiHoaDon !== 0 && !isStorePickup) {
                 timelineHtml = `
-                <div style="margin-top: 24px; padding-bottom: 30px; border-bottom: 1px solid rgba(0,0,0,0.06); margin-bottom: 30px;">
-                    ${generateTimelineHTML(currentStatus)}
-                </div>`;
+            <div style="margin-top: 24px; padding-bottom: 30px; border-bottom: 1px solid rgba(0,0,0,0.06); margin-bottom: 30px;">
+                ${generateTimelineHTML(currentStatus)}
+            </div>`;
             }
 
             let headerHtml = `
-        <div style="display: flex; align-items: center; flex-wrap: wrap; font-size:18px; font-weight:600;">
-            Chi tiết Đơn hàng #${data.ma}
-            ${loaiGiaoHangHtml}
-            <span style="background:${statusObj.cssClass.includes('CHO_THANH_TOAN') ? '#fef3c7' : statusObj.cssClass.includes('CHO_XAC_NHAN') ? '#e0e7ff' : statusObj.cssClass.includes('HOAN_THANH') ? '#d1fae5' : statusObj.cssClass.includes('HUY') ? '#fee2e2' : '#f3f4f6'}; color:${statusObj.cssClass.includes('CHO_THANH_TOAN') ? '#d97706' : statusObj.cssClass.includes('CHO_XAC_NHAN') ? '#4338ca' : statusObj.cssClass.includes('HOAN_THANH') ? '#059669' : statusObj.cssClass.includes('HUY') ? '#dc2626' : '#4b5563'}; padding: 4px 12px; border-radius: 4px; margin-left: 10px; font-size: 10px; text-transform:uppercase; font-weight:700; letter-spacing:0.1em; border: 1px solid rgba(0,0,0,0.05); font-family: 'DM Sans', sans-serif;">${statusObj.label}</span>
-        </div>
-        ${timelineHtml}
-        `;
+    <div style="display: flex; align-items: center; flex-wrap: wrap; font-size:18px; font-weight:600;">
+        Chi tiết Đơn hàng #${data.ma}
+        ${loaiGiaoHangHtml}
+        <span style="background:${statusObj.cssClass.includes('CHO_THANH_TOAN') ? '#fef3c7' : statusObj.cssClass.includes('CHO_XAC_NHAN') ? '#e0e7ff' : statusObj.cssClass.includes('HOAN_THANH') ? '#d1fae5' : statusObj.cssClass.includes('HUY') ? '#fee2e2' : '#f3f4f6'}; color:${statusObj.cssClass.includes('CHO_THANH_TOAN') ? '#d97706' : statusObj.cssClass.includes('CHO_XAC_NHAN') ? '#4338ca' : statusObj.cssClass.includes('HOAN_THANH') ? '#059669' : statusObj.cssClass.includes('HUY') ? '#dc2626' : '#4b5563'}; padding: 4px 12px; border-radius: 4px; margin-left: 10px; font-size: 10px; text-transform:uppercase; font-weight:700; letter-spacing:0.1em; border: 1px solid rgba(0,0,0,0.05); font-family: 'DM Sans', sans-serif;">${statusObj.label}</span>
+    </div>
+    ${timelineHtml}
+    `;
 
             const formatDateTime = (dateStr) => {
                 if (!dateStr || String(dateStr).trim() === '' || String(dateStr).toLowerCase() === 'null') return null;
@@ -1412,6 +1412,16 @@
             const tenKhach = data.tenKhachHang || data.tenNguoiNhan || (data.khachHang ? data.khachHang.hoTen : 'Khách hàng');
             let rawPhone = data.sdtNhan || data.sdtKhachHang || (data.khachHang ? data.khachHang.soDienThoai : null);
             const sdtKhach = (rawPhone && String(rawPhone).toLowerCase() !== 'undefined' && String(rawPhone).toLowerCase() !== 'null') ? rawPhone : '---';
+
+            // LẤY EMAIL KHÁCH HÀNG (ĐÃ ĐƯỢC BỔ SUNG)
+            let emailKhach = 'Không có Email';
+            if (data.email && String(data.email).trim() !== '' && String(data.email).toLowerCase() !== 'null') {
+                emailKhach = data.email;
+            } else if (data.emailNguoiNhan && String(data.emailNguoiNhan).trim() !== '' && String(data.emailNguoiNhan).toLowerCase() !== 'null') {
+                emailKhach = data.emailNguoiNhan;
+            } else if (data.khachHang && data.khachHang.email) {
+                emailKhach = data.khachHang.email;
+            }
 
             let rawAddress = data.diaChiGiaoHang || data.diaChiNhan || data.diaChiNguoiNhan;
             let diaChiKhachHtml = '';
@@ -1429,15 +1439,15 @@
             } else {
                 if (isStorePickup) {
                     deliveryInfoHtml = `
-                    <p><strong>Hình thức:</strong> <span style="color:#d97706; font-weight:600;"><i class="fa-solid fa-store"></i> Nhận tại cửa hàng</span></p>
-                    <p><strong>Ngày hẹn lấy:</strong> ${formatDateTime(data.ngayHenLayHang) || 'Chưa xác định'}</p>
-                    ${data.ngayHangSanSang ? `<p style="color:#10b981; font-size:14px; margin-top:8px;"><i class="fa-solid fa-box-check"></i> <strong>ĐÃ CHUẨN BỊ XONG LÚC:</strong> ${formatDateTime(data.ngayHangSanSang)}</p>` : '<p style="color:#f59e0b; font-style:italic; font-size:12px; margin-top:8px;"><i class="fa-solid fa-hourglass-half"></i> Cửa hàng đang chuẩn bị sản phẩm...</p>'}
-                `;
+                <p><strong>Hình thức:</strong> <span style="color:#d97706; font-weight:600;"><i class="fa-solid fa-store"></i> Nhận tại cửa hàng</span></p>
+                <p><strong>Ngày hẹn lấy:</strong> ${formatDateTime(data.ngayHenLayHang) || 'Chưa xác định'}</p>
+                ${data.ngayHangSanSang ? `<p style="color:#10b981; font-size:14px; margin-top:8px;"><i class="fa-solid fa-box-check"></i> <strong>ĐÃ CHUẨN BỊ XONG LÚC:</strong> ${formatDateTime(data.ngayHangSanSang)}</p>` : '<p style="color:#f59e0b; font-style:italic; font-size:12px; margin-top:8px;"><i class="fa-solid fa-hourglass-half"></i> Cửa hàng đang chuẩn bị sản phẩm...</p>'}
+            `;
                 } else {
                     deliveryInfoHtml = `
-                    <p><strong>Hình thức:</strong> <span style="color:#2563eb; font-weight:600;"><i class="fa-solid fa-truck"></i> Giao hàng tận nơi</span></p>
-                    <p><strong>Dự kiến nhận:</strong> <span style="color:#10b981; font-weight:600;">${formatDateTime(data.ngayNhanHangDuKien) || 'Đang chờ đơn vị vận chuyển'}</span></p>
-                `;
+                <p><strong>Hình thức:</strong> <span style="color:#2563eb; font-weight:600;"><i class="fa-solid fa-truck"></i> Giao hàng tận nơi</span></p>
+                <p><strong>Dự kiến nhận:</strong> <span style="color:#10b981; font-weight:600;">${formatDateTime(data.ngayNhanHangDuKien) || 'Đang chờ đơn vị vận chuyển'}</span></p>
+            `;
                 }
             }
 
@@ -1450,26 +1460,27 @@
             }
 
             let infoGridHtml = `
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; padding: 20px; background: #fafafa; border: 1px solid rgba(0,0,0,0.05); font-size: 13px; line-height: 1.6;">
-                <div>
-                    <label style="font-size: 10px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 8px; font-weight:600;"><i class="fa-solid fa-location-dot"></i> Thông tin nhận hàng</label>
-                    <p><strong>Người nhận:</strong> ${tenKhach}</p>
-                    <p><strong>Số điện thoại:</strong> ${sdtKhach}</p>
-                    ${diaChiKhachHtml}
-                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1);">
-                        ${deliveryInfoHtml}
-                    </div>
-                </div>
-                <div>
-                    <label style="font-size: 10px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 8px; font-weight:600;"><i class="fa-solid fa-receipt"></i> Thanh toán & Hóa đơn</label>
-                    <p><strong>Ngày đặt hàng:</strong> ${formatDateTime(data.ngayTao) || '---'}</p>
-                    <p><strong>Ngày thanh toán:</strong> ${formatDateTime(data.ngayThanhToan) || '<span style="color:#dc2626;">Chưa thanh toán</span>'}</p>
-                    <p><strong>Phương thức TT:</strong> ${getPaymentMethodDisplay(data.phuongThucThanhToan, isStorePickup || data.loaiHoaDon === 0)}</p>
-                    ${maGDHtml}
-                    <p style="margin-top:8px;"><strong>Ghi chú:</strong> <span style="font-style: italic; color: #888;">${ghiChu}</span></p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; padding: 20px; background: #fafafa; border: 1px solid rgba(0,0,0,0.05); font-size: 13px; line-height: 1.6;">
+            <div>
+                <label style="font-size: 10px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 8px; font-weight:600;"><i class="fa-solid fa-location-dot"></i> Thông tin nhận hàng</label>
+                <p><strong>Người nhận:</strong> ${tenKhach}</p>
+                <p><strong>Số điện thoại:</strong> ${sdtKhach}</p>
+                <p><strong>Email:</strong> ${emailKhach}</p>
+                ${diaChiKhachHtml}
+                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1);">
+                    ${deliveryInfoHtml}
                 </div>
             </div>
-        `;
+            <div>
+                <label style="font-size: 10px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 8px; font-weight:600;"><i class="fa-solid fa-receipt"></i> Thanh toán & Hóa đơn</label>
+                <p><strong>Ngày đặt hàng:</strong> ${formatDateTime(data.ngayTao) || '---'}</p>
+                <p><strong>Ngày thanh toán:</strong> ${formatDateTime(data.ngayThanhToan) || '<span style="color:#dc2626;">Chưa thanh toán</span>'}</p>
+                <p><strong>Phương thức TT:</strong> ${getPaymentMethodDisplay(data.phuongThucThanhToan, isStorePickup || data.loaiHoaDon === 0)}</p>
+                ${maGDHtml}
+                <p style="margin-top:8px;"><strong>Ghi chú:</strong> <span style="font-style: italic; color: #888;">${ghiChu}</span></p>
+            </div>
+        </div>
+    `;
 
             let dsSanPhamHtml = '';
             let calculatedGiaTamThoi = 0;
@@ -1477,18 +1488,18 @@
 
             if (dsSanPham.length > 0) {
                 dsSanPhamHtml = `
-                <div style="overflow-x:auto; margin-top:15px; border-top:1px dashed rgba(0,0,0,0.1); padding-top:15px;">
-                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
-                        <thead>
-                            <tr>
-                                <th style="padding: 12px 0; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid rgba(0,0,0,0.08);">Sản phẩm</th>
-                                <th style="text-align:center; padding: 12px 0; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid rgba(0,0,0,0.08);">Đơn giá</th>
-                                <th style="text-align:center; padding: 12px 0; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid rgba(0,0,0,0.08);">SL</th>
-                                <th style="text-align:right; padding: 12px 0; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid rgba(0,0,0,0.08);">Thành tiền</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
+            <div style="overflow-x:auto; margin-top:15px; border-top:1px dashed rgba(0,0,0,0.1); padding-top:15px;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead>
+                        <tr>
+                            <th style="padding: 12px 0; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid rgba(0,0,0,0.08);">Sản phẩm</th>
+                            <th style="text-align:center; padding: 12px 0; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid rgba(0,0,0,0.08);">Đơn giá</th>
+                            <th style="text-align:center; padding: 12px 0; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid rgba(0,0,0,0.08);">SL</th>
+                            <th style="text-align:right; padding: 12px 0; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid rgba(0,0,0,0.08);">Thành tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
 
                 dsSanPham.forEach(item => {
                     const spct = item.sanPhamChiTiet || item.chiTietSanPham || {};
@@ -1505,28 +1516,28 @@
                     let priceDisplayHtml = '';
                     if (donGiaGoc > giaBan) {
                         priceDisplayHtml = `<div style="color:var(--muted); text-decoration:line-through; font-size:11px; margin-bottom:2px;">${formatCurrency(donGiaGoc)}</div>
-                                        <div style="font-weight:600; color:var(--accent);">${formatCurrency(giaBan)}</div>`;
+                                    <div style="font-weight:600; color:var(--accent);">${formatCurrency(giaBan)}</div>`;
                     } else {
                         priceDisplayHtml = `${formatCurrency(giaBan)}`;
                     }
 
                     dsSanPhamHtml += `
-                    <tr>
-                        <td style="padding: 16px 0; border-bottom: 1px solid rgba(0,0,0,0.05);">
-                            <div style="display:flex;align-items:flex-start; cursor:pointer;" onclick="closeGlobalTrack(); location.hash='#detail?id=${item.idSanPham || (spct.sanPham ? spct.sanPham.id : '')}'">
-                                <img src="${hinhAnh}" style="margin-top:4px; width: 60px; height: 80px; object-fit: cover; margin-right:15px; border: 1px solid rgba(0,0,0,0.05);">
-                                <div style="flex:1;">
-                                    <div style="font-size: 17px; font-weight:500; color:var(--text); transition:0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text)'">${tenSP}</div>
-                                    <div style="color:var(--muted); font-size: 12px; margin-top:2px;">SKU: <span style="font-weight:500; color:var(--text);">${sku}</span></div>
-                                    <div style="color:var(--muted); font-size: 12px; margin-top:2px;">Phân loại: <span style="font-weight:500; color:var(--text);">${phanLoai}</span></div>
-                                </div>
+                <tr>
+                    <td style="padding: 16px 0; border-bottom: 1px solid rgba(0,0,0,0.05);">
+                        <div style="display:flex;align-items:flex-start; cursor:pointer;" onclick="closeGlobalTrack(); location.hash='#detail?id=${item.idSanPham || (spct.sanPham ? spct.sanPham.id : '')}'">
+                            <img src="${hinhAnh}" style="margin-top:4px; width: 60px; height: 80px; object-fit: cover; margin-right:15px; border: 1px solid rgba(0,0,0,0.05);">
+                            <div style="flex:1;">
+                                <div style="font-size: 17px; font-weight:500; color:var(--text); transition:0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text)'">${tenSP}</div>
+                                <div style="color:var(--muted); font-size: 12px; margin-top:2px;">SKU: <span style="font-weight:500; color:var(--text);">${sku}</span></div>
+                                <div style="color:var(--muted); font-size: 12px; margin-top:2px;">Phân loại: <span style="font-weight:500; color:var(--text);">${phanLoai}</span></div>
                             </div>
-                        </td>
-                        <td style="text-align:center; vertical-align:top; padding-top:20px; font-size:13px; border-bottom: 1px solid rgba(0,0,0,0.05);">${priceDisplayHtml}</td>
-                        <td style="text-align:center; vertical-align:top; padding-top:20px; font-size:13px; border-bottom: 1px solid rgba(0,0,0,0.05);">${sl}</td>
-                        <td style="text-align:right; vertical-align:top; padding-top:20px; font-size:13px; font-weight:600; color:var(--accent); border-bottom: 1px solid rgba(0,0,0,0.05);">${formatCurrency(giaBan * sl)}</td>
-                    </tr>
-                `;
+                        </div>
+                    </td>
+                    <td style="text-align:center; vertical-align:top; padding-top:20px; font-size:13px; border-bottom: 1px solid rgba(0,0,0,0.05);">${priceDisplayHtml}</td>
+                    <td style="text-align:center; vertical-align:top; padding-top:20px; font-size:13px; border-bottom: 1px solid rgba(0,0,0,0.05);">${sl}</td>
+                    <td style="text-align:right; vertical-align:top; padding-top:20px; font-size:13px; font-weight:600; color:var(--accent); border-bottom: 1px solid rgba(0,0,0,0.05);">${formatCurrency(giaBan * sl)}</td>
+                </tr>
+            `;
                 });
                 dsSanPhamHtml += `</tbody></table></div>`;
             }
@@ -1540,30 +1551,30 @@
             let giamGiaText = maVoucherStr ? `Voucher giảm giá (${maVoucherStr})` : 'Voucher giảm giá';
 
             let giamGiaHtmlGuest = giamGiaVoucher > 0 ? `
-            <div style="display:flex; justify-content:space-between; font-size:13px;">
-                <span style="color:var(--muted);">${giamGiaText}</span>
-                <span style="color:#10b981; font-weight:500;">-${formatCurrency(giamGiaVoucher)}</span>
-            </div>
-        ` : '';
+        <div style="display:flex; justify-content:space-between; font-size:13px;">
+            <span style="color:var(--muted);">${giamGiaText}</span>
+            <span style="color:#10b981; font-weight:500;">-${formatCurrency(giamGiaVoucher)}</span>
+        </div>
+    ` : '';
 
             let phiShipHtmlGuest = (data.loaiHoaDon === 0 || isStorePickup) ? '' : `
-            <div style="display:flex; justify-content:space-between; font-size:13px;">
-                <span style="color:var(--muted);">Phí vận chuyển</span>
-                <span style="font-weight:500; color:var(--text);">${phiShip > 0 ? formatCurrency(phiShip) : 'Miễn phí'}</span>
-            </div>
-        `;
+        <div style="display:flex; justify-content:space-between; font-size:13px;">
+            <span style="color:var(--muted);">Phí vận chuyển</span>
+            <span style="font-weight:500; color:var(--text);">${phiShip > 0 ? formatCurrency(phiShip) : 'Miễn phí'}</span>
+        </div>
+    `;
 
             // 🌟 Điều hướng an toàn với các nút thao tác vì Script của Account có thể chưa load ở Trang chủ
             let actionButtonsHtml = '';
             const jsSafeRedirect = `
-            window.location.hash = '#account';
-            setTimeout(() => {
-                const input = document.getElementById('guestOrderCode');
-                if(input) { input.value = '${data.ma}'; }
-                if(window.AccountApp) { window.AccountApp.guestTrackOrder(); }
-            }, 500);
-            closeGlobalTrack();
-        `;
+        window.location.hash = '#account';
+        setTimeout(() => {
+            const input = document.getElementById('guestOrderCode');
+            if(input) { input.value = '${data.ma}'; }
+            if(window.AccountApp) { window.AccountApp.guestTrackOrder(); }
+        }, 500);
+        closeGlobalTrack();
+    `;
 
             if (currentStatus === 'CHO_XAC_NHAN' || currentStatus === 'CHO_THANH_TOAN') {
                 actionButtonsHtml += `<button onclick="${jsSafeRedirect}" style="padding:10px 20px; color:#dc2626; border:1px solid rgba(220,38,38,0.2); background:rgba(220,38,38,0.05); margin-right:10px; font-size:11px; text-transform:uppercase; letter-spacing:0.1em; cursor:pointer; border-radius:var(--radius-md); font-family:'DM Sans', sans-serif;"><i class="fa-solid fa-xmark"></i> Hủy đơn</button>`;
@@ -1578,30 +1589,30 @@
             }
 
             let finalHtml = `
-            ${headerHtml}
-            ${infoGridHtml}
-            ${dsSanPhamHtml}
-            <div style="border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 20px; margin-top: 10px; display:flex; flex-direction:column; align-items:flex-end;">
-                <div style="width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 12px; text-align: left;">
-                    <div style="display:flex; justify-content:space-between; font-size:13px;">
-                        <span style="color:var(--muted);">Tạm tính hàng</span>
-                        <span style="font-weight:500; color:var(--text);">${formatCurrency(currentGiaTamThoi)}</span>
-                    </div>
-                    ${phiShipHtmlGuest}
-                    ${giamGiaHtmlGuest}
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding-top:16px; border-top:2px solid var(--text);">
-                        <span style="font-weight:600; font-size:14px; text-transform:uppercase; color:var(--text);">TỔNG CỘNG</span>
-                        <span style="font-weight:800; font-size:24px; color:var(--accent);">${formatCurrency(tongTien)}</span>
-                    </div>
+        ${headerHtml}
+        ${infoGridHtml}
+        ${dsSanPhamHtml}
+        <div style="border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 20px; margin-top: 10px; display:flex; flex-direction:column; align-items:flex-end;">
+            <div style="width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 12px; text-align: left;">
+                <div style="display:flex; justify-content:space-between; font-size:13px;">
+                    <span style="color:var(--muted);">Tạm tính hàng</span>
+                    <span style="font-weight:500; color:var(--text);">${formatCurrency(currentGiaTamThoi)}</span>
                 </div>
-
-                ${actionButtonsHtml ? `
-                <div style="margin-top: 24px; display: flex; flex-direction: column; align-items: flex-end; width: 100%;">
-                    <div style="font-size:11px; color:#c08060; text-align:right; margin-bottom:12px; font-style:italic;">* Chuyển hướng đến trang Quản lý tài khoản để thực hiện các thao tác Mua lại, Hủy đơn hoặc Thanh toán</div>
-                    <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;">${actionButtonsHtml}</div>
-                </div>` : ''}
+                ${phiShipHtmlGuest}
+                ${giamGiaHtmlGuest}
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding-top:16px; border-top:2px solid var(--text);">
+                    <span style="font-weight:600; font-size:14px; text-transform:uppercase; color:var(--text);">TỔNG CỘNG</span>
+                    <span style="font-weight:800; font-size:24px; color:var(--accent);">${formatCurrency(tongTien)}</span>
+                </div>
             </div>
-        `;
+
+            ${actionButtonsHtml ? `
+            <div style="margin-top: 24px; display: flex; flex-direction: column; align-items: flex-end; width: 100%;">
+                <div style="font-size:11px; color:#c08060; text-align:right; margin-bottom:12px; font-style:italic;">* Chuyển hướng đến trang Quản lý tài khoản để thực hiện các thao tác Mua lại, Hủy đơn hoặc Thanh toán</div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;">${actionButtonsHtml}</div>
+            </div>` : ''}
+        </div>
+    `;
 
             resultDiv.innerHTML = finalHtml;
 

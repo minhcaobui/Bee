@@ -1604,6 +1604,16 @@
                     let rawPhone = data.sdtNhan || data.sdtKhachHang || (data.khachHang ? data.khachHang.soDienThoai : null);
                     const sdtKhach = (rawPhone && String(rawPhone).toLowerCase() !== 'undefined' && String(rawPhone).toLowerCase() !== 'null') ? rawPhone : '---';
 
+                    // LẤY EMAIL KHÁCH HÀNG (THÊM MỚI VÀO ĐÂY)
+                    let emailKhach = 'Không có Email';
+                    if (data.email && String(data.email).trim() !== '' && String(data.email).toLowerCase() !== 'null') {
+                        emailKhach = data.email;
+                    } else if (data.emailNguoiNhan && String(data.emailNguoiNhan).trim() !== '' && String(data.emailNguoiNhan).toLowerCase() !== 'null') {
+                        emailKhach = data.emailNguoiNhan;
+                    } else if (data.khachHang && data.khachHang.email) {
+                        emailKhach = data.khachHang.email;
+                    }
+
                     let rawAddress = data.diaChiGiaoHang || data.diaChiNhan || data.diaChiNguoiNhan;
                     let diaChiKhachHtml = '';
                     if (data.loaiHoaDon === 0) {
@@ -1640,11 +1650,13 @@
                         }
                     }
 
+                    // Đưa Email vào phần hiển thị Thông tin nhận hàng
                     document.querySelector('.detail-info-grid').innerHTML = `
                         <div class="detail-info-item">
-                            <label><i class="bi bi-geo-alt-fill"></i> Thông vị nhận hàng</label>
+                            <label><i class="bi bi-geo-alt-fill"></i> Thông tin nhận hàng</label>
                             <p><strong>Người nhận:</strong> ${tenKhach}</p>
                             <p><strong>Số điện thoại:</strong> ${sdtKhach}</p>
+                            <p><strong>Email:</strong> ${emailKhach}</p>
                             ${diaChiKhachHtml}
                             <div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1);">
                                 ${deliveryInfoHtml}
@@ -3241,6 +3253,16 @@
                     let rawPhone = data.sdtNhan || data.sdtKhachHang || (data.khachHang ? data.khachHang.soDienThoai : null);
                     const sdtKhach = (rawPhone && String(rawPhone).toLowerCase() !== 'undefined' && String(rawPhone).toLowerCase() !== 'null') ? rawPhone : '---';
 
+                    // LẤY EMAIL KHÁCH HÀNG (THÊM MỚI VÀO ĐÂY)
+                    let emailKhach = 'Không có Email';
+                    if (data.email && String(data.email).trim() !== '' && String(data.email).toLowerCase() !== 'null') {
+                        emailKhach = data.email;
+                    } else if (data.emailNguoiNhan && String(data.emailNguoiNhan).trim() !== '' && String(data.emailNguoiNhan).toLowerCase() !== 'null') {
+                        emailKhach = data.emailNguoiNhan;
+                    } else if (data.khachHang && data.khachHang.email) {
+                        emailKhach = data.khachHang.email;
+                    }
+
                     let rawAddress = data.diaChiGiaoHang || data.diaChiNhan || data.diaChiNguoiNhan;
                     let diaChiKhachHtml = '';
                     if (data.loaiHoaDon === 0) {
@@ -3277,12 +3299,14 @@
                         }
                     }
 
+                    // Đưa Email vào phần hiển thị
                     let infoGridHtml = `
                         <div class="detail-info-grid" style="margin-top: 20px; padding: 20px; text-align: left; background: #fafafa;">
                             <div class="detail-info-item">
                                 <label><i class="bi bi-geo-alt-fill"></i> Thông tin nhận hàng</label>
                                 <p><strong>Người nhận:</strong> ${tenKhach}</p>
                                 <p><strong>Số điện thoại:</strong> ${sdtKhach}</p>
+                                <p><strong>Email:</strong> ${emailKhach}</p>
                                 ${diaChiKhachHtml}
                                 <div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1);">
                                     ${deliveryInfoHtml}
@@ -3428,7 +3452,7 @@
                     resultDiv.innerHTML = '<div style="color:#c03c3c; text-align:center; font-size:13px; padding: 20px;">Lỗi kết nối máy chủ! Vui lòng thử lại sau.</div>';
                     resultDiv.style.display = 'block';
                 }
-            },
+            }
         };
 
         setTimeout(() => window.AccountApp.init(), 100);

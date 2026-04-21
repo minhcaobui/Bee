@@ -44,12 +44,12 @@ public class DanhGiaSanPhamApi {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        Sort sortObj = Sort.by(Sort.Direction.DESC, "noiDungTraLoi");
-
+        // ĐÃ FIX: Sắp xếp chuẩn theo Ngày Tạo thay vì ưu tiên sắp xếp theo chữ cái của câu trả lời
+        Sort sortObj;
         if ("OLDEST".equalsIgnoreCase(sort)) {
-            sortObj = sortObj.and(Sort.by(Sort.Direction.ASC, "ngayTao"));
+            sortObj = Sort.by(Sort.Direction.ASC, "ngayTao");
         } else {
-            sortObj = sortObj.and(Sort.by(Sort.Direction.DESC, "ngayTao"));
+            sortObj = Sort.by(Sort.Direction.DESC, "ngayTao");
         }
 
         Pageable pageable = PageRequest.of(page, size, sortObj);
@@ -112,13 +112,14 @@ public class DanhGiaSanPhamApi {
         DanhGia dg = danhGiaRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy đánh giá!"));
 
+        // Hàm này vừa có tác dụng TRẢ LỜI MỚI, vừa có tác dụng SỬA CÂU TRẢ LỜI CŨ
         dg.setNhanVienTraLoi(nv);
         dg.setNoiDungTraLoi(noiDungTraLoi.trim());
         dg.setNgayTraLoi(new Date());
 
         danhGiaRepo.save(dg);
 
-        return ResponseEntity.ok(Map.of("message", "Đã gửi phản hồi thành công!"));
+        return ResponseEntity.ok(Map.of("message", "Đã lưu phản hồi thành công!"));
     }
 
     @Data

@@ -24,9 +24,37 @@ function showToast(message, type = 'success') {
 
 window.toast = showToast;
 
+// ======================================================================
+// HÀM MỚI: QUÉT DỌN CÁC MODAL BỊ KẸT TRÊN BODY TRƯỚC KHI CHUYỂN TRANG
+// ======================================================================
+function cleanupGarbage() {
+    // ĐÃ SỬA: CHỈ XÓA ĐÚNG CÁI OTP MODAL CỦA TRANG PROFILE
+    // Tuyệt đối tha mạng cho genericConfirmOverlay của hệ thống!
+    const garbageIds = ['otpModal'];
+
+    garbageIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.parentElement === document.body) {
+            el.remove();
+        }
+    });
+
+    if (window.DashboardApp) {
+        if (window.DashboardApp.chartDoanhThuInstance) window.DashboardApp.chartDoanhThuInstance.dispose();
+        if (window.DashboardApp.chartTiLeInstance) window.DashboardApp.chartTiLeInstance.dispose();
+        window.DashboardApp.chartDoanhThuInstance = null;
+        window.DashboardApp.chartTiLeInstance = null;
+    }
+}
+// ======================================================================
+
 async function loadModule(moduleName) {
     const contentArea = document.getElementById('content-area');
     const pageTitle = document.getElementById('pageTitle');
+
+    // Quét dọn trước khi tải trang mới
+    cleanupGarbage();
+
     window.showLoading();
     let url = '';
     let title = '';
@@ -114,7 +142,6 @@ function executeScripts(container, moduleName) {
             document.body.appendChild(newScript);
         } else {
             try {
-                // Dùng eval để ép trình duyệt chạy code ngay lập tức
                 eval(oldScript.innerHTML);
                 console.log("Đã chạy script nội tuyến thành công");
             } catch (e) {
@@ -128,70 +155,34 @@ function executeScripts(container, moduleName) {
     setTimeout(() => {
         console.log(`Đang kích hoạt init cho module: ${moduleName}`);
         if (moduleName === 'catalogs') {
-            if (typeof window.initCatalogs !== 'undefined') {
-                window.initCatalogs();
-            } else {
-                console.warn("Chưa tìm thấy CatalogApp");
-            }
+            if (typeof window.initCatalogs !== 'undefined') window.initCatalogs();
         }
         else if (moduleName === 'orders') {
-            if (typeof window.OrderApp !== 'undefined') {
-                window.OrderApp.init();
-            } else {
-                console.warn("Chưa tìm thấy OrderApp");
-            }
+            if (typeof window.OrderApp !== 'undefined') window.OrderApp.init();
         }
         else if (moduleName === 'products') {
-            if (typeof window.initProducts !== 'undefined') {
-                window.initProducts();
-            } else {
-                console.warn("Chưa tìm thấy ProductApp");
-            }
+            if (typeof window.initProducts !== 'undefined') window.initProducts();
         }
         else if (moduleName === 'promotions') {
-            if (typeof window.PromotionApp !== 'undefined') {
-                window.PromotionApp.init();
-            } else {
-                console.warn("Chưa tìm thấy PromotionApp");
-            }
+            if (typeof window.PromotionApp !== 'undefined') window.PromotionApp.init();
         }
         else if (moduleName === 'pos') {
-            if (typeof window.PosApp !== 'undefined') {
-                window.PosApp.init();
-            } else {
-                console.warn("Chưa tìm thấy PosApp");
-            }
+            if (typeof window.PosApp !== 'undefined') window.PosApp.init();
         }
         else if (moduleName === 'customers') {
-            if (typeof window.CustomerApp !== 'undefined') {
-                window.CustomerApp.init();
-            } else {
-                console.warn("Chưa tìm thấy CustomerApp");
-            }
+            if (typeof window.CustomerApp !== 'undefined') window.CustomerApp.init();
         }
         else if (moduleName === 'profiles') {
-            if (typeof window.ProfileApp !== 'undefined') {
-                window.ProfileApp.init();
-            } else {
-                console.warn("Chưa tìm thấy CustomerApp");
-            }
+            if (typeof window.ProfileApp !== 'undefined') window.ProfileApp.init();
         }
         else if (moduleName === 'dashboard') {
-            if (typeof window.DB !== 'undefined') {
-                window.DB.init();
-            } else {
-                console.warn("Chưa tìm thấy DB");
-            }
+            if (typeof window.DashboardApp !== 'undefined') window.DashboardApp.init(); // GỌI ĐÚNG DashboardApp
         }
         else if (moduleName === 'staff') {
-            if (typeof window.StaffApp !== 'undefined') {
-                window.StaffApp.init();
-            }
+            if (typeof window.StaffApp !== 'undefined') window.StaffApp.init();
         }
         else if (moduleName === 'reviews') {
-            if (typeof window.ReviewApp !== 'undefined') {
-                window.ReviewApp.init();
-            }
+            if (typeof window.ReviewApp !== 'undefined') window.ReviewApp.init();
         }
     }, 100);
 }

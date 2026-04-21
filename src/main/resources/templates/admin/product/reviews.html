@@ -78,10 +78,10 @@
         .rv-img:hover { opacity: 0.8; }
 
         /* PHẦN PHẢN HỒI CỦA NHÂN VIÊN */
-        .rv-reply-box { background: var(--gray-100); border-left: 3px solid var(--primary); padding: 14px 16px; border-radius: 0 var(--border-radius) var(--border-radius) 0; margin-top: 10px; }
+        .rv-reply-box { background: var(--gray-100); border-left: 3px solid var(--primary); padding: 14px 16px; border-radius: 0 var(--border-radius) var(--border-radius) 0; margin-top: 10px; transition: 0.3s; }
         .rv-reply-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
         .rv-reply-name { font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase;}
-        .rv-reply-date { font-size: 11px; color: var(--sub); }
+        .rv-reply-date { font-size: 11px; color: var(--sub); display: flex; align-items: center;}
         .rv-reply-text { font-size: 13px; color: var(--text-main); line-height: 1.5; font-weight: 500;}
 
         /* KHUNG NHẬP TRẢ LỜI */
@@ -102,13 +102,13 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* ==========================================================================
-           CSS BỔ SUNG CHO TOAST VÀ CONFIRM (ĐÃ ĐỔI LẠI ĐÚNG TOP 30PX Y NHƯ TRANG KHÁCH HÀNG)
+           CÔNG THỨC VÀNG: ÉP VỊ TRÍ TOAST VÀO FILE NÀY
            ========================================================================== */
         #genericConfirmOverlay, #toastHost, .toast-container { z-index: 2147483647 !important; }
 
         #toastHost, .toast-container {
             position: fixed !important;
-            top: 30px !important; /* ĐÃ SỬA THÀNH 30PX CHUẨN XÁC! */
+            top: 30px !important;
             right: 20px !important;
             display: flex !important;
             flex-direction: column;
@@ -119,13 +119,8 @@
 
         .custom-toast { display: flex; align-items: center; background: #ffffff; padding: 12px 16px; border-radius: var(--border-radius); box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 280px; max-width: 380px; border: 1px solid var(--gray-200); border-left: 4px solid var(--primary); animation: slideInRight 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; pointer-events: auto;}
         .custom-toast.toast-success { border-left-color: #10b981; }
-        .custom-toast.toast-success .toast-icon { color: #10b981; }
         .custom-toast.toast-error { border-left-color: #ef4444; }
-        .custom-toast.toast-error .toast-icon { color: #ef4444; }
         .custom-toast.toast-warning { border-left-color: #f59e0b; }
-        .custom-toast.toast-warning .toast-icon { color: #f59e0b; }
-        .custom-toast.toast-info { border-left-color: #3b82f6; }
-        .custom-toast.toast-info .toast-icon { color: #3b82f6; }
         .toast-icon { font-size: 18px; margin-right: 12px; }
         .toast-msg { flex-grow: 1; font-size: 13px; font-weight: 500; color: var(--text-main); line-height: 1.4; }
         .toast-close { background: none; border: none; color: var(--sub); cursor: pointer; font-size: 18px; margin-left: 10px; padding: 0; transition: color 0.2s; }
@@ -133,46 +128,22 @@
         @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes slideOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
 
-        .modal-overlay { position: fixed !important; inset: 0 !important; background: rgba(15, 23, 42, 0.4) !important; z-index: 2147483647 !important; backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; }
-        .modal-card { padding: 24px; width: 360px; background: #ffffff; border: 1px solid var(--gray-200); border-radius: var(--border-radius); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-
-
         /* ==========================================================================
            RESPONSIVE MOBILE CHO TRANG QUẢN LÝ ĐÁNH GIÁ
            ========================================================================== */
         @media (max-width: 768px) {
             .rv-container { padding: 15px; }
-
-            /* Thanh Tabs */
             .actions-bar { padding-bottom: 10px; }
             .tabs { width: 100%; border-bottom: 1px solid var(--gray-200); }
-
-            /* Thanh Tìm kiếm và Bộ lọc */
             .search-wrapper { flex-direction: column; align-items: stretch; gap: 10px; }
             .search-box { width: 100%; min-width: 100%; }
             .filter-select { width: 100%; }
             .btn-reset { width: 100% !important; margin-top: 5px; }
-
-            /* Card Đánh giá (Header) */
-            .rv-card-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-            }
-            .rv-product-ref {
-                margin-top: 0;
-                width: 100%;
-                justify-content: space-between;
-            }
-
-            /* Box Trả lời của Nhân viên */
+            .rv-card-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .rv-product-ref { margin-top: 0; width: 100%; justify-content: space-between; }
             .rv-reply-header { flex-direction: column; align-items: flex-start; gap: 4px; }
-
-            /* Khung nhập phản hồi (Nút bấm) */
             .rv-form-actions { flex-direction: column; align-items: stretch; }
             .rv-form-actions .btn { width: 100%; }
-
-            /* Phân trang */
             .pagination-wrapper { flex-direction: column; gap: 10px; align-items: center; }
         }
     </style>
@@ -231,7 +202,7 @@
     </div>
 
     <script>
-        // --- REVIEW APP MAIN (Sử dụng chung window.toast và window.confirmDialog từ admin-layout.js) ---
+        // --- REVIEW APP MAIN ---
         window.ReviewApp = {
             state: {
                 data: [], page: 0, size: 10, totalPages: 0,
@@ -241,7 +212,6 @@
             debounceTimer: null,
             initialized: false,
 
-            // Bộ lọc chống mã độc XSS
             escapeHTML: function(str) {
                 if (!str) return '';
                 return str.replace(/[&<>'"]/g,
@@ -357,18 +327,32 @@
                         const noiDungTraLoiAnToan = this.escapeHTML(rv.noiDungTraLoi);
                         const tenNhanVienSafe = this.escapeHTML(rv.tenNhanVienTraLoi) || 'Nhân viên';
 
+                        // ĐÃ THÊM NÚT SỬA VÀ BOX SỬA DỮ LIỆU
                         replyHtml = `
-                            <div class="rv-reply-box">
+                            <div id="rv-view-${rv.id}" class="rv-reply-box">
                                 <div class="rv-reply-header">
                                     <span class="rv-reply-name"><i class="bi bi-person-badge"></i> PHẢN HỒI TỪ CỬA HÀNG (${tenNhanVienSafe})</span>
-                                    <span class="rv-reply-date">${this.formatDate(rv.ngayTraLoi)}</span>
+                                    <div class="rv-reply-date">
+                                        <span>${this.formatDate(rv.ngayTraLoi)}</span>
+                                        <button style="background:none; border:none; cursor:pointer; color:var(--primary); margin-left:10px; font-size:14px;" title="Sửa phản hồi" onclick="ReviewApp.toggleEdit(${rv.id})">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="rv-reply-text">${noiDungTraLoiAnToan}</div>
+                            </div>
+
+                            <div class="rv-reply-form" id="rv-form-${rv.id}">
+                                <textarea class="rv-textarea" id="rv-input-${rv.id}" placeholder="Nhập nội dung phản hồi...">${rv.noiDungTraLoi}</textarea>
+                                <div class="rv-form-actions">
+                                    <button class="btn btn-secondary" onclick="ReviewApp.toggleEdit(${rv.id})" style="height:34px!important;">Hủy</button>
+                                    <button class="btn btn-primary" style="height:34px!important;" onclick="ReviewApp.submitReply(${rv.id})"><i class="bi bi-check-circle"></i> Cập nhật</button>
+                                </div>
                             </div>
                         `;
                     } else {
                         replyHtml = `
-                            <div class="rv-action-bar">
+                            <div class="rv-action-bar" id="rv-btn-group-${rv.id}">
                                 <button class="btn btn-secondary" style="height:32px !important; font-size:11px; border-color:var(--primary); color:var(--primary);" onclick="ReviewApp.toggleForm(${rv.id})"><i class="bi bi-reply-fill"></i> Trả lời đánh giá</button>
                             </div>
                             <div class="rv-reply-form" id="rv-form-${rv.id}">
@@ -411,10 +395,26 @@
             },
 
             toggleForm: function(id) {
+                const btnGroup = document.getElementById(`rv-btn-group-${id}`);
                 const form = document.getElementById(`rv-form-${id}`);
-                if (form) {
+                if (form && btnGroup) {
                     form.classList.toggle('active');
-                    if(form.classList.contains('active')) {
+                    btnGroup.style.display = form.classList.contains('active') ? 'none' : 'flex';
+                    if(form.classList.contains('active')) document.getElementById(`rv-input-${id}`).focus();
+                }
+            },
+
+            // ĐÃ THÊM HÀM MỞ FORM SỬA CHỮA
+            toggleEdit: function(id) {
+                const view = document.getElementById(`rv-view-${id}`);
+                const form = document.getElementById(`rv-form-${id}`);
+                if (view && form) {
+                    if (form.classList.contains('active')) {
+                        form.classList.remove('active');
+                        view.style.display = 'block';
+                    } else {
+                        form.classList.add('active');
+                        view.style.display = 'none';
                         document.getElementById(`rv-input-${id}`).focus();
                     }
                 }
@@ -435,7 +435,7 @@
                 }
 
                 if (typeof window.confirmDialog === 'function') {
-                    window.confirmDialog("XÁC NHẬN PHẢN HỒI", "Bạn có chắc chắn muốn gửi câu trả lời này cho khách hàng?", async () => {
+                    window.confirmDialog("XÁC NHẬN", "Bạn có chắc chắn muốn lưu nội dung phản hồi này?", async () => {
                         try {
                             const res = await fetch(`/api/reviews/${id}/reply`, {
                                 method: 'POST',
@@ -448,7 +448,7 @@
                                 throw new Error(err.message || "Gửi phản hồi thất bại");
                             }
 
-                            if (typeof window.toast === 'function') window.toast("Đã gửi phản hồi thành công!", "success");
+                            if (typeof window.toast === 'function') window.toast("Đã lưu phản hồi thành công!", "success");
                             this.loadData();
 
                         } catch (error) {
