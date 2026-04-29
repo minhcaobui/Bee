@@ -348,8 +348,13 @@
 
                 <div style="display: flex; gap: 15px;">
                     <div class="form-group" style="flex: 1;">
-                        <label class="form-label">Ngày sinh</label>
-                        <input id="inpDob" type="date" class="form-input">
+                        <label class="form-label">Ngày sinh <span style="color:var(--danger-color)" class="required-star">*</span></label>
+                        <div style="display: flex; gap: 8px; width: 100%;">
+                            <select id="selDay" class="form-select" style="flex: 1; padding: 0 5px !important; min-width: 0;"><option value="">Ngày</option></select>
+                            <select id="selMonth" class="form-select" style="flex: 1; padding: 0 5px !important; min-width: 0;"><option value="">Tháng</option></select>
+                            <select id="selYear" class="form-select" style="flex: 1.2; padding: 0 5px !important; min-width: 0;"><option value="">Năm</option></select>
+                        </div>
+                        <input type="hidden" id="inpDob">
                     </div>
                     <div class="form-group" style="flex: 1;">
                         <label class="form-label">Giới tính</label>
@@ -549,6 +554,59 @@
         return `<span class="badge-status" style="background:#6366f1;">${(ten || ma).toUpperCase()}</span>`;
     };
 
+    /* ==========================================================================
+       HELPER: KHỞI TẠO VÀ ĐỒNG BỘ NGÀY SINH TỪ 3 DROPDOWN
+       ========================================================================== */
+    const DateHelper = {
+        initDropdowns: function(dayId, monthId, yearId, hiddenId) {
+            const daySel = document.getElementById(dayId);
+            const monthSel = document.getElementById(monthId);
+            const yearSel = document.getElementById(yearId);
+            const hiddenInput = document.getElementById(hiddenId);
+
+            if (!daySel || !monthSel || !yearSel || !hiddenInput) return;
+
+            let dHtml = '<option value="">Ngày</option>';
+            for(let i=1; i<=31; i++) dHtml += `<option value="${i<10?'0'+i:i}">${i}</option>`;
+            daySel.innerHTML = dHtml;
+
+            let mHtml = '<option value="">Tháng</option>';
+            for(let i=1; i<=12; i++) mHtml += `<option value="${i<10?'0'+i:i}">Tháng ${i}</option>`;
+            monthSel.innerHTML = mHtml;
+
+            const currYear = new Date().getFullYear();
+            let yHtml = '<option value="">Năm</option>';
+            for(let i=currYear-15; i>=currYear-80; i--) yHtml += `<option value="${i}">${i}</option>`;
+            yearSel.innerHTML = yHtml;
+
+            const syncDate = () => {
+                const d = daySel.value, m = monthSel.value, y = yearSel.value;
+                hiddenInput.value = (d && m && y) ? `${y}-${m}-${d}` : '';
+            };
+
+            daySel.addEventListener('change', syncDate);
+            monthSel.addEventListener('change', syncDate);
+            yearSel.addEventListener('change', syncDate);
+        },
+
+        setValue: function(dateStr, dayId, monthId, yearId, hiddenId) {
+            if (!dateStr) {
+                document.getElementById(dayId).value = '';
+                document.getElementById(monthId).value = '';
+                document.getElementById(yearId).value = '';
+                document.getElementById(hiddenId).value = '';
+                return;
+            }
+            const parts = dateStr.split('-');
+            if (parts.length === 3) {
+                document.getElementById(yearId).value = parts[0];
+                document.getElementById(monthId).value = parts[1];
+                document.getElementById(dayId).value = parts[2];
+                document.getElementById(hiddenId).value = dateStr;
+            }
+        }
+    };
+
     // --- MAIN APP ---
     window.CustomerApp = {
         initialized: false,
@@ -646,6 +704,7 @@
 
         init() {
             if (this.initialized) return;
+            DateHelper.initDropdowns('selDay', 'selMonth', 'selYear', 'inpDob'); // Khởi tạo 3 ô Ngày sinh
             this.loadData();
             this.Address.loadProvinces('inpCity');
             this.Address.loadProvinces('subCity');
@@ -834,8 +893,12 @@
                 document.getElementById('inpEmail').value = data.email;
 
                 let dob = data.ngaySinh;
-                if (Array.isArray(dob)) dob = `${dob[0]}-${String(dob[1]).padStart(2, '0')}-${String(dob[2]).padStart(2, '0')}`;
-                document.getElementById('inpDob').value = dob || '';
+                if (Array.isArray(dob)) {
+                    dob = `${dob[0]}-${String(dob[1]).padStart(2, '0')}-${String(dob[2]).padStart(2, '0')}`;
+                } else if (dob && dob.includes('T')) {
+                    dob = dob.split('T')[0];
+                }
+                DateHelper.setValue(dob || '', 'selDay', 'selMonth', 'selYear', 'inpDob');
 
                 document.getElementById('inpGender').value = (data.gioiTinh === 'Nam' || data.gioiTinh === true) ? 'true' : 'false';
                 document.getElementById('inpStatus').checked = data.trangThai;
@@ -1057,6 +1120,7 @@
             const nameInput = document.getElementById('inpName').value.trim();
             const phoneInput = document.getElementById('inpPhone').value.trim();
             const emailInput = document.getElementById('inpEmail').value.trim();
+            const dobInput = document.getElementById('inpDob').value;
 
             if (!nameInput || !phoneInput) {
                 if(typeof window.toast === 'function') window.toast('Vui lòng nhập đầy đủ Tên và Số điện thoại!', 'warning');
@@ -1073,6 +1137,23 @@
                 return;
             }
 
+            // VALIDATE ĐỘ TUỔI TỐI THIỂU 15 TUỔI
+            if (!dobInput) {
+                if(typeof window.toast === 'function') window.toast('Vui lòng chọn ngày tháng năm sinh!', 'warning');
+                return;
+            }
+            const dobDate = new Date(dobInput);
+            const today = new Date();
+            let age = today.getFullYear() - dobDate.getFullYear();
+            const m = today.getMonth() - dobDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
+                age--;
+            }
+            if (age < 15) {
+                if(typeof window.toast === 'function') window.toast('Khách hàng phải từ đủ 15 tuổi trở lên!', 'error');
+                return;
+            }
+
             if(typeof window.confirmDialog === 'function') {
                 window.confirmDialog("XÁC NHẬN LƯU", "Bạn có chắc chắn muốn lưu thông tin khách hàng này vào hệ thống?", async () => {
                     const btn = document.getElementById('btnSave');
@@ -1082,7 +1163,7 @@
                         hoTen: nameInput,
                         soDienThoai: phoneInput,
                         email: emailInput,
-                        ngaySinh: document.getElementById('inpDob').value,
+                        ngaySinh: dobInput, // Lấy từ biến dobInput đã gán ở trên
                         gioiTinh: document.getElementById('inpGender').value === 'true',
                         trangThai: document.getElementById('inpStatus').checked
                     };
@@ -1232,11 +1313,12 @@
 
         closeDrawer() { document.getElementById('drawer').classList.remove('show', 'wide'); document.getElementById('overlay').classList.remove('show'); },
         resetForm() {
-            document.querySelectorAll('input').forEach(i => { if(i.type !== 'checkbox') i.value = ''; });
+            document.querySelectorAll('input').forEach(i => { if(i.type !== 'checkbox' && i.type !== 'hidden') i.value = ''; });
             document.getElementById('imgPreview').src = ''; document.getElementById('imgPreview').style.display = 'none';
             document.getElementById('iconUpload').style.display = 'block'; document.getElementById('inpStatus').checked = true;
             document.getElementById('inpFile').value = ''; document.getElementById('subAddressForm').style.display = 'none';
             this.Address.reset('inpCity', 'inpDist', 'inpWard'); this.Address.reset('subCity', 'subDist', 'subWard');
+            DateHelper.setValue('', 'selDay', 'selMonth', 'selYear', 'inpDob'); // Reset ô chọn Ngày sinh
         },
         previewImage(input) {
             if (input.files && input.files[0]) {

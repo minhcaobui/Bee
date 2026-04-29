@@ -89,11 +89,20 @@
                         <span id="notif-badge" style="position:absolute; top:8px; right:8px; width:10px; height:10px; background:var(--red-primary); border-radius:50%; border:2px solid #fff; display:none;"></span>
                     </button>
                     <div id="notif-dropdown" class="dropdown-menu">
-                        <div class="dropdown-header">THÔNG BÁO MỚI</div>
-                        <div class="dropdown-content">
+                        <div class="notif-tabs">
+                            <div id="tab-orders" class="notif-tab active" onclick="NotifApp.switchTab('orders')">ĐƠN HÀNG</div>
+                            <div id="tab-reviews" class="notif-tab" onclick="NotifApp.switchTab('reviews')">ĐÁNH GIÁ</div>
+                        </div>
+                        <div class="dropdown-content" id="notif-orders-content">
                             <div class="empty-notif">
-                                <i class="bi bi-bell-slash"></i>
-                                <span>Không có thông báo mới nào</span>
+                                <i class="bi bi-receipt"></i>
+                                <span>Đang tải thông báo đơn hàng...</span>
+                            </div>
+                        </div>
+                        <div class="dropdown-content" id="notif-reviews-content" style="display: none;">
+                            <div class="empty-notif">
+                                <i class="bi bi-star"></i>
+                                <span>Đang tải thông báo đánh giá...</span>
                             </div>
                         </div>
                     </div>

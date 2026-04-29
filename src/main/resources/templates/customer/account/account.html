@@ -20,43 +20,32 @@
         /* 1. Container bao ngoài để căn giữa toàn bộ */
         .account-container {
             display: flex;
-            align-items: center;
-            justify-content: center;
             min-height: 100vh;
-            padding: 40px 20px;
-            /* Ý tưởng về nền: Sử dụng gradient nhẹ hoặc màu hạt dẻ mờ cho sang */
-            background: radial-gradient(circle at top left, #f8f9fa 0%, #e9ecef 100%);
+            background: var(--bg);
         }
 
-        /* 2. Thẻ Card chính - Ranh giới không được vượt quá */
         .account-layout {
             width: 100%;
-            max-width: 1250px; /* Giới hạn chiều ngang nhỉnh hơn sidebar 1 chút như mày muốn */
-            height: 85vh; /* Giới hạn chiều cao */
             display: grid;
-            grid-template-columns: 300px 1fr; /* Cố định sidebar 300px */
+            grid-template-columns: 300px 1fr;
             background: var(--white);
-            border: 1px solid rgba(0,0,0,0.08);
-            border-radius: 24px; /* Bo góc to nhìn cho hiện đại */
-            box-shadow: 0 30px 60px rgba(0,0,0,0.06);
-            overflow: hidden; /* Đảm bảo nội dung ko tràn ra ngoài bo góc */
-            margin: 0 auto;
         }
 
-        /* 3. Sidebar cố định (Chuẩn mực của mày) */
+        /* 3. Sidebar cố định */
         .account-sidebar {
-            height: 100%;
+            min-height: 100vh;
             background: #fff;
-            border-right: 1px solid rgba(0,0,0,0.06); /* Đường kẻ dọc phân chia giữa sidebar và content */
+            border-right: 1px solid rgba(0,0,0,0.06);
             padding: 40px 0;
-            position: relative;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
             z-index: 10;
         }
 
-        /* 4. Vùng nội dung được phép cuộn */
+        /* 4. Vùng nội dung cuộn tự nhiên */
         .account-content {
-            height: 100%;
-            overflow-y: auto; /* Chỉ cho phép cuộn dọc ở đây */
             padding: 40px 60px;
             background: #ffffff;
         }
@@ -676,230 +665,241 @@
     </div>
     <div class="account-container">
         <div class="account-layout" id="account-view">
-        <div class="account-sidebar">
-            <div class="account-user">
-                <div class="account-avatar-wrap">
-                    <div class="account-avatar" id="sidebarAvatar">
-                        <i class="bi bi-person" style="font-size: 28px;"></i>
-                    </div>
-                    <div class="account-avatar-edit" onclick="document.getElementById('avatarFileInput').click()">
-                        <svg viewBox="0 0 24 24" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </div>
-                </div>
-                <div class="account-user-name" id="sidebarName">Đang tải...</div>
-                <div class="account-user-email" id="sidebarEmail">...</div>
-                <div class="account-user-since" id="sidebarSince"></div>
-            </div>
-            <ul class="account-nav">
-                <div class="nav-item-wrapper" data-nav="overview">
-                    <li><button class="account-nav-btn active" data-panel="overview"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>Tổng quan</button></li>
-                </div>
-                <div class="nav-item-wrapper" data-nav="orders">
-                    <li><button class="account-nav-btn" data-panel="orders"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M9 12h6M9 16h6M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h5l5 5v11a2 2 0 01-2 2z"/></svg>Đơn hàng của tôi</button></li>
-                </div>
-                <div class="nav-item-wrapper" data-nav="wishlist">
-                    <li><button class="account-nav-btn" data-panel="wishlist"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Sản phẩm Yêu thích</button></li>
-                </div>
-                <div class="nav-item-wrapper" data-nav="profile">
-                    <li><button class="account-nav-btn" data-panel="profile"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg>Thông tin cá nhân</button></li>
-                </div>
-            </ul>
-            <div class="account-nav-logout">
-                <button class="account-logout-btn" onclick="window.AccountApp.confirmLogout()">
-                    <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Đăng xuất
-                </button>
-            </div>
-        </div>
-
-        <div class="account-content">
-
-            <div class="account-panel active" id="panel-overview">
-                <div class="account-panel-title" id="overviewGreeting">Xin chào...</div>
-                <div class="account-panel-subtitle">Đây là tóm tắt hoạt động tài khoản của bạn.</div>
-
-                <div class="account-overview-grid">
-                    <div class="account-stat-card"><div class="account-stat-num" id="statOrders">0</div><div class="account-stat-label">Đơn hàng</div></div>
-                    <div class="account-stat-card"><div class="account-stat-num" id="statWishlist">0</div><div class="account-stat-label">Yêu thích</div></div>
-                    <div class="account-stat-card"><div class="account-stat-num" id="statTotalSpent">0 ₫</div><div class="account-stat-label">Tổng chi tiêu</div></div>
-                </div>
-
-                <div class="account-recent-title">Đơn hàng gần đây</div>
-                <div id="recentOrdersList"></div>
-                <div id="overviewAddressBlock"></div>
-            </div>
-
-            <div class="account-panel" id="panel-orders">
-                <div class="orders-sticky-header">
-                <div class="account-panel-title">Đơn hàng của tôi</div>
-                <div class="account-panel-subtitle">Lịch sử và trạng thái tất cả đơn hàng.</div>
-
-                <div style="display: flex; flex-direction: column; gap: 16px; border-bottom: 1px solid rgba(0,0,0,0.08); margin-bottom: 32px; padding-bottom: 16px;">
-                    <div class="orders-filter-bar" id="ordersFilterBar" style="border-bottom: none; margin-bottom: 0; overflow-x: auto; white-space: nowrap;">
-                        <button class="orders-filter-tab active" data-filter="all">Tất cả</button>
-                        <button class="orders-filter-tab" data-filter="CHO_XAC_NHAN">Chờ xác nhận</button>
-                        <button class="orders-filter-tab" data-filter="CHO_THANH_TOAN">Chờ thanh toán</button>
-                        <button class="orders-filter-tab" data-filter="CHO_GIAO_VAN_CHUYEN">Chờ lấy hàng</button>
-                        <button class="orders-filter-tab" data-filter="DANG_GIAO_HANG">Đang giao</button>
-                        <button class="orders-filter-tab" data-filter="HOAN_THANH">Đã giao</button>
-                        <button class="orders-filter-tab" data-filter="DA_HUY">Đã huỷ</button>
-                    </div>
-
-                    <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
-                        <div style="position: relative; flex: 1; min-width: 250px; max-width: 350px;">
-                            <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted);"></i>
-                            <input type="text" id="myOrderSearch" placeholder="Tìm mã hóa đơn, tên sản phẩm..." class="account-form-input" style="padding-left: 36px; width: 100%; border-radius: var(--radius-md);;" oninput="window.AccountApp.handleInstantSearch()">
+            <div class="account-sidebar">
+                <div class="account-user">
+                    <div class="account-avatar-wrap">
+                        <div class="account-avatar" id="sidebarAvatar">
+                            <i class="bi bi-person" style="font-size: 28px;"></i>
+                        </div>
+                        <div class="account-avatar-edit" onclick="document.getElementById('avatarFileInput').click()">
+                            <svg viewBox="0 0 24 24" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                         </div>
                     </div>
+                    <div class="account-user-name" id="sidebarName">Đang tải...</div>
+                    <div class="account-user-email" id="sidebarEmail">...</div>
+                    <div class="account-user-since" id="sidebarSince"></div>
                 </div>
-
-                </div>
-
-                <div id="ordersContainer"></div>
-                <div id="myOrdersPagination" style="display: flex; justify-content: center; gap: 6px; margin-top: 24px; flex-wrap: wrap; padding-bottom: 40px;"></div>
-            </div>
-
-            <div class="account-panel" id="panel-wishlist">
-                <div class="account-panel-title">Sản phẩm yêu thích</div>
-                <div class="account-panel-subtitle">Danh sách các sản phẩm bạn đã lưu.</div>
-                <div class="wishlist-grid" id="wishlistContainer"></div>
-                <div id="wishlistShowMoreWrap" style="display:none; text-align:center; margin-top:28px;">
-                    <button id="btnWishlistToggle" onclick="window.AccountApp.toggleWishlistDisplay()"
-                            style="padding:13px 40px; background:transparent; color:var(--text); border:1px solid rgba(0,0,0,0.15);
-               font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600; letter-spacing:0.12em;
-               text-transform:uppercase; cursor:pointer; border-radius: var(--radius-md); transition:0.2s;
-               display:inline-flex; align-items:center; gap:8px;">
-                        <i class="fa-solid fa-angles-down" id="wishlistToggleIcon"></i>
-                        <span id="wishlistToggleText">Xem thêm</span>
+                <ul class="account-nav">
+                    <div class="nav-item-wrapper" data-nav="overview">
+                        <li><button class="account-nav-btn active" data-panel="overview"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>Tổng quan</button></li>
+                    </div>
+                    <div class="nav-item-wrapper" data-nav="orders">
+                        <li><button class="account-nav-btn" data-panel="orders"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M9 12h6M9 16h6M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h5l5 5v11a2 2 0 01-2 2z"/></svg>Đơn hàng của tôi</button></li>
+                    </div>
+                    <div class="nav-item-wrapper" data-nav="wishlist">
+                        <li><button class="account-nav-btn" data-panel="wishlist"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Sản phẩm Yêu thích</button></li>
+                    </div>
+                    <div class="nav-item-wrapper" data-nav="profile">
+                        <li><button class="account-nav-btn" data-panel="profile"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg>Thông tin cá nhân</button></li>
+                    </div>
+                </ul>
+                <div class="account-nav-logout">
+                    <button class="account-logout-btn" onclick="window.AccountApp.confirmLogout()">
+                        <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Đăng xuất
                     </button>
                 </div>
             </div>
 
-            <div class="account-panel" id="panel-order-detail">
+            <div class="account-content">
 
-                <div class="account-panel-title" id="detOrderMa">Chi tiết</div>
-                <div class="detail-info-grid">
-                    <div class="detail-info-item"><label>Người nhận</label><p id="detTenNhan"></p><p id="detSdtNhan"></p><p id="detDiaChi"></p></div>
-                    <div class="detail-info-item"><label>Thanh toán</label><p id="detPayment"></p><p id="detStatus"></p></div>
+                <div class="account-panel active" id="panel-overview">
+                    <div class="account-panel-title" id="overviewGreeting">Xin chào...</div>
+                    <div class="account-panel-subtitle">Đây là tóm tắt hoạt động tài khoản của bạn.</div>
+
+                    <div class="account-overview-grid">
+                        <div class="account-stat-card"><div class="account-stat-num" id="statOrders">0</div><div class="account-stat-label">Đơn hàng</div></div>
+                        <div class="account-stat-card"><div class="account-stat-num" id="statWishlist">0</div><div class="account-stat-label">Yêu thích</div></div>
+                        <div class="account-stat-card"><div class="account-stat-num" id="statTotalSpent">0 ₫</div><div class="account-stat-label">Tổng chi tiêu</div></div>
+                    </div>
+
+                    <div class="account-recent-title">Đơn hàng gần đây</div>
+                    <div id="recentOrdersList"></div>
+                    <div id="overviewAddressBlock"></div>
                 </div>
-                <table class="detail-product-table">
-                    <thead><tr><th>Sản phẩm</th><th style="text-align:center">Đơn giá</th><th style="text-align:center">SL</th><th style="text-align:right">Thành tiền</th></tr></thead>
-                    <tbody id="detProductList"></tbody>
-                </table>
+
+                <div class="account-panel" id="panel-orders">
+                    <div class="orders-sticky-header">
+                        <div class="account-panel-title">Đơn hàng của tôi</div>
+                        <div class="account-panel-subtitle">Lịch sử và trạng thái tất cả đơn hàng.</div>
+
+                        <div style="display: flex; flex-direction: column; gap: 16px; border-bottom: 1px solid rgba(0,0,0,0.08); margin-bottom: 32px; padding-bottom: 16px;">
+                            <div class="orders-filter-bar" id="ordersFilterBar" style="border-bottom: none; margin-bottom: 0; overflow-x: auto; white-space: nowrap;">
+                                <button class="orders-filter-tab active" data-filter="all">Tất cả</button>
+                                <button class="orders-filter-tab" data-filter="CHO_XAC_NHAN">Chờ xác nhận</button>
+                                <button class="orders-filter-tab" data-filter="CHO_THANH_TOAN">Chờ thanh toán</button>
+                                <button class="orders-filter-tab" data-filter="CHO_GIAO_VAN_CHUYEN">Chờ lấy hàng</button>
+                                <button class="orders-filter-tab" data-filter="DANG_GIAO_HANG">Đang giao</button>
+                                <button class="orders-filter-tab" data-filter="HOAN_THANH">Đã giao</button>
+                                <button class="orders-filter-tab" data-filter="DA_HUY">Đã huỷ</button>
+                            </div>
+
+                            <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+                                <div style="position: relative; flex: 1; min-width: 250px; max-width: 350px;">
+                                    <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted);"></i>
+                                    <input type="text" id="myOrderSearch" placeholder="Tìm mã hóa đơn, tên sản phẩm..." class="account-form-input" style="padding-left: 36px; width: 100%; border-radius: var(--radius-md);;" oninput="window.AccountApp.handleInstantSearch()">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div id="ordersContainer"></div>
+                    <div id="myOrdersPagination" style="display: flex; justify-content: center; gap: 6px; margin-top: 24px; flex-wrap: wrap; padding-bottom: 40px;"></div>
+                </div>
+
+                <div class="account-panel" id="panel-wishlist">
+                    <div class="account-panel-title">Sản phẩm yêu thích</div>
+                    <div class="account-panel-subtitle">Danh sách các sản phẩm bạn đã lưu.</div>
+                    <div class="wishlist-grid" id="wishlistContainer"></div>
+                    <div id="wishlistShowMoreWrap" style="display:none; text-align:center; margin-top:28px;">
+                        <button id="btnWishlistToggle" onclick="window.AccountApp.toggleWishlistDisplay()"
+                                style="padding:13px 40px; background:transparent; color:var(--text); border:1px solid rgba(0,0,0,0.15);
+               font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600; letter-spacing:0.12em;
+               text-transform:uppercase; cursor:pointer; border-radius: var(--radius-md); transition:0.2s;
+               display:inline-flex; align-items:center; gap:8px;">
+                            <i class="fa-solid fa-angles-down" id="wishlistToggleIcon"></i>
+                            <span id="wishlistToggleText">Xem thêm</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="account-panel" id="panel-order-detail">
+
+                    <div class="account-panel-title" id="detOrderMa">Chi tiết</div>
+                    <div class="detail-info-grid">
+                        <div class="detail-info-item"><label>Người nhận</label><p id="detTenNhan"></p><p id="detSdtNhan"></p><p id="detDiaChi"></p></div>
+                        <div class="detail-info-item"><label>Thanh toán</label><p id="detPayment"></p><p id="detStatus"></p></div>
+                    </div>
+                    <table class="detail-product-table">
+                        <thead><tr><th>Sản phẩm</th><th style="text-align:center">Đơn giá</th><th style="text-align:center">SL</th><th style="text-align:right">Thành tiền</th></tr></thead>
+                        <tbody id="detProductList"></tbody>
+                    </table>
+                </div>
+
+                <div class="account-panel" id="panel-profile">
+
+                    <div id="staffPortalBanner" class="staff-banner" style="display:none;">
+                        <i class="bi bi-shield-check" style="font-size:32px; color:#ef4444;"></i>
+                        <div>
+                            <div style="font-weight:800; color:#b91c1c; font-size:14px; margin-bottom:4px; text-transform:uppercase;">Cổng Thông Tin Nhân Viên</div>
+                            <div style="font-size:13px; color:#991b1b;">Bạn đang đăng nhập bằng tài khoản quản trị viên. Tính năng giỏ hàng, hóa đơn và sổ địa chỉ giao hàng đã bị vô hiệu hóa trên hệ thống khách hàng.</div>
+                        </div>
+                    </div>
+
+                    <div class="account-panel-title">Thông tin cá nhân</div>
+                    <div class="account-panel-subtitle">Cập nhật hồ sơ và thông vị bảo mật.</div>
+
+                    <div class="profile-avatar-section">
+                        <div class="profile-avatar-big" id="profileAvatarBig">
+                            <i class="bi bi-person" style="font-size: 36px;"></i>
+                        </div>
+                        <div>
+                            <div class="profile-avatar-name" id="profileNameBig">Đang tải...</div>
+                            <div class="profile-avatar-sub" id="profileSinceBig">...</div>
+                            <label class="profile-avatar-upload" for="avatarFileInput">Đổi ảnh đại diện</label>
+                            <input type="file" id="avatarFileInput" accept="image/*" style="display:none">
+                        </div>
+                    </div>
+
+                    <div style="font-family: 'DM Sans', sans-serif;font-size:22px;margin-bottom:8px">Thông tin cơ bản</div>
+
+                    <div class="account-form-grid">
+                        <div class="account-form-field full">
+                            <label class="account-form-label">
+                                Tên đăng nhập
+                                <span style="text-transform:none; color:#c08060; font-size:10px; margin-left:8px; font-style:italic;">(Chỉ được phép thay đổi 1 lần duy nhất)</span>
+                            </label>
+                            <input id="inpUsername" class="account-form-input" type="text" placeholder="Nhập tên đăng nhập tùy chọn...">
+                            <div id="usernameWarning" style="display:none; font-size:11px; color:#c03c3c; margin-top:4px;">
+                                <svg viewBox="0 0 24 24" style="width:12px; height:12px; stroke:currentColor; fill:none; vertical-align:middle; margin-right:2px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                Tên đăng nhập đã được thay đổi, bạn không thể sửa đổi thêm.
+                            </div>
+                        </div>
+
+                        <div class="account-form-field">
+                            <label class="account-form-label">Họ và Tên</label>
+                            <input id="inpFirstName" class="account-form-input" type="text" placeholder="Nhập họ và tên...">
+                        </div>
+
+                        <div class="account-form-field">
+                            <label class="account-form-label">Số điện thoại</label>
+                            <input id="inpPhone" class="account-form-input" type="tel" placeholder="Nhập số điện thoại...">
+                        </div>
+
+                        <div class="account-form-field">
+                            <label class="account-form-label">Email</label>
+                            <input id="inpEmail" class="account-form-input" type="email" placeholder="Nhập địa chỉ email của bạn...">
+                        </div>
+
+                        <div class="account-form-field">
+                            <label class="account-form-label">Ngày sinh</label>
+                            <div style="display: flex; gap: 10px; width: 100%;">
+                                <select id="selDay" class="account-form-input" style="flex: 1; padding: 13px 10px !important; min-width: 0;">
+                                    <option value="">Ngày</option>
+                                </select>
+                                <select id="selMonth" class="account-form-input" style="flex: 1; padding: 13px 10px !important; min-width: 0;">
+                                    <option value="">Tháng</option>
+                                </select>
+                                <select id="selYear" class="account-form-input" style="flex: 1.2; padding: 13px 10px !important; min-width: 0;">
+                                    <option value="">Năm</option>
+                                </select>
+                            </div>
+                            <input type="hidden" id="inpDob">
+                        </div>
+
+                        <div class="account-form-field">
+                            <label class="account-form-label">Giới tính</label>
+                            <select id="inpGender" class="account-form-input" style="cursor: pointer;">
+                                <option value="">Chọn giới tính</option>
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                                <option value="Khác">Khác</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="account-form-save" id="btnSaveProfile" onclick="window.AccountApp.confirmAction('profile')">Lưu thay đổi</button>
+
+                    <div class="account-section-divider" id="addressDivider1"></div>
+
+                    <div id="addressBookHeaderWrap" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; max-width:640px;">
+                        <div style="font-family: 'DM Sans', sans-serif;font-size:22px;">Sổ địa chỉ</div>
+                        <button onclick="window.AccountApp.openAddressModal()" style="padding: 12px 24px; background: var(--accent); color: white; border: none; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; border-radius: var(--radius-md); font-family: 'DM Sans', sans-serif; transition: background 0.2s;" onmouseover="this.style.background='#2c4238'" onmouseout="this.style.background='var(--accent)'">+ Thêm địa chỉ mới</button>
+                    </div>
+                    <div id="addressBookContainer" style="max-width:640px; margin-bottom:48px;"></div>
+
+                    <div class="account-section-divider" id="addressDivider2"></div>
+
+                    <div style="font-family: 'DM Sans', sans-serif;font-size:22px;margin-bottom:8px">Đổi mật khẩu</div>
+                    <div class="account-form-grid">
+                        <div class="account-form-field full">
+                            <label class="account-form-label">Mật khẩu hiện tại</label>
+                            <div class="input-password-wrap">
+                                <input class="account-form-input" type="password" id="pwCurrent" placeholder="Nhập mật khẩu hiện tại">
+                                <button class="toggle-pw-btn" type="button" onclick="window.AccountApp.togglePassword('pwCurrent', this)"><svg viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8-11-8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                            </div>
+                        </div>
+                        <div class="account-form-field full">
+                            <label class="account-form-label">Mật khẩu mới</label>
+                            <div class="input-password-wrap">
+                                <input class="account-form-input" type="password" id="pwNew" placeholder="Tối thiểu 8 ký tự" oninput="window.AccountApp.checkPasswordStrength(this.value)">
+                                <button class="toggle-pw-btn" type="button" onclick="window.AccountApp.togglePassword('pwNew', this)"><svg viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8-11-8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                            </div>
+                            <div class="password-strength"><div class="password-strength-bar" id="pwStrengthBar"></div></div>
+                            <div class="password-strength-label" id="pwStrengthLabel"></div>
+                        </div>
+                        <div class="account-form-field full">
+                            <label class="account-form-label">Xác nhận mật khẩu mới</label>
+                            <div class="input-password-wrap">
+                                <input class="account-form-input" type="password" id="pwConfirm" placeholder="Nhập lại mật khẩu mới">
+                                <button class="toggle-pw-btn" type="button" onclick="window.AccountApp.togglePassword('pwConfirm', this)"><svg viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8-11-8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="account-form-save" onclick="window.AccountApp.confirmAction('password')">Đổi mật khẩu</button>
+                </div>
+
             </div>
-
-            <div class="account-panel" id="panel-profile">
-
-                <div id="staffPortalBanner" class="staff-banner" style="display:none;">
-                    <i class="bi bi-shield-check" style="font-size:32px; color:#ef4444;"></i>
-                    <div>
-                        <div style="font-weight:800; color:#b91c1c; font-size:14px; margin-bottom:4px; text-transform:uppercase;">Cổng Thông Tin Nhân Viên</div>
-                        <div style="font-size:13px; color:#991b1b;">Bạn đang đăng nhập bằng tài khoản quản trị viên. Tính năng giỏ hàng, hóa đơn và sổ địa chỉ giao hàng đã bị vô hiệu hóa trên hệ thống khách hàng.</div>
-                    </div>
-                </div>
-
-                <div class="account-panel-title">Thông tin cá nhân</div>
-                <div class="account-panel-subtitle">Cập nhật hồ sơ và thông vị bảo mật.</div>
-
-                <div class="profile-avatar-section">
-                    <div class="profile-avatar-big" id="profileAvatarBig">
-                        <i class="bi bi-person" style="font-size: 36px;"></i>
-                    </div>
-                    <div>
-                        <div class="profile-avatar-name" id="profileNameBig">Đang tải...</div>
-                        <div class="profile-avatar-sub" id="profileSinceBig">...</div>
-                        <label class="profile-avatar-upload" for="avatarFileInput">Đổi ảnh đại diện</label>
-                        <input type="file" id="avatarFileInput" accept="image/*" style="display:none">
-                    </div>
-                </div>
-
-                <div style="font-family: 'DM Sans', sans-serif;font-size:22px;margin-bottom:8px">Thông tin cơ bản</div>
-
-                <div class="account-form-grid">
-                    <div class="account-form-field full">
-                        <label class="account-form-label">
-                            Tên đăng nhập
-                            <span style="text-transform:none; color:#c08060; font-size:10px; margin-left:8px; font-style:italic;">(Chỉ được phép thay đổi 1 lần duy nhất)</span>
-                        </label>
-                        <input id="inpUsername" class="account-form-input" type="text" placeholder="Nhập tên đăng nhập tùy chọn...">
-                        <div id="usernameWarning" style="display:none; font-size:11px; color:#c03c3c; margin-top:4px;">
-                            <svg viewBox="0 0 24 24" style="width:12px; height:12px; stroke:currentColor; fill:none; vertical-align:middle; margin-right:2px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                            Tên đăng nhập đã được thay đổi, bạn không thể sửa đổi thêm.
-                        </div>
-                    </div>
-
-                    <div class="account-form-field">
-                        <label class="account-form-label">Họ và Tên</label>
-                        <input id="inpFirstName" class="account-form-input" type="text" placeholder="Nhập họ và tên...">
-                    </div>
-
-                    <div class="account-form-field">
-                        <label class="account-form-label">Số điện thoại</label>
-                        <input id="inpPhone" class="account-form-input" type="tel" placeholder="Nhập số điện thoại...">
-                    </div>
-
-                    <div class="account-form-field">
-                        <label class="account-form-label">Email</label>
-                        <input id="inpEmail" class="account-form-input" type="email" placeholder="Nhập địa chỉ email của bạn...">
-                    </div>
-
-                    <div class="account-form-field">
-                        <label class="account-form-label">Ngày sinh</label>
-                        <input id="inpDob" class="account-form-input" type="date">
-                    </div>
-
-                    <div class="account-form-field">
-                        <label class="account-form-label">Giới tính</label>
-                        <select id="inpGender" class="account-form-input" style="cursor: pointer;">
-                            <option value="">Chọn giới tính</option>
-                            <option value="Nam">Nam</option>
-                            <option value="Nữ">Nữ</option>
-                            <option value="Khác">Khác</option>
-                        </select>
-                    </div>
-                </div>
-                <button class="account-form-save" id="btnSaveProfile" onclick="window.AccountApp.confirmAction('profile')">Lưu thay đổi</button>
-
-                <div class="account-section-divider" id="addressDivider1"></div>
-
-                <div id="addressBookHeaderWrap" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; max-width:640px;">
-                    <div style="font-family: 'DM Sans', sans-serif;font-size:22px;">Sổ địa chỉ</div>
-                    <button onclick="window.AccountApp.openAddressModal()" style="padding: 12px 24px; background: var(--accent); color: white; border: none; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; border-radius: var(--radius-md); font-family: 'DM Sans', sans-serif; transition: background 0.2s;" onmouseover="this.style.background='#2c4238'" onmouseout="this.style.background='var(--accent)'">+ Thêm địa chỉ mới</button>
-                </div>
-                <div id="addressBookContainer" style="max-width:640px; margin-bottom:48px;"></div>
-
-                <div class="account-section-divider" id="addressDivider2"></div>
-
-                <div style="font-family: 'DM Sans', sans-serif;font-size:22px;margin-bottom:8px">Đổi mật khẩu</div>
-                <div class="account-form-grid">
-                    <div class="account-form-field full">
-                        <label class="account-form-label">Mật khẩu hiện tại</label>
-                        <div class="input-password-wrap">
-                            <input class="account-form-input" type="password" id="pwCurrent" placeholder="Nhập mật khẩu hiện tại">
-                            <button class="toggle-pw-btn" type="button" onclick="window.AccountApp.togglePassword('pwCurrent', this)"><svg viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8-11-8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-                        </div>
-                    </div>
-                    <div class="account-form-field full">
-                        <label class="account-form-label">Mật khẩu mới</label>
-                        <div class="input-password-wrap">
-                            <input class="account-form-input" type="password" id="pwNew" placeholder="Tối thiểu 8 ký tự" oninput="window.AccountApp.checkPasswordStrength(this.value)">
-                            <button class="toggle-pw-btn" type="button" onclick="window.AccountApp.togglePassword('pwNew', this)"><svg viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8-11-8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-                        </div>
-                        <div class="password-strength"><div class="password-strength-bar" id="pwStrengthBar"></div></div>
-                        <div class="password-strength-label" id="pwStrengthLabel"></div>
-                    </div>
-                    <div class="account-form-field full">
-                        <label class="account-form-label">Xác nhận mật khẩu mới</label>
-                        <div class="input-password-wrap">
-                            <input class="account-form-input" type="password" id="pwConfirm" placeholder="Nhập lại mật khẩu mới">
-                            <button class="toggle-pw-btn" type="button" onclick="window.AccountApp.togglePassword('pwConfirm', this)"><svg viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8-11-8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-                        </div>
-                    </div>
-                </div>
-                <button class="account-form-save" onclick="window.AccountApp.confirmAction('password')">Đổi mật khẩu</button>
-            </div>
-
         </div>
-    </div>
     </div>
 
     <div class="acc-modal-overlay" id="accAddressModalOverlay" onclick="if(event.target === this) window.AccountApp.closeAddressModal()">
@@ -983,6 +983,59 @@
     </div>
 
     <script>
+        /* ==========================================================================
+           HELPER: KHỞI TẠO VÀ ĐỒNG BỘ NGÀY SINH TỪ 3 DROPDOWN
+           ========================================================================== */
+        const DateHelper = {
+            initDropdowns: function(dayId, monthId, yearId, hiddenId) {
+                const daySel = document.getElementById(dayId);
+                const monthSel = document.getElementById(monthId);
+                const yearSel = document.getElementById(yearId);
+                const hiddenInput = document.getElementById(hiddenId);
+
+                if (!daySel || !monthSel || !yearSel || !hiddenInput) return;
+
+                let dHtml = '<option value="">Ngày</option>';
+                for(let i=1; i<=31; i++) dHtml += `<option value="${i<10?'0'+i:i}">${i}</option>`;
+                daySel.innerHTML = dHtml;
+
+                let mHtml = '<option value="">Tháng</option>';
+                for(let i=1; i<=12; i++) mHtml += `<option value="${i<10?'0'+i:i}">Tháng ${i}</option>`;
+                monthSel.innerHTML = mHtml;
+
+                const currYear = new Date().getFullYear();
+                let yHtml = '<option value="">Năm</option>';
+                for(let i=currYear-15; i>=currYear-80; i--) yHtml += `<option value="${i}">${i}</option>`;
+                yearSel.innerHTML = yHtml;
+
+                const syncDate = () => {
+                    const d = daySel.value, m = monthSel.value, y = yearSel.value;
+                    hiddenInput.value = (d && m && y) ? `${y}-${m}-${d}` : '';
+                };
+
+                daySel.addEventListener('change', syncDate);
+                monthSel.addEventListener('change', syncDate);
+                yearSel.addEventListener('change', syncDate);
+            },
+
+            setValue: function(dateStr, dayId, monthId, yearId, hiddenId) {
+                if (!dateStr) {
+                    document.getElementById(dayId).value = '';
+                    document.getElementById(monthId).value = '';
+                    document.getElementById(yearId).value = '';
+                    document.getElementById(hiddenId).value = '';
+                    return;
+                }
+                const parts = dateStr.split('-');
+                if (parts.length === 3) {
+                    document.getElementById(yearId).value = parts[0];
+                    document.getElementById(monthId).value = parts[1];
+                    document.getElementById(dayId).value = parts[2];
+                    document.getElementById(hiddenId).value = dateStr;
+                }
+            }
+        };
+
         window.AccountApp = {
             state: {
                 user: null,
@@ -1004,8 +1057,11 @@
                 apiUrl: 'https://online-gateway.ghn.vn/shiip/public-api'
             },
 
+
+
             init: async function() {
                 this.bindEvents();
+                DateHelper.initDropdowns('selDay', 'selMonth', 'selYear', 'inpDob');
                 await this.fetchData();
             },
 
@@ -2605,7 +2661,13 @@
 
                 const inpUser = document.getElementById('inpUsername');
                 inpUser.value = user.tenDangNhap || '';
-                if(user.ngaySinh) { document.getElementById('inpDob').value = user.ngaySinh.substring(0, 10); }
+
+                // Đổ dữ liệu Ngày sinh vào 3 ô Dropdown
+                if(user.ngaySinh) {
+                    DateHelper.setValue(user.ngaySinh.substring(0, 10), 'selDay', 'selMonth', 'selYear', 'inpDob');
+                } else {
+                    DateHelper.setValue('', 'selDay', 'selMonth', 'selYear', 'inpDob');
+                }
 
                 if (user.daDoiTenDangNhap || (user.tenDangNhap && user.tenDangNhap !== user.soDienThoai)) {
                     inpUser.disabled = true;
@@ -2725,6 +2787,23 @@
                 if (!hoTen) { this.showAccountNotification("Lỗi", "Vui lòng nhập họ và tên!", true); return; }
                 if (phone && !/^0[0-9]{9}$/.test(phone)) { this.showAccountNotification("Lỗi", "Số điện thoại không hợp lệ!", true); return; }
                 if (email && !/^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$/.test(email)) { this.showAccountNotification("Lỗi", "Email không đúng định dạng!", true); return; }
+
+                // THÊM VALIDATE NGÀY SINH VÀ TUỔI HỢP LÝ MUA ONLINE (15+)
+                if (!ngaySinh) {
+                    this.showAccountNotification("Lỗi", "Vui lòng chọn đầy đủ ngày tháng năm sinh!", true);
+                    return;
+                }
+                const dobDate = new Date(ngaySinh);
+                const today = new Date();
+                let age = today.getFullYear() - dobDate.getFullYear();
+                const m = today.getMonth() - dobDate.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
+                    age--;
+                }
+                if (age < 15) {
+                    this.showAccountNotification("Lỗi", "Bạn phải từ đủ 15 tuổi trở lên để tự mua hàng!", true);
+                    return;
+                }
 
                 const btn = document.getElementById('btnSaveProfile');
                 const oldText = btn.innerText;

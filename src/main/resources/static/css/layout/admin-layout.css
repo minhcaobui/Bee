@@ -225,9 +225,6 @@ button, input, select, textarea {
     min-width: 0;
 }
 
-/* =========================================
-   FIX LỖI DROPDOWN THÔNG BÁO BỊ KHUẤT
-   ========================================= */
 #top-header {
     height: var(--header-height);
     background: var(--panel);
@@ -311,7 +308,7 @@ button, input, select, textarea {
     position: absolute;
     top: calc(100% + 10px);
     right: 0;
-    width: 320px;
+    width: 340px;
     background: #fff;
     border: 1px solid var(--border);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Bóng đổ gọn gàng hơn */
@@ -322,7 +319,36 @@ button, input, select, textarea {
     overflow: hidden;
 }
 .dropdown-menu.show { display: flex; animation: fadeIn 0.2s ease-out; }
-.dropdown-header { padding: 12px 20px; border-bottom: 1px solid var(--border); font-size: 12px; color: var(--text-main); font-weight: 700; background: var(--panel-hover);}
+
+/* CSS MỚI CHO TAB THÔNG BÁO */
+.notif-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel-hover);
+}
+
+.notif-tab {
+    flex: 1;
+    text-align: center;
+    padding: 12px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--sub);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: 0.2s;
+}
+
+.notif-tab:hover {
+    color: var(--primary);
+}
+
+.notif-tab.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    background: #fff;
+}
+
 .dropdown-content { max-height: 350px; overflow-y: auto; }
 .empty-notif { padding: 40px 20px; text-align: center; color: var(--sub); display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 12px; font-weight: 500;}
 
@@ -367,7 +393,7 @@ button, input, select, textarea {
 .loader-content { text-align: center; padding: 20px; border-radius: 8px; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid var(--border);}
 
 /* =========================================
-   CSS CHO TOAST THÔNG BÁO DÙNG CHUNG - PHONG CÁCH FLAT, NGHIÊM TÚC
+   CSS CHO TOAST THÔNG BÁO DÙNG CHUNG
    ========================================= */
 #toastHost, .toast-container {
     position: fixed !important;
@@ -387,7 +413,7 @@ button, input, select, textarea {
     background: #ffffff;
     padding: 12px 16px;
     border-radius: var(--border-radius);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Bóng đổ thanh lịch */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     min-width: 280px;
     max-width: 380px;
     border: 1px solid var(--border);
@@ -416,7 +442,9 @@ button, input, select, textarea {
 .notif-list { display: flex; flex-direction: column; }
 .notif-item { padding: 15px 20px; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s; display: flex; gap: 15px; align-items: flex-start; }
 .notif-item:hover { background: var(--panel-hover); }
-.notif-icon { width: 36px; height: 36px; background: #e0f2fe; color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
+.notif-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
+.notif-icon.order { background: #e0f2fe; color: var(--primary); }
+.notif-icon.review { background: #fef08a; color: #ca8a04; } /* Thêm màu cho icon đánh giá */
 .notif-content { flex: 1; }
 .notif-title { font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 2px; }
 .notif-desc { font-size: 12px; color: var(--sub); margin-bottom: 6px; line-height: 1.4; font-weight: 400; text-transform: none;}
@@ -489,7 +517,6 @@ button, input, select, textarea {
         right: -50px;
     }
 
-    /* Đảm bảo Toast full width trên mobile */
     #toastHost, .toast-container {
         top: 10px !important;
         right: 10px !important;

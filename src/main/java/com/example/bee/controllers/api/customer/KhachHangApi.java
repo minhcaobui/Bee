@@ -938,6 +938,43 @@ public class KhachHangApi {
         ));
     }
 
+    // ==========================================
+    // API LẤY THÔNG BÁO ĐÁNH GIÁ MỚI CHO ADMIN
+    // ==========================================
+    @GetMapping("/danh-gia/thong-bao-moi")
+    public ResponseEntity<?> getNewReviewNotifications() {
+        // Lấy 5 đánh giá mới nhất
+        Pageable topFive = PageRequest.of(0, 5, Sort.by("ngayTao").descending());
+        Page<DanhGia> pageData = danhGiaRepo.findAll(topFive);
+
+        List<Map<String, Object>> result = new java.util.ArrayList<>();
+        List<KhachHang> allKhachHang = khRepo.findAll();
+
+        for (DanhGia dg : pageData.getContent()) {
+            String tenKhachHang = "Khách hàng ẩn danh";
+
+            // Tìm tên khách hàng thông qua Tài Khoản
+            for (KhachHang kh : allKhachHang) {
+                if (kh.getTaiKhoan() != null && dg.getTaiKhoan() != null && kh.getTaiKhoan().getId().equals(dg.getTaiKhoan().getId())) {
+                    if (kh.getHoTen() != null && !kh.getHoTen().trim().isEmpty()) {
+                        tenKhachHang = kh.getHoTen();
+                    }
+                    break;
+                }
+            }
+
+            result.add(Map.of(
+                    "id", dg.getId(),
+                    "khachHang", tenKhachHang,
+                    "soSao", dg.getSoSao() != null ? dg.getSoSao() : 5,
+                    "noiDung", dg.getNoiDung() != null ? dg.getNoiDung() : "",
+                    "ngayTao", dg.getNgayTao() != null ? dg.getNgayTao().toString() : ""
+            ));
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
     @PostMapping("/send-otp")
     @ResponseBody
     public ResponseEntity<?> sendOtp(@RequestParam String email) {

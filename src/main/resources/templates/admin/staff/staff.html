@@ -14,9 +14,7 @@
            ========================================================================== */
         * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
         :root {
-            /* TÙY CHỈNH ĐỘ CAO THANH MENU TRÊN CÙNG CỦA BẠN (ĐỂ DRAWER VỪA KHÍT) */
             --layout-header-height: 70px;
-
             --bg: #f8fafc;
             --panel: #ffffff;
             --gray-100: #f8fafc;
@@ -129,7 +127,7 @@
         .form-input:disabled, .form-select:disabled { background: var(--gray-100); color: var(--sub); cursor: not-allowed; border-color: var(--gray-200); }
         .form-textarea { min-height: 100px; resize: vertical; padding: 12px; }
 
-        /* Form Checkbox Trạng Thái (Đồng bộ Catalogs) */
+        /* Form Checkbox Trạng Thái */
         .v-checkbox { accent-color: var(--primary); cursor: pointer; }
         .status-checkbox-group { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; width: max-content; margin-top: 10px;}
         .status-checkbox-group input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
@@ -151,7 +149,7 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* ==========================================================================
-           CSS BỔ SUNG CHO TOAST VÀ CONFIRM (ĐẢM BẢO LUÔN HIỂN THỊ TRÊN CÙNG)
+           CSS BỔ SUNG CHO TOAST VÀ CONFIRM
            ========================================================================== */
         #genericConfirmOverlay, #toastHost, .toast-container { z-index: 2147483647 !important; }
 
@@ -481,7 +479,7 @@
         state: {
             mainTab: 'nv',
             page: 0, size: 10, totalPages: 0, q: '', status: '',
-            editingId: null, isViewMode: false, originalEmail: '', tempPayload: null
+            editingId: null, isViewMode: false, originalEmail: '', tempPayload: null, originalRoleId: null
         },
 
         // --- SUB-MODULE: CHỨC VỤ ---
@@ -531,7 +529,7 @@
                     const res = await fetch(`/api/chuc-vu?size=100`);
                     let data = await res.json();
                     let list = data.content || data;
-                    sel.innerHTML = '<option value="">-- Chọn chức vụ --</option>' + list.map(cv => `<option value="${cv.id}">${cv.ten}</option>`).join('');
+                    sel.innerHTML = '<option value="">-- Chọn chức vụ --</option>' + list.map(cv => `<option value="${cv.id}" data-ma="${(cv.ma || '').toLowerCase()}">${cv.ten}</option>`).join('');
                 } catch(e) { sel.innerHTML = '<option value="">-- Lỗi tải chức vụ --</option>'; }
             },
 
@@ -746,6 +744,7 @@
                 document.getElementById('nvDay').value = '';
                 document.getElementById('nvMonth').value = '';
                 document.getElementById('nvYear').value = '';
+                document.getElementById('nvNgaySinh').value = '';
                 return;
             }
             const parts = dateStr.split('-');
@@ -795,10 +794,26 @@
                     }
                 }
 
-                const badgeClass = item.trangThai ? 'badge-active' : 'badge-inactive';
-                const badgeText = item.trangThai ? 'Đang làm việc' : 'Nghỉ việc';
-                // ĐÃ SỬA: TRUYỀN THÊM EMAIL VÀO HÀM ĐỂ BẢO VỆ TÀI KHOẢN ADMIN
-                const statusHtml = `<span class="badge-status ${badgeClass}" onclick="window.StaffApp.quickToggle(${item.id}, ${item.trangThai}, '${item.email}')">${badgeText}</span>`;
+                // KIỂM TRA TÀI KHOẢN ADMIN MẶC ĐỊNH
+                const isSystemAdmin = item.id === 1 || (item.email && item.email.toLowerCase() === 'admin@shop.com');
+
+                let statusHtml = '';
+                let actionHtml = '';
+
+                if (isSystemAdmin) {
+                    statusHtml = `<span class="badge-status badge-active" style="cursor: not-allowed; opacity: 0.8; border-color: var(--primary); color: var(--primary); background: #eff6ff;" title="Tài khoản hệ thống">Hệ thống</span>`;
+                    actionHtml = `<span style="color: var(--sub); font-size: 11px; font-weight: 700; background: var(--gray-100); padding: 4px 8px; border-radius: 4px; border: 1px solid var(--gray-200);">MẶC ĐỊNH</span>`;
+                } else {
+                    const badgeClass = item.trangThai ? 'badge-active' : 'badge-inactive';
+                    const badgeText = item.trangThai ? 'Đang làm việc' : 'Nghỉ việc';
+                    statusHtml = `<span class="badge-status ${badgeClass}" onclick="window.StaffApp.quickToggle(${item.id}, ${item.trangThai}, '${item.email}')">${badgeText}</span>`;
+
+                    actionHtml = `
+                        <button class="btn-icon" title="Đổi mật khẩu" onclick="window.StaffApp.openChangePassword(${item.id}, '${item.hoTen.replace(/'/g, "\\'")}')"><i class="bi bi-key"></i></button>
+                        <button class="btn-icon" title="Xem chi tiết" onclick="window.StaffApp.openEdit(${item.id}, true)"><i class="bi bi-eye"></i></button>
+                        <button class="btn-icon" title="Sửa hồ sơ" onclick="window.StaffApp.openEdit(${item.id}, false)"><i class="bi bi-pencil"></i></button>
+                    `;
+                }
 
                 return `
                 <tr>
@@ -814,9 +829,7 @@
                         ${statusHtml}
                     </td>
                     <td style="text-align:right; white-space: nowrap;">
-                        <button class="btn-icon" title="Đổi mật khẩu" onclick="window.StaffApp.openChangePassword(${item.id}, '${item.hoTen.replace(/'/g, "\\'")}')"><i class="bi bi-key"></i></button>
-                        <button class="btn-icon" title="Xem chi tiết" onclick="window.StaffApp.openEdit(${item.id}, true)"><i class="bi bi-eye"></i></button>
-                        <button class="btn-icon" title="Sửa hồ sơ" onclick="window.StaffApp.openEdit(${item.id}, false)"><i class="bi bi-pencil"></i></button>
+                        ${actionHtml}
                     </td>
                 </tr>
             `}).join('');
@@ -854,9 +867,8 @@
 
         changePage(p) { this.state.page = p; this.loadData(); window.scrollTo({ top: 0, behavior: 'smooth' }); },
 
-        // ĐÃ SỬA: CHẶN VÔ HIỆU HOÁ TÀI KHOẢN ADMIN TRỰC TIẾP TỪ BẢNG
         async quickToggle(id, currentState, email) {
-            if (email === 'admin@shop.com') {
+            if (id === 1 || email === 'admin@shop.com') {
                 if (typeof window.toast === 'function') window.toast("Tài khoản Quản trị tối cao (Admin) không được phép thay đổi trạng thái!", "error");
                 return;
             }
@@ -870,13 +882,17 @@
                             if(typeof window.toast === 'function') window.toast(await res.text(), "success");
                             this.loadData();
                         }
-                        else { if(typeof window.toast === 'function') window.toast("Hệ thống từ chối yêu cầu!", "error"); }
+                        else { if(typeof window.toast === 'function') window.toast(await res.text(), "error"); }
                     } catch(e) { if(typeof window.toast === 'function') window.toast("Mất kết nối!", "error"); }
                 });
             }
         },
 
         openChangePassword(id, name) {
+            if (id === 1) {
+                if(typeof window.toast === 'function') window.toast("Không thể đổi mật khẩu tài khoản hệ thống mặc định!", "error");
+                return;
+            }
             this.state.activePwdId = id;
             document.getElementById('pwdCustomerName').innerText = name;
             document.getElementById('inpNewPassword').value = '';
@@ -898,14 +914,15 @@
                     const oldText = btn.innerHTML;
                     btn.innerHTML = 'ĐANG XỬ LÝ...'; btn.disabled = true;
                     try {
-                        // SỬ DỤNG API ĐỔI MẬT KHẨU CỦA ADMIN CHỈ ĐỊNH CHO NHÂN VIÊN
                         const res = await fetch(`/api/nhan-vien/${this.state.activePwdId}/doi-mat-khau-admin`, {
                             method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ matKhauMoi: newPwd })
                         });
                         if (res.ok) { if(typeof window.toast === 'function') window.toast('Đổi mật khẩu thành công.', 'success'); this.closePwdDrawer(); }
                         else {
                             let errorMsg = 'Hệ thống từ chối yêu cầu.';
-                            try { const err = await res.json(); errorMsg = err.message || err.error || errorMsg; } catch(e) {}
+                            try { const err = await res.json(); errorMsg = err.message || err.error || errorMsg; } catch(e) {
+                                errorMsg = await res.text();
+                            }
                             if(typeof window.toast === 'function') window.toast(errorMsg, 'error');
                         }
                     } catch (e) { if(typeof window.toast === 'function') window.toast('Sự cố đường truyền mạng.', 'error'); }
@@ -916,6 +933,7 @@
 
         openDrawer(mode) {
             this.state.editingId = null; this.state.isViewMode = false; this.state.originalEmail = '';
+            this.state.originalRoleId = null;
 
             document.getElementById('drawerTitle').innerText = 'TẠO HỒ SƠ NHÂN VIÊN';
             document.getElementById('drawerTabs').style.display = 'flex';
@@ -930,11 +948,34 @@
             this.resetForm();
             this.toggleInputs(false);
 
+            // CHẶN CHỌN CHỨC VỤ QUẢN LÝ KHI THÊM MỚI
+            const roleOptions = document.getElementById('nvChucVu').options;
+            for (let i = 0; i < roleOptions.length; i++) {
+                const opt = roleOptions[i];
+                const txt = opt.text.toLowerCase();
+                const ma = opt.getAttribute('data-ma') || '';
+
+                if (txt.includes('quản lý') || ma.includes('quan_ly') || ma.includes('admin')) {
+                    opt.disabled = true;
+                    opt.style.display = 'none';
+                } else {
+                    opt.disabled = false;
+                    opt.style.display = 'block';
+                }
+            }
+            document.getElementById('nvChucVu').selectedIndex = 0;
+
             document.getElementById('drawer').classList.add('show');
             document.getElementById('overlay').classList.add('show');
         },
 
         async openEdit(id, isView) {
+            // Chặn Edit tài khoản Admin mặc định
+            if (id === 1 && !isView) {
+                if(typeof window.toast === 'function') window.toast("Không thể chỉnh sửa tài khoản hệ thống mặc định!", "error");
+                return;
+            }
+
             this.state.editingId = id; this.state.isViewMode = isView;
 
             document.getElementById('drawerTitle').innerText = isView ? 'CHI TIẾT NHÂN VIÊN' : 'CẬP NHẬT HỒ SƠ';
@@ -943,10 +984,17 @@
             document.getElementById('passwordBlock').style.display = isView ? 'none' : 'block';
 
             this.switchDrawerTab('info');
+
             try {
                 const res = await fetch(`/api/nhan-vien/detail/${id}`);
                 if (!res.ok) throw new Error("Không thể tải thông tin");
                 const d = await res.json();
+
+                // Lớp phòng vệ thứ 2: Chặn qua email trả về
+                if (d.email === 'admin@shop.com' && !isView) {
+                    if(typeof window.toast === 'function') window.toast("Không thể chỉnh sửa tài khoản hệ thống mặc định!", "error");
+                    return;
+                }
 
                 this.state.originalEmail = d.email;
 
@@ -956,13 +1004,41 @@
                 document.getElementById('nvEmail').value = d.email;
 
                 if (d.chucVu) {
-                    document.getElementById('nvChucVu').value = typeof d.chucVu === 'object' ? d.chucVu.id : d.chucVu;
+                    const cvId = typeof d.chucVu === 'object' ? d.chucVu.id : d.chucVu;
+                    document.getElementById('nvChucVu').value = cvId;
+                    this.state.originalRoleId = cvId;
+
+                    const roleOptions = document.getElementById('nvChucVu').options;
+                    for (let i = 0; i < roleOptions.length; i++) {
+                        const opt = roleOptions[i];
+                        const txt = opt.text.toLowerCase();
+                        const ma = opt.getAttribute('data-ma') || '';
+
+                        if (txt.includes('quản lý') || ma.includes('quan_ly') || ma.includes('admin')) {
+                            if (opt.value == cvId) {
+                                opt.disabled = false;
+                                opt.style.display = 'block';
+                            } else {
+                                opt.disabled = true;
+                                opt.style.display = 'none';
+                            }
+                        } else {
+                            opt.disabled = false;
+                            opt.style.display = 'block';
+                        }
+                    }
+                } else {
+                    this.state.originalRoleId = null;
                 }
 
                 let dob = d.ngaySinh;
-                if (Array.isArray(dob)) dob = `${dob[0]}-${String(dob[1]).padStart(2, '0')}-${String(dob[2]).padStart(2, '0')}`;
-                else if (dob && dob.includes('T')) dob = dob.split('T')[0];
-                this.setDateDropdowns(dob);
+                if (dob) {
+                    if (Array.isArray(dob)) dob = `${dob[0]}-${String(dob[1]).padStart(2, '0')}-${String(dob[2]).padStart(2, '0')}`;
+                    else if (typeof dob === 'string' && dob.includes('T')) dob = dob.split('T')[0];
+                    this.setDateDropdowns(dob);
+                } else {
+                    this.setDateDropdowns('');
+                }
 
                 document.getElementById('nvGender').value = d.gioiTinh;
 
@@ -1048,8 +1124,42 @@
                         btn.innerHTML = 'LƯU HỒ SƠ'; btn.disabled = false; return;
                     }
 
-                    if (!isNew && email === 'admin@shop.com') {
-                        if(typeof window.toast === 'function') window.toast("Tài khoản Quản trị tối cao (Admin) không được phép sửa từ bảng này!", "error");
+                    const selectedOption = document.getElementById('nvChucVu').options[document.getElementById('nvChucVu').selectedIndex];
+                    const txt = selectedOption.text.toLowerCase();
+                    const ma = selectedOption.getAttribute('data-ma') || '';
+                    const isManagerSelected = txt.includes('quản lý') || ma.includes('quan_ly') || ma.includes('admin');
+
+                    if (isNew && isManagerSelected) {
+                        this.switchDrawerTab('info');
+                        if(typeof window.toast === 'function') window.toast("Không được phép cấp quyền Quản lý khi tạo mới nhân viên!", "error");
+                        btn.innerHTML = 'LƯU HỒ SƠ'; btn.disabled = false;
+                        return;
+                    }
+
+                    if (!isNew && isManagerSelected && this.state.originalRoleId != chucVu) {
+                        this.switchDrawerTab('info');
+                        if(typeof window.toast === 'function') window.toast("Không được phép thăng cấp nhân viên lên Quản lý!", "error");
+                        btn.innerHTML = 'LƯU HỒ SƠ'; btn.disabled = false;
+                        return;
+                    }
+
+                    // Validate đủ 18 tuổi
+                    const dobDate = new Date(dob);
+                    const today = new Date();
+                    let age = today.getFullYear() - dobDate.getFullYear();
+                    const m = today.getMonth() - dobDate.getMonth();
+                    if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
+                        age--;
+                    }
+                    if (age < 18) {
+                        this.switchDrawerTab('info');
+                        if(typeof window.toast === 'function') window.toast("Tuổi của nhân viên phải từ đủ 18 tuổi trở lên!", "error");
+                        btn.innerHTML = 'LƯU HỒ SƠ'; btn.disabled = false;
+                        return;
+                    }
+
+                    if (!isNew && (email === 'admin@shop.com' || this.state.editingId === 1)) {
+                        if(typeof window.toast === 'function') window.toast("Tài khoản Quản trị tối cao không được phép sửa từ bảng này!", "error");
                         btn.innerHTML = 'LƯU HỒ SƠ'; btn.disabled = false; return;
                     }
 
@@ -1143,7 +1253,7 @@
         },
 
         toggleInputs(v) {
-            document.querySelectorAll('#drawer .form-input, #drawer .form-select').forEach(i => { i.disabled = v; });
+            document.querySelectorAll('#drawer .form-input, .form-select').forEach(i => { i.disabled = v; });
             document.getElementById('btnSave').style.display = v ? 'none' : 'block';
             const chk = document.getElementById('nvTrangThai');
             if(chk) chk.disabled = v;
@@ -1188,7 +1298,7 @@
     };
 
     /* ==========================================================================
-       GIẢI PHÁP KHỞI TẠO BÁM ĐUỔI (FIX 100% LỖI KHÔNG TẢI ĐƯỢC JS QUA ROUTER)
+       GIẢI PHÁP KHỞI TẠO BÁM ĐUỔI
        ========================================================================== */
     let initAttemptsStaff = 0;
 

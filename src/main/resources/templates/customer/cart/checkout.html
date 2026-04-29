@@ -7,20 +7,15 @@
         /* NỀN VÀ KHUNG CHÍNH */
         .checkout-page {
             padding: 40px 25px 100px;
-            background: radial-gradient(circle at top left, #f8f9fa 0%, #e9ecef 100%);
+            background: var(--bg);
             min-height: 100vh;
             font-family: 'DM Sans', sans-serif;
         }
 
         /* Khung bọc ngoài toàn bộ nội dung */
         .checkout-wrapper {
-            max-width: 1300px;
-            margin: 0 auto;
+            width: 100%;
             background: var(--white);
-            border: 1px solid rgba(0,0,0,0.08);
-            border-radius: 24px;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.06);
-            overflow: hidden;
         }
 
         /* Sửa lại Header cho dính vào khung */
@@ -854,13 +849,14 @@
                     '<img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-MoMo-Square.png" class="pm-icon" alt="MoMo">' +
                     '</label>' +
 
-                    '<label class="pm-option" id="lbl-pm-transfer" onclick="window.CheckoutApp.selectPayment(\'CHUYEN_KHOAN\')">' +
-                    '<input type="radio" name="paymentType" value="CHUYEN_KHOAN"> ' +
+                    '<label class="pm-option" id="lbl-pm-transfer" style="opacity: 0.5; cursor: not-allowed; position: relative; overflow: hidden; background: #f4f4f5;" title="Tính năng đang được nâng cấp">' +
+                    '<div style="position: absolute; top: 12px; right: -28px; background: #ef4444; color: #ffffff; font-size: 9px; font-weight: 700; padding: 4px 30px; transform: rotate(45deg); letter-spacing: 0.5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">BẢO TRÌ</div>' +
+                    '<input type="radio" name="paymentType" value="CHUYEN_KHOAN" disabled> ' +
                     '<div style="flex: 1;">' +
-                    '<div class="pm-label">Chuyển khoản qua Ngân hàng</div>' +
-                    '<div class="pm-desc">Khách hàng chủ động chuyển tiền vào STK cửa hàng.</div>' +
+                    '<div class="pm-label" style="color: var(--muted);">Chuyển khoản qua Ngân hàng</div>' +
+                    '<div class="pm-desc">Tính năng đang bảo trì để tích hợp API tự động.</div>' +
                     '</div>' +
-                    '<i class="fa-solid fa-money-bill-transfer pm-icon" style="font-size:24px; color:var(--accent); display:flex; align-items:center; justify-content:center;"></i>' +
+                    '<i class="fa-solid fa-money-bill-transfer pm-icon" style="font-size:24px; color:var(--muted); display:flex; align-items:center; justify-content:center;"></i>' +
                     '</label>' +
 
                     '</div>' +
@@ -916,7 +912,7 @@
                     '</div>' +
                     '</div>' +
                     '</div>';
-                    '</div>';
+                '</div>';
 
                 this.updateShippingFee(this.state.shippingFee);
 

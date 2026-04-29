@@ -3,20 +3,13 @@
 
         #cart-section {
             min-height: 100vh;
-            background: radial-gradient(circle at top left, #f8f9fa 0%, #e9ecef 100%);
+            background: var(--bg);
             font-family: 'DM Sans', sans-serif;
-            padding: 40px 0 60px 0;
         }
 
         .cart-wrapper {
             width: 100%;
-            max-width: 1300px;
-            margin: 0 auto;
             background: var(--white);
-            border: 1px solid rgba(0,0,0,0.08);
-            border-radius: 24px;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.06);
-            overflow: hidden;
         }
 
         /* ── CART HEADER ── */
@@ -379,19 +372,16 @@
 
         /* ── RECOMMENDED PRODUCTS ── */
         .cart-recommend-section {
-            max-width: 1300px;
-            margin: 40px auto 100px; /* Cách giỏ hàng trên 40px, cách đáy trang 100px */
+            width: 100%;
+            margin: 40px 0 60px;
             padding: 0;
             background: none;
-            border-top: none;
+            border-top: 1px solid rgba(0,0,0,0.06);
         }
 
         .recommend-boxed-container {
             background: var(--white);
-            border: 1px solid rgba(0,0,0,0.08);
-            border-radius: var(--radius-xl); /* Bo góc 24px như Account */
-            box-shadow: 0 30px 60px rgba(0,0,0,0.06); /* Bóng đổ sâu cho sang */
-            padding: 48px 60px; /* Khoảng thở bên trong rộng rãi */
+            padding: 48px 60px;
         }
 
 
@@ -524,83 +514,83 @@
     </style>
     <div class="cart-wrapper">
         <div class="cart-page-header">
-        <div>
-            <div class="cart-page-eyebrow">Mua sắm</div>
-            <h1 class="cart-page-title">Giỏ hàng</h1>
-            <div class="cart-count-badge" id="headerCartCount">Đang tải...</div>
+            <div>
+                <div class="cart-page-eyebrow">Mua sắm</div>
+                <h1 class="cart-page-title">Giỏ hàng</h1>
+                <div class="cart-count-badge" id="headerCartCount">Đang tải...</div>
+            </div>
+            <button class="cart-continue-btn" onclick="window.location.hash='shop'">
+                <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                Tiếp tục mua
+            </button>
         </div>
-        <button class="cart-continue-btn" onclick="window.location.hash='shop'">
-            <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-            Tiếp tục mua
-        </button>
-    </div>
 
         <div class="cart-layout" id="cartLayout">
-        <div id="cart-qa-backdrop" onclick="window.CartApp.closeAllSelections()"></div>
-        <div class="cart-empty" id="cartEmptyState">
-            <div class="cart-empty-icon">
-                <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-            </div>
-            <div class="cart-empty-title">Giỏ hàng trống</div>
-            <div class="cart-empty-desc">Có vẻ như bạn chưa thêm sản phẩm nào vào giỏ hàng.<br>Hãy khám phá những sản phẩm mới nhất của chúng tôi.</div>
-            <div class="cart-empty-actions">
-                <a href="#shop" class="cart-empty-btn">Đến Cửa Hàng</a>
-                <button onclick="document.getElementById('cartRecommendSection').scrollIntoView({behavior: 'smooth'})" class="cart-empty-btn-outline">Xem Gợi Ý</button>
-            </div>
-        </div>
-
-        <div class="cart-items" id="cartItemsSection">
-            <div class="cart-items-header">
-                <div>Sản phẩm</div>
-                <div style="text-align:center">Đơn giá</div>
-                <div style="text-align:center">Số lượng</div>
-                <div style="text-align:right">Thành tiền</div>
-                <div></div>
-            </div>
-
-            <div id="cartDynamicItems"></div>
-
-            <div class="cart-note">
-                <div class="cart-note-label">Ghi chú đơn hàng</div>
-                <textarea id="cartNoteInput" class="cart-note-input" placeholder="Ví dụ: gói quà, giao giờ hành chính..."></textarea>
-            </div>
-        </div>
-
-        <div class="cart-summary" id="cartSummarySection">
-            <div class="cart-summary-title">Tóm tắt đơn hàng</div>
-
-            <div class="cart-summary-rows">
-                <div class="cart-summary-row">
-                    <span class="cart-summary-label">Tạm tính</span>
-                    <span class="cart-summary-val" id="cartSubtotal">0 ₫</span>
+            <div id="cart-qa-backdrop" onclick="window.CartApp.closeAllSelections()"></div>
+            <div class="cart-empty" id="cartEmptyState">
+                <div class="cart-empty-icon">
+                    <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                </div>
+                <div class="cart-empty-title">Giỏ hàng trống</div>
+                <div class="cart-empty-desc">Có vẻ như bạn chưa thêm sản phẩm nào vào giỏ hàng.<br>Hãy khám phá những sản phẩm mới nhất của chúng tôi.</div>
+                <div class="cart-empty-actions">
+                    <a href="#shop" class="cart-empty-btn">Đến Cửa Hàng</a>
+                    <button onclick="document.getElementById('cartRecommendSection').scrollIntoView({behavior: 'smooth'})" class="cart-empty-btn-outline">Xem Gợi Ý</button>
                 </div>
             </div>
 
-            <div class="cart-summary-total">
-                <span class="cart-total-label">Tổng cộng</span>
-                <span class="cart-total-val" id="cartTotal">0 ₫</span>
-            </div>
+            <div class="cart-items" id="cartItemsSection">
+                <div class="cart-items-header">
+                    <div>Sản phẩm</div>
+                    <div style="text-align:center">Đơn giá</div>
+                    <div style="text-align:center">Số lượng</div>
+                    <div style="text-align:right">Thành tiền</div>
+                    <div></div>
+                </div>
 
-            <button class="cart-checkout-btn" id="btnCheckout" onclick="window.CartApp.proceedToCheckout()">
-                <span>Tiến hành thanh toán</span>
-                <svg style="width:16px; height:16px; fill:none; stroke:white;" viewBox="0 0 24 24" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
+                <div id="cartDynamicItems"></div>
 
-            <div class="cart-payment-icons" style="border-radius: 0px">
-                <div class="payment-icon">VNPay</div>
-                <div class="payment-icon">MoMo</div>
-                <div class="payment-icon">COD</div>
-            </div>
-
-            <div class="cart-guarantee">
-                <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                <div class="cart-guarantee-text">
-                    <strong>Đổi trả miễn phí trong 30 ngày.</strong> Mua sắm hoàn toàn yên tâm với chính sách của Beemate.
+                <div class="cart-note">
+                    <div class="cart-note-label">Ghi chú đơn hàng</div>
+                    <textarea id="cartNoteInput" class="cart-note-input" placeholder="Ví dụ: gói quà, giao giờ hành chính..."></textarea>
                 </div>
             </div>
-        </div>
 
-    </div>
+            <div class="cart-summary" id="cartSummarySection">
+                <div class="cart-summary-title">Tóm tắt đơn hàng</div>
+
+                <div class="cart-summary-rows">
+                    <div class="cart-summary-row">
+                        <span class="cart-summary-label">Tạm tính</span>
+                        <span class="cart-summary-val" id="cartSubtotal">0 ₫</span>
+                    </div>
+                </div>
+
+                <div class="cart-summary-total">
+                    <span class="cart-total-label">Tổng cộng</span>
+                    <span class="cart-total-val" id="cartTotal">0 ₫</span>
+                </div>
+
+                <button class="cart-checkout-btn" id="btnCheckout" onclick="window.CartApp.proceedToCheckout()">
+                    <span>Tiến hành thanh toán</span>
+                    <svg style="width:16px; height:16px; fill:none; stroke:white;" viewBox="0 0 24 24" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+
+                <div class="cart-payment-icons" style="border-radius: 0px">
+                    <div class="payment-icon">VNPay</div>
+                    <div class="payment-icon">MoMo</div>
+                    <div class="payment-icon">COD</div>
+                </div>
+
+                <div class="cart-guarantee">
+                    <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <div class="cart-guarantee-text">
+                        <strong>Đổi trả miễn phí trong 30 ngày.</strong> Mua sắm hoàn toàn yên tâm với chính sách của Beemate.
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
 
     <div class="cart-recommend-section" id="cartRecommendSection" style="display: none;">

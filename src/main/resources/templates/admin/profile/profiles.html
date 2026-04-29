@@ -237,7 +237,12 @@
 
                     <div class="pf-form-group">
                         <label class="pf-label">Ngày sinh</label>
-                        <input type="date" id="inpDob" class="pf-input">
+                        <div style="display: flex; gap: 5px;">
+                            <select id="selDay" class="pf-input" style="flex: 1; padding: 0 8px;"><option value="">Ngày</option></select>
+                            <select id="selMonth" class="pf-input" style="flex: 1; padding: 0 8px;"><option value="">Tháng</option></select>
+                            <select id="selYear" class="pf-input" style="flex: 1.5; padding: 0 8px;"><option value="">Năm</option></select>
+                        </div>
+                        <input type="hidden" id="inpDob">
                     </div>
 
                     <div class="pf-form-group">
@@ -321,6 +326,59 @@
         }
     })();
 
+    /* ==========================================================================
+       HELPER: KHỞI TẠO VÀ ĐỒNG BỘ NGÀY SINH TỪ 3 DROPDOWN
+       ========================================================================== */
+    const DateHelper = {
+        initDropdowns: function(dayId, monthId, yearId, hiddenId) {
+            const daySel = document.getElementById(dayId);
+            const monthSel = document.getElementById(monthId);
+            const yearSel = document.getElementById(yearId);
+            const hiddenInput = document.getElementById(hiddenId);
+
+            if (!daySel || !monthSel || !yearSel || !hiddenInput) return;
+
+            let dHtml = '<option value="">Ngày</option>';
+            for(let i=1; i<=31; i++) dHtml += `<option value="${i<10?'0'+i:i}">${i}</option>`;
+            daySel.innerHTML = dHtml;
+
+            let mHtml = '<option value="">Tháng</option>';
+            for(let i=1; i<=12; i++) mHtml += `<option value="${i<10?'0'+i:i}">Tháng ${i}</option>`;
+            monthSel.innerHTML = mHtml;
+
+            const currYear = new Date().getFullYear();
+            let yHtml = '<option value="">Năm</option>';
+            for(let i=currYear-15; i>=currYear-80; i--) yHtml += `<option value="${i}">${i}</option>`;
+            yearSel.innerHTML = yHtml;
+
+            const syncDate = () => {
+                const d = daySel.value, m = monthSel.value, y = yearSel.value;
+                hiddenInput.value = (d && m && y) ? `${y}-${m}-${d}` : '';
+            };
+
+            daySel.addEventListener('change', syncDate);
+            monthSel.addEventListener('change', syncDate);
+            yearSel.addEventListener('change', syncDate);
+        },
+
+        setValue: function(dateStr, dayId, monthId, yearId, hiddenId) {
+            if (!dateStr) {
+                document.getElementById(dayId).value = '';
+                document.getElementById(monthId).value = '';
+                document.getElementById(yearId).value = '';
+                document.getElementById(hiddenId).value = '';
+                return;
+            }
+            const parts = dateStr.split('-');
+            if (parts.length === 3) {
+                document.getElementById(yearId).value = parts[0];
+                document.getElementById(monthId).value = parts[1];
+                document.getElementById(dayId).value = parts[2];
+                document.getElementById(hiddenId).value = dateStr;
+            }
+        }
+    };
+
     // KHÔNG CÓ BẤT KỲ HTML HAY JS NÀO TẠO TOAST TRONG FILE NÀY NỮA, SẠCH 100% !!
 
     window.ProfileApp = {
@@ -329,6 +387,9 @@
 
         init: async function() {
             if (this.initialized) return;
+
+            // Khởi tạo các ô chọn Ngày tháng năm
+            DateHelper.initDropdowns('selDay', 'selMonth', 'selYear', 'inpDob');
 
             if (typeof window.showLoading === 'function') window.showLoading();
             try {
@@ -368,7 +429,9 @@
 
             if (d.ngaySinh) {
                 const parts = d.ngaySinh.split('T')[0];
-                document.getElementById('inpDob').value = parts;
+                DateHelper.setValue(parts, 'selDay', 'selMonth', 'selYear', 'inpDob');
+            } else {
+                DateHelper.setValue('', 'selDay', 'selMonth', 'selYear', 'inpDob');
             }
 
             if (d.daDoiTenDangNhap === true) {
@@ -385,10 +448,28 @@
             const tenDangNhapMoi = document.getElementById('inpUsername').value.trim();
             const phone = document.getElementById('inpPhone').value.trim();
             const email = document.getElementById('inpEmail').value.trim();
+            const dobStr = document.getElementById('inpDob').value;
 
             if (!hoTen) { if (typeof window.toast === 'function') window.toast("Vui lòng nhập họ và tên!", "warning"); return; }
             if (phone && !/^0[0-9]{9}$/.test(phone)) { if (typeof window.toast === 'function') window.toast("Số điện thoại không hợp lệ!", "warning"); return; }
             if (email && !/^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$/.test(email)) { if (typeof window.toast === 'function') window.toast("Email không đúng định dạng!", "warning"); return; }
+
+            // Validate Ngày Sinh và Độ tuổi 18+
+            if (!dobStr) {
+                if (typeof window.toast === 'function') window.toast("Vui lòng chọn đầy đủ ngày tháng năm sinh!", "warning");
+                return;
+            }
+            const dob = new Date(dobStr);
+            const today = new Date();
+            let age = today.getFullYear() - dob.getFullYear();
+            const m = today.getMonth() - dob.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+                age--;
+            }
+            if (age < 18) {
+                if (typeof window.toast === 'function') window.toast("Tài khoản nhân viên phải từ đủ 18 tuổi trở lên!", "error");
+                return;
+            }
 
             if (typeof window.confirmDialog === 'function') {
                 window.confirmDialog("XÁC NHẬN LƯU", "Bạn có chắc chắn muốn lưu những thay đổi của hồ sơ này?", async () => {
@@ -401,7 +482,7 @@
                         soDienThoai: phone,
                         email: email,
                         gioiTinh: document.getElementById('inpGender').value,
-                        ngaySinh: document.getElementById('inpDob').value,
+                        ngaySinh: dobStr,
                         diaChi: document.getElementById('inpAddress').value.trim(),
                         tenDangNhap: tenDangNhapMoi
                     };

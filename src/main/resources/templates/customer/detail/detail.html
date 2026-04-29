@@ -908,7 +908,7 @@
                 this.renderReviewList();
             },
 
-            // 4. Vẽ Review ra màn hình (Có ảnh, có phân loại)
+            // 4. Vẽ Review ra màn hình (Có ảnh, có phân loại, CÓ PHẢN HỒI CỦA SHOP)
             renderReviewList: function() {
                 const container = document.getElementById('reviewsContainer');
                 const loadMoreBtn = document.getElementById('loadMoreReviewsArea');
@@ -953,6 +953,21 @@
                         editBtnHtml = `<button onclick="window.DetailApp.openReviewModal(${detailId}, '${rv.phanLoai || ''}', true, ${rv.soSao}, '${escapedContent}')" style="background:none; border:none; color:var(--accent); font-size:11px; text-decoration:underline; cursor:pointer; padding:0 8px;">Sửa đánh giá</button>`;
                     }
 
+                    // ==========================================
+                    // XỬ LÝ PHẢN HỒI TỪ ADMIN (SỬ DỤNG rv.noiDungTraLoi)
+                    // ==========================================
+                    let shopReplyHtml = '';
+                    if (rv.noiDungTraLoi && rv.noiDungTraLoi.trim() !== '') {
+                        shopReplyHtml = `
+                            <div class="review-reply">
+                                <div class="review-reply-header">
+                                    <span class="review-reply-from"><i class="fa-solid fa-headset"></i> BEEMATE PHẢN HỒI</span>
+                                </div>
+                                <div class="review-reply-content">${rv.noiDungTraLoi.replace(/\n/g, '<br>')}</div>
+                            </div>
+                        `;
+                    }
+
                     return `
                         <div class="review-item" style="${highlightStyle} margin-bottom: 28px;">
                             <div class="reviewer-name">
@@ -968,6 +983,7 @@
                             </div>
                             <div class="review-content">${rv.noiDung || 'Khách hàng không để lại nội dung.'}</div>
                             ${imagesHtml}
+                            ${shopReplyHtml}
                         </div>
                     `;
                 }).join('');

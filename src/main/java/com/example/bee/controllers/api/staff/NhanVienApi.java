@@ -125,8 +125,18 @@ public class NhanVienApi {
     @ResponseBody
     @Transactional
     public ResponseEntity<?> toggleStatus(@PathVariable Integer id) {
+        // CHẶN: Vô hiệu hóa tài khoản mặc định
+        if (id != null && id == 1) {
+            return ResponseEntity.badRequest().body("Không thể khóa tài khoản hệ thống mặc định!");
+        }
+
         NhanVien nv = nhanVienRepository.findById(id).orElse(null);
         if (nv == null) return ResponseEntity.notFound().build();
+
+        // CHẶN BẰNG EMAIL
+        if (nv.getEmail() != null && nv.getEmail().equalsIgnoreCase("admin@shop.com")) {
+            return ResponseEntity.badRequest().body("Không thể thay đổi trạng thái của Quản trị viên tối cao!");
+        }
 
         nv.setTrangThai(!nv.getTrangThai());
 
@@ -156,6 +166,14 @@ public class NhanVienApi {
             @RequestParam(value = "password", required = false) String pass,
             @RequestParam(value = "confirmPassword", required = false) String confirm) {
         try {
+            // CHẶN: Nếu người dùng cố tình cập nhật tài khoản Admin ID = 1
+            if (id != null && id == 1) {
+                return ResponseEntity.badRequest().body("Lỗi bảo mật: Tài khoản mặc định không thể chỉnh sửa qua chức năng này!");
+            }
+            if (email != null && email.equalsIgnoreCase("admin@shop.com") && id != null) {
+                return ResponseEntity.badRequest().body("Lỗi bảo mật: Không thể can thiệp vào tài khoản admin@shop.com!");
+            }
+
             if (hoTen == null || hoTen.trim().isEmpty())
                 return ResponseEntity.badRequest().body("Họ tên không được để trống!");
             if (soDienThoai == null || soDienThoai.isBlank())
@@ -182,13 +200,30 @@ public class NhanVienApi {
             ChucVu cv = chucVuRepository.findById(chucVuId)
                     .orElseThrow(() -> new RuntimeException("Chức vụ được chọn không tồn tại!"));
 
+            String tenCv = cv.getTen() != null ? cv.getTen().toLowerCase() : "";
+            String maCv = cv.getMa() != null ? cv.getMa().toLowerCase() : "";
+            boolean isManagerRole = tenCv.contains("quản lý") || maCv.contains("quan_ly") || maCv.contains("admin");
+
             NhanVien target;
             boolean isNew = (id == null);
 
             if (!isNew) {
                 target = nhanVienRepository.findByIdWithTaiKhoan(id).orElseThrow(() -> new RuntimeException("Không tìm thấy NV"));
+
                 if (target.getChucVu() != null && target.getChucVu().getId() == 1 && chucVuId != 1) {
                     return ResponseEntity.badRequest().body("Không thể giáng chức của Admin tối cao!");
+                }
+
+                if (isManagerRole) {
+                    ChucVu oldCv = target.getChucVu();
+                    boolean wasManager = oldCv != null && (
+                            (oldCv.getTen() != null && oldCv.getTen().toLowerCase().contains("quản lý")) ||
+                                    (oldCv.getMa() != null && oldCv.getMa().toLowerCase().contains("quan_ly")) ||
+                                    (oldCv.getMa() != null && oldCv.getMa().toLowerCase().contains("admin"))
+                    );
+                    if (!wasManager) {
+                        return ResponseEntity.badRequest().body("Bảo mật: Không được phép thăng cấp nhân viên lên Quản lý!");
+                    }
                 }
 
                 if (nhanVienRepository.existsBySoDienThoaiAndIdNot(soDienThoai, id))
@@ -199,6 +234,10 @@ public class NhanVienApi {
                     return ResponseEntity.badRequest().body("Email này đã được đăng ký cho một tài khoản khác (Nhân viên/Khách hàng)!");
                 }
             } else {
+                if (isManagerRole) {
+                    return ResponseEntity.badRequest().body("Bảo mật: Không được phép cấp quyền Quản lý khi tạo mới nhân viên!");
+                }
+
                 if (nhanVienRepository.existsBySoDienThoai(soDienThoai))
                     return ResponseEntity.badRequest().body("Số điện thoại đã tồn tại!");
                 if (taiKhoanRepository.existsByTenDangNhap(email))
@@ -458,5 +497,41 @@ public class NhanVienApi {
         taiKhoanRepository.save(tk);
 
         return ResponseEntity.ok(Map.of("message", "Đổi mật khẩu an toàn thành công"));
+    }
+
+    @PatchMapping("/{id}/doi-mat-khau-admin")
+    @ResponseBody
+    @Transactional
+    public ResponseEntity<?> doiMatKhauAdmin(@PathVariable Integer id, @RequestBody Map<String, String> payload) {
+        try {
+            // CHẶN: Vô hiệu hóa đổi mật khẩu admin mặc định
+            if (id != null && id == 1) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Không thể đổi mật khẩu tài khoản hệ thống mặc định từ đây!"));
+            }
+
+            NhanVien nv = nhanVienRepository.findByIdWithTaiKhoan(id).orElse(null);
+            if (nv == null || nv.getTaiKhoan() == null) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Không tìm thấy nhân viên hoặc nhân viên chưa có tài khoản!"));
+            }
+
+            // CHẶN: Qua Email
+            if (nv.getEmail() != null && nv.getEmail().equalsIgnoreCase("admin@shop.com")) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Không thể tác động đến mật khẩu của Quản trị viên tối cao!"));
+            }
+
+            String newPw = payload.get("matKhauMoi");
+            if (newPw == null || newPw.trim().length() < 6) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Mật khẩu mới phải có ít nhất 6 ký tự!"));
+            }
+
+            TaiKhoan tk = nv.getTaiKhoan();
+            tk.setMatKhau(passwordEncoder.encode(newPw.trim()));
+            taiKhoanRepository.save(tk);
+
+            return ResponseEntity.ok(Map.of("message", "Đổi mật khẩu thành công!"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body(Map.of("message", "Lỗi hệ thống: " + e.getMessage()));
+        }
     }
 }

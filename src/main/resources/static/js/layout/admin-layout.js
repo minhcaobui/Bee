@@ -51,15 +51,12 @@ function toggleDropdown(id) {
     if (!isOpen) target.classList.add('show');
 }
 
-let hasUnread = true;
-
 function handleNotifClick() {
     toggleDropdown('notif-dropdown');
-    if (hasUnread) {
-        hasUnread = false;
-        const badge = document.getElementById('notif-badge');
-        if (badge) badge.style.display = 'none';
-    }
+    // Khi mở hộp thoại lên, không tắt luôn badge nếu vẫn còn data mới,
+    // nhưng trong logic thực tế ta có thể tắt để báo là đã xem.
+    const badge = document.getElementById('notif-badge');
+    if (badge) badge.style.display = 'none';
 }
 
 window.addEventListener('click', e => {
@@ -87,12 +84,11 @@ function executeLogout() {
 }
 
 /* =========================================
-   HÀM TOAST THÔNG BÁO DÙNG CHUNG (CẬP NHẬT GIAO DIỆN PHẲNG)
+   HÀM TOAST THÔNG BÁO DÙNG CHUNG
    ========================================= */
 window.toast = function(message, type = 'success') {
     let toastHost = document.getElementById('toastHost');
 
-    // KIỂM TRA QUAN TRỌNG: Ép khung Toast phải nằm ở lớp ngoài cùng (con trực tiếp của body)
     if (!toastHost || toastHost.parentElement !== document.body) {
         if (toastHost) toastHost.remove();
         toastHost = document.createElement('div');
@@ -101,7 +97,7 @@ window.toast = function(message, type = 'success') {
         document.body.appendChild(toastHost);
     }
 
-    toastHost.innerHTML = ''; // Xóa thông báo cũ đi nếu có
+    toastHost.innerHTML = '';
 
     const toast = document.createElement('div');
     toast.className = `custom-toast toast-${type}`;
@@ -126,16 +122,14 @@ window.toast = function(message, type = 'success') {
 };
 
 /* =========================================
-   HÀM MODAL XÁC NHẬN DÙNG CHUNG (CẬP NHẬT GIAO DIỆN CORPORATE)
+   HÀM MODAL XÁC NHẬN DÙNG CHUNG
    ========================================= */
 window.confirmDialog = function(title, message, onConfirmCallback) {
     let overlay = document.getElementById('genericConfirmOverlay');
 
-    // KIỂM TRA QUAN TRỌNG: Ép khung Xác nhận phải nằm ở lớp ngoài cùng
     if (!overlay || overlay.parentElement !== document.body) {
         if (overlay) overlay.remove();
 
-        // Tự động tạo lại và gắn thẳng vào thẻ body
         overlay = document.createElement('div');
         overlay.id = 'genericConfirmOverlay';
         overlay.className = 'overlay';
@@ -181,7 +175,6 @@ window.confirmDialog = function(title, message, onConfirmCallback) {
 document.addEventListener('DOMContentLoaded', () => {
     startClock();
 
-    // Tự động đóng menu trên điện thoại khi người dùng bấm chọn một mục
     document.querySelectorAll('.sidebar-item').forEach(item => {
         item.addEventListener('click', () => {
             if (window.innerWidth <= 768) {
@@ -192,34 +185,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
-
-function addOrderNotification(order) {
-    const container = document.querySelector('.dropdown-content');
-    const badge = document.getElementById('notif-badge');
-    badge.style.display = 'block';
-    if (container.querySelector('.empty-notif')) container.innerHTML = '';
-    const notifItem = document.createElement('div');
-    notifItem.style = "padding: 15px 20px; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s;";
-    notifItem.onmouseover = () => notifItem.style.background = "var(--panel-hover)";
-    notifItem.onmouseout = () => notifItem.style.background = "#fff";
-    notifItem.onclick = () => {
-        sessionStorage.setItem('highlightOrderId', order.id);
-        if (window.location.hash === '#orders') {
-            if (window.OrderApp) {
-                OrderApp.loadData();
-            }
-        } else {
-            window.location.hash = '#orders';
-        }
-        document.getElementById('notif-dropdown').classList.remove('show');
-    };
-    notifItem.innerHTML = `
-        <div style="font-weight: 600; font-size: 12px; color: var(--primary); margin-bottom: 2px;">Đơn hàng mới!</div>
-        <div style="font-size: 12px; color: var(--text-main);">Mã đơn: <b>${order.ma}</b></div>
-        <div style="font-size: 11px; color: var(--sub); margin-top: 4px;">Vừa xong - ${order.tenKhach}</div>
-    `;
-    container.prepend(notifItem);
-}
 
 document.addEventListener("DOMContentLoaded", function () {
     const urlParams = new URLSearchParams(window.location.search);
@@ -234,14 +199,20 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
+/* =========================================
+   HỆ THỐNG THÔNG BÁO MỚI (ORDERS & REVIEWS)
+   ========================================= */
 const NotifApp = {
     lastOrderId: null,
+    lastReviewId: null,
     pollingInterval: 10000,
+    hasNewOrders: false,
+    hasNewReviews: false,
 
     init: function() {
         this.bindDropdownEvent();
-        this.fetchNotifications();
-        setInterval(() => this.fetchNotifications(), this.pollingInterval);
+        this.fetchAllData();
+        setInterval(() => this.fetchAllData(), this.pollingInterval);
     },
 
     bindDropdownEvent: function() {
@@ -253,6 +224,7 @@ const NotifApp = {
             btn.onclick = (e) => {
                 e.stopPropagation();
                 dropdown.classList.toggle('show');
+                this.updateBadgeDisplay(false); // Ẩn badge khi mở
             };
         }
 
@@ -263,38 +235,68 @@ const NotifApp = {
         });
     },
 
-    fetchNotifications: async function() {
+    switchTab: function(tabName) {
+        document.querySelectorAll('.notif-tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('notif-orders-content').style.display = 'none';
+        document.getElementById('notif-reviews-content').style.display = 'none';
+
+        if (tabName === 'orders') {
+            document.getElementById('tab-orders').classList.add('active');
+            document.getElementById('notif-orders-content').style.display = 'block';
+        } else if (tabName === 'reviews') {
+            document.getElementById('tab-reviews').classList.add('active');
+            document.getElementById('notif-reviews-content').style.display = 'block';
+        }
+    },
+
+    fetchAllData: function() {
+        this.fetchOrderNotifications();
+        this.fetchReviewNotifications();
+    },
+
+    updateBadgeDisplay: function(forceShow = null) {
+        const badge = document.getElementById('notif-badge');
+        if (!badge) return;
+
+        if (forceShow !== null) {
+            badge.style.display = forceShow ? 'block' : 'none';
+        } else {
+            if (this.hasNewOrders || this.hasNewReviews) {
+                badge.style.display = 'block';
+            }
+        }
+    },
+
+    // ===== PHẦN ĐƠN HÀNG =====
+    fetchOrderNotifications: async function() {
         try {
             const res = await fetch('/api/hoa-don/thong-bao-moi');
             if (!res.ok) return;
             const data = await res.json();
-
-            this.renderUI(data);
-
+            this.renderOrdersUI(data);
         } catch (error) {
-            console.error("Lỗi lấy thông báo:", error);
+            console.error("Lỗi lấy thông báo đơn hàng:", error);
         }
     },
 
-    renderUI: function(orders) {
-        const badge = document.getElementById('notif-badge');
-        const content = document.querySelector('.dropdown-content');
-        if(!badge || !content) return;
+    renderOrdersUI: function(orders) {
+        const content = document.getElementById('notif-orders-content');
+        if(!content) return;
 
         if (!orders || orders.length === 0) {
-            badge.style.display = 'none';
+            this.hasNewOrders = false;
             content.innerHTML = `
-                    <div class="empty-notif" style="padding:30px; text-align:center; color:var(--sub);">
-                        <i class="bi bi-bell-slash" style="font-size:24px; display:block; margin-bottom:10px;"></i>
-                        <span>Không có đơn hàng mới chờ xác nhận</span>
-                    </div>`;
+                <div class="empty-notif">
+                    <i class="bi bi-receipt" style="font-size:24px; display:block; margin-bottom:10px;"></i>
+                    <span>Không có đơn hàng mới chờ xác nhận</span>
+                </div>`;
             return;
         }
 
-        badge.style.display = 'block';
-
         const newestOrderId = orders[0].id;
         if (this.lastOrderId !== null && newestOrderId > this.lastOrderId) {
+            this.hasNewOrders = true;
+            this.updateBadgeDisplay();
             this.playDingSound();
             if(window.toast) {
                 window.toast(`Có đơn hàng online mới: #${orders[0].ma}`, "success");
@@ -309,7 +311,7 @@ const NotifApp = {
 
             html += `
                 <div class="notif-item" onclick="NotifApp.goToOrder()">
-                    <div class="notif-icon"><i class="bi bi-bag-check-fill"></i></div>
+                    <div class="notif-icon order"><i class="bi bi-bag-check-fill"></i></div>
                     <div class="notif-content">
                         <div class="notif-title">Đơn hàng mới: #${ord.ma}</div>
                         <div class="notif-desc">Khách hàng <b>${ord.khachHang}</b> vừa đặt hàng với tổng giá trị <b>${total}</b>.</div>
@@ -318,12 +320,86 @@ const NotifApp = {
                 </div>`;
         });
         html += '</div>';
-
-        html += `
-                <div style="text-align:center; padding:12px; border-top:1px solid var(--border); font-size:12px; font-weight:600; cursor:pointer; color:var(--primary); background:var(--panel-hover);" onclick="NotifApp.goToOrder()">
+        html += `<div style="text-align:center; padding:12px; border-top:1px solid var(--border); font-size:12px; font-weight:600; cursor:pointer; color:var(--primary); background:var(--panel-hover);" onclick="NotifApp.goToOrder()">
                     XEM TẤT CẢ HÓA ĐƠN <i class="bi bi-arrow-right"></i>
-                </div>
-            `;
+                 </div>`;
+
+        content.innerHTML = html;
+    },
+
+    // ===== PHẦN ĐÁNH GIÁ =====
+    fetchReviewNotifications: async function() {
+        try {
+            // LƯU Ý: Chỗ này cần có API tương ứng trên Java Spring Boot của bạn
+            const res = await fetch('/api/khach-hang/danh-gia/thong-bao-moi');
+            if (!res.ok) return;
+            const data = await res.json();
+            this.renderReviewsUI(data);
+        } catch (error) {
+            console.error("Lỗi lấy thông báo đánh giá:", error);
+            // Backup giao diện trống nếu chưa có API
+            const content = document.getElementById('notif-reviews-content');
+            if (content && content.innerHTML.includes("Đang tải")) {
+                content.innerHTML = `
+                    <div class="empty-notif">
+                        <i class="bi bi-star" style="font-size:24px; display:block; margin-bottom:10px;"></i>
+                        <span>Chưa có dữ liệu đánh giá</span>
+                    </div>`;
+            }
+        }
+    },
+
+    renderReviewsUI: function(reviews) {
+        const content = document.getElementById('notif-reviews-content');
+        if(!content) return;
+
+        if (!reviews || reviews.length === 0) {
+            this.hasNewReviews = false;
+            content.innerHTML = `
+                <div class="empty-notif">
+                    <i class="bi bi-star" style="font-size:24px; display:block; margin-bottom:10px;"></i>
+                    <span>Không có đánh giá mới nào</span>
+                </div>`;
+            return;
+        }
+
+        const newestReviewId = reviews[0].id;
+        if (this.lastReviewId !== null && newestReviewId > this.lastReviewId) {
+            this.hasNewReviews = true;
+            this.updateBadgeDisplay();
+            this.playDingSound();
+            if(window.toast) {
+                window.toast(`Có đánh giá mới từ khách hàng!`, "info");
+            }
+        }
+        this.lastReviewId = newestReviewId;
+
+        let html = '<div class="notif-list">';
+        reviews.forEach(rev => {
+            const timeAgo = this.timeSince(rev.ngayTao);
+            let starsHtml = '';
+            for(let i=0; i<5; i++) {
+                if(i < (rev.soSao || 5)) starsHtml += '<i class="bi bi-star-fill" style="color: #ca8a04;"></i>';
+                else starsHtml += '<i class="bi bi-star" style="color: #cbd5e1;"></i>';
+            }
+
+            html += `
+                <div class="notif-item" onclick="NotifApp.goToReviews()">
+                    <div class="notif-icon review"><i class="bi bi-star-fill"></i></div>
+                    <div class="notif-content">
+                        <div class="notif-title">${rev.khachHang || 'Khách hàng'} vừa đánh giá</div>
+                        <div class="notif-desc">
+                            <div style="margin-bottom: 2px;">${starsHtml}</div>
+                            <i>"${rev.noiDung || 'Đã để lại một đánh giá.'}"</i>
+                        </div>
+                        <div class="notif-time"><i class="bi bi-clock"></i> ${timeAgo}</div>
+                    </div>
+                </div>`;
+        });
+        html += '</div>';
+        html += `<div style="text-align:center; padding:12px; border-top:1px solid var(--border); font-size:12px; font-weight:600; cursor:pointer; color:var(--primary); background:var(--panel-hover);" onclick="NotifApp.goToReviews()">
+                    ĐI TỚI TRANG ĐÁNH GIÁ <i class="bi bi-arrow-right"></i>
+                 </div>`;
 
         content.innerHTML = html;
     },
@@ -331,16 +407,17 @@ const NotifApp = {
     goToOrder: function() {
         document.getElementById('notif-dropdown').classList.remove('show');
         window.location.hash = 'orders';
+    },
 
-        if(window.OrderApp && typeof window.OrderApp.switchTab === 'function') {
-            setTimeout(() => window.OrderApp.switchTab('don-hang'), 100);
-        }
+    goToReviews: function() {
+        document.getElementById('notif-dropdown').classList.remove('show');
+        window.location.hash = 'reviews';
     },
 
     playDingSound: function() {
         try {
             const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-            audio.volume = 0.3; // Giảm âm lượng một chút cho đỡ chói (Nghiêm túc hơn)
+            audio.volume = 0.3;
             audio.play().catch(e => console.log("Trình duyệt chặn autoplay âm thanh"));
         } catch(e){}
     },
