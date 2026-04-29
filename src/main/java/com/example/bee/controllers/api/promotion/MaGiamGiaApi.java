@@ -1,5 +1,6 @@
 package com.example.bee.controllers.api.promotion;
 
+import com.example.bee.constants.LoaiGiamGia;
 import com.example.bee.entities.account.TaiKhoan;
 import com.example.bee.entities.notification.ThongBao;
 import com.example.bee.entities.promotion.MaGiamGia;
@@ -59,7 +60,7 @@ public class MaGiamGiaApi {
 
         // 2. Phân tách logic kiểm tra rủi ro theo loại giảm giá
         boolean isPercent = body.getLoaiGiamGia() != null &&
-                (body.getLoaiGiamGia().equalsIgnoreCase("PERCENT") || body.getLoaiGiamGia().contains("%"));
+                (body.getLoaiGiamGia().equalsIgnoreCase(LoaiGiamGia.PHAN_TRAM) || body.getLoaiGiamGia().contains("%"));
 
         if (isPercent) {
             // ----- KIỂM TRA CHO GIẢM % -----
@@ -91,6 +92,29 @@ public class MaGiamGiaApi {
 
             // Gán lại GiaTriGiamGiaToiDa bằng đúng số tiền giảm mặt định (Vì giảm tiền mặt thì max cũng là số đó)
             body.setGiaTriGiamGiaToiDa(body.getGiaTriGiamGia());
+        }
+    }
+
+    // Hàm dùng chung để gửi thông báo cho khách hàng
+    private void sendVoucherNotification(MaGiamGia voucher) {
+        try {
+            List<TaiKhoan> khachHangs = taiKhoanRepository.findByVaiTro_Ma("ROLE_CUSTOMER");
+            if (khachHangs != null && !khachHangs.isEmpty()) {
+                List<ThongBao> thongBaos = new ArrayList<>();
+                for (TaiKhoan tk : khachHangs) {
+                    ThongBao tb = new ThongBao();
+                    tb.setTaiKhoanId(tk.getId());
+                    tb.setTieuDe("Mã giảm giá mới dành cho bạn!");
+                    tb.setNoiDung("Mã ưu đãi " + voucher.getMaCode() + " đã có sẵn. Nhập mã ngay lúc thanh toán để được giảm giá nhé!");
+                    tb.setLoaiThongBao("VOUCHER");
+                    tb.setDaDoc(false);
+                    tb.setDaXoa(false);
+                    thongBaos.add(tb);
+                }
+                thongBaoRepository.saveAll(thongBaos);
+            }
+        } catch (Exception e) {
+            System.out.println("Lỗi gửi thông báo Voucher: " + e.getMessage());
         }
     }
 
@@ -135,25 +159,9 @@ public class MaGiamGiaApi {
 
         MaGiamGia savedVoucher = voucherRepo.save(body);
 
-        // Gửi thông báo cho khách hàng
-        try {
-            List<TaiKhoan> khachHangs = taiKhoanRepository.findByVaiTro_Ma("ROLE_CUSTOMER");
-            if (khachHangs != null && !khachHangs.isEmpty()) {
-                List<ThongBao> thongBaos = new ArrayList<>();
-                for (TaiKhoan tk : khachHangs) {
-                    ThongBao tb = new ThongBao();
-                    tb.setTaiKhoanId(tk.getId());
-                    tb.setTieuDe("Mã giảm giá mới dành cho bạn!");
-                    tb.setNoiDung("Mã ưu đãi " + savedVoucher.getMaCode() + " đã có sẵn. Nhập mã ngay lúc thanh toán để được giảm giá nhé!");
-                    tb.setLoaiThongBao("VOUCHER");
-                    tb.setDaDoc(false);
-                    tb.setDaXoa(false);
-                    thongBaos.add(tb);
-                }
-                thongBaoRepository.saveAll(thongBaos);
-            }
-        } catch (Exception e) {
-            System.out.println("Lỗi gửi thông báo Voucher: " + e.getMessage());
+        // Chỉ gửi thông báo nếu voucher có trạng thái đang hoạt động (true)
+        if (Boolean.TRUE.equals(savedVoucher.getTrangThai())) {
+            sendVoucherNotification(savedVoucher);
         }
 
         return ResponseEntity.ok(savedVoucher);
@@ -186,7 +194,14 @@ public class MaGiamGiaApi {
         entity.setChoPhepCongDon(body.getChoPhepCongDon());
         entity.setTrangThai(body.getTrangThai());
 
-        return ResponseEntity.ok(voucherRepo.save(entity));
+        MaGiamGia updatedVoucher = voucherRepo.save(entity);
+
+        // Gửi thông báo nếu voucher được cập nhật và có trạng thái đang hoạt động (true)
+        if (Boolean.TRUE.equals(updatedVoucher.getTrangThai())) {
+            sendVoucherNotification(updatedVoucher);
+        }
+
+        return ResponseEntity.ok(updatedVoucher);
     }
 
     @PatchMapping("/{id}/trang-thai")

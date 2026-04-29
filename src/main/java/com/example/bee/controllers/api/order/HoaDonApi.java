@@ -144,6 +144,8 @@ public class HoaDonApi {
 
             Date ngayCapNhatCuoi = hd.getNgayThanhToan();
             BigDecimal tongTienHangThucTe = BigDecimal.ZERO;
+            BigDecimal tongGiaGoc = BigDecimal.ZERO;
+
             List<Map<String, Object>> chiTietResponses = new ArrayList<>();
 
             for (HoaDonChiTiet ct : listHdct) {
@@ -156,6 +158,7 @@ public class HoaDonApi {
                 Integer soLuong = ct.getSoLuong() != null ? ct.getSoLuong() : 0;
 
                 tongTienHangThucTe = tongTienHangThucTe.add(giaBan.multiply(BigDecimal.valueOf(soLuong)));
+                tongGiaGoc = tongGiaGoc.add(donGia.multiply(BigDecimal.valueOf(soLuong)));
 
                 Map<String, Object> itemMap = new HashMap<>();
                 itemMap.put("id", ct.getId());
@@ -179,10 +182,25 @@ public class HoaDonApi {
                 chiTietResponses.add(itemMap);
             }
 
+            BigDecimal giaTamThoi = hd.getGiaTamThoi() != null ? hd.getGiaTamThoi() : tongTienHangThucTe;
+            BigDecimal tienGiamGiaSanPham = tongGiaGoc.subtract(giaTamThoi);
+            if (tienGiamGiaSanPham.compareTo(BigDecimal.ZERO) < 0) tienGiamGiaSanPham = BigDecimal.ZERO;
+
+            // BÓC TÁCH CHIẾT KHẤU NHÂN VIÊN VÀ TIỀN GIẢM VOUCHER
+            BigDecimal chietKhauNV = BigDecimal.ZERO;
+            String rawGhiChu = hd.getGhiChu() != null ? hd.getGhiChu() : "";
+            if (rawGhiChu.contains("[Đơn mua nội bộ bởi:")) {
+                chietKhauNV = giaTamThoi.multiply(new BigDecimal("0.05")).setScale(0, RoundingMode.HALF_UP);
+            }
+
+            BigDecimal totalDiscount = hd.getGiaTriKhuyenMai() != null ? hd.getGiaTriKhuyenMai() : BigDecimal.ZERO;
+            BigDecimal tienGiamVoucher = totalDiscount.subtract(chietKhauNV);
+            if (tienGiamVoucher.compareTo(BigDecimal.ZERO) < 0) {
+                tienGiamVoucher = BigDecimal.ZERO;
+            }
+
             BigDecimal phiShip = hd.getPhiVanChuyen() != null ? hd.getPhiVanChuyen() : BigDecimal.ZERO;
             BigDecimal tongPhaiTra = hd.getGiaTong() != null ? hd.getGiaTong() : BigDecimal.ZERO;
-
-            BigDecimal voucherCalculated = hd.getGiaTriKhuyenMai() != null ? hd.getGiaTriKhuyenMai() : BigDecimal.ZERO;
 
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             SimpleDateFormat sdfDate = new SimpleDateFormat("dd/MM/yyyy");
@@ -215,7 +233,6 @@ public class HoaDonApi {
             }
             response.put("sdtKhachHang", sdtNhan);
 
-            // FIX EMAIL LẤY TỪ THÔNG TIN GIAO HÀNG
             String emailNhan = "";
             if (hd.getThongTinGiaoHang() != null && hd.getThongTinGiaoHang().getEmailNhan() != null && !hd.getThongTinGiaoHang().getEmailNhan().isEmpty()) {
                 emailNhan = hd.getThongTinGiaoHang().getEmailNhan();
@@ -224,7 +241,6 @@ public class HoaDonApi {
             }
             response.put("email", emailNhan);
 
-            String rawGhiChu = hd.getGhiChu() != null ? hd.getGhiChu() : "";
             if (rawGhiChu.contains("[BUY_NOW]")) rawGhiChu = rawGhiChu.replace("[BUY_NOW]", "").trim();
             response.put("ghiChu", rawGhiChu);
 
@@ -315,12 +331,15 @@ public class HoaDonApi {
 
             response.put("tienHang", tongTienHangThucTe);
             response.put("phiVanChuyen", phiShip);
-            response.put("tienGiamVoucher", voucherCalculated);
             response.put("tongTien", tongPhaiTra);
             response.put("chiTiets", chiTietResponses);
 
-            response.put("giaTamThoi", hd.getGiaTamThoi() != null ? hd.getGiaTamThoi() : tongTienHangThucTe);
-            response.put("giaTriKhuyenMai", voucherCalculated);
+            response.put("giaTamThoi", giaTamThoi);
+            response.put("tongGiaGoc", tongGiaGoc);
+            response.put("tienGiamGiaSanPham", tienGiamGiaSanPham);
+            response.put("giaTriKhuyenMai", totalDiscount);
+            response.put("tienGiamVoucher", tienGiamVoucher);
+            response.put("chietKhauNV", chietKhauNV);
 
             return ResponseEntity.ok(response);
 
@@ -395,6 +414,19 @@ public class HoaDonApi {
             hd.setNhanVien(nhanVienThaoTac);
         }
         hdRepo.save(hd);
+
+        // Cập nhật trạng thái thanh toán nếu hóa đơn hoàn thành (Dành cho COD)
+        if ("HOAN_THANH".equals(nextMa)) {
+            List<ThanhToan> ttList = thanhToanRepo.findByHoaDon_Id(hd.getId());
+            if (ttList != null && !ttList.isEmpty()) {
+                ThanhToan tt = ttList.get(0);
+                if ("CHO_THANH_TOAN".equals(tt.getTrangThai())) {
+                    tt.setTrangThai("THANH_CONG");
+                    tt.setNgayThanhToan(new Date());
+                    thanhToanRepo.save(tt);
+                }
+            }
+        }
 
         if (hd.getKhachHang() != null && hd.getKhachHang().getTaiKhoan() != null) {
             ThongBao tb = new ThongBao();
@@ -721,10 +753,22 @@ public class HoaDonApi {
             ThanhToan tt = new ThanhToan();
             tt.setHoaDon(savedHd);
             tt.setSoTien(tongTienCuoi);
-            tt.setPhuongThuc(req.phuongThucThanhToan != null ? req.phuongThucThanhToan : "TIEN_MAT");
+            String pttt = req.phuongThucThanhToan != null ? req.phuongThucThanhToan : "TIEN_MAT";
+            tt.setPhuongThuc(pttt);
             tt.setLoaiThanhToan("THANH_TOAN");
-            tt.setTrangThai(ttBanDau.getMa().equals("CHO_THANH_TOAN") ? "CHO_THANH_TOAN" : "THANH_CONG");
-            tt.setNgayThanhToan(new Date());
+
+            // Fix trạng thái thanh toán đối với COD
+            if ("COD".equalsIgnoreCase(pttt)) {
+                tt.setTrangThai("CHO_THANH_TOAN");
+                tt.setNgayThanhToan(null);
+            } else {
+                tt.setTrangThai(ttBanDau.getMa().equals("CHO_THANH_TOAN") ? "CHO_THANH_TOAN" : "THANH_CONG");
+                if ("THANH_CONG".equals(tt.getTrangThai())) {
+                    tt.setNgayThanhToan(new Date());
+                } else {
+                    tt.setNgayThanhToan(null);
+                }
+            }
             thanhToanRepo.save(tt);
 
             LichSuHoaDon ls = new LichSuHoaDon();
@@ -876,7 +920,6 @@ public class HoaDonApi {
         }
         result.put("sdtKhachHang", sdtNhan);
 
-        // FIX LẤY EMAIL TỪ THÔNG TIN GIAO HÀNG
         String emailNhan = "";
         if (hoaDon.getThongTinGiaoHang() != null && hoaDon.getThongTinGiaoHang().getEmailNhan() != null && !hoaDon.getThongTinGiaoHang().getEmailNhan().isEmpty()) {
             emailNhan = hoaDon.getThongTinGiaoHang().getEmailNhan();
@@ -934,18 +977,10 @@ public class HoaDonApi {
         result.put("tongTien", hoaDon.getGiaTong());
         result.put("phiVanChuyen", hoaDon.getPhiVanChuyen());
 
-        BigDecimal voucherCalculated = hoaDon.getGiaTriKhuyenMai() != null ? hoaDon.getGiaTriKhuyenMai() : BigDecimal.ZERO;
-        result.put("giaTamThoi", hoaDon.getGiaTamThoi());
-        result.put("giaTriKhuyenMai", voucherCalculated);
-        result.put("tienGiamVoucher", voucherCalculated);
-
-        if (hoaDon.getMaGiamGia() != null) {
-            result.put("maVoucher", hoaDon.getMaGiamGia().getMaCode());
-        } else {
-            result.put("maVoucher", "Không áp dụng");
-        }
-
         java.util.List<com.example.bee.entities.order.HoaDonChiTiet> danhSachChiTiet = hdctRepo.findByHoaDonId(hoaDon.getId());
+        BigDecimal tongGiaGocTraCuu = BigDecimal.ZERO;
+        BigDecimal giaTamThoiTraCuu = hoaDon.getGiaTamThoi() != null ? hoaDon.getGiaTamThoi() : BigDecimal.ZERO;
+
         java.util.List<java.util.Map<String, Object>> listChiTiet = new java.util.ArrayList<>();
         if (danhSachChiTiet != null && !danhSachChiTiet.isEmpty()) {
             for (com.example.bee.entities.order.HoaDonChiTiet hdct : danhSachChiTiet) {
@@ -961,6 +996,8 @@ public class HoaDonApi {
                 }
                 item.put("donGia", donGia);
                 item.put("giaBan", giaBan);
+
+                tongGiaGocTraCuu = tongGiaGocTraCuu.add(donGia.multiply(BigDecimal.valueOf(hdct.getSoLuong())));
 
                 if (hdct.getSanPhamChiTiet() != null) {
                     item.put("sku", hdct.getSanPhamChiTiet().getSku());
@@ -979,6 +1016,34 @@ public class HoaDonApi {
             }
         }
         result.put("chiTiets", listChiTiet);
+
+        BigDecimal tienGiamSanPhamTraCuu = tongGiaGocTraCuu.subtract(giaTamThoiTraCuu);
+        if(tienGiamSanPhamTraCuu.compareTo(BigDecimal.ZERO) < 0) tienGiamSanPhamTraCuu = BigDecimal.ZERO;
+
+        BigDecimal chietKhauNV = BigDecimal.ZERO;
+        if (rawGhiChu.contains("[Đơn mua nội bộ bởi:")) {
+            chietKhauNV = giaTamThoiTraCuu.multiply(new BigDecimal("0.05")).setScale(0, RoundingMode.HALF_UP);
+        }
+
+        BigDecimal totalDiscount = hoaDon.getGiaTriKhuyenMai() != null ? hoaDon.getGiaTriKhuyenMai() : BigDecimal.ZERO;
+        BigDecimal tienGiamVoucher = totalDiscount.subtract(chietKhauNV);
+        if (tienGiamVoucher.compareTo(BigDecimal.ZERO) < 0) {
+            tienGiamVoucher = BigDecimal.ZERO;
+        }
+
+        result.put("giaTamThoi", giaTamThoiTraCuu);
+        result.put("tongGiaGoc", tongGiaGocTraCuu);
+        result.put("tienGiamGiaSanPham", tienGiamSanPhamTraCuu);
+        result.put("giaTriKhuyenMai", totalDiscount);
+        result.put("tienGiamVoucher", tienGiamVoucher);
+        result.put("chietKhauNV", chietKhauNV);
+
+        if (hoaDon.getMaGiamGia() != null) {
+            result.put("maVoucher", hoaDon.getMaGiamGia().getMaCode());
+        } else {
+            result.put("maVoucher", "Không áp dụng");
+        }
+
         return ResponseEntity.ok(result);
     }
 
@@ -1018,20 +1083,40 @@ public class HoaDonApi {
         }
         List<Map<String, Object>> items = new ArrayList<>();
         BigDecimal tongTienHang = BigDecimal.ZERO;
+        BigDecimal tongGiaGoc = BigDecimal.ZERO;
+
         for (HoaDonChiTiet ct : listHdct) {
             Map<String, Object> item = new HashMap<>();
             String tenSP = ct.getSanPhamChiTiet().getSanPham().getTen();
             String thuocTinh = ct.getSanPhamChiTiet().getMauSac().getTen() + " - " + ct.getSanPhamChiTiet().getKichThuoc().getTen();
             item.put("ten", tenSP + " (" + thuocTinh + ")");
             item.put("soLuong", ct.getSoLuong());
-            item.put("donGia", ct.getGiaTien());
-            BigDecimal thanhTien = ct.getGiaTien().multiply(BigDecimal.valueOf(ct.getSoLuong()));
+
+            BigDecimal giaBan = ct.getGiaTien() != null ? ct.getGiaTien() : BigDecimal.ZERO;
+            BigDecimal donGia = giaBan;
+            if (ct.getSanPhamChiTiet() != null && ct.getSanPhamChiTiet().getGiaBan() != null) {
+                donGia = ct.getSanPhamChiTiet().getGiaBan();
+            }
+
+            item.put("donGia", giaBan);
+            item.put("giaBan", giaBan);
+
+            BigDecimal thanhTien = giaBan.multiply(BigDecimal.valueOf(ct.getSoLuong()));
             item.put("thanhTien", thanhTien);
+
             tongTienHang = tongTienHang.add(thanhTien);
+            tongGiaGoc = tongGiaGoc.add(donGia.multiply(BigDecimal.valueOf(ct.getSoLuong())));
             items.add(item);
         }
         Map<String, Object> summary = new HashMap<>();
+
+        BigDecimal tienGiamSanPham = tongGiaGoc.subtract(tongTienHang);
+        if(tienGiamSanPham.compareTo(BigDecimal.ZERO) < 0) tienGiamSanPham = BigDecimal.ZERO;
+
         summary.put("tongTienHang", tongTienHang);
+        summary.put("tongGiaGoc", tongGiaGoc);
+        summary.put("tienGiamSanPham", tienGiamSanPham);
+
         BigDecimal phiShip = hd.getPhiVanChuyen() != null ? hd.getPhiVanChuyen() : BigDecimal.ZERO;
         summary.put("phiVanChuyen", phiShip);
         BigDecimal tongPhaiTra = hd.getGiaTong() != null ? hd.getGiaTong() : BigDecimal.ZERO;
@@ -1039,6 +1124,19 @@ public class HoaDonApi {
         if (giamGia.compareTo(BigDecimal.ZERO) < 0) giamGia = BigDecimal.ZERO;
         summary.put("giamGia", giamGia);
         summary.put("tongThanhToan", tongPhaiTra);
+
+        BigDecimal chietKhauNV = BigDecimal.ZERO;
+        String rawGhiChu = hd.getGhiChu() != null ? hd.getGhiChu() : "";
+        if (rawGhiChu.contains("[Đơn mua nội bộ bởi:")) {
+            chietKhauNV = tongTienHang.multiply(new BigDecimal("0.05")).setScale(0, RoundingMode.HALF_UP);
+        }
+        BigDecimal tienGiamVoucher = giamGia.subtract(chietKhauNV);
+        if (tienGiamVoucher.compareTo(BigDecimal.ZERO) < 0) {
+            tienGiamVoucher = BigDecimal.ZERO;
+        }
+
+        summary.put("tienGiamVoucher", tienGiamVoucher);
+        summary.put("chietKhauNV", chietKhauNV);
 
         List<ThanhToan> ttListPrint = thanhToanRepo.findByHoaDon_Id(hd.getId());
         String ptttPrint = "TIEN_MAT";

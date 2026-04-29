@@ -325,7 +325,7 @@
                 <div class="detail-card-header"><i class="bi bi-box-seam"></i> Danh sách sản phẩm</div>
                 <div class="detail-card-body">
                     <div id="viewProductList" style="border:1px solid var(--border-light); border-radius:4px; margin-bottom:16px; overflow-x:auto;"></div>
-                    <div id="viewSummaryBox" style="font-size:13px; line-height:2.2; max-width:320px; float:right;"></div>
+                    <div id="viewSummaryBox" style="font-size:13px; line-height:2.2; max-width:340px; float:right;"></div>
                     <div style="clear:both;"></div>
                 </div>
             </div>
@@ -451,18 +451,19 @@
         const ten = tt.ten;
         const ma = tt.ma;
 
-        if (ma === 'HOAN_THANH' || id === 6 || ten === 'Hoàn thành') return `<span class="badge-status" style="background:var(--success);">Hoàn thành</span>`;
-        if (ma === 'DA_HUY' || id === 7 || ten === 'Đã hủy') return `<span class="badge-status" style="background:var(--danger);">Đã hủy</span>`;
-        if (ma === 'GIAO_THAT_BAI' || ten === 'Giao thất bại') return `<span class="badge-status" style="background:var(--danger);">Giao thất bại</span>`;
-        if (ma === 'DA_HOAN_HANG' || ten === 'Đã nhận hoàn hàng') return `<span class="badge-status" style="background:#f43f5e;">Đã hoàn hàng</span>`;
-        if (ma === 'TU_CHOI_TRA_HANG') return `<span class="badge-status" style="background:var(--danger);">Từ chối trả hàng</span>`;
+        if (ma === 'HOAN_THANH' || id === 7 || ten === 'Hoàn thành') return `<span class="badge-status" style="background:var(--success);">Hoàn thành</span>`;
+        if (ma === 'CHO_KHACH_LAY' || id === 6 || ten === 'Chờ khách đến lấy') return `<span class="badge-status" style="background:#14b8a6;">Chờ khách lấy</span>`;
+        if (ma === 'DA_HUY' || id === 8 || ten === 'Đã hủy') return `<span class="badge-status" style="background:var(--danger);">Đã hủy</span>`;
+        if (ma === 'GIAO_THAT_BAI' || id === 11 || ten === 'Giao thất bại') return `<span class="badge-status" style="background:var(--danger);">Giao thất bại</span>`;
+        if (ma === 'DA_HOAN_HANG' || id === 13 || ten === 'Đã nhận lại hàng hoàn') return `<span class="badge-status" style="background:#f43f5e;">Đã hoàn hàng</span>`;
+        if (ma === 'TU_CHOI_TRA_HANG' || id === 15 || ten === 'Từ chối trả hàng') return `<span class="badge-status" style="background:var(--danger);">Từ chối trả hàng</span>`;
 
-        if (ma === 'CHO_THANH_TOAN' || id === 1 || ten === 'Chờ thanh toán') return `<span class="badge-status" style="background:var(--warning);">Chờ thanh toán</span>`;
-        if (ma === 'DANG_GIAO_HANG' || ten.includes('Đang giao')) return `<span class="badge-status" style="background:var(--primary);">Đang giao hàng</span>`;
-        if (ma === 'CHO_GIAO_VAN_CHUYEN' || ten === 'Chờ giao cho đơn vị vận chuyển') return `<span class="badge-status" style="background:#0ea5e9;">Chờ giao cho DV VC</span>`;
+        if (ma === 'CHO_THANH_TOAN' || id === 2 || ten === 'Chờ thanh toán') return `<span class="badge-status" style="background:var(--warning);">Chờ thanh toán</span>`;
+        if (ma === 'DANG_GIAO_HANG' || id === 5 || ten.includes('Đang giao')) return `<span class="badge-status" style="background:var(--primary);">Đang giao hàng</span>`;
+        if (ma === 'CHO_GIAO_VAN_CHUYEN' || id === 4 || ten === 'Chờ giao cho đơn vị vận chuyển') return `<span class="badge-status" style="background:#0ea5e9;">Chờ giao cho DV VC</span>`;
 
-        if (ma === 'DANG_HOAN_HANG') return `<span class="badge-status" style="background:#8b5cf6;">Đang hoàn hàng về kho</span>`;
-        if (ma === 'YEU_CAU_TRA_HANG') return `<span class="badge-status" style="background:#f97316;">Yêu cầu trả hàng</span>`;
+        if (ma === 'DANG_HOAN_HANG' || id === 12) return `<span class="badge-status" style="background:#8b5cf6;">Đang hoàn hàng về kho</span>`;
+        if (ma === 'YEU_CAU_TRA_HANG' || id === 14) return `<span class="badge-status" style="background:#f97316;">Yêu cầu trả hàng</span>`;
 
         return `<span class="badge-status" style="background:#6366f1;">${ten}</span>`;
     };
@@ -902,7 +903,6 @@
             }
         },
 
-        // ĐÃ THÊM HÀM CHANGEPAGE ĐỂ PHÂN TRANG HOẠT ĐỘNG
         changePage: function(p) {
             if (p < 0 || p >= this.state.totalPages) return;
             this.state.page = p;
@@ -1102,7 +1102,7 @@
                 setTxt('viewTrangThaiText', (hd.trangThaiTen || '').toUpperCase());
                 setTxt('viewMaVoucher', hd.maVoucher || 'Không áp dụng');
 
-                const giaTamThoi = hd.giaTamThoi || 0;
+                const giaTamThoi = Number(hd.giaTamThoi) || 0;
                 let isStorePickup = (hd.hinhThucGiaoHang === 'NHAN_TAI_CUA_HANG') ||
                     (hd.loaiHoaDon === 1 && hd.phiVanChuyen === 0 && giaTamThoi < 5000000) ||
                     (hd.diaChiGiaoHang && hd.diaChiGiaoHang.toLowerCase().includes('nhận tại cửa hàng'));
@@ -1149,7 +1149,6 @@
 
                 setTxt('viewSDTKhach', (hd.sdtKhachHang && String(hd.sdtKhachHang) !== 'null') ? hd.sdtKhachHang : "Không có SĐT");
 
-                // LẤY VÀ HIỂN THỊ EMAIL KHÁCH HÀNG (ĐÃ FIX LOGIC)
                 let emailToDisplay = "Không có Email";
                 if (hd.email && String(hd.email) !== 'null' && String(hd.email).trim() !== '') emailToDisplay = hd.email;
                 else if (hd.emailNguoiNhan && String(hd.emailNguoiNhan) !== 'null') emailToDisplay = hd.emailNguoiNhan;
@@ -1189,24 +1188,57 @@
 
                 const phiShip = Number(hd.phiVanChuyen) || 0;
                 const tongTien = Number(hd.tongTien) || 0;
-                let giamGia = (giaTamThoi + phiShip) - tongTien;
-                if (giamGia < 0) giamGia = Number(hd.tienGiamVoucher) || 0;
                 const tienHoan = Number(hd.tienHoan) || 0;
+
+                const tongGiaGoc = Number(hd.tongGiaGoc) || 0;
+                const tienGiamGiaSanPham = Number(hd.tienGiamGiaSanPham) || 0;
+                const tienGiamVoucher = Number(hd.tienGiamVoucher) || 0;
+                const chietKhauNV = Number(hd.chietKhauNV) || 0;
 
                 let phiShipRowHtml = (hd.loaiHoaDon === 0 || isStorePickup) ? '' : `
                     <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
                         <span>Phí vận chuyển:</span> <strong style="color:var(--text-main);">${phiShip > 0 ? this.formatCurrency(phiShip) : 'Miễn phí'}</strong>
                     </div>`;
 
+                // CẬP NHẬT LOGIC TÍNH TOÁN HIỂN THỊ CHI TIẾT TỪNG PHẦN GIẢM GIÁ
                 let sBoxHtml = `
-                    <div style="width:100%; font-size:13px; color:var(--text-main);">
+                    <div style="width:100%; font-size:13px; color:var(--text-main);">`;
+
+                if (tienGiamGiaSanPham > 0) {
+                    sBoxHtml += `
+                        <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                            <span>Tổng tiền hàng:</span> <strong style="color:var(--text-main);">${this.formatCurrency(tongGiaGoc)}</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                            <span>Khuyến mãi sản phẩm:</span> <strong style="color:var(--success);">-${this.formatCurrency(tienGiamGiaSanPham)}</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:12px; padding-top:12px; border-top:1px dashed var(--border-light);">
+                            <span>Tạm tính:</span> <strong style="color:var(--text-main);">${this.formatCurrency(giaTamThoi)}</strong>
+                        </div>`;
+                } else {
+                    sBoxHtml += `
                         <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
                             <span>Tiền hàng:</span> <strong style="color:var(--text-main);">${this.formatCurrency(giaTamThoi)}</strong>
-                        </div>
-                        ${phiShipRowHtml}
+                        </div>`;
+                }
+
+                sBoxHtml += `${phiShipRowHtml}`;
+
+                if (tienGiamVoucher > 0) {
+                    sBoxHtml += `
                         <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-                            <span>Voucher:</span> <strong style="color:var(--success);">-${this.formatCurrency(giamGia)}</strong>
-                        </div>
+                            <span>Voucher:</span> <strong style="color:var(--success);">-${this.formatCurrency(tienGiamVoucher)}</strong>
+                        </div>`;
+                }
+
+                if (chietKhauNV > 0) {
+                    sBoxHtml += `
+                        <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                            <span style="color:#3b82f6;">Ưu đãi nội bộ (5%):</span> <strong style="color:var(--success);">-${this.formatCurrency(chietKhauNV)}</strong>
+                        </div>`;
+                }
+
+                sBoxHtml += `
                         <div style="display:flex; justify-content:space-between; font-size:13px; margin-top:16px; border-top:1px solid var(--border-color); padding-top:16px;">
                             <span style="font-weight:700; text-transform:uppercase;">TỔNG THANH TOÁN:</span>
                             <strong style="color:var(--primary); font-size:16px;">${this.formatCurrency(tongTien)}</strong>

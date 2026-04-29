@@ -1,6 +1,9 @@
 package com.example.bee.controllers.api.promotion;
 
+import com.example.bee.constants.LoaiGiamGia;
 import com.example.bee.dto.PromotionRequest;
+import com.example.bee.entities.account.TaiKhoan;
+import com.example.bee.entities.notification.ThongBao;
 import com.example.bee.entities.product.SanPham;
 import com.example.bee.entities.product.SanPhamChiTiet;
 import com.example.bee.entities.promotion.KhuyenMai;
@@ -54,7 +57,7 @@ public class KhuyenMaiApi {
         }
 
         boolean isPercent = req.getLoai() != null &&
-                (req.getLoai().equalsIgnoreCase("PERCENT") || req.getLoai().contains("%"));
+                (req.getLoai().equalsIgnoreCase(LoaiGiamGia.PHAN_TRAM) || req.getLoai().contains("%"));
 
         if (isPercent) {
             if (req.getGiaTri() == null || req.getGiaTri().compareTo(BigDecimal.ONE) < 0 || req.getGiaTri().compareTo(new BigDecimal("70")) > 0) {
@@ -167,6 +170,29 @@ public class KhuyenMaiApi {
 
     private boolean checkDaSuDung(Integer khuyenMaiId) {
         return false;
+    }
+
+    // Hàm dùng chung để gửi thông báo đợt Sale cho khách hàng
+    private void sendKhuyenMaiNotification(KhuyenMai khuyenMai) {
+        try {
+            List<TaiKhoan> khachHangs = taiKhoanRepository.findByVaiTro_Ma("ROLE_CUSTOMER");
+            if (khachHangs != null && !khachHangs.isEmpty()) {
+                List<ThongBao> thongBaos = new ArrayList<>();
+                for (TaiKhoan tk : khachHangs) {
+                    ThongBao tb = new ThongBao();
+                    tb.setTaiKhoanId(tk.getId());
+                    tb.setTieuDe("Đợt Sale mới: " + khuyenMai.getTen());
+                    tb.setNoiDung("Chương trình khuyến mãi giảm giá các mặt hàng đã bắt đầu. Nhanh tay săn sale kẻo lỡ!");
+                    tb.setLoaiThongBao("VOUCHER");
+                    tb.setDaDoc(false);
+                    tb.setDaXoa(false);
+                    thongBaos.add(tb);
+                }
+                thongBaoRepository.saveAll(thongBaos);
+            }
+        } catch (Exception e) {
+            System.out.println("Lỗi gửi thông báo Sale: " + e.getMessage());
+        }
     }
 
     @Scheduled(fixedRate = 60000)
@@ -299,24 +325,9 @@ public class KhuyenMaiApi {
 
         saveProductsAndSkus(saved.getId(), body.getIdSanPhams(), body.getIdSanPhamChiTiets());
 
-        try {
-            java.util.List<com.example.bee.entities.account.TaiKhoan> khachHangs = taiKhoanRepository.findByVaiTro_Ma("ROLE_CUSTOMER");
-            if (khachHangs != null && !khachHangs.isEmpty()) {
-                java.util.List<com.example.bee.entities.notification.ThongBao> thongBaos = new java.util.ArrayList<>();
-                for (com.example.bee.entities.account.TaiKhoan tk : khachHangs) {
-                    com.example.bee.entities.notification.ThongBao tb = new com.example.bee.entities.notification.ThongBao();
-                    tb.setTaiKhoanId(tk.getId());
-                    tb.setTieuDe("Đợt Sale mới: " + saved.getTen());
-                    tb.setNoiDung("Chương trình khuyến mãi giảm giá các mặt hàng đã bắt đầu. Nhanh tay săn sale kẻo lỡ!");
-                    tb.setLoaiThongBao("VOUCHER");
-                    tb.setDaDoc(false);
-                    tb.setDaXoa(false);
-                    thongBaos.add(tb);
-                }
-                thongBaoRepository.saveAll(thongBaos);
-            }
-        } catch (Exception e) {
-            System.out.println("Lỗi gửi thông báo Sale: " + e.getMessage());
+        // Chỉ gửi thông báo nếu chương trình có trạng thái đang hoạt động (true)
+        if (Boolean.TRUE.equals(saved.getTrangThai())) {
+            sendKhuyenMaiNotification(saved);
         }
 
         return ResponseEntity.ok(saved);
@@ -364,6 +375,11 @@ public class KhuyenMaiApi {
         // Xóa các liên kết cũ và thêm lại
         khuyenMaiSanPhamRepository.deleteByIdKhuyenMai(id);
         saveProductsAndSkus(saved.getId(), body.getIdSanPhams(), body.getIdSanPhamChiTiets());
+
+        // Gửi thông báo nếu chương trình được cập nhật và có trạng thái đang hoạt động (true)
+        if (Boolean.TRUE.equals(saved.getTrangThai())) {
+            sendKhuyenMaiNotification(saved);
+        }
 
         return ResponseEntity.ok(saved);
     }

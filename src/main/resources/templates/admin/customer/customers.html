@@ -76,6 +76,7 @@
         /* Table */
         .table-wrapper { border: 1px solid var(--gray-200); width: 100%; overflow-x: auto; background: #ffffff; border-radius: var(--border-radius); }
         table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+        .drawer table { min-width: 100%; } /* BỔ SUNG: Fix lỗi tràn bảng trong các ngăn kéo (drawer) */
         thead th { text-align: left; padding: 12px 15px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--sub); background: var(--gray-100); border-bottom: 1px solid var(--gray-200); white-space: nowrap; position: sticky; top: 0; z-index: 10;}
         tbody td { padding: 10px 15px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; font-size: 13px; word-wrap: break-word; color: var(--text-main);}
         tbody tr:hover { background: var(--gray-100); }
@@ -172,7 +173,7 @@
         .addr-actions { position: absolute; top: 16px; right: 16px; display: flex; gap: 8px; }
 
         /* CHO ORDER & PRODUCT SUB-TABS */
-        .sub-table-container { background: #ffffff; border: 1px solid var(--gray-200); border-radius: var(--border-radius); padding: 20px; }
+        .sub-table-container { background: #ffffff; border: 1px solid var(--gray-200); border-radius: var(--border-radius); padding: 20px; overflow-x: auto; } /* BỔ SUNG: Thêm overflow-x auto để không tràn block */
 
         .expand-btn { cursor: pointer; color: var(--sub); font-size: 16px; padding: 6px; border-radius: 50%; transition: 0.2s; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px;}
         .expand-btn:hover { background: var(--gray-100); color: var(--text-main); }
@@ -181,7 +182,8 @@
         .order-detail-row { display: none; background: var(--gray-100);}
         .order-detail-row.show { display: table-row; }
         .order-detail-content { padding: 20px !important; border-left: 4px solid var(--primary); }
-        .detail-table { width: 100%; border-collapse: collapse; background: #ffffff; border: 1px solid var(--gray-200); border-radius: var(--border-radius); overflow: hidden;}
+        /* BỔ SUNG: Chỉnh lại min-width: 100% cho bảng chi tiết để không bị giãn */
+        .detail-table { width: 100%; min-width: 100%; border-collapse: collapse; background: #ffffff; border: 1px solid var(--gray-200); border-radius: var(--border-radius); overflow: hidden;}
         .detail-table th { background: var(--gray-100); padding: 10px 12px; font-size: 11px; font-weight: 700; color: var(--sub); text-transform: uppercase; border-bottom: 1px solid var(--gray-200);}
         .detail-table td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid var(--gray-200); color: var(--text-main);}
 

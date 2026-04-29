@@ -521,18 +521,12 @@
             container.innerHTML = html;
         },
 
-        changePage: function(p) {
-            if (p < 0 || p >= this.state.totalPages) return;
-            this.state.page = p;
-            this.loadData();
-        },
-
         renderSaleTable: function (list) {
             const tbody = document.getElementById('tbody');
             if (list.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Chưa có khuyến mãi nào</td></tr>'; return; }
             tbody.innerHTML = list.map((item, index) => {
                 const fm = new Intl.NumberFormat('vi-VN');
-                const val = item.loai === 'PERCENT' ? item.giaTri + '%' : fm.format(item.giaTri) + ' ₫';
+                const val = item.loai === 'PHAN_TRAM' ? item.giaTri + '%' : fm.format(item.giaTri) + ' ₫';
 
                 const badgeClass = item.trangThai ? 'badge-active' : 'badge-inactive';
                 const badgeText = item.trangThai ? 'Đang hoạt động' : 'Ngừng hoạt động';
@@ -542,7 +536,7 @@
                     <td style="text-align:center;">${(this.state.page * this.state.size) + index + 1}</td>
                     <td style="font-weight:700; color:var(--text-main);">${item.ma}</td>
                     <td style="font-weight:600;">${item.ten}</td>
-                    <td><span class="badge-type">${item.loai === 'PERCENT' ? 'Phần trăm' : 'Tiền mặt'}</span></td>
+                    <td><span class="badge-type">${item.loai === 'PHAN_TRAM' ? 'Phần trăm' : 'Tiền mặt'}</span></td>
                     <td style="font-weight:700; color:#d63384;">${val}</td>
                     <td style="font-size:12px; color:var(--sub);">${item.ngayBatDau.replace('T',' ')}<br>${item.ngayKetThuc.replace('T',' ')}</td>
                     <td style="text-align:center;">${statusHtml}</td>
@@ -561,11 +555,11 @@
             tbody.innerHTML = list.map((item, index) => {
                 const fm = new Intl.NumberFormat('vi-VN');
                 let typeLabel = '';
-                if (item.loaiGiamGia === 'PERCENT') typeLabel = '<span class="badge-type">Phần trăm</span>';
+                if (item.loaiGiamGia === 'PHAN_TRAM') typeLabel = '<span class="badge-type">Phần trăm</span>';
                 else if (item.loaiGiamGia === 'FREESHIP') typeLabel = '<span class="badge-type" style="background:#dbeafe; color:#2563eb; border-color:#bfdbfe;"><i class="bi bi-truck"></i> Freeship</span>';
                 else typeLabel = '<span class="badge-type">Tiền mặt</span>';
 
-                const val = item.loaiGiamGia === 'PERCENT' ? item.giaTriGiamGia + '%' : fm.format(item.giaTriGiamGia) + ' ₫';
+                const val = item.loaiGiamGia === 'PHAN_TRAM' ? item.giaTriGiamGia + '%' : fm.format(item.giaTriGiamGia) + ' ₫';
                 const cond = fm.format(item.dieuKien);
 
                 const badgeClass = item.trangThai ? 'badge-active' : 'badge-inactive';
@@ -618,7 +612,7 @@
             const isVoucher = this.state.activeTab === 'voucher';
 
             if (!keepValue) { input.value = ''; }
-            if (type === 'PERCENT') {
+            if (type === 'PHAN_TRAM') {
                 input.placeholder = "Ví dụ: 10 (%)";
                 document.getElementById('groupMaxGiam').style.display = isVoucher ? 'block' : 'none';
             } else if (type === 'FREESHIP') {
@@ -641,9 +635,9 @@
 
             const typeSelect = document.getElementById('kmLoai');
             if (isSale) {
-                typeSelect.innerHTML = '<option value="PERCENT">Phần trăm (%)</option><option value="AMOUNT">Giảm trực tiếp (VNĐ)</option>';
+                typeSelect.innerHTML = '<option value="PHAN_TRAM">Phần trăm (%)</option><option value="GIA TIEN">Giảm trực tiếp (VNĐ)</option>';
             } else {
-                typeSelect.innerHTML = '<option value="PERCENT">Phần trăm (%)</option><option value="AMOUNT">Tiền mặt (VNĐ)</option><option value="FREESHIP">Hỗ trợ vận chuyển (VNĐ)</option>';
+                typeSelect.innerHTML = '<option value="PHAN_TRAM">Phần trăm (%)</option><option value="GIA TIEN">Tiền mặt (VNĐ)</option><option value="FREESHIP">Hỗ trợ vận chuyển (VNĐ)</option>';
             }
             this.handleTypeChange();
 
@@ -681,9 +675,9 @@
 
                 const typeSelect = document.getElementById('kmLoai');
                 if (isSale) {
-                    typeSelect.innerHTML = '<option value="PERCENT">Phần trăm (%)</option><option value="AMOUNT">Giảm trực tiếp (VNĐ)</option>';
+                    typeSelect.innerHTML = '<option value="PHAN_TRAM">Phần trăm (%)</option><option value="GIA TIEN">Giảm trực tiếp (VNĐ)</option>';
                 } else {
-                    typeSelect.innerHTML = '<option value="PERCENT">Phần trăm (%)</option><option value="AMOUNT">Tiền mặt (VNĐ)</option><option value="FREESHIP">Hỗ trợ vận chuyển (VNĐ)</option>';
+                    typeSelect.innerHTML = '<option value="PHAN_TRAM">Phần trăm (%)</option><option value="GIA TIEN">Tiền mặt (VNĐ)</option><option value="FREESHIP">Hỗ trợ vận chuyển (VNĐ)</option>';
                 }
 
                 document.getElementById('kmMa').value = isSale ? item.ma : item.maCode;
@@ -692,9 +686,9 @@
                 if (isSale) {
                     document.getElementById('kmLoai').value = item.loai;
                 } else {
-                    if (item.loaiGiamGia === 'PERCENT') document.getElementById('kmLoai').value = 'PERCENT';
+                    if (item.loaiGiamGia === 'PHAN_TRAM') document.getElementById('kmLoai').value = 'PHAN_TRAM';
                     else if (item.loaiGiamGia === 'FREESHIP') document.getElementById('kmLoai').value = 'FREESHIP';
-                    else document.getElementById('kmLoai').value = 'AMOUNT';
+                    else document.getElementById('kmLoai').value = 'GIA TIEN';
                 }
 
                 const giaTri = isSale ? item.giaTri : item.giaTriGiamGia;
@@ -725,7 +719,7 @@
                     document.getElementById('vDieuKien').value = item.dieuKien ? new Intl.NumberFormat('en-US').format(item.dieuKien) : '';
                     document.getElementById('vSoLuong').value = item.soLuong;
 
-                    if (item.loaiGiamGia === 'PERCENT') {
+                    if (item.loaiGiamGia === 'PHAN_TRAM') {
                         document.getElementById('vGiaTriToiDa').value = item.giaTriGiamGiaToiDa ? new Intl.NumberFormat('en-US').format(item.giaTriGiamGiaToiDa) : '';
                         document.getElementById('groupMaxGiam').style.display = 'block';
                     }
@@ -797,11 +791,11 @@
                         payload.choPhepCongDon = true;
                     } else {
                         payload.maCode = document.getElementById('kmMa').value.trim();
-                        if (loaiRaw === 'PERCENT') payload.loaiGiamGia = 'PERCENT';
+                        if (loaiRaw === 'PHAN_TRAM') payload.loaiGiamGia = 'PHAN_TRAM';
                         else if (loaiRaw === 'FREESHIP') payload.loaiGiamGia = 'FREESHIP';
-                        else payload.loaiGiamGia = 'FIXED';
+                        else payload.loaiGiamGia = 'GIA TIEN';
                         payload.giaTriGiamGia = giaTriRaw;
-                        payload.giaTriGiamGiaToiDa = (loaiRaw === 'PERCENT') ? cleanMoney('vGiaTriToiDa', null) : null;
+                        payload.giaTriGiamGiaToiDa = (loaiRaw === 'PHAN_TRAM') ? cleanMoney('vGiaTriToiDa', null) : null;
                         payload.dieuKien = cleanMoney('vDieuKien', 0);
                         payload.soLuong = parseInt(document.getElementById('vSoLuong').value) || 0;
                     }

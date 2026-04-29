@@ -1626,7 +1626,6 @@
                         loaiGiaoHangHtml = `<span style="font-size: 10px; font-weight: 700; color: #a16207; background: #fefce8; padding: 4px 10px; border-radius: var(--radius-sm); margin-left: 12px; letter-spacing: 0.05em; vertical-align: middle;"><i class="bi bi-truck"></i> GIAO TẬN NƠI</span>`;
                     }
 
-                    // 🌟 ĐÃ FIX: Tự động sinh Timeline HTML không cần query ID cũ để tránh lỗi Null
                     let timelineHtml = '';
                     if (data.loaiHoaDon !== 0 && !isStorePickup) {
                         timelineHtml = `
@@ -1660,7 +1659,6 @@
                     let rawPhone = data.sdtNhan || data.sdtKhachHang || (data.khachHang ? data.khachHang.soDienThoai : null);
                     const sdtKhach = (rawPhone && String(rawPhone).toLowerCase() !== 'undefined' && String(rawPhone).toLowerCase() !== 'null') ? rawPhone : '---';
 
-                    // LẤY EMAIL KHÁCH HÀNG (THÊM MỚI VÀO ĐÂY)
                     let emailKhach = 'Không có Email';
                     if (data.email && String(data.email).trim() !== '' && String(data.email).toLowerCase() !== 'null') {
                         emailKhach = data.email;
@@ -1706,7 +1704,6 @@
                         }
                     }
 
-                    // Đưa Email vào phần hiển thị Thông tin nhận hàng
                     document.querySelector('.detail-info-grid').innerHTML = `
                         <div class="detail-info-item">
                             <label><i class="bi bi-geo-alt-fill"></i> Thông tin nhận hàng</label>
@@ -1730,7 +1727,6 @@
 
                     let html = '';
                     const chiTiets = data.chiTiets || [];
-                    let calculatedGiaTamThoi = 0;
 
                     chiTiets.forEach(item => {
                         let reviewSectionHtml = '';
@@ -1751,8 +1747,6 @@
                         } else {
                             priceDisplayHtml = `${this.formatCurrency(itemPrice)}`;
                         }
-
-                        calculatedGiaTamThoi += (itemPrice * itemQty);
 
                         if (currentStatus === 'HOAN_THANH' && detailId) {
                             const existingReview = this.state.myReviews.find(r => r.hoaDonChiTietId === detailId || (r.hoaDonChiTiet && r.hoaDonChiTiet.id === detailId));
@@ -1805,44 +1799,86 @@
                         </tr>`;
                     });
 
-                    const phiShip = data.phiVanChuyen || 0;
-                    const tongTien = data.giaTong || data.tongTien || 0;
+                    // 🌟 BÓC TÁCH CHI TIẾT CÁC KHOẢN TIỀN
+                    const phiShip = Number(data.phiVanChuyen) || 0;
+                    const tongTien = Number(data.tongTien) || Number(data.giaTong) || 0;
+                    const tienHoan = Number(data.tienHoan) || 0;
 
-                    const currentGiaTamThoi = data.giaTamThoi || calculatedGiaTamThoi;
-                    const giamGiaVoucher = data.giaTriKhuyenMai || 0;
+                    const tongGiaGoc = Number(data.tongGiaGoc) || 0;
+                    const tienGiamGiaSanPham = Number(data.tienGiamGiaSanPham) || 0;
+                    const currentGiaTamThoi = Number(data.giaTamThoi) || 0;
+                    const tienGiamVoucher = Number(data.tienGiamVoucher) || 0;
+                    const chietKhauNV = Number(data.chietKhauNV) || 0;
 
-                    const maVoucherStr = (data.maVoucher && data.maVoucher !== 'Không áp dụng') ? data.maVoucher : '';
+                    let phiShipRowHtml = (data.loaiHoaDon === 0 || isStorePickup) ? '' : `
+                        <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:13px;">
+                            <span style="color:var(--muted);">Phí vận chuyển:</span> <span style="font-weight:500; color:var(--text);">${phiShip > 0 ? this.formatCurrency(phiShip) : 'Miễn phí'}</span>
+                        </div>`;
+
+                    const maVoucherStr = (data.maVoucher && data.maVoucher !== 'Không áp dụng') ? data.maVoucher : (data.maGiamGia ? data.maGiamGia.maCode : '');
                     let giamGiaText = maVoucherStr ? `Voucher giảm giá (${maVoucherStr})` : 'Voucher giảm giá';
 
-                    let giamGiaHtml = giamGiaVoucher > 0 ? `
-                        <div style="display:flex; justify-content:space-between; font-size:13px;">
-                            <span style="color:var(--muted);">${giamGiaText}</span>
-                            <span style="color:#10b981; font-weight:500;">-${this.formatCurrency(giamGiaVoucher)}</span>
-                        </div>
-                    ` : '';
+                    // 🌟 RENDER BẢNG TÍNH TIỀN CHUẨN
+                    let sBoxHtml = '';
+                    if (tienGiamGiaSanPham > 0) {
+                        sBoxHtml += `
+                            <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:13px;">
+                                <span style="color:var(--muted);">Tổng tiền hàng:</span> <span style="font-weight:500; color:var(--text);">${this.formatCurrency(tongGiaGoc)}</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:13px;">
+                                <span style="color:var(--muted);">Khuyến mãi sản phẩm:</span> <span style="color:#10b981; font-weight:500;">-${this.formatCurrency(tienGiamGiaSanPham)}</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:12px; padding-top:12px; border-top:1px dashed var(--border-light); font-size:13px;">
+                                <span style="color:var(--muted);">Tạm tính:</span> <span style="font-weight:500; color:var(--text);">${this.formatCurrency(currentGiaTamThoi)}</span>
+                            </div>`;
+                    } else {
+                        sBoxHtml += `
+                            <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:13px;">
+                                <span style="color:var(--muted);">Tạm tính hàng:</span> <span style="font-weight:500; color:var(--text);">${this.formatCurrency(currentGiaTamThoi)}</span>
+                            </div>`;
+                    }
 
-                    let phiShipHtml = (data.loaiHoaDon === 0 || isStorePickup) ? '' : `
-                        <div style="display:flex; justify-content:space-between; font-size:13px;">
-                            <span style="color:var(--muted);">Phí vận chuyển</span>
-                            <span style="font-weight:500; color:var(--text);">${phiShip > 0 ? this.formatCurrency(phiShip) : 'Miễn phí'}</span>
-                        </div>
-                    `;
+                    sBoxHtml += phiShipRowHtml;
+
+                    if (tienGiamVoucher > 0) {
+                        sBoxHtml += `
+                            <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:13px;">
+                                <span style="color:var(--muted);">${giamGiaText}</span> <span style="color:#10b981; font-weight:500;">-${this.formatCurrency(tienGiamVoucher)}</span>
+                            </div>`;
+                    }
+
+                    if (chietKhauNV > 0) {
+                        sBoxHtml += `
+                            <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:13px;">
+                                <span style="color:#3b82f6;">Ưu đãi nội bộ (5%):</span> <span style="color:#10b981; font-weight:500;">-${this.formatCurrency(chietKhauNV)}</span>
+                            </div>`;
+                    }
+
+                    sBoxHtml += `
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding-top:16px; border-top:2px solid var(--text);">
+                            <span style="font-weight:600; font-size:14px; text-transform:uppercase; color:var(--text);">TỔNG CỘNG</span>
+                            <span style="font-weight:800; font-size:24px; color:var(--accent);">${this.formatCurrency(tongTien)}</span>
+                        </div>`;
+
+                    if (tienHoan > 0) {
+                        const tienThucNhan = currentGiaTamThoi - tienHoan;
+                        sBoxHtml += `
+                            <div style="display:flex; justify-content:space-between; font-size:13px; margin-top:12px; padding-top:12px; border-top:1px dashed var(--border-color);">
+                                <span style="font-weight:600; color:var(--success); font-size:12px;">Tiền hoàn đổi/trả:</span>
+                                <strong style="color:var(--success); font-size:14px;">-${this.formatCurrency(tienHoan)}</strong>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:12px; border-top:1px dashed var(--danger);">
+                                <span style="font-weight:700; font-size:14px; text-transform:uppercase; color:var(--danger);">Thực nhận:</span>
+                                <strong style="color:var(--danger); font-size:18px;">${this.formatCurrency(tienThucNhan)}</strong>
+                            </div>`;
+                    }
 
                     let totalRow = `
                         <tr>
                             <td colspan="4" style="padding-top: 24px; border-bottom: none;">
                                 <div style="display:flex; justify-content:flex-end;">
-                                    <div style="width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 12px;">
-                                        <div style="display:flex; justify-content:space-between; font-size:13px;">
-                                            <span style="color:var(--muted);">Tạm tính hàng</span>
-                                            <span style="font-weight:500; color:var(--text);">${this.formatCurrency(currentGiaTamThoi)}</span>
-                                        </div>
-                                        ${phiShipHtml}
-                                        ${giamGiaHtml}
-                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding-top:16px; border-top:2px solid var(--text);">
-                                            <span style="font-weight:600; font-size:14px; text-transform:uppercase; color:var(--text);">TỔNG CỘNG</span>
-                                            <span style="font-weight:800; font-size:24px; color:var(--accent);">${this.formatCurrency(tongTien)}</span>
-                                        </div>
+                                    <div style="width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 0;">
+                                        ${sBoxHtml}
                                     </div>
                                 </div>
                             </td>
@@ -2194,15 +2230,12 @@
                     return;
                 }
 
-                // 1. Lấy dữ kiện tìm kiếm (chỉ còn từ khóa)
                 const keyword = (document.getElementById('myOrderSearch')?.value || '').toLowerCase().trim();
 
-                // 2. Lọc mảng orders
                 let filteredOrders = this.state.orders.filter(ord => {
                     const cardStatus = ord.trangThaiMa;
                     const filter = this.state.ordersCurrentFilter || 'all';
 
-                    // Lọc theo trạng thái Tab
                     let isStatusMatch = false;
                     if (filter === 'all') {
                         isStatusMatch = true;
@@ -2212,7 +2245,6 @@
                         isStatusMatch = (cardStatus === filter);
                     }
 
-                    // Lọc theo Từ khóa: Tìm trong Mã HĐ HOẶC Tên sản phẩm
                     let isKeywordMatch = true;
                     if (keyword) {
                         const matchMa = ord.ma && ord.ma.toLowerCase().includes(keyword);
@@ -2223,7 +2255,6 @@
                     return isStatusMatch && isKeywordMatch;
                 });
 
-                // 3. Tính toán Phân trang
                 const totalOrders = filteredOrders.length;
                 const totalPages = Math.ceil(totalOrders / this.state.ordersPerPage) || 1;
                 if (this.state.ordersPage > totalPages) this.state.ordersPage = totalPages;
@@ -2238,7 +2269,6 @@
                     return;
                 }
 
-                // 4. Render danh sách đã được cắt trang
                 let html = '';
                 paginatedOrders.forEach(ord => {
                     const statusObj = this.getStatusConfig(ord.trangThaiMa);
@@ -2247,7 +2277,23 @@
                     const tamTinh = ord.giaTamThoi || (ord.chiTiets || []).reduce((sum, item) => sum + ((item.giaBan || 0) * (item.soLuong || 0)), 0);
                     const phiShip = ord.phiVanChuyen || 0;
 
-                    const giamGia = ord.giaTriKhuyenMai || Math.max(0, (tamTinh + phiShip) - tongTien);
+                    // 🌟 BÓC TÁCH CHI TIẾT CÁC KHOẢN TIỀN
+                    let tongGiaGoc = tamTinh;
+                    if (ord.chiTiets && ord.chiTiets.length > 0) {
+                        tongGiaGoc = ord.chiTiets.reduce((sum, item) => sum + ((item.donGia || item.giaBan || 0) * (item.soLuong || 1)), 0);
+                    }
+                    let tienGiamGiaSanPham = tongGiaGoc - tamTinh;
+                    if (tienGiamGiaSanPham < 0) tienGiamGiaSanPham = 0;
+
+                    let chietKhauNV = 0;
+                    if (ord.ghiChu && ord.ghiChu.includes("[Đơn mua nội bộ bởi:")) {
+                        chietKhauNV = Math.round(tamTinh * 0.05);
+                    }
+
+                    const totalDiscount = ord.giaTriKhuyenMai || Math.max(0, (tamTinh + phiShip) - tongTien);
+                    let tienGiamVoucher = totalDiscount - chietKhauNV;
+                    if (tienGiamVoucher < 0) tienGiamVoucher = 0;
+
                     const maVoucherStr = ord.maVoucher ? ` (${ord.maVoucher})` : '';
 
                     let isStorePickup = (ord.hinhThucGiaoHang === 'NHAN_TAI_CUA_HANG') ||
@@ -2287,9 +2333,27 @@
             `;
                     }
 
-                    let phiShipHtml = (ord.loaiHoaDon === 0 || isStorePickup) ? '' : `<div class="quick-detail-row"><span>Phí giao hàng:</span> <span>${this.formatCurrency(phiShip)}</span></div>`;
+                    // 🌟 TẠO HTML CHO XEM NHANH CHI TIẾT
+                    let quickDetailsHtml = '';
+                    if (tienGiamGiaSanPham > 0) {
+                        quickDetailsHtml += `<div class="quick-detail-row"><span>Tổng tiền hàng:</span> <span>${this.formatCurrency(tongGiaGoc)}</span></div>`;
+                        quickDetailsHtml += `<div class="quick-detail-row"><span>Khuyến mãi sản phẩm:</span> <span style="color:#10b981;">-${this.formatCurrency(tienGiamGiaSanPham)}</span></div>`;
+                        quickDetailsHtml += `<div class="quick-detail-row" style="padding-top:8px; border-top:1px dashed var(--border-light); margin-top:8px;"><span>Tạm tính:</span> <span>${this.formatCurrency(tamTinh)}</span></div>`;
+                    } else {
+                        quickDetailsHtml += `<div class="quick-detail-row"><span>Tạm tính hàng:</span> <span>${this.formatCurrency(tamTinh)}</span></div>`;
+                    }
 
-                    let giamGiaHtml = giamGia > 0 ? `<div class="quick-detail-row"><span>Giảm giá voucher${maVoucherStr}:</span> <span style="color:#10b981;">-${this.formatCurrency(giamGia)}</span></div>` : '';
+                    if (ord.loaiHoaDon !== 0 && !isStorePickup) {
+                        quickDetailsHtml += `<div class="quick-detail-row"><span>Phí giao hàng:</span> <span>${phiShip > 0 ? this.formatCurrency(phiShip) : 'Miễn phí'}</span></div>`;
+                    }
+
+                    if (tienGiamVoucher > 0) {
+                        quickDetailsHtml += `<div class="quick-detail-row"><span>Voucher${maVoucherStr}:</span> <span style="color:#10b981;">-${this.formatCurrency(tienGiamVoucher)}</span></div>`;
+                    }
+
+                    if (chietKhauNV > 0) {
+                        quickDetailsHtml += `<div class="quick-detail-row"><span style="color:#3b82f6;">Ưu đãi nội bộ (5%):</span> <span style="color:#10b981;">-${this.formatCurrency(chietKhauNV)}</span></div>`;
+                    }
 
                     html += `<div class="account-order-card" data-status="${ord.trangThaiMa}" style="border-radius: var(--radius-md);">
             <div class="account-order-card-header">
@@ -2303,9 +2367,7 @@
             ${firstItemHtml}
 
             <div class="order-quick-details" id="quick-details-${ord.id}" style="display:none;">
-                <div class="quick-detail-row"><span>Tạm tính hàng:</span> <span>${this.formatCurrency(tamTinh)}</span></div>
-                ${phiShipHtml}
-                ${giamGiaHtml}
+                ${quickDetailsHtml}
                 <div class="quick-detail-row total-row"><span>Tổng thanh toán:</span> <span style="color:var(--accent); font-size:16px;">${this.formatCurrency(tongTien)}</span></div>
             </div>
 
@@ -2321,7 +2383,6 @@
                 });
                 container.innerHTML = html;
 
-                // 5. Render nút chuyển trang
                 if (totalPages > 1 && paginationContainer) {
                     let pageHtml = '';
                     for (let i = 1; i <= totalPages; i++) {
@@ -3284,11 +3345,10 @@
 
                     const data = await res.json();
 
-                    // 🌟 Lấy chuẩn trạng thái
                     const currentStatus = data.trangThaiMa || (data.trangThaiHoaDon ? data.trangThaiHoaDon.ma : 'UNDEFINED');
                     const statusObj = this.getStatusConfig(currentStatus);
 
-                    const giaTamThoi = data.giaTamThoi || 0;
+                    const giaTamThoi = Number(data.giaTamThoi) || 0;
 
                     let isStorePickup = (data.hinhThucGiaoHang === 'NHAN_TAI_CUA_HANG') ||
                         (data.loaiHoaDon === 1 && data.phiVanChuyen === 0 && giaTamThoi < 5000000) ||
@@ -3332,7 +3392,6 @@
                     let rawPhone = data.sdtNhan || data.sdtKhachHang || (data.khachHang ? data.khachHang.soDienThoai : null);
                     const sdtKhach = (rawPhone && String(rawPhone).toLowerCase() !== 'undefined' && String(rawPhone).toLowerCase() !== 'null') ? rawPhone : '---';
 
-                    // LẤY EMAIL KHÁCH HÀNG (THÊM MỚI VÀO ĐÂY)
                     let emailKhach = 'Không có Email';
                     if (data.email && String(data.email).trim() !== '' && String(data.email).toLowerCase() !== 'null') {
                         emailKhach = data.email;
@@ -3378,7 +3437,6 @@
                         }
                     }
 
-                    // Đưa Email vào phần hiển thị
                     let infoGridHtml = `
                         <div class="detail-info-grid" style="margin-top: 20px; padding: 20px; text-align: left; background: #fafafa;">
                             <div class="detail-info-item">
@@ -3403,7 +3461,6 @@
                     `;
 
                     let dsSanPhamHtml = '';
-                    let calculatedGiaTamThoi = 0;
                     const dsSanPham = data.chiTiets || [];
 
                     if (dsSanPham.length > 0) {
@@ -3426,11 +3483,9 @@
                             const tenSP = item.tenSanPham || (spct.sanPham ? spct.sanPham.ten : 'Sản phẩm Beemate');
                             const phanLoai = item.thuocTinh || (spct.mauSac && spct.kichThuoc ? `${spct.mauSac.ten} - ${spct.kichThuoc.ten}` : 'Mặc định');
                             const sku = item.sku || item.maSanPhamChiTiet || item.maSku || spct.sku || spct.maSanPhamChiTiet || spct.ma || 'N/A';
-                            const giaBan = item.giaBan || item.giaTien || 0;
-                            const sl = item.soLuong || 1;
-                            const donGiaGoc = item.donGia || giaBan;
-
-                            calculatedGiaTamThoi += (giaBan * sl);
+                            const giaBan = Number(item.giaBan) || Number(item.giaTien) || 0;
+                            const sl = Number(item.soLuong) || 1;
+                            const donGiaGoc = Number(item.donGia) || giaBan;
 
                             let priceDisplayHtml = '';
                             if (donGiaGoc > giaBan) {
@@ -3460,27 +3515,64 @@
                         });
                     }
 
-                    const phiShip = data.phiVanChuyen || 0;
-                    const tongTien = data.giaTong || data.tongTien || 0;
-                    const currentGiaTamThoi = data.giaTamThoi || calculatedGiaTamThoi;
-                    const giamGiaVoucher = data.giaTriKhuyenMai || data.tienGiamVoucher || 0;
+                    // 🌟 BÓC TÁCH KHOẢN TIỀN NHƯ BÊN TRÊN
+                    const phiShip = Number(data.phiVanChuyen) || 0;
+                    const tongTien = Number(data.tongTien) || Number(data.giaTong) || 0;
+
+                    const tongGiaGoc = Number(data.tongGiaGoc) || 0;
+                    const tienGiamGiaSanPham = Number(data.tienGiamGiaSanPham) || 0;
+                    const currentGiaTamThoi = Number(data.giaTamThoi) || 0;
+                    const tienGiamVoucher = Number(data.tienGiamVoucher) || 0;
+                    const chietKhauNV = Number(data.chietKhauNV) || 0;
 
                     const maVoucherStr = (data.maVoucher && data.maVoucher !== 'Không áp dụng') ? data.maVoucher : (data.maGiamGia ? data.maGiamGia.maCode : '');
                     let giamGiaText = maVoucherStr ? `Voucher giảm giá (${maVoucherStr})` : 'Voucher giảm giá';
 
-                    let giamGiaHtmlGuest = giamGiaVoucher > 0 ? `
-                        <div style="display:flex; justify-content:space-between; font-size:13px;">
-                            <span style="color:var(--muted);">${giamGiaText}</span>
-                            <span style="color:#10b981; font-weight:500;">-${this.formatCurrency(giamGiaVoucher)}</span>
-                        </div>
-                    ` : '';
+                    let sBoxHtml = '';
+                    if (tienGiamGiaSanPham > 0) {
+                        sBoxHtml += `
+                            <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:13px;">
+                                <span style="color:var(--muted);">Tổng tiền hàng:</span> <span style="font-weight:500; color:var(--text);">${this.formatCurrency(tongGiaGoc)}</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:13px;">
+                                <span style="color:var(--muted);">Khuyến mãi sản phẩm:</span> <span style="color:#10b981; font-weight:500;">-${this.formatCurrency(tienGiamGiaSanPham)}</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:12px; padding-top:12px; border-top:1px dashed var(--border-light); font-size:13px;">
+                                <span style="color:var(--muted);">Tạm tính:</span> <span style="font-weight:500; color:var(--text);">${this.formatCurrency(currentGiaTamThoi)}</span>
+                            </div>`;
+                    } else {
+                        sBoxHtml += `
+                            <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:13px;">
+                                <span style="color:var(--muted);">Tạm tính hàng:</span> <span style="font-weight:500; color:var(--text);">${this.formatCurrency(currentGiaTamThoi)}</span>
+                            </div>`;
+                    }
 
-                    let phiShipHtmlGuest = (data.loaiHoaDon === 0 || isStorePickup) ? '' : `
-                        <div style="display:flex; justify-content:space-between; font-size:13px;">
-                            <span style="color:var(--muted);">Phí vận chuyển</span>
-                            <span style="font-weight:500; color:var(--text);">${phiShip > 0 ? this.formatCurrency(phiShip) : 'Miễn phí'}</span>
-                        </div>
-                    `;
+                    if (data.loaiHoaDon !== 0 && !isStorePickup) {
+                        sBoxHtml += `
+                        <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:13px;">
+                            <span style="color:var(--muted);">Phí vận chuyển</span> <span style="font-weight:500; color:var(--text);">${phiShip > 0 ? this.formatCurrency(phiShip) : 'Miễn phí'}</span>
+                        </div>`;
+                    }
+
+                    if (tienGiamVoucher > 0) {
+                        sBoxHtml += `
+                            <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:13px;">
+                                <span style="color:var(--muted);">${giamGiaText}</span> <span style="color:#10b981; font-weight:500;">-${this.formatCurrency(tienGiamVoucher)}</span>
+                            </div>`;
+                    }
+
+                    if (chietKhauNV > 0) {
+                        sBoxHtml += `
+                            <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:13px;">
+                                <span style="color:#3b82f6;">Ưu đãi nội bộ (5%):</span> <span style="color:#10b981; font-weight:500;">-${this.formatCurrency(chietKhauNV)}</span>
+                            </div>`;
+                    }
+
+                    sBoxHtml += `
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding-top:16px; border-top:2px solid var(--text);">
+                            <span style="font-weight:600; font-size:14px; text-transform:uppercase; color:var(--text);">TỔNG CỘNG</span>
+                            <span style="font-weight:800; font-size:24px; color:var(--accent);">${this.formatCurrency(tongTien)}</span>
+                        </div>`;
 
                     let actionButtonsHtml = '';
                     if (currentStatus === 'CHO_XAC_NHAN' || currentStatus === 'CHO_THANH_TOAN') {
@@ -3488,7 +3580,6 @@
                     }
 
                     if (['HOAN_THANH', 'DA_HUY', 'GIAO_THAT_BAI'].includes(currentStatus)) {
-                        // Sửa gọi hàm guestReorder và truyền mã đơn hàng (data.ma)
                         actionButtonsHtml += `<button onclick="window.AccountApp.guestReorder('${data.ma}')" class="account-reorder-btn" style="background:#fff; color:var(--text); border-color:var(--text); margin-right:10px;"><i class="bi bi-cart-plus"></i> Mua lại đơn này</button>`;
                     }
 
@@ -3496,7 +3587,6 @@
                         actionButtonsHtml += `<button onclick="window.AccountApp.guestRepayOrder(${data.id}, ${tongTien}, '${data.phuongThucThanhToan}', '${data.ma}')" class="account-form-save" style="border-radius: var(--radius-md); padding:10px 24px;"><i class="bi bi-wallet2"></i> THANH TOÁN NGAY</button>`;
                     }
 
-                    // Đóng thẻ table
                     dsSanPhamHtml += `</tbody></table>`;
 
                     let finalHtml = `
@@ -3506,17 +3596,8 @@
                             ${dsSanPhamHtml}
                         </div>
                         <div style="border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 20px; margin-top: 10px; display:flex; flex-direction:column; align-items:flex-end;">
-                            <div style="width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 12px; text-align: left;">
-                                <div style="display:flex; justify-content:space-between; font-size:13px;">
-                                    <span style="color:var(--muted);">Tạm tính hàng</span>
-                                    <span style="font-weight:500; color:var(--text);">${this.formatCurrency(currentGiaTamThoi)}</span>
-                                </div>
-                                ${phiShipHtmlGuest}
-                                ${giamGiaHtmlGuest}
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding-top:16px; border-top:2px solid var(--text);">
-                                    <span style="font-weight:600; font-size:14px; text-transform:uppercase; color:var(--text);">TỔNG CỘNG</span>
-                                    <span style="font-weight:800; font-size:24px; color:var(--accent);">${this.formatCurrency(tongTien)}</span>
-                                </div>
+                            <div style="width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 0; text-align: left;">
+                                ${sBoxHtml}
                             </div>
 
                             ${actionButtonsHtml ? `<div style="margin-top: 20px; display: flex; justify-content: flex-end; width: 100%;">${actionButtonsHtml}</div>` : ''}

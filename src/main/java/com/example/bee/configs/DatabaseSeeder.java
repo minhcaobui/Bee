@@ -42,7 +42,6 @@ public class DatabaseSeeder implements CommandLineRunner {
         // 1. KHỞI TẠO VAI TRÒ (ROLE) - Cập nhật đủ 3 vai trò theo DB
         VaiTro roleAdmin = vaiTroRepository.findById(1).orElseGet(() -> {
             VaiTro vt = new VaiTro();
-            vt.setId(1);
             vt.setMa("ROLE_ADMIN");
             vt.setTen("Quản trị viên");
             return vaiTroRepository.save(vt);
@@ -50,7 +49,6 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         VaiTro roleStaff = vaiTroRepository.findById(2).orElseGet(() -> {
             VaiTro vt = new VaiTro();
-            vt.setId(2);
             vt.setMa("ROLE_STAFF");
             vt.setTen("Nhân viên");
             return vaiTroRepository.save(vt);
@@ -58,7 +56,6 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         vaiTroRepository.findById(3).orElseGet(() -> {
             VaiTro vt = new VaiTro();
-            vt.setId(3);
             vt.setMa("ROLE_CUSTOMER");
             vt.setTen("Khách hàng");
             return vaiTroRepository.save(vt);
@@ -67,7 +64,6 @@ public class DatabaseSeeder implements CommandLineRunner {
         // 2. KHỞI TẠO CHỨC VỤ MẶC ĐỊNH - Cập nhật tên và mô tả khớp với DB
         ChucVu cvAdmin = chucVuRepository.findById(1).orElseGet(() -> {
             ChucVu cv = new ChucVu();
-            cv.setId(1);
             cv.setMa("QUAN_LY");
             cv.setTen("Quản lý");
             cv.setMoTa(null); // Trùng khớp với ảnh DB
@@ -76,7 +72,6 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         chucVuRepository.findById(2).orElseGet(() -> {
             ChucVu cv = new ChucVu();
-            cv.setId(2);
             cv.setMa("NHAN_VIEN_BAN_HANG");
             cv.setTen("Nhân viên bán hàng");
             cv.setMoTa(null); // Trùng khớp với ảnh DB
@@ -86,17 +81,17 @@ public class DatabaseSeeder implements CommandLineRunner {
         // 3. KHỞI TẠO TRẠNG THÁI HÓA ĐƠN - Đủ 11 trạng thái như trong ảnh
         if (trangThaiHoaDonRepository.count() == 0) {
             List<TrangThaiHoaDon> danhSachTrangThai = Arrays.asList(
-                    new TrangThaiHoaDon(1, "CHO_XAC_NHAN", "Chờ xác nhận"),
-                    new TrangThaiHoaDon(2, "CHO_THANH_TOAN", "Chờ thanh toán"),
-                    new TrangThaiHoaDon(3, "DA_XAC_NHAN", "Đã xác nhận / Đang xử lý"),
-                    new TrangThaiHoaDon(4, "CHO_GIAO_VAN_CHUYEN", "Chờ giao cho đơn vị vận chuyển"),
-                    new TrangThaiHoaDon(5, "DANG_GIAO_HANG", "Đang giao hàng"),
-                    new TrangThaiHoaDon(6, "CHO_KHACH_LAY", "Chờ khách đến lấy (Tại cửa hàng)"),
-                    new TrangThaiHoaDon(7, "HOAN_THANH", "Hoàn thành"),
-                    new TrangThaiHoaDon(8, "DA_HUY", "Đã hủy"),
-                    new TrangThaiHoaDon(9, "GIAO_THAT_BAI", "Giao hàng thất bại"),
-                    new TrangThaiHoaDon(10, "DANG_HOAN_HANG", "Đang hoàn hàng về kho"),
-                    new TrangThaiHoaDon(11, "DA_HOAN_HANG", "Đã nhận lại hàng hoàn")
+                    taoTrangThaiHoaDon("CHO_XAC_NHAN", "Chờ xác nhận"),
+                    taoTrangThaiHoaDon("CHO_THANH_TOAN", "Chờ thanh toán"),
+                    taoTrangThaiHoaDon("DA_XAC_NHAN", "Đã xác nhận / Đang xử lý"),
+                    taoTrangThaiHoaDon("CHO_GIAO_VAN_CHUYEN", "Chờ giao cho đơn vị vận chuyển"),
+                    taoTrangThaiHoaDon("DANG_GIAO_HANG", "Đang giao hàng"),
+                    taoTrangThaiHoaDon("CHO_KHACH_LAY", "Chờ khách đến lấy (Tại cửa hàng)"),
+                    taoTrangThaiHoaDon("HOAN_THANH", "Hoàn thành"),
+                    taoTrangThaiHoaDon("DA_HUY", "Đã hủy"),
+                    taoTrangThaiHoaDon("GIAO_THAT_BAI", "Giao hàng thất bại"),
+                    taoTrangThaiHoaDon("DANG_HOAN_HANG", "Đang hoàn hàng về kho"),
+                    taoTrangThaiHoaDon("DA_HOAN_HANG", "Đã nhận lại hàng hoàn")
             );
             trangThaiHoaDonRepository.saveAll(danhSachTrangThai);
             System.out.println("✅ Đã khởi tạo 11 trạng thái hóa đơn cơ bản.");
@@ -143,5 +138,13 @@ public class DatabaseSeeder implements CommandLineRunner {
         } else {
             System.out.println("⚡ Dữ liệu mầm đã tồn tại, bỏ qua bước khởi tạo.");
         }
+    }
+
+    // Hàm hỗ trợ khởi tạo đối tượng TrangThaiHoaDon không cần set cứng ID
+    private TrangThaiHoaDon taoTrangThaiHoaDon(String ma, String ten) {
+        TrangThaiHoaDon tt = new TrangThaiHoaDon();
+        tt.setMa(ma);
+        tt.setTen(ten);
+        return tt;
     }
 }
