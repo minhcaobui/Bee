@@ -896,7 +896,7 @@
 
                 let discountLabel = '';
                 const loai = (v.loaiGiamGia || '').toUpperCase();
-                if (loai === 'PERCENT' || loai === 'PHẦN TRĂM' || loai === '%') {
+                if (loai === 'PHAN_TRAM' || loai === 'PHẦN TRĂM' || loai === '%') {
                     discountLabel = `Giảm ${v.giaTriGiamGia}%`;
                     if (v.giaTriGiamGiaToiDa) {
                         discountLabel += ` (Tối đa ${new Intl.NumberFormat('vi-VN').format(v.giaTriGiamGiaToiDa)}&nbsp;₫)`;

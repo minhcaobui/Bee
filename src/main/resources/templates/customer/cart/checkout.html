@@ -122,13 +122,13 @@
         .delivery-time-notice { font-size: 12px; color: #2563eb; background: #eff6ff; padding: 10px; border-radius: 4px; border: 1px dashed #bfdbfe; margin-bottom: 16px; display: none; font-weight: 600; text-align: center;}
         .delivery-time-notice i { margin-right: 6px; }
 
-        .co-calc-total { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 20px; margin-top: 12px; }
+        .co-calc-total { display: flex; justify-content: space-between; align-items: center; border-top: 2px solid var(--accent); padding-top: 20px; margin-top: 12px; }
         .co-total-label { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
-        .co-total-val { font-size: 24px; font-weight: 700; color: var(--text); }
+        .co-total-val { font-size: 28px; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
 
         .btn-submit-order { width: 100%; padding: 18px; background: var(--accent); color: white; border: none; font-family: 'DM Sans', sans-serif; font-size: 14px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 600; cursor: pointer; margin-top: 24px; transition: 0.3s; border-radius: var(--radius-md); }
-        .btn-submit-order:hover { background: #2c4238; }
-        .btn-submit-order:disabled { background: #ccc; cursor: not-allowed; }
+        .btn-submit-order:hover:not(:disabled) { background: #2c4238; }
+        .btn-submit-order:disabled { background: #ccc; cursor: not-allowed; opacity: 0.7; }
 
         .empty-co { text-align: center; padding: 80px 20px; grid-column: 1/-1; }
         .empty-co-btn { display: inline-block; margin-top: 20px; padding: 14px 32px; background: var(--text); color: white; text-decoration: none; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; border-radius: var(--radius-md);}
@@ -385,6 +385,50 @@
                 await this.autoFillUserData();
             },
 
+            attachFormValidation: function() {
+                const form = document.getElementById('form-checkout');
+                const btnSubmit = document.getElementById('btn-submit');
+                if (!form || !btnSubmit) return;
+
+                const checkValidity = () => {
+                    let isValid = true;
+                    const s = this.state;
+                    const isStore = s.deliveryMethod === 'store';
+
+                    const nameInput = document.getElementById('co-name');
+                    const phoneInput = document.getElementById('co-phone');
+                    const emailInput = document.getElementById('co-email');
+
+                    if (!nameInput || !nameInput.value.trim()) isValid = false;
+                    if (!phoneInput || !phoneInput.value.trim()) isValid = false;
+                    if (!emailInput || !emailInput.value.trim()) isValid = false;
+
+                    if (isStore) {
+                        const pickupInput = document.getElementById('co-pickup-time');
+                        if (!pickupInput || !pickupInput.value.trim()) isValid = false;
+                    } else {
+                        const provinceInput = document.getElementById('co-province');
+                        const districtInput = document.getElementById('co-district');
+                        const wardInput = document.getElementById('co-ward');
+                        const addressInput = document.getElementById('co-address-detail');
+
+                        if (!provinceInput || !provinceInput.value) isValid = false;
+                        if (!districtInput || !districtInput.value) isValid = false;
+                        if (!wardInput || !wardInput.value) isValid = false;
+                        if (!addressInput || !addressInput.value.trim()) isValid = false;
+                    }
+
+                    btnSubmit.disabled = !isValid;
+                };
+
+                checkValidity();
+
+                form.addEventListener('input', checkValidity);
+                form.addEventListener('change', checkValidity);
+
+                this._triggerValidation = checkValidity;
+            },
+
             checkLoginStatus: async function() {
                 try {
                     let resNv = await fetch('/api/nhan-vien/my-profile');
@@ -454,7 +498,6 @@
                     }
 
                     this.state.cart = rawItems.map(item => {
-                        // 🌟 ĐÃ FIX TẬN GỐC: Lấy cả giá trị nguyên bản để truyền cho DB
                         let originalPrice = item.originalPrice || item.giaBan || 0;
                         let price = item.price || item.giaSauKhuyenMai || item.giaBan || 0;
 
@@ -467,8 +510,8 @@
                                 idSanPhamChiTiet: item.idSanPhamChiTiet,
                                 productId: item.idSanPham,
                                 name: item.tenSanPham,
-                                price: price, // Giá đã sale
-                                originalPrice: originalPrice, // Giá gốc
+                                price: price,
+                                originalPrice: originalPrice,
                                 qty: item.soLuongTrongGio,
                                 colorName: parts[0],
                                 sizeName: parts[1],
@@ -638,9 +681,11 @@
                         const dDate = new Date(timestamp);
                         const formattedDate = ("0" + dDate.getDate()).slice(-2) + "/" + ("0" + (dDate.getMonth() + 1)).slice(-2) + "/" + dDate.getFullYear();
 
+                        this.state.estimatedDelivery = formattedDate;
                         timeNoticeBox.innerHTML = `<i class="fa-solid fa-calendar-check"></i>Dự kiến nhận hàng: <b>${formattedDate}</b>`;
                         timeNoticeBox.style.display = 'block';
                     } else {
+                        this.state.estimatedDelivery = null;
                         timeNoticeBox.style.display = 'none';
                     }
 
@@ -737,6 +782,8 @@
                         }
                     }
                 } catch (e) { console.log(e); }
+
+                if (this._triggerValidation) this._triggerValidation();
             },
 
             render: function() {
@@ -759,10 +806,8 @@
                 for (let i = 0; i < this.state.cart.length; i++) {
                     const item = this.state.cart[i];
 
-                    // 🌟 CỘNG VÀO TẠM TÍNH LÀ GIÁ SALE (price) thay vì giá gốc
                     this.state.subTotal += (item.price * item.qty);
 
-                    // 🌟 HIỆN THỊ GIÁ CÓ GẠCH CHÉO NẾU CÓ KHUYẾN MÃI
                     let priceHtml = '';
                     if (item.originalPrice > item.price) {
                         priceHtml = `<div style="font-size:11px; text-decoration:line-through; color:var(--muted); margin-bottom:2px;">${this.formatMoney(item.originalPrice)}</div>
@@ -912,7 +957,7 @@
 
                     '</div>' +
 
-                    '<button type="submit" class="btn-submit-order" id="btn-submit">Xác nhận đặt hàng</button>' +
+                    '<button type="submit" class="btn-submit-order" id="btn-submit" disabled>Xác nhận đặt hàng</button>' +
                     '</form>' +
                     '</div>' +
 
@@ -968,10 +1013,34 @@
                 this.updateShippingFee(this.state.shippingFee);
 
                 if (isStore) {
+                    const checkTodayAvailability = () => {
+                        const now = new Date();
+                        let minH = now.getHours();
+                        let minM = now.getMinutes() + 30;
+                        if (minM >= 60) { minH += 1; minM -= 60; }
+
+                        // Cửa hàng đóng lúc 21:30. Nếu thời gian lấy sớm nhất vượt qua 21:30 thì hôm nay không còn nhận.
+                        if (minH > 21 || (minH === 21 && minM > 30)) return false;
+                        return true;
+                    };
+
+                    const getMinTimeForToday = () => {
+                        const now = new Date();
+                        let minH = now.getHours();
+                        let minM = now.getMinutes() + 30;
+                        if (minM >= 60) { minH += 1; minM -= 60; }
+
+                        if (minH < 8 || (minH === 8 && minM === 0)) return "08:00";
+                        return String(minH).padStart(2, '0') + ":" + String(minM).padStart(2, '0');
+                    };
+
+                    const isTodayOk = checkTodayAvailability();
+                    const startDate = isTodayOk ? "today" : new Date().fp_incr(1); // Nếu quá giờ thì bắt đầu từ ngày mai
+
                     flatpickr("#co-pickup-time", {
                         enableTime: true,
                         time_24hr: true,
-                        minDate: "today",
+                        minDate: startDate,
                         maxDate: new Date().fp_incr(7), // Tối đa 7 ngày tính từ hôm nay
                         locale: "vn",
                         dateFormat: "Y-m-d\\TH:i",
@@ -979,23 +1048,30 @@
                         altFormat: "H:i - d/m/Y",
                         minTime: "08:00", // Giờ mở cửa mặc định
                         maxTime: "21:30", // Giờ đóng cửa mặc định
-                        onChange: function(selectedDates, dateStr, instance) {
+                        onReady: (selectedDates, dateStr, instance) => {
+                            // Sự kiện này chạy 1 lần khi lịch vừa load lên
+                            if (instance.input.value === "" || (selectedDates[0] && selectedDates[0].toDateString() === new Date().toDateString())) {
+                                if (isTodayOk) {
+                                    instance.set('minTime', getMinTimeForToday());
+                                } else {
+                                    instance.set('minTime', "08:00");
+                                }
+                            }
+                        },
+                        onChange: (selectedDates, dateStr, instance) => {
                             const today = new Date();
                             if (selectedDates[0] && selectedDates[0].toDateString() === today.toDateString()) {
-                                // Nếu chọn lấy luôn trong ngày hôm nay -> Min time là giờ hiện tại + 30 phút chuẩn bị hàng
-                                let minH = today.getHours();
-                                let minM = today.getMinutes() + 30;
-                                if (minM >= 60) { minH += 1; minM -= 60; }
-
-                                let minTimeStr = minH + ":" + (minM < 10 ? "0"+minM : minM);
-                                instance.set('minTime', minTimeStr);
+                                instance.set('minTime', getMinTimeForToday());
                             } else {
-                                // Nếu chọn ngày khác -> Được chọn từ lúc cửa hàng mở cửa
                                 instance.set('minTime', "08:00");
                             }
+
+                            if(this._triggerValidation) this._triggerValidation();
                         }
                     });
                 }
+
+                this.attachFormValidation();
             },
 
             selectPayment: function(type) {
@@ -1087,6 +1163,8 @@
 
                 this.closeAddressModal();
                 if(window.showToast && !addr.isAutoFill) window.showToast("Đã áp dụng địa chỉ giao hàng!", "success");
+
+                if (this._triggerValidation) this._triggerValidation();
             },
 
             openPromoModal: function() {
@@ -1290,9 +1368,6 @@
                 // Đã bị vô hiệu hóa khi dùng Sandbox Button để tránh xung đột
             },
 
-            // ========================================================
-            // 🌟 HÀM NÚT BẤM GIẢ LẬP ĐÓNG VAI NGÂN HÀNG BẮN WEBHOOK
-            // ========================================================
             testThanhToanAo: async function(event) {
                 const maHD = document.getElementById('qrContent').innerText.replace('ThanhToan_', '').trim();
                 const amountStr = document.getElementById('qrAmount').innerText.replace(/\D/g, '');
@@ -1357,13 +1432,11 @@
                 const s = this.state;
                 const isStore = s.deliveryMethod === 'store';
 
-                // Populate summary
                 const cartCount = s.cart.reduce((a, i) => a + (i.qty || 1), 0);
                 document.getElementById('cf-item-label').innerText = `Tạm tính (${cartCount} sản phẩm)`;
                 document.getElementById('cf-subtotal').innerText = this.formatMoney(s.subTotal);
                 document.getElementById('cf-total').innerText = this.formatMoney(s.total);
 
-                // Phí ship — ẩn nếu ra quầy
                 const shipRow = document.getElementById('cf-ship-row');
                 if (isStore) {
                     shipRow.style.display = 'none';
@@ -1372,31 +1445,35 @@
                     document.getElementById('cf-shipping').innerText = s.shippingFee === 0 ? 'Miễn phí' : this.formatMoney(s.shippingFee);
                 }
 
-                // Voucher
                 const discRow = document.getElementById('cf-discount-row');
                 if (s.discount > 0) {
                     discRow.style.display = 'flex';
                     document.getElementById('cf-discount').innerText = '-' + this.formatMoney(s.discount);
                 } else { discRow.style.display = 'none'; }
 
-                // Ưu đãi nhân viên
                 const empRow = document.getElementById('cf-emp-discount-row');
                 if (s.employeeDiscount > 0) {
                     empRow.style.display = 'flex';
                     document.getElementById('cf-emp-discount').innerText = '-' + this.formatMoney(s.employeeDiscount);
                 } else { empRow.style.display = 'none'; }
 
-                // Checklist
                 const paymentEl = document.querySelector('input[name="paymentType"]:checked');
                 const paymentMap = { COD: 'Thanh toán khi nhận hàng (COD)', MOMO: 'Ví MoMo', VNPAY: 'VNPay', CHUYEN_KHOAN: 'Chuyển khoản ngân hàng' };
                 let paymentLabel = paymentEl ? (paymentMap[paymentEl.value] || paymentEl.value) : '';
 
-                // Cập nhật nhãn thanh toán nếu là nhận tại cửa hàng
                 if (isStore && paymentEl && paymentEl.value === 'COD') {
                     paymentLabel = 'Thanh toán tại cửa hàng';
                 }
 
+                const recipientName = document.getElementById('co-name')?.value || '';
+                const recipientPhone = document.getElementById('co-phone')?.value || '';
+
                 let items = '';
+
+                if (recipientName || recipientPhone) {
+                    items += `<div class="confirm-check-item"><i class="fa-solid fa-user"></i><span>Người nhận: <strong style="color:var(--text)">${recipientName}</strong>${recipientPhone ? ' · <strong style="color:var(--text)">' + recipientPhone + '</strong>' : ''}</span></div>`;
+                }
+
                 if (isStore) {
                     items += `<div class="confirm-check-item"><i class="fa-solid fa-store"></i><span>Nhận tại cửa hàng: <strong style="color:var(--text)">13 Phan Tây Nhạc, Xuân Phương, Nam Từ Liêm, Hà Nội</strong></span></div>`;
                     const pickupVal = document.getElementById('co-pickup-time')?.value;
@@ -1413,11 +1490,25 @@
                     const wardName = selWard?.options[selWard.selectedIndex]?.getAttribute('data-name') || '';
                     const fullAddr = [detail, wardName, distName, provName].filter(Boolean).join(', ');
                     items += `<div class="confirm-check-item"><i class="fa-solid fa-location-dot"></i><span>Giao tới: <strong style="color:var(--text)">${fullAddr}</strong></span></div>`;
+
+                    if (s.estimatedDelivery) {
+                        items += `<div class="confirm-check-item"><i class="fa-solid fa-calendar-check"></i><span>Dự kiến nhận hàng: <strong style="color:#2563eb">${s.estimatedDelivery}</strong></span></div>`;
+                    }
                 }
+
                 items += `<div class="confirm-check-item"><i class="fa-solid fa-wallet"></i><span>Thanh toán: <strong style="color:var(--text)">${paymentLabel}</strong></span></div>`;
                 if (s.appliedPromoCode) {
                     items += `<div class="confirm-check-item"><i class="fa-solid fa-tag"></i><span>Voucher <strong style="color:var(--text)">${s.appliedPromoCode}</strong> đã áp dụng</span></div>`;
                 }
+
+                const redirectMethods = ['MOMO', 'VNPAY', 'CHUYEN_KHOAN'];
+                if (paymentEl && redirectMethods.includes(paymentEl.value)) {
+                    const redirectNote = paymentEl.value === 'CHUYEN_KHOAN'
+                        ? 'Mã QR chuyển khoản sẽ hiện sau khi bạn xác nhận.'
+                        : `Bạn sẽ được chuyển đến trang thanh toán ${paymentLabel} sau khi xác nhận.`;
+                    items += `<div class="confirm-check-item" style="margin-top:4px;padding:8px 10px;background:#fffbeb;border-radius:6px;border:1px dashed #fbbf24;"><i class="fa-solid fa-circle-info" style="color:#d97706;"></i><span style="color:#92400e;font-weight:500;">${redirectNote}</span></div>`;
+                }
+
                 document.getElementById('cf-checklist').innerHTML = items;
 
                 document.getElementById('confirmView').style.display = 'block';
@@ -1499,7 +1590,6 @@
                 }
                 const isBuyNowMode = window.location.hash.includes('mode=buynow');
 
-                // 🌟 ĐÃ FIX TẬN GỐC: Truyền giá trị chính xác cho Backend
                 const payload = {
                     tenNguoiNhan: document.getElementById('co-name').value,
                     soDienThoai: document.getElementById('co-phone').value,
@@ -1516,7 +1606,7 @@
                     phuongThucThanhToan: paymentMethod,
                     tienHang: this.state.subTotal,
                     phiShip: this.state.shippingFee,
-                    tienGiam: this.state.discount, // Chỉ gửi riêng tiền discount của Voucher
+                    tienGiam: this.state.discount,
                     tongTien: this.state.total,
                     voucherId: voucherIdToSubmit,
                     isBuyNow: isBuyNowMode,
@@ -1524,7 +1614,7 @@
                         return {
                             chiTietSanPhamId: item.idSanPhamChiTiet || item.skuId,
                             soLuong: item.qty,
-                            donGia: item.price // Truyền đúng giá Sale từ Frontend lên
+                            donGia: item.price
                         };
                     })
                 };
@@ -1559,7 +1649,7 @@
                         const momoRes = await fetch(`/api/hoa-don/momo-payment/${invoiceId}`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({}) // 🌟 ĐÃ FIX: Thêm body rỗng để Backend không báo lỗi 400
+                            body: JSON.stringify({})
                         });
 
                         if (!momoRes.ok) throw new Error("Lỗi kết nối API MoMo Online!");
@@ -1579,7 +1669,7 @@
                         const vnpayRes = await fetch(`/api/hoa-don/vnpay-payment/${invoiceId}`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({}) // 🌟 ĐÃ FIX: Thêm body rỗng để Backend không báo lỗi 400
+                            body: JSON.stringify({})
                         });
 
                         if (!vnpayRes.ok) throw new Error("Lỗi kết nối API VNPay Online!");
@@ -1619,6 +1709,7 @@
                         if (!isBuyNowMode) { window.CartHelper.clear(); }
                         btnSubmit.innerText = 'Chốt đơn ngay';
                         btnSubmit.disabled = false;
+                        if (window.hideLoading) window.hideLoading();
                         document.getElementById('confirmModalOverlay').style.display = 'flex';
                         document.getElementById('confirmModal').classList.add('open');
                         this.showSuccessScreen();

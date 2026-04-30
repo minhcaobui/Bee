@@ -321,11 +321,11 @@
             <div style="display: flex; gap: 15px; margin-top: 15px;">
                 <div class="form-group" style="flex: 1;">
                     <label class="form-label">Ngày bắt đầu <span style="color:#ef4444">*</span></label>
-                    <input id="kmNgayBatDau" type="datetime-local" class="form-input">
+                    <input id="kmNgayBatDau" type="datetime-local" class="form-input" onchange="window.PromotionApp.handleStartDateChange()">
                 </div>
                 <div class="form-group" style="flex: 1;">
                     <label class="form-label">Ngày kết thúc <span style="color:#ef4444">*</span></label>
-                    <input id="kmNgayKetThuc" type="datetime-local" class="form-input">
+                    <input id="kmNgayKetThuc" type="datetime-local" class="form-input" onchange="window.PromotionApp.handleEndDateChange()">
                 </div>
             </div>
 
@@ -651,6 +651,16 @@
                 const el = document.getElementById(id);
                 if(el) el.value = '';
             });
+
+            // Tính toán thời gian hiện tại chuẩn format YYYY-MM-DDThh:mm
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            const minDateTime = now.toISOString().slice(0, 16);
+
+// Set thuộc tính min để khóa quá khứ ở form HTML
+            document.getElementById('kmNgayBatDau').min = minDateTime;
+            document.getElementById('kmNgayKetThuc').min = minDateTime;
+
             document.getElementById('kmCongDon').checked = true;
 
             if (isSale) {
@@ -731,11 +741,22 @@
                     }
                 }
 
+                // 1. Cập nhật tiêu đề tương ứng cho form Sửa
+                document.getElementById('drawerTitle').innerText = isSale ? "CẬP NHẬT ĐỢT SALE" : "CẬP NHẬT VOUCHER";
+
                 const now = new Date();
-                if (new Date(item.ngayBatDau) <= now) document.getElementById('kmNgayBatDau').disabled = true;
+                if (isSale) {
+                    if (new Date(item.ngayBatDau) <= now) document.getElementById('kmNgayBatDau').disabled = true;
+                } else {
+                    if (new Date(item.ngayBatDau) <= now && item.luotSuDung > 0) {
+                        document.getElementById('kmNgayBatDau').disabled = true;
+                    }
+                }
+
                 document.getElementById('kmMa').disabled = true;
 
                 document.getElementById('drawer').classList.add('show');
+
                 document.getElementById('overlay').classList.add('show');
             } catch(e) { if (typeof window.toast === 'function') window.toast("Truy xuất thông tin thất bại.", "error"); }
         },
@@ -762,8 +783,31 @@
 
             if (!ten) { if (typeof window.toast === 'function') window.toast('Vui lòng nhập tên chương trình.', 'warning'); return; }
             if (!ngayBatDau || !ngayKetThuc) { if (typeof window.toast === 'function') window.toast('Thiếu thông tin thời gian.', 'warning'); return; }
-            if (new Date(ngayKetThuc) <= new Date(ngayBatDau)) { if (typeof window.toast === 'function') window.toast('Kết thúc phải sau Bắt đầu.', 'warning'); return; }
+
+
+            const diffInMinutes = (new Date(ngayKetThuc) - new Date(ngayBatDau)) / (1000 * 60);
+            if (diffInMinutes < 5) {
+                if (typeof window.toast === 'function') window.toast('Thời gian kết thúc phải sau thời gian bắt đầu ít nhất 5 phút!', 'warning');
+                return;
+            }
+
             if (giaTriRaw === null) { if (typeof window.toast === 'function') window.toast('Vui lòng nhập định mức chiết khấu.', 'warning'); return; }
+
+
+            // Chặn cứng việc lưu thời gian ở quá khứ
+            const currentTime = new Date();
+
+// Chỉ chặn Ngày bắt đầu nếu là Thêm Mới (chứ Sửa chương trình đang chạy thì Ngày bắt đầu ở quá khứ là bình thường)
+            if (!this.state.editingId && new Date(ngayBatDau) < currentTime) {
+                if (typeof window.toast === 'function') window.toast('Ngày giờ bắt đầu không được chọn trong quá khứ!', 'warning');
+                return;
+            }
+
+// Luôn chặn Ngày kết thúc nếu nó trôi về quá khứ
+            if (new Date(ngayKetThuc) < currentTime) {
+                if (typeof window.toast === 'function') window.toast('Ngày giờ kết thúc không được nằm trong quá khứ!', 'warning');
+                return;
+            }
 
             if(isSale && this.state.selectedProductIds.length === 0 && this.state.selectedSkuIds.length === 0) {
                 if (typeof window.toast === 'function') window.toast('Bạn chưa chọn sản phẩm hoặc phân loại (SKU) nào để áp dụng Sale!', 'warning');
@@ -897,6 +941,77 @@
             if (val.length > 1 && val.startsWith('0')) val = val.substring(1);
             el.value = val ? parseInt(val).toLocaleString('en-US') : '';
         },
+
+        handleStartDateChange: function() {
+            const startInputEl = document.getElementById('kmNgayBatDau');
+            if (!startInputEl.value) return;
+
+            const selectedDate = new Date(startInputEl.value);
+            const now = new Date();
+
+            // KIỂM TRA QUÁ KHỨ: Nếu chọn giờ/phút trong quá khứ, ép nảy về hiện tại ngay lập tức
+            if (selectedDate < now) {
+                if (typeof window.toast === 'function') window.toast('Không thể chọn thời gian trong quá khứ. Đã tự động cập nhật!', 'warning');
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                const currentIso = now.toISOString().slice(0, 16);
+                startInputEl.value = currentIso;
+
+                // Cập nhật lại selectedDate để tiếp tục tính toán ngày kết thúc
+                selectedDate.setTime(now.getTime());
+            }
+
+
+
+            // TÍNH TOÁN NGÀY KẾT THÚC (+5 phút)
+            selectedDate.setMinutes(selectedDate.getMinutes() + 5 - selectedDate.getTimezoneOffset());
+            const minEndDate = selectedDate.toISOString().slice(0, 16);
+
+            const endInputEl = document.getElementById('kmNgayKetThuc');
+            endInputEl.min = minEndDate;
+
+            // Ép ngày kết thúc nhảy theo nếu đang nhỏ hơn mức cho phép
+            if (endInputEl.value && new Date(endInputEl.value) < new Date(minEndDate)) {
+                endInputEl.value = minEndDate;
+            }
+        },
+
+        handleEndDateChange: function() {
+            const startInputEl = document.getElementById('kmNgayBatDau');
+            const endInputEl = document.getElementById('kmNgayKetThuc');
+
+            if (!endInputEl.value) return;
+
+            const endDate = new Date(endInputEl.value);
+            const now = new Date();
+            let minValidEnd = new Date(now.getTime());
+
+            // 1. Xác định mốc thời gian làm mốc (hiện tại hoặc ngày bắt đầu)
+            if (startInputEl.value) {
+                const startDate = new Date(startInputEl.value);
+                // Nếu ngày bắt đầu ở tương lai, lấy ngày bắt đầu làm mốc.
+                // (Nếu ngày bắt đầu ở quá khứ do đang chạy dở, vẫn lấy hiện tại làm mốc)
+                if (startDate > now) {
+                    minValidEnd = new Date(startDate.getTime());
+                }
+            }
+
+            // 2. Cộng thêm đúng 5 phút vào mốc để tạo ranh giới tối thiểu
+            minValidEnd.setMinutes(minValidEnd.getMinutes() + 5);
+
+            // 3. Nếu người dùng cố tình chọn thời gian nhỏ hơn ranh giới này (quá khứ hoặc vi phạm 5p) -> Ép nảy về đúng mốc!
+            if (endDate < minValidEnd) {
+                if (typeof window.toast === 'function') {
+                    window.toast('Ngày kết thúc phải lớn hơn hiện tại và sau ngày bắt đầu ít nhất 5 phút. Đã tự động điều chỉnh!', 'warning');
+                }
+
+                // Bù trừ múi giờ để format ra chuẩn ISO String nhét lại vào input
+                minValidEnd.setMinutes(minValidEnd.getMinutes() - minValidEnd.getTimezoneOffset());
+                endInputEl.value = minValidEnd.toISOString().slice(0, 16);
+            }
+        },
+
+
+
         handleSearch: function(val) { clearTimeout(this.timeout); this.timeout = setTimeout(() => { this.state.q = val.trim(); this.state.page = 0; this.loadData(); }, 500); },
         handleStatus: function(val) { this.state.trangThai = val; this.state.page = 0; this.loadData(); },
         resetFilters: function() { this.state.q=''; this.state.trangThai=''; document.getElementById('search').value=''; document.getElementById('fTrangThaiFilter').value=''; this.loadData(); },
@@ -950,23 +1065,48 @@
             this.updateSelectedCount();
         },
 
-        toggleSelection: function (id, checked, type) {
+        toggleSelection: function (id, checked, type, parentId = null) {
             if (type === 'PRODUCT') {
                 if (checked) {
                     if (!this.state.selectedProductIds.includes(id)) this.state.selectedProductIds.push(id);
+                    // Bỏ chọn tất cả SKU con vì đã chọn cả cha
+                    const product = this.state.products.find(p => p.id === id);
+                    if (product && product.skus) {
+                        const skuIds = product.skus.map(s => s.id);
+                        this.state.selectedSkuIds = this.state.selectedSkuIds.filter(x => !skuIds.includes(x));
+                    }
                 } else {
                     this.state.selectedProductIds = this.state.selectedProductIds.filter(x => x !== id);
                 }
-                // Nếu đổi trạng thái sản phẩm thì render lại nguyên bảng để khóa/mở các checkbox SKU con
-                this.renderProductSelectionTable(this.state.filteredProducts);
             } else {
+                // Xử lý khi tích chọn SKU lẻ
                 if (checked) {
                     if (!this.state.selectedSkuIds.includes(id)) this.state.selectedSkuIds.push(id);
+
+                    // Logic gom SKU thành Sản phẩm cha
+                    if (parentId) {
+                        const product = this.state.products.find(p => p.id === parentId);
+                        if (product && product.skus) {
+                            const allSkuIds = product.skus.map(s => s.id);
+                            // Kiểm tra xem tất cả SKU của sản phẩm này đã được tích hết chưa
+                            const isAllSelected = allSkuIds.every(skuId => this.state.selectedSkuIds.includes(skuId));
+
+                            if (isAllSelected) {
+                                // Nếu đã tích đủ full SKU -> Tự động chuyển thành tích Sản phẩm cha
+                                if (!this.state.selectedProductIds.includes(parentId)) {
+                                    this.state.selectedProductIds.push(parentId);
+                                }
+                                // Xóa toàn bộ các SKU con khỏi danh sách chọn lẻ để mảng data được sạch
+                                this.state.selectedSkuIds = this.state.selectedSkuIds.filter(x => !allSkuIds.includes(x));
+                            }
+                        }
+                    }
                 } else {
                     this.state.selectedSkuIds = this.state.selectedSkuIds.filter(x => x !== id);
                 }
-                this.updateSelectedCount();
             }
+            // Render lại bảng để giao diện tự ăn theo data mới
+            this.renderProductSelectionTable(this.state.filteredProducts);
         },
 
         updateSelectedCount: function() {

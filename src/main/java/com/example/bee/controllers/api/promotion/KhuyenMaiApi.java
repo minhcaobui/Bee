@@ -209,12 +209,21 @@ public class KhuyenMaiApi {
     @GetMapping("/san-pham")
     public ResponseEntity<?> getAllProducts() {
         List<SanPham> list = sanPhamRepo.getAllActiveProducts();
+        LocalDateTime now = LocalDateTime.now(); // Lấy mốc thời gian hiện tại để check sale đang chạy
 
         List<Map<String, Object>> result = list.stream().map(sp -> {
             Map<String, Object> item = new HashMap<>();
             item.put("id", sp.getId());
             item.put("ma", sp.getMa());
             item.put("ten", sp.getTen());
+
+            // Tận dụng hàm checkTrungLich có sẵn để xem Sản phẩm này có đang chạy sale nào hiện tại không
+            List<KhuyenMai> kmSanPham = khuyenMaiRepository.checkTrungLich(Collections.singletonList(sp.getId()), now, now, -1);
+            if (!kmSanPham.isEmpty()) {
+                item.put("tenKhuyenMai", kmSanPham.get(0).getTen());
+            } else {
+                item.put("tenKhuyenMai", null);
+            }
 
             // Lấy thêm danh sách SKU con và format tên phân loại (Màu sắc - Kích thước)
             List<Map<String, Object>> skus = new ArrayList<>();
@@ -233,8 +242,16 @@ public class KhuyenMaiApi {
                         if (phanLoai.trim().isEmpty()) {
                             phanLoai = "Mặc định";
                         }
-
                         s.put("ten", phanLoai);
+
+                        // Tận dụng hàm checkTrungLichSku có sẵn
+                        List<KhuyenMai> kmSku = khuyenMaiRepository.checkTrungLichSku(Collections.singletonList(sku.getId()), now, now, -1);
+                        if (!kmSku.isEmpty()) {
+                            s.put("tenKhuyenMai", kmSku.get(0).getTen());
+                        } else {
+                            s.put("tenKhuyenMai", null);
+                        }
+
                         skus.add(s);
                     }
                 }

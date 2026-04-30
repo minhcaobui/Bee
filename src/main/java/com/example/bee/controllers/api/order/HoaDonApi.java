@@ -1229,6 +1229,64 @@ public class HoaDonApi {
         }
     }
 
+    // ==========================================
+    // API POS TẠO URL THANH TOÁN MOMO TẠI QUẦY
+    // ==========================================
+    @PostMapping("/momo-payment-pos/{invoiceId}")
+    @Transactional
+    public ResponseEntity<?> getMomoUrlPos(@PathVariable Integer invoiceId) {
+        try {
+            HoaDon hd = hdRepo.findById(invoiceId).orElseThrow(() -> new RuntimeException("Không tìm thấy Hóa đơn"));
+            BigDecimal totalAmount = hd.getGiaTong();
+
+            List<ThanhToan> ttMomoList = thanhToanRepo.findByHoaDon_Id(hd.getId());
+            if (ttMomoList != null && !ttMomoList.isEmpty()) {
+                ThanhToan ttMomo = ttMomoList.get(0);
+                ttMomo.setPhuongThuc("MOMO");
+                thanhToanRepo.save(ttMomo);
+            } else {
+                ThanhToan ttMomo = new ThanhToan();
+                ttMomo.setHoaDon(hd);
+                ttMomo.setSoTien(totalAmount);
+                ttMomo.setPhuongThuc("MOMO");
+                ttMomo.setLoaiThanhToan("THANH_TOAN");
+                ttMomo.setTrangThai("CHO_THANH_TOAN");
+                ttMomo.setNgayThanhToan(new Date());
+                thanhToanRepo.save(ttMomo);
+            }
+
+            String rId = String.valueOf(System.currentTimeMillis());
+            String oId = hd.getMa() + "_" + rId;
+            String amountStr = totalAmount.setScale(0, RoundingMode.HALF_UP).toString();
+
+            String posReturnUrl = "https://beemate.store/api/hoa-don/momo-callback";
+
+            String rawHash = "accessKey=" + accessKey.trim() + "&amount=" + amountStr + "&extraData=&ipnUrl=" + notifyUrl.trim() + "&orderId=" + oId + "&orderInfo=ThanhToan_POS_" + hd.getMa() + "&partnerCode=" + partnerCode.trim() + "&redirectUrl=" + posReturnUrl + "&requestId=" + rId + "&requestType=captureWallet";
+            String signature = MomoSecurity.signHmacSHA256(rawHash, secretKey.trim());
+
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("partnerCode", partnerCode.trim());
+            body.put("accessKey", accessKey.trim());
+            body.put("requestId", rId);
+            body.put("amount", Long.valueOf(amountStr));
+            body.put("orderId", oId);
+            body.put("orderInfo", "ThanhToan_POS_" + hd.getMa());
+            body.put("redirectUrl", posReturnUrl);
+            body.put("ipnUrl", notifyUrl.trim());
+            body.put("extraData", "");
+            body.put("requestType", "captureWallet");
+            body.put("signature", signature);
+            body.put("lang", "vi");
+
+            RestTemplate restTemplate = new RestTemplate();
+            Map<String, Object> response = restTemplate.postForObject(endpoint.trim(), body, Map.class);
+
+            return ResponseEntity.ok(Map.of("payUrl", response.get("payUrl")));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
 
     @GetMapping("/momo-callback")
     @Transactional
@@ -1402,6 +1460,82 @@ public class HoaDonApi {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
+
+    // ==========================================
+    // API POS TẠO URL THANH TOÁN VNPAY TẠI QUẦY
+    // ==========================================
+    @PostMapping("/vnpay-payment-pos/{invoiceId}")
+    @Transactional
+    public ResponseEntity<?> getVnPayUrlPos(@PathVariable Integer invoiceId, HttpServletRequest request) {
+        try {
+            HoaDon hd = hdRepo.findById(invoiceId).orElseThrow(() -> new RuntimeException("Không tìm thấy Hóa đơn"));
+            BigDecimal totalAmount = hd.getGiaTong();
+
+            List<ThanhToan> ttVnpayList = thanhToanRepo.findByHoaDon_Id(hd.getId());
+            if (ttVnpayList != null && !ttVnpayList.isEmpty()) {
+                ThanhToan ttVnpay = ttVnpayList.get(0);
+                ttVnpay.setPhuongThuc("VNPAY");
+                thanhToanRepo.save(ttVnpay);
+            } else {
+                ThanhToan ttVnpay = new ThanhToan();
+                ttVnpay.setHoaDon(hd);
+                ttVnpay.setSoTien(totalAmount);
+                ttVnpay.setPhuongThuc("VNPAY");
+                ttVnpay.setLoaiThanhToan("THANH_TOAN");
+                ttVnpay.setTrangThai("CHO_THANH_TOAN");
+                ttVnpay.setNgayThanhToan(new Date());
+                thanhToanRepo.save(ttVnpay);
+            }
+
+            String vnp_TxnRef = hd.getMa() + "_" + System.currentTimeMillis();
+            Map<String, String> vnp_Params = new HashMap<>();
+            vnp_Params.put("vnp_Version", "2.1.0");
+            vnp_Params.put("vnp_Command", "pay");
+            vnp_Params.put("vnp_TmnCode", vnp_TmnCode.trim());
+            vnp_Params.put("vnp_Amount", String.valueOf(totalAmount.multiply(new BigDecimal("100")).setScale(0, RoundingMode.HALF_UP)));
+            vnp_Params.put("vnp_CurrCode", "VND");
+            vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
+            vnp_Params.put("vnp_OrderInfo", "ThanhToan_POS_" + hd.getMa());
+            vnp_Params.put("vnp_OrderType", "other");
+            vnp_Params.put("vnp_Locale", "vn");
+
+            String posReturnUrl = "https://beemate.store/api/hoa-don/vnpay-callback";
+            vnp_Params.put("vnp_ReturnUrl", posReturnUrl);
+            vnp_Params.put("vnp_IpAddr", "127.0.0.1");
+
+            Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+            vnp_Params.put("vnp_CreateDate", formatter.format(cld.getTime()));
+
+            List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
+            Collections.sort(fieldNames);
+            StringBuilder hashData = new StringBuilder();
+            StringBuilder query = new StringBuilder();
+            for (Iterator<String> itr = fieldNames.iterator(); itr.hasNext(); ) {
+                String fieldName = itr.next();
+                String fieldValue = vnp_Params.get(fieldName);
+                if ((fieldValue != null) && (fieldValue.length() > 0)) {
+                    String encodedValue = java.net.URLEncoder.encode(fieldValue, java.nio.charset.StandardCharsets.UTF_8.toString()).replace("+", "%20");
+                    String encodedName = java.net.URLEncoder.encode(fieldName, java.nio.charset.StandardCharsets.UTF_8.toString());
+                    hashData.append(fieldName).append('=').append(encodedValue);
+                    query.append(encodedName).append('=').append(encodedValue);
+                    if (itr.hasNext()) {
+                        query.append('&');
+                        hashData.append('&');
+                    }
+                }
+            }
+
+            String vnp_SecureHash = com.example.bee.utils.VnPayUtil.hmacSHA512(vnp_HashSecret.trim(), hashData.toString());
+            String paymentUrl = vnp_PayUrl.trim() + "?" + query.toString() + "&vnp_SecureHash=" + vnp_SecureHash;
+
+            return ResponseEntity.ok(Map.of("payUrl", paymentUrl));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
 
     @GetMapping("/vnpay-callback")
     @Transactional
