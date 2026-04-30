@@ -102,7 +102,8 @@ public class SanPhamApi {
     }
 
     private String generateMa() {
-        return "SP" + System.currentTimeMillis();
+        String timeStr = String.valueOf(System.currentTimeMillis());
+        return "SP" + timeStr.substring(timeStr.length() - 5);
     }
 
     @GetMapping("/{id}")

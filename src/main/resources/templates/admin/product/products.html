@@ -1059,6 +1059,7 @@
                     if(typeof window.toast === 'function') window.toast(`Đổi ảnh thành công cho ${successCount}/${ids.length} SKU đã chọn.`, "success");
                     this.state.selectedVariants = [];
                     this.loadVariants(this.state.currentProductId);
+                    this.loadData();
                 });
             }
         },
@@ -1091,6 +1092,7 @@
                     if(typeof window.toast === 'function') window.toast(`Đổi giá thành công cho ${successCount}/${ids.length} SKU đã chọn.`, "success");
                     this.state.selectedVariants = [];
                     this.loadVariants(this.state.currentProductId);
+                    this.loadData();
                 });
             }
         },
@@ -1283,6 +1285,7 @@
                             if(typeof window.toast === 'function') window.toast(`Đã tạo thành công ${payloadList.length} biến thể SKU!`, "success");
                             this.closeBulkDrawer();
                             this.loadVariants(this.state.currentProductId);
+                            this.loadData();
                         }
 
                     } catch (error) { if(typeof window.toast === 'function') window.toast("Có lỗi xảy ra kết nối mạng.", "error"); }
@@ -1361,6 +1364,7 @@
                             if(typeof window.toast === 'function') window.toast(isEdit ? 'Cập nhật SKU thành công.' : 'Bổ sung SKU thành công.', 'success');
                             this.closeVariantForm();
                             this.loadVariants(this.state.currentProductId);
+                            this.loadData();
                         } else {
                             const errData = await res.json();
                             if(typeof window.toast === 'function') window.toast(errData.message || 'Lỗi lưu thông tin.', 'error');
@@ -1398,6 +1402,7 @@
                             if(res.ok) {
                                 if(typeof window.toast === 'function') window.toast("Đã cập nhật trạng thái SKU.", "success");
                                 this.loadVariants(this.state.currentProductId);
+                                this.loadData();
                             }
                         } catch(e) { }
                     }

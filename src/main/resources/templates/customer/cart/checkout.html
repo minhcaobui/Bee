@@ -190,16 +190,28 @@
 
         /* --- CSS CHO MODAL CONFIRM ĐẶT HÀNG --- */
         .confirm-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 11000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); animation: fadeIn 0.3s ease;}
-        .confirm-modal { background: #fff; width: 400px; max-width: 90%; border-radius: var(--radius-xl); padding: 32px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.15); transform: translateY(20px); transition: all 0.3s ease; opacity: 0; }
+        .confirm-modal { background: #fff; width: 440px; max-width: 92%; border-radius: var(--radius-xl); padding: 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); transform: translateY(20px); transition: all 0.3s ease; opacity: 0; }
         .confirm-modal.open { transform: translateY(0); opacity: 1; }
-        .confirm-icon { width: 60px; height: 60px; background: rgba(61,90,76,0.1); color: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; }
-        .confirm-title { font-size: 28px; font-weight: 600; color: var(--text); margin-bottom: 12px; }
-        .confirm-desc { font-size: 14px; color: var(--muted); margin-bottom: 30px; line-height: 1.5; }
-        .confirm-actions { display: flex; gap: 12px; }
-        .btn-cf-cancel { flex: 1; padding: 14px; background: #f4f4f5; color: var(--text); border: 1px solid rgba(0,0,0,0.1); border-radius: var(--radius-md); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: 0.2s;}
-        .btn-cf-cancel:hover { background: #e4e4e7; }
-        .btn-cf-submit { flex: 1; padding: 14px; background: var(--accent); color: white; border: none; border-radius: var(--radius-md); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: 0.2s;}
+        .confirm-modal-header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+        .confirm-icon { width: 40px; height: 40px; background: rgba(61,90,76,0.1); color: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
+        .confirm-summary-box { background: #f8f9fa; border-radius: var(--radius-md); padding: 14px 16px; margin-bottom: 14px; }
+        .confirm-summary-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px; font-size: 12px; }
+        .confirm-summary-row:last-child { margin-bottom: 0; }
+        .confirm-summary-divider { border: none; border-top: 1px solid rgba(0,0,0,0.07); margin: 10px 0; }
+        .confirm-checklist { display: flex; flex-direction: column; gap: 9px; margin-bottom: 20px; }
+        .confirm-check-item { display: flex; align-items: flex-start; gap: 10px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+        .confirm-check-item i { color: var(--accent); font-size: 13px; margin-top: 1px; width: 14px; flex-shrink: 0; }
+        .confirm-actions { display: flex; gap: 10px; }
+        .btn-cf-cancel { flex: 1; padding: 11px; background: transparent; color: var(--muted); border: 1px solid rgba(0,0,0,0.12); border-radius: var(--radius-md); font-size: 13px; cursor: pointer; transition: 0.2s;}
+        .btn-cf-cancel:hover { background: #f4f4f5; }
+        .btn-cf-submit { flex: 1.4; padding: 11px; background: var(--accent); color: white; border: none; border-radius: var(--radius-md); font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s;}
         .btn-cf-submit:hover { background: #2c4238; }
+        .confirm-success { text-align: center; padding: 8px 0 4px; }
+        .confirm-success-icon { width: 56px; height: 56px; background: rgba(61,90,76,0.1); color: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 22px; }
+        .confirm-success-title { font-size: 17px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+        .confirm-success-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
+        .confirm-success-countdown { font-size: 12px; color: var(--muted); margin-top: 14px; }
+        .confirm-success-countdown span { color: var(--accent); font-weight: 600; }
 
         @media (max-width: 900px) {
             .checkout-page { padding: 40px 24px; }
@@ -292,12 +304,51 @@
 
     <div class="confirm-modal-overlay" id="confirmModalOverlay">
         <div class="confirm-modal" id="confirmModal">
-            <div class="confirm-icon"><i class="fa-solid fa-cart-arrow-down"></i></div>
-            <div class="confirm-title">Xác nhận đặt hàng</div>
-            <div class="confirm-desc">Bạn có chắc chắn muốn chốt đơn hàng này không? Vui lòng kiểm tra lại thông tin trước khi bấm xác nhận.</div>
-            <div class="confirm-actions">
-                <button class="btn-cf-cancel" onclick="window.CheckoutApp.closeConfirmModal()">Để tôi xem lại</button>
-                <button class="btn-cf-submit" id="btn-submit-real" onclick="window.CheckoutApp.executeSubmitOrder()">Chốt đơn ngay</button>
+            <!-- Confirm view -->
+            <div id="confirmView">
+                <div class="confirm-modal-header">
+                    <div class="confirm-icon"><i class="fa-solid fa-bag-shopping"></i></div>
+                    <div>
+                        <div style="font-size:15px;font-weight:500;color:var(--text);">Xác nhận đặt hàng</div>
+                        <div style="font-size:12px;color:var(--muted);">Kiểm tra lại trước khi chốt nhé</div>
+                    </div>
+                </div>
+                <div class="confirm-summary-box">
+                    <div class="confirm-summary-row">
+                        <span style="color:var(--muted);" id="cf-item-label">Tạm tính</span>
+                        <span id="cf-subtotal" style="color:var(--text);"></span>
+                    </div>
+                    <div class="confirm-summary-row" id="cf-ship-row">
+                        <span style="color:var(--muted);">Phí vận chuyển</span>
+                        <span id="cf-shipping" style="color:var(--text);"></span>
+                    </div>
+                    <div class="confirm-summary-row" id="cf-discount-row" style="display:none;">
+                        <span style="color:var(--muted);">Giảm giá voucher</span>
+                        <span id="cf-discount" style="color:var(--accent);"></span>
+                    </div>
+                    <div class="confirm-summary-row" id="cf-emp-discount-row" style="display:none;">
+                        <span style="color:var(--muted);">Ưu đãi nhân viên</span>
+                        <span id="cf-emp-discount" style="color:var(--accent);"></span>
+                    </div>
+                    <hr class="confirm-summary-divider">
+                    <div class="confirm-summary-row">
+                        <span style="font-weight:500;color:var(--text);">Tổng thanh toán</span>
+                        <span id="cf-total" style="font-size:16px;font-weight:600;color:var(--accent);"></span>
+                    </div>
+                </div>
+                <div class="confirm-checklist" id="cf-checklist"></div>
+                <div class="confirm-actions">
+                    <button class="btn-cf-cancel" onclick="window.CheckoutApp.closeConfirmModal()">Để tôi xem lại</button>
+                    <button class="btn-cf-submit" id="btn-submit-real" onclick="window.CheckoutApp.executeSubmitOrder()">Chốt đơn ngay</button>
+                </div>
+            </div>
+            <!-- Success view -->
+            <div id="successView" style="display:none;" class="confirm-success">
+                <div class="confirm-success-icon"><i class="fa-solid fa-check"></i></div>
+                <div class="confirm-success-title">Cảm ơn bạn đã tin tưởng Bee! 🎉</div>
+                <div class="confirm-success-sub" id="successSubText"></div>
+                <button onclick="window.location.href='/customer/#account'" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-md);font-size:13px;font-weight:600;cursor:pointer;">Xem đơn hàng ngay</button>
+                <div class="confirm-success-countdown">Tự động chuyển trang sau <span id="cf-countdown">5</span>s...</div>
             </div>
         </div>
     </div>
@@ -921,16 +972,26 @@
                         enableTime: true,
                         time_24hr: true,
                         minDate: "today",
+                        maxDate: new Date().fp_incr(7), // Tối đa 7 ngày tính từ hôm nay
                         locale: "vn",
                         dateFormat: "Y-m-d\\TH:i",
                         altInput: true,
                         altFormat: "H:i - d/m/Y",
+                        minTime: "08:00", // Giờ mở cửa mặc định
+                        maxTime: "21:30", // Giờ đóng cửa mặc định
                         onChange: function(selectedDates, dateStr, instance) {
                             const today = new Date();
                             if (selectedDates[0] && selectedDates[0].toDateString() === today.toDateString()) {
-                                instance.set('minTime', today.getHours() + ':' + today.getMinutes());
+                                // Nếu chọn lấy luôn trong ngày hôm nay -> Min time là giờ hiện tại + 30 phút chuẩn bị hàng
+                                let minH = today.getHours();
+                                let minM = today.getMinutes() + 30;
+                                if (minM >= 60) { minH += 1; minM -= 60; }
+
+                                let minTimeStr = minH + ":" + (minM < 10 ? "0"+minM : minM);
+                                instance.set('minTime', minTimeStr);
                             } else {
-                                instance.set('minTime', null);
+                                // Nếu chọn ngày khác -> Được chọn từ lúc cửa hàng mở cửa
+                                instance.set('minTime', "08:00");
                             }
                         }
                     });
@@ -1293,6 +1354,74 @@
                     return;
                 }
 
+                const s = this.state;
+                const isStore = s.deliveryMethod === 'store';
+
+                // Populate summary
+                const cartCount = s.cart.reduce((a, i) => a + (i.qty || 1), 0);
+                document.getElementById('cf-item-label').innerText = `Tạm tính (${cartCount} sản phẩm)`;
+                document.getElementById('cf-subtotal').innerText = this.formatMoney(s.subTotal);
+                document.getElementById('cf-total').innerText = this.formatMoney(s.total);
+
+                // Phí ship — ẩn nếu ra quầy
+                const shipRow = document.getElementById('cf-ship-row');
+                if (isStore) {
+                    shipRow.style.display = 'none';
+                } else {
+                    shipRow.style.display = 'flex';
+                    document.getElementById('cf-shipping').innerText = s.shippingFee === 0 ? 'Miễn phí' : this.formatMoney(s.shippingFee);
+                }
+
+                // Voucher
+                const discRow = document.getElementById('cf-discount-row');
+                if (s.discount > 0) {
+                    discRow.style.display = 'flex';
+                    document.getElementById('cf-discount').innerText = '-' + this.formatMoney(s.discount);
+                } else { discRow.style.display = 'none'; }
+
+                // Ưu đãi nhân viên
+                const empRow = document.getElementById('cf-emp-discount-row');
+                if (s.employeeDiscount > 0) {
+                    empRow.style.display = 'flex';
+                    document.getElementById('cf-emp-discount').innerText = '-' + this.formatMoney(s.employeeDiscount);
+                } else { empRow.style.display = 'none'; }
+
+                // Checklist
+                const paymentEl = document.querySelector('input[name="paymentType"]:checked');
+                const paymentMap = { COD: 'Thanh toán khi nhận hàng (COD)', MOMO: 'Ví MoMo', VNPAY: 'VNPay', CHUYEN_KHOAN: 'Chuyển khoản ngân hàng' };
+                let paymentLabel = paymentEl ? (paymentMap[paymentEl.value] || paymentEl.value) : '';
+
+                // Cập nhật nhãn thanh toán nếu là nhận tại cửa hàng
+                if (isStore && paymentEl && paymentEl.value === 'COD') {
+                    paymentLabel = 'Thanh toán tại cửa hàng';
+                }
+
+                let items = '';
+                if (isStore) {
+                    items += `<div class="confirm-check-item"><i class="fa-solid fa-store"></i><span>Nhận tại cửa hàng: <strong style="color:var(--text)">13 Phan Tây Nhạc, Xuân Phương, Nam Từ Liêm, Hà Nội</strong></span></div>`;
+                    const pickupVal = document.getElementById('co-pickup-time')?.value;
+                    if (pickupVal) {
+                        items += `<div class="confirm-check-item"><i class="fa-regular fa-calendar-check"></i><span>Ngày hẹn lấy: <strong style="color:var(--text)">${pickupVal}</strong></span></div>`;
+                    }
+                } else {
+                    const selProv = document.getElementById('co-province');
+                    const selDist = document.getElementById('co-district');
+                    const selWard = document.getElementById('co-ward');
+                    const detail = document.getElementById('co-address-detail')?.value || '';
+                    const provName = selProv?.options[selProv.selectedIndex]?.getAttribute('data-name') || '';
+                    const distName = selDist?.options[selDist.selectedIndex]?.getAttribute('data-name') || '';
+                    const wardName = selWard?.options[selWard.selectedIndex]?.getAttribute('data-name') || '';
+                    const fullAddr = [detail, wardName, distName, provName].filter(Boolean).join(', ');
+                    items += `<div class="confirm-check-item"><i class="fa-solid fa-location-dot"></i><span>Giao tới: <strong style="color:var(--text)">${fullAddr}</strong></span></div>`;
+                }
+                items += `<div class="confirm-check-item"><i class="fa-solid fa-wallet"></i><span>Thanh toán: <strong style="color:var(--text)">${paymentLabel}</strong></span></div>`;
+                if (s.appliedPromoCode) {
+                    items += `<div class="confirm-check-item"><i class="fa-solid fa-tag"></i><span>Voucher <strong style="color:var(--text)">${s.appliedPromoCode}</strong> đã áp dụng</span></div>`;
+                }
+                document.getElementById('cf-checklist').innerHTML = items;
+
+                document.getElementById('confirmView').style.display = 'block';
+                document.getElementById('successView').style.display = 'none';
                 document.getElementById('confirmModalOverlay').style.display = 'flex';
                 setTimeout(() => { document.getElementById('confirmModal').classList.add('open'); }, 10);
             },
@@ -1300,6 +1429,23 @@
             closeConfirmModal: function() {
                 document.getElementById('confirmModal').classList.remove('open');
                 setTimeout(() => { document.getElementById('confirmModalOverlay').style.display = 'none'; }, 300);
+            },
+
+            showSuccessScreen: function() {
+                const isStore = this.state.deliveryMethod === 'store';
+                const subText = isStore
+                    ? 'Đơn hàng đã được ghi nhận. Hóa đơn đã gửi về Email của bạn — hẹn gặp bạn tại cửa hàng nhé!'
+                    : 'Đơn hàng đã được ghi nhận. Hóa đơn đã gửi về Email — chúng mình sẽ giao hàng sớm nhất có thể!';
+                document.getElementById('successSubText').innerText = subText;
+                document.getElementById('confirmView').style.display = 'none';
+                document.getElementById('successView').style.display = 'block';
+                let count = 5;
+                const tick = setInterval(() => {
+                    count--;
+                    const el = document.getElementById('cf-countdown');
+                    if (el) el.innerText = count;
+                    if (count <= 0) { clearInterval(tick); window.location.href = '/customer/#account'; }
+                }, 1000);
             },
 
             executeSubmitOrder: async function() {
@@ -1470,14 +1616,12 @@
                         return;
                     }
                     else {
-                        if (window.showToast) { window.showToast("Đặt hàng thành công! Hóa đơn đã được gửi về Email.", "success"); }
-                        else { alert("Đặt hàng thành công! Chúng tôi đã gửi hóa đơn về Email của bạn."); }
-
-                        if (!isBuyNowMode) {
-                            window.CartHelper.clear();
-                        }
-
-                        window.location.hash = 'account';
+                        if (!isBuyNowMode) { window.CartHelper.clear(); }
+                        btnSubmit.innerText = 'Chốt đơn ngay';
+                        btnSubmit.disabled = false;
+                        document.getElementById('confirmModalOverlay').style.display = 'flex';
+                        document.getElementById('confirmModal').classList.add('open');
+                        this.showSuccessScreen();
                     }
 
                 } catch (error) {

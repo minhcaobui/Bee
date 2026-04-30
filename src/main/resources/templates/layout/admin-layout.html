@@ -32,11 +32,11 @@
             <div class="sidebar-label">QUẢN LÝ NGHIỆP VỤ</div>
             <a href="#orders" class="sidebar-item"><i class="bi bi-receipt-cutoff"></i> <span>Quản Lý Hóa Đơn</span></a>
 
-            <a href="#catalogs" class="sidebar-item"><i class="bi bi-layers-fill"></i> <span>Quản Lý Thuộc Tính</span></a>
-            <a href="#products" class="sidebar-item"><i class="bi bi-box-seam-fill"></i> <span>Quản Lý Sản Phẩm</span></a>
-            <a href="#promotions" class="sidebar-item"><i class="bi bi-ticket-perforated-fill"></i> <span>Chương Trình Khuyến Mãi</span></a>
-            <a href="#customers" class="sidebar-item"><i class="bi bi-people-fill"></i> <span>Hồ Sơ Khách Hàng</span></a>
-            <a href="#reviews" class="sidebar-item"><i class="bi bi-star-fill"></i> <span>Đánh Giá Sản Phẩm</span></a>
+            <a href="#catalogs" class="sidebar-item" sec:authorize="hasAuthority('ROLE_ADMIN')"><i class="bi bi-layers-fill"></i> <span>Quản Lý Thuộc Tính</span></a>
+            <a href="#products" class="sidebar-item" sec:authorize="hasAuthority('ROLE_ADMIN')"><i class="bi bi-box-seam-fill"></i> <span>Quản Lý Sản Phẩm</span></a>
+            <a href="#promotions" class="sidebar-item" sec:authorize="hasAuthority('ROLE_ADMIN')"><i class="bi bi-ticket-perforated-fill"></i> <span>Chương Trình Khuyến Mãi</span></a>
+            <a href="#customers" class="sidebar-item" sec:authorize="hasAuthority('ROLE_ADMIN')"><i class="bi bi-people-fill"></i> <span>Hồ Sơ Khách Hàng</span></a>
+            <a href="#reviews" class="sidebar-item" sec:authorize="hasAuthority('ROLE_ADMIN')"><i class="bi bi-star-fill"></i> <span>Đánh Giá Sản Phẩm</span></a>
 
             <a href="#staff" class="sidebar-item" sec:authorize="hasAuthority('ROLE_ADMIN')">
                 <i class="bi bi-person-badge-fill"></i> <span>Quản Lý Nhân Viên</span>

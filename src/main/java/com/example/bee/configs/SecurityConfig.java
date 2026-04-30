@@ -29,13 +29,23 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/register", "/login", "/forgot-password/**", "/css/**", "/js/**", "/images/**", "/customer/**", "/", "/api/payment/**").permitAll()
+                        // 1. MỞ KHÓA CHO GIAO DIỆN KHÁCH VÃNG LAI VÀ TÀI NGUYÊN TĨNH
+                        .requestMatchers(
+                                "/", "/home", "/about", "/shop/**", "/detail/**", "/cart/**", "/checkout/**",
+                                "/register", "/login", "/forgot-password/**",
+                                "/css/**", "/js/**", "/images/**", "/uploads/**", "/customer/**",
+                                "/api/payment/**"
+                        ).permitAll()
 
+                        // 2. MỞ KHÓA API CHO KHÁCH VÃNG LAI (Catalog, Giỏ hàng, Checkout)
                         .requestMatchers(
                                 "/api/products/**",
+                                "/api/san-pham/**",
                                 "/api/danh-muc/**",
                                 "/api/mau-sac/**",
                                 "/api/kich-thuoc/**",
+                                "/api/chat-lieu/**",
+                                "/api/hang/**",
                                 "/api/hoa-don/tra-cuu/**",
                                 "/api/hoa-don/checkout",
                                 "/api/hoa-don/check-employee",
