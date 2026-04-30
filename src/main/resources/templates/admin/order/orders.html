@@ -239,6 +239,19 @@
         .history-table td { padding: 12px; border-bottom: 1px dashed var(--border-light); vertical-align: top; color: var(--text-main); }
         .history-table tr:last-child td { border-bottom: none; }
 
+        /* CSS MỚI: DÀNH CHO POPUP CHỌN THANH TOÁN */
+        .overlay {
+            position: fixed;
+            top: var(--layout-header-height);
+            left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.4);
+            z-index: 999999;
+            backdrop-filter: blur(2px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
         /* RESPONSIVE */
         @media (max-width: 768px) {
             .filter-row-1.online-mode, .filter-row-1.history-mode, .filter-row-2.history-mode { grid-template-columns: 1fr; gap: 12px; }
@@ -383,7 +396,7 @@
         </div>
     </aside>
 
-    <div id="orderPromptOverlay" style="position: fixed; top: var(--layout-header-height); left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.4); z-index: 9999999; backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center;">
+    <div id="orderPromptOverlay" class="overlay">
         <div style="padding: 24px; width: 400px; background: #fff; border-radius: var(--radius); box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
             <h4 id="orderPromptTitle" style="margin-bottom:12px; font-size:15px; font-weight: 700; display: flex; align-items: center; gap: 8px;"></h4>
             <div id="orderPromptMsg" style="margin-bottom:12px; color:var(--text-muted); font-size: 13px;"></div>
@@ -391,6 +404,87 @@
             <div style="display:flex; justify-content:flex-end; gap:12px;">
                 <button id="btnOrderPromptCancel" class="btn btn-secondary">Hủy</button>
                 <button id="btnOrderPromptOk" class="btn btn-danger">Xác nhận hủy đơn</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CHỌN PHƯƠNG THỨC THANH TOÁN & TÍNH TIỀN THỪA -->
+    <div id="paymentPromptOverlay" class="overlay" style="z-index: 9999999; display: none; align-items: center; justify-content: center;">
+        <div style="width: 480px; background: #fff; border-radius: var(--radius); box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; display: flex; flex-direction: column;">
+
+            <div style="padding: 16px 20px; border-bottom: 1px solid var(--border-color); background: #fafafa; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 14px; font-weight: 700; color: var(--text-main);"><i class="bi bi-wallet2" style="margin-right: 6px; color: var(--primary);"></i> XÁC NHẬN THANH TOÁN & HOÀN THÀNH</span>
+                <button class="btn-close" onclick="document.getElementById('paymentPromptOverlay').style.display='none'"></button>
+            </div>
+
+            <div style="padding: 24px;">
+                <style>
+                    .pos-fieldset { border: 1px solid var(--border-color); border-radius: var(--radius); padding: 10px 15px 12px; margin-bottom: 16px; position: relative; background: #ffffff;}
+                    .pos-legend { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; padding: 0 6px; width: auto; float: none; margin-bottom: 0; border: none; }
+                    .pos-input-money { width: 100%; border: none; padding: 0; height: 36px; font-size: 24px; font-weight: 700; background: transparent; text-align: right; outline: none; font-family: inherit; color: var(--text-main);}
+                    .payment-tabs { display: flex; margin-bottom: 20px; border: 1px solid var(--border-color); border-radius: var(--radius); overflow: hidden;}
+                    .payment-tab { flex: 1; padding: 12px; border: none; background: #f0f2f5; font-size: 12px; font-weight: 600; text-transform: uppercase; cursor: pointer; transition: all 0.2s; outline: none; color: var(--text-muted);}
+                    .payment-tab.active { background: var(--text-main); color: #ffffff; }
+                    .payment-option { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90px; border: 1px solid var(--border-color); border-radius: var(--radius); cursor: pointer; background: #ffffff; position: relative; transition: 0.2s;}
+                    .payment-option.selected { border: 1px solid var(--primary) !important; background: #e0f2fe; }
+                    .payment-option.selected::after { content: "\F26B"; font-family: "bootstrap-icons"; position: absolute; top: 6px; right: 6px; color: var(--primary); font-size: 16px; }
+                </style>
+
+                <div style="text-align: center; margin-bottom: 20px; background: #fafafa; padding: 15px; border: 1px dashed var(--border-color); border-radius: var(--radius);">
+                    <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">TỔNG CẦN THANH TOÁN</div>
+                    <div id="modalTotal" style="font-size: 36px; font-weight: 700; color: var(--danger);">0 ₫</div>
+                </div>
+
+                <div class="payment-tabs">
+                    <button class="payment-tab active" onclick="OrderApp.switchStorePaymentMethod('cash', this)">Tiền mặt</button>
+                    <button class="payment-tab" onclick="OrderApp.switchStorePaymentMethod('transfer', this)">Quét mã / C.Khoản</button>
+                </div>
+
+                <div style="min-height: 120px;">
+                    <!-- TIỀN MẶT -->
+                    <div id="cash-section" style="display: block;">
+                        <fieldset class="pos-fieldset">
+                            <legend class="pos-legend">Tiền khách đưa</legend>
+                            <div style="display: flex; align-items: center;">
+                                <input type="text" class="pos-input-money" id="inpKhachDua" oninput="OrderApp.calcChange()" placeholder="0">
+                                <span style="font-weight: 600; margin-left: 10px; font-size: 13px; color: var(--text-muted);">VNĐ</span>
+                            </div>
+                        </fieldset>
+
+                        <fieldset class="pos-fieldset" style="background: #fefce8; border-color: #fde047;">
+                            <legend class="pos-legend" style="color: #a16207;">Tiền thừa trả lại</legend>
+                            <div id="lblTienThua" style="text-align: right; font-size: 24px; font-weight: 700; color: var(--text-main); height: 36px; line-height: 36px; white-space: nowrap;">0&nbsp;₫</div>
+                        </fieldset>
+                    </div>
+
+                    <!-- CHUYỂN KHOẢN -->
+                    <div id="transfer-section" style="display: none;">
+                        <div style="display: flex; gap: 10px; width: 100%; justify-content: space-between;">
+                            <div class="payment-option selected" data-method="MOMO" onclick="OrderApp.selectApp(this)">
+                                <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-MoMo-Square.png" style="width:28px; height:28px; object-fit:contain; margin-bottom:8px;">
+                                <span style="font-size: 11px; font-weight: 600;">VÍ MOMO</span>
+                            </div>
+                            <div class="payment-option" data-method="VNPAY" onclick="OrderApp.selectApp(this)">
+                                <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Icon-VNPAY-QR.png" style="width:28px; height:28px; object-fit:contain; margin-bottom:8px;">
+                                <span style="font-size: 11px; font-weight: 600;">VNPAY</span>
+                            </div>
+                            <div class="payment-option" data-method="CHUYEN_KHOAN" onclick="OrderApp.selectApp(this)">
+                                <i class="bi bi-bank" style="font-size: 24px; color: var(--text-muted); margin-bottom: 6px;"></i>
+                                <span style="font-size: 11px; font-weight: 600; text-align: center; color: var(--text-muted);">CHUYỂN KHOẢN</span>
+                            </div>
+                        </div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 12px; text-align: center; font-style: italic;">
+                            Ghi chú: Đối với MoMo/VNPay, vui lòng kiểm tra kĩ màn hình giao dịch của khách trước khi xác nhận.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="padding: 16px 24px; border-top: 1px solid var(--border-color); background: #fafafa; display: flex; justify-content: flex-end; gap: 12px;">
+                <button class="btn btn-secondary" onclick="document.getElementById('paymentPromptOverlay').style.display='none'">HỦY BỎ</button>
+                <button class="btn btn-primary" onclick="OrderApp.executeStorePayment()">
+                    <i class="bi bi-check-circle-fill"></i> XÁC NHẬN HOÀN THÀNH
+                </button>
             </div>
         </div>
     </div>
@@ -473,7 +567,8 @@
             activeTab: 'don-hang',
             q: '', statusId: '', loai: '', pttt: '',
             nhanVienId: '', dateFrom: '', dateTo: '',
-            page: 0, size: 10, totalPages: 0
+            page: 0, size: 10, totalPages: 0,
+            currentOrder: null // <--- Mới: Lưu order đang xem
         },
 
         _nvList: [],
@@ -672,7 +767,7 @@
                 activeTab: this.state.activeTab,
                 q: '', statusId: '', loai: '', pttt: '',
                 nhanVienId: '', dateFrom: '', dateTo: '',
-                page: 0, size: 10, totalPages: 0
+                page: 0, size: 10, totalPages: 0, currentOrder: null
             };
             this._nvSelectedId = null;
             this.renderFilterSection();
@@ -1081,6 +1176,7 @@
                     throw new Error("Lỗi API: " + res.status + " " + errTxt);
                 }
                 const hd = await res.json();
+                this.state.currentOrder = hd; // LƯU ĐƠN HIỆN TẠI VÀO STATE ĐỂ DÙNG CHUNG CHO MODAL
 
                 const setTxt = (elementId, value) => {
                     const el = document.getElementById(elementId);
@@ -1394,12 +1490,25 @@
                 if(currentMa === 'CHO_XAC_NHAN') nextActionText = "Duyệt & Đóng gói";
                 if(currentMa === 'DA_XAC_NHAN') nextActionText = hd.hinhThucGiaoHang === 'NHAN_TAI_CUA_HANG' ? "Đã gói xong - Chờ lấy" : "Đã gói xong - Giao Shipper";
                 if(currentMa === 'CHO_GIAO_VAN_CHUYEN') nextActionText = "Shipper đang đi giao";
-                if(currentMa === 'DANG_GIAO_HANG' || currentMa === 'CHO_KHACH_LAY') nextActionText = "Xác nhận giao thành công";
-                if(currentMa === 'YEU_CAU_TRA_HANG') nextActionText = "Chấp nhận trả hàng";
-                if(currentMa === 'DANG_HOAN_HANG') nextActionText = "Xác nhận nhận hàng hoàn";
 
-                btnNext.innerHTML = `${nextActionText} <i class="bi bi-arrow-right"></i>`;
-                btnNext.onclick = () => this.nextStatus(hd.id);
+                // SỬA NÚT CHO ĐƠN NHẬN TẠI CỬA HÀNG
+                if(currentMa === 'CHO_KHACH_LAY') {
+                    nextActionText = "Xác nhận đã nhận & Thanh toán";
+                    btnNext.innerHTML = `${nextActionText} <i class="bi bi-check-circle"></i>`;
+                    btnNext.onclick = () => this.confirmStorePickupPayment(); // Gọi hàm mở Popup tính tiền
+                }
+                else if(currentMa === 'DANG_GIAO_HANG') {
+                    nextActionText = "Xác nhận giao thành công";
+                    btnNext.innerHTML = `${nextActionText} <i class="bi bi-arrow-right"></i>`;
+                    btnNext.onclick = () => this.nextStatus(hd.id);
+                }
+                else {
+                    if(currentMa === 'YEU_CAU_TRA_HANG') nextActionText = "Chấp nhận trả hàng";
+                    if(currentMa === 'DANG_HOAN_HANG') nextActionText = "Xác nhận nhận hàng hoàn";
+                    btnNext.innerHTML = `${nextActionText} <i class="bi bi-arrow-right"></i>`;
+                    btnNext.onclick = () => this.nextStatus(hd.id);
+                }
+
                 footer.appendChild(btnNext);
             } else {
                 const waitMsg = document.createElement('div');
@@ -1421,18 +1530,142 @@
             }
         },
 
-        nextStatus: function(id) {
+        /* --- LOGIC CỦA POPUP CHỌN PHƯƠNG THỨC THANH TOÁN CHO ĐƠN STORE PICKUP --- */
+        switchStorePaymentMethod: function(type, el) {
+            el.parentElement.querySelectorAll('.payment-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('cash-section').style.display = type === 'cash' ? 'block' : 'none';
+            document.getElementById('transfer-section').style.display = type === 'cash' ? 'none' : 'block';
+        },
+
+        calcChange: function () {
+            const inputEl = document.getElementById('inpKhachDua');
+            let rawValue = inputEl.value.replace(/\D/g, '');
+            if (rawValue !== '') inputEl.value = new Intl.NumberFormat('vi-VN').format(parseInt(rawValue));
+            else inputEl.value = '';
+
+            const hd = this.state.currentOrder;
+            if(!hd) return;
+            const total = Number(hd.tongTien || 0);
+            const cust = parseInt(rawValue) || 0;
+            document.getElementById('lblTienThua').innerHTML = new Intl.NumberFormat('vi-VN').format(Math.max(0, cust - total)) + '&nbsp;₫';
+        },
+
+        selectApp: function(el) {
+            const container = el.closest('#transfer-section');
+            container.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
+            el.classList.add('selected');
+        },
+
+        confirmStorePickupPayment: function() {
+            const hd = this.state.currentOrder;
+            if (!hd) return;
+
+            document.getElementById('modalTotal').innerHTML = new Intl.NumberFormat('vi-VN').format(Number(hd.tongTien || 0)) + '&nbsp;₫';
+            document.getElementById('inpKhachDua').value = '';
+            document.getElementById('lblTienThua').innerHTML = '0&nbsp;₫';
+
+            const tabs = document.querySelectorAll('#paymentPromptOverlay .payment-tab');
+            if (tabs.length > 0) this.switchStorePaymentMethod('cash', tabs[0]);
+
+            document.getElementById('paymentPromptOverlay').style.display = 'flex';
+        },
+
+        executeStorePayment: function() {
+            const hd = this.state.currentOrder;
+            if (!hd) return;
+            const total = Number(hd.tongTien || 0);
+
+            const isCash = document.getElementById('cash-section').style.display !== 'none';
+            let finalMethod = 'TIEN_MAT';
+
+            if (!isCash) {
+                const selectedOpt = document.querySelector('#transfer-section .payment-option.selected');
+                if (selectedOpt) {
+                    finalMethod = selectedOpt.getAttribute('data-method');
+                } else {
+                    finalMethod = 'MOMO';
+                }
+            }
+
+            if (isCash) {
+                const khachDua = parseInt(document.getElementById('inpKhachDua').value.replace(/\D/g, '')) || 0;
+                if (khachDua < total) {
+                    if(typeof window.toast === 'function') window.toast("Số tiền khách đưa chưa đủ!", "warning");
+                    return;
+                }
+            }
+
+            document.getElementById('paymentPromptOverlay').style.display = 'none';
+
+            if (finalMethod === 'CHUYEN_KHOAN') {
+                const bankId = "MB";
+                const accountNo = "0988123456";
+                const accountName = "NGUYEN VAN HOANG";
+                const addInfo = "ThanhToan_" + hd.ma;
+                const qrUrl = `https://img.vietqr.io/image/${bankId}-${accountNo}-compact2.png?amount=${total}&addInfo=${addInfo}&accountName=${encodeURIComponent(accountName)}`;
+                this.showTransferQR(qrUrl, bankId, accountNo, accountName, total, addInfo, finalMethod, hd.id);
+                return;
+            }
+
+            // Ghi nhận trực tiếp phương thức thanh toán vào CSDL mà không cần mã QR
+            this.nextStatus(hd.id, finalMethod);
+        },
+
+        showTransferQR: function(qrUrl, bank, acc, name, amount, info, finalMethod, hdId) {
+            const oldOverlay = document.getElementById('qrOverlayWindow');
+            if(oldOverlay) oldOverlay.remove();
+
+            const overlay = document.createElement('div');
+            overlay.id = 'qrOverlayWindow';
+            overlay.style.cssText = 'position:fixed; top: var(--layout-header-height); inset:0; background:rgba(15,23,42,0.5); z-index:10000; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(2px);';
+            overlay.innerHTML = `
+                <div style="background:#ffffff; width:440px; max-width:90%; border-radius:var(--radius); padding:24px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.1); position: relative;">
+                    <button style="position:absolute; top:12px; right:12px; background:none; border:none; font-size:24px; cursor:pointer; color:var(--text-muted); width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:var(--radius); transition:0.2s;" onmouseover="this.style.background='var(--gray-200)'; this.style.color='var(--text-main)'" onmouseout="this.style.background='none'; this.style.color='var(--text-muted)'" onclick="this.parentElement.parentElement.remove()">&times;</button>
+                    <h3 style="font-size:16px; margin-bottom:8px; font-weight:700; text-transform:uppercase; color: var(--primary);"><i class="bi bi-qr-code-scan" style="margin-right: 6px;"></i> Quét Mã Chuyển Khoản</h3>
+                    <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px; font-weight: 500;">Vui lòng hướng dẫn khách hàng quét mã QR dưới đây để thanh toán.</p>
+                    <img src="${qrUrl}" style="width:240px; height:240px; margin:15px auto; border:1px solid var(--border-color); border-radius:var(--radius); padding:10px; display:block; background: #ffffff;">
+                    <div style="font-size:13px; margin-bottom:24px; text-align:left; background:#fafafa; padding:20px; border-radius:var(--radius); border:1px solid var(--border-color);">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px dashed var(--border-color); padding-bottom:8px;"><span>Ngân hàng:</span> <strong style="color:var(--text-main);">${bank}</strong></div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px dashed var(--border-color); padding-bottom:8px;"><span>Số tài khoản:</span> <strong style="color:var(--text-main);">${acc}</strong></div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px dashed var(--border-color); padding-bottom:8px;"><span>Chủ tài khoản:</span> <strong style="color:var(--text-main);">${name}</strong></div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px dashed var(--border-color); padding-bottom:8px;"><span>Số tiền:</span> <strong style="color:#dc2626; font-size:15px; white-space: nowrap;">${new Intl.NumberFormat('vi-VN').format(amount)}&nbsp;₫</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Nội dung CK:</span> <strong style="color:var(--primary);">${info}</strong></div>
+                    </div>
+
+                    <button id="qrConfirmBtn" style="padding:14px 24px; background:var(--text-main); color:#ffffff; border:none; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; cursor:pointer; border-radius:var(--radius); width:100%; transition:0.2s;" onmouseover="this.style.background='#1e293b'" onmouseout="this.style.background='var(--text-main)'" onclick="OrderApp.nextStatus(${hdId}, '${finalMethod}'); this.parentElement.parentElement.remove();">
+                        <i class="bi bi-check-circle-fill"></i> ĐÃ NHẬN TIỀN & HOÀN THÀNH
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        },
+        /* --- KẾT THÚC LOGIC POPUP THANH TOÁN CHO ĐƠN STORE PICKUP --- */
+
+        // NHẬN THÊM BIẾN paymentMethod ĐỂ LƯU VÀO DB
+        nextStatus: function(id, paymentMethod = null) {
+            let confirmMessage = "Bạn có chắc chắn muốn chuyển đơn hàng này sang bước tiếp theo không?";
+            if (paymentMethod) {
+                confirmMessage = "Xác nhận khách hàng đã nhận đủ sản phẩm và hoàn tất thanh toán?";
+            }
+
             if (typeof window.confirmDialog === 'function') {
                 window.confirmDialog(
                     "Xác nhận trạng thái",
-                    "Bạn có chắc chắn muốn chuyển đơn hàng này sang bước tiếp theo không?",
+                    confirmMessage,
                     async () => {
                         try {
                             if (window.showLoading) window.showLoading();
+
+                            const payload = { ghiChu: "Admin chuyển trạng thái" };
+                            if (paymentMethod) {
+                                payload.phuongThucThanhToan = paymentMethod;
+                            }
+
                             const res = await fetch(`/api/hoa-don/${id}/next-status`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ ghiChu: "Admin chuyển trạng thái" })
+                                body: JSON.stringify(payload)
                             });
                             if (!res.ok) throw new Error("Chuyển trạng thái thất bại");
                             if (typeof window.toast === 'function') window.toast("Cập nhật trạng thái thành công!", "success");

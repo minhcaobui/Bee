@@ -360,6 +360,7 @@ public class HoaDonApi {
         String hinhThucGiao = hd.getHinhThucGiaoHang() != null ? hd.getHinhThucGiaoHang() : "GIAO_TAN_NOI";
         String nextMa = "";
         String ghiChu = req.getOrDefault("ghiChu", "Cập nhật trạng thái tự động");
+        String phuongThucMoi = req.get("phuongThucThanhToan"); // Lấy phương thức thanh toán mới do NV chọn
 
         switch (currentMa) {
             case "CHO_XAC_NHAN":
@@ -415,7 +416,7 @@ public class HoaDonApi {
         }
         hdRepo.save(hd);
 
-        // Cập nhật trạng thái thanh toán nếu hóa đơn hoàn thành (Dành cho COD)
+        // Cập nhật trạng thái thanh toán nếu hóa đơn hoàn thành (Dành cho COD hoặc nhận tại cửa hàng)
         if ("HOAN_THANH".equals(nextMa)) {
             List<ThanhToan> ttList = thanhToanRepo.findByHoaDon_Id(hd.getId());
             if (ttList != null && !ttList.isEmpty()) {
@@ -423,6 +424,13 @@ public class HoaDonApi {
                 if ("CHO_THANH_TOAN".equals(tt.getTrangThai())) {
                     tt.setTrangThai("THANH_CONG");
                     tt.setNgayThanhToan(new Date());
+
+                    // CẬP NHẬT PHƯƠNG THỨC THANH TOÁN MỚI (NẾU CÓ)
+                    if (phuongThucMoi != null && !phuongThucMoi.trim().isEmpty()) {
+                        tt.setPhuongThuc(phuongThucMoi);
+                        ghiChu += " (Khách thanh toán bằng: " + phuongThucMoi + ")";
+                    }
+
                     thanhToanRepo.save(tt);
                 }
             }
@@ -771,10 +779,22 @@ public class HoaDonApi {
             }
             thanhToanRepo.save(tt);
 
+            // SỬA ĐOẠN NÀY LẠI ĐỂ LOG ĐÚNG LỊCH SỬ TẠO ĐƠN THEO LOẠI GIAO HÀNG
+            String ghiChuTaoDon = "";
+            if (ttBanDau.getMa().equals("CHO_THANH_TOAN")) {
+                ghiChuTaoDon = "Đang chờ thanh toán online";
+            } else {
+                if ("NHAN_TAI_CUA_HANG".equals(hd.getHinhThucGiaoHang())) {
+                    ghiChuTaoDon = "Khách hàng đặt đơn Online (Nhận và thanh toán tại cửa hàng)";
+                } else {
+                    ghiChuTaoDon = "Khách hàng đặt đơn Online (Thanh toán khi nhận hàng - COD)";
+                }
+            }
+
             LichSuHoaDon ls = new LichSuHoaDon();
             ls.setHoaDon(savedHd);
             ls.setTrangThaiHoaDon(ttBanDau);
-            ls.setGhiChu(ttBanDau.getMa().equals("CHO_THANH_TOAN") ? "Đang chờ thanh toán online" : "Khách hàng đặt đơn Online (COD)");
+            ls.setGhiChu(ghiChuTaoDon);
             ls.setNgayTao(new Date());
             lsRepo.save(ls);
 
