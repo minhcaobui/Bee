@@ -35,6 +35,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -66,6 +67,7 @@ public class BanHangApi {
     private final VaiTroRepository vaiTroRepo;
     private final PasswordEncoder passwordEncoder;
     private final GioHangRepository gioHangRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Value("${momo.partnerCode}")
     private String partnerCode;
@@ -148,6 +150,11 @@ public class BanHangApi {
                     .build());
 
             hoaDonRepo.save(hd);
+            try {
+                messagingTemplate.convertAndSend("/topic/public/stock", "STOCK_CHANGED");
+            } catch (Exception e) {
+                System.out.println("Lỗi gửi WS: " + e.getMessage());
+            }
         }
     }
 
@@ -175,7 +182,7 @@ public class BanHangApi {
             if (activeSales != null && !activeSales.isEmpty()) {
                 KhuyenMai km = activeSales.get(0);
 
-                // ÁP DỤNG LOẠI GIẢM GIÁ[cite: 1]
+                // ÁP DỤNG LOẠI GIẢM GIÁ
                 boolean isPercent = km.getLoai() != null && km.getLoai().equalsIgnoreCase(LoaiGiamGia.PHAN_TRAM);
 
                 if (isPercent) {
@@ -211,7 +218,11 @@ public class BanHangApi {
 
         spct.setSoLuongTamGiu(Math.max(0, spct.getSoLuongTamGiu() + delta));
         variantRepo.save(spct);
-
+        try {
+            messagingTemplate.convertAndSend("/topic/public/stock", "STOCK_CHANGED");
+        } catch (Exception e) {
+            System.out.println("Lỗi gửi WS: " + e.getMessage());
+        }
         return ResponseEntity.ok(Map.of("message", "OK"));
     }
 
@@ -314,7 +325,7 @@ public class BanHangApi {
                     baseForVoucher = tongTienNguyenGia;
                 }
 
-                // ÁP DỤNG LOẠI GIẢM GIÁ[cite: 1]
+                // ÁP DỤNG LOẠI GIẢM GIÁ
                 boolean isPercent = voucher.getLoaiGiamGia() != null && voucher.getLoaiGiamGia().equalsIgnoreCase(LoaiGiamGia.PHAN_TRAM);
                 if (isPercent) {
                     giamGiaVoucher = baseForVoucher.multiply(voucher.getGiaTriGiamGia().divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP));
@@ -370,6 +381,12 @@ public class BanHangApi {
                 .ghiChu(ghiChuLichSu)
                 .nhanVien(nvChotDon)
                 .build());
+
+        try {
+            messagingTemplate.convertAndSend("/topic/public/stock", "STOCK_CHANGED");
+        } catch (Exception e) {
+            System.out.println("Lỗi gửi WS: " + e.getMessage());
+        }
 
         return hd;
     }

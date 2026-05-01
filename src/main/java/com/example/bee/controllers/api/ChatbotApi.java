@@ -24,9 +24,7 @@ import java.util.Map;
 public class ChatbotApi {
 
     private final String[] API_KEYS = {
-            "AIzaSyDEFcb-eS-6ksIMVypn38nkgoPXYcn44X4",
-            "AIzaSyCTRuuWMWKpxg3LWDYcEq-0bJRORQiV5i4",
-            "AIzaSyBcFi73Vv1vu82wOPo9HhejtLvTi9JBO_0"
+            "AIzaSyBvj-W-6M1V71B3LcKyTWpgHMgg61zjNr8"
     };
 
     @Autowired

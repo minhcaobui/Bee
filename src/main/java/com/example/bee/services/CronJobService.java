@@ -32,14 +32,13 @@ public class CronJobService {
     private final LichSuHoaDonRepository lichSuHoaDonRepository;
 
     /**
-     * Cú pháp Cron: Giây - Phút - Giờ - Ngày - Tháng - Thứ
-     * "0 0 2 * * ?" nghĩa là: Chạy vào đúng 02:00:00 sáng, mỗi ngày.
+     * Chạy mỗi 15 phút (900.000 ms) để dọn dẹp cột số lượng tạm giữ trên toàn hệ thống.
      */
-    @Scheduled(cron = "0 0 2 * * ?")
+    @Scheduled(fixedRate = 900000)
     public void donDepTonKhoTamGiu() {
-        System.out.println("[CRONJOB - " + LocalDateTime.now() + "] Đang dọn dẹp hàng bị giam tại POS...");
+        System.out.println("[CRONJOB - " + LocalDateTime.now() + "] Đang dọn dẹp hàng bị tạm giữ trên toàn hệ thống...");
         sanPhamChiTietRepository.resetAllSoLuongTamGiu();
-        System.out.println("[CRONJOB] Hoàn tất dọn dẹp! Toàn bộ kho đã được giải phóng.");
+        System.out.println("[CRONJOB] Hoàn tất dọn dẹp! Toàn bộ cột số lượng tạm giữ đã được reset về 0.");
     }
 
     /**

@@ -737,6 +737,17 @@
             this.countdownTimer = setInterval(() => {
                 this.updateCountdown();
             }, 1000);
+
+            // --- CODE THÊM: TỰ ĐỘNG CẬP NHẬT KHO NGẦM MỖI 10 GIÂY ---
+            setInterval(() => {
+                // Nếu thu ngân đang gõ tìm kiếm thì tạm ngưng làm mới để tránh bị giật khung gõ
+                if (document.activeElement && document.activeElement.id === 'productSearchInput') return;
+
+                // Lấy từ khóa và bộ lọc hiện tại để gọi lại API ngầm
+                const currentSearch = document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '';
+                this.loadProducts(currentSearch);
+            }, 10000);
+            // ---------------------------------------------------------
         },
 
         handleProductSearch: function(val) {
@@ -784,7 +795,7 @@
             statusEl.className = 'badge bg-warning';
 
             if (!inv.expiryTime) {
-                inv.expiryTime = new Date().getTime() + (24 * 60 * 60 * 1000);
+                inv.expiryTime = new Date().getTime() + (30 * 60 * 1000);
                 this.saveState();
             }
 
@@ -795,7 +806,7 @@
                 cdEl.innerText = '00:00:00';
                 if (!inv.isExpired) {
                     inv.isExpired = true;
-                    window.toast(`Hóa đơn ${inv.name} đã quá thời gian 24H và tự động bị hủy!`, "error");
+                    window.toast(`Hóa đơn ${inv.name} đã quá thời gian 30 Phút và tự động bị hủy!`, "error");
                     this.forceDelete(inv.id);
                 }
             } else {
@@ -1291,7 +1302,7 @@
             if (savedInvoices) {
                 this.invoices = JSON.parse(savedInvoices);
                 this.invoices = this.invoices.map(inv => {
-                    if(!inv.expiryTime) inv.expiryTime = new Date().getTime() + (24 * 60 * 60 * 1000);
+                    if(!inv.expiryTime) inv.expiryTime = new Date().getTime() + (30 * 60 * 1000);
                     return { ...inv, id: Number(inv.id) };
                 });
                 let activeId = parseInt(savedActiveId);
@@ -1412,7 +1423,7 @@
 
             const orderNum = this.invoices.length + 1;
             const tempId   = Date.now();
-            const expiry   = new Date().getTime() + (24 * 60 * 60 * 1000);
+            const expiry   = new Date().getTime() + (30 * 60 * 1000);
 
             this.invoices.push({
                 id: tempId,

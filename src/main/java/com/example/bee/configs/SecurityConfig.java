@@ -33,7 +33,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/", "/home", "/about", "/shop/**", "/detail/**", "/cart/**", "/checkout/**",
                                 "/register", "/login", "/forgot-password/**",
-                                "/css/**", "/js/**", "/images/**", "/uploads/**", "/customer/**",
+                                "/css/**", "/js/**", "/images/**", "/uploads/**", "/customer/**", "/ws/**",
                                 "/api/hoa-don/**"
                         ).permitAll()
 

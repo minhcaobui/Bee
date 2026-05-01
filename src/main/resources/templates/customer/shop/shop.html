@@ -1421,6 +1421,16 @@
                         };
                         sessionStorage.setItem('bee_buy_now', JSON.stringify([buyNowItem]));
 
+                        // --- CODE THÊM: GỌI API TẠM GIỮ KHO MUA NGAY ---
+                        try {
+                            await fetch('/api/hoa-don/update-hold', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ spctId: sku.id, delta: inputQty })
+                            });
+                        } catch (e) { console.error("Lỗi tạm giữ:", e); }
+                        // ----------------------------------------
+
                         this.closeAllSelections();
                         document.getElementById('deliveryModalOverlay').style.display = 'flex';
                         setTimeout(() => { document.querySelector('.delivery-modal').classList.add('open'); }, 10);

@@ -7,6 +7,8 @@ import com.example.bee.entities.order.*;
 import com.example.bee.entities.product.SanPhamChiTiet;
 import com.example.bee.entities.promotion.MaGiamGia;
 import com.example.bee.entities.staff.NhanVien;
+import com.example.bee.repositories.cart.GioHangChiTietRepository;
+import com.example.bee.repositories.cart.GioHangRepository;
 import com.example.bee.repositories.customer.KhachHangRepository;
 import com.example.bee.repositories.notification.ThongBaoRepository;
 import com.example.bee.repositories.order.*;
@@ -31,6 +33,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -53,11 +56,10 @@ public class HoaDonApi {
     private final EmailService emailService;
     private final ThongBaoRepository thongBaoRepository;
     private final MaGiamGiaRepository maGiamGiaRepo;
-
+    private final SimpMessagingTemplate messagingTemplate;
     private final ThanhToanRepository thanhToanRepo;
-
-    private final com.example.bee.repositories.cart.GioHangRepository gioHangRepository;
-    private final com.example.bee.repositories.cart.GioHangChiTietRepository gioHangChiTietRepository;
+    private final GioHangRepository gioHangRepository;
+    private final GioHangChiTietRepository gioHangChiTietRepository;
 
     private final GhnService ghnService;
 
@@ -610,6 +612,12 @@ public class HoaDonApi {
                 .ghiChu(req.getOrDefault("ghiChu", "Khách hàng/Admin yêu cầu hủy đơn"))
                 .build());
 
+        try {
+            messagingTemplate.convertAndSend("/topic/public/stock", "STOCK_CHANGED");
+        } catch (Exception e) {
+            System.out.println("Lỗi gửi WS: " + e.getMessage());
+        }
+
         return ResponseEntity.ok(Map.of("message", "Đơn hàng đã được hủy và hoàn sản phẩm vào kho!"));
     }
 
@@ -747,7 +755,15 @@ public class HoaDonApi {
 
                 BigDecimal giaThucTe = itemReq.donGia != null ? itemReq.donGia : spct.getGiaBan();
 
+                // GIẢM SỐ LƯỢNG KHO
                 spct.setSoLuong(spct.getSoLuong() - itemReq.soLuong);
+
+                // NẾU LÀ MUA NGAY THÌ GIẢM CẢ SỐ LƯỢNG TẠM GIỮ (VÌ ĐÃ CHỐT ĐƠN RỒI)
+                if (Boolean.TRUE.equals(req.isBuyNow)) {
+                    int currentHold = spct.getSoLuongTamGiu() == null ? 0 : spct.getSoLuongTamGiu();
+                    spct.setSoLuongTamGiu(Math.max(0, currentHold - itemReq.soLuong));
+                }
+
                 spctRepo.save(spct);
 
                 HoaDonChiTiet hdct = new HoaDonChiTiet();
@@ -822,6 +838,13 @@ public class HoaDonApi {
                 }
             } catch (Exception e) {
                 System.out.println("Lỗi gửi Email: " + e.getMessage());
+            }
+            try {
+                // Đẩy chuỗi "NEW_ORDER" xuống kênh "/topic/admin/orders"
+                messagingTemplate.convertAndSend("/topic/admin/orders", "NEW_ORDER");
+                messagingTemplate.convertAndSend("/topic/public/stock", "STOCK_CHANGED");
+            } catch (Exception e) {
+                System.out.println("Lỗi gửi WebSocket: " + e.getMessage());
             }
 
             return ResponseEntity.ok(Map.of("message", "Đặt hàng thành công", "maHoaDon", savedHd.getMa(), "id", savedHd.getId(), "tongTienThucTe", tongTienCuoi));
@@ -1828,6 +1851,33 @@ public class HoaDonApi {
         }
 
         return ResponseEntity.status(HttpStatus.FOUND).location(java.net.URI.create(redirectUrl)).build();
+    }
+
+    @PostMapping("/update-hold")
+    @Transactional
+    public ResponseEntity<?> updateHoldStockOnline(@RequestBody Map<String, Object> body) {
+        Integer spctId = (Integer) body.get("spctId");
+        Integer delta = (Integer) body.get("delta");
+
+        SanPhamChiTiet spct = spctRepo.findById(spctId)
+                .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
+
+        int currentHold = spct.getSoLuongTamGiu() == null ? 0 : spct.getSoLuongTamGiu();
+
+        if (delta > 0 && (spct.getSoLuong() - currentHold) < delta) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Kho không đủ đáp ứng!"));
+        }
+
+        spct.setSoLuongTamGiu(Math.max(0, currentHold + delta));
+        spctRepo.save(spct);
+
+        try {
+            messagingTemplate.convertAndSend("/topic/public/stock", "STOCK_CHANGED");
+        } catch (Exception e) {
+            System.out.println("Lỗi gửi WS: " + e.getMessage());
+        }
+
+        return ResponseEntity.ok(Map.of("message", "OK"));
     }
 
     public static class CheckoutRequest {

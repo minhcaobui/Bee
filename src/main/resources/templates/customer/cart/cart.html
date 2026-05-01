@@ -651,6 +651,35 @@
                 this.render();
 
                 this.loadRecommendations();
+                this.connectWebSocket();
+            },
+
+            connectWebSocket: function() {
+                const socket = new SockJS('/ws'); // Đảm bảo cấu hình WebSockets ở Backend (WebSocketConfig.java) đã đúng
+                const stompClient = Stomp.over(socket);
+
+                stompClient.debug = null;
+
+                stompClient.connect({}, (frame) => {
+                    console.log('✅ Đã kết nối WebSockets (Giỏ hàng/Kho)');
+
+                    stompClient.subscribe('/topic/public/stock', (message) => {
+                        if (message.body === "STOCK_CHANGED") {
+                            console.log("🔔 Nhận được thông báo kho thay đổi từ server!");
+
+                            // Có thể thêm dòng này để hiện toast báo cho người dùng
+                            if(typeof window.showToast === 'function') {
+                                window.showToast("Dữ liệu kho vừa được cập nhật, giỏ hàng đang làm mới...", "info");
+                            }
+
+                            // Gọi lại loadCartData
+                            this.loadCartData();
+                        }
+                    });
+                }, (error) => {
+                    console.warn("Đứt kết nối WebSockets, đang thử lại...", error);
+                    setTimeout(() => this.connectWebSocket(), 5000);
+                });
             },
 
             getAvailableStock: function(variant) {

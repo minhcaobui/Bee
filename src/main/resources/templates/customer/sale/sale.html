@@ -1460,6 +1460,16 @@
                             };
                             sessionStorage.setItem('bee_buy_now', JSON.stringify([buyNowItem]));
 
+                            // --- CODE THÊM: GỌI API TẠM GIỮ KHO MUA NGAY ---
+                            try {
+                                await fetch('/api/hoa-don/update-hold', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ spctId: sku.id, delta: inputQty })
+                                });
+                            } catch (e) { console.error("Lỗi tạm giữ:", e); }
+                            // ----------------------------------------
+
                             // 🌟 ĐÃ SỬA: Đóng bảng chọn size và bật Popup chọn phương thức nhận hàng (Dùng đúng ID của trang Sale)
                             this.closeAllSelections();
                             document.getElementById('saleDeliveryModalOverlay').style.display = 'flex';
