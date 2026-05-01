@@ -22,16 +22,28 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Controller
 @RequestMapping("/api/nhan-vien")
 @RequiredArgsConstructor
 public class NhanVienApi {
 
-    private static final Map<String, String> otpStorage = new HashMap<>();
+    private static class OtpData {
+        String otp;
+        long expiryTime;
+
+        OtpData(String otp, long expiryTime) {
+            this.otp = otp;
+            this.expiryTime = expiryTime;
+        }
+    }
+
+    private static final Map<String, OtpData> otpStorage = new ConcurrentHashMap<>();
     private final NhanVienRepository nhanVienRepository;
     private final TaiKhoanRepository taiKhoanRepository;
     private final PasswordEncoder passwordEncoder;
@@ -46,14 +58,19 @@ public class NhanVienApi {
     @ResponseBody
     public ResponseEntity<?> sendOtp(@RequestParam String email) {
         try {
-            String otp = String.format("%06d", new Random().nextInt(999999));
-            otpStorage.put(email, otp);
+            SecureRandom random = new SecureRandom();
+            String otp = String.format("%06d", random.nextInt(999999));
+
+            long expiryTime = System.currentTimeMillis() + 5 * 60 * 1000;
+            otpStorage.put(email, new OtpData(otp, expiryTime));
+
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(senderEmail);
             message.setTo(email);
             message.setSubject("[BeeMate] MÃ XÁC THỰC OTP HỆ THỐNG");
             message.setText("Chào bạn,\n\nBạn đang thực hiện thao tác cập nhật hồ sơ trên hệ thống BeeMate.\n"
                     + "Mã xác thực OTP của bạn là: " + otp + "\n\n"
+                    + "Mã này có hiệu lực trong vòng 5 phút.\n"
                     + "Vui lòng nhập mã này vào hệ thống để hoàn tất.\n"
                     + "Trân trọng,\nBan Quản Trị Hệ Thống BeeMate.");
             mailSender.send(message);
@@ -67,10 +84,16 @@ public class NhanVienApi {
     @PostMapping("/verify-otp")
     @ResponseBody
     public ResponseEntity<?> verifyOtp(@RequestParam String email, @RequestParam String otp) {
-        String savedOtp = otpStorage.get(email);
-        if (savedOtp != null && savedOtp.equals(otp)) {
-            otpStorage.remove(email);
-            return ResponseEntity.ok("Xác thực OTP thành công!");
+        OtpData savedOtpData = otpStorage.get(email);
+        if (savedOtpData != null) {
+            if (System.currentTimeMillis() > savedOtpData.expiryTime) {
+                otpStorage.remove(email);
+                return ResponseEntity.badRequest().body("Mã OTP đã hết hạn, vui lòng gửi lại mã mới!");
+            }
+            if (savedOtpData.otp.equals(otp)) {
+                otpStorage.remove(email);
+                return ResponseEntity.ok("Xác thực OTP thành công!");
+            }
         }
         return ResponseEntity.badRequest().body("Mã OTP không chính xác, vui lòng nhập lại!");
     }
@@ -125,7 +148,6 @@ public class NhanVienApi {
     @ResponseBody
     @Transactional
     public ResponseEntity<?> toggleStatus(@PathVariable Integer id) {
-        // CHẶN: Vô hiệu hóa tài khoản mặc định
         if (id != null && id == 1) {
             return ResponseEntity.badRequest().body("Không thể khóa tài khoản hệ thống mặc định!");
         }
@@ -133,7 +155,6 @@ public class NhanVienApi {
         NhanVien nv = nhanVienRepository.findById(id).orElse(null);
         if (nv == null) return ResponseEntity.notFound().build();
 
-        // CHẶN BẰNG EMAIL
         if (nv.getEmail() != null && nv.getEmail().equalsIgnoreCase("admin@shop.com")) {
             return ResponseEntity.badRequest().body("Không thể thay đổi trạng thái của Quản trị viên tối cao!");
         }
@@ -166,7 +187,6 @@ public class NhanVienApi {
             @RequestParam(value = "password", required = false) String pass,
             @RequestParam(value = "confirmPassword", required = false) String confirm) {
         try {
-            // CHẶN: Nếu người dùng cố tình cập nhật tài khoản Admin ID = 1
             if (id != null && id == 1) {
                 return ResponseEntity.badRequest().body("Lỗi bảo mật: Tài khoản mặc định không thể chỉnh sửa qua chức năng này!");
             }
@@ -195,7 +215,7 @@ public class NhanVienApi {
 
             LocalDate hienTai = LocalDate.now();
             int tuoi = Period.between(ngaySinh.toLocalDate(), hienTai).getYears();
-            if (tuoi < 15) return ResponseEntity.badRequest().body("Nhân viên phải từ đủ 15 tuổi trở lên!");
+            if (tuoi < 18) return ResponseEntity.badRequest().body("Nhân viên phải từ đủ 18 tuổi trở lên!");
 
             ChucVu cv = chucVuRepository.findById(chucVuId)
                     .orElseThrow(() -> new RuntimeException("Chức vụ được chọn không tồn tại!"));
@@ -310,12 +330,8 @@ public class NhanVienApi {
 
     @GetMapping("/test-login")
     @ResponseBody
-    public String testLogin() {
-        TaiKhoan admin = taiKhoanRepository.findById(1).orElse(null);
-        if (admin == null) return "Không tìm thấy user admin01 trong DB!";
-        String hashTrongDb = admin.getMatKhau();
-        boolean isMatch = passwordEncoder.matches("123456", hashTrongDb);
-        return "Mã Hash trong DB: " + hashTrongDb + "<br>Kết quả so sánh với '123456': " + (isMatch ? "KHỚP 100% (Mật khẩu đúng)" : "SAI BÉT (Mật khẩu sai)");
+    public ResponseEntity<?> testLogin() {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Tính năng này đã bị khóa vì lý do bảo mật hệ thống.");
     }
 
     @GetMapping("/my-profile")
@@ -446,7 +462,14 @@ public class NhanVienApi {
 
                 if (payload.containsKey("ngaySinh") && payload.get("ngaySinh") != null && !payload.get("ngaySinh").isEmpty()) {
                     try {
-                        nv.setNgaySinh(java.sql.Date.valueOf(payload.get("ngaySinh")));
+                        java.sql.Date newDob = java.sql.Date.valueOf(payload.get("ngaySinh"));
+                        LocalDate hienTai = LocalDate.now();
+                        int tuoi = Period.between(newDob.toLocalDate(), hienTai).getYears();
+                        // BẢO MẬT: Bổ sung chặn tuổi < 18 ở Backend khi tự sửa hồ sơ
+                        if (tuoi < 18) {
+                            return ResponseEntity.badRequest().body(Map.of("message", "Nhân viên phải từ đủ 18 tuổi trở lên!"));
+                        }
+                        nv.setNgaySinh(newDob);
                     } catch (Exception e) {
                     }
                 }
@@ -504,7 +527,6 @@ public class NhanVienApi {
     @Transactional
     public ResponseEntity<?> doiMatKhauAdmin(@PathVariable Integer id, @RequestBody Map<String, String> payload) {
         try {
-            // CHẶN: Vô hiệu hóa đổi mật khẩu admin mặc định
             if (id != null && id == 1) {
                 return ResponseEntity.badRequest().body(Map.of("message", "Không thể đổi mật khẩu tài khoản hệ thống mặc định từ đây!"));
             }
@@ -514,7 +536,6 @@ public class NhanVienApi {
                 return ResponseEntity.badRequest().body(Map.of("message", "Không tìm thấy nhân viên hoặc nhân viên chưa có tài khoản!"));
             }
 
-            // CHẶN: Qua Email
             if (nv.getEmail() != null && nv.getEmail().equalsIgnoreCase("admin@shop.com")) {
                 return ResponseEntity.badRequest().body(Map.of("message", "Không thể tác động đến mật khẩu của Quản trị viên tối cao!"));
             }

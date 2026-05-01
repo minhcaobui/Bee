@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +26,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/gio-hang")
 @RequiredArgsConstructor
-@Transactional
 public class GioHangApi {
 
     private final GioHangRepository gioHangRepo;
@@ -42,6 +42,7 @@ public class GioHangApi {
     }
 
     @GetMapping
+    @Transactional(readOnly = true)
     public ResponseEntity<?> getMyCart() {
         TaiKhoan tk = getLoggedInUser();
         if (tk == null) {
@@ -66,7 +67,6 @@ public class GioHangApi {
             item.put("id", ct.getId());
             item.put("idSanPhamChiTiet", spct.getId());
 
-            // 🌟 BỌC THÉP CHỐNG LỖI NULL POINTER EXCEPTION
             String tenSp = spct.getSanPham() != null ? spct.getSanPham().getTen() : "Sản phẩm";
             Integer idSp = spct.getSanPham() != null ? spct.getSanPham().getId() : 0;
             String tenMau = spct.getMauSac() != null ? spct.getMauSac().getTen() : "";
@@ -79,7 +79,11 @@ public class GioHangApi {
             item.put("giaBan", spct.getGiaBan());
             item.put("giaSauKhuyenMai", spct.getGiaSauKhuyenMai() != null ? spct.getGiaSauKhuyenMai() : spct.getGiaBan());
             item.put("soLuongTrongGio", ct.getSoLuong());
-            item.put("soLuongTonKho", spct.getSoLuong());
+
+            // BẢO MẬT LOGIC KHO: Phải trả về số lượng KHẢ DỤNG cho Frontend
+            Integer slKhaDung = Math.max(0, spct.getSoLuong() - (spct.getSoLuongTamGiu() != null ? spct.getSoLuongTamGiu() : 0));
+            item.put("soLuongTonKho", slKhaDung);
+
             item.put("trangThai", spct.getTrangThai());
             result.add(item);
         }
@@ -87,7 +91,9 @@ public class GioHangApi {
         return ResponseEntity.ok(result);
     }
 
+    // BẢO MẬT RACE CONDITION: Thêm Isolation.READ_COMMITTED để chặn người khác đọc/lưu sai số lượng khi click liên tục
     @PostMapping("/them")
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public ResponseEntity<?> addToCart(@RequestBody Map<String, Integer> payload) {
         TaiKhoan tk = getLoggedInUser();
         if (tk == null) {
@@ -116,17 +122,20 @@ public class GioHangApi {
 
         GioHangChiTiet existingItem = gioHangChiTietRepo.findByGioHang_IdAndSanPhamChiTiet_Id(gh.getId(), spctId);
 
+        // BẢO MẬT LOGIC KHO: Tính Số lượng Khả Dụng thực tế
+        int slKhaDung = Math.max(0, spct.getSoLuong() - (spct.getSoLuongTamGiu() != null ? spct.getSoLuongTamGiu() : 0));
+
         if (existingItem != null) {
-            int newQty = existingItem.getSoLuong() + soLuongThem;
-            if (newQty > spct.getSoLuong()) {
-                return ResponseEntity.badRequest().body(Map.of("message", "Số lượng vượt quá tồn kho hiện tại (" + spct.getSoLuong() + ")"));
+            // Không tính số lượng đã có trong giỏ hàng vì nó thuộc về giỏ hàng hiện tại, chỉ check khoảng thêm mới
+            if (soLuongThem > slKhaDung) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Kho không đủ số lượng để thêm!"));
             }
-            existingItem.setSoLuong(newQty);
+            existingItem.setSoLuong(existingItem.getSoLuong() + soLuongThem);
             existingItem.setNgayThem(LocalDateTime.now());
             gioHangChiTietRepo.save(existingItem);
         } else {
-            if (soLuongThem > spct.getSoLuong()) {
-                return ResponseEntity.badRequest().body(Map.of("message", "Số lượng vượt quá tồn kho hiện tại (" + spct.getSoLuong() + ")"));
+            if (soLuongThem > slKhaDung) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Kho không đủ số lượng để thêm!"));
             }
             GioHangChiTiet newItem = new GioHangChiTiet();
             newItem.setGioHang(gh);
@@ -143,6 +152,7 @@ public class GioHangApi {
     }
 
     @PutMapping("/cap-nhat")
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public ResponseEntity<?> updateCartItem(@RequestBody Map<String, Integer> payload) {
         TaiKhoan tk = getLoggedInUser();
         if (tk == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -164,8 +174,14 @@ public class GioHangApi {
             return ResponseEntity.ok(Map.of("message", "Đã xóa sản phẩm khỏi giỏ hàng"));
         }
 
-        if (soLuongMoi > item.getSanPhamChiTiet().getSoLuong()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Số lượng vượt quá tồn kho"));
+        SanPhamChiTiet spct = item.getSanPhamChiTiet();
+        // BẢO MẬT LOGIC KHO: Cập nhật giỏ hàng cần so với tổng khả dụng nếu tăng số lượng
+        int slKhaDung = Math.max(0, spct.getSoLuong() - (spct.getSoLuongTamGiu() != null ? spct.getSoLuongTamGiu() : 0));
+
+        int soChenhLechTangThem = soLuongMoi - item.getSoLuong();
+
+        if (soChenhLechTangThem > 0 && soChenhLechTangThem > slKhaDung) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Kho chỉ còn " + slKhaDung + " sản phẩm khả dụng"));
         }
 
         item.setSoLuong(soLuongMoi);
@@ -179,6 +195,7 @@ public class GioHangApi {
     }
 
     @DeleteMapping("/xoa/{idGioHangChiTiet}")
+    @Transactional
     public ResponseEntity<?> deleteCartItem(@PathVariable("idGioHangChiTiet") Integer idGioHangChiTiet) {
         TaiKhoan tk = getLoggedInUser();
         if (tk == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -196,6 +213,7 @@ public class GioHangApi {
     }
 
     @DeleteMapping("/xoa-tat-ca")
+    @Transactional
     public ResponseEntity<?> clearCart() {
         TaiKhoan tk = getLoggedInUser();
         if (tk == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

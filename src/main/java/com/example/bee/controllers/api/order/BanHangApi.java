@@ -1,5 +1,6 @@
 package com.example.bee.controllers.api.order;
 
+import com.example.bee.constants.LoaiGiamGia;
 import com.example.bee.entities.account.TaiKhoan;
 import com.example.bee.entities.account.VaiTro;
 import com.example.bee.entities.cart.GioHang;
@@ -96,6 +97,60 @@ public class BanHangApi {
         return null;
     }
 
+    private void cancelOldInvoiceIfExist(String maHD) {
+        if (maHD == null || maHD.isEmpty()) return;
+        HoaDon hd = hoaDonRepo.findByMa(maHD);
+
+        // Nếu tìm thấy hóa đơn cũ đang chờ thanh toán
+        if (hd != null && ("CHO_THANH_TOAN".equals(hd.getTrangThaiHoaDon().getMa()) || "CHO_XAC_NHAN".equals(hd.getTrangThaiHoaDon().getMa()))) {
+            TrangThaiHoaDon ttHuy = trangThaiRepo.findByMa("DA_HUY");
+            hd.setTrangThaiHoaDon(ttHuy);
+
+            // 1. Chuyển trạng thái giao dịch thành Thất bại
+            List<ThanhToan> tts = thanhToanRepo.findByHoaDon_Id(hd.getId());
+            if (tts != null && !tts.isEmpty()) {
+                for (ThanhToan tt : tts) {
+                    tt.setTrangThai("THAT_BAI");
+                    thanhToanRepo.save(tt);
+                }
+            }
+
+            // 2. Hoàn lại số lượng sản phẩm vào kho
+            List<HoaDonChiTiet> hdctList = hdctRepo.findByHoaDonId(hd.getId());
+            for (HoaDonChiTiet ct : hdctList) {
+                SanPhamChiTiet spct = ct.getSanPhamChiTiet();
+                if (spct != null) {
+                    spct.setSoLuong(spct.getSoLuong() + ct.getSoLuong());
+                    variantRepo.save(spct);
+                }
+            }
+
+            // 3. Hoàn lại lượt sử dụng Mã giảm giá (nếu có)
+            if (hd.getMaGiamGia() != null) {
+                MaGiamGia voucher = hd.getMaGiamGia();
+                int luotMoi = voucher.getLuotSuDung() - 1;
+                if (luotMoi >= 0) {
+                    voucher.setLuotSuDung(luotMoi);
+                    if (!voucher.getTrangThai() && voucher.getNgayKetThuc() != null && voucher.getNgayKetThuc().isAfter(java.time.LocalDateTime.now())) {
+                        voucher.setTrangThai(true);
+                    }
+                    maGiamGiaRepo.save(voucher);
+                }
+            }
+
+            // 4. Lưu lịch sử tự động hủy
+            lichSuRepo.save(LichSuHoaDon.builder()
+                    .hoaDon(hd)
+                    .trangThaiHoaDon(ttHuy)
+                    .ghiChu("Hệ thống tự động hủy đơn cũ do khách thao tác lại thanh toán trên POS")
+                    .nhanVien(getLoggedInNhanVien())
+                    .ngayTao(new Date())
+                    .build());
+
+            hoaDonRepo.save(hd);
+        }
+    }
+
     @GetMapping("/products/search")
     public List<SanPhamChiTiet> searchProducts(
             @RequestParam(required = false, defaultValue = "") String q,
@@ -111,7 +166,6 @@ public class BanHangApi {
             BigDecimal giaGoc = spct.getGiaBan() != null ? spct.getGiaBan() : BigDecimal.ZERO;
             BigDecimal giaSauKM = giaGoc;
 
-            // 🌟 Dùng hàm truy vấn mới: Dò cả theo SP cha và SKU con
             List<KhuyenMai> activeSales = khuyenMaiRepo.findActivePromotionsForSku(
                     spct.getSanPham().getId(),
                     spct.getId(),
@@ -119,11 +173,10 @@ public class BanHangApi {
             );
 
             if (activeSales != null && !activeSales.isEmpty()) {
-                // Lấy đợt Sale tốt nhất (đã được ORDER BY giaTri DESC trong câu SQL)
                 KhuyenMai km = activeSales.get(0);
 
-                boolean isPercent = km.getLoai() != null &&
-                        (km.getLoai().toUpperCase().contains("PERCENT") || km.getLoai().contains("%"));
+                // ÁP DỤNG LOẠI GIẢM GIÁ[cite: 1]
+                boolean isPercent = km.getLoai() != null && km.getLoai().equalsIgnoreCase(LoaiGiamGia.PHAN_TRAM);
 
                 if (isPercent) {
                     BigDecimal tyLe = km.getGiaTri().divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
@@ -206,7 +259,6 @@ public class BanHangApi {
             BigDecimal thanhTienItem = price.multiply(BigDecimal.valueOf(qty));
             giaTamTinh = giaTamTinh.add(thanhTienItem);
 
-            // Nếu giá bán ra (price) bằng hoặc lớn hơn giá gốc thì chứng tỏ SP không chạy Sale
             if (price.compareTo(giaGoc) >= 0) {
                 tongTienNguyenGia = tongTienNguyenGia.add(thanhTienItem);
             }
@@ -262,7 +314,8 @@ public class BanHangApi {
                     baseForVoucher = tongTienNguyenGia;
                 }
 
-                boolean isPercent = voucher.getLoaiGiamGia() != null && (voucher.getLoaiGiamGia().toUpperCase().contains("PERCENT") || voucher.getLoaiGiamGia().contains("%"));
+                // ÁP DỤNG LOẠI GIẢM GIÁ[cite: 1]
+                boolean isPercent = voucher.getLoaiGiamGia() != null && voucher.getLoaiGiamGia().equalsIgnoreCase(LoaiGiamGia.PHAN_TRAM);
                 if (isPercent) {
                     giamGiaVoucher = baseForVoucher.multiply(voucher.getGiaTriGiamGia().divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP));
                     if (voucher.getGiaTriGiamGiaToiDa() != null && giamGiaVoucher.compareTo(voucher.getGiaTriGiamGiaToiDa()) > 0) {
@@ -325,6 +378,8 @@ public class BanHangApi {
     @Transactional
     public ResponseEntity<?> finishOrder(@RequestBody Map<String, Object> payload) {
         try {
+            String oldMaHD = (String) payload.get("maHD");
+            cancelOldInvoiceIfExist(oldMaHD);
             String method = payload.get("method") != null ? payload.get("method").toString() : "TIEN_MAT";
             HoaDon hd = createOrderToDB(payload, method, "HOAN_THANH");
             return ResponseEntity.ok(Map.of("message", "Thành công!", "ma", hd.getMa(), "id", hd.getId()));
@@ -338,6 +393,9 @@ public class BanHangApi {
     @Transactional
     public ResponseEntity<?> getMomoUrl(@RequestBody Map<String, Object> payload) {
         try {
+            String oldMaHD = (String) payload.get("maHD");
+            cancelOldInvoiceIfExist(oldMaHD);
+
             HoaDon hd = createOrderToDB(payload, "MOMO", "CHO_THANH_TOAN");
 
             String rId = String.valueOf(System.currentTimeMillis());
@@ -375,6 +433,9 @@ public class BanHangApi {
     @Transactional
     public ResponseEntity<?> getVnPayUrl(@RequestBody Map<String, Object> payload, HttpServletRequest request) {
         try {
+            String oldMaHD = (String) payload.get("maHD");
+            cancelOldInvoiceIfExist(oldMaHD);
+
             HoaDon hd = createOrderToDB(payload, "VNPAY", "CHO_THANH_TOAN");
 
             String vnp_TxnRef = hd.getMa() + "_" + System.currentTimeMillis();
@@ -428,6 +489,7 @@ public class BanHangApi {
     @Transactional
     public ResponseEntity<?> confirmOnlinePayment(@RequestBody Map<String, String> body) {
         String maHD = body.get("maHD");
+        String maGiaoDich = body.get("maGiaoDich"); // Lấy thêm mã giao dịch từ JS gửi lên
         HoaDon hd = hoaDonRepo.findByMa(maHD);
 
         if (hd == null) {
@@ -448,6 +510,12 @@ public class BanHangApi {
         if (tts != null && !tts.isEmpty()) {
             ThanhToan tt = tts.get(0);
             tt.setTrangThai("THANH_CONG");
+
+            // Thêm đoạn này để lưu mã giao dịch
+            if (maGiaoDich != null && !maGiaoDich.isEmpty()) {
+                tt.setMaGiaoDich(maGiaoDich);
+            }
+
             tt.setNgayThanhToan(new Date());
             thanhToanRepo.save(tt);
         }
@@ -531,8 +599,6 @@ public class BanHangApi {
         BigDecimal giaTamTinh = BigDecimal.ZERO;
         BigDecimal tongTienNguyenGia = BigDecimal.ZERO;
 
-        LocalDateTime now = LocalDateTime.now();
-
         if (cart != null) {
             for (Map<String, Object> item : cart) {
                 Integer spctId = Integer.valueOf(item.get("id").toString());
@@ -544,7 +610,6 @@ public class BanHangApi {
                 BigDecimal thanhTienItem = price.multiply(BigDecimal.valueOf(qty));
                 giaTamTinh = giaTamTinh.add(thanhTienItem);
 
-                // Nếu giá gửi lên (price) >= giá gốc -> Sản phẩm đang ở mức giá gốc
                 if (price.compareTo(giaGoc) >= 0) {
                     tongTienNguyenGia = tongTienNguyenGia.add(thanhTienItem);
                 }

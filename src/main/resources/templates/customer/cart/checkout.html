@@ -1220,7 +1220,7 @@
 
                     let discountLabel = v.ten;
                     if (!discountLabel) {
-                        if (loai.toLowerCase().includes('percent')) {
+                        if (loai.toLowerCase().includes('PHAN_TRAM')) {
                             discountLabel = `Giảm ${giaTri}%`;
                             if (max) discountLabel += ` (Tối đa ${this.formatMoney(max)})`;
                         } else {
@@ -1230,7 +1230,7 @@
 
                     let expectedDiscount = 0;
                     if (isEligible) {
-                        if (loai.toLowerCase().includes('percent')) {
+                        if (loai.toLowerCase().includes('PHAN_TRAM')) {
                             expectedDiscount = (this.state.subTotal * giaTri) / 100;
                             if (max && expectedDiscount > max) expectedDiscount = max;
                         } else {
@@ -1319,7 +1319,7 @@
                 let giaTri = v.giaTriGiamGia || v.giaTri || 0;
                 let maxGiam = v.giaTriGiamGiaToiDa || v.giamToiDa || null;
 
-                if (loai.toLowerCase().includes('percent')) {
+                if (loai.toLowerCase().includes('PHAN_TRAM')) {
                     let calc = (baseForVoucher * giaTri) / 100;
                     if (maxGiam && calc > maxGiam) calc = maxGiam;
                     this.state.discount = calc;

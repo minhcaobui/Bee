@@ -76,7 +76,6 @@ public class SanPhamApi {
                     BigDecimal giaGoc = spct.getGiaBan() != null ? spct.getGiaBan() : BigDecimal.ZERO;
                     BigDecimal giaSauKM = giaGoc;
 
-                    // 🌟 Dùng hàm dò Sale mới: Tìm theo cả SP cha và SKU con
                     List<KhuyenMai> activeSales = khuyenMaiRepo.findActivePromotionsForSku(sp.getId(), spct.getId(), now);
 
                     if (activeSales != null && !activeSales.isEmpty()) {
@@ -102,8 +101,7 @@ public class SanPhamApi {
     }
 
     private String generateMa() {
-        String timeStr = String.valueOf(System.currentTimeMillis());
-        return "SP" + timeStr.substring(timeStr.length() - 5);
+        return "SP" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
     }
 
     @GetMapping("/{id}")
@@ -121,7 +119,6 @@ public class SanPhamApi {
                 BigDecimal giaGoc = spct.getGiaBan() != null ? spct.getGiaBan() : BigDecimal.ZERO;
                 BigDecimal giaSauKM = giaGoc;
 
-                // 🌟 Dùng hàm dò Sale mới
                 List<KhuyenMai> activeSales = khuyenMaiRepo.findActivePromotionsForSku(sp.getId(), spct.getId(), now);
 
                 if (activeSales != null && !activeSales.isEmpty()) {
@@ -254,7 +251,6 @@ public class SanPhamApi {
             BigDecimal giaGoc = spct.getGiaBan() != null ? spct.getGiaBan() : BigDecimal.ZERO;
             BigDecimal giaSauKM = giaGoc;
 
-            // 🌟 Dùng hàm dò Sale mới
             List<KhuyenMai> activeSales = khuyenMaiRepo.findActivePromotionsForSku(id, spct.getId(), now);
 
             if (activeSales != null && !activeSales.isEmpty()) {
@@ -282,6 +278,10 @@ public class SanPhamApi {
     @PostMapping("/{productId}/variants")
     @Transactional
     public ResponseEntity<?> createVariant(@PathVariable Integer productId, @RequestBody VariantRequest req) {
+        if (req.getGiaBan() == null || req.getGiaBan().compareTo(BigDecimal.ZERO) < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Giá bán không được để trống và phải lớn hơn hoặc bằng 0!");
+        }
+
         SanPham sp = sanPhamrepo.findById(productId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy sản phẩm gốc"));
 
@@ -315,7 +315,7 @@ public class SanPhamApi {
         String skuCode = String.format("%s-%s-%s", maSanPham, maMau, maKichThuoc);
 
         if (variantRepo.existsBySku(skuCode)) {
-            skuCode += "-" + System.currentTimeMillis();
+            skuCode += "-" + UUID.randomUUID().toString().substring(0, 4).toUpperCase();
         }
 
         variant.setSku(skuCode);
@@ -329,12 +329,13 @@ public class SanPhamApi {
             Integer currentMauId = variant.getMauSac() != null ? variant.getMauSac().getId() : null;
             Integer currentSizeId = variant.getKichThuoc() != null ? variant.getKichThuoc().getId() : null;
 
-            boolean isChangingAttr = false;
-            if (req.getIdMauSac() != null && !req.getIdMauSac().equals(currentMauId)) isChangingAttr = true;
-            if (req.getIdKichThuoc() != null && !req.getIdKichThuoc().equals(currentSizeId)) isChangingAttr = true;
+            Integer newMauId = req.getIdMauSac() != null ? req.getIdMauSac() : currentMauId;
+            Integer newSizeId = req.getIdKichThuoc() != null ? req.getIdKichThuoc() : currentSizeId;
+
+            boolean isChangingAttr = !Objects.equals(currentMauId, newMauId) || !Objects.equals(currentSizeId, newSizeId);
 
             if (isChangingAttr && variantRepo.existsBySanPhamIdAndMauSacIdAndKichThuocId(
-                    variant.getSanPham().getId(), req.getIdMauSac(), req.getIdKichThuoc())) {
+                    variant.getSanPham().getId(), newMauId, newSizeId)) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Biến thể Màu + Size này đã tồn tại!");
             }
 
@@ -371,9 +372,7 @@ public class SanPhamApi {
             }
 
             variant.setSoLuong(newQty);
-            if (newQty > 0 && (variant.getTrangThai() == null || !variant.getTrangThai())) {
-                variant.setTrangThai(true);
-            } else if (newQty == 0 && (variant.getTrangThai() == null || variant.getTrangThai())) {
+            if (newQty == 0 && (variant.getTrangThai() == null || variant.getTrangThai())) {
                 variant.setTrangThai(false);
             }
             variantRepo.save(variant);
@@ -398,20 +397,6 @@ public class SanPhamApi {
 
     private String safeTrim(String s) {
         return s == null ? null : s.trim();
-    }
-
-    private String removeVietnameseTones(String str) {
-        if (str == null) return "";
-        str = str.replaceAll("à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ", "a");
-        str = str.replaceAll("è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ", "e");
-        str = str.replaceAll("ì|í|ị|ỉ|ĩ", "i");
-        str = str.replaceAll("ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ", "o");
-        str = str.replaceAll("ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ", "u");
-        str = str.replaceAll("ỳ|ý|ỵ|ỷ|ỹ", "y");
-        str = str.replaceAll("đ", "d");
-        str = str.replaceAll("À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ", "A");
-        str = str.replaceAll("[^a-zA-Z0-9 ]", "");
-        return str.replaceAll("\\s+", "").toUpperCase();
     }
 
 }

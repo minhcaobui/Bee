@@ -9,6 +9,7 @@ import java.text.NumberFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -38,12 +39,17 @@ public class ThongKeApi {
             case "week" -> new LocalDateTime[]{cur[0].minusWeeks(1), cur[1].minusWeeks(1)};
             case "month" -> new LocalDateTime[]{cur[0].minusMonths(1), cur[1].minusMonths(1)};
             case "year" -> new LocalDateTime[]{cur[0].minusYears(1), cur[1].minusYears(1)};
-            default -> new LocalDateTime[]{cur[0].minusMonths(1), cur[1].minusMonths(1)};
+            default -> {
+                // TÍNH ĐÚNG KHOẢNG CÁCH NGÀY ĐỂ TRỪ CHO CHÍNH XÁC KỲ TRƯỚC
+                long daysBetween = ChronoUnit.DAYS.between(cur[0], cur[1]) + 1;
+                yield new LocalDateTime[]{cur[0].minusDays(daysBetween), cur[1].minusDays(daysBetween)};
+            }
         };
     }
 
     private double calcChg(double cur, double prev) {
-        if (prev == 0) return cur > 0 ? 100.0 : 0.0;
+        // TRẢ VỀ 0 NẾU PREV = 0 ĐỂ TRÁNH DIVISION BY ZERO HAY HIỂN THỊ 100% VÔ LÝ
+        if (prev == 0) return 0.0;
         return Math.round((cur - prev) / prev * 1000.0) / 10.0;
     }
 

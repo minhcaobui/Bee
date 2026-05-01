@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -36,9 +37,7 @@ public class MaGiamGiaApi {
     private final ThongBaoRepository thongBaoRepository;
     private final TaiKhoanRepository taiKhoanRepository;
 
-    // 🌟 ĐÃ CẤU TRÚC LẠI HÀM VALIDATE ĐỂ TRÁNH LỖI KHI NHẬP %
     private void validateVoucherLogic(MaGiamGia body) {
-        // 1. Kiểm tra thông tin cơ bản
         if (body.getNgayBatDau() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vui lòng chọn Ngày bắt đầu.");
         }
@@ -58,12 +57,10 @@ public class MaGiamGiaApi {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lỗi: Giá trị giảm giá phải lớn hơn 0.");
         }
 
-        // 2. Phân tách logic kiểm tra rủi ro theo loại giảm giá
         boolean isPercent = body.getLoaiGiamGia() != null &&
                 (body.getLoaiGiamGia().equalsIgnoreCase(LoaiGiamGia.PHAN_TRAM) || body.getLoaiGiamGia().contains("%"));
 
         if (isPercent) {
-            // ----- KIỂM TRA CHO GIẢM % -----
             if (body.getGiaTriGiamGia().compareTo(BigDecimal.ONE) < 0 || body.getGiaTriGiamGia().compareTo(new BigDecimal("100")) > 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lỗi: Mức giảm phần trăm chỉ được phép từ 1% đến 100% để tránh bán dưới giá vốn.");
             }
@@ -71,31 +68,26 @@ public class MaGiamGiaApi {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lỗi rủi ro cực cao: Khuyến mãi theo % BẮT BUỘC phải thiết lập 'Mức giảm tối đa (VNĐ)' để tránh khách mua đơn hàng lớn và trừ âm tiền cửa hàng.");
             }
         } else {
-            // ----- KIỂM TRA CHO GIẢM TIỀN MẶT -----
             if (body.getGiaTriGiamGia().compareTo(new BigDecimal("1000")) < 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lỗi: Mức giảm tiền mặt tối thiểu là 1.000 VNĐ.");
             }
 
             if (body.getDieuKien().compareTo(BigDecimal.ZERO) > 0) {
-                // Tiền giảm không được vượt quá 50% của điều kiện đơn tối thiểu
                 BigDecimal maxSafeDiscount = body.getDieuKien().multiply(new BigDecimal("0.5"));
                 if (body.getGiaTriGiamGia().compareTo(maxSafeDiscount) > 0) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                            "Lỗi rủi ro lỗ: Với đơn tối thiểu " + String.format("%,.0f", body.getDieuKien()) + "đ, mức giảm tiền mặt không được vượt quá 100% (Tối đa " + String.format("%,.0f", maxSafeDiscount) + "đ).");
+                            "Lỗi rủi ro lỗ: Với đơn tối thiểu " + String.format("%,.0f", body.getDieuKien()) + "đ, mức giảm tiền mặt không được vượt quá 50% (Tối đa " + String.format("%,.0f", maxSafeDiscount) + "đ).");
                 }
             } else {
-                // Nếu là voucher 0đ (Ai cũng xài được) thì chỉ cho giảm tối đa 50k
                 if (body.getGiaTriGiamGia().compareTo(new BigDecimal("50000")) > 0) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lỗi: Voucher áp dụng cho mọi đơn hàng (0đ) chỉ được phép giảm tối đa 50.000 VNĐ để chống gian lận bào mã.");
                 }
             }
 
-            // Gán lại GiaTriGiamGiaToiDa bằng đúng số tiền giảm mặt định (Vì giảm tiền mặt thì max cũng là số đó)
             body.setGiaTriGiamGiaToiDa(body.getGiaTriGiamGia());
         }
     }
 
-    // Hàm dùng chung để gửi thông báo cho khách hàng
     private void sendVoucherNotification(MaGiamGia voucher) {
         try {
             List<TaiKhoan> khachHangs = taiKhoanRepository.findByVaiTro_Ma("ROLE_CUSTOMER");
@@ -141,7 +133,6 @@ public class MaGiamGiaApi {
     @PostMapping
     @Transactional
     public ResponseEntity<?> create(@RequestBody MaGiamGia body) {
-        // GỌI HÀM VALIDATE
         validateVoucherLogic(body);
 
         if (body.getMaCode() == null || body.getMaCode().trim().isEmpty()) {
@@ -159,7 +150,6 @@ public class MaGiamGiaApi {
 
         MaGiamGia savedVoucher = voucherRepo.save(body);
 
-        // Chỉ gửi thông báo nếu voucher có trạng thái đang hoạt động (true)
         if (Boolean.TRUE.equals(savedVoucher.getTrangThai())) {
             sendVoucherNotification(savedVoucher);
         }
@@ -196,7 +186,6 @@ public class MaGiamGiaApi {
 
         MaGiamGia updatedVoucher = voucherRepo.save(entity);
 
-        // Gửi thông báo nếu voucher được cập nhật và có trạng thái đang hoạt động (true)
         if (Boolean.TRUE.equals(updatedVoucher.getTrangThai())) {
             sendVoucherNotification(updatedVoucher);
         }
@@ -232,10 +221,7 @@ public class MaGiamGiaApi {
 
 
     private String generateCode() {
-        // Lấy thời gian hiện tại thành chuỗi (13 chữ số)
-        String timeStr = String.valueOf(System.currentTimeMillis());
-        // Chỉ lấy 8 số cuối cùng ghép với chữ "KM" -> Tổng cộng vừa đúng 10 ký tự
-        return "VOUCHER" + timeStr.substring(timeStr.length() - 5);
+        return "VC" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 
     @Scheduled(fixedRate = 60000)

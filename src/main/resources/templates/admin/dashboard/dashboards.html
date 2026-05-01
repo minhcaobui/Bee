@@ -24,7 +24,7 @@
         .db-container { max-width: 100%; padding: 20px 30px; font-family: 'Be Vietnam Pro', 'Inter', sans-serif; background: var(--panel); color: var(--text-main); font-size: 13px; line-height: 1.5; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;}
 
         /* ── HEADER & FILTER ── */
-        .db-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 15px;}
+        .db-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap; gap: 15px;}
         .db-title { font-size: 18px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.5px;}
 
         .db-filter-bar { display: flex; gap: 12px; align-items: center; background: var(--gray-100); padding: 10px 16px; border-radius: var(--border-radius); border: 1px solid var(--gray-200); flex-wrap: wrap;}
@@ -294,6 +294,16 @@
     </div>
 
     <script>
+        // HÀM CHỐNG XSS CHO DOM
+        window.escapeHtml = function(unsafe) {
+            return (unsafe || '').toString()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        };
+
         // --- HỆ THỐNG LOGIC DASHBOARD CHUẨN XÁC ---
         window.DashboardApp = {
             chartDoanhThuInstance: null,
@@ -301,7 +311,6 @@
             initialized: false,
 
             init: function() {
-                // Khởi tạo ngày mặc định cho custom (tuần qua)
                 const end = new Date();
                 const start = new Date();
                 start.setDate(start.getDate() - 6);
@@ -312,7 +321,6 @@
                 this.initCharts();
                 this.loadAllData();
 
-                // Lắng nghe sự kiện resize để vẽ lại biểu đồ cho khỏi móp méo
                 window.addEventListener('resize', () => {
                     if(this.chartDoanhThuInstance) this.chartDoanhThuInstance.resize();
                     if(this.chartTiLeInstance) this.chartTiLeInstance.resize();
@@ -326,7 +334,7 @@
                     wrap.style.display = 'flex';
                 } else {
                     wrap.style.display = 'none';
-                    this.loadAllData(); // Tự động load nếu chọn option có sẵn
+                    this.loadAllData();
                 }
             },
 
@@ -346,7 +354,8 @@
                     el.innerHTML = `<i class="bi bi-arrow-down-right"></i> Giảm ${Math.abs(val).toFixed(1)}%`;
                     el.className = 'db-trend trend-down';
                 } else {
-                    el.innerHTML = `<i class="bi bi-dash"></i> Không đổi (0%)`;
+                    // Nếu tỷ lệ là 0 có thể là do không đổi, HOẶC do dữ liệu mốc thời gian trước (prev) là 0 (đã sửa ở backend).
+                    el.innerHTML = `<i class="bi bi-dash"></i> Không đổi / Mới cập nhật`;
                     el.className = 'db-trend';
                     el.style.color = 'var(--sub)';
                 }
@@ -373,14 +382,12 @@
                 const params = this.getDateParams();
                 if (!params) return;
 
-                // Bật loading
                 ['loadChartDoanhThu', 'loadChartTiLe', 'loadTopSP', 'loadHetHang'].forEach(id => {
                     const el = document.getElementById(id);
                     if(el) el.classList.add('show');
                 });
 
                 try {
-                    // 1. Tải chỉ số tổng quan
                     const resOverview = await fetch(`/api/thong-ke/overview${params}`);
                     if (resOverview.ok) {
                         const data = await resOverview.json();
@@ -395,28 +402,24 @@
                         this.formatTrend('trendDonHuy', data.donHuyRatio);
                     }
 
-                    // 2. Tải dữ liệu biểu đồ doanh thu
                     const resChart = await fetch(`/api/thong-ke/chart-doanh-thu${params}`);
                     if (resChart.ok) {
                         const chartData = await resChart.json();
                         this.updateChartDoanhThu(chartData.labels, chartData.doanhThu, chartData.donHang);
                     }
 
-                    // 3. Tải dữ liệu tròn (Tỷ lệ)
                     const resPie = await fetch(`/api/thong-ke/chart-trang-thai${params}`);
                     if (resPie.ok) {
                         const pieData = await resPie.json();
                         this.updateChartTiLe(pieData);
                     }
 
-                    // 4. Tải Top Sản phẩm
                     const resTop = await fetch(`/api/thong-ke/top-san-pham${params}`);
                     if (resTop.ok) {
                         const topData = await resTop.json();
                         this.renderTopSP(topData);
                     }
 
-                    // 5. Tải Cảnh báo hết hàng (Không phụ thuộc ngày)
                     const resWarning = await fetch(`/api/thong-ke/sap-het-hang`);
                     if (resWarning.ok) {
                         const warnData = await resWarning.json();
@@ -429,7 +432,6 @@
                     console.error(error);
                     if(typeof window.toast === 'function') window.toast("Lỗi tải dữ liệu thống kê!", "error");
                 } finally {
-                    // Tắt loading
                     ['loadChartDoanhThu', 'loadChartTiLe', 'loadTopSP', 'loadHetHang'].forEach(id => {
                         const el = document.getElementById(id);
                         if(el) el.classList.remove('show');
@@ -437,7 +439,6 @@
                 }
             },
 
-            // Khởi tạo vỏ ECharts rỗng
             initCharts: function() {
                 const domDT = document.getElementById('chartDoanhThu');
                 const domTL = document.getElementById('chartTiLe');
@@ -534,19 +535,18 @@
             updateChartTiLe: function(data) {
                 if (!this.chartTiLeInstance) return;
 
-                // Ánh xạ màu sắc cho chuẩn
                 const colorMap = {
-                    'HOAN_THANH': '#10b981', // Xanh lá
-                    'DA_HUY': '#ef4444',     // Đỏ
-                    'CHO_THANH_TOAN': '#f59e0b', // Vàng
-                    'DANG_GIAO_HANG': '#2563eb', // Xanh dương
-                    'CHO_XAC_NHAN': '#8b5cf6', // Tím
-                    'DA_HOAN_HANG': '#f43f5e'  // Hồng
+                    'HOAN_THANH': '#10b981',
+                    'DA_HUY': '#ef4444',
+                    'CHO_THANH_TOAN': '#f59e0b',
+                    'DANG_GIAO_HANG': '#2563eb',
+                    'CHO_XAC_NHAN': '#8b5cf6',
+                    'DA_HOAN_HANG': '#f43f5e'
                 };
 
                 const chartData = data.map(item => ({
                     value: item.soLuong,
-                    name: item.tenTrangThai,
+                    name: window.escapeHtml(item.tenTrangThai),
                     itemStyle: { color: colorMap[item.maTrangThai] || '#94a3b8' }
                 }));
 
@@ -612,10 +612,11 @@
 
                 tbody.innerHTML = list.map((sp, idx) => {
                     let rankClass = idx < 3 ? `rank-${idx + 1}` : '';
+                    let safeName = window.escapeHtml(sp.tenSanPham);
                     return `
                         <tr>
                             <td style="text-align:center;"><span class="db-rank ${rankClass}">${idx + 1}</span></td>
-                            <td><div class="db-sp-name" title="${sp.tenSanPham}">${sp.tenSanPham}</div></td>
+                            <td><div class="db-sp-name" title="${safeName}">${safeName}</div></td>
                             <td style="text-align:right; font-weight:600; color:var(--primary);">${sp.soLuongDaBan.toLocaleString('vi-VN')}</td>
                             <td style="text-align:right; font-weight:700; color:var(--danger);">${this.formatMoney(sp.doanhThu)}</td>
                         </tr>
@@ -632,10 +633,12 @@
 
                 tbody.innerHTML = list.map(sp => {
                     let textKho = sp.soLuong === 0 ? '<span style="color:var(--danger); font-weight:700;">Hết hàng (0)</span>' : `<span style="color:var(--warning); font-weight:700;">Sắp hết (${sp.soLuong})</span>`;
+                    let safeName = window.escapeHtml(sp.tenSanPham);
+                    let safeAttr = window.escapeHtml(sp.thuocTinh);
                     return `
                         <tr>
-                            <td><div class="db-sp-name" title="${sp.tenSanPham}">${sp.tenSanPham}</div></td>
-                            <td style="color:var(--sub);">${sp.thuocTinh}</td>
+                            <td><div class="db-sp-name" title="${safeName}">${safeName}</div></td>
+                            <td style="color:var(--sub);">${safeAttr}</td>
                             <td style="text-align:center; background:#fef2f2;">${textKho}</td>
                         </tr>
                     `;
@@ -643,13 +646,11 @@
             }
         };
 
-        // --- CƠ CHẾ BÁM ĐUỔI (POLLING) CHỐNG LỖI TẢI JS QUA ROUTER ---
         let initAttemptsDB = 0;
 
         function bootDashboardApp() {
             if (window.DashboardApp && window.DashboardApp.initialized) return;
 
-            // Kiểm tra xem giao diện có tồn tại hay không và ECharts đã load xong chưa
             if (document.getElementById('chartDoanhThu') && typeof echarts !== 'undefined') {
                 window.DashboardApp.init();
                 window.DashboardApp.initialized = true;

@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/chuc-vu")
@@ -44,7 +45,7 @@ public class ChucVuApi {
 
         String maCV = request.getMa();
         if (maCV == null || maCV.trim().isEmpty()) {
-            maCV = "CV" + System.currentTimeMillis();
+            maCV = "CV" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
         } else {
             maCV = maCV.trim().toUpperCase();
             if (chucVuRepo.existsByMa(maCV)) {

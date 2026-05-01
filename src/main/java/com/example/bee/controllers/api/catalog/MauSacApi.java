@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/mau-sac")
@@ -26,8 +27,7 @@ public class MauSacApi {
     private final MauSacRepository mauSacRepository;
 
     private String generateMa() {
-        String timeStr = String.valueOf(System.currentTimeMillis());
-        return "MS" + timeStr.substring(timeStr.length() - 5);
+        return "MS" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
     }
 
     @GetMapping

@@ -380,6 +380,15 @@
         }
     });
 
+    window.escapeHtml = function(unsafe) {
+        return (unsafe || '').toString()
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    };
+
     window.PromotionApp = {
         initialized: false,
         state: {
@@ -461,7 +470,7 @@
         loadData: async function () {
             const { activeTab, page, size, q, trangThai } = this.state;
             const endpoint = activeTab === 'sale' ? '/api/khuyen-mai' : '/api/vouchers';
-            const url = `${endpoint}?page=${page}&size=${size}&q=${q}&trangThai=${trangThai}`;
+            const url = `${endpoint}?page=${page}&size=${size}&q=${encodeURIComponent(q)}&trangThai=${trangThai}`;
 
             try {
                 const res = await fetch(url);
@@ -534,8 +543,8 @@
 
                 return `<tr>
                     <td style="text-align:center;">${(this.state.page * this.state.size) + index + 1}</td>
-                    <td style="font-weight:700; color:var(--text-main);">${item.ma}</td>
-                    <td style="font-weight:600;">${item.ten}</td>
+                    <td style="font-weight:700; color:var(--text-main);">${window.escapeHtml(item.ma)}</td>
+                    <td style="font-weight:600;">${window.escapeHtml(item.ten)}</td>
                     <td><span class="badge-type">${item.loai === 'PHAN_TRAM' ? 'Phần trăm' : 'Tiền mặt'}</span></td>
                     <td style="font-weight:700; color:#d63384;">${val}</td>
                     <td style="font-size:12px; color:var(--sub);">${item.ngayBatDau.replace('T',' ')}<br>${item.ngayKetThuc.replace('T',' ')}</td>
@@ -591,8 +600,8 @@
 
                 return `<tr>
                     <td style="text-align:center;">${(this.state.page * this.state.size) + index + 1}</td>
-                    <td style="font-weight:700; color:var(--text-main);">${item.maCode}</td>
-                    <td><div style="font-weight:600;">${item.ten}</div><div style="font-size:11px; color:var(--sub); margin-top:2px;">${item.choPhepCongDon ? 'Cộng dồn Sale: Có' : 'Không cộng dồn Sale'}</div></td>
+                    <td style="font-weight:700; color:var(--text-main);">${window.escapeHtml(item.maCode)}</td>
+                    <td><div style="font-weight:600;">${window.escapeHtml(item.ten)}</div><div style="font-size:11px; color:var(--sub); margin-top:2px;">${item.choPhepCongDon ? 'Cộng dồn Sale: Có' : 'Không cộng dồn Sale'}</div></td>
                     <td>${typeLabel}</td>
                     <td style="font-weight:700; color:#d63384;">${val}</td>
                     <td style="font-size:12px; color:var(--sub);">Từ ${cond} ₫</td>
@@ -639,7 +648,7 @@
             } else {
                 typeSelect.innerHTML = '<option value="PHAN_TRAM">Phần trăm (%)</option><option value="GIA TIEN">Tiền mặt (VNĐ)</option><option value="FREESHIP">Hỗ trợ vận chuyển (VNĐ)</option>';
             }
-            this.handleTypeChange();
+            this.handleTypeChange(false);
 
             document.getElementById('saleFields').style.display = isSale ? 'block' : 'none';
             document.getElementById('voucherFields').style.display = isSale ? 'none' : 'block';
@@ -1042,8 +1051,8 @@
                 const isProdChecked = this.state.selectedProductIds.includes(p.id);
                 html += `<tr class="prod-row">
                     <td style="text-align:center;"><input type="checkbox" class="product-check v-checkbox" style="width:14px; height:14px; cursor:pointer;" value="${p.id}" ${isProdChecked?'checked':''} onchange="window.PromotionApp.toggleSelection(${p.id}, this.checked, 'PRODUCT')"></td>
-                    <td style="font-weight:700; color:var(--text-main);">${p.ma}</td>
-                    <td style="font-weight:600;">${p.ten}</td>
+                    <td style="font-weight:700; color:var(--text-main);">${window.escapeHtml(p.ma)}</td>
+                    <td style="font-weight:600;">${window.escapeHtml(p.ten)}</td>
                 </tr>`;
 
                 if (p.skus && p.skus.length > 0) {
@@ -1055,8 +1064,8 @@
 
                         html += `<tr class="sku-row">
                             <td style="text-align:center;"><input type="checkbox" class="sku-check v-checkbox" style="width:12px; height:12px; cursor:pointer;" value="${sku.id}" ${actuallyChecked} ${disabledState} onchange="window.PromotionApp.toggleSelection(${sku.id}, this.checked, 'SKU')"></td>
-                            <td style="padding-left: 25px; font-size: 12px; color: var(--sub);">↳ ${sku.sku}</td>
-                            <td style="font-size: 12px; color: var(--sub);">Phân loại: <span style="font-weight:500; color:var(--text-main);">${sku.ten}</span></td>
+                            <td style="padding-left: 25px; font-size: 12px; color: var(--sub);">↳ ${window.escapeHtml(sku.sku)}</td>
+                            <td style="font-size: 12px; color: var(--sub);">Phân loại: <span style="font-weight:500; color:var(--text-main);">${window.escapeHtml(sku.ten)}</span></td>
                         </tr>`;
                     });
                 }

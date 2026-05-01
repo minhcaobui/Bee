@@ -34,7 +34,7 @@ public class SecurityConfig {
                                 "/", "/home", "/about", "/shop/**", "/detail/**", "/cart/**", "/checkout/**",
                                 "/register", "/login", "/forgot-password/**",
                                 "/css/**", "/js/**", "/images/**", "/uploads/**", "/customer/**",
-                                "/api/payment/**"
+                                "/api/hoa-don/**"
                         ).permitAll()
 
                         // 2. MỞ KHÓA API CHO KHÁCH VÃNG LAI (Catalog, Giỏ hàng, Checkout)

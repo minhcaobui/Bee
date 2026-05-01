@@ -308,6 +308,15 @@
             this.initialized = true;
         },
 
+        escapeHtml: function(unsafe) {
+            return (unsafe || '').toString()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        },
+
         bindEvents: function () {
             const self = this;
             document.querySelectorAll('.tab').forEach(tab => {
@@ -373,7 +382,7 @@
         loadData: async function () {
             this.renderHeader();
             const {activeTab, page, size, q, trangThai} = this.state;
-            const url = `/api/${activeTab}?page=${page}&size=${size}&q=${q}&trangThai=${trangThai}`;
+            const url = `/api/${activeTab}?page=${page}&size=${size}&q=${encodeURIComponent(q)}&trangThai=${trangThai}`;
             try {
                 const res = await fetch(url);
                 const data = await res.json();
@@ -404,8 +413,12 @@
             tbody.innerHTML = list.map((item, index) => {
                 const stt = (this.state.page * this.state.size) + index + 1;
                 let extraCells = '';
+
+                const safeMa = this.escapeHtml(item.ma);
+                const safeTen = this.escapeHtml(item.ten);
+
                 if (this.state.hasDesc) {
-                    const moTa = item.moTa || '—';
+                    const moTa = this.escapeHtml(item.moTa || '—');
                     const ngayTao = item.ngayTao ? new Date(item.ngayTao).toLocaleDateString('vi-VN') : '—';
                     extraCells = `<td style="color:var(--sub); max-width:250px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${moTa}</td>
                               <td style="font-size:12px; color:var(--sub)">${ngayTao}</td>`;
@@ -417,8 +430,8 @@
 
                 return `<tr>
                     <td style="text-align:center;">${stt}</td>
-                    <td style="font-weight:700; color:var(--text-main);">${item.ma || '—'}</td>
-                    <td style="font-weight:600; color:var(--text-main);">${item.ten || '—'}</td>
+                    <td style="font-weight:700; color:var(--text-main);">${safeMa || '—'}</td>
+                    <td style="font-weight:600; color:var(--text-main);">${safeTen || '—'}</td>
                     ${extraCells}
                     <td style="text-align:center;">${statusHtml}</td>
                     <td style="text-align:right">
@@ -647,24 +660,19 @@
     let initAttempts = 0;
 
     function bootCatalogApp() {
-        // 1. Kiểm tra xem app đã chạy chưa để tránh render bảng 2 lần
         if (window.CatalogApp && window.CatalogApp.initialized) return;
 
-        // 2. Dùng 1 thẻ HTML đặc trưng (ví dụ id='btnAdd') để làm cờ hiệu nhận biết giao diện đã được bơm vào DOM chưa
         if (document.getElementById('btnAdd')) {
             window.CatalogApp.init();
         }
-        // 3. Nếu giao diện chưa kịp vẽ, lặp lại việc kiểm tra sau 50ms (Quét tối đa 40 lần ~ 2 giây)
         else if (initAttempts < 40) {
             initAttempts++;
             setTimeout(bootCatalogApp, 50);
         }
     }
 
-    // Luôn chạy ngay lập tức khi file vừa được đọc
     bootCatalogApp();
 
-    // Dự phòng thêm cho trường hợp load F5 truyền thống
     document.addEventListener("DOMContentLoaded", bootCatalogApp);
 
 </script>

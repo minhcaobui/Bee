@@ -44,7 +44,6 @@ public class DanhGiaSanPhamApi {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        // ĐÃ FIX: Sắp xếp chuẩn theo Ngày Tạo thay vì ưu tiên sắp xếp theo chữ cái của câu trả lời
         Sort sortObj;
         if ("OLDEST".equalsIgnoreCase(sort)) {
             sortObj = Sort.by(Sort.Direction.ASC, "ngayTao");
@@ -103,16 +102,19 @@ public class DanhGiaSanPhamApi {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập bằng tài khoản Nhân viên!");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Vui lòng đăng nhập để thao tác!");
         }
 
-        NhanVien nv = nvRepo.findByTaiKhoan_TenDangNhap(auth.getName())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Tài khoản không có quyền thao tác!"));
+        NhanVien nv = nvRepo.findByTaiKhoan_TenDangNhap(auth.getName()).orElse(null);
+        boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (nv == null && !isAdmin) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Tài khoản không có quyền thao tác!");
+        }
 
         DanhGia dg = danhGiaRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy đánh giá!"));
 
-        // Hàm này vừa có tác dụng TRẢ LỜI MỚI, vừa có tác dụng SỬA CÂU TRẢ LỜI CŨ
         dg.setNhanVienTraLoi(nv);
         dg.setNoiDungTraLoi(noiDungTraLoi.trim());
         dg.setNgayTraLoi(new Date());

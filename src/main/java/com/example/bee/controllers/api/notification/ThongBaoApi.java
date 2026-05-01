@@ -7,10 +7,13 @@ import com.example.bee.repositories.notification.ThongBaoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -102,5 +105,26 @@ public class ThongBaoApi {
 
         if (hasChanges) thongBaoRepository.saveAll(list);
         return ResponseEntity.ok(Collections.singletonMap("message", "Đã xóa tất cả"));
+    }
+
+    // BẢO MẬT & TỐI ƯU CƠ SỞ DỮ LIỆU: Dọn rác các thông báo cũ
+    @Scheduled(cron = "0 0 2 * * ?") // Chạy mỗi đêm lúc 2h sáng
+    @Transactional
+    public void cleanupOldNotifications() {
+        try {
+            LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
+            // Xóa cứng (hard-delete) các thông báo đã đánh dấu DaXoa=true HOẶC quá 30 ngày để tiết kiệm dung lượng ổ cứng
+            List<ThongBao> oldNotifs = thongBaoRepository.findAll().stream()
+                    .filter(tb -> (tb.getDaXoa() != null && tb.getDaXoa()) ||
+                            (tb.getNgayTao() != null && tb.getNgayTao().isBefore(thirtyDaysAgo)))
+                    .collect(Collectors.toList());
+
+            if (!oldNotifs.isEmpty()) {
+                thongBaoRepository.deleteAll(oldNotifs);
+                System.out.println("Scheduler: Đã dọn dẹp " + oldNotifs.size() + " thông báo cũ/rác.");
+            }
+        } catch (Exception e) {
+            System.err.println("Scheduler Lỗi: Không thể dọn dẹp thông báo. " + e.getMessage());
+        }
     }
 }

@@ -1042,7 +1042,7 @@
                     const giaTriVoucher = Number(v.giaTriGiamGia);
 
                     // Thuật toán tính số tiền thực tế được giảm của mã này
-                    if (type.includes('PERCENT') || type.includes('%') || type.includes('PHẦN TRĂM')) {
+                    if (type.includes('PHAN_TRAM') || type.includes('%') || type.includes('PHẦN TRĂM')) {
                         calcDiscount = (baseForVoucher * giaTriVoucher) / 100;
                         if (v.giaTriGiamGiaToiDa && calcDiscount > Number(v.giaTriGiamGiaToiDa)) {
                             calcDiscount = Number(v.giaTriGiamGiaToiDa); // Chặn trần tối đa
@@ -1135,7 +1135,8 @@
                     }
 
                     const giaTriVoucher = Number(v.giaTriGiamGia);
-                    if (type.includes('PERCENT') || type.includes('%')) {
+                    if (type.includes('PHAN_TRAM') || type.includes('%')) {
+                        calcVoucher = (baseForVoucher * giaTriVoucher) / 100;
                         calcVoucher = (baseForVoucher * giaTriVoucher) / 100;
                         if (v.giaTriGiamGiaToiDa && calcVoucher > Number(v.giaTriGiamGiaToiDa)) {
                             calcVoucher = Number(v.giaTriGiamGiaToiDa);
@@ -1181,7 +1182,7 @@
                 try {
                     const res = await fetch('/api/pos/confirm-online-payment', {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ maHD: maHDFromUrl })
+                        body: JSON.stringify({ maHD: maHDFromUrl, maGiaoDich: orderId })
                     });
                     if (res.ok) {
                         let data = {};
@@ -1235,7 +1236,7 @@
                 try {
                     const res = await fetch('/api/pos/confirm-online-payment', {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ maHD: maHDFromUrl })
+                        body: JSON.stringify({ maHD: maHDFromUrl, maGiaoDich: vnp_TxnRef })
                     });
                     if (res.ok) {
                         let data = {};
@@ -1638,7 +1639,7 @@
                 try {
                     const resMomo = await fetch(`/api/pos/momo-payment`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ cart: inv.cart, amount: total, customerId: inv.customerId, voucherId: inv.voucher ? inv.voucher.id : null, method: finalMethod })
+                        body: JSON.stringify({ cart: inv.cart, amount: total, customerId: inv.customerId, voucherId: inv.voucher ? inv.voucher.id : null, method: finalMethod, maHD: inv.maHD })
                     });
                     const dataMomo = await resMomo.json();
                     if (dataMomo.payUrl) {
@@ -1656,7 +1657,7 @@
                 try {
                     const resVnpay = await fetch(`/api/pos/vnpay-payment`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ cart: inv.cart, amount: total, customerId: inv.customerId, voucherId: inv.voucher ? inv.voucher.id : null, method: finalMethod })
+                        body: JSON.stringify({ cart: inv.cart, amount: total, customerId: inv.customerId, voucherId: inv.voucher ? inv.voucher.id : null, method: finalMethod, maHD: inv.maHD })
                     });
                     const dataVnpay = await resVnpay.json();
                     if (dataVnpay.payUrl) {
@@ -1692,7 +1693,8 @@
                 amount: total,
                 method: finalMethod,
                 cart: inv.cart,
-                voucherId: inv.voucher ? inv.voucher.id : null
+                voucherId: inv.voucher ? inv.voucher.id : null,
+                maHD: inv.maHD // <--- THÊM DÒNG NÀY VÀO PAYLOAD
             };
 
             try {

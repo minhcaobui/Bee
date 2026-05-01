@@ -42,6 +42,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @RestController
@@ -49,8 +50,19 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class KhachHangApi {
 
-    private static final Map<String, String> otpStorageKhach = new HashMap<>();
-    private static final SecureRandom RAND = new SecureRandom();
+    // Lớp bọc OTP kèm thời gian hết hạn
+    private static class OtpData {
+        String otp;
+        long expiryTime;
+
+        OtpData(String otp, long expiryTime) {
+            this.otp = otp;
+            this.expiryTime = expiryTime;
+        }
+    }
+
+    // Sử dụng ConcurrentHashMap để an toàn trong môi trường đa luồng
+    private static final Map<String, OtpData> otpStorageKhach = new ConcurrentHashMap<>();
     private final org.springframework.mail.javamail.JavaMailSender mailSender;
     private final KhachHangRepository khRepo;
     private final NhanVienRepository nvRepo;
@@ -63,11 +75,12 @@ public class KhachHangApi {
     private final HoaDonRepository hoaDonRepository;
     private final VaiTroRepository vaiTroRepo;
     private final com.example.bee.repositories.cart.GioHangRepository gioHangRepository;
+
     @Value("${spring.mail.username}")
     private String senderEmail;
 
     private String generateMa() {
-        return "KH" + System.currentTimeMillis();
+        return "KH" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 
     @GetMapping
@@ -359,11 +372,9 @@ public class KhachHangApi {
 
         List<Map<String, Object>> voucherList = new java.util.ArrayList<>();
 
-        // 🌟 ĐÃ FIX: Dùng SimpleDateFormat để xử lý chuẩn xác kiểu java.util.Date của sếp
         java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
         for (com.example.bee.entities.order.HoaDon hd : ordersWithVoucher) {
-            // Lấy ra đúng kiểu java.util.Date
             java.util.Date ngay = hd.getNgayThanhToan() != null ? hd.getNgayThanhToan() : hd.getNgayTao();
             String formattedDate = ngay != null ? formatter.format(ngay) : "---";
 
@@ -372,7 +383,7 @@ public class KhachHangApi {
                     "tenVoucher", hd.getMaGiamGia().getTen(),
                     "giamGia", hd.getGiaTriKhuyenMai(),
                     "maDonHang", hd.getMa(),
-                    "ngaySuDung", formattedDate // Trả về chuỗi đẹp luôn
+                    "ngaySuDung", formattedDate
             ));
         }
 
@@ -864,8 +875,10 @@ public class KhachHangApi {
     public ResponseEntity<?> adminChangePassword(@PathVariable Integer id, @RequestBody Map<String, String> body) {
         String matKhauMoi = body.get("matKhauMoi");
 
-        if (matKhauMoi == null || matKhauMoi.trim().length() < 6) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Mật khẩu phải có ít nhất 6 ký tự"));
+        // BẢO MẬT: Phải kiểm tra regex mật khẩu mạnh tương tự như các chỗ khác
+        String passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,}).*$";
+        if (matKhauMoi == null || !matKhauMoi.matches(passwordRegex)) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Mật khẩu phải từ 8 ký tự, gồm chữ hoa, thường, số và ký tự đặc biệt!"));
         }
 
         KhachHang kh = khRepo.findById(id)
@@ -938,12 +951,8 @@ public class KhachHangApi {
         ));
     }
 
-    // ==========================================
-    // API LẤY THÔNG BÁO ĐÁNH GIÁ MỚI CHO ADMIN
-    // ==========================================
     @GetMapping("/danh-gia/thong-bao-moi")
     public ResponseEntity<?> getNewReviewNotifications() {
-        // Lấy 5 đánh giá mới nhất
         Pageable topFive = PageRequest.of(0, 5, Sort.by("ngayTao").descending());
         Page<DanhGia> pageData = danhGiaRepo.findAll(topFive);
 
@@ -953,7 +962,6 @@ public class KhachHangApi {
         for (DanhGia dg : pageData.getContent()) {
             String tenKhachHang = "Khách hàng ẩn danh";
 
-            // Tìm tên khách hàng thông qua Tài Khoản
             for (KhachHang kh : allKhachHang) {
                 if (kh.getTaiKhoan() != null && dg.getTaiKhoan() != null && kh.getTaiKhoan().getId().equals(dg.getTaiKhoan().getId())) {
                     if (kh.getHoTen() != null && !kh.getHoTen().trim().isEmpty()) {
@@ -979,14 +987,18 @@ public class KhachHangApi {
     @ResponseBody
     public ResponseEntity<?> sendOtp(@RequestParam String email) {
         try {
-            String otp = String.format("%06d", new Random().nextInt(999999));
-            otpStorageKhach.put(email, otp);
+            SecureRandom random = new SecureRandom();
+            String otp = String.format("%06d", random.nextInt(999999));
+            long expiryTime = System.currentTimeMillis() + 5 * 60 * 1000;
+            otpStorageKhach.put(email, new OtpData(otp, expiryTime));
+
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(senderEmail);
             message.setTo(email);
             message.setSubject("[BeeMate] MÃ XÁC THỰC OTP THAY ĐỔI EMAIL");
             message.setText("Chào bạn,\n\nBạn đang thực hiện thao tác thay đổi Email trên hệ thống BeeMate.\n"
                     + "Mã xác thực OTP của bạn là: " + otp + "\n\n"
+                    + "Mã này có hiệu lực trong vòng 5 phút.\n"
                     + "Vui lòng nhập mã này vào hệ thống để hoàn tất.\n"
                     + "Trân trọng,\nBan Quản Trị Hệ Thống BeeMate.");
             mailSender.send(message);
@@ -1000,10 +1012,16 @@ public class KhachHangApi {
     @PostMapping("/verify-otp")
     @ResponseBody
     public ResponseEntity<?> verifyOtp(@RequestParam String email, @RequestParam String otp) {
-        String savedOtp = otpStorageKhach.get(email);
-        if (savedOtp != null && savedOtp.equals(otp)) {
-            otpStorageKhach.remove(email);
-            return ResponseEntity.ok("Xác thực OTP thành công!");
+        OtpData savedOtpData = otpStorageKhach.get(email);
+        if (savedOtpData != null) {
+            if (System.currentTimeMillis() > savedOtpData.expiryTime) {
+                otpStorageKhach.remove(email);
+                return ResponseEntity.badRequest().body("Mã OTP đã hết hạn, vui lòng gửi lại mã mới!");
+            }
+            if (savedOtpData.otp.equals(otp)) {
+                otpStorageKhach.remove(email);
+                return ResponseEntity.ok("Xác thực OTP thành công!");
+            }
         }
         return ResponseEntity.badRequest().body("Mã OTP không chính xác, vui lòng nhập lại!");
     }
@@ -1022,7 +1040,6 @@ public class KhachHangApi {
         }
         return ResponseEntity.ok("Email hợp lệ");
     }
-
 
     private void mapRequestToEntity(DiaChiRequest req, DiaChiKhachHang dc) {
         dc.setHoTenNhan(req.getHoTenNhan());

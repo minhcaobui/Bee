@@ -68,7 +68,6 @@ public class KhuyenMaiApi {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mức giảm giá tối thiểu là 1.000 VNĐ.");
             }
 
-            // Validate cấp độ Sản phẩm
             for (SanPham sp : danhSachSanPham) {
                 if (sp.getChiTietSanPhams() == null || sp.getChiTietSanPhams().isEmpty()) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -94,7 +93,6 @@ public class KhuyenMaiApi {
                 }
             }
 
-            // Validate cấp độ SKU (Biến thể)
             if (danhSachSku != null) {
                 for (SanPhamChiTiet sku : danhSachSku) {
                     BigDecimal giaBan = sku.getGiaBan() != null ? sku.getGiaBan() : BigDecimal.ZERO;
@@ -125,7 +123,6 @@ public class KhuyenMaiApi {
             return;
         }
 
-        // Kiểm tra trùng lịch cho cấp Sản phẩm
         if (hasProducts) {
             List<KhuyenMai> conflicts = khuyenMaiRepository.checkTrungLich(
                     request.getIdSanPhams(),
@@ -150,7 +147,6 @@ public class KhuyenMaiApi {
             }
         }
 
-        // Kiểm tra trùng lịch cho cấp SKU (Cần đảm bảo hàm checkTrungLichSku đã có trong Repository)
         if (hasSkus) {
             List<KhuyenMai> skuConflicts = khuyenMaiRepository.checkTrungLichSku(
                     request.getIdSanPhamChiTiets(),
@@ -172,7 +168,6 @@ public class KhuyenMaiApi {
         return false;
     }
 
-    // Hàm dùng chung để gửi thông báo đợt Sale cho khách hàng
     private void sendKhuyenMaiNotification(KhuyenMai khuyenMai) {
         try {
             List<TaiKhoan> khachHangs = taiKhoanRepository.findByVaiTro_Ma("ROLE_CUSTOMER");
@@ -202,14 +197,13 @@ public class KhuyenMaiApi {
     }
 
     private String generateCode() {
-        String timeStr = String.valueOf(System.currentTimeMillis());
-        return "KM" + timeStr.substring(timeStr.length() - 8);
+        return "KM" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 
     @GetMapping("/san-pham")
     public ResponseEntity<?> getAllProducts() {
         List<SanPham> list = sanPhamRepo.getAllActiveProducts();
-        LocalDateTime now = LocalDateTime.now(); // Lấy mốc thời gian hiện tại để check sale đang chạy
+        LocalDateTime now = LocalDateTime.now();
 
         List<Map<String, Object>> result = list.stream().map(sp -> {
             Map<String, Object> item = new HashMap<>();
@@ -217,7 +211,6 @@ public class KhuyenMaiApi {
             item.put("ma", sp.getMa());
             item.put("ten", sp.getTen());
 
-            // Tận dụng hàm checkTrungLich có sẵn để xem Sản phẩm này có đang chạy sale nào hiện tại không
             List<KhuyenMai> kmSanPham = khuyenMaiRepository.checkTrungLich(Collections.singletonList(sp.getId()), now, now, -1);
             if (!kmSanPham.isEmpty()) {
                 item.put("tenKhuyenMai", kmSanPham.get(0).getTen());
@@ -225,16 +218,14 @@ public class KhuyenMaiApi {
                 item.put("tenKhuyenMai", null);
             }
 
-            // Lấy thêm danh sách SKU con và format tên phân loại (Màu sắc - Kích thước)
             List<Map<String, Object>> skus = new ArrayList<>();
             if (sp.getChiTietSanPhams() != null && !sp.getChiTietSanPhams().isEmpty()) {
                 for (com.example.bee.entities.product.SanPhamChiTiet sku : sp.getChiTietSanPhams()) {
-                    if (sku.getTrangThai() != null && sku.getTrangThai()) { // Chỉ lấy SKU đang bán
+                    if (sku.getTrangThai() != null && sku.getTrangThai()) {
                         Map<String, Object> s = new HashMap<>();
                         s.put("id", sku.getId());
                         s.put("sku", sku.getSku());
 
-                        // Xử lý an toàn tránh lỗi NullPointerException nếu thiếu màu/size
                         String mau = (sku.getMauSac() != null) ? sku.getMauSac().getTen() : "";
                         String size = (sku.getKichThuoc() != null) ? sku.getKichThuoc().getTen() : "";
                         String phanLoai = mau + (mau.isEmpty() || size.isEmpty() ? "" : " - ") + size;
@@ -244,7 +235,6 @@ public class KhuyenMaiApi {
                         }
                         s.put("ten", phanLoai);
 
-                        // Tận dụng hàm checkTrungLichSku có sẵn
                         List<KhuyenMai> kmSku = khuyenMaiRepository.checkTrungLichSku(Collections.singletonList(sku.getId()), now, now, -1);
                         if (!kmSku.isEmpty()) {
                             s.put("tenKhuyenMai", kmSku.get(0).getTen());
@@ -256,7 +246,7 @@ public class KhuyenMaiApi {
                     }
                 }
             }
-            item.put("skus", skus); // Đính kèm mảng skus vào object sản phẩm trả về cho Frontend
+            item.put("skus", skus);
 
             return item;
         }).collect(Collectors.toList());
@@ -320,12 +310,14 @@ public class KhuyenMaiApi {
         validateChongLo(body, danhSachSanPham, danhSachSku);
         validateConflict(null, body);
 
-        // Đảm bảo không tạo khuyến mãi trong quá khứ
         if (body.getNgayBatDau().isBefore(LocalDateTime.now().minusMinutes(1))) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ngày bắt đầu không được đặt ở quá khứ.");
         }
         if (body.getNgayKetThuc().isBefore(LocalDateTime.now())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ngày kết thúc không được đặt ở quá khứ.");
+        }
+        if (body.getNgayKetThuc().isBefore(body.getNgayBatDau())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ngày kết thúc phải lớn hơn ngày bắt đầu.");
         }
 
         String code = (body.getMa() != null && !body.getMa().trim().isEmpty())
@@ -342,7 +334,6 @@ public class KhuyenMaiApi {
 
         saveProductsAndSkus(saved.getId(), body.getIdSanPhams(), body.getIdSanPhamChiTiets());
 
-        // Chỉ gửi thông báo nếu chương trình có trạng thái đang hoạt động (true)
         if (Boolean.TRUE.equals(saved.getTrangThai())) {
             sendKhuyenMaiNotification(saved);
         }
@@ -369,7 +360,10 @@ public class KhuyenMaiApi {
         validateChongLo(body, danhSachSanPham, danhSachSku);
         validateConflict(id, body);
 
-        // Đảm bảo cập nhật ngày kết thúc không nằm trong quá khứ
+        if (body.getNgayKetThuc().isBefore(body.getNgayBatDau())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ngày kết thúc phải lớn hơn ngày bắt đầu.");
+        }
+
         if (body.getNgayKetThuc().isBefore(LocalDateTime.now())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ngày kết thúc không được đặt ở quá khứ.");
         }
@@ -380,7 +374,6 @@ public class KhuyenMaiApi {
                         "Chương trình đã hoặc đang diễn ra, không thể thay đổi Ngày Bắt Đầu!");
             }
         } else {
-            // Nếu chương trình chưa diễn ra, cho phép đổi ngày bắt đầu nhưng không được đặt trong quá khứ
             if (body.getNgayBatDau().isBefore(LocalDateTime.now().minusMinutes(1))) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ngày bắt đầu không được đặt ở quá khứ.");
             }
@@ -389,11 +382,9 @@ public class KhuyenMaiApi {
         mapToEntity(body, entity);
         KhuyenMai saved = khuyenMaiRepository.save(entity);
 
-        // Xóa các liên kết cũ và thêm lại
         khuyenMaiSanPhamRepository.deleteByIdKhuyenMai(id);
         saveProductsAndSkus(saved.getId(), body.getIdSanPhams(), body.getIdSanPhamChiTiets());
 
-        // Gửi thông báo nếu chương trình được cập nhật và có trạng thái đang hoạt động (true)
         if (Boolean.TRUE.equals(saved.getTrangThai())) {
             sendKhuyenMaiNotification(saved);
         }

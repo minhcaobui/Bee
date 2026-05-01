@@ -17,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/chat-lieu")
@@ -27,8 +28,7 @@ public class ChatLieuApi {
     private final SanPhamRepository sanPhamRepository;
 
     private String generateMa() {
-        String timeStr = String.valueOf(System.currentTimeMillis());
-        return "CL" + timeStr.substring(timeStr.length() - 5);
+        return "CL" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
     }
 
     @GetMapping

@@ -340,7 +340,8 @@
                     if (rv.danhSachHinhAnh) {
                         const imgs = rv.danhSachHinhAnh.split(',').filter(x => x.trim() !== '');
                         imgs.forEach(src => {
-                            imgHtml += `<img src="${src.trim()}" class="rv-img" onclick="ReviewApp.openLightbox('${src.trim()}')">`;
+                            const safeSrc = this.escapeHTML(src.trim());
+                            imgHtml += `<img src="${safeSrc}" class="rv-img" data-src="${safeSrc}" onclick="ReviewApp.openLightbox(this.getAttribute('data-src'))">`;
                         });
                         if(imgHtml) imgHtml = `<div class="rv-images">${imgHtml}</div>`;
                     }
@@ -354,9 +355,8 @@
                     let replyHtml = '';
                     if (rv.noiDungTraLoi) {
                         const noiDungTraLoiAnToan = this.escapeHTML(rv.noiDungTraLoi);
-                        const tenNhanVienSafe = this.escapeHTML(rv.tenNhanVienTraLoi) || 'Nhân viên';
+                        const tenNhanVienSafe = this.escapeHTML(rv.tenNhanVienTraLoi) || 'Hệ thống';
 
-                        // ĐÃ THÊM NÚT SỬA VÀ BOX SỬA DỮ LIỆU
                         replyHtml = `
                             <div id="rv-view-${rv.id}" class="rv-reply-box">
                                 <div class="rv-reply-header">
@@ -372,7 +372,7 @@
                             </div>
 
                             <div class="rv-reply-form" id="rv-form-${rv.id}">
-                                <textarea class="rv-textarea" id="rv-input-${rv.id}" placeholder="Nhập nội dung phản hồi...">${rv.noiDungTraLoi}</textarea>
+                                <textarea class="rv-textarea" id="rv-input-${rv.id}" placeholder="Nhập nội dung phản hồi...">${noiDungTraLoiAnToan}</textarea>
                                 <div class="rv-form-actions">
                                     <button class="btn btn-secondary" onclick="ReviewApp.toggleEdit(${rv.id})" style="height:34px!important;">Hủy</button>
                                     <button class="btn btn-primary" style="height:34px!important;" onclick="ReviewApp.submitReply(${rv.id})"><i class="bi bi-check-circle"></i> Cập nhật</button>

@@ -1259,7 +1259,7 @@ public class HoaDonApi {
             String oId = hd.getMa() + "_" + rId;
             String amountStr = totalAmount.setScale(0, RoundingMode.HALF_UP).toString();
 
-            String posReturnUrl = "https://beemate.store/api/hoa-don/momo-callback";
+            String posReturnUrl = "https://beemate.store/api/hoa-don/momo-callback-admin";
 
             String rawHash = "accessKey=" + accessKey.trim() + "&amount=" + amountStr + "&extraData=&ipnUrl=" + notifyUrl.trim() + "&orderId=" + oId + "&orderInfo=ThanhToan_POS_" + hd.getMa() + "&partnerCode=" + partnerCode.trim() + "&redirectUrl=" + posReturnUrl + "&requestId=" + rId + "&requestType=captureWallet";
             String signature = MomoSecurity.signHmacSHA256(rawHash, secretKey.trim());
@@ -1499,7 +1499,7 @@ public class HoaDonApi {
             vnp_Params.put("vnp_OrderType", "other");
             vnp_Params.put("vnp_Locale", "vn");
 
-            String posReturnUrl = "https://beemate.store/api/hoa-don/vnpay-callback";
+            String posReturnUrl = "https://beemate.store/api/hoa-don/vnpay-callback-admin";
             vnp_Params.put("vnp_ReturnUrl", posReturnUrl);
             vnp_Params.put("vnp_IpAddr", "127.0.0.1");
 
@@ -1719,6 +1719,115 @@ public class HoaDonApi {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(usedIds);
+    }
+
+    // ==========================================
+    // CALLBACK DÀNH RIÊNG CHO ADMIN / POS
+    // ==========================================
+    @GetMapping("/momo-callback-admin")
+    @Transactional
+    public ResponseEntity<Void> momoCallbackAdmin(HttpServletRequest request) {
+        String resultCode = request.getParameter("resultCode");
+        String orderId = request.getParameter("orderId");
+        String redirectUrl = "https://beemate.store/admin#orders";
+
+        try {
+            if (orderId != null && orderId.contains("_")) {
+                String maHD = orderId.split("_")[0];
+                HoaDon hd = hdRepo.findByMa(maHD);
+
+                if (hd != null) {
+                    if ("0".equals(resultCode)) {
+                        // 1. Chuyển hóa đơn sang HOÀN THÀNH
+                        TrangThaiHoaDon ttHoanThanh = ttRepo.findByMa("HOAN_THANH");
+                        hd.setTrangThaiHoaDon(ttHoanThanh);
+                        hd.setNgayThanhToan(new Date());
+                        hdRepo.save(hd);
+
+                        // 2. Cập nhật trạng thái Thanh toán & Mã giao dịch
+                        List<ThanhToan> tts = thanhToanRepo.findByHoaDon_Id(hd.getId());
+                        if (tts != null && !tts.isEmpty()) {
+                            ThanhToan tt = tts.get(0);
+                            tt.setTrangThai("THANH_CONG");
+                            tt.setMaGiaoDich(orderId);
+                            tt.setNgayThanhToan(new Date());
+                            thanhToanRepo.save(tt);
+                        }
+
+                        // 3. Ghi log lịch sử
+                        lsRepo.save(LichSuHoaDon.builder()
+                                .hoaDon(hd).trangThaiHoaDon(ttHoanThanh)
+                                .ghiChu("Khách thanh toán MoMo tại quầy thành công")
+                                .build());
+                    } else {
+                        // Thất bại thì chỉ cập nhật trạng thái thanh toán là THAT_BAI, không tự ý hủy đơn của Admin
+                        List<ThanhToan> tts = thanhToanRepo.findByHoaDon_Id(hd.getId());
+                        if (tts != null && !tts.isEmpty()) {
+                            ThanhToan tt = tts.get(0);
+                            tt.setTrangThai("THAT_BAI");
+                            thanhToanRepo.save(tt);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return ResponseEntity.status(HttpStatus.FOUND).location(java.net.URI.create(redirectUrl)).build();
+    }
+
+    @GetMapping("/vnpay-callback-admin")
+    @Transactional
+    public ResponseEntity<Void> vnpayCallbackAdmin(HttpServletRequest request) {
+        String vnp_ResponseCode = request.getParameter("vnp_ResponseCode");
+        String vnp_TxnRef = request.getParameter("vnp_TxnRef");
+        String redirectUrl = "https://beemate.store/admin#orders";
+
+        try {
+            if (vnp_TxnRef != null && vnp_TxnRef.contains("_")) {
+                String maHD = vnp_TxnRef.split("_")[0];
+                HoaDon hd = hdRepo.findByMa(maHD);
+
+                if (hd != null) {
+                    if ("00".equals(vnp_ResponseCode)) {
+                        // 1. Chuyển hóa đơn sang HOÀN THÀNH
+                        TrangThaiHoaDon ttHoanThanh = ttRepo.findByMa("HOAN_THANH");
+                        hd.setTrangThaiHoaDon(ttHoanThanh);
+                        hd.setNgayThanhToan(new Date());
+                        hdRepo.save(hd);
+
+                        // 2. Cập nhật trạng thái Thanh toán & Mã giao dịch
+                        List<ThanhToan> tts = thanhToanRepo.findByHoaDon_Id(hd.getId());
+                        if (tts != null && !tts.isEmpty()) {
+                            ThanhToan tt = tts.get(0);
+                            tt.setTrangThai("THANH_CONG");
+                            tt.setMaGiaoDich(vnp_TxnRef);
+                            tt.setNgayThanhToan(new Date());
+                            thanhToanRepo.save(tt);
+                        }
+
+                        // 3. Ghi log lịch sử
+                        lsRepo.save(LichSuHoaDon.builder()
+                                .hoaDon(hd).trangThaiHoaDon(ttHoanThanh)
+                                .ghiChu("Khách thanh toán VNPay tại quầy thành công")
+                                .build());
+                    } else {
+                        // Thất bại
+                        List<ThanhToan> tts = thanhToanRepo.findByHoaDon_Id(hd.getId());
+                        if (tts != null && !tts.isEmpty()) {
+                            ThanhToan tt = tts.get(0);
+                            tt.setTrangThai("THAT_BAI");
+                            thanhToanRepo.save(tt);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return ResponseEntity.status(HttpStatus.FOUND).location(java.net.URI.create(redirectUrl)).build();
     }
 
     public static class CheckoutRequest {

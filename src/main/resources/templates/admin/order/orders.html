@@ -1620,6 +1620,8 @@
         generateEWalletQR: async function(hdId, method, amount) {
             try {
                 if (window.showLoading) window.showLoading();
+
+                // 1. Gọi API tạo thanh toán chuẩn thay vì POS tĩnh
                 const endpoint = method === 'MOMO' ? `/api/hoa-don/momo-payment-pos/${hdId}` : `/api/hoa-don/vnpay-payment-pos/${hdId}`;
                 const res = await fetch(endpoint, {
                     method: 'POST',
@@ -1631,11 +1633,27 @@
                 const data = await res.json();
                 const payUrl = data.payUrl;
 
-                // Sử dụng qrserver để tạo QR Code từ link payUrl trả về
-                const qrImgSrc = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(payUrl)}`;
+                // 2. LƯU Ý QUAN TRỌNG: Mở link payUrl trong Tab mới thay vì gen QR tĩnh
+                // Tại sao phải làm vậy? Vì luồng thanh toán chuẩn yêu cầu redirect để lấy Callback.
+                // Ở trang quản lý Admin này, mở tab mới thanh toán là giải pháp an toàn nhất.
 
-                const bankName = method === 'MOMO' ? "Ví MoMo" : "VNPay";
-                this.showTransferQR(qrImgSrc, bankName, "Quét mã qua ứng dụng", "BEEMATE STORE", amount, "ThanhToan_POS_" + hdId, method, hdId);
+                window.location.href = data.payUrl;
+
+                // 3. Hiển thị thông báo và đóng popup (Đóng popup QR đơn sơ cũ đi)
+                document.getElementById('paymentPromptOverlay').style.display = 'none';
+
+                if (typeof window.confirmDialog === 'function') {
+                    window.confirmDialog(
+                        "Đang xử lý thanh toán",
+                        "Đã mở cổng thanh toán " + method + " ở một tab mới. Sau khi khách hàng hoàn tất thanh toán, vui lòng tải lại trang để xem trạng thái cập nhật.",
+                        () => {
+                            this.loadData();
+                            this.openDetail(hdId);
+                        }
+                    );
+                } else {
+                    alert("Đã mở cổng thanh toán " + method + " ở tab mới. Vui lòng F5 sau khi thanh toán xong.");
+                }
 
             } catch (err) {
                 if (typeof window.toast === 'function') window.toast(err.message, "error");

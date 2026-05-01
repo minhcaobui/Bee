@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/kich-thuoc")
@@ -26,8 +27,7 @@ public class KichThuocApi {
     private final KichThuocRepository kichThuocRepository;
 
     private String generateMa() {
-        String timeStr = String.valueOf(System.currentTimeMillis());
-        return "KT" + timeStr.substring(timeStr.length() - 5);
+        return "KT" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
     }
 
     @GetMapping

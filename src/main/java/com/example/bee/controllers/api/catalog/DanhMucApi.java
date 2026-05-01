@@ -17,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/danh-muc")
@@ -27,8 +28,7 @@ public class DanhMucApi {
     private final SanPhamRepository sanPhamRepository;
 
     private String generateMa() {
-        String timeStr = String.valueOf(System.currentTimeMillis());
-        return "DM" + timeStr.substring(timeStr.length() - 5);
+        return "DM" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
     }
 
     @GetMapping

@@ -76,7 +76,7 @@
         /* Table */
         .table-wrapper { border: 1px solid var(--gray-200); width: 100%; overflow-x: auto; background: #ffffff; border-radius: var(--border-radius); }
         table { width: 100%; border-collapse: collapse; min-width: 1000px; }
-        .drawer table { min-width: 100%; } /* BỔ SUNG: Fix lỗi tràn bảng trong các ngăn kéo (drawer) */
+        .drawer table { min-width: 100%; }
         thead th { text-align: left; padding: 12px 15px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--sub); background: var(--gray-100); border-bottom: 1px solid var(--gray-200); white-space: nowrap; position: sticky; top: 0; z-index: 10;}
         tbody td { padding: 10px 15px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; font-size: 13px; word-wrap: break-word; color: var(--text-main);}
         tbody tr:hover { background: var(--gray-100); }
@@ -173,7 +173,7 @@
         .addr-actions { position: absolute; top: 16px; right: 16px; display: flex; gap: 8px; }
 
         /* CHO ORDER & PRODUCT SUB-TABS */
-        .sub-table-container { background: #ffffff; border: 1px solid var(--gray-200); border-radius: var(--border-radius); padding: 20px; overflow-x: auto; } /* BỔ SUNG: Thêm overflow-x auto để không tràn block */
+        .sub-table-container { background: #ffffff; border: 1px solid var(--gray-200); border-radius: var(--border-radius); padding: 20px; overflow-x: auto; }
 
         .expand-btn { cursor: pointer; color: var(--sub); font-size: 16px; padding: 6px; border-radius: 50%; transition: 0.2s; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px;}
         .expand-btn:hover { background: var(--gray-100); color: var(--text-main); }
@@ -182,7 +182,6 @@
         .order-detail-row { display: none; background: var(--gray-100);}
         .order-detail-row.show { display: table-row; }
         .order-detail-content { padding: 20px !important; border-left: 4px solid var(--primary); }
-        /* BỔ SUNG: Chỉnh lại min-width: 100% cho bảng chi tiết để không bị giãn */
         .detail-table { width: 100%; min-width: 100%; border-collapse: collapse; background: #ffffff; border: 1px solid var(--gray-200); border-radius: var(--border-radius); overflow: hidden;}
         .detail-table th { background: var(--gray-100); padding: 10px 12px; font-size: 11px; font-weight: 700; color: var(--sub); text-transform: uppercase; border-bottom: 1px solid var(--gray-200);}
         .detail-table td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid var(--gray-200); color: var(--text-main);}
@@ -543,10 +542,19 @@
         }
     });
 
+    window.escapeHtml = function(unsafe) {
+        return (unsafe || '').toString()
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    };
+
     const getStatusBadge = (tt) => {
         if (!tt) return '<span class="badge-status" style="background:var(--gray-300); color:var(--text-main);">N/A</span>';
         const ma = typeof tt === 'object' ? tt.ma : tt;
-        const ten = typeof tt === 'object' ? tt.ten : tt;
+        const ten = typeof tt === 'object' ? window.escapeHtml(tt.ten) : window.escapeHtml(tt);
 
         if (ma === 'HOAN_THANH') return `<span class="badge-status" style="background:var(--success-color);">HOÀN THÀNH</span>`;
         if (ma === 'DA_HUY') return `<span class="badge-status" style="background:var(--danger-color);">ĐÃ HỦY</span>`;
@@ -717,7 +725,7 @@
             const tbody = document.getElementById('tbody');
             tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px; color:var(--sub);">Đang tải dữ liệu...</td></tr>`;
             try {
-                const res = await fetch(`/api/khach-hang?page=${this.state.page}&size=${this.state.size}&q=${this.state.q}&trangThai=${this.state.status}`);
+                const res = await fetch(`/api/khach-hang?page=${this.state.page}&size=${this.state.size}&q=${encodeURIComponent(this.state.q)}&trangThai=${this.state.status}`);
                 const data = await res.json();
                 this.state.totalPages = data.totalPages || 0;
                 this.renderTable(data.content);
@@ -737,7 +745,11 @@
             tbody.innerHTML = list.map((item, index) => {
                 const stt = (this.state.page * this.state.size) + index + 1;
 
-                // BADGE CHỮ
+                const safeMa = window.escapeHtml(item.ma);
+                const safeHoTen = window.escapeHtml(item.hoTen);
+                const safeSoDienThoai = window.escapeHtml(item.soDienThoai);
+                const safeEmail = window.escapeHtml(item.email);
+
                 const badgeClass = item.trangThai ? 'badge-active' : 'badge-inactive';
                 const badgeText = item.trangThai ? 'Đang hoạt động' : 'Ngừng hoạt động';
                 const statusHtml = `<span class="badge-status ${badgeClass}" onclick="window.CustomerApp.quickToggle(${item.id}, ${item.trangThai})">${badgeText}</span>`;
@@ -745,13 +757,13 @@
                 return `
                     <tr>
                         <td style="text-align:center;">${stt}</td>
-                        <td style="font-weight:700; color:var(--text-main);">${item.ma}</td>
-                        <td><span style="font-weight: 600; color: var(--text-main); font-size: 13px;">${item.hoTen}</span></td>
-                        <td><div style="font-weight:600;">${item.soDienThoai || '---'}</div><div style="font-size:12px; color:var(--sub);">${item.email || ''}</div></td>
-                        <td>${item.gioiTinh ? item.gioiTinh : '---'}</td>
+                        <td style="font-weight:700; color:var(--text-main);">${safeMa}</td>
+                        <td><span style="font-weight: 600; color: var(--text-main); font-size: 13px;">${safeHoTen}</span></td>
+                        <td><div style="font-weight:600;">${safeSoDienThoai || '---'}</div><div style="font-size:12px; color:var(--sub);">${safeEmail || ''}</div></td>
+                        <td>${item.gioiTinh ? window.escapeHtml(item.gioiTinh) : '---'}</td>
                         <td style="text-align:center;">${statusHtml}</td>
                         <td style="text-align:right; white-space: nowrap;">
-                            <button class="btn-icon" title="Đổi mật khẩu" onclick="window.CustomerApp.openChangePassword(${item.id}, '${item.hoTen.replace(/'/g, "\\'")}')"><i class="bi bi-key"></i></button>
+                            <button class="btn-icon" title="Đổi mật khẩu" data-name="${safeHoTen}" onclick="window.CustomerApp.openChangePassword(${item.id}, this.getAttribute('data-name'))"><i class="bi bi-key"></i></button>
                             <button class="btn-icon" title="Xem chi tiết" onclick="window.CustomerApp.openEdit(${item.id}, true)"><i class="bi bi-eye"></i></button>
                             <button class="btn-icon" title="Sửa" onclick="window.CustomerApp.openEdit(${item.id}, false)"><i class="bi bi-pencil"></i></button>
                         </td>
@@ -955,7 +967,7 @@
             const tbody = document.getElementById('subOrderBody');
             tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">Đang tải dữ liệu...</td></tr>`;
             try {
-                const url = `/api/khach-hang/${this.state.editingId}/hoa-don?page=${this.state.subParams.order.page}&size=${this.state.subParams.order.size}&q=${this.state.subParams.order.q}&statusId=${this.state.subParams.order.status}`;
+                const url = `/api/khach-hang/${this.state.editingId}/hoa-don?page=${this.state.subParams.order.page}&size=${this.state.subParams.order.size}&q=${encodeURIComponent(this.state.subParams.order.q)}&statusId=${this.state.subParams.order.status}`;
                 const res = await fetch(url);
                 const data = await res.json();
                 const content = data.content || data;
@@ -974,7 +986,7 @@
                         <td style="text-align:center;">
                             <i class="bi bi-chevron-down expand-btn" id="icon-order-${hd.id}" onclick="window.CustomerApp.toggleOrderDetail(${hd.id})"></i>
                         </td>
-                        <td style="font-weight:700; color:var(--text-main);">${hd.ma}</td>
+                        <td style="font-weight:700; color:var(--text-main);">${window.escapeHtml(hd.ma)}</td>
                         <td style="font-size:12px; color:var(--sub);">${new Date(hd.ngayTao).toLocaleString('vi-VN')}</td>
                         <td style="font-weight:700; color:var(--danger-color); text-align:right;">${(hd.giaTong || 0).toLocaleString('vi-VN')} ₫</td>
                         <td style="text-align:center;">${statusBadge}</td>
@@ -1022,11 +1034,11 @@
                         <tr>
                             <td>
                                 <div class="flex-center">
-                                    <img src="${ct.hinhAnh || 'https://placehold.co/40x40'}" class="product-img-sm" onerror="this.src='https://placehold.co/40x40'">
-                                    <div><div style="font-weight:600; color:var(--text-main);">${ct.tenSanPham}</div><div style="font-size:10px; color:var(--sub);">SKU: ${ct.sku || 'N/A'}</div></div>
+                                    <img src="${window.escapeHtml(ct.hinhAnh) || 'https://placehold.co/40x40'}" class="product-img-sm" onerror="this.src='https://placehold.co/40x40'">
+                                    <div><div style="font-weight:600; color:var(--text-main);">${window.escapeHtml(ct.tenSanPham)}</div><div style="font-size:10px; color:var(--sub);">SKU: ${window.escapeHtml(ct.sku) || 'N/A'}</div></div>
                                 </div>
                             </td>
-                            <td><span style="background:var(--gray-100); padding:2px 6px; border-radius:2px; font-weight:600; color:var(--sub); border:1px solid var(--gray-200);">${ct.thuocTinh}</span></td>
+                            <td><span style="background:var(--gray-100); padding:2px 6px; border-radius:2px; font-weight:600; color:var(--sub); border:1px solid var(--gray-200);">${window.escapeHtml(ct.thuocTinh)}</span></td>
                             <td style="font-weight:600; color:var(--text-main);">x${ct.soLuong}</td>
                             <td style="text-align:right;">${(ct.giaBan || 0).toLocaleString('vi-VN')} ₫</td>
                             <td style="font-weight:600; color:var(--danger-color); text-align:right;">${((ct.giaBan || 0) * (ct.soLuong || 1)).toLocaleString('vi-VN')} ₫</td>
@@ -1066,10 +1078,10 @@
                         <tr>
                             <td>
                                 <div class="flex-center">
-                                    <img src="${img}" class="product-img-sm" onerror="this.src='https://placehold.co/40x40'">
+                                    <img src="${window.escapeHtml(img)}" class="product-img-sm" onerror="this.src='https://placehold.co/40x40'">
                                     <div>
-                                        <div style="font-weight:600; font-size:13px; color:var(--text-main);">${spct.sanPham.ten}</div>
-                                        <div style="font-size:11px; color:var(--sub); margin-top:2px;">Phân loại: ${spct.mauSac.ten} - ${spct.kichThuoc.ten}</div>
+                                        <div style="font-weight:600; font-size:13px; color:var(--text-main);">${window.escapeHtml(spct.sanPham.ten)}</div>
+                                        <div style="font-size:11px; color:var(--sub); margin-top:2px;">Phân loại: ${window.escapeHtml(spct.mauSac.ten)} - ${window.escapeHtml(spct.kichThuoc.ten)}</div>
                                     </div>
                                 </div>
                             </td>
@@ -1101,14 +1113,14 @@
 
                 tbody.innerHTML = content.map(v => `
                     <tr>
-                        <td style="font-weight:700; color:var(--text-main);">${v.maVoucher}</td>
-                        <td style="font-weight:600; color:var(--text-main);">${v.tenVoucher}</td>
+                        <td style="font-weight:700; color:var(--text-main);">${window.escapeHtml(v.maVoucher)}</td>
+                        <td style="font-weight:600; color:var(--text-main);">${window.escapeHtml(v.tenVoucher)}</td>
                         <td style="font-weight:700; color:var(--success-color); text-align:right;">-${(v.giamGia || 0).toLocaleString('vi-VN')} ₫</td>
                         <td style="text-align:center;">
-                            <span style="color:var(--sub); font-weight:600;">${v.maDonHang}</span>
+                            <span style="color:var(--sub); font-weight:600;">${window.escapeHtml(v.maDonHang)}</span>
                         </td>
                         <td style="font-size:12px; color:var(--sub);">
-                            ${v.ngaySuDung}
+                            ${window.escapeHtml(v.ngaySuDung)}
                         </td>
                     </tr>
                 `).join('');
@@ -1165,7 +1177,7 @@
                         hoTen: nameInput,
                         soDienThoai: phoneInput,
                         email: emailInput,
-                        ngaySinh: dobInput, // Lấy từ biến dobInput đã gán ở trên
+                        ngaySinh: dobInput,
                         gioiTinh: document.getElementById('inpGender').value === 'true',
                         trangThai: document.getElementById('inpStatus').checked
                     };
@@ -1252,11 +1264,11 @@
                     return `
                     <div class="addr-card ${addr.laMacDinh ? 'default' : ''}">
                         <div style="font-weight:700; font-size:13px; margin-bottom:6px; color:var(--text-main);">
-                            ${addr.hoTenNhan || ''} | ${addr.sdtNhan || ''}
+                            ${window.escapeHtml(addr.hoTenNhan || '')} | ${window.escapeHtml(addr.sdtNhan || '')}
                             ${addr.laMacDinh ? '<span class="addr-tag">Mặc định</span>' : ''}
                         </div>
-                        <div style="font-size:12px; color:var(--sub); margin-bottom:4px;">${addr.diaChiChiTiet}</div>
-                        <div style="font-size:12px; color:var(--sub);">${addr.phuongXa}, ${addr.quanHuyen}, ${addr.tinhThanhPho}</div>
+                        <div style="font-size:12px; color:var(--sub); margin-bottom:4px;">${window.escapeHtml(addr.diaChiChiTiet)}</div>
+                        <div style="font-size:12px; color:var(--sub);">${window.escapeHtml(addr.phuongXa)}, ${window.escapeHtml(addr.quanHuyen)}, ${window.escapeHtml(addr.tinhThanhPho)}</div>
                         <div class="addr-actions">${defaultBtn} ${deleteBtn}</div>
                     </div>
                 `}).join('');

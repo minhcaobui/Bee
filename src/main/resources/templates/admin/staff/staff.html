@@ -450,7 +450,7 @@
                 <label class="form-label">Mật khẩu mới <span style="color:var(--danger-color)">*</span></label>
                 <div class="search-box">
                     <i class="bi bi-key"></i>
-                    <input type="text" id="inpNewPassword" class="form-input" style="padding-left: 36px;" placeholder="Nhập ít nhất 6 ký tự...">
+                    <input type="password" id="inpNewPassword" class="form-input" style="padding-left: 36px;" placeholder="Nhập ít nhất 6 ký tự...">
                 </div>
             </div>
         </div>
@@ -473,6 +473,15 @@
         }
     });
 
+    window.escapeHtml = function(unsafe) {
+        return (unsafe || '').toString()
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    };
+
     // --- MAIN APP ---
     window.StaffApp = {
         initialized: false,
@@ -490,7 +499,7 @@
                 const tbody = document.getElementById('tableRoleContent');
                 tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color:var(--sub);">Đang tải dữ liệu...</td></tr>`;
                 try {
-                    const res = await fetch(`/api/chuc-vu?q=${this.state.q}&page=${this.state.page}&size=${this.state.size}`);
+                    const res = await fetch(`/api/chuc-vu?q=${encodeURIComponent(this.state.q)}&page=${this.state.page}&size=${this.state.size}`);
                     let data = await res.json();
 
                     const list = data.content || data;
@@ -506,9 +515,9 @@
                     tbody.innerHTML = list.map((item, idx) => `
                         <tr>
                             <td style="text-align:center;">${startIdx + idx + 1}</td>
-                            <td style="font-weight:700; color:var(--text-main);">${item.ma || '---'}</td>
-                            <td><span style="font-weight: 600; color: var(--text-main); font-size: 13px;">${item.ten || 'Chưa có tên'}</span></td>
-                            <td style="color:var(--sub); font-size:13px;">${item.moTa || item.ghiChu || 'Không có mô tả'}</td>
+                            <td style="font-weight:700; color:var(--text-main);">${window.escapeHtml(item.ma || '---')}</td>
+                            <td><span style="font-weight: 600; color: var(--text-main); font-size: 13px;">${window.escapeHtml(item.ten || 'Chưa có tên')}</span></td>
+                            <td style="color:var(--sub); font-size:13px;">${window.escapeHtml(item.moTa || item.ghiChu || 'Không có mô tả')}</td>
                             <td style="text-align:right; white-space: nowrap;">
                                 <button class="btn-icon" title="Sửa chức vụ" onclick="window.StaffApp.Role.openDrawer(${item.id})"><i class="bi bi-pencil"></i></button>
                             </td>
@@ -529,7 +538,7 @@
                     const res = await fetch(`/api/chuc-vu?size=100`);
                     let data = await res.json();
                     let list = data.content || data;
-                    sel.innerHTML = '<option value="">-- Chọn chức vụ --</option>' + list.map(cv => `<option value="${cv.id}" data-ma="${(cv.ma || '').toLowerCase()}">${cv.ten}</option>`).join('');
+                    sel.innerHTML = '<option value="">-- Chọn chức vụ --</option>' + list.map(cv => `<option value="${cv.id}" data-ma="${(cv.ma || '').toLowerCase()}">${window.escapeHtml(cv.ten)}</option>`).join('');
                 } catch(e) { sel.innerHTML = '<option value="">-- Lỗi tải chức vụ --</option>'; }
             },
 
@@ -608,7 +617,7 @@
                 if (typeof window.confirmDialog === 'function') {
                     window.confirmDialog(
                         this.state.editingId ? "XÁC NHẬN CẬP NHẬT" : "XÁC NHẬN TẠO MỚI",
-                        `Bạn có chắc chắn muốn lưu thông tin chức vụ "${payload.ten}" này không?`,
+                        `Bạn có chắc chắn muốn lưu thông tin chức vụ "${window.escapeHtml(payload.ten)}" này không?`,
                         async () => {
                             btn.innerText = 'ĐANG XỬ LÝ...'; btn.disabled = true;
                             try {
@@ -760,7 +769,7 @@
             const tbody = document.getElementById('tableContent');
             tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px; color:var(--sub);">Đang tải dữ liệu...</td></tr>`;
             try {
-                const res = await fetch(`/api/nhan-vien/list-json?q=${this.state.q}&status=${this.state.status}`);
+                const res = await fetch(`/api/nhan-vien/list-json?q=${encodeURIComponent(this.state.q)}&status=${this.state.status}`);
                 let list = await res.json();
 
                 this.state.totalPages = Math.ceil(list.length / this.state.size) || 1;
@@ -794,7 +803,12 @@
                     }
                 }
 
-                // KIỂM TRA TÀI KHOẢN ADMIN MẶC ĐỊNH
+                const safeMa = window.escapeHtml(item.ma);
+                const safeHoTen = window.escapeHtml(item.hoTen);
+                const safeChucVu = window.escapeHtml(chucVuName);
+                const safeSdt = window.escapeHtml(item.soDienThoai);
+                const safeEmail = window.escapeHtml(item.email);
+
                 const isSystemAdmin = item.id === 1 || (item.email && item.email.toLowerCase() === 'admin@shop.com');
 
                 let statusHtml = '';
@@ -806,10 +820,10 @@
                 } else {
                     const badgeClass = item.trangThai ? 'badge-active' : 'badge-inactive';
                     const badgeText = item.trangThai ? 'Đang làm việc' : 'Nghỉ việc';
-                    statusHtml = `<span class="badge-status ${badgeClass}" onclick="window.StaffApp.quickToggle(${item.id}, ${item.trangThai}, '${item.email}')">${badgeText}</span>`;
+                    statusHtml = `<span class="badge-status ${badgeClass}" onclick="window.StaffApp.quickToggle(${item.id}, ${item.trangThai}, '${safeEmail}')">${badgeText}</span>`;
 
                     actionHtml = `
-                        <button class="btn-icon" title="Đổi mật khẩu" onclick="window.StaffApp.openChangePassword(${item.id}, '${item.hoTen.replace(/'/g, "\\'")}')"><i class="bi bi-key"></i></button>
+                        <button class="btn-icon" title="Đổi mật khẩu" onclick="window.StaffApp.openChangePassword(${item.id}, '${safeHoTen}')"><i class="bi bi-key"></i></button>
                         <button class="btn-icon" title="Xem chi tiết" onclick="window.StaffApp.openEdit(${item.id}, true)"><i class="bi bi-eye"></i></button>
                         <button class="btn-icon" title="Sửa hồ sơ" onclick="window.StaffApp.openEdit(${item.id}, false)"><i class="bi bi-pencil"></i></button>
                     `;
@@ -818,12 +832,12 @@
                 return `
                 <tr>
                     <td style="text-align:center;">${startIdx + idx + 1}</td>
-                    <td style="font-weight:700; color:var(--text-main);">${item.ma || '---'}</td>
-                    <td><span style="font-weight: 600; color: var(--text-main); font-size: 13px;">${item.hoTen || 'Chưa cập nhật'}</span></td>
-                    <td><span style="font-weight: 600; color: var(--primary);">${chucVuName}</span></td>
+                    <td style="font-weight:700; color:var(--text-main);">${safeMa || '---'}</td>
+                    <td><span style="font-weight: 600; color: var(--text-main); font-size: 13px;">${safeHoTen || 'Chưa cập nhật'}</span></td>
+                    <td><span style="font-weight: 600; color: var(--primary);">${safeChucVu}</span></td>
                     <td>
-                        <div style="font-weight:600; color:var(--text-main);">${item.soDienThoai || '---'}</div>
-                        <div style="font-size:12px; color:var(--sub);">${item.email || '---'}</div>
+                        <div style="font-weight:600; color:var(--text-main);">${safeSdt || '---'}</div>
+                        <div style="font-size:12px; color:var(--sub);">${safeEmail || '---'}</div>
                     </td>
                     <td style="text-align:center;">
                         ${statusHtml}
@@ -1215,10 +1229,10 @@
                     this.state.tempPayload = payload;
                     const idParam = isNew ? '' : `&id=${this.state.editingId}`;
 
-                    const checkPhoneRes = await fetch(`/api/nhan-vien/check-phone?phone=${phone}${idParam}`);
+                    const checkPhoneRes = await fetch(`/api/nhan-vien/check-phone?phone=${encodeURIComponent(phone)}${idParam}`);
                     if (!checkPhoneRes.ok) { this.switchDrawerTab('info'); if(typeof window.toast === 'function') window.toast(await checkPhoneRes.text(), "error"); btn.innerHTML = 'LƯU HỒ SƠ'; btn.disabled = false; return; }
 
-                    const checkEmailRes = await fetch(`/api/nhan-vien/check-email?email=${email}${idParam}`);
+                    const checkEmailRes = await fetch(`/api/nhan-vien/check-email?email=${encodeURIComponent(email)}${idParam}`);
                     if (!checkEmailRes.ok) { this.switchDrawerTab('info'); if(typeof window.toast === 'function') window.toast(await checkEmailRes.text(), "error"); btn.innerHTML = 'LƯU HỒ SƠ'; btn.disabled = false; return; }
 
                     this.executeFinalSave();
