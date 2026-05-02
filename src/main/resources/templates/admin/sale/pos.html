@@ -8,7 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
     <style>
         /* ==========================================================================
            1. CORE SYSTEM STYLE (ĐỒNG BỘ CORPORATE SAAS ADMIN)
@@ -625,7 +624,8 @@
         </div>
     </div>
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.2/dist/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     /* ==========================================================================
@@ -737,17 +737,35 @@
             this.countdownTimer = setInterval(() => {
                 this.updateCountdown();
             }, 1000);
+            this.connectWebSocket();
+        },
 
-            // --- CODE THÊM: TỰ ĐỘNG CẬP NHẬT KHO NGẦM MỖI 10 GIÂY ---
-            setInterval(() => {
-                // Nếu thu ngân đang gõ tìm kiếm thì tạm ngưng làm mới để tránh bị giật khung gõ
-                if (document.activeElement && document.activeElement.id === 'productSearchInput') return;
+        connectWebSocket: function() {
+            const socket = new SockJS('/ws');
+            const stompClient = Stomp.over(socket);
 
-                // Lấy từ khóa và bộ lọc hiện tại để gọi lại API ngầm
-                const currentSearch = document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '';
-                this.loadProducts(currentSearch);
-            }, 10000);
-            // ---------------------------------------------------------
+            // Tắt log của STOMP nếu không muốn rác console
+            stompClient.debug = null;
+
+            stompClient.connect({}, (frame) => {
+                console.log('✅ Đã kết nối WebSockets (Màn hình POS)');
+
+                stompClient.subscribe('/topic/public/stock', (message) => {
+                    if (message.body === "STOCK_CHANGED") {
+                        console.log("🔔 Kho có thay đổi từ hệ thống, đang cập nhật lại danh sách...");
+
+                        // Tránh giật lag nếu thu ngân đang gõ tìm kiếm
+                        if (document.activeElement && document.activeElement.id === 'productSearchInput') return;
+
+                        // Gọi lại hàm load sản phẩm với từ khóa hiện tại
+                        const currentSearch = document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '';
+                        this.loadProducts(currentSearch);
+                    }
+                });
+            }, (error) => {
+                console.warn("Đứt kết nối WebSockets, đang thử lại sau 5s...", error);
+                setTimeout(() => this.connectWebSocket(), 5000);
+            });
         },
 
         handleProductSearch: function(val) {
@@ -1205,13 +1223,22 @@
                             if (!completedInvoiceId) completedInvoiceId = this.invoices[idx].dbId;
                             this.invoices.splice(idx, 1);
                             this.invoices.forEach((inv, i) => inv.name = `HÓA ĐƠN ${i + 1}`);
-                            this.activeInvoiceId = this.invoices.length > 0 ? this.invoices[0].id : null;
+
+                            if (this.invoices.length === 0) {
+                                this.invoices.push({
+                                    id: Date.now(), dbId: null, maHD: null, name: `HÓA ĐƠN 1`, cart: [],
+                                    customer: 'KHÁCH VÃNG LAI', customerId: null, voucher: null,
+                                    expiryTime: new Date().getTime() + (30 * 60 * 1000)
+                                });
+                            }
+                            this.activeInvoiceId = this.invoices[0].id;
+                            this.usedVoucherIds = [];
+                            document.getElementById('voucherInput').value = '';
                             this.saveState();
                         }
 
                         window.toast("THANH TOÁN MOMO THÀNH CÔNG VÀ ĐÃ LƯU DB!", "success");
-                        const currentSearch = document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '';
-                        await this.loadProducts(currentSearch);
+                        this.clearProductSearch();
                         this.renderTabs();
                         this.renderCart();
 
@@ -1223,16 +1250,35 @@
                     }
                 } catch (e) { console.error("Lỗi xác nhận MoMo:", e); }
                 window.history.replaceState({}, document.title, window.location.pathname);
+
             } else if (resultCode && resultCode !== '0') {
+                // TRƯỜNG HỢP THẤT BẠI HOẶC KHÁCH HỦY GIAO DỊCH
                 const maHDFromUrl = orderId?.split('_')[0];
-                const failedInv = this.invoices.find(inv => inv.maHD === maHDFromUrl);
-                if (failedInv?.dbId) {
-                    await fetch(`/api/pos/invoices/${failedInv.dbId}`, { method: 'DELETE' });
-                    failedInv.dbId = null;
-                    failedInv.maHD = null;
+                const failedInvIdx = this.invoices.findIndex(inv => inv.maHD === maHDFromUrl);
+
+                if (failedInvIdx !== -1) {
+                    // KHÔNG gọi API DELETE nữa để giữ đơn trong DB cho phép thanh toán lại ở trang Admin
+                    // Tiến hành clear đơn này khỏi màn hình POS
+                    this.invoices.splice(failedInvIdx, 1);
+                    this.invoices.forEach((inv, i) => inv.name = `HÓA ĐƠN ${i + 1}`);
+
+                    if (this.invoices.length === 0) {
+                        this.invoices.push({
+                            id: Date.now(), dbId: null, maHD: null, name: `HÓA ĐƠN 1`, cart: [],
+                            customer: 'KHÁCH VÃNG LAI', customerId: null, voucher: null,
+                            expiryTime: new Date().getTime() + (30 * 60 * 1000)
+                        });
+                    }
+                    this.activeInvoiceId = this.invoices[0].id;
+                    this.usedVoucherIds = [];
+                    document.getElementById('voucherInput').value = '';
                     this.saveState();
                 }
-                window.toast("Giao dịch MoMo thất bại hoặc đã hủy", "warning");
+
+                window.toast("Giao dịch MoMo bị hủy! Đơn hàng được chuyển vào mục Chờ thanh toán.", "warning");
+                this.clearProductSearch();
+                this.renderTabs();
+                this.renderCart();
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
         },
@@ -1259,13 +1305,22 @@
                             if (!completedInvoiceId) completedInvoiceId = this.invoices[idx].dbId;
                             this.invoices.splice(idx, 1);
                             this.invoices.forEach((inv, i) => inv.name = `HÓA ĐƠN ${i + 1}`);
-                            this.activeInvoiceId = this.invoices.length > 0 ? this.invoices[0].id : null;
+
+                            if (this.invoices.length === 0) {
+                                this.invoices.push({
+                                    id: Date.now(), dbId: null, maHD: null, name: `HÓA ĐƠN 1`, cart: [],
+                                    customer: 'KHÁCH VÃNG LAI', customerId: null, voucher: null,
+                                    expiryTime: new Date().getTime() + (30 * 60 * 1000)
+                                });
+                            }
+                            this.activeInvoiceId = this.invoices[0].id;
+                            this.usedVoucherIds = [];
+                            document.getElementById('voucherInput').value = '';
                             this.saveState();
                         }
 
                         window.toast("THANH TOÁN VNPAY THÀNH CÔNG VÀ ĐÃ LƯU DB!", "success");
-                        const currentSearch = document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '';
-                        await this.loadProducts(currentSearch);
+                        this.clearProductSearch();
                         this.renderTabs();
                         this.renderCart();
 
@@ -1277,16 +1332,34 @@
                     }
                 } catch (e) { console.error("Lỗi xác nhận VNPay:", e); }
                 window.history.replaceState({}, document.title, window.location.pathname);
+
             } else if (vnp_ResponseCode && vnp_ResponseCode !== '00') {
+                // TRƯỜNG HỢP THẤT BẠI HOẶC KHÁCH HỦY GIAO DỊCH
                 const maHDFromUrl = vnp_TxnRef?.split('_')[0];
-                const failedInv = this.invoices.find(inv => inv.maHD === maHDFromUrl);
-                if (failedInv?.dbId) {
-                    await fetch(`/api/pos/invoices/${failedInv.dbId}`, { method: 'DELETE' });
-                    failedInv.dbId = null;
-                    failedInv.maHD = null;
+                const failedInvIdx = this.invoices.findIndex(inv => inv.maHD === maHDFromUrl);
+
+                if (failedInvIdx !== -1) {
+                    // KHÔNG gọi API DELETE nữa để giữ đơn trong DB
+                    this.invoices.splice(failedInvIdx, 1);
+                    this.invoices.forEach((inv, i) => inv.name = `HÓA ĐƠN ${i + 1}`);
+
+                    if (this.invoices.length === 0) {
+                        this.invoices.push({
+                            id: Date.now(), dbId: null, maHD: null, name: `HÓA ĐƠN 1`, cart: [],
+                            customer: 'KHÁCH VÃNG LAI', customerId: null, voucher: null,
+                            expiryTime: new Date().getTime() + (30 * 60 * 1000)
+                        });
+                    }
+                    this.activeInvoiceId = this.invoices[0].id;
+                    this.usedVoucherIds = [];
+                    document.getElementById('voucherInput').value = '';
                     this.saveState();
                 }
-                window.toast("Thanh toán VNPay thất bại hoặc đã hủy", "warning");
+
+                window.toast("Giao dịch VNPay bị hủy! Đơn hàng được chuyển vào mục Chờ thanh toán.", "warning");
+                this.clearProductSearch();
+                this.renderTabs();
+                this.renderCart();
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
         },
@@ -1705,7 +1778,7 @@
                 method: finalMethod,
                 cart: inv.cart,
                 voucherId: inv.voucher ? inv.voucher.id : null,
-                maHD: inv.maHD // <--- THÊM DÒNG NÀY VÀO PAYLOAD
+                maHD: inv.maHD
             };
 
             try {
@@ -1727,16 +1800,36 @@
                     if (qrOverlay) qrOverlay.remove();
                     this.closeModal('payModal');
 
+                    // 1. Xóa đơn đã thanh toán khỏi mảng
                     this.invoices = this.invoices.filter(i => i.id !== this.activeInvoiceId);
                     this.invoices.forEach((i, idx) => i.name = `HÓA ĐƠN ${idx + 1}`);
-                    this.activeInvoiceId = this.invoices.length > 0 ? this.invoices[0].id : null;
+
+                    // 2. [QUAN TRỌNG] Nếu không còn tab đơn hàng nào, tự động tạo 1 tab trống mới
+                    if (this.invoices.length === 0) {
+                        this.invoices.push({
+                            id: Date.now(),
+                            dbId: null,
+                            maHD: null,
+                            name: `HÓA ĐƠN 1`,
+                            cart: [],
+                            customer: 'KHÁCH VÃNG LAI',
+                            customerId: null,
+                            voucher: null,
+                            expiryTime: new Date().getTime() + (30 * 60 * 1000)
+                        });
+                    }
+
+                    // 3. Chuyển active sang đơn đầu tiên và CLEAR các dữ liệu rác
+                    this.activeInvoiceId = this.invoices[0].id;
+                    this.usedVoucherIds = []; // Reset mảng voucher của khách cũ
+                    document.getElementById('voucherInput').value = ''; // Xóa ô text voucher
+                    this.clearProductSearch(); // Tự động xóa ô tìm kiếm sản phẩm đưa về mặc định
 
                     this.saveState();
-                    const currentSearch = document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '';
-                    await this.loadProducts(currentSearch);
                     this.renderTabs();
                     this.renderCart();
 
+                    // In hóa đơn
                     this.inHoaDon(completedInvoiceId);
                 } else {
                     let errorMsg = "Thanh toán thất bại.";
@@ -1810,93 +1903,169 @@
 
         inHoaDon: async function(idHoaDon) {
             try {
-                const res = await fetch('/api/pos/' + idHoaDon + '/print-data');
+                const res = await fetch(`/api/pos/${idHoaDon}/print-data`);
                 if (!res.ok) throw new Error("Không lấy được dữ liệu in");
                 const data = await res.json();
 
-                const formatTien = (num) => new Intl.NumberFormat('vi-VN').format(num) + ' ₫';
+                // Hàm format tiền bỏ chữ đ đi để tiết kiệm không gian trên giấy in nhiệt
+                const formatTien = (num) => new Intl.NumberFormat('vi-VN').format(num);
 
                 let htmlContent = `
-                    <html><head><title>In hóa đơn ${data.order.maHoaDon}</title><style>
-                        body { font-family: 'Courier New', Courier, monospace; width: 80mm; margin: 0 auto; font-size: 12px; color: #000; }
-                        h2 { text-align: center; font-size: 16px; margin-bottom: 5px; }
-                        p { margin: 2px 0; }
-                        .center { text-align: center; }
-                        .line { border-top: 1px dashed #000; margin: 10px 0; }
-                        table { width: 100%; border-collapse: collapse; }
-                        th, td { text-align: right; vertical-align: top; padding: 2px 0; }
-                        th:first-child, td:first-child { text-align: left; }
-                        .bold { font-weight: bold; }
-                        .footer-msg { text-align: center; font-style: italic; margin-top: 15px; font-size: 11px; }
-                        .account-info { border: 1px solid #000; padding: 8px; margin-top: 15px; border-radius: 4px; }
-                    </style></head><body>
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>In hóa đơn ${data.order.maHoaDon}</title>
+                        <style>
+                            @page { margin: 0; }
+                            body {
+                                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                                width: 80mm;
+                                margin: 0 auto;
+                                padding: 10px 15px;
+                                font-size: 12px;
+                                color: #000;
+                                line-height: 1.5;
+                                box-sizing: border-box;
+                            }
+                            .text-center { text-align: center; }
+                            .text-right { text-align: right; }
+                            .text-left { text-align: left; }
+                            .font-bold { font-weight: bold; }
 
-                    <h2>${data.store.tenCuaHang}</h2>
-                    <p class="center">${data.store.diaChi}</p>
-                    <p class="center">ĐT: ${data.store.soDienThoai}</p>
+                            .store-name { font-size: 18px; font-weight: 800; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;}
+                            .store-info { font-size: 11px; margin-bottom: 2px; }
 
-                    <div class="line"></div>
-                    <p class="bold center">HÓA ĐƠN BÁN LẺ</p>
-                    <p>Mã HĐ: ${data.order.maHoaDon}</p>
-                    <p>Ngày: ${data.order.ngayTao}</p>
-                    <p>Thu ngân: ${data.order.thuNgan}</p>
-                    <p>Khách hàng: ${data.order.tenKhachHang}</p>
+                            .divider { border-top: 1px dashed #000; margin: 10px 0; }
+                            .divider-thick { border-top: 2px solid #000; margin: 12px 0; }
 
-                    <div class="line"></div>
-                    <table>
-                        <thead><tr><th>Sản phẩm</th><th style="width:15%;">SL</th><th style="width:30%;">T.Tiền</th></tr></thead>
-                        <tbody>
+                            .invoice-title { font-size: 16px; font-weight: bold; margin: 12px 0 8px 0; text-transform: uppercase; }
+                            .order-info { font-size: 11px; display: flex; justify-content: space-between; margin-bottom: 4px; }
+
+                            table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+                            th { padding: 6px 0; border-bottom: 1px dashed #000; font-size: 11px; text-transform: uppercase;}
+                            td { padding: 8px 0; vertical-align: top; font-size: 12px; }
+                            .item-name { font-weight: bold; margin-bottom: 4px; display: block; font-size: 13px;}
+                            .item-meta { font-size: 11px; color: #444; }
+
+                            .summary-container { margin-top: 12px; }
+                            .summary-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px; }
+                            .summary-row.total { font-size: 18px; font-weight: bold; margin-top: 8px; padding-top: 8px; border-top: 1px solid #000; }
+
+                            .account-box { border: 1px dashed #000; padding: 10px; margin-top: 15px; text-align: center; border-radius: 6px; background-color: #fafafa;}
+                            .account-box p { margin: 4px 0; font-size: 11px; }
+
+                            .footer { text-align: center; margin-top: 20px; font-size: 11px; font-style: italic; color: #333;}
+                        </style>
+                    </head>
+                    <body>
+                        <div class="text-center">
+                            <div class="store-name">${data.store.tenCuaHang}</div>
+                            <div class="store-info">${data.store.diaChi}</div>
+                            <div class="store-info">Hotline: ${data.store.soDienThoai}</div>
+                        </div>
+
+                        <div class="divider"></div>
+                        <div class="text-center invoice-title">HÓA ĐƠN BÁN HÀNG</div>
+
+                        <div class="order-info"><span>Số hóa đơn:</span> <span class="font-bold">${data.order.maHoaDon}</span></div>
+                        <div class="order-info"><span>Ngày in:</span> <span>${data.order.ngayTao}</span></div>
+                        <div class="order-info"><span>Thu ngân:</span> <span>${data.order.thuNgan}</span></div>
+                        <div class="order-info"><span>Khách hàng:</span> <span>${data.order.tenKhachHang}</span></div>
+
+                        <div class="divider"></div>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="text-left" style="width: 55%;">Tên SP</th>
+                                    <th class="text-center" style="width: 15%;">SL</th>
+                                    <th class="text-right" style="width: 30%;">T.Tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                 `;
 
                 data.items.forEach(item => {
                     htmlContent += `
                         <tr>
-                            <td>${item.ten}<br><small>${formatTien(item.donGia)}</small></td>
-                            <td class="center">${item.soLuong}</td>
-                            <td>${formatTien(item.thanhTien)}</td>
+                            <td class="text-left">
+                                <span class="item-name">${item.ten}</span>
+                                <span class="item-meta">${formatTien(item.donGia)}</span>
+                            </td>
+                            <td class="text-center font-bold" style="font-size: 14px;">${item.soLuong}</td>
+                            <td class="text-right font-bold">${formatTien(item.thanhTien)}</td>
                         </tr>
                     `;
                 });
 
                 htmlContent += `
-                        </tbody>
-                    </table>
-                    <div class="line"></div>
+                            </tbody>
+                        </table>
 
-                    <table>
-                        <tr><td>Tổng tiền hàng:</td><td>${formatTien(data.summary.tongTienHang)}</td></tr>
-                        ${data.summary.giamGia > 0 ? `<tr><td>Giảm giá:</td><td>- ${formatTien(data.summary.giamGia)}</td></tr>` : ''}
-                        ${data.summary.phiVanChuyen > 0 ? `<tr><td>Phí vận chuyển:</td><td>${formatTien(data.summary.phiVanChuyen)}</td></tr>` : ''}
-                        <tr><td class="bold">KHÁCH PHẢI TRẢ:</td><td class="bold" style="font-size:14px;">${formatTien(data.summary.tongThanhToan)}</td></tr>
-                    </table>
+                        <div class="divider-thick"></div>
 
-                    <p style="margin-top:10px;">P.Thức: ${data.summary.phuongThuc}</p>
+                        <div class="summary-container">
+                            <div class="summary-row">
+                                <span>Tổng tiền hàng:</span>
+                                <span>${formatTien(data.summary.tongTienHang)}</span>
+                            </div>
+                `;
+
+                if (data.summary.giamGia > 0) {
+                    htmlContent += `
+                            <div class="summary-row">
+                                <span>Giảm giá/Voucher:</span>
+                                <span>- ${formatTien(data.summary.giamGia)}</span>
+                            </div>`;
+                }
+                if (data.summary.phiVanChuyen > 0) {
+                    htmlContent += `
+                            <div class="summary-row">
+                                <span>Phí vận chuyển:</span>
+                                <span>${formatTien(data.summary.phiVanChuyen)}</span>
+                            </div>`;
+                }
+
+                htmlContent += `
+                            <div class="summary-row total">
+                                <span>KHÁCH TRẢ:</span>
+                                <span>${formatTien(data.summary.tongThanhToan)} đ</span>
+                            </div>
+                        </div>
+
+                        <div class="divider"></div>
+                        <div class="text-center" style="font-size: 12px; margin-top: 8px;">
+                            Thanh toán bằng: <b>${data.summary.phuongThuc}</b>
+                        </div>
                 `;
 
                 if (data.order.inThongTinTaiKhoan) {
                     htmlContent += `
-                        <div class="account-info">
-                            <p class="bold center">CẬP NHẬT TÀI KHOẢN</p>
-                            <p>Truy cập: www.beemate.vn</p>
-                            <p>Tài khoản: ${data.order.sdtKhachHang}</p>
-                            <p>Mật khẩu: <b style="font-size:14px;">123456</b></p>
-                            <p style="font-size: 10px; margin-top: 5px;">(Vui lòng đổi mật khẩu để bảo mật tích điểm)</p>
+                        <div class="account-box">
+                            <p class="font-bold" style="font-size: 13px;">THÔNG TIN TÀI KHOẢN</p>
+                            <p>Web: <b>beemate.store</b></p>
+                            <p>Tài khoản: <b>${data.order.sdtKhachHang}</b></p>
+                            <p>Mật khẩu: <b style="font-size: 14px;">123456</b></p>
+                            <p style="font-size: 10px; margin-top: 4px; color: #666;">(Đăng nhập để tích điểm & nhận ưu đãi)</p>
                         </div>
                     `;
                 }
 
                 htmlContent += `
-                    <p class="footer-msg">Xin cảm ơn và hẹn gặp lại quý khách!</p>
-                    </body></html>
+                        <div class="footer">
+                            <p>Cảm ơn quý khách đã mua sắm tại BeeMate!</p>
+                            <p>Vui lòng giữ lại hóa đơn để đổi trả trong 7 ngày.</p>
+                        </div>
+                    </body>
+                    </html>
                 `;
 
                 let printFrame = document.getElementById('hidden-print-frame');
                 if (!printFrame) {
                     printFrame = document.createElement('iframe');
                     printFrame.id = 'hidden-print-frame';
-                    printFrame.style.position = 'fixed';
-                    printFrame.style.right = '0';
-                    printFrame.style.bottom = '0';
+                    printFrame.style.position = 'absolute';
                     printFrame.style.width = '0';
                     printFrame.style.height = '0';
                     printFrame.style.border = '0';
@@ -1908,6 +2077,7 @@
                 frameDoc.write(htmlContent);
                 frameDoc.close();
 
+                // Đợi load xong css rồi mới in
                 setTimeout(() => {
                     printFrame.contentWindow.focus();
                     printFrame.contentWindow.print();
@@ -1915,7 +2085,7 @@
 
             } catch (e) {
                 console.error("Lỗi in hóa đơn:", e);
-                window.toast("Không thể in hóa đơn lúc này!", "error");
+                if (typeof window.toast === 'function') window.toast("Không thể in hóa đơn lúc này!", "error");
             }
         },
 

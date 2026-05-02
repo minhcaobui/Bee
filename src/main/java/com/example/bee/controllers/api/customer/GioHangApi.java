@@ -11,6 +11,7 @@ import com.example.bee.repositories.products.SanPhamChiTietRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Isolation;
@@ -32,6 +33,9 @@ public class GioHangApi {
     private final GioHangChiTietRepository gioHangChiTietRepo;
     private final SanPhamChiTietRepository spctRepo;
     private final TaiKhoanRepository taiKhoanRepo;
+
+    // TIÊM BEAN ĐỂ GỬI WEBSOCKET MESSAGE
+    private final SimpMessagingTemplate messagingTemplate;
 
     private TaiKhoan getLoggedInUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -148,6 +152,9 @@ public class GioHangApi {
         gh.setCapNhatCuoi(LocalDateTime.now());
         gioHangRepo.save(gh);
 
+        // GỬI THÔNG BÁO QUA WEBSOCKET ĐỂ CÁC TAB KHÁC HOẶC CLIENT KHÁC UPDATE DỮ LIỆU
+        messagingTemplate.convertAndSend("/topic/public/stock", "STOCK_CHANGED");
+
         return ResponseEntity.ok(Map.of("message", "Đã thêm sản phẩm vào giỏ hàng!"));
     }
 
@@ -171,6 +178,7 @@ public class GioHangApi {
 
         if (soLuongMoi <= 0) {
             gioHangChiTietRepo.delete(item);
+            messagingTemplate.convertAndSend("/topic/public/stock", "STOCK_CHANGED");
             return ResponseEntity.ok(Map.of("message", "Đã xóa sản phẩm khỏi giỏ hàng"));
         }
 
@@ -191,6 +199,9 @@ public class GioHangApi {
         gh.setCapNhatCuoi(LocalDateTime.now());
         gioHangRepo.save(gh);
 
+        // GỬI THÔNG BÁO QUA WEBSOCKET
+        messagingTemplate.convertAndSend("/topic/public/stock", "STOCK_CHANGED");
+
         return ResponseEntity.ok(Map.of("message", "Cập nhật số lượng thành công"));
     }
 
@@ -207,6 +218,9 @@ public class GioHangApi {
             GioHang gh = item.getGioHang();
             gh.setCapNhatCuoi(LocalDateTime.now());
             gioHangRepo.save(gh);
+
+            // GỬI THÔNG BÁO QUA WEBSOCKET
+            messagingTemplate.convertAndSend("/topic/public/stock", "STOCK_CHANGED");
         }
 
         return ResponseEntity.ok(Map.of("message", "Đã xóa sản phẩm khỏi giỏ hàng"));
@@ -225,6 +239,9 @@ public class GioHangApi {
 
             gh.setCapNhatCuoi(LocalDateTime.now());
             gioHangRepo.save(gh);
+
+            // GỬI THÔNG BÁO QUA WEBSOCKET
+            messagingTemplate.convertAndSend("/topic/public/stock", "STOCK_CHANGED");
         }
 
         return ResponseEntity.ok(Map.of("message", "Đã dọn sạch giỏ hàng"));

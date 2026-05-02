@@ -653,9 +653,9 @@
             </div>
             <button class="sticky-btn" onclick="window.scrollTo({top:0, behavior:'smooth'})">Chọn &amp; Mua ngay</button>
         </div>
-
     </section>
-
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.2/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <script>
         window.DetailApp = {
             state: {
@@ -707,6 +707,52 @@
                 }
 
                 await this.fetchData();
+                this.connectWebSocket();
+            },
+
+            connectWebSocket: function() {
+                const socket = new SockJS('/ws');
+                const stompClient = Stomp.over(socket);
+
+                stompClient.debug = null; // Tắt log rác
+
+                stompClient.connect({}, (frame) => {
+                    console.log('Đã kết nối WebSockets (Chi tiết sản phẩm)');
+
+                    stompClient.subscribe('/topic/public/stock', async (message) => {
+                        if (message.body === "STOCK_CHANGED") {
+                            console.log("Có biến động kho, đang tự động đồng bộ...");
+
+                            try {
+                                const vRes = await fetch(`/api/products/${this.state.productId}/variants`);
+                                if (vRes.ok) {
+                                    this.state.variants = await vRes.json();
+
+                                    // 1. Tái tạo lại map màu/size từ dữ liệu mới nhất lỡ có sự thay đổi từ DB
+                                    const colorMap = new Map(), sizeMap = new Map();
+                                    this.state.variants.forEach(v => {
+                                        if (v.mauSac) colorMap.set(v.mauSac.id, v.mauSac);
+                                        if (v.kichThuoc) sizeMap.set(v.kichThuoc.id, v.kichThuoc);
+                                    });
+                                    this.state.uniqueColors = Array.from(colorMap.values());
+                                    this.state.uniqueSizes = this.sortSizes(Array.from(sizeMap.values()));
+
+                                    // 2. Ép giao diện vẽ lại toàn bộ dựa trên ID đã lưu (Giữ nguyên lựa chọn của khách)
+                                    this.renderColors();
+                                    this.renderSizes();
+
+                                    // 3. Cập nhật lại số lượng tồn kho và giá
+                                    this.updatePriceAndStock();
+                                }
+                            } catch (e) {
+                                console.error("Lỗi khi tải lại kho qua WebSocket:", e);
+                            }
+                        }
+                    });
+                }, (error) => {
+                    console.warn("Mất kết nối WebSockets, đang thử lại sau 5s...", error);
+                    setTimeout(() => this.connectWebSocket(), 5000);
+                });
             },
 
             getAvailableStock: function(variant) {

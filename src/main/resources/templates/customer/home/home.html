@@ -1055,7 +1055,8 @@
         </div>
     </div>
 
-
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.2/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <script>
         window.HomeApp = (function() {
 
@@ -1822,6 +1823,64 @@
                     window.location.hash = '#detail?id='+productId;
                 },
                 _carNext(id) { carouselReg[id]?._next(); }, _carPrev(id) { carouselReg[id]?._prev(); }, _carGoTo(id, idx) { carouselReg[id]?._goTo(idx); },
+
+                connectWebSocket() {
+                    const socket = new SockJS('/ws');
+                    const stompClient = Stomp.over(socket);
+
+                    stompClient.debug = null; // Tắt log rác
+
+                    stompClient.connect({}, (frame) => {
+                        console.log('Đã kết nối WebSockets (Trang chủ)');
+
+                        stompClient.subscribe('/topic/public/stock', async (message) => {
+                            if (message.body === "STOCK_CHANGED") {
+                                console.log("Có biến động kho, đồng bộ bảng chọn nhanh...");
+
+                                // Tìm xem có bảng chọn nhanh (Quick Select) nào đang mở không
+                                const openCard = document.querySelector('.product-card.show-selection');
+                                const openGlobal = document.getElementById('global-qs-modal');
+                                let activeId = null;
+                                let isGlobal = false;
+
+                                if (openCard) {
+                                    // Đang mở popup mua nhanh ở Grid sản phẩm
+                                    activeId = parseInt(openCard.id.replace('home-card-', ''));
+                                } else if (openGlobal && openGlobal.classList.contains('show')) {
+                                    // Đang mở popup mua nhanh ở phần Sản phẩm gợi ý / Sắp hết hàng
+                                    const qtyInput = openGlobal.querySelector('.qs-qty-input');
+                                    if (qtyInput) {
+                                        activeId = parseInt(qtyInput.id.replace('qs-qty-gl-', ''));
+                                        isGlobal = true;
+                                    }
+                                }
+
+                                // Nếu có bảng đang mở, tải lại đúng dữ liệu của sản phẩm đó và ép vẽ lại
+                                if (activeId) {
+                                    try {
+                                        const vRes = await fetch(`/api/products/${activeId}/variants`);
+                                        if (vRes.ok) {
+                                            const variants = await vRes.json();
+                                            const product = state.allProducts.find(p => p.id === activeId);
+                                            if (product) product.chiTietSanPhams = variants;
+
+                                            // Vẽ lại lựa chọn (Logic này bốc sẵn từ tempSel nên KHÔNG LÀM MẤT size/màu đang chọn)
+                                            if (isGlobal) {
+                                                pub.renderGlobalSelOpts(activeId);
+                                            } else {
+                                                renderSelOpts(activeId);
+                                            }
+                                        }
+                                    } catch(e) { console.error("Lỗi đồng bộ kho QS:", e); }
+                                }
+                            }
+                        });
+                    }, (error) => {
+                        console.warn("Mất kết nối WebSockets, thử lại sau 5s...", error);
+                        setTimeout(() => pub.connectWebSocket(), 5000);
+                    });
+                },
+
                 init() {
                     fetch('/api/khach-hang/my-profile').then(res => {
                         if (!res.ok) {
@@ -1855,8 +1914,12 @@
                             }, 150);
                         }
                     }, 80);
-                }
-            };
+
+                    // 🌟 ĐÃ DI CHUYỂN VÀO BÊN TRONG HÀM INIT
+                    this.connectWebSocket();
+                } // Dấu ngoặc đóng của hàm init()
+
+            }; // Dấu ngoặc đóng của đối tượng pub
             return pub;
 
         })();

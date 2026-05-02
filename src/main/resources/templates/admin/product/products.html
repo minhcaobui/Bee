@@ -161,9 +161,11 @@
         #vFormDrawer { width: 100%; max-width: 450px; z-index: 999995; }
         #bulkDrawer { width: 100%; max-width: 850px; z-index: 999995; }
         #stockDrawer { width: 100%; max-width: 400px; z-index: 999997; }
+        #priceDrawer { width: 100%; max-width: 400px; z-index: 999997; } /* THÊM CHO ĐỔI GIÁ */
 
         #vFormOverlay, #bulkOverlay { z-index: 999994; }
         #stockOverlay { z-index: 999996; }
+        #priceOverlay { z-index: 999996; } /* THÊM CHO ĐỔI GIÁ */
 
         .product-cell { display: flex; align-items: center; gap: 12px; }
         .product-img { width: 44px; height: 44px; border-radius: var(--border-radius); object-fit: cover; border: 1px solid var(--gray-200); background: var(--gray-100); }
@@ -564,6 +566,31 @@
     </div>
 </aside>
 
+<!-- DRAWER ĐỔI GIÁ HÀNG LOẠT MỚI THÊM -->
+<div id="priceOverlay" class="pd-overlay" onclick="ProductApp.closePriceForm()"></div>
+<aside class="drawer" id="priceDrawer">
+    <div class="drawer-header">
+        <h3 class="drawer-title">ĐỔI GIÁ HÀNG LOẠT</h3>
+        <button class="btn-icon" onclick="ProductApp.closePriceForm()" style="border:none; box-shadow:none; flex-shrink: 0;"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="drawer-body">
+        <div style="background:var(--gray-100); padding:15px; border-radius:var(--border-radius); margin-bottom:20px; border:1px solid var(--gray-200);">
+            <div style="font-size:11px; color:var(--sub); font-weight:700; text-transform: uppercase;">ĐỐI TƯỢNG ÁP DỤNG:</div>
+            <div id="pSkuCount" style="font-weight:700; font-size:14px; margin-top:4px; color:var(--text-main);">-</div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Giá bán mới (VNĐ) <span style="color:var(--danger-color)">*</span></label>
+            <input type="text" id="pInputPrice" class="form-input" placeholder="VD: 150,000" oninput="ProductApp.formatCurrencyInput(this)">
+            <div style="margin-top:12px; font-size: 13px; color:var(--sub); font-weight: 500;">
+                Giá này sẽ được áp dụng chung cho tất cả các SKU đang được chọn.
+            </div>
+        </div>
+    </div>
+    <div class="drawer-footer">
+        <button class="btn btn-primary" style="width:100%; height: 40px !important;" onclick="ProductApp.submitUpdatePrice()">XÁC NHẬN ĐỔI GIÁ</button>
+    </div>
+</aside>
+
 <script>
     window.escapeHtml = function(unsafe) {
         return (unsafe || '').toString()
@@ -576,6 +603,7 @@
 
     /* ========================================================================
        PROMPT DIALOG SYSTEM (DÀNH RIÊNG CHO SẢN PHẨM: ĐỔI GIÁ HÀNG LOẠT)
+       Đã được thay thế bằng Drawer ở phía dưới, có thể giữ lại hàm này nếu dùng cho việc khác
        ======================================================================== */
     window.promptDialog = function (title, placeholder, onConfirm) {
         let overlay = document.getElementById('productPromptOverlay');
@@ -1075,12 +1103,38 @@
             }
         },
 
+        /* ĐÃ SỬA THÀNH MỞ DRAWER ĐỔI GIÁ */
         triggerBulkPrice: function() {
-            if (typeof window.promptDialog === 'function') {
-                window.promptDialog("ĐỔI GIÁ HÀNG LOẠT", "Nhập giá bán mới (VNĐ)...", async (newPriceStr) => {
-                    const newPrice = parseFloat(newPriceStr);
-                    if (!newPrice || newPrice <= 0) { if(typeof window.toast === 'function') window.toast("Giá bán không hợp lệ", "error"); return; }
+            const count = this.state.selectedVariants.length;
+            if (count === 0) {
+                if(typeof window.toast === 'function') window.toast("Vui lòng chọn ít nhất 1 SKU để đổi giá!", "warning");
+                return;
+            }
+            document.getElementById('pSkuCount').textContent = `Đang chọn ${count} SKU`;
+            const input = document.getElementById('pInputPrice');
+            input.value = '';
 
+            document.getElementById('priceDrawer').classList.add('show');
+            document.getElementById('priceOverlay').classList.add('show');
+            setTimeout(() => input.focus(), 300);
+        },
+
+        closePriceForm: function() {
+            document.getElementById('priceDrawer').classList.remove('show');
+            document.getElementById('priceOverlay').classList.remove('show');
+        },
+
+        submitUpdatePrice: async function() {
+            const priceStr = document.getElementById('pInputPrice').value;
+            const newPrice = priceStr ? parseFloat(priceStr.replace(/,/g, '')) : null;
+
+            if (!newPrice || newPrice <= 0) {
+                if(typeof window.toast === 'function') window.toast("Vui lòng nhập giá bán hợp lệ!", "error");
+                return;
+            }
+
+            if (typeof window.confirmDialog === 'function') {
+                window.confirmDialog("XÁC NHẬN ĐỔI GIÁ", `Bạn sẽ áp dụng giá mới ${newPrice.toLocaleString('en-US')} ₫ cho ${this.state.selectedVariants.length} SKU đã chọn?`, async () => {
                     const ids = this.state.selectedVariants;
                     let successCount = 0;
                     if(typeof window.toast === 'function') window.toast(`Đang cập nhật giá cho ${ids.length} SKU...`, "warning");
@@ -1101,7 +1155,9 @@
 
                     await Promise.all(updatePromises);
                     if(typeof window.toast === 'function') window.toast(`Đổi giá thành công cho ${successCount}/${ids.length} SKU đã chọn.`, "success");
+
                     this.state.selectedVariants = [];
+                    this.closePriceForm(); // Đóng Drawer sau khi xong
                     this.loadVariants(this.state.currentProductId);
                     this.loadData();
                 });
@@ -1599,11 +1655,12 @@
             }
         },
 
-        /* --- QUẢN LÝ ĐÓNG MỞ DRAWER --- */
+        /* --- QUẢN LÝ ĐÓNG MỞ DRAWER CẬP NHẬT THÊM PRICE DRAWER --- */
         handleOverlayClick: function() {
             if (document.getElementById('bulkDrawer').classList.contains('show')) this.closeBulkDrawer();
             else if (document.getElementById('vFormDrawer').classList.contains('show')) this.closeVariantForm();
             else if (document.getElementById('stockDrawer').classList.contains('show')) this.closeStockForm();
+            else if (document.getElementById('priceDrawer').classList.contains('show')) this.closePriceForm();
             else if (document.getElementById('variantDrawer').classList.contains('show')) this.closeVariantDrawer();
             else this.closeDrawer();
         },

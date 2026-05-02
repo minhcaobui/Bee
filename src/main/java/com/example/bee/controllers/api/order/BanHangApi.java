@@ -717,8 +717,8 @@ public class BanHangApi {
         List<HoaDonChiTiet> listHdct = hdctRepo.findByHoaDonId(id);
 
         Map<String, Object> storeInfo = new HashMap<>();
-        storeInfo.put("tenCuaHang", "SHOP THỜI TRANG BEEMATE");
-        storeInfo.put("diaChi", "123 Đường Trịnh Văn Bô, Phúc Yên, Vĩnh Phúc");
+        storeInfo.put("tenCuaHang", "BEEMATE STORE");
+        storeInfo.put("diaChi", "13 phố Phan Tây Nhạc, phường Xuân Phương, Nam Từ Liêm, TP Hà Nội");
         storeInfo.put("soDienThoai", "0988.123.456");
 
         Map<String, Object> orderInfo = new HashMap<>();
@@ -774,9 +774,24 @@ public class BanHangApi {
         summary.put("tongThanhToan", tongPhaiTra);
 
         List<ThanhToan> ttListPrint = thanhToanRepo.findByHoaDon_Id(hd.getId());
-        String ptttPrint = "TIEN_MAT";
+        String ptttPrint = "Tiền mặt";
         if (ttListPrint != null && !ttListPrint.isEmpty()) {
-            ptttPrint = ttListPrint.get(0).getPhuongThuc();
+            String phuongThucDB = ttListPrint.get(0).getPhuongThuc();
+            if (phuongThucDB != null) {
+                if (phuongThucDB.equalsIgnoreCase("TIEN_MAT")) {
+                    ptttPrint = "Tiền mặt";
+                } else if (phuongThucDB.equalsIgnoreCase("CHUYEN_KHOAN")) {
+                    ptttPrint = "Chuyển khoản";
+                } else if (phuongThucDB.equalsIgnoreCase("MOMO")) {
+                    ptttPrint = "Ví MoMo";
+                } else if (phuongThucDB.equalsIgnoreCase("VNPAY")) {
+                    ptttPrint = "VNPay";
+                } else if (phuongThucDB.equalsIgnoreCase("COD")) {
+                    ptttPrint = "Thanh toán khi nhận hàng (COD)";
+                } else {
+                    ptttPrint = phuongThucDB;
+                }
+            }
         }
         summary.put("phuongThuc", ptttPrint);
 

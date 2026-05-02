@@ -60,7 +60,6 @@ public class HoaDonApi {
     private final ThanhToanRepository thanhToanRepo;
     private final GioHangRepository gioHangRepository;
     private final GioHangChiTietRepository gioHangChiTietRepository;
-
     private final GhnService ghnService;
 
     @Value("${momo.partnerCode}")
@@ -365,6 +364,15 @@ public class HoaDonApi {
         String phuongThucMoi = req.get("phuongThucThanhToan"); // Lấy phương thức thanh toán mới do NV chọn
 
         switch (currentMa) {
+            case "CHO_THANH_TOAN":
+                // Xử lý riêng cho đơn POS (Bán tại quầy) hoặc thanh toán tại quầy đang chờ thanh toán
+                if (hd.getLoaiHoaDon() != null && hd.getLoaiHoaDon() == 0) {
+                    nextMa = "HOAN_THANH";
+                    if(hd.getNgayThanhToan() == null) hd.setNgayThanhToan(new Date());
+                } else {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Đơn online đang chờ thanh toán, khách hàng cần tự thanh toán hoặc Admin có thể hủy đơn!");
+                }
+                break;
             case "CHO_XAC_NHAN":
                 nextMa = "DA_XAC_NHAN";
                 break;
@@ -475,6 +483,16 @@ public class HoaDonApi {
                     thongBaoRepository.save(tb);
                     break;
             }
+        }
+
+        try {
+            // Lấy tên đăng nhập (hoặc ID) của khách hàng để gửi đích danh
+            String username = hd.getKhachHang().getTaiKhoan().getTenDangNhap();
+            // Vì frontend của bạn đang subscribe kênh chung "/topic/public/notifications",
+            // ta tạm thời dùng kênh chung này để demo (Thực tế nên dùng /user/.../queue/notif)
+            messagingTemplate.convertAndSend("/topic/public/notifications", "NEW_CUSTOMER_NOTIF");
+        } catch (Exception e) {
+            System.out.println("Lỗi gửi WS: " + e.getMessage());
         }
 
         LichSuHoaDon ls = new LichSuHoaDon();
@@ -843,6 +861,7 @@ public class HoaDonApi {
                 // Đẩy chuỗi "NEW_ORDER" xuống kênh "/topic/admin/orders"
                 messagingTemplate.convertAndSend("/topic/admin/orders", "NEW_ORDER");
                 messagingTemplate.convertAndSend("/topic/public/stock", "STOCK_CHANGED");
+                messagingTemplate.convertAndSend("/topic/admin/notifications", "NEW_NOTIF");
             } catch (Exception e) {
                 System.out.println("Lỗi gửi WebSocket: " + e.getMessage());
             }
@@ -1097,8 +1116,8 @@ public class HoaDonApi {
         List<HoaDonChiTiet> listHdct = hdctRepo.findByHoaDonId(id);
         Map<String, Object> storeInfo = new HashMap<>();
         storeInfo.put("tenCuaHang", "BEEMATE STORE");
-        storeInfo.put("diaChi", "13 phố Phan Tây Nhạc, phường Xuân Phương, TP Hà Nội");
-        storeInfo.put("soDienThoai", "1900 3636");
+        storeInfo.put("diaChi", "13 phố Phan Tây Nhạc, phường Xuân Phương, Nam Từ Liêm, TP Hà Nội");
+        storeInfo.put("soDienThoai", "0988.123.456");
         Map<String, Object> orderInfo = new HashMap<>();
         orderInfo.put("maHoaDon", hd.getMa());
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
@@ -1182,9 +1201,24 @@ public class HoaDonApi {
         summary.put("chietKhauNV", chietKhauNV);
 
         List<ThanhToan> ttListPrint = thanhToanRepo.findByHoaDon_Id(hd.getId());
-        String ptttPrint = "TIEN_MAT";
+        String ptttPrint = "Tiền mặt";
         if (ttListPrint != null && !ttListPrint.isEmpty()) {
-            ptttPrint = ttListPrint.get(0).getPhuongThuc();
+            String phuongThucDB = ttListPrint.get(0).getPhuongThuc();
+            if (phuongThucDB != null) {
+                if (phuongThucDB.equalsIgnoreCase("TIEN_MAT")) {
+                    ptttPrint = "Tiền mặt";
+                } else if (phuongThucDB.equalsIgnoreCase("CHUYEN_KHOAN")) {
+                    ptttPrint = "Chuyển khoản";
+                } else if (phuongThucDB.equalsIgnoreCase("MOMO")) {
+                    ptttPrint = "Ví MoMo";
+                } else if (phuongThucDB.equalsIgnoreCase("VNPAY")) {
+                    ptttPrint = "VNPay";
+                } else if (phuongThucDB.equalsIgnoreCase("COD")) {
+                    ptttPrint = "Thanh toán khi nhận hàng (COD)";
+                } else {
+                    ptttPrint = phuongThucDB;
+                }
+            }
         }
         summary.put("phuongThuc", ptttPrint);
 
@@ -1565,10 +1599,44 @@ public class HoaDonApi {
     public ResponseEntity<Void> vnpayCallbackOnline(HttpServletRequest request) {
         String vnp_ResponseCode = request.getParameter("vnp_ResponseCode");
         String vnp_TxnRef = request.getParameter("vnp_TxnRef");
+        String vnp_SecureHash = request.getParameter("vnp_SecureHash");
 
         String redirectUrl = "https://beemate.store/customer#home";
 
         try {
+            // VÁ LỖI BẢO MẬT: Xác thực chữ ký điện tử (Checksum)
+            Map<String, String> fields = new HashMap<>();
+            for (Enumeration<String> params = request.getParameterNames(); params.hasMoreElements(); ) {
+                String fieldName = params.nextElement();
+                String fieldValue = request.getParameter(fieldName);
+                if ((fieldValue != null) && (fieldValue.length() > 0)) {
+                    fields.put(fieldName, fieldValue);
+                }
+            }
+            fields.remove("vnp_SecureHashType");
+            fields.remove("vnp_SecureHash");
+
+            List<String> fieldNames = new ArrayList<>(fields.keySet());
+            Collections.sort(fieldNames);
+            StringBuilder hashData = new StringBuilder();
+            for (Iterator<String> itr = fieldNames.iterator(); itr.hasNext(); ) {
+                String fieldName = itr.next();
+                String fieldValue = fields.get(fieldName);
+                if ((fieldValue != null) && (fieldValue.length() > 0)) {
+                    hashData.append(fieldName).append('=').append(java.net.URLEncoder.encode(fieldValue, java.nio.charset.StandardCharsets.UTF_8.toString()));
+                    if (itr.hasNext()) hashData.append('&');
+                }
+            }
+
+            String signValue = com.example.bee.utils.VnPayUtil.hmacSHA512(vnp_HashSecret.trim(), hashData.toString());
+
+            // So sánh chữ ký, nếu KHÔNG KHỚP -> Bị giả mạo URL
+            if (!signValue.equals(vnp_SecureHash)) {
+                System.err.println("CẢNH BÁO BẢO MẬT: Phát hiện giả mạo URL VNPay!");
+                return ResponseEntity.status(HttpStatus.FOUND).location(java.net.URI.create("https://beemate.store/customer#checkout?error=invalid_signature")).build();
+            }
+
+            // ... (Phần logic xử lý đơn hàng bên dưới giữ nguyên y hệt của bạn) ...
             if (vnp_TxnRef != null && vnp_TxnRef.contains("_")) {
                 String maHD = vnp_TxnRef.split("_")[0];
                 HoaDon hd = hdRepo.findByMa(maHD);
@@ -1853,7 +1921,7 @@ public class HoaDonApi {
         return ResponseEntity.status(HttpStatus.FOUND).location(java.net.URI.create(redirectUrl)).build();
     }
 
-    @PostMapping("/update-hold")
+    @PostMapping(value = "/update-hold", consumes = "application/json")
     @Transactional
     public ResponseEntity<?> updateHoldStockOnline(@RequestBody Map<String, Object> body) {
         Integer spctId = (Integer) body.get("spctId");
@@ -1864,11 +1932,16 @@ public class HoaDonApi {
 
         int currentHold = spct.getSoLuongTamGiu() == null ? 0 : spct.getSoLuongTamGiu();
 
+        // Chặn không cho giữ âm
+        if (currentHold + delta < 0) {
+            delta = -currentHold; // Nếu trừ lố thì chỉ trừ về 0
+        }
+
         if (delta > 0 && (spct.getSoLuong() - currentHold) < delta) {
             return ResponseEntity.badRequest().body(Map.of("message", "Kho không đủ đáp ứng!"));
         }
 
-        spct.setSoLuongTamGiu(Math.max(0, currentHold + delta));
+        spct.setSoLuongTamGiu(currentHold + delta);
         spctRepo.save(spct);
 
         try {

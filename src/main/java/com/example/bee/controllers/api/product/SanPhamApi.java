@@ -80,7 +80,7 @@ public class SanPhamApi {
 
                     if (activeSales != null && !activeSales.isEmpty()) {
                         KhuyenMai km = activeSales.get(0);
-                        if ("PERCENT".equals(km.getLoai())) {
+                        if ("PHAN_TRAM".equals(km.getLoai())) {
                             BigDecimal tyLe = km.getGiaTri().divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
                             BigDecimal tienGiam = giaGoc.multiply(tyLe).setScale(0, RoundingMode.HALF_UP);
                             giaSauKM = giaGoc.subtract(tienGiam);
@@ -123,7 +123,7 @@ public class SanPhamApi {
 
                 if (activeSales != null && !activeSales.isEmpty()) {
                     KhuyenMai km = activeSales.get(0);
-                    if ("PERCENT".equals(km.getLoai())) {
+                    if ("PHAN_TRAM".equals(km.getLoai())) {
                         BigDecimal tyLe = km.getGiaTri().divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
                         BigDecimal tienGiam = giaGoc.multiply(tyLe).setScale(0, RoundingMode.HALF_UP);
                         giaSauKM = giaGoc.subtract(tienGiam);
@@ -255,7 +255,7 @@ public class SanPhamApi {
 
             if (activeSales != null && !activeSales.isEmpty()) {
                 KhuyenMai km = activeSales.get(0);
-                if ("PERCENT".equals(km.getLoai())) {
+                if ("PHAN_TRAM".equals(km.getLoai())) {
                     BigDecimal tyLe = km.getGiaTri().divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
                     BigDecimal tienGiam = giaGoc.multiply(tyLe).setScale(0, RoundingMode.HALF_UP);
                     giaSauKM = giaGoc.subtract(tienGiam);

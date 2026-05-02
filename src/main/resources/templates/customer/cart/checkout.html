@@ -373,52 +373,54 @@
             },
 
             init: async function() {
-                // --- THÊM MỚI: BẮT SỰ KIỆN RỜI TRANG ĐỂ NHẢ TẠM GIỮ ---
+                // --- BẮT ĐẦU: LOGIC MUA NGAY & GIỮ KHO ---
                 const isBuyNowMode = window.location.hash.includes('mode=buynow');
+                this.isSuccess = false; // Cờ đánh dấu đã chốt đơn thành công chưa
+
                 if (isBuyNowMode) {
                     const releaseHold = () => {
-                        // Xóa bộ đếm nếu khách chủ động rời đi trước khi hết giờ
+                        // CHỈ NHẢ KHO KHI CHƯA CHỐT ĐƠN THÀNH CÔNG
+                        if (this.isSuccess) return;
+
                         if (this.holdTimeout) clearTimeout(this.holdTimeout);
 
                         const rawItems = JSON.parse(sessionStorage.getItem('bee_buy_now') || '[]');
-                        if (rawItems.length > 0 && !window.CheckoutApp.isSuccess) {
+                        if (rawItems.length > 0) {
                             const item = rawItems[0];
                             const spctId = item.idSanPhamChiTiet || item.skuId;
                             const qty = item.qty;
 
-                            // Dùng fetch với keepalive để API vẫn chạy ngầm khi tab bị đóng
-                            fetch('/api/hoa-don/update-hold', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ spctId: spctId, delta: -qty }),
-                                keepalive: true
-                            }).catch(e => console.log(e));
+                            // VÁ LỖI TRÌNH DUYỆT CHẶN FETCH: Dùng sendBeacon để gửi data lúc đóng tab
+                            const url = '/api/hoa-don/update-hold';
+                            const payload = JSON.stringify({ spctId: spctId, delta: -qty });
+                            const blob = new Blob([payload], { type: 'application/json' });
+                            navigator.sendBeacon(url, blob);
 
                             sessionStorage.removeItem('bee_buy_now');
                         }
                     };
 
-                    // Nếu khách đóng tab, tải lại trang
+                    // Bắt sự kiện F5, Đóng tab, Đóng trình duyệt
                     window.addEventListener('beforeunload', releaseHold);
-                    // Nếu khách bấm nút Back hoặc chuyển view khác
+
+                    // Bắt sự kiện bấm nút Back hoặc chuyển qua menu khác của website
                     window.addEventListener('hashchange', (e) => {
                         if (!e.newURL.includes('checkout?mode=buynow')) releaseHold();
                     });
 
-                    // --- CHỐNG TREO ĐƠN: TỰ ĐỘNG QUAY LẠI SAU 5 PHÚT ---
-                    const timeoutMinutes = 5; // Bạn có thể đổi số 5 thành số phút mong muốn
+                    // BỘ ĐẾM 5 PHÚT HỦY KHO TỰ ĐỘNG
+                    const timeoutMinutes = 5;
                     this.holdTimeout = setTimeout(() => {
-                        if (!window.CheckoutApp.isSuccess) {
+                        if (!this.isSuccess) {
                             if (window.showToast) window.showToast("Đã quá thời gian giữ hàng (5 phút), hệ thống tự động hủy thanh toán!", "error");
                             else alert("Đã quá thời gian giữ hàng (5 phút), hệ thống tự động hủy thanh toán!");
 
-                            // Lệnh này kích hoạt y hệt nút "Quay lại", khiến sự kiện hashchange chạy và gọi releaseHold nhả kho
-                            history.back();
+                            releaseHold(); // Chủ động gọi nhả kho
+                            window.location.hash = 'shop'; // Đuổi về trang shop
                         }
                     }, timeoutMinutes * 60 * 1000);
-                    // -----------------------------------------------------
                 }
-                // -----------------------------------------------------
+                // --- KẾT THÚC: LOGIC MUA NGAY & GIỮ KHO ---
 
                 this.state.deliveryMethod = localStorage.getItem('bee_delivery_method') || 'home';
                 await this.checkLoginStatus();

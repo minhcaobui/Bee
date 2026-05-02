@@ -21,13 +21,25 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.SecureRandom;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Controller
 @RequiredArgsConstructor
 public class DangNhapController {
 
-    private static final Map<String, String> otpForgotStorage = new HashMap<>();
+    // VÁ LỖI TRÀN RAM: Sử dụng ConcurrentHashMap và lưu kèm thời hạn sống của OTP
+    private static class OtpData {
+        String otp;
+        long expiryTime;
+        OtpData(String otp, long expiryTime) {
+            this.otp = otp;
+            this.expiryTime = expiryTime;
+        }
+    }
+    private static final Map<String, OtpData> otpForgotStorage = new ConcurrentHashMap<>();
+
     private final TaiKhoanRepository taiKhoanRepository;
     private final KhachHangRepository khachHangRepository;
     private final VaiTroRepository vaiTroRepository;
@@ -36,7 +48,7 @@ public class DangNhapController {
     private final JavaMailSender mailSender;
 
     private String generateMa() {
-        return "KH" + System.currentTimeMillis();
+        return "KH" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 
     @GetMapping("/login")
@@ -110,14 +122,17 @@ public class DangNhapController {
                 return ResponseEntity.badRequest().body("Không tìm thấy tài khoản nào liên kết với Email này!");
             }
 
-            String otp = String.format("%06d", new Random().nextInt(999999));
-            otpForgotStorage.put(email, otp);
+            SecureRandom random = new SecureRandom();
+            String otp = String.format("%06d", random.nextInt(999999));
+            long expiryTime = System.currentTimeMillis() + 5 * 60 * 1000; // Sống 5 phút
+            otpForgotStorage.put(email, new OtpData(otp, expiryTime));
 
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(email);
             message.setSubject("[BeeMate] MÃ OTP KHÔI PHỤC MẬT KHẨU");
             message.setText("Chào bạn,\n\nBạn đã yêu cầu khôi phục mật khẩu tại BeeMate.\n"
                     + "Mã xác thực OTP của bạn là: " + otp + "\n\n"
+                    + "Mã này sẽ hết hạn sau 5 phút.\n"
                     + "Tuyệt đối không chia sẻ mã này cho bất kỳ ai.\n"
                     + "Trân trọng,\nĐội ngũ BeeMate.");
             mailSender.send(message);
@@ -133,9 +148,13 @@ public class DangNhapController {
     @Transactional
     public ResponseEntity<?> resetPassword(@RequestParam String email, @RequestParam String otp) {
         try {
-            String savedOtp = otpForgotStorage.get(email);
-            if (savedOtp == null || !savedOtp.equals(otp)) {
-                return ResponseEntity.badRequest().body("Mã OTP không chính xác hoặc đã hết hạn!");
+            OtpData savedOtpData = otpForgotStorage.get(email);
+            if (savedOtpData == null || !savedOtpData.otp.equals(otp)) {
+                return ResponseEntity.badRequest().body("Mã OTP không chính xác!");
+            }
+            if (System.currentTimeMillis() > savedOtpData.expiryTime) {
+                otpForgotStorage.remove(email);
+                return ResponseEntity.badRequest().body("Mã OTP đã hết hạn, vui lòng gửi lại mã mới!");
             }
 
             KhachHang kh = khachHangRepository.findByEmail(email).orElse(null);

@@ -4,13 +4,10 @@ window.toggleSidebar = function() {
     const overlay = document.getElementById('sidebar-overlay');
 
     if (window.innerWidth <= 768) {
-        // Trên điện thoại: Trượt menu ra/vào và hiện overlay
         sidebar.classList.toggle('mobile-open');
         if (overlay) overlay.classList.toggle('show');
-        // Xoá class collapsed nếu có để tránh lỗi hiển thị
         sidebar.classList.remove('collapsed');
     } else {
-        // Trên máy tính: Thu nhỏ menu như bình thường
         sidebar.classList.toggle('collapsed');
         sidebar.classList.remove('mobile-open');
         if (overlay) overlay.classList.remove('show');
@@ -20,12 +17,10 @@ window.toggleSidebar = function() {
 function startClock() {
     const el = document.getElementById('realtimeClock');
     if (!el) return;
-
     function update() {
         const now = new Date();
         el.textContent = `${now.toLocaleTimeString('vi-VN', {hour12: false})} - ${now.toLocaleDateString('vi-VN')}`;
     }
-
     update();
     setInterval(update, 1000);
 }
@@ -37,11 +32,7 @@ window.showLoading = function () {
 
 window.hideLoading = function () {
     const loader = document.getElementById('globalLoader');
-    if (loader) {
-        setTimeout(() => {
-            loader.classList.remove('show');
-        }, 300);
-    }
+    if (loader) setTimeout(() => loader.classList.remove('show'), 300);
 };
 
 function toggleDropdown(id) {
@@ -53,8 +44,6 @@ function toggleDropdown(id) {
 
 function handleNotifClick() {
     toggleDropdown('notif-dropdown');
-    // Khi mở hộp thoại lên, không tắt luôn badge nếu vẫn còn data mới,
-    // nhưng trong logic thực tế ta có thể tắt để báo là đã xem.
     const badge = document.getElementById('notif-badge');
     if (badge) badge.style.display = 'none';
 }
@@ -66,19 +55,17 @@ window.addEventListener('click', e => {
 
 function confirmLogout(event) {
     if (event) {
-        event.preventDefault(); // Ngăn form tự động submit
-        event.stopPropagation(); // Ngăn sự kiện click lan ra ngoài
+        event.preventDefault();
+        event.stopPropagation();
     }
     document.getElementById('confirmOverlay').style.display = 'flex';
 }
 
 function executeLogout() {
-    // Tìm form có chứa đường dẫn logout của Spring Security và submit
     const logoutForm = document.querySelector('form[action*="logout"]');
     if (logoutForm) {
         logoutForm.submit();
     } else {
-        // Backup an toàn nếu không tìm thấy form
         window.location.href = '/logout';
     }
 }
@@ -88,7 +75,6 @@ function executeLogout() {
    ========================================= */
 window.toast = function(message, type = 'success') {
     let toastHost = document.getElementById('toastHost');
-
     if (!toastHost || toastHost.parentElement !== document.body) {
         if (toastHost) toastHost.remove();
         toastHost = document.createElement('div');
@@ -96,9 +82,7 @@ window.toast = function(message, type = 'success') {
         toastHost.className = 'toast-container';
         document.body.appendChild(toastHost);
     }
-
     toastHost.innerHTML = '';
-
     const toast = document.createElement('div');
     toast.className = `custom-toast toast-${type}`;
 
@@ -112,24 +96,17 @@ window.toast = function(message, type = 'success') {
         <span class="toast-msg">${message}</span>
         <button class="toast-close" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>
     `;
-
     toastHost.appendChild(toast);
-
     setTimeout(() => {
         toast.style.animation = 'slideOutRight 0.3s forwards';
         setTimeout(() => toast.remove(), 300);
     }, 3500);
 };
 
-/* =========================================
-   HÀM MODAL XÁC NHẬN DÙNG CHUNG
-   ========================================= */
 window.confirmDialog = function(title, message, onConfirmCallback) {
     let overlay = document.getElementById('genericConfirmOverlay');
-
     if (!overlay || overlay.parentElement !== document.body) {
         if (overlay) overlay.remove();
-
         overlay = document.createElement('div');
         overlay.id = 'genericConfirmOverlay';
         overlay.className = 'overlay';
@@ -146,7 +123,6 @@ window.confirmDialog = function(title, message, onConfirmCallback) {
         `;
         document.body.appendChild(overlay);
     }
-
     const titleEl = document.getElementById('genericConfirmTitle');
     const msgEl = document.getElementById('genericConfirmMsg');
     const btnOk = document.getElementById('btnGenericOk');
@@ -154,65 +130,54 @@ window.confirmDialog = function(title, message, onConfirmCallback) {
 
     titleEl.innerHTML = `<i class="bi bi-question-circle" style="color: var(--primary); font-size: 18px;"></i> ${title}`;
     msgEl.innerHTML = message;
-
     overlay.style.display = 'flex';
-
-    btnOk.onclick = null;
-    btnCancel.onclick = null;
 
     btnOk.onclick = function() {
         overlay.style.display = 'none';
-        if (typeof onConfirmCallback === 'function') {
-            onConfirmCallback();
-        }
+        if (typeof onConfirmCallback === 'function') onConfirmCallback();
     };
-
-    btnCancel.onclick = function() {
-        overlay.style.display = 'none';
-    };
+    btnCancel.onclick = function() { overlay.style.display = 'none'; };
 };
-
-document.addEventListener('DOMContentLoaded', () => {
-    startClock();
-
-    document.querySelectorAll('.sidebar-item').forEach(item => {
-        item.addEventListener('click', () => {
-            if (window.innerWidth <= 768) {
-                document.getElementById('main-sidebar').classList.remove('mobile-open');
-                const overlay = document.getElementById('sidebar-overlay');
-                if (overlay) overlay.classList.remove('show');
-            }
-        });
-    });
-});
-
-document.addEventListener("DOMContentLoaded", function () {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('error') && urlParams.get('error') === '403') {
-        if (typeof window.toast === 'function') {
-            window.toast('Bạn không có quyền truy cập vào chức năng này!', 'error');
-        } else {
-            alert('Bạn không có quyền truy cập vào chức năng này!');
-        }
-        const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-        window.history.replaceState({path: cleanUrl}, '', cleanUrl);
-    }
-});
 
 /* =========================================
    HỆ THỐNG THÔNG BÁO MỚI (ORDERS & REVIEWS)
    ========================================= */
 const NotifApp = {
-    lastOrderId: null,
-    lastReviewId: null,
-    pollingInterval: 10000,
+    lastOrderId: localStorage.getItem('admin_last_order_id') || 0,
+    lastReviewId: localStorage.getItem('admin_last_review_id') || 0,
     hasNewOrders: false,
     hasNewReviews: false,
+    justReceivedRealtime: false,
 
     init: function() {
         this.bindDropdownEvent();
         this.fetchAllData();
-        setInterval(() => this.fetchAllData(), this.pollingInterval);
+        this.connectWebSocket();
+    },
+
+    connectWebSocket: function() {
+        if (typeof SockJS === 'undefined' || typeof Stomp === 'undefined') {
+            console.error("❌ Thư viện SockJS hoặc StompJS chưa được tải!");
+            return;
+        }
+
+        const socket = new SockJS('/ws');
+        const stompClient = Stomp.over(socket);
+        stompClient.debug = null;
+
+        stompClient.connect({}, (frame) => {
+            console.log('✅ Đã kết nối WebSockets (Thông báo Admin)');
+            stompClient.subscribe('/topic/admin/notifications', (message) => {
+                if (message.body === "NEW_NOTIF") {
+                    console.log("🔔 Có thông báo mới cho Admin, đang tự động tải lại...");
+                    this.justReceivedRealtime = true;
+                    this.fetchAllData();
+                }
+            });
+        }, (error) => {
+            console.warn("Mất kết nối WebSockets, đang thử lại sau 5s...", error);
+            setTimeout(() => this.connectWebSocket(), 5000);
+        });
     },
 
     bindDropdownEvent: function() {
@@ -224,15 +189,20 @@ const NotifApp = {
             btn.onclick = (e) => {
                 e.stopPropagation();
                 dropdown.classList.toggle('show');
-                this.updateBadgeDisplay(false); // Ẩn badge khi mở
+                this.updateBadgeDisplay(false);
+
+                if (this.hasNewOrders) {
+                    localStorage.setItem('admin_last_order_id', this.lastOrderId);
+                    this.hasNewOrders = false;
+                    document.querySelectorAll('#notif-orders-content .notif-item.unread').forEach(item => item.classList.remove('unread'));
+                }
+                if (this.hasNewReviews) {
+                    localStorage.setItem('admin_last_review_id', this.lastReviewId);
+                    this.hasNewReviews = false;
+                    document.querySelectorAll('#notif-reviews-content .notif-item.unread').forEach(item => item.classList.remove('unread'));
+                }
             };
         }
-
-        document.addEventListener('click', (e) => {
-            if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) {
-                dropdown.classList.remove('show');
-            }
-        });
     },
 
     switchTab: function(tabName) {
@@ -257,7 +227,6 @@ const NotifApp = {
     updateBadgeDisplay: function(forceShow = null) {
         const badge = document.getElementById('notif-badge');
         if (!badge) return;
-
         if (forceShow !== null) {
             badge.style.display = forceShow ? 'block' : 'none';
         } else {
@@ -267,16 +236,13 @@ const NotifApp = {
         }
     },
 
-    // ===== PHẦN ĐƠN HÀNG =====
     fetchOrderNotifications: async function() {
         try {
             const res = await fetch('/api/hoa-don/thong-bao-moi');
             if (!res.ok) return;
             const data = await res.json();
             this.renderOrdersUI(data);
-        } catch (error) {
-            console.error("Lỗi lấy thông báo đơn hàng:", error);
-        }
+        } catch (error) { console.error("Lỗi lấy thông báo đơn hàng:", error); }
     },
 
     renderOrdersUI: function(orders) {
@@ -294,23 +260,25 @@ const NotifApp = {
         }
 
         const newestOrderId = orders[0].id;
-        if (this.lastOrderId !== null && newestOrderId > this.lastOrderId) {
+        if (newestOrderId > parseInt(this.lastOrderId)) {
             this.hasNewOrders = true;
             this.updateBadgeDisplay();
-            this.playDingSound();
-            if(window.toast) {
-                window.toast(`Có đơn hàng online mới: #${orders[0].ma}`, "success");
+            if (this.justReceivedRealtime) {
+                this.playDingSound();
+                if(window.toast) window.toast(`Có đơn hàng online mới: #${orders[0].ma}`, "success");
+                this.justReceivedRealtime = false;
             }
+            this.lastOrderId = newestOrderId;
         }
-        this.lastOrderId = newestOrderId;
 
         let html = '<div class="notif-list">';
         orders.forEach(ord => {
             const total = new Intl.NumberFormat('vi-VN').format(ord.tongTien || 0) + ' đ';
             const timeAgo = this.timeSince(ord.ngayTao);
+            const isUnread = ord.id > parseInt(localStorage.getItem('admin_last_order_id') || 0) ? 'unread' : '';
 
             html += `
-                <div class="notif-item" onclick="NotifApp.goToOrder()">
+                <div class="notif-item ${isUnread}" onclick="NotifApp.goToOrder()">
                     <div class="notif-icon order"><i class="bi bi-bag-check-fill"></i></div>
                     <div class="notif-content">
                         <div class="notif-title">Đơn hàng mới: #${ord.ma}</div>
@@ -320,24 +288,17 @@ const NotifApp = {
                 </div>`;
         });
         html += '</div>';
-        html += `<div style="text-align:center; padding:12px; border-top:1px solid var(--border); font-size:12px; font-weight:600; cursor:pointer; color:var(--primary); background:var(--panel-hover);" onclick="NotifApp.goToOrder()">
-                    XEM TẤT CẢ HÓA ĐƠN <i class="bi bi-arrow-right"></i>
-                 </div>`;
-
+        html += `<div style="text-align:center; padding:12px; border-top:1px solid var(--border); font-size:12px; font-weight:600; cursor:pointer; color:var(--primary); background:var(--panel-hover);" onclick="NotifApp.goToOrder()">XEM TẤT CẢ HÓA ĐƠN <i class="bi bi-arrow-right"></i></div>`;
         content.innerHTML = html;
     },
 
-    // ===== PHẦN ĐÁNH GIÁ =====
     fetchReviewNotifications: async function() {
         try {
-            // LƯU Ý: Chỗ này cần có API tương ứng trên Java Spring Boot của bạn
             const res = await fetch('/api/khach-hang/danh-gia/thong-bao-moi');
             if (!res.ok) return;
             const data = await res.json();
             this.renderReviewsUI(data);
         } catch (error) {
-            console.error("Lỗi lấy thông báo đánh giá:", error);
-            // Backup giao diện trống nếu chưa có API
             const content = document.getElementById('notif-reviews-content');
             if (content && content.innerHTML.includes("Đang tải")) {
                 content.innerHTML = `
@@ -364,15 +325,16 @@ const NotifApp = {
         }
 
         const newestReviewId = reviews[0].id;
-        if (this.lastReviewId !== null && newestReviewId > this.lastReviewId) {
+        if (newestReviewId > parseInt(this.lastReviewId)) {
             this.hasNewReviews = true;
             this.updateBadgeDisplay();
-            this.playDingSound();
-            if(window.toast) {
-                window.toast(`Có đánh giá mới từ khách hàng!`, "info");
+            if (this.justReceivedRealtime) {
+                this.playDingSound();
+                if(window.toast) window.toast(`Có đánh giá mới từ khách hàng!`, "info");
+                this.justReceivedRealtime = false;
             }
+            this.lastReviewId = newestReviewId;
         }
-        this.lastReviewId = newestReviewId;
 
         let html = '<div class="notif-list">';
         reviews.forEach(rev => {
@@ -382,9 +344,10 @@ const NotifApp = {
                 if(i < (rev.soSao || 5)) starsHtml += '<i class="bi bi-star-fill" style="color: #ca8a04;"></i>';
                 else starsHtml += '<i class="bi bi-star" style="color: #cbd5e1;"></i>';
             }
+            const isUnread = rev.id > parseInt(localStorage.getItem('admin_last_review_id') || 0) ? 'unread' : '';
 
             html += `
-                <div class="notif-item" onclick="NotifApp.goToReviews()">
+                <div class="notif-item ${isUnread}" onclick="NotifApp.goToReviews()">
                     <div class="notif-icon review"><i class="bi bi-star-fill"></i></div>
                     <div class="notif-content">
                         <div class="notif-title">${rev.khachHang || 'Khách hàng'} vừa đánh giá</div>
@@ -397,10 +360,7 @@ const NotifApp = {
                 </div>`;
         });
         html += '</div>';
-        html += `<div style="text-align:center; padding:12px; border-top:1px solid var(--border); font-size:12px; font-weight:600; cursor:pointer; color:var(--primary); background:var(--panel-hover);" onclick="NotifApp.goToReviews()">
-                    ĐI TỚI TRANG ĐÁNH GIÁ <i class="bi bi-arrow-right"></i>
-                 </div>`;
-
+        html += `<div style="text-align:center; padding:12px; border-top:1px solid var(--border); font-size:12px; font-weight:600; cursor:pointer; color:var(--primary); background:var(--panel-hover);" onclick="NotifApp.goToReviews()">ĐI TỚI TRANG ĐÁNH GIÁ <i class="bi bi-arrow-right"></i></div>`;
         content.innerHTML = html;
     },
 
@@ -418,7 +378,7 @@ const NotifApp = {
         try {
             const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
             audio.volume = 0.3;
-            audio.play().catch(e => console.log("Trình duyệt chặn autoplay âm thanh"));
+            audio.play().catch(e => console.log("Browser chặn âm thanh tự động"));
         } catch(e){}
     },
 
@@ -426,7 +386,6 @@ const NotifApp = {
         if (!dateStr) return "Gần đây";
         const date = new Date(dateStr.replace(/-/g, '/'));
         const seconds = Math.floor((new Date() - date) / 1000);
-
         let interval = seconds / 31536000;
         if (interval > 1) return Math.floor(interval) + " năm trước";
         interval = seconds / 2592000;
@@ -441,12 +400,18 @@ const NotifApp = {
     }
 };
 
+// Khởi chạy hệ thống sau khi load DOM
 document.addEventListener("DOMContentLoaded", () => {
+    startClock();
     NotifApp.init();
-});
 
-setInterval(() => {
-    if(typeof fetchNotifications === 'function') {
-        fetchNotifications();
-    }
-}, 30000);
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                document.getElementById('main-sidebar').classList.remove('mobile-open');
+                const overlay = document.getElementById('sidebar-overlay');
+                if (overlay) overlay.classList.remove('show');
+            }
+        });
+    });
+});

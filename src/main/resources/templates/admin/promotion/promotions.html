@@ -413,7 +413,11 @@
                 const isChecked = e.target.checked;
                 this.state.filteredProducts.forEach(p => {
                     if (isChecked) {
-                        if (!this.state.selectedProductIds.includes(p.id)) this.state.selectedProductIds.push(p.id);
+                        // CHỈ CHỌN NHỮNG SẢN PHẨM KHÔNG BỊ TRÙNG KHUYẾN MÃI
+                        const isProdDisabled = !this.state.selectedProductIds.includes(p.id) && p.tenKhuyenMai;
+                        if (!isProdDisabled && !this.state.selectedProductIds.includes(p.id)) {
+                            this.state.selectedProductIds.push(p.id);
+                        }
                     } else {
                         this.state.selectedProductIds = [];
                         this.state.selectedSkuIds = [];
@@ -895,7 +899,6 @@
 
         openView: async function(id) {
             await this.openEdit(id);
-            this.setFormState(true);
             const isSale = this.state.activeTab === 'sale';
             document.getElementById('drawerTitle').innerText = isSale ? "CHI TIẾT ĐỢT SALE" : "CHI TIẾT VOUCHER";
 
@@ -916,6 +919,9 @@
                 document.getElementById('checkAll').style.display = 'none';
                 document.getElementById('selectedCount').innerText = `(Chỉ hiển thị các mục đang áp dụng)`;
             }
+
+            // CHUYỂN DÒNG NÀY XUỐNG DƯỚI CÙNG SAU KHI ĐÃ RENDER LẠI BẢNG ĐỂ NÓ KHÓA CHÍNH XÁC CÁC CHECKBOX
+            this.setFormState(true);
         },
 
         quickToggle: async function(id, currentState) {
@@ -1048,24 +1054,44 @@
         renderProductSelectionTable: function (data) {
             let html = '';
             data.forEach(p => {
+                // Kiểm tra Sản phẩm có được tick ở đợt KM HIỆN TẠI không
                 const isProdChecked = this.state.selectedProductIds.includes(p.id);
+                // Kiểm tra xem có bị trùng với đợt Sale khác (Dựa trên trường tenKhuyenMai từ API)
+                const isProdDisabled = !isProdChecked && p.tenKhuyenMai;
+
+                const tdStyleProd = isProdDisabled ? 'background: #e2e8f0; opacity: 0.6; pointer-events: none;' : 'background: var(--gray-100); border-bottom: 2px solid var(--gray-200);';
+                const prodBadge = isProdDisabled ? `<span style="font-size: 11px; color: #dc2626; margin-left: 10px; font-style: italic;"><i class="bi bi-info-circle"></i> Đang chạy: ${window.escapeHtml(p.tenKhuyenMai)}</span>` : '';
+
                 html += `<tr class="prod-row">
-                    <td style="text-align:center;"><input type="checkbox" class="product-check v-checkbox" style="width:14px; height:14px; cursor:pointer;" value="${p.id}" ${isProdChecked?'checked':''} onchange="window.PromotionApp.toggleSelection(${p.id}, this.checked, 'PRODUCT')"></td>
-                    <td style="font-weight:700; color:var(--text-main);">${window.escapeHtml(p.ma)}</td>
-                    <td style="font-weight:600;">${window.escapeHtml(p.ten)}</td>
+                    <td style="text-align:center; ${tdStyleProd}"><input type="checkbox" class="product-check v-checkbox" style="width:14px; height:14px; cursor:pointer;" value="${p.id}" ${isProdChecked?'checked':''} ${isProdDisabled?'disabled':''} onchange="window.PromotionApp.toggleSelection(${p.id}, this.checked, 'PRODUCT')"></td>
+                    <td style="font-weight:700; color:var(--text-main); ${tdStyleProd}">${window.escapeHtml(p.ma)}</td>
+                    <td style="font-weight:600; ${tdStyleProd}">${window.escapeHtml(p.ten)} ${prodBadge}</td>
                 </tr>`;
 
                 if (p.skus && p.skus.length > 0) {
                     p.skus.forEach(sku => {
                         const isSkuChecked = this.state.selectedSkuIds.includes(sku.id);
-                        // Khi Sản phẩm được tick -> SKU tự động được tick theo và disable để tránh người dùng chọn lộn xộn
-                        const disabledState = isProdChecked ? 'disabled checked' : '';
-                        const actuallyChecked = isProdChecked || isSkuChecked ? 'checked' : '';
+                        const isSkuDisabled = !isSkuChecked && !isProdChecked && sku.tenKhuyenMai;
+
+                        let disabledState = '';
+                        let actuallyChecked = '';
+
+                        if (isProdChecked) {
+                            disabledState = 'disabled';
+                            actuallyChecked = 'checked';
+                        } else if (isSkuChecked) {
+                            actuallyChecked = 'checked';
+                        } else if (isSkuDisabled) {
+                            disabledState = 'disabled';
+                        }
+
+                        const tdStyleSku = isSkuDisabled ? 'background: #f8fafc; opacity: 0.6; pointer-events: none; border-bottom: 1px dashed var(--gray-200);' : 'background: #ffffff; border-bottom: 1px dashed var(--gray-200);';
+                        const skuBadge = isSkuDisabled ? `<span style="font-size: 11px; color: #dc2626; margin-left: 10px; font-style: italic;"><i class="bi bi-info-circle"></i> Đang chạy: ${window.escapeHtml(sku.tenKhuyenMai)}</span>` : '';
 
                         html += `<tr class="sku-row">
-                            <td style="text-align:center;"><input type="checkbox" class="sku-check v-checkbox" style="width:12px; height:12px; cursor:pointer;" value="${sku.id}" ${actuallyChecked} ${disabledState} onchange="window.PromotionApp.toggleSelection(${sku.id}, this.checked, 'SKU')"></td>
-                            <td style="padding-left: 25px; font-size: 12px; color: var(--sub);">↳ ${window.escapeHtml(sku.sku)}</td>
-                            <td style="font-size: 12px; color: var(--sub);">Phân loại: <span style="font-weight:500; color:var(--text-main);">${window.escapeHtml(sku.ten)}</span></td>
+                            <td style="text-align:center; ${tdStyleSku}"><input type="checkbox" class="sku-check v-checkbox" style="width:12px; height:12px; cursor:pointer;" value="${sku.id}" ${actuallyChecked} ${disabledState} onchange="window.PromotionApp.toggleSelection(${sku.id}, this.checked, 'SKU')"></td>
+                            <td style="padding-left: 25px; font-size: 12px; color: var(--sub); ${tdStyleSku}">↳ ${window.escapeHtml(sku.sku)}</td>
+                            <td style="font-size: 12px; color: var(--sub); ${tdStyleSku}">Phân loại: <span style="font-weight:500; color:var(--text-main);">${window.escapeHtml(sku.ten)}</span> ${skuBadge}</td>
                         </tr>`;
                     });
                 }

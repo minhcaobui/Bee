@@ -471,7 +471,9 @@
                                 <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Icon-VNPAY-QR.png" style="width:28px; height:28px; object-fit:contain; margin-bottom:8px;">
                                 <span style="font-size: 11px; font-weight: 600;">VNPAY</span>
                             </div>
-                            <div class="payment-option" data-method="CHUYEN_KHOAN" onclick="OrderApp.selectApp(this)">
+                            <!-- THAY ĐỔI Ở ĐÂY: Vô hiệu hóa nút Chuyển Khoản -->
+                            <div class="payment-option" style="opacity: 0.5; cursor: not-allowed; position: relative; overflow: hidden; background: #f8fafc;" title="Tính năng đang được nâng cấp">
+                                <div style="position: absolute; top: 12px; right: -28px; background: #ef4444; color: #ffffff; font-size: 9px; font-weight: 700; padding: 4px 30px; transform: rotate(45deg); letter-spacing: 0.5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">BẢO TRÌ</div>
                                 <i class="bi bi-bank" style="font-size: 24px; color: var(--text-muted); margin-bottom: 6px;"></i>
                                 <span style="font-size: 11px; font-weight: 600; text-align: center; color: var(--text-muted);">CHUYỂN KHOẢN</span>
                             </div>
@@ -1184,12 +1186,18 @@
                     btnHuyHtml = `<button class="btn-icon btn-danger" title="Hủy đơn" onclick="OrderApp.huyDon(${hd.id})"><i class="bi bi-x-lg"></i></button>`;
                 }
 
+                let btnInHtml = '';
+                if (isHistory && hd.trangThaiHoaDon && hd.trangThaiHoaDon.ma === 'HOAN_THANH') {
+                    btnInHtml = `<button class="btn-icon" title="In hóa đơn" style="color:var(--success); border-color:#bbf7d0; background:#f0fdf4;" onclick="event.stopPropagation(); OrderApp.inHoaDon(${hd.id})"><i class="bi bi-printer"></i></button>`;
+                }
+
                 trContent += `
                     <td>${loaiDonHtml}</td>
                     <td style="font-size:12px; color:var(--text-muted);">${timeToDisplay}</td>
                     <td style="text-align:center;">${trangThaiBadge}</td>
                     <td style="text-align:right; white-space: nowrap;">
                         <button class="btn-icon" title="Xem chi tiết" onclick="OrderApp.openDetail(${hd.id})"><i class="bi bi-eye"></i></button>
+                        ${btnInHtml}
                         ${btnHuyHtml}
                     </td>`;
 
@@ -1495,6 +1503,194 @@
             document.getElementById('timeline').innerHTML = html;
         },
 
+        inHoaDon: async function(idHoaDon) {
+            try {
+                const res = await fetch(`/api/hoa-don/${idHoaDon}/print-data`);
+                if (!res.ok) throw new Error("Không lấy được dữ liệu in");
+                const data = await res.json();
+
+                // Hàm format tiền bỏ chữ đ đi để tiết kiệm không gian trên giấy in nhiệt
+                const formatTien = (num) => new Intl.NumberFormat('vi-VN').format(num);
+
+                let htmlContent = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>In hóa đơn ${data.order.maHoaDon}</title>
+                        <style>
+                            @page { margin: 0; }
+                            body {
+                                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                                width: 80mm;
+                                margin: 0 auto;
+                                padding: 10px 15px;
+                                font-size: 12px;
+                                color: #000;
+                                line-height: 1.5;
+                                box-sizing: border-box;
+                            }
+                            .text-center { text-align: center; }
+                            .text-right { text-align: right; }
+                            .text-left { text-align: left; }
+                            .font-bold { font-weight: bold; }
+
+                            .store-name { font-size: 18px; font-weight: 800; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;}
+                            .store-info { font-size: 11px; margin-bottom: 2px; }
+
+                            .divider { border-top: 1px dashed #000; margin: 10px 0; }
+                            .divider-thick { border-top: 2px solid #000; margin: 12px 0; }
+
+                            .invoice-title { font-size: 16px; font-weight: bold; margin: 12px 0 8px 0; text-transform: uppercase; }
+                            .order-info { font-size: 11px; display: flex; justify-content: space-between; margin-bottom: 4px; }
+
+                            table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+                            th { padding: 6px 0; border-bottom: 1px dashed #000; font-size: 11px; text-transform: uppercase;}
+                            td { padding: 8px 0; vertical-align: top; font-size: 12px; }
+                            .item-name { font-weight: bold; margin-bottom: 4px; display: block; font-size: 13px;}
+                            .item-meta { font-size: 11px; color: #444; }
+
+                            .summary-container { margin-top: 12px; }
+                            .summary-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px; }
+                            .summary-row.total { font-size: 18px; font-weight: bold; margin-top: 8px; padding-top: 8px; border-top: 1px solid #000; }
+
+                            .account-box { border: 1px dashed #000; padding: 10px; margin-top: 15px; text-align: center; border-radius: 6px; background-color: #fafafa;}
+                            .account-box p { margin: 4px 0; font-size: 11px; }
+
+                            .footer { text-align: center; margin-top: 20px; font-size: 11px; font-style: italic; color: #333;}
+                        </style>
+                    </head>
+                    <body>
+                        <div class="text-center">
+                            <div class="store-name">${data.store.tenCuaHang}</div>
+                            <div class="store-info">${data.store.diaChi}</div>
+                            <div class="store-info">Hotline: ${data.store.soDienThoai}</div>
+                        </div>
+
+                        <div class="divider"></div>
+                        <div class="text-center invoice-title">HÓA ĐƠN BÁN HÀNG</div>
+
+                        <div class="order-info"><span>Số hóa đơn:</span> <span class="font-bold">${data.order.maHoaDon}</span></div>
+                        <div class="order-info"><span>Ngày in:</span> <span>${data.order.ngayTao}</span></div>
+                        <div class="order-info"><span>Thu ngân:</span> <span>${data.order.thuNgan}</span></div>
+                        <div class="order-info"><span>Khách hàng:</span> <span>${data.order.tenKhachHang}</span></div>
+
+                        <div class="divider"></div>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="text-left" style="width: 55%;">Tên SP</th>
+                                    <th class="text-center" style="width: 15%;">SL</th>
+                                    <th class="text-right" style="width: 30%;">T.Tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                data.items.forEach(item => {
+                    htmlContent += `
+                        <tr>
+                            <td class="text-left">
+                                <span class="item-name">${item.ten}</span>
+                                <span class="item-meta">${formatTien(item.donGia)}</span>
+                            </td>
+                            <td class="text-center font-bold" style="font-size: 14px;">${item.soLuong}</td>
+                            <td class="text-right font-bold">${formatTien(item.thanhTien)}</td>
+                        </tr>
+                    `;
+                });
+
+                htmlContent += `
+                            </tbody>
+                        </table>
+
+                        <div class="divider-thick"></div>
+
+                        <div class="summary-container">
+                            <div class="summary-row">
+                                <span>Tổng tiền hàng:</span>
+                                <span>${formatTien(data.summary.tongTienHang)}</span>
+                            </div>
+                `;
+
+                if (data.summary.giamGia > 0) {
+                    htmlContent += `
+                            <div class="summary-row">
+                                <span>Giảm giá/Voucher:</span>
+                                <span>- ${formatTien(data.summary.giamGia)}</span>
+                            </div>`;
+                }
+                if (data.summary.phiVanChuyen > 0) {
+                    htmlContent += `
+                            <div class="summary-row">
+                                <span>Phí vận chuyển:</span>
+                                <span>${formatTien(data.summary.phiVanChuyen)}</span>
+                            </div>`;
+                }
+
+                htmlContent += `
+                            <div class="summary-row total">
+                                <span>KHÁCH TRẢ:</span>
+                                <span>${formatTien(data.summary.tongThanhToan)} đ</span>
+                            </div>
+                        </div>
+
+                        <div class="divider"></div>
+                        <div class="text-center" style="font-size: 12px; margin-top: 8px;">
+                            Thanh toán bằng: <b>${data.summary.phuongThuc}</b>
+                        </div>
+                `;
+
+                if (data.order.inThongTinTaiKhoan) {
+                    htmlContent += `
+                        <div class="account-box">
+                            <p class="font-bold" style="font-size: 13px;">THÔNG TIN TÀI KHOẢN</p>
+                            <p>Web: <b>beemate.store</b></p>
+                            <p>Tài khoản: <b>${data.order.sdtKhachHang}</b></p>
+                            <p>Mật khẩu: <b style="font-size: 14px;">123456</b></p>
+                            <p style="font-size: 10px; margin-top: 4px; color: #666;">(Đăng nhập để tích điểm & nhận ưu đãi)</p>
+                        </div>
+                    `;
+                }
+
+                htmlContent += `
+                        <div class="footer">
+                            <p>Cảm ơn quý khách đã mua sắm tại BeeMate!</p>
+                            <p>Vui lòng giữ lại hóa đơn để đổi trả trong 7 ngày.</p>
+                        </div>
+                    </body>
+                    </html>
+                `;
+
+                let printFrame = document.getElementById('hidden-print-frame');
+                if (!printFrame) {
+                    printFrame = document.createElement('iframe');
+                    printFrame.id = 'hidden-print-frame';
+                    printFrame.style.position = 'absolute';
+                    printFrame.style.width = '0';
+                    printFrame.style.height = '0';
+                    printFrame.style.border = '0';
+                    document.body.appendChild(printFrame);
+                }
+
+                const frameDoc = printFrame.contentWindow.document;
+                frameDoc.open();
+                frameDoc.write(htmlContent);
+                frameDoc.close();
+
+                // Đợi load xong css rồi mới in
+                setTimeout(() => {
+                    printFrame.contentWindow.focus();
+                    printFrame.contentWindow.print();
+                }, 500);
+
+            } catch (e) {
+                console.error("Lỗi in hóa đơn:", e);
+                if (typeof window.toast === 'function') window.toast("Không thể in hóa đơn lúc này!", "error");
+            }
+        },
+
         renderActions: function(hd) {
             const footer = document.getElementById('drawerFooter');
             footer.innerHTML = '';
@@ -1566,8 +1762,22 @@
             footer.innerHTML = '';
             const currentMa = hd.trangThaiMa;
 
-            if (!['HOAN_THANH', 'DA_HUY', 'DA_DOI', 'DA_TRA', 'TU_CHOI_TRA_HANG', 'DA_HOAN_HANG'].includes(currentMa)) {
-                footer.innerHTML = `<div style="width:100%; text-align:center; font-weight:500; color:var(--text-muted); padding:10px 0;">Hóa đơn tại quầy đang chờ xử lý thanh toán.</div>`;
+            if (currentMa === 'CHO_THANH_TOAN') {
+                const btnHuy = document.createElement('button');
+                btnHuy.className = 'btn btn-secondary';
+                btnHuy.style.cssText = 'flex:1; color:var(--danger); border-color:var(--danger);';
+                btnHuy.innerHTML = '<i class="bi bi-x-lg"></i> Hủy đơn';
+                btnHuy.onclick = () => this.huyDon(hd.id);
+                footer.appendChild(btnHuy);
+
+                const btnThanhToan = document.createElement('button');
+                btnThanhToan.className = 'btn btn-primary';
+                btnThanhToan.style.cssText = 'flex:2;';
+                btnThanhToan.innerHTML = 'Tiếp tục thanh toán <i class="bi bi-credit-card"></i>';
+                btnThanhToan.onclick = () => this.confirmStorePickupPayment(); // Dùng chung hàm thanh toán cực chuẩn
+                footer.appendChild(btnThanhToan);
+            } else if (!['HOAN_THANH', 'DA_HUY', 'DA_DOI', 'DA_TRA', 'TU_CHOI_TRA_HANG', 'DA_HOAN_HANG'].includes(currentMa)) {
+                footer.innerHTML = `<div style="width:100%; text-align:center; font-weight:500; color:var(--text-muted); padding:10px 0;">Hóa đơn tại quầy đang chờ xử lý.</div>`;
             } else {
                 footer.innerHTML = `<div style="width:100%; text-align:center; font-weight:500; color:var(--text-muted); padding:10px 0;">Hóa đơn tại quầy đã đóng.</div>`;
             }
@@ -1761,7 +1971,17 @@
                                 body: JSON.stringify(payload)
                             });
                             if (!res.ok) throw new Error("Chuyển trạng thái thất bại");
+
+                            const dataRes = await res.json();
+
                             if (typeof window.toast === 'function') window.toast("Cập nhật trạng thái thành công!", "success");
+
+                            // AUTO PRINT LOGIC
+                            const hd = this.state.currentOrder;
+                            if (dataRes.nextStatusMa === 'HOAN_THANH' && hd && hd.hinhThucGiaoHang === 'NHAN_TAI_CUA_HANG') {
+                                this.inHoaDon(id);
+                            }
+
                             this.loadData();
                             this.openDetail(id);
                         } catch (err) {

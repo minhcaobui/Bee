@@ -930,15 +930,47 @@
         <button class="notif-modal-action" id="notifPopBtn" onclick="window.NotificationApp.navigateFromPopup()">XEM CHI TIẾT</button>
     </div>
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.2/dist/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 <script src="/js/customer-router.js"></script>
 <script>
-    /* ── NOTIFICATION APP ── */
     window.NotificationApp = {
         notifications: [],
         currentPopNotif: null,
 
-        init: async function() { await this.fetchData(); },
+        init: async function() {
+            await this.fetchData();
+            this.connectWebSocket(); // Khởi chạy lắng nghe
+        },
+
+        connectWebSocket: function() {
+            const socket = new SockJS('/ws');
+            const stompClient = Stomp.over(socket);
+            stompClient.debug = null;
+
+            stompClient.connect({}, (frame) => {
+                console.log('✅ Đã kết nối WebSockets (Thông báo Khách hàng)');
+
+                // Lắng nghe kênh thông báo chung của khách hàng
+                stompClient.subscribe('/topic/public/notifications', (message) => {
+                    if (message.body === "NEW_CUSTOMER_NOTIF") {
+                        console.log("🔔 Có thông báo mới cho khách hàng, đang tự động tải lại...");
+                        this.fetchData();
+
+                        // Lắc nhẹ icon chuông để gây chú ý
+                        const bellBtn = document.querySelector('.notif-bell-btn i');
+                        if (bellBtn) {
+                            bellBtn.style.animation = 'cartBounce 0.4s ease';
+                            setTimeout(() => bellBtn.style.animation = '', 400);
+                        }
+                    }
+                });
+            }, (error) => {
+                console.warn("Mất kết nối WebSockets, đang thử lại sau 5s...", error);
+                setTimeout(() => this.connectWebSocket(), 5000);
+            });
+        },
+
         fetchData: async function() {
             try {
                 const res = await fetch('/api/thong-bao/my-notifications');
@@ -1625,8 +1657,6 @@
     document.addEventListener('DOMContentLoaded', () => {
         if (window.CartHelper && typeof window.CartHelper.updateBadge === 'function') window.CartHelper.updateBadge();
     });
-
-    setInterval(() => { if(window.NotificationApp) window.NotificationApp.fetchData(); }, 30000);
 </script>
 
 <div id="searchOverlay" style="position:fixed;inset:0;z-index:9000;background:rgba(255,255,255,0.97);backdrop-filter:blur(16px);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s ease;">    <button onclick="closeSearch()" style="position:absolute;top:28px;right:48px;background:none;border:none;cursor:pointer;font-family:var(--main-font);font-size:11px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:10px;transition:color .2s" onmouseenter="this.style.color='var(--text)'" onmouseleave="this.style.color='var(--muted)'">Đóng <i class="fa-solid fa-xmark"></i></button>
