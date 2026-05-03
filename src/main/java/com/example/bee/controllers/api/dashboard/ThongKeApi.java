@@ -3,9 +3,11 @@ package com.example.bee.controllers.api.dashboard;
 import com.example.bee.repositories.dashboard.DashboardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.text.NumberFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,10 +28,14 @@ public class ThongKeApi {
         LocalDate today = LocalDate.now();
         return switch (period) {
             case "today" -> new LocalDateTime[]{today.atStartOfDay(), today.atTime(23, 59, 59)};
-            case "week" -> new LocalDateTime[]{today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).atStartOfDay(), today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)).atTime(23, 59, 59)};
-            case "month" -> new LocalDateTime[]{today.withDayOfMonth(1).atStartOfDay(), today.withDayOfMonth(today.lengthOfMonth()).atTime(23, 59, 59)};
-            case "year" -> new LocalDateTime[]{today.withDayOfYear(1).atStartOfDay(), today.withDayOfYear(today.lengthOfYear()).atTime(23, 59, 59)};
-            default -> new LocalDateTime[]{LocalDate.parse(from).atStartOfDay(), LocalDate.parse(to).atTime(23, 59, 59)};
+            case "week" ->
+                    new LocalDateTime[]{today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).atStartOfDay(), today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)).atTime(23, 59, 59)};
+            case "month" ->
+                    new LocalDateTime[]{today.withDayOfMonth(1).atStartOfDay(), today.withDayOfMonth(today.lengthOfMonth()).atTime(23, 59, 59)};
+            case "year" ->
+                    new LocalDateTime[]{today.withDayOfYear(1).atStartOfDay(), today.withDayOfYear(today.lengthOfYear()).atTime(23, 59, 59)};
+            default ->
+                    new LocalDateTime[]{LocalDate.parse(from).atStartOfDay(), LocalDate.parse(to).atTime(23, 59, 59)};
         };
     }
 
@@ -40,7 +46,6 @@ public class ThongKeApi {
             case "month" -> new LocalDateTime[]{cur[0].minusMonths(1), cur[1].minusMonths(1)};
             case "year" -> new LocalDateTime[]{cur[0].minusYears(1), cur[1].minusYears(1)};
             default -> {
-                // TÍNH ĐÚNG KHOẢNG CÁCH NGÀY ĐỂ TRỪ CHO CHÍNH XÁC KỲ TRƯỚC
                 long daysBetween = ChronoUnit.DAYS.between(cur[0], cur[1]) + 1;
                 yield new LocalDateTime[]{cur[0].minusDays(daysBetween), cur[1].minusDays(daysBetween)};
             }
@@ -48,7 +53,6 @@ public class ThongKeApi {
     }
 
     private double calcChg(double cur, double prev) {
-        // TRẢ VỀ 0 NẾU PREV = 0 ĐỂ TRÁNH DIVISION BY ZERO HAY HIỂN THỊ 100% VÔ LÝ
         if (prev == 0) return 0.0;
         return Math.round((cur - prev) / prev * 1000.0) / 10.0;
     }
@@ -57,25 +61,20 @@ public class ThongKeApi {
     public ResponseEntity<?> stats(@RequestParam(defaultValue = "week") String type, @RequestParam(required = false) String startDate, @RequestParam(required = false) String endDate) {
         LocalDateTime[] cur = getRange(type, startDate, endDate);
         LocalDateTime[] prev = getPrevRange(type, cur);
-
         List<Object[]> cList = repo.getStats(cur[0], cur[1]);
         List<Object[]> pList = repo.getStats(prev[0], prev[1]);
-
         Object[] c = cList.isEmpty() ? new Object[8] : cList.get(0);
         Object[] p = pList.isEmpty() ? new Object[8] : pList.get(0);
-
         double rev = c[0] != null ? ((Number) c[0]).doubleValue() : 0;
         double ord = c[1] != null ? ((Number) c[1]).doubleValue() : 0;
         double pend = c[3] != null ? ((Number) c[3]).doubleValue() : 0;
         double canc = c[4] != null ? ((Number) c[4]).doubleValue() : 0;
         double comp = c[5] != null ? ((Number) c[5]).doubleValue() : 0;
         double sold = c[6] != null ? ((Number) c[6]).doubleValue() : 0;
-
         double pRev = p[0] != null ? ((Number) p[0]).doubleValue() : 0;
         double pComp = p[5] != null ? ((Number) p[5]).doubleValue() : 0;
         double pCanc = p[4] != null ? ((Number) p[4]).doubleValue() : 0;
         double pSold = p[6] != null ? ((Number) p[6]).doubleValue() : 0;
-
         Map<String, Object> res = new HashMap<>();
         res.put("doanhThu", rev);
         res.put("doanhThuRatio", calcChg(rev, pRev));
@@ -98,20 +97,17 @@ public class ThongKeApi {
             case "year" -> repo.getChartMonth(cur[0], cur[1]);
             default -> repo.getChartDay(cur[0], cur[1]);
         };
-
         Map<Integer, long[]> curMap = new LinkedHashMap<>();
         curRows.forEach(r -> curMap.put(((Number) r[0]).intValue(), new long[]{((Number) r[1]).longValue(), ((Number) r[2]).longValue()}));
-
         List<String> labels = switch (type) {
             case "today" -> IntStream.rangeClosed(7, 21).mapToObj(h -> h + "h").toList();
             case "week" -> List.of("T2", "T3", "T4", "T5", "T6", "T7", "CN");
             case "year" -> List.of("T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10", "T11", "T12");
-            default -> IntStream.rangeClosed(1, cur[0].toLocalDate().lengthOfMonth()).mapToObj(String::valueOf).toList();
+            default ->
+                    IntStream.rangeClosed(1, cur[0].toLocalDate().lengthOfMonth()).mapToObj(String::valueOf).toList();
         };
-
         List<Long> revList = new ArrayList<>();
         List<Long> ordList = new ArrayList<>();
-
         for (int i = 0; i < labels.size(); i++) {
             int key = switch (type) {
                 case "today" -> i + 7;
@@ -123,7 +119,6 @@ public class ThongKeApi {
             revList.add(cv[0]);
             ordList.add(cv[1]);
         }
-
         Map<String, Object> chartRes = new HashMap<>();
         chartRes.put("labels", labels);
         chartRes.put("doanhThu", revList);
@@ -135,7 +130,6 @@ public class ThongKeApi {
     public ResponseEntity<?> chartTrangThai(@RequestParam(defaultValue = "week") String type, @RequestParam(required = false) String startDate, @RequestParam(required = false) String endDate) {
         LocalDateTime[] cur = getRange(type, startDate, endDate);
         List<Object[]> rows = repo.getOrderStatusesRatio(cur[0], cur[1]);
-
         List<Map<String, Object>> result = rows.stream().map(r -> {
             Map<String, Object> m = new HashMap<>();
             m.put("tenTrangThai", r[0].toString());
@@ -143,7 +137,6 @@ public class ThongKeApi {
             m.put("soLuong", ((Number) r[2]).longValue());
             return m;
         }).collect(Collectors.toList());
-
         return ResponseEntity.ok(result);
     }
 
@@ -151,7 +144,6 @@ public class ThongKeApi {
     public ResponseEntity<?> topProducts(@RequestParam(defaultValue = "week") String type, @RequestParam(required = false) String startDate, @RequestParam(required = false) String endDate) {
         LocalDateTime[] cur = getRange(type, startDate, endDate);
         List<Object[]> rows = repo.getTopProducts(cur[0], cur[1]);
-
         List<Map<String, Object>> result = rows.stream().map(r -> {
             Map<String, Object> m = new HashMap<>();
             m.put("id", ((Number) r[0]).intValue());

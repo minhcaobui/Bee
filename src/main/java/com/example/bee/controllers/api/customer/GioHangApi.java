@@ -33,8 +33,6 @@ public class GioHangApi {
     private final GioHangChiTietRepository gioHangChiTietRepo;
     private final SanPhamChiTietRepository spctRepo;
     private final TaiKhoanRepository taiKhoanRepo;
-
-    // TIÊM BEAN ĐỂ GỬI WEBSOCKET MESSAGE
     private final SimpMessagingTemplate messagingTemplate;
 
     private TaiKhoan getLoggedInUser() {
@@ -52,30 +50,24 @@ public class GioHangApi {
         if (tk == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Vui lòng đăng nhập"));
         }
-
         GioHang gh = gioHangRepo.findByTaiKhoan_Id(tk.getId()).orElse(null);
         if (gh == null) {
             gh = new GioHang();
             gh.setTaiKhoan(tk);
             gh = gioHangRepo.save(gh);
         }
-
         List<GioHangChiTiet> chiTiets = gioHangChiTietRepo.findByGioHang_Id(gh.getId());
-
         List<Map<String, Object>> result = new ArrayList<>();
         for (GioHangChiTiet ct : chiTiets) {
             SanPhamChiTiet spct = ct.getSanPhamChiTiet();
             if (spct == null) continue;
-
             Map<String, Object> item = new HashMap<>();
             item.put("id", ct.getId());
             item.put("idSanPhamChiTiet", spct.getId());
-
             String tenSp = spct.getSanPham() != null ? spct.getSanPham().getTen() : "Sản phẩm";
             Integer idSp = spct.getSanPham() != null ? spct.getSanPham().getId() : 0;
             String tenMau = spct.getMauSac() != null ? spct.getMauSac().getTen() : "";
             String tenKichThuoc = spct.getKichThuoc() != null ? spct.getKichThuoc().getTen() : "";
-
             item.put("idSanPham", idSp);
             item.put("tenSanPham", tenSp);
             item.put("thuocTinh", tenMau + " - " + tenKichThuoc);
@@ -83,11 +75,8 @@ public class GioHangApi {
             item.put("giaBan", spct.getGiaBan());
             item.put("giaSauKhuyenMai", spct.getGiaSauKhuyenMai() != null ? spct.getGiaSauKhuyenMai() : spct.getGiaBan());
             item.put("soLuongTrongGio", ct.getSoLuong());
-
-            // BẢO MẬT LOGIC KHO: Phải trả về số lượng KHẢ DỤNG cho Frontend
             Integer slKhaDung = Math.max(0, spct.getSoLuong() - (spct.getSoLuongTamGiu() != null ? spct.getSoLuongTamGiu() : 0));
             item.put("soLuongTonKho", slKhaDung);
-
             item.put("trangThai", spct.getTrangThai());
             result.add(item);
         }
@@ -95,7 +84,6 @@ public class GioHangApi {
         return ResponseEntity.ok(result);
     }
 
-    // BẢO MẬT RACE CONDITION: Thêm Isolation.READ_COMMITTED để chặn người khác đọc/lưu sai số lượng khi click liên tục
     @PostMapping("/them")
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public ResponseEntity<?> addToCart(@RequestBody Map<String, Integer> payload) {
@@ -103,7 +91,6 @@ public class GioHangApi {
         if (tk == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Vui lòng đăng nhập để thêm vào giỏ hàng"));
         }
-
         Integer spctId = payload.get("idSanPhamChiTiet");
         Integer soLuongThem = payload.get("soLuong");
         if (soLuongThem == null) soLuongThem = 1;
@@ -111,26 +98,19 @@ public class GioHangApi {
         if (spctId == null || soLuongThem <= 0) {
             return ResponseEntity.badRequest().body(Map.of("message", "Dữ liệu không hợp lệ"));
         }
-
         SanPhamChiTiet spct = spctRepo.findById(spctId).orElse(null);
         if (spct == null || !spct.getTrangThai()) {
             return ResponseEntity.badRequest().body(Map.of("message", "Sản phẩm không tồn tại hoặc đã ngừng kinh doanh"));
         }
-
         GioHang gh = gioHangRepo.findByTaiKhoan_Id(tk.getId()).orElse(null);
         if (gh == null) {
             gh = new GioHang();
             gh.setTaiKhoan(tk);
             gh = gioHangRepo.save(gh);
         }
-
         GioHangChiTiet existingItem = gioHangChiTietRepo.findByGioHang_IdAndSanPhamChiTiet_Id(gh.getId(), spctId);
-
-        // BẢO MẬT LOGIC KHO: Tính Số lượng Khả Dụng thực tế
         int slKhaDung = Math.max(0, spct.getSoLuong() - (spct.getSoLuongTamGiu() != null ? spct.getSoLuongTamGiu() : 0));
-
         if (existingItem != null) {
-            // Không tính số lượng đã có trong giỏ hàng vì nó thuộc về giỏ hàng hiện tại, chỉ check khoảng thêm mới
             if (soLuongThem > slKhaDung) {
                 return ResponseEntity.badRequest().body(Map.of("message", "Kho không đủ số lượng để thêm!"));
             }
@@ -148,13 +128,9 @@ public class GioHangApi {
             newItem.setNgayThem(LocalDateTime.now());
             gioHangChiTietRepo.save(newItem);
         }
-
         gh.setCapNhatCuoi(LocalDateTime.now());
         gioHangRepo.save(gh);
-
-        // GỬI THÔNG BÁO QUA WEBSOCKET ĐỂ CÁC TAB KHÁC HOẶC CLIENT KHÁC UPDATE DỮ LIỆU
         messagingTemplate.convertAndSend("/topic/public/stock", "STOCK_CHANGED");
-
         return ResponseEntity.ok(Map.of("message", "Đã thêm sản phẩm vào giỏ hàng!"));
     }
 
@@ -163,45 +139,32 @@ public class GioHangApi {
     public ResponseEntity<?> updateCartItem(@RequestBody Map<String, Integer> payload) {
         TaiKhoan tk = getLoggedInUser();
         if (tk == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
         Integer idGioHangChiTiet = payload.get("idGioHangChiTiet");
         Integer soLuongMoi = payload.get("soLuong");
-
         if (idGioHangChiTiet == null || soLuongMoi == null) {
             return ResponseEntity.badRequest().body(Map.of("message", "Dữ liệu không hợp lệ"));
         }
-
         GioHangChiTiet item = gioHangChiTietRepo.findById(idGioHangChiTiet).orElse(null);
         if (item == null || !item.getGioHang().getTaiKhoan().getId().equals(tk.getId())) {
             return ResponseEntity.badRequest().body(Map.of("message", "Không tìm thấy sản phẩm trong giỏ"));
         }
-
         if (soLuongMoi <= 0) {
             gioHangChiTietRepo.delete(item);
             messagingTemplate.convertAndSend("/topic/public/stock", "STOCK_CHANGED");
             return ResponseEntity.ok(Map.of("message", "Đã xóa sản phẩm khỏi giỏ hàng"));
         }
-
         SanPhamChiTiet spct = item.getSanPhamChiTiet();
-        // BẢO MẬT LOGIC KHO: Cập nhật giỏ hàng cần so với tổng khả dụng nếu tăng số lượng
         int slKhaDung = Math.max(0, spct.getSoLuong() - (spct.getSoLuongTamGiu() != null ? spct.getSoLuongTamGiu() : 0));
-
         int soChenhLechTangThem = soLuongMoi - item.getSoLuong();
-
         if (soChenhLechTangThem > 0 && soChenhLechTangThem > slKhaDung) {
             return ResponseEntity.badRequest().body(Map.of("message", "Kho chỉ còn " + slKhaDung + " sản phẩm khả dụng"));
         }
-
         item.setSoLuong(soLuongMoi);
         gioHangChiTietRepo.save(item);
-
         GioHang gh = item.getGioHang();
         gh.setCapNhatCuoi(LocalDateTime.now());
         gioHangRepo.save(gh);
-
-        // GỬI THÔNG BÁO QUA WEBSOCKET
         messagingTemplate.convertAndSend("/topic/public/stock", "STOCK_CHANGED");
-
         return ResponseEntity.ok(Map.of("message", "Cập nhật số lượng thành công"));
     }
 
@@ -210,19 +173,14 @@ public class GioHangApi {
     public ResponseEntity<?> deleteCartItem(@PathVariable("idGioHangChiTiet") Integer idGioHangChiTiet) {
         TaiKhoan tk = getLoggedInUser();
         if (tk == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
         GioHangChiTiet item = gioHangChiTietRepo.findById(idGioHangChiTiet).orElse(null);
         if (item != null && item.getGioHang().getTaiKhoan().getId().equals(tk.getId())) {
             gioHangChiTietRepo.delete(item);
-
             GioHang gh = item.getGioHang();
             gh.setCapNhatCuoi(LocalDateTime.now());
             gioHangRepo.save(gh);
-
-            // GỬI THÔNG BÁO QUA WEBSOCKET
             messagingTemplate.convertAndSend("/topic/public/stock", "STOCK_CHANGED");
         }
-
         return ResponseEntity.ok(Map.of("message", "Đã xóa sản phẩm khỏi giỏ hàng"));
     }
 
@@ -231,19 +189,14 @@ public class GioHangApi {
     public ResponseEntity<?> clearCart() {
         TaiKhoan tk = getLoggedInUser();
         if (tk == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
         GioHang gh = gioHangRepo.findByTaiKhoan_Id(tk.getId()).orElse(null);
         if (gh != null) {
             List<GioHangChiTiet> chiTiets = gioHangChiTietRepo.findByGioHang_Id(gh.getId());
             gioHangChiTietRepo.deleteAll(chiTiets);
-
             gh.setCapNhatCuoi(LocalDateTime.now());
             gioHangRepo.save(gh);
-
-            // GỬI THÔNG BÁO QUA WEBSOCKET
             messagingTemplate.convertAndSend("/topic/public/stock", "STOCK_CHANGED");
         }
-
         return ResponseEntity.ok(Map.of("message", "Đã dọn sạch giỏ hàng"));
     }
 }

@@ -26,14 +26,12 @@ public class UploadApi {
                     .body(Collections.singletonMap("message", "File trống!"));
         }
 
-        // BẢO MẬT: Kiểm tra cứng loại file
         String contentType = file.getContentType();
         if (contentType == null || !contentType.startsWith("image/") || contentType.contains("svg")) {
             return ResponseEntity.badRequest()
                     .body(Collections.singletonMap("message", "Chỉ chấp nhận các định dạng file ảnh chuẩn (JPEG, PNG, WEBP)!"));
         }
 
-        // BẢO MẬT: Kiểm tra dung lượng (Tối đa 2MB)
         if (file.getSize() > 2 * 1024 * 1024) {
             return ResponseEntity.badRequest()
                     .body(Collections.singletonMap("message", "Kích thước ảnh quá lớn. Vui lòng tải ảnh dưới 2MB!"));

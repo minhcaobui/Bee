@@ -1681,7 +1681,13 @@
                         body: JSON.stringify(payload)
                     });
 
-                    if (!res.ok) throw new Error("Lỗi khi tạo đơn hàng");
+                    // Bắt chính xác lỗi mà Backend trả về ở đây
+                    if (!res.ok) {
+                        let errData = {};
+                        try { errData = await res.json(); } catch(e) {}
+                        throw new Error(errData.message || "Lỗi khi tạo đơn hàng");
+                    }
+
                     const responseData = await res.json();
                     const invoiceId = responseData.id || responseData.invoiceId;
                     const maHD = responseData.ma || ('HD' + invoiceId);
@@ -1772,7 +1778,11 @@
 
                 } catch (error) {
                     console.error("Lỗi đặt hàng:", error);
-                    alert("Có lỗi xảy ra, vui lòng thử lại sau!");
+                    // Cập nhật Toast/Alert để bung chính xác lỗi mà Backend trả về
+                    if (window.hideLoading) window.hideLoading();
+                    if (window.showToast) window.showToast(error.message || "Có lỗi xảy ra, vui lòng thử lại sau!", "error");
+                    else alert(error.message || "Có lỗi xảy ra, vui lòng thử lại sau!");
+
                     btnSubmit.innerText = 'Chốt đơn ngay';
                     btnSubmit.disabled = false;
                 }

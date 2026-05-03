@@ -88,7 +88,6 @@ public class MauSacApi {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Không thể ngừng hoạt động! Đang có sản phẩm sử dụng màu sắc này.");
             }
         }
-
         entity.setTen(newTen);
         entity.setTrangThai(newTrangThai != null ? newTrangThai : entity.getTrangThai());
         return mauSacRepository.save(entity);

@@ -2,7 +2,6 @@ package com.example.bee.configs;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -29,15 +28,12 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // 1. MỞ KHÓA CHO GIAO DIỆN KHÁCH VÃNG LAI VÀ TÀI NGUYÊN TĨNH
                         .requestMatchers(
                                 "/", "/home", "/about", "/shop/**", "/detail/**", "/cart/**", "/checkout/**",
                                 "/register", "/login", "/forgot-password/**",
                                 "/css/**", "/js/**", "/images/**", "/uploads/**", "/customer/**", "/ws/**",
                                 "/api/hoa-don/**"
                         ).permitAll()
-
-                        // 2. MỞ KHÓA API CHO KHÁCH VÃNG LAI (Catalog, Giỏ hàng, Checkout)
                         .requestMatchers(
                                 "/api/products/**",
                                 "/api/san-pham/**",
@@ -54,28 +50,22 @@ public class SecurityConfig {
                                 "/api/chatbot/**",
                                 "/api/gio-hang/**"
                         ).permitAll()
-
                         .requestMatchers(HttpMethod.PATCH, "/api/hoa-don/*/huy").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/hoa-don/momo-payment/*").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/hoa-don/vnpay-payment/*").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/hoa-don/*/confirm-transfer").permitAll()
-
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/khach-hang/reviews/**").permitAll()
-
                         .requestMatchers(
                                 "/dashboards/**",
                                 "/returns/**",
                                 "/api/thong-ke/**",
                                 "/staff/**"
                         ).hasAuthority("ROLE_ADMIN")
-
                         .requestMatchers(
                                 "/api/nhan-vien/my-profile",
                                 "/api/nhan-vien/change-password"
                         ).hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
-
                         .requestMatchers("/api/nhan-vien/**").hasAuthority("ROLE_ADMIN")
-
                         .requestMatchers(
                                 "/api/upload",
                                 "/api/khach-hang/reviews/**",
@@ -90,7 +80,6 @@ public class SecurityConfig {
                                 "/api/hoa-don/**",
                                 "/api/thong-bao/**"
                         ).hasAnyAuthority("ROLE_CUSTOMER", "ROLE_STAFF", "ROLE_ADMIN")
-
                         .requestMatchers(
                                 "/admin/**",
                                 "/products/**",
@@ -99,7 +88,6 @@ public class SecurityConfig {
                                 "/api/reviews/**",
                                 "/api/**"
                         ).hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
-
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

@@ -67,13 +67,18 @@ window.CartHelper = {
             return await res.json(); // An toàn thì dịch
         }
         const text = await res.text();
-        console.error("🚨 Server không trả về JSON. Nội dung thực tế là:", text);
+        console.error("Server không trả về JSON. Nội dung thực tế là:", text);
         return null;
     },
 
     async getCart() {
         try {
             const res = await fetch('/api/gio-hang', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+
+            // ĐÃ FIX TẠI ĐÂY: Nếu là khách (401/403), ngắt ngay và trả về giỏ hàng Local
+            if (res.status === 401 || res.status === 403) {
+                return JSON.parse(localStorage.getItem('bee_cart') || '[]');
+            }
 
             if (res.ok) {
                 const data = await this.safeJson(res);
@@ -214,7 +219,7 @@ async function loadModule(moduleName) {
     const module = moduleMap[moduleName];
     if (!module) {
         window.hideLoading();
-        console.warn(`[Router] Module "${moduleName}" không tồn tại`);
+        console.warn(`Module "${moduleName}" không tồn tại`);
         return;
     }
 
@@ -245,7 +250,7 @@ async function loadModule(moduleName) {
         }, 180);
 
     } catch (err) {
-        console.error('[Router] Lỗi tải module:', err);
+        console.error('Lỗi tải module:', err);
         contentArea.innerHTML = `
             <div style="text-align:center;padding:100px 20px;font-family:'DM Sans',sans-serif;">
                 <div style="font-size:48px;margin-bottom:16px;">😕</div>
@@ -281,7 +286,7 @@ function executeScripts(container, moduleName) {
             try {
                 eval(oldScript.innerHTML);
             } catch (e) {
-                console.error(`[Router] ❌ Lỗi script ${moduleName}:`, e);
+                console.error(`Lỗi script ${moduleName}:`, e);
             }
         }
         oldScript.remove();
@@ -324,7 +329,7 @@ window.updateCartBadge = async function() {
             badge.style.display = count > 0 ? 'flex' : 'none';
         }
     } catch (e) {
-        console.warn('[Cart] Không thể cập nhật badge:', e);
+        console.warn('Không thể cập nhật badge:', e);
     }
 };
 

@@ -70,7 +70,6 @@ public class ChatLieuApi {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên chất liệu này đã tồn tại!");
         if (chatLieuRepository.existsByMaIgnoreCase(ma))
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã chất liệu này đã tồn tại!");
-
         ChatLieu entity = new ChatLieu();
         entity.setMa(ma);
         entity.setTen(ten);
@@ -91,7 +90,6 @@ public class ChatLieuApi {
         if (!entity.getTen().equalsIgnoreCase(newTen) && chatLieuRepository.existsByTenIgnoreCase(newTen)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên này đã tồn tại ở bản ghi khác!");
         }
-
         Boolean newTrangThai = body.getTrangThai();
         if (newTrangThai != null && !newTrangThai && Boolean.TRUE.equals(entity.getTrangThai())) {
             boolean isUsed = sanPhamRepository.existsByChatLieu_IdAndTrangThaiTrue(id);
@@ -99,7 +97,6 @@ public class ChatLieuApi {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Không thể ngừng hoạt động! Đang có sản phẩm thuộc chất liệu này đang được bày bán.");
             }
         }
-
         entity.setTen(newTen);
         if (body.getMoTa() != null) entity.setMoTa(body.getMoTa().trim());
         entity.setTrangThai(newTrangThai != null ? newTrangThai : entity.getTrangThai());

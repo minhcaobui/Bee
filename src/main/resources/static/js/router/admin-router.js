@@ -1,6 +1,19 @@
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
 
+// ======================================================================
+// HỆ THỐNG QUẢN LÝ VÒNG LẶP (Tránh rò rỉ bộ nhớ & lỗi spam console)
+// Tự động ghi nhận mọi setInterval được gọi trong các module
+// ======================================================================
+window.activeIntervals = [];
+const originalSetInterval = window.setInterval;
+window.setInterval = function(fn, delay) {
+    const id = originalSetInterval(fn, delay);
+    window.activeIntervals.push(id);
+    return id;
+};
+// ======================================================================
+
 function showToast(message, type = 'success') {
     const host = document.getElementById('toastHost');
     if (!host) return;
@@ -28,7 +41,13 @@ window.toast = showToast;
 // HÀM MỚI: QUÉT DỌN CÁC MODAL BỊ KẸT TRÊN BODY TRƯỚC KHI CHUYỂN TRANG
 // ======================================================================
 function cleanupGarbage() {
-    // ĐÃ SỬA: CHỈ XÓA ĐÚNG CÁI OTP MODAL CỦA TRANG PROFILE
+    // 1. Dọn dẹp tất cả các vòng lặp đếm ngược (setInterval) đang chạy ngầm
+    if (window.activeIntervals && window.activeIntervals.length > 0) {
+        window.activeIntervals.forEach(id => clearInterval(id));
+        window.activeIntervals = [];
+    }
+
+    // 2. CHỈ XÓA ĐÚNG CÁI OTP MODAL CỦA TRANG PROFILE
     // Tuyệt đối tha mạng cho genericConfirmOverlay của hệ thống!
     const garbageIds = ['otpModal'];
 
@@ -39,6 +58,7 @@ function cleanupGarbage() {
         }
     });
 
+    // 3. Dọn dẹp Chart.js instances
     if (window.DashboardApp) {
         if (window.DashboardApp.chartDoanhThuInstance) window.DashboardApp.chartDoanhThuInstance.dispose();
         if (window.DashboardApp.chartTiLeInstance) window.DashboardApp.chartTiLeInstance.dispose();
@@ -134,7 +154,6 @@ async function loadModule(moduleName) {
 
 function executeScripts(container, moduleName) {
     const scripts = container.querySelectorAll('script');
-    console.log(`Tìm thấy ${scripts.length} thẻ script trong module ${moduleName}`);
     Array.from(scripts).forEach(oldScript => {
         if (oldScript.src) {
             const newScript = document.createElement('script');
@@ -143,17 +162,15 @@ function executeScripts(container, moduleName) {
         } else {
             try {
                 eval(oldScript.innerHTML);
-                console.log("Đã chạy script nội tuyến thành công");
             } catch (e) {
-                console.error("Lỗi cú pháp trong script của module:", e);
-                window.toast(`Lỗi Script: ${e.message}`, 'error');
+                console.error(e);
+                window.toast(`${e.message}`, 'error');
             }
         }
         oldScript.remove();
     });
 
     setTimeout(() => {
-        console.log(`Đang kích hoạt init cho module: ${moduleName}`);
         if (moduleName === 'catalogs') {
             if (typeof window.initCatalogs !== 'undefined') window.initCatalogs();
         }

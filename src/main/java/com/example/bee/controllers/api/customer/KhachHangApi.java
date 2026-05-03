@@ -20,9 +20,9 @@ import com.example.bee.repositories.customer.DiaChiKhachHangRepository;
 import com.example.bee.repositories.customer.KhachHangRepository;
 import com.example.bee.repositories.order.HoaDonChiTietRepository;
 import com.example.bee.repositories.order.HoaDonRepository;
+import com.example.bee.repositories.products.SanPhamYeuThichRepository;
 import com.example.bee.repositories.reviews.DanhGiaRepository;
 import com.example.bee.repositories.staff.NhanVienRepository;
-import com.example.bee.repositories.products.SanPhamYeuThichRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,18 +50,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class KhachHangApi {
 
-    // Lớp bọc OTP kèm thời gian hết hạn
-    private static class OtpData {
-        String otp;
-        long expiryTime;
-
-        OtpData(String otp, long expiryTime) {
-            this.otp = otp;
-            this.expiryTime = expiryTime;
-        }
-    }
-
-    // Sử dụng ConcurrentHashMap để an toàn trong môi trường đa luồng
     private static final Map<String, OtpData> otpStorageKhach = new ConcurrentHashMap<>();
     private final org.springframework.mail.javamail.JavaMailSender mailSender;
     private final KhachHangRepository khRepo;
@@ -75,7 +63,6 @@ public class KhachHangApi {
     private final HoaDonRepository hoaDonRepository;
     private final VaiTroRepository vaiTroRepo;
     private final com.example.bee.repositories.cart.GioHangRepository gioHangRepository;
-
     @Value("${spring.mail.username}")
     private String senderEmail;
 
@@ -119,7 +106,6 @@ public class KhachHangApi {
         if (ten.isEmpty() || ten.length() > 100) {
             return ResponseEntity.badRequest().body(Map.of("message", "Họ tên không được để trống và tối đa 100 ký tự"));
         }
-
         String sdt = req.getSoDienThoai() != null ? req.getSoDienThoai().trim() : "";
         if (sdt.isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("message", "Số điện thoại không được để trống"));
@@ -133,7 +119,6 @@ public class KhachHangApi {
         if (taiKhoanRepository.existsByTenDangNhap(sdt)) {
             return ResponseEntity.badRequest().body(Map.of("message", "Số điện thoại này đã được đăng ký tài khoản khác"));
         }
-
         String email = req.getEmail() != null ? req.getEmail().trim() : "";
         if (!email.isEmpty()) {
             if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
@@ -143,21 +128,17 @@ public class KhachHangApi {
                 return ResponseEntity.badRequest().body(Map.of("message", "Email đã tồn tại trong hệ thống"));
             }
         }
-
         VaiTro roleCustomer = vaiTroRepo.findByMa("ROLE_CUSTOMER")
                 .orElseThrow(() -> new RuntimeException("Chưa cấu hình quyền ROLE_CUSTOMER"));
-
         TaiKhoan tk = new TaiKhoan();
         tk.setTenDangNhap(sdt);
         tk.setMatKhau(passwordEncoder.encode("123456"));
         tk.setVaiTro(roleCustomer);
         tk.setTrangThai(true);
         TaiKhoan savedTk = taiKhoanRepository.save(tk);
-
         GioHang gioHang = new GioHang();
         gioHang.setTaiKhoan(savedTk);
         gioHangRepository.save(gioHang);
-
         KhachHang kh = new KhachHang();
         kh.setMa(generateMa());
         kh.setHoTen(ten);
@@ -167,9 +148,7 @@ public class KhachHangApi {
         kh.setEmail(email.isEmpty() ? null : email);
         kh.setTrangThai(req.getTrangThai() != null ? req.getTrangThai() : true);
         if (req.getHinhAnh() != null) kh.setHinhAnh(req.getHinhAnh());
-
         kh.setTaiKhoan(savedTk);
-
         String tinh = req.getTinhThanhPho() != null ? req.getTinhThanhPho().trim() : "";
         String huyen = req.getQuanHuyen() != null ? req.getQuanHuyen().trim() : "";
         String xa = req.getPhuongXa() != null ? req.getPhuongXa().trim() : "";
@@ -182,7 +161,6 @@ public class KhachHangApi {
             kh.setDiaChi("Khách lẻ / Mua tại cửa hàng");
         }
         KhachHang savedKh = khRepo.save(kh);
-
         if (hasRealAddress) {
             DiaChiKhachHang dc = new DiaChiKhachHang();
             dc.setKhachHang(savedKh);
@@ -208,7 +186,6 @@ public class KhachHangApi {
     public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody KhachHangRequest req) {
         KhachHang kh = khRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy khách hàng"));
-
         if (req.getHoTen() != null) {
             String ten = req.getHoTen().trim();
             if (ten.isEmpty() || ten.length() > 100) {
@@ -216,7 +193,6 @@ public class KhachHangApi {
             }
             kh.setHoTen(ten);
         }
-
         if (req.getGioiTinh() != null) kh.setGioiTinh(req.getGioiTinh() ? "Nam" : "Nữ");
         if (req.getNgaySinh() != null) kh.setNgaySinh(req.getNgaySinh());
 
@@ -231,10 +207,8 @@ public class KhachHangApi {
             if (khRepo.existsBySoDienThoaiAndIdNot(sdtNew, id)) {
                 return ResponseEntity.badRequest().body(Map.of("message", "Số điện thoại đã được sử dụng bởi khách hàng khác"));
             }
-
             kh.setSoDienThoai(sdtNew);
         }
-
         if (req.getEmail() != null) {
             String emailNew = req.getEmail().trim();
             if (!emailNew.isEmpty()) {
@@ -249,7 +223,6 @@ public class KhachHangApi {
                 kh.setEmail(null);
             }
         }
-
         if (req.getTrangThai() != null) {
             kh.setTrangThai(req.getTrangThai());
             if (kh.getTaiKhoan() != null) {
@@ -257,7 +230,6 @@ public class KhachHangApi {
             }
         }
         if (req.getHinhAnh() != null) kh.setHinhAnh(req.getHinhAnh());
-
         return ResponseEntity.ok(khRepo.save(kh));
     }
 
@@ -266,15 +238,12 @@ public class KhachHangApi {
     public ResponseEntity<?> quickToggleStatus(@PathVariable Integer id) {
         KhachHang kh = khRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Khách hàng không tồn tại"));
-
         kh.setTrangThai(!kh.getTrangThai());
-
         if (kh.getTaiKhoan() != null) {
             TaiKhoan tk = kh.getTaiKhoan();
             tk.setTrangThai(kh.getTrangThai());
             taiKhoanRepository.save(tk);
         }
-
         return ResponseEntity.ok(khRepo.save(kh));
     }
 
@@ -287,21 +256,17 @@ public class KhachHangApi {
             @RequestParam(required = false, defaultValue = "") String statusId
     ) {
         List<HoaDon> allOrders = hoaDonRepository.findByKhachHangIdOrderByNgayTaoDesc(id);
-
         List<HoaDon> filteredList = allOrders.stream()
                 .filter(hd -> q.isEmpty() || hd.getMa().toLowerCase().contains(q.toLowerCase()))
                 .filter(hd -> statusId.isEmpty() || (hd.getTrangThaiHoaDon() != null && hd.getTrangThaiHoaDon().getMa().equals(statusId)))
                 .collect(Collectors.toList());
-
         int start = page * size;
         int end = Math.min((start + size), filteredList.size());
         List<HoaDon> pageContent = new ArrayList<>();
         if (start <= filteredList.size()) {
             pageContent = filteredList.subList(start, end);
         }
-
         int totalPages = (int) Math.ceil((double) filteredList.size() / size);
-
         return ResponseEntity.ok(Map.of(
                 "content", pageContent,
                 "totalPages", totalPages,
@@ -315,27 +280,21 @@ public class KhachHangApi {
                                                @RequestParam(defaultValue = "0") int page,
                                                @RequestParam(defaultValue = "5") int size) {
         List<HoaDon> orders = hoaDonRepository.findByKhachHangIdOrderByNgayTaoDesc(id);
-
         List<HoaDon> completedOrders = orders.stream()
                 .filter(hd -> hd.getTrangThaiHoaDon() != null && "HOAN_THANH".equals(hd.getTrangThaiHoaDon().getMa()))
                 .collect(Collectors.toList());
-
         Map<Integer, Map<String, Object>> productStats = new java.util.HashMap<>();
-
         for (HoaDon hd : completedOrders) {
             List<HoaDonChiTiet> details = hoaDonChiTietRepository.findByHoaDonId(hd.getId());
             for (HoaDonChiTiet ct : details) {
                 Integer spctId = ct.getSanPhamChiTiet().getId();
-
                 productStats.putIfAbsent(spctId, new java.util.HashMap<>(Map.of(
                         "spct", ct.getSanPhamChiTiet(),
                         "soLuongMua", 0,
                         "tongTienChi", BigDecimal.ZERO
                 )));
-
                 Map<String, Object> stat = productStats.get(spctId);
                 stat.put("soLuongMua", (int) stat.get("soLuongMua") + ct.getSoLuong());
-
                 BigDecimal currentTotal = (BigDecimal) stat.get("tongTienChi");
                 BigDecimal itemTotal = ct.getGiaTien().multiply(BigDecimal.valueOf(ct.getSoLuong()));
                 stat.put("tongTienChi", currentTotal.add(itemTotal));
@@ -344,12 +303,10 @@ public class KhachHangApi {
 
         List<Map<String, Object>> sortedList = new java.util.ArrayList<>(productStats.values());
         sortedList.sort((a, b) -> Integer.compare((int) b.get("soLuongMua"), (int) a.get("soLuongMua")));
-
         int start = Math.min(page * size, sortedList.size());
         int end = Math.min(start + size, sortedList.size());
         List<Map<String, Object>> pageContent = sortedList.subList(start, end);
         int totalPages = (int) Math.ceil((double) sortedList.size() / size);
-
         return ResponseEntity.ok(Map.of(
                 "content", pageContent,
                 "totalPages", totalPages,
@@ -363,21 +320,16 @@ public class KhachHangApi {
                                              @RequestParam(defaultValue = "0") int page,
                                              @RequestParam(defaultValue = "5") int size) {
         List<com.example.bee.entities.order.HoaDon> orders = hoaDonRepository.findByKhachHangIdOrderByNgayTaoDesc(id);
-
         List<com.example.bee.entities.order.HoaDon> ordersWithVoucher = orders.stream()
                 .filter(hd -> hd.getMaGiamGia() != null
                         && hd.getTrangThaiHoaDon() != null
                         && "HOAN_THANH".equals(hd.getTrangThaiHoaDon().getMa()))
                 .collect(java.util.stream.Collectors.toList());
-
         List<Map<String, Object>> voucherList = new java.util.ArrayList<>();
-
         java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-
         for (com.example.bee.entities.order.HoaDon hd : ordersWithVoucher) {
             java.util.Date ngay = hd.getNgayThanhToan() != null ? hd.getNgayThanhToan() : hd.getNgayTao();
             String formattedDate = ngay != null ? formatter.format(ngay) : "---";
-
             voucherList.add(Map.of(
                     "maVoucher", hd.getMaGiamGia().getMaCode(),
                     "tenVoucher", hd.getMaGiamGia().getTen(),
@@ -386,12 +338,10 @@ public class KhachHangApi {
                     "ngaySuDung", formattedDate
             ));
         }
-
         int start = Math.min(page * size, voucherList.size());
         int end = Math.min(start + size, voucherList.size());
         List<Map<String, Object>> pageContent = voucherList.subList(start, end);
         int totalPages = (int) Math.ceil((double) voucherList.size() / size);
-
         return ResponseEntity.ok(Map.of(
                 "content", pageContent,
                 "totalPages", totalPages,
@@ -405,9 +355,7 @@ public class KhachHangApi {
         if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Chưa đăng nhập"));
         }
-
         String username = authentication.getName();
-
         Optional<KhachHang> khOpt = khRepo.findByTaiKhoan_TenDangNhap(username);
         if (khOpt.isPresent()) {
             KhachHang kh = khOpt.get();
@@ -423,7 +371,6 @@ public class KhachHangApi {
                     "daDoiTenDangNhap", kh.getTaiKhoan() != null && Boolean.TRUE.equals(kh.getTaiKhoan().getDaDoiTenDangNhap())
             ));
         }
-
         Optional<NhanVien> nvOpt = nvRepo.findByTaiKhoan_TenDangNhap(username);
         if (nvOpt.isPresent()) {
             NhanVien nv = nvOpt.get();
@@ -439,7 +386,6 @@ public class KhachHangApi {
                     "daDoiTenDangNhap", nv.getTaiKhoan() != null && Boolean.TRUE.equals(nv.getTaiKhoan().getDaDoiTenDangNhap())
             ));
         }
-
         return ResponseEntity.ok(Map.of(
                 "hoTen", "Người dùng mới",
                 "soDienThoai", username,
@@ -453,20 +399,15 @@ public class KhachHangApi {
 
     @PutMapping("/my-profile")
     public ResponseEntity<?> updateProfile(@RequestBody Map<String, String> payload, Authentication authentication) {
-
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Chưa đăng nhập"));
         }
-
         String username = authentication.getName();
-
         TaiKhoan taiKhoan = taiKhoanRepository.findByTenDangNhap(username)
                 .orElse(null);
-
         if (taiKhoan == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Không tìm thấy tài khoản hợp lệ!"));
         }
-
         Optional<NhanVien> nvOpt = nvRepo.findByTaiKhoan_TenDangNhap(username);
         if (nvOpt.isPresent()) {
             NhanVien nv = nvOpt.get();
@@ -475,64 +416,49 @@ public class KhachHangApi {
             nv.setEmail(payload.get("email"));
             nv.setGioiTinh(payload.get("gioiTinh"));
             nv.setDiaChi(payload.get("diaChi"));
-
             if (payload.get("ngaySinh") != null && !payload.get("ngaySinh").isEmpty()) {
                 nv.setNgaySinh(java.sql.Date.valueOf(payload.get("ngaySinh")));
             }
-
             if (payload.get("hinhAnh") != null && !payload.get("hinhAnh").trim().isEmpty()) {
                 nv.setHinhAnh(payload.get("hinhAnh"));
             }
-
             nvRepo.save(nv);
             return ResponseEntity.ok(Map.of("message", "Cập nhật hồ sơ nhân viên thành công!"));
         }
-
         KhachHang kh = khRepo.findByTaiKhoan_TenDangNhap(username).orElse(null);
-
         if (kh == null) {
             kh = new KhachHang();
             kh.setTaiKhoan(taiKhoan);
             kh.setTrangThai(true);
-            kh.setMa("KH" + System.currentTimeMillis());
+            kh.setMa("KH" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         }
-
         kh.setHoTen(payload.get("hoTen"));
         kh.setSoDienThoai(payload.get("soDienThoai"));
         kh.setEmail(payload.get("email"));
         kh.setGioiTinh(payload.get("gioiTinh"));
         kh.setDiaChi(payload.get("diaChi"));
-
         if (payload.get("ngaySinh") != null && !payload.get("ngaySinh").toString().isEmpty()) {
             kh.setNgaySinh(java.time.LocalDate.parse(payload.get("ngaySinh").toString()));
         }
-
         if (payload.get("hinhAnh") != null && !payload.get("hinhAnh").trim().isEmpty()) {
             kh.setHinhAnh(payload.get("hinhAnh"));
         }
-
         khRepo.save(kh);
-
         boolean isUsernameChanged = false;
         String newUsername = payload.get("tenDangNhap");
-
         if (newUsername != null && !newUsername.trim().isEmpty() && !newUsername.equals(taiKhoan.getTenDangNhap())) {
-
             if (Boolean.TRUE.equals(taiKhoan.getDaDoiTenDangNhap())) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Bạn chỉ được đổi tên đăng nhập 1 lần duy nhất!"));
             }
-
             if (taiKhoanRepository.existsByTenDangNhap(newUsername)) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Tên đăng nhập này đã có người sử dụng!"));
             }
-
             taiKhoan.setTenDangNhap(newUsername);
             taiKhoan.setDaDoiTenDangNhap(true);
             taiKhoanRepository.save(taiKhoan);
 
             isUsernameChanged = true;
         }
-
         return ResponseEntity.ok(Map.of(
                 "message", "Cập nhật thành công!",
                 "usernameChanged", isUsernameChanged
@@ -628,7 +554,6 @@ public class KhachHangApi {
         String username = authentication.getName();
         KhachHang kh = khRepo.findByTaiKhoan_TenDangNhap(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy khách hàng"));
-
         return ResponseEntity.ok(dcRepo.findByKhachHangId(kh.getId()));
     }
 
@@ -637,7 +562,6 @@ public class KhachHangApi {
         String username = authentication.getName();
         KhachHang kh = khRepo.findByTaiKhoan_TenDangNhap(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-
         return ResponseEntity.ok(dcRepo.findByKhachHangIdAndLaMacDinhTrue(kh.getId()).orElse(null));
     }
 
@@ -646,14 +570,12 @@ public class KhachHangApi {
     public ResponseEntity<?> addMyAddress(@RequestBody DiaChiRequest req, Authentication authentication) {
         String username = authentication.getName();
         KhachHang kh = khRepo.findByTaiKhoan_TenDangNhap(username).orElseThrow();
-
         if (req.getLaMacDinh() != null && req.getLaMacDinh()) {
             dcRepo.findByKhachHangIdAndLaMacDinhTrue(kh.getId()).ifPresent(old -> {
                 old.setLaMacDinh(false);
                 dcRepo.save(old);
             });
         }
-
         DiaChiKhachHang dc = new DiaChiKhachHang();
         dc.setKhachHang(kh);
         mapRequestToEntity(req, dc);
@@ -665,11 +587,9 @@ public class KhachHangApi {
     public ResponseEntity<?> updateMyAddress(@PathVariable Integer id, @RequestBody DiaChiRequest req, Authentication authentication) {
         DiaChiKhachHang dc = dcRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-
         if (!dc.getKhachHang().getTaiKhoan().getTenDangNhap().equals(authentication.getName())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-
         if (req.getLaMacDinh() != null && req.getLaMacDinh()) {
             dcRepo.findByKhachHangIdAndLaMacDinhTrue(dc.getKhachHang().getId()).ifPresent(old -> {
                 if (!old.getId().equals(id)) {
@@ -678,7 +598,6 @@ public class KhachHangApi {
                 }
             });
         }
-
         mapRequestToEntity(req, dc);
         return ResponseEntity.ok(dcRepo.save(dc));
     }
@@ -690,12 +609,10 @@ public class KhachHangApi {
         if (!newDef.getKhachHang().getTaiKhoan().getTenDangNhap().equals(authentication.getName())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-
         dcRepo.findByKhachHangIdAndLaMacDinhTrue(newDef.getKhachHang().getId()).ifPresent(old -> {
             old.setLaMacDinh(false);
             dcRepo.save(old);
         });
-
         newDef.setLaMacDinh(true);
         return ResponseEntity.ok(dcRepo.save(newDef));
     }
@@ -704,11 +621,9 @@ public class KhachHangApi {
     public ResponseEntity<?> deleteMyAddress(@PathVariable Integer idDiaChi, Authentication authentication) {
         DiaChiKhachHang dc = dcRepo.findById(idDiaChi)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-
         if (!dc.getKhachHang().getTaiKhoan().getTenDangNhap().equals(authentication.getName())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-
         if (dc.getLaMacDinh()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Không thể xóa địa chỉ mặc định");
         }
@@ -723,7 +638,6 @@ public class KhachHangApi {
         }
         KhachHang kh = khRepo.findByTaiKhoan_TenDangNhap(authentication.getName()).orElse(null);
         if (kh == null || kh.getTaiKhoan() == null) return ResponseEntity.ok(Map.of("isSaved", false));
-
         boolean isSaved = wishlistRepo.findFirstByTaiKhoanIdAndSanPhamId(kh.getTaiKhoan().getId(), sanPhamId).isPresent();
         return ResponseEntity.ok(Map.of("isSaved", isSaved));
     }
@@ -738,7 +652,6 @@ public class KhachHangApi {
         if (kh == null || kh.getTaiKhoan() == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Vui lòng đăng nhập!"));
         }
-
         Integer userId = kh.getTaiKhoan().getId();
         var exist = wishlistRepo.findFirstByTaiKhoanIdAndSanPhamId(userId, sanPhamId);
 
@@ -758,7 +671,6 @@ public class KhachHangApi {
     public ResponseEntity<?> getReviews(@PathVariable Integer sanPhamId) {
         List<DanhGia> list = danhGiaRepo.findBySanPhamIdOrderByNgayTaoDesc(sanPhamId);
         List<KhachHang> allKhachHang = khRepo.findAll();
-
         for (DanhGia dg : list) {
             String tenNguoiDanhGia = "Khách hàng ẩn danh";
 
@@ -772,7 +684,6 @@ public class KhachHangApi {
             }
             dg.setTenKhachHang(tenNguoiDanhGia);
         }
-
         return ResponseEntity.ok(list);
     }
 
@@ -782,60 +693,46 @@ public class KhachHangApi {
             @PathVariable Integer orderDetailId,
             @RequestBody DanhGiaRequest req,
             Authentication auth) {
-
         if (auth == null || !auth.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
         TaiKhoan tk = taiKhoanRepository.findByTenDangNhap(auth.getName()).orElse(null);
         if (tk == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
         HoaDonChiTiet hdct = hoaDonChiTietRepository.findById(orderDetailId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy chi tiết hóa đơn"));
-
         if (hdct.getHoaDon() == null || hdct.getHoaDon().getKhachHang() == null ||
                 hdct.getHoaDon().getKhachHang().getTaiKhoan() == null ||
                 !hdct.getHoaDon().getKhachHang().getTaiKhoan().getId().equals(tk.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Bạn không có quyền đánh giá sản phẩm của đơn hàng này!"));
         }
-
         if (hdct.getHoaDon().getTrangThaiHoaDon() == null || !"HOAN_THANH".equals(hdct.getHoaDon().getTrangThaiHoaDon().getMa())) {
             return ResponseEntity.badRequest().body(Map.of("message", "Chỉ đơn hàng đã giao thành công mới được phép đánh giá!"));
         }
-
         SanPham sp = hdct.getSanPhamChiTiet().getSanPham();
-
         Optional<DanhGia> existingOpt = danhGiaRepo.findByHoaDonChiTiet_Id(orderDetailId);
-
         DanhGia danhGia;
         if (existingOpt.isPresent()) {
             danhGia = existingOpt.get();
-
             if (Boolean.TRUE.equals(danhGia.getDaSua())) {
                 return ResponseEntity.badRequest().body(Map.of("message", "Bạn chỉ được phép sửa đánh giá 1 lần duy nhất!"));
             }
-
             danhGia.setDaSua(true);
         } else {
             danhGia = new DanhGia();
             danhGia.setDaSua(false);
             danhGia.setNgayTao(java.time.LocalDateTime.now());
         }
-
         danhGia.setTaiKhoan(tk);
         danhGia.setSanPham(sp);
         danhGia.setHoaDonChiTiet(hdct);
-
         String noiDung = req.getNoiDung() != null ? req.getNoiDung().trim() : "";
         if (noiDung.isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("message", "Vui lòng nhập nội dung đánh giá!"));
         }
-
         danhGia.setSoSao(req.getSoSao() != null ? req.getSoSao() : 5);
         danhGia.setNoiDung(noiDung);
         danhGia.setPhanLoai(req.getPhanLoai());
         danhGia.setDanhSachHinhAnh(req.getDanhSachHinhAnh());
-
         danhGiaRepo.save(danhGia);
         return ResponseEntity.ok(Map.of("message", "Đánh giá thành công!"));
     }
@@ -849,11 +746,9 @@ public class KhachHangApi {
         if (kh == null || kh.getTaiKhoan() == null) {
             return ResponseEntity.ok(java.util.Collections.emptyList());
         }
-
         List<SanPhamYeuThich> list = wishlistRepo.findAll().stream()
                 .filter(w -> w.getTaiKhoanId().equals(kh.getTaiKhoan().getId()))
                 .collect(java.util.stream.Collectors.toList());
-
         return ResponseEntity.ok(list);
     }
 
@@ -863,7 +758,6 @@ public class KhachHangApi {
             return ResponseEntity.ok(java.util.Collections.emptyList());
         KhachHang kh = khRepo.findByTaiKhoan_TenDangNhap(authentication.getName()).orElse(null);
         if (kh == null || kh.getTaiKhoan() == null) return ResponseEntity.ok(java.util.Collections.emptyList());
-
         List<DanhGia> myReviews = danhGiaRepo.findAll().stream()
                 .filter(r -> r.getTaiKhoan() != null && r.getTaiKhoan().getId().equals(kh.getTaiKhoan().getId()))
                 .collect(java.util.stream.Collectors.toList());
@@ -874,24 +768,18 @@ public class KhachHangApi {
     @Transactional
     public ResponseEntity<?> adminChangePassword(@PathVariable Integer id, @RequestBody Map<String, String> body) {
         String matKhauMoi = body.get("matKhauMoi");
-
-        // BẢO MẬT: Phải kiểm tra regex mật khẩu mạnh tương tự như các chỗ khác
         String passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,}).*$";
         if (matKhauMoi == null || !matKhauMoi.matches(passwordRegex)) {
             return ResponseEntity.badRequest().body(Map.of("message", "Mật khẩu phải từ 8 ký tự, gồm chữ hoa, thường, số và ký tự đặc biệt!"));
         }
-
         KhachHang kh = khRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy khách hàng"));
-
         TaiKhoan tk = kh.getTaiKhoan();
         if (tk == null) {
             return ResponseEntity.badRequest().body(Map.of("message", "Khách hàng này chưa có tài khoản đăng nhập (Chỉ mua tại quầy)"));
         }
-
         tk.setMatKhau(passwordEncoder.encode(matKhauMoi));
         taiKhoanRepository.save(tk);
-
         return ResponseEntity.ok(Map.of("message", "Cập nhật mật khẩu thành công"));
     }
 
@@ -904,12 +792,9 @@ public class KhachHangApi {
         if (kh == null || kh.getTaiKhoan() == null) {
             return ResponseEntity.ok(Map.of("eligible", false, "message", "Tài khoản không hợp lệ!"));
         }
-
         Integer userId = kh.getTaiKhoan().getId();
-
         List<HoaDon> myOrders = hoaDonRepository.findByKhachHangIdOrderByNgayTaoDesc(kh.getId());
         List<HoaDonChiTiet> purchasedDetails = new java.util.ArrayList<>();
-
         for (HoaDon hd : myOrders) {
             if ("HOAN_THANH".equals(hd.getTrangThaiHoaDon().getMa())) {
                 List<HoaDonChiTiet> chiTiets = hoaDonChiTietRepository.findByHoaDonId(hd.getId());
@@ -920,17 +805,14 @@ public class KhachHangApi {
                 }
             }
         }
-
         if (purchasedDetails.isEmpty()) {
             return ResponseEntity.ok(Map.of("eligible", false, "message", "Bạn cần mua và nhận sản phẩm này thành công để có thể đánh giá!"));
         }
-
         List<Integer> reviewedDetailIds = danhGiaRepo.findBySanPhamIdOrderByNgayTaoDesc(sanPhamId).stream()
                 .filter(r -> r.getTaiKhoan() != null && r.getTaiKhoan().getId().equals(userId)
                         && r.getHoaDonChiTiet() != null && r.getHoaDonChiTiet().getId() != null)
                 .map(r -> r.getHoaDonChiTiet().getId())
                 .collect(java.util.stream.Collectors.toList());
-
         HoaDonChiTiet unreviewedDetail = null;
         for (HoaDonChiTiet ct : purchasedDetails) {
             if (!reviewedDetailIds.contains(ct.getId())) {
@@ -938,11 +820,9 @@ public class KhachHangApi {
                 break;
             }
         }
-
         if (unreviewedDetail == null) {
             return ResponseEntity.ok(Map.of("eligible", false, "message", "Bạn đã viết đánh giá cho tất cả các lượt mua của sản phẩm này rồi! Cảm ơn bạn rất nhiều."));
         }
-
         String phanLoai = unreviewedDetail.getSanPhamChiTiet().getMauSac().getTen() + " - " + unreviewedDetail.getSanPhamChiTiet().getKichThuoc().getTen();
         return ResponseEntity.ok(Map.of(
                 "eligible", true,
@@ -955,13 +835,10 @@ public class KhachHangApi {
     public ResponseEntity<?> getNewReviewNotifications() {
         Pageable topFive = PageRequest.of(0, 5, Sort.by("ngayTao").descending());
         Page<DanhGia> pageData = danhGiaRepo.findAll(topFive);
-
         List<Map<String, Object>> result = new java.util.ArrayList<>();
         List<KhachHang> allKhachHang = khRepo.findAll();
-
         for (DanhGia dg : pageData.getContent()) {
             String tenKhachHang = "Khách hàng ẩn danh";
-
             for (KhachHang kh : allKhachHang) {
                 if (kh.getTaiKhoan() != null && dg.getTaiKhoan() != null && kh.getTaiKhoan().getId().equals(dg.getTaiKhoan().getId())) {
                     if (kh.getHoTen() != null && !kh.getHoTen().trim().isEmpty()) {
@@ -970,7 +847,6 @@ public class KhachHangApi {
                     break;
                 }
             }
-
             result.add(Map.of(
                     "id", dg.getId(),
                     "khachHang", tenKhachHang,
@@ -979,7 +855,6 @@ public class KhachHangApi {
                     "ngayTao", dg.getNgayTao() != null ? dg.getNgayTao().toString() : ""
             ));
         }
-
         return ResponseEntity.ok(result);
     }
 
@@ -991,7 +866,6 @@ public class KhachHangApi {
             String otp = String.format("%06d", random.nextInt(999999));
             long expiryTime = System.currentTimeMillis() + 5 * 60 * 1000;
             otpStorageKhach.put(email, new OtpData(otp, expiryTime));
-
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(senderEmail);
             message.setTo(email);
@@ -1054,5 +928,15 @@ public class KhachHangApi {
         dc.setLaMacDinh(req.getLaMacDinh() != null ? req.getLaMacDinh() : false);
         dc.setTrangThai(true);
         dc.setLoaiDiaChi("Nhà riêng");
+    }
+
+    private static class OtpData {
+        String otp;
+        long expiryTime;
+
+        OtpData(String otp, long expiryTime) {
+            this.otp = otp;
+            this.expiryTime = expiryTime;
+        }
     }
 }

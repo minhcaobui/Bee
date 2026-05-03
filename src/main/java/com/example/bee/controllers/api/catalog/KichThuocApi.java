@@ -88,7 +88,6 @@ public class KichThuocApi {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Không thể ngừng hoạt động! Đang có sản phẩm sử dụng kích thước này.");
             }
         }
-
         entity.setTen(newTen);
         entity.setTrangThai(newTrangThai != null ? newTrangThai : entity.getTrangThai());
         return kichThuocRepository.save(entity);

@@ -1,4 +1,4 @@
-package com.example.bee.configs; // Lưu ý đổi package cho đúng với cấu trúc của bạn
+package com.example.bee.configs;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -12,7 +12,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // Mở endpoint /ws, cho phép mọi nguồn (CORS) và sử dụng SockJS
         registry.addEndpoint("/ws").setAllowedOriginPatterns("*").withSockJS();
     }
 

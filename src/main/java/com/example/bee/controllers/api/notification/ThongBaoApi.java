@@ -38,7 +38,6 @@ public class ThongBaoApi {
     public ResponseEntity<?> getMyNotifications() {
         TaiKhoan tk = getLoggedInAccount();
         if (tk == null) return ResponseEntity.ok(Collections.emptyList());
-
         List<ThongBao> list = thongBaoRepository.findByTaiKhoanIdOrderByNgayTaoDesc(tk.getId())
                 .stream()
                 .filter(tb -> tb.getDaXoa() == null || !tb.getDaXoa())
@@ -62,17 +61,14 @@ public class ThongBaoApi {
     public ResponseEntity<?> markAllAsRead() {
         TaiKhoan tk = getLoggedInAccount();
         if (tk == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
         List<ThongBao> list = thongBaoRepository.findByTaiKhoanIdOrderByNgayTaoDesc(tk.getId());
         boolean hasChanges = false;
-
         for (ThongBao tb : list) {
             if (tb.getDaDoc() == null || !tb.getDaDoc()) {
                 tb.setDaDoc(true);
                 hasChanges = true;
             }
         }
-
         if (hasChanges) thongBaoRepository.saveAll(list);
         return ResponseEntity.ok(Collections.singletonMap("message", "Đã đọc tất cả"));
     }
@@ -92,33 +88,27 @@ public class ThongBaoApi {
     public ResponseEntity<?> deleteAllMyNotifications() {
         TaiKhoan tk = getLoggedInAccount();
         if (tk == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
         List<ThongBao> list = thongBaoRepository.findByTaiKhoanIdOrderByNgayTaoDesc(tk.getId());
         boolean hasChanges = false;
-
         for (ThongBao tb : list) {
             if (tb.getDaXoa() == null || !tb.getDaXoa()) {
                 tb.setDaXoa(true);
                 hasChanges = true;
             }
         }
-
         if (hasChanges) thongBaoRepository.saveAll(list);
         return ResponseEntity.ok(Collections.singletonMap("message", "Đã xóa tất cả"));
     }
 
-    // BẢO MẬT & TỐI ƯU CƠ SỞ DỮ LIỆU: Dọn rác các thông báo cũ
-    @Scheduled(cron = "0 0 2 * * ?") // Chạy mỗi đêm lúc 2h sáng
+    @Scheduled(cron = "0 0 2 * * ?")
     @Transactional
     public void cleanupOldNotifications() {
         try {
             LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
-            // Xóa cứng (hard-delete) các thông báo đã đánh dấu DaXoa=true HOẶC quá 30 ngày để tiết kiệm dung lượng ổ cứng
             List<ThongBao> oldNotifs = thongBaoRepository.findAll().stream()
                     .filter(tb -> (tb.getDaXoa() != null && tb.getDaXoa()) ||
                             (tb.getNgayTao() != null && tb.getNgayTao().isBefore(thirtyDaysAgo)))
                     .collect(Collectors.toList());
-
             if (!oldNotifs.isEmpty()) {
                 thongBaoRepository.deleteAll(oldNotifs);
                 System.out.println("Scheduler: Đã dọn dẹp " + oldNotifs.size() + " thông báo cũ/rác.");

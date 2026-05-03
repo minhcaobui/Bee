@@ -743,27 +743,20 @@
         connectWebSocket: function() {
             const socket = new SockJS('/ws');
             const stompClient = Stomp.over(socket);
-
-            // Tắt log của STOMP nếu không muốn rác console
             stompClient.debug = null;
-
             stompClient.connect({}, (frame) => {
-                console.log('✅ Đã kết nối WebSockets (Màn hình POS)');
+                console.log('Đã kết nối WebSockets');
 
                 stompClient.subscribe('/topic/public/stock', (message) => {
                     if (message.body === "STOCK_CHANGED") {
-                        console.log("🔔 Kho có thay đổi từ hệ thống, đang cập nhật lại danh sách...");
-
-                        // Tránh giật lag nếu thu ngân đang gõ tìm kiếm
+                        console.log("Kho có thay đổi từ hệ thống, đang cập nhật lại danh sách...");
                         if (document.activeElement && document.activeElement.id === 'productSearchInput') return;
-
-                        // Gọi lại hàm load sản phẩm với từ khóa hiện tại
                         const currentSearch = document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '';
                         this.loadProducts(currentSearch);
                     }
                 });
             }, (error) => {
-                console.warn("Đứt kết nối WebSockets, đang thử lại sau 5s...", error);
+                console.warn("Đứt kết nối WebSockets, đang thử lại sau 5s", error);
                 setTimeout(() => this.connectWebSocket(), 5000);
             });
         },
@@ -1540,7 +1533,7 @@
 
         syncCartWithServer: async function() {
             try {
-                const res = await fetch('/api/pos/invoices/pending');
+                // const res = await fetch('/api/pos/invoices/pending');
                 const pendingInvoices = await res.json();
 
                 this.invoices = this.invoices.filter(localInv =>
@@ -1833,6 +1826,7 @@
                     this.inHoaDon(completedInvoiceId);
                 } else {
                     let errorMsg = "Thanh toán thất bại.";
+                    // Bắt và hiển thị chính xác message từ Backend
                     try { const errData = await res.json(); errorMsg = errData.message || errorMsg; } catch (ex) {}
                     window.toast(errorMsg, "error");
                     if (qrBtn) { qrBtn.disabled = false; qrBtn.innerHTML = "<i class='bi bi-check-circle-fill'></i> ĐÃ NHẬN TIỀN & IN HÓA ĐƠN"; }

@@ -622,7 +622,7 @@
             stompClient.debug = null;
 
             stompClient.connect({}, (frame) => {
-                console.log('✅ Đã kết nối WebSockets (Admin Orders)');
+                console.log('Đã kết nối WebSockets');
 
                 // Lắng nghe tín hiệu từ Backend
                 stompClient.subscribe('/topic/admin/orders', (message) => {
@@ -630,9 +630,9 @@
 
                         // 1. Hiển thị thông báo (Toast)
                         if (typeof window.toast === 'function') {
-                            window.toast("🔔 CÓ ĐƠN HÀNG ONLINE MỚI!", "success");
+                            window.toast("CÓ ĐƠN HÀNG ONLINE MỚI!", "success");
                         } else {
-                            console.log("🔔 CÓ ĐƠN HÀNG ONLINE MỚI!");
+                            console.log("CÓ ĐƠN HÀNG ONLINE MỚI!");
                         }
 
                         // 2. Cập nhật lại bảng dữ liệu nếu Admin đang ở tab "ĐƠN CHỜ XỬ LÝ"
@@ -645,7 +645,7 @@
                     }
                 });
             }, (error) => {
-                console.error("❌ Lỗi kết nối WebSockets: ", error);
+                console.error("Lỗi kết nối WebSockets: ", error);
                 // Tự động kết nối lại sau 5 giây nếu bị đứt mạng
                 setTimeout(() => this.connectWebSocket(), 5000);
             });

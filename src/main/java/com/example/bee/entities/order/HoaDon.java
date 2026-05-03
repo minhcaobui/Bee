@@ -37,7 +37,6 @@ public class HoaDon {
 
     private BigDecimal giaTong;
 
-    // Cột JSON lưu trữ thông tin nhận hàng
     @Column(name = "thong_tin_giao_hang", columnDefinition = "NVARCHAR(MAX)")
     @Convert(converter = com.example.bee.converters.ThongTinGiaoHangConverter.class)
     private ThongTinGiaoHang thongTinGiaoHang;
@@ -45,7 +44,6 @@ public class HoaDon {
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String ghiChu;
 
-    // Phân loại hình thức: GIAO_TAN_NOI hoặc NHAN_TAI_CUA_HANG
     @Column(name = "hinh_thuc_giao_hang", length = 50)
     private String hinhThucGiaoHang;
 
@@ -75,7 +73,6 @@ public class HoaDon {
     @Temporal(TemporalType.TIMESTAMP)
     private Date ngayThanhToan;
 
-    // Các cột thời gian cho API Vận chuyển và Lấy tại cửa hàng
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "ngay_nhan_hang_du_kien")
@@ -112,7 +109,6 @@ public class HoaDon {
         if (this.thanhToans != null && !this.thanhToans.isEmpty()) {
             return this.thanhToans.get(0).getPhuongThuc();
         }
-        // Dùng class Constants thay vì gõ chữ cứng
         if (this.loaiHoaDon != null && this.loaiHoaDon == 0) {
             return PhuongThucThanhToan.TIEN_MAT;
         }

@@ -22,24 +22,16 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.SecureRandom;
-import java.util.*;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Controller
 @RequiredArgsConstructor
 public class DangNhapController {
 
-    // VÁ LỖI TRÀN RAM: Sử dụng ConcurrentHashMap và lưu kèm thời hạn sống của OTP
-    private static class OtpData {
-        String otp;
-        long expiryTime;
-        OtpData(String otp, long expiryTime) {
-            this.otp = otp;
-            this.expiryTime = expiryTime;
-        }
-    }
     private static final Map<String, OtpData> otpForgotStorage = new ConcurrentHashMap<>();
-
     private final TaiKhoanRepository taiKhoanRepository;
     private final KhachHangRepository khachHangRepository;
     private final VaiTroRepository vaiTroRepository;
@@ -73,7 +65,6 @@ public class DangNhapController {
                 redirectAttributes.addAttribute("regError", "Email này đã được sử dụng!");
                 return "redirect:/login";
             }
-
             TaiKhoan newAccount = new TaiKhoan();
             newAccount.setTenDangNhap(soDienThoai);
             newAccount.setMatKhau(passwordEncoder.encode(password));
@@ -82,11 +73,9 @@ public class DangNhapController {
             newAccount.setVaiTro(roleCustomer);
             newAccount.setTrangThai(true);
             TaiKhoan savedAccount = taiKhoanRepository.save(newAccount);
-
             GioHang gioHang = new GioHang();
             gioHang.setTaiKhoan(savedAccount);
             gioHangRepository.save(gioHang);
-
             Optional<KhachHang> khachPos = khachHangRepository.findBySoDienThoai(soDienThoai);
             if (khachPos.isPresent()) {
                 KhachHang existingKh = khachPos.get();
@@ -121,12 +110,10 @@ public class DangNhapController {
             if (khOpt.isEmpty() || khOpt.get().getTaiKhoan() == null) {
                 return ResponseEntity.badRequest().body("Không tìm thấy tài khoản nào liên kết với Email này!");
             }
-
             SecureRandom random = new SecureRandom();
             String otp = String.format("%06d", random.nextInt(999999));
-            long expiryTime = System.currentTimeMillis() + 5 * 60 * 1000; // Sống 5 phút
+            long expiryTime = System.currentTimeMillis() + 5 * 60 * 1000;
             otpForgotStorage.put(email, new OtpData(otp, expiryTime));
-
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(email);
             message.setSubject("[BeeMate] MÃ OTP KHÔI PHỤC MẬT KHẨU");
@@ -136,7 +123,6 @@ public class DangNhapController {
                     + "Tuyệt đối không chia sẻ mã này cho bất kỳ ai.\n"
                     + "Trân trọng,\nĐội ngũ BeeMate.");
             mailSender.send(message);
-
             return ResponseEntity.ok("Mã OTP đã được gửi đến email của bạn!");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Lỗi gửi Email. Vui lòng thử lại sau!");
@@ -156,18 +142,14 @@ public class DangNhapController {
                 otpForgotStorage.remove(email);
                 return ResponseEntity.badRequest().body("Mã OTP đã hết hạn, vui lòng gửi lại mã mới!");
             }
-
             KhachHang kh = khachHangRepository.findByEmail(email).orElse(null);
             if (kh == null || kh.getTaiKhoan() == null) {
                 return ResponseEntity.badRequest().body("Lỗi xác thực tài khoản!");
             }
-
             String newPw = UUID.randomUUID().toString().substring(0, 8);
-
             TaiKhoan tk = kh.getTaiKhoan();
             tk.setMatKhau(passwordEncoder.encode(newPw));
             taiKhoanRepository.save(tk);
-
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(email);
             message.setSubject("[BeeMate] MẬT KHẨU MỚI CỦA BẠN");
@@ -180,6 +162,16 @@ public class DangNhapController {
             return ResponseEntity.ok("Thành công! Mật khẩu mới đã được gửi vào Email của bạn.");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Lỗi hệ thống, không thể đặt lại mật khẩu!");
+        }
+    }
+
+    private static class OtpData {
+        String otp;
+        long expiryTime;
+
+        OtpData(String otp, long expiryTime) {
+            this.otp = otp;
+            this.expiryTime = expiryTime;
         }
     }
 }

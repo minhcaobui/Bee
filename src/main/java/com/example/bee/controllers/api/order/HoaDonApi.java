@@ -28,12 +28,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -72,7 +72,6 @@ public class HoaDonApi {
     private String endpoint;
     @Value("${momo.notifyUrl}")
     private String notifyUrl;
-
     @Value("${vnpay.tmnCode}")
     private String vnp_TmnCode;
     @Value("${vnpay.hashSecret}")
@@ -94,7 +93,6 @@ public class HoaDonApi {
         Pageable pageable = PageRequest.of(page, size);
         q = (q != null && !q.trim().isEmpty()) ? q.trim() : null;
         phuongThucThanhToan = (phuongThucThanhToan != null && !phuongThucThanhToan.trim().isEmpty()) ? phuongThucThanhToan : null;
-
         if (endDate != null) {
             Calendar cal = Calendar.getInstance();
             cal.setTime(endDate);
@@ -103,7 +101,6 @@ public class HoaDonApi {
             cal.set(Calendar.SECOND, 59);
             endDate = cal.getTime();
         }
-
         Page<HoaDon> result = hdRepo.searchDonHangChoXuLy(q, statusId, loaiHoaDon, phuongThucThanhToan, startDate, endDate, pageable);
         return ResponseEntity.ok(result);
     }
@@ -123,7 +120,6 @@ public class HoaDonApi {
         Pageable pageable = PageRequest.of(page, size);
         q = (q != null && !q.trim().isEmpty()) ? q.trim() : null;
         phuongThucThanhToan = (phuongThucThanhToan != null && !phuongThucThanhToan.trim().isEmpty()) ? phuongThucThanhToan : null;
-
         if (endDate != null) {
             Calendar cal = Calendar.getInstance();
             cal.setTime(endDate);
@@ -132,7 +128,6 @@ public class HoaDonApi {
             cal.set(Calendar.SECOND, 59);
             endDate = cal.getTime();
         }
-
         Page<HoaDon> result = hdRepo.searchLichSuHoaDon(q, statusId, nhanVienId, loaiHoaDon, phuongThucThanhToan, startDate, endDate, pageable);
         return ResponseEntity.ok(result);
     }
@@ -142,32 +137,25 @@ public class HoaDonApi {
         try {
             HoaDon hd = hdRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
             List<HoaDonChiTiet> listHdct = hdctRepo.findByHoaDonId(id);
-
             Date ngayCapNhatCuoi = hd.getNgayThanhToan();
             BigDecimal tongTienHangThucTe = BigDecimal.ZERO;
             BigDecimal tongGiaGoc = BigDecimal.ZERO;
-
             List<Map<String, Object>> chiTietResponses = new ArrayList<>();
-
             for (HoaDonChiTiet ct : listHdct) {
                 BigDecimal giaBan = ct.getGiaTien() != null ? ct.getGiaTien() : BigDecimal.ZERO;
                 BigDecimal donGia = giaBan;
                 if (ct.getSanPhamChiTiet() != null) {
                     donGia = ct.getSanPhamChiTiet().getGiaBan() != null ? ct.getSanPhamChiTiet().getGiaBan() : giaBan;
                 }
-
                 Integer soLuong = ct.getSoLuong() != null ? ct.getSoLuong() : 0;
-
                 tongTienHangThucTe = tongTienHangThucTe.add(giaBan.multiply(BigDecimal.valueOf(soLuong)));
                 tongGiaGoc = tongGiaGoc.add(donGia.multiply(BigDecimal.valueOf(soLuong)));
-
                 Map<String, Object> itemMap = new HashMap<>();
                 itemMap.put("id", ct.getId());
                 if (ct.getSanPhamChiTiet() != null) {
                     itemMap.put("idSanPhamChiTiet", ct.getSanPhamChiTiet().getId());
                     itemMap.put("sku", ct.getSanPhamChiTiet().getSku());
                     itemMap.put("hinhAnh", ct.getSanPhamChiTiet().getHinhAnh());
-
                     if (ct.getSanPhamChiTiet().getSanPham() != null) {
                         itemMap.put("idSanPham", ct.getSanPhamChiTiet().getSanPham().getId());
                         itemMap.put("tenSanPham", ct.getSanPhamChiTiet().getSanPham().getTen());
@@ -179,33 +167,25 @@ public class HoaDonApi {
                 itemMap.put("soLuong", soLuong);
                 itemMap.put("donGia", donGia);
                 itemMap.put("giaBan", giaBan);
-
                 chiTietResponses.add(itemMap);
             }
-
             BigDecimal giaTamThoi = hd.getGiaTamThoi() != null ? hd.getGiaTamThoi() : tongTienHangThucTe;
             BigDecimal tienGiamGiaSanPham = tongGiaGoc.subtract(giaTamThoi);
             if (tienGiamGiaSanPham.compareTo(BigDecimal.ZERO) < 0) tienGiamGiaSanPham = BigDecimal.ZERO;
-
-            // BÓC TÁCH CHIẾT KHẤU NHÂN VIÊN VÀ TIỀN GIẢM VOUCHER
             BigDecimal chietKhauNV = BigDecimal.ZERO;
             String rawGhiChu = hd.getGhiChu() != null ? hd.getGhiChu() : "";
             if (rawGhiChu.contains("[Đơn mua nội bộ bởi:")) {
                 chietKhauNV = giaTamThoi.multiply(new BigDecimal("0.05")).setScale(0, RoundingMode.HALF_UP);
             }
-
             BigDecimal totalDiscount = hd.getGiaTriKhuyenMai() != null ? hd.getGiaTriKhuyenMai() : BigDecimal.ZERO;
             BigDecimal tienGiamVoucher = totalDiscount.subtract(chietKhauNV);
             if (tienGiamVoucher.compareTo(BigDecimal.ZERO) < 0) {
                 tienGiamVoucher = BigDecimal.ZERO;
             }
-
             BigDecimal phiShip = hd.getPhiVanChuyen() != null ? hd.getPhiVanChuyen() : BigDecimal.ZERO;
             BigDecimal tongPhaiTra = hd.getGiaTong() != null ? hd.getGiaTong() : BigDecimal.ZERO;
-
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             SimpleDateFormat sdfDate = new SimpleDateFormat("dd/MM/yyyy");
-
             String tenNhanVienHienTai = "Hệ thống";
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication != null && authentication.isAuthenticated() && !authentication.getPrincipal().equals("anonymousUser")) {
@@ -213,11 +193,9 @@ public class HoaDonApi {
                 var nhanVienDangNhap = nvRepo.findByTaiKhoan_TenDangNhap(username).orElse(null);
                 if (nhanVienDangNhap != null) tenNhanVienHienTai = nhanVienDangNhap.getHoTen();
             }
-
             Map<String, Object> response = new HashMap<>();
             response.put("id", hd.getId());
             response.put("ma", hd.getMa());
-
             String tenNhan = "Khách hàng";
             if (hd.getThongTinGiaoHang() != null && hd.getThongTinGiaoHang().getTenNguoiNhan() != null) {
                 tenNhan = hd.getThongTinGiaoHang().getTenNguoiNhan();
@@ -225,7 +203,6 @@ public class HoaDonApi {
                 tenNhan = hd.getKhachHang().getHoTen();
             }
             response.put("tenKhachHang", tenNhan);
-
             String sdtNhan = "";
             if (hd.getThongTinGiaoHang() != null && hd.getThongTinGiaoHang().getSdtNhan() != null) {
                 sdtNhan = hd.getThongTinGiaoHang().getSdtNhan();
@@ -233,7 +210,6 @@ public class HoaDonApi {
                 sdtNhan = hd.getKhachHang().getSoDienThoai();
             }
             response.put("sdtKhachHang", sdtNhan);
-
             String emailNhan = "";
             if (hd.getThongTinGiaoHang() != null && hd.getThongTinGiaoHang().getEmailNhan() != null && !hd.getThongTinGiaoHang().getEmailNhan().isEmpty()) {
                 emailNhan = hd.getThongTinGiaoHang().getEmailNhan();
@@ -241,10 +217,8 @@ public class HoaDonApi {
                 emailNhan = hd.getKhachHang().getEmail();
             }
             response.put("email", emailNhan);
-
             if (rawGhiChu.contains("[BUY_NOW]")) rawGhiChu = rawGhiChu.replace("[BUY_NOW]", "").trim();
             response.put("ghiChu", rawGhiChu);
-
             String diaChiGiaoHang = "";
             Integer maTinh = null;
             Integer maHuyen = null;
@@ -261,23 +235,18 @@ public class HoaDonApi {
             response.put("maTinh", maTinh);
             response.put("maHuyen", maHuyen);
             response.put("maXa", maXa);
-
             List<ThanhToan> ttList = thanhToanRepo.findByHoaDon_Id(hd.getId());
-
             String phuongThuc = (hd.getLoaiHoaDon() != null && hd.getLoaiHoaDon() == 0)
                     ? PhuongThucThanhToan.TIEN_MAT
                     : PhuongThucThanhToan.COD;
-
             if (ttList != null && !ttList.isEmpty() && ttList.get(0).getPhuongThuc() != null) {
                 phuongThuc = ttList.get(0).getPhuongThuc();
             }
             response.put("phuongThucThanhToan", phuongThuc);
-
             response.put("trangThaiMa", hd.getTrangThaiHoaDon() != null ? hd.getTrangThaiHoaDon().getMa() : "");
             response.put("trangThaiTen", hd.getTrangThaiHoaDon() != null ? hd.getTrangThaiHoaDon().getTen() : "");
             response.put("loaiHoaDon", hd.getLoaiHoaDon());
             response.put("tenNhanVien", hd.getNhanVien() != null ? hd.getNhanVien().getHoTen() : tenNhanVienHienTai);
-
             response.put("hinhThucGiaoHang", hd.getHinhThucGiaoHang());
             response.put("ngayTao", hd.getNgayTao() != null ? sdf.format(hd.getNgayTao()) : null);
             response.put("ngayThanhToan", hd.getNgayThanhToan() != null ? sdf.format(hd.getNgayThanhToan()) : null);
@@ -285,15 +254,14 @@ public class HoaDonApi {
             response.put("ngayNhanHangDuKien", hd.getNgayNhanHangDuKien() != null ? sdfDate.format(hd.getNgayNhanHangDuKien()) : null);
             response.put("ngayHenLayHang", hd.getNgayHenLayHang() != null ? sdf.format(hd.getNgayHenLayHang()) : null);
             response.put("ngayHangSanSang", hd.getNgayHangSanSang() != null ? sdf.format(hd.getNgayHangSanSang()) : null);
-
             String maVoucher = "Không áp dụng";
             try {
                 if (hd.getMaGiamGia() != null) {
                     maVoucher = hd.getMaGiamGia().getMaCode() != null ? hd.getMaGiamGia().getMaCode() : hd.getMaGiamGia().getMaCode();
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
             response.put("maVoucher", maVoucher);
-
             List<Map<String, Object>> resThanhToan = new ArrayList<>();
             if (ttList != null) {
                 for (ThanhToan tt : ttList) {
@@ -308,7 +276,6 @@ public class HoaDonApi {
                 }
             }
             response.put("lichSuThanhToan", resThanhToan);
-
             List<LichSuHoaDon> listLichSu = lsRepo.findAll().stream()
                     .filter(ls -> ls.getHoaDon() != null && ls.getHoaDon().getId().equals(id))
                     .sorted((ls1, ls2) -> {
@@ -318,7 +285,6 @@ public class HoaDonApi {
                         return ls2.getNgayTao().compareTo(ls1.getNgayTao());
                     })
                     .collect(Collectors.toList());
-
             List<Map<String, Object>> resLichSu = new ArrayList<>();
             for (LichSuHoaDon ls : listLichSu) {
                 Map<String, Object> mapLS = new HashMap<>();
@@ -329,21 +295,17 @@ public class HoaDonApi {
                 resLichSu.add(mapLS);
             }
             response.put("lichSuThaoTac", resLichSu);
-
             response.put("tienHang", tongTienHangThucTe);
             response.put("phiVanChuyen", phiShip);
             response.put("tongTien", tongPhaiTra);
             response.put("chiTiets", chiTietResponses);
-
             response.put("giaTamThoi", giaTamThoi);
             response.put("tongGiaGoc", tongGiaGoc);
             response.put("tienGiamGiaSanPham", tienGiamGiaSanPham);
             response.put("giaTriKhuyenMai", totalDiscount);
             response.put("tienGiamVoucher", tienGiamVoucher);
             response.put("chietKhauNV", chietKhauNV);
-
             return ResponseEntity.ok(response);
-
         } catch (Exception e) {
             e.printStackTrace();
             String errorMsg = e.getMessage() != null ? e.getMessage() : e.toString();
@@ -356,19 +318,16 @@ public class HoaDonApi {
     public ResponseEntity<?> nextStatus(@PathVariable Integer id, @RequestBody Map<String, String> req) {
         HoaDon hd = hdRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy hóa đơn"));
-
         String currentMa = hd.getTrangThaiHoaDon().getMa();
         String hinhThucGiao = hd.getHinhThucGiaoHang() != null ? hd.getHinhThucGiaoHang() : "GIAO_TAN_NOI";
         String nextMa = "";
         String ghiChu = req.getOrDefault("ghiChu", "Cập nhật trạng thái tự động");
-        String phuongThucMoi = req.get("phuongThucThanhToan"); // Lấy phương thức thanh toán mới do NV chọn
-
+        String phuongThucMoi = req.get("phuongThucThanhToan");
         switch (currentMa) {
             case "CHO_THANH_TOAN":
-                // Xử lý riêng cho đơn POS (Bán tại quầy) hoặc thanh toán tại quầy đang chờ thanh toán
                 if (hd.getLoaiHoaDon() != null && hd.getLoaiHoaDon() == 0) {
                     nextMa = "HOAN_THANH";
-                    if(hd.getNgayThanhToan() == null) hd.setNgayThanhToan(new Date());
+                    if (hd.getNgayThanhToan() == null) hd.setNgayThanhToan(new Date());
                 } else {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Đơn online đang chờ thanh toán, khách hàng cần tự thanh toán hoặc Admin có thể hủy đơn!");
                 }
@@ -395,38 +354,32 @@ public class HoaDonApi {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Đơn tại cửa hàng không qua bước này!");
                 }
                 nextMa = "HOAN_THANH";
-                if(hd.getNgayThanhToan() == null) hd.setNgayThanhToan(new Date());
+                if (hd.getNgayThanhToan() == null) hd.setNgayThanhToan(new Date());
                 break;
             case "CHO_KHACH_LAY":
                 if (!"NHAN_TAI_CUA_HANG".equals(hinhThucGiao)) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Đơn giao tận nơi không qua bước chờ khách lấy!");
                 }
                 nextMa = "HOAN_THANH";
-                if(hd.getNgayThanhToan() == null) hd.setNgayThanhToan(new Date());
+                if (hd.getNgayThanhToan() == null) hd.setNgayThanhToan(new Date());
                 break;
             default:
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Trạng thái hiện tại không thể chuyển tiếp");
         }
-
         TrangThaiHoaDon nextStatus = ttRepo.findByMa(nextMa);
         if (nextStatus == null) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi Database: Không tìm thấy mã trạng thái " + nextMa);
         }
-
         hd.setTrangThaiHoaDon(nextStatus);
-
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         NhanVien nhanVienThaoTac = null;
         if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
             nhanVienThaoTac = nvRepo.findByTaiKhoan_TenDangNhap(auth.getName()).orElse(null);
         }
-
         if (hd.getNhanVien() == null && nhanVienThaoTac != null) {
             hd.setNhanVien(nhanVienThaoTac);
         }
         hdRepo.save(hd);
-
-        // Cập nhật trạng thái thanh toán nếu hóa đơn hoàn thành (Dành cho COD hoặc nhận tại cửa hàng)
         if ("HOAN_THANH".equals(nextMa)) {
             List<ThanhToan> ttList = thanhToanRepo.findByHoaDon_Id(hd.getId());
             if (ttList != null && !ttList.isEmpty()) {
@@ -434,24 +387,19 @@ public class HoaDonApi {
                 if ("CHO_THANH_TOAN".equals(tt.getTrangThai())) {
                     tt.setTrangThai("THANH_CONG");
                     tt.setNgayThanhToan(new Date());
-
-                    // CẬP NHẬT PHƯƠNG THỨC THANH TOÁN MỚI (NẾU CÓ)
                     if (phuongThucMoi != null && !phuongThucMoi.trim().isEmpty()) {
                         tt.setPhuongThuc(phuongThucMoi);
                         ghiChu += " (Khách thanh toán bằng: " + phuongThucMoi + ")";
                     }
-
                     thanhToanRepo.save(tt);
                 }
             }
         }
-
         if (hd.getKhachHang() != null && hd.getKhachHang().getTaiKhoan() != null) {
             ThongBao tb = new ThongBao();
             tb.setTaiKhoanId(hd.getKhachHang().getTaiKhoan().getId());
             tb.setLoaiThongBao("ORDER");
             tb.setDaDoc(false);
-
             switch (nextMa) {
                 case "DA_XAC_NHAN":
                     tb.setTieuDe("Đơn hàng đã được xác nhận");
@@ -486,15 +434,11 @@ public class HoaDonApi {
         }
 
         try {
-            // Lấy tên đăng nhập (hoặc ID) của khách hàng để gửi đích danh
             String username = hd.getKhachHang().getTaiKhoan().getTenDangNhap();
-            // Vì frontend của bạn đang subscribe kênh chung "/topic/public/notifications",
-            // ta tạm thời dùng kênh chung này để demo (Thực tế nên dùng /user/.../queue/notif)
             messagingTemplate.convertAndSend("/topic/public/notifications", "NEW_CUSTOMER_NOTIF");
         } catch (Exception e) {
             System.out.println("Lỗi gửi WS: " + e.getMessage());
         }
-
         LichSuHoaDon ls = new LichSuHoaDon();
         ls.setHoaDon(hd);
         ls.setTrangThaiHoaDon(nextStatus);
@@ -502,7 +446,6 @@ public class HoaDonApi {
         ls.setGhiChu(ghiChu);
         ls.setNgayTao(new Date());
         lsRepo.save(ls);
-
         return ResponseEntity.ok(Map.of(
                 "message", "Cập nhật thành công",
                 "nextStatus", nextStatus.getTen(),
@@ -516,35 +459,28 @@ public class HoaDonApi {
         try {
             HoaDon hd = hdRepo.findById(id)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy hóa đơn"));
-
             List<ThanhToan> tts = thanhToanRepo.findByHoaDon_Id(hd.getId());
             String phuongThuc = "TIEN_MAT";
             if (tts != null && !tts.isEmpty()) {
                 phuongThuc = tts.get(0).getPhuongThuc();
             }
-
             if (!"CHUYEN_KHOAN".equalsIgnoreCase(phuongThuc)) {
                 return ResponseEntity.badRequest().body(Map.of("message", "Chỉ áp dụng cho đơn Chuyển khoản"));
             }
-
             TrangThaiHoaDon ttChoThanhToan = ttRepo.findByMa("CHO_THANH_TOAN");
             if (ttChoThanhToan == null) throw new RuntimeException("Chưa cấu hình trạng thái CHO_THANH_TOAN trong DB");
-
             hd.setTrangThaiHoaDon(ttChoThanhToan);
             hdRepo.save(hd);
-
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             var nhanVienThaoTac = (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser"))
                     ? nvRepo.findByTaiKhoan_TenDangNhap(auth.getName()).orElse(null)
                     : null;
-
             lsRepo.save(LichSuHoaDon.builder()
                     .hoaDon(hd)
                     .trangThaiHoaDon(ttChoThanhToan)
                     .nhanVien(nhanVienThaoTac)
                     .ghiChu("Nhân viên xác nhận chưa nhận được tiền, chuyển về Chờ thanh toán")
                     .build());
-
             return ResponseEntity.ok(Map.of("message", "Đã chuyển về Chờ thanh toán"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
@@ -557,17 +493,14 @@ public class HoaDonApi {
         HoaDon hd = hdRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy hóa đơn"));
         String currentStatus = hd.getTrangThaiHoaDon().getMa();
-
         List<ThanhToan> ttList = thanhToanRepo.findByHoaDon_Id(hd.getId());
         boolean daThanhToanOnline = ttList.stream().anyMatch(tt ->
                 ("VNPAY".equals(tt.getPhuongThuc()) || "MOMO".equals(tt.getPhuongThuc()))
                         && "THANH_CONG".equals(tt.getTrangThai())
         );
-
         if (daThanhToanOnline) {
             return ResponseEntity.badRequest().body(Map.of("message", "Đơn hàng đã được thanh toán trực tuyến. Vui lòng liên hệ Hotline CSKH để yêu cầu hủy và hoàn tiền!"));
         }
-
         if ("HOAN_THANH".equals(currentStatus) || "DANG_GIAO".equals(currentStatus) || "DANG_GIAO_HANG".equals(currentStatus) || "CHO_KHACH_LAY".equals(currentStatus)) {
             return ResponseEntity.badRequest().body(Map.of("message", "Không thể hủy đơn hàng đã giao hoặc đang giao!"));
         }
@@ -577,10 +510,8 @@ public class HoaDonApi {
         if ("DA_HUY".equals(hd.getTrangThaiHoaDon().getMa())) {
             return ResponseEntity.badRequest().body(Map.of("message", "Đơn hàng này đã bị hủy từ trước!"));
         }
-
         TrangThaiHoaDon ttHuy = ttRepo.findByMa("DA_HUY");
         hd.setTrangThaiHoaDon(ttHuy);
-
         List<HoaDonChiTiet> hdctList = hdctRepo.findByHoaDonId(hd.getId());
         for (HoaDonChiTiet ct : hdctList) {
             SanPhamChiTiet spct = ct.getSanPhamChiTiet();
@@ -589,7 +520,6 @@ public class HoaDonApi {
                 spctRepo.save(spct);
             }
         }
-
         if (hd.getMaGiamGia() != null) {
             MaGiamGia voucher = hd.getMaGiamGia();
             int luotMoi = voucher.getLuotSuDung() - 1;
@@ -601,18 +531,14 @@ public class HoaDonApi {
                 maGiamGiaRepo.save(voucher);
             }
         }
-
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         var nhanVienThaoTac = (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser"))
                 ? nvRepo.findByTaiKhoan_TenDangNhap(auth.getName()).orElse(null)
                 : null;
-
         if (hd.getNhanVien() == null && nhanVienThaoTac != null) {
             hd.setNhanVien(nhanVienThaoTac);
         }
-
         hdRepo.save(hd);
-
         if (hd.getKhachHang() != null && hd.getKhachHang().getTaiKhoan() != null) {
             ThongBao tb = new ThongBao();
             tb.setTaiKhoanId(hd.getKhachHang().getTaiKhoan().getId());
@@ -622,20 +548,17 @@ public class HoaDonApi {
             tb.setNoiDung("Đơn hàng #" + hd.getMa() + " đã bị hủy. Lý do: " + req.getOrDefault("ghiChu", "Khách hàng / Admin yêu cầu hủy đơn."));
             thongBaoRepository.save(tb);
         }
-
         lsRepo.save(LichSuHoaDon.builder()
                 .hoaDon(hd)
                 .trangThaiHoaDon(ttHuy)
                 .nhanVien(nhanVienThaoTac)
                 .ghiChu(req.getOrDefault("ghiChu", "Khách hàng/Admin yêu cầu hủy đơn"))
                 .build());
-
         try {
             messagingTemplate.convertAndSend("/topic/public/stock", "STOCK_CHANGED");
         } catch (Exception e) {
             System.out.println("Lỗi gửi WS: " + e.getMessage());
         }
-
         return ResponseEntity.ok(Map.of("message", "Đơn hàng đã được hủy và hoàn sản phẩm vào kho!"));
     }
 
@@ -651,7 +574,6 @@ public class HoaDonApi {
             hd.setMa("HD" + System.currentTimeMillis());
             hd.setLoaiHoaDon(1);
             hd.setNgayTao(new Date());
-
             ThongTinGiaoHang thongTin = ThongTinGiaoHang.builder()
                     .tenNguoiNhan(req.tenNguoiNhan)
                     .sdtNhan(req.soDienThoai)
@@ -663,7 +585,6 @@ public class HoaDonApi {
                     .build();
             hd.setThongTinGiaoHang(thongTin);
             hd.setHinhThucGiaoHang(req.hinhThucGiaoHang != null ? req.hinhThucGiaoHang : "GIAO_TAN_NOI");
-
             if ("GIAO_TAN_NOI".equals(hd.getHinhThucGiaoHang()) && req.maHuyen != null && req.maXa != null) {
                 Date expectedDate = ghnService.calculateExpectedDeliveryDate(req.maHuyen, req.maXa, null);
                 if (expectedDate != null) {
@@ -672,22 +593,18 @@ public class HoaDonApi {
             } else if ("NHAN_TAI_CUA_HANG".equals(hd.getHinhThucGiaoHang()) && req.ngayHenLayHang != null) {
                 hd.setNgayHenLayHang(req.ngayHenLayHang);
             }
-
             BigDecimal chietKhauNV = BigDecimal.ZERO;
             String ghiChu = req.ghiChu != null ? req.ghiChu : "";
 
             if (req.isBuyNow != null && req.isBuyNow) {
                 ghiChu += " [BUY_NOW]";
             }
-
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             boolean isStaffOrAdminLoggedIn = false;
             String loggedInUsername = "";
-
             if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
                 String role = auth.getAuthorities().iterator().next().getAuthority();
                 loggedInUsername = auth.getName();
-
                 if ("ROLE_STAFF".equals(role) || "ROLE_ADMIN".equals(role)) {
                     isStaffOrAdminLoggedIn = true;
                 } else {
@@ -695,62 +612,48 @@ public class HoaDonApi {
                     hd.setKhachHang(kh);
                 }
             }
-
             if (isStaffOrAdminLoggedIn) {
                 chietKhauNV = req.tienHang.multiply(new BigDecimal("0.05")).setScale(0, RoundingMode.HALF_UP);
-
                 NhanVien nvMua = nvRepo.findByTaiKhoan_TenDangNhap(loggedInUsername).orElse(null);
                 String tenNv = nvMua != null ? nvMua.getHoTen() : loggedInUsername;
-
                 if (!ghiChu.isEmpty()) ghiChu += " - ";
                 ghiChu += "[Đơn mua nội bộ bởi: " + tenNv + "]";
-
                 hd.setNhanVien(nvMua);
             }
-
             hd.setGhiChu(ghiChu.trim());
-
             BigDecimal tienHang = req.tienHang != null ? req.tienHang : BigDecimal.ZERO;
             BigDecimal phiShip = req.phiShip != null ? req.phiShip : BigDecimal.ZERO;
             BigDecimal tienGiam = req.tienGiam != null ? req.tienGiam : BigDecimal.ZERO;
-
             BigDecimal tongTienCuoi = req.tongTien != null ? req.tongTien : tienHang.subtract(tienGiam).add(phiShip);
-
             if (tongTienCuoi.compareTo(BigDecimal.ZERO) < 0) {
                 tongTienCuoi = BigDecimal.ZERO;
             }
-
             hd.setGiaTamThoi(tienHang);
             hd.setGiaTriKhuyenMai(tienGiam.add(chietKhauNV));
             hd.setPhiVanChuyen(phiShip);
             hd.setGiaTong(tongTienCuoi);
-
             TrangThaiHoaDon ttBanDau;
             if ("MOMO".equalsIgnoreCase(req.phuongThucThanhToan) || "VNPAY".equalsIgnoreCase(req.phuongThucThanhToan) || "CHUYEN_KHOAN".equalsIgnoreCase(req.phuongThucThanhToan)) {
                 ttBanDau = ttRepo.findByMa("CHO_THANH_TOAN");
             } else {
                 ttBanDau = ttRepo.findByMa("CHO_XAC_NHAN");
             }
-
             if (ttBanDau == null) throw new RuntimeException("Lỗi cấu hình trạng thái trong DB");
             hd.setTrangThaiHoaDon(ttBanDau);
-
             if (req.voucherId != null) {
                 MaGiamGia voucher = maGiamGiaRepo.findById(req.voucherId).orElse(null);
                 if (voucher != null) {
                     if (!voucher.getTrangThai() ||
                             voucher.getLuotSuDung() >= voucher.getSoLuong() ||
                             (voucher.getNgayKetThuc() != null && voucher.getNgayKetThuc().isBefore(java.time.LocalDateTime.now()))) {
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Mã giảm giá đã hết lượt sử dụng hoặc hết hạn!"));
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Mã giảm giá đã hết lượt sử dụng hoặc đã hết hạn!"));
                     }
-
                     if (hd.getKhachHang() != null) {
                         boolean daSuDung = hdRepo.existsByKhachHangIdAndMaGiamGiaIdAndTrangThaiHoaDon_MaNot(hd.getKhachHang().getId(), voucher.getId(), "DA_HUY");
                         if (daSuDung) {
                             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Bạn đã sử dụng mã giảm giá này cho một đơn hàng khác rồi!"));
                         }
                     }
-
                     hd.setMaGiamGia(voucher);
                     int luotMoi = voucher.getLuotSuDung() + 1;
                     voucher.setLuotSuDung(luotMoi);
@@ -760,30 +663,20 @@ public class HoaDonApi {
                     maGiamGiaRepo.save(voucher);
                 }
             }
-
             HoaDon savedHd = hdRepo.save(hd);
-
             for (CheckoutItemRequest itemReq : req.chiTietDonHangs) {
                 SanPhamChiTiet spct = spctRepo.findById(itemReq.chiTietSanPhamId)
                         .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
-
                 if (spct.getSoLuong() < itemReq.soLuong) {
-                    throw new RuntimeException("Sản phẩm " + spct.getSanPham().getTen() + " không đủ số lượng!");
+                    throw new RuntimeException("Sản phẩm " + spct.getSanPham().getTen() + " đã hết hoặc không đủ số lượng (Chỉ còn " + spct.getSoLuong() + " sản phẩm)!");
                 }
-
                 BigDecimal giaThucTe = itemReq.donGia != null ? itemReq.donGia : spct.getGiaBan();
-
-                // GIẢM SỐ LƯỢNG KHO
                 spct.setSoLuong(spct.getSoLuong() - itemReq.soLuong);
-
-                // NẾU LÀ MUA NGAY THÌ GIẢM CẢ SỐ LƯỢNG TẠM GIỮ (VÌ ĐÃ CHỐT ĐƠN RỒI)
                 if (Boolean.TRUE.equals(req.isBuyNow)) {
                     int currentHold = spct.getSoLuongTamGiu() == null ? 0 : spct.getSoLuongTamGiu();
                     spct.setSoLuongTamGiu(Math.max(0, currentHold - itemReq.soLuong));
                 }
-
                 spctRepo.save(spct);
-
                 HoaDonChiTiet hdct = new HoaDonChiTiet();
                 hdct.setHoaDon(savedHd);
                 hdct.setSanPhamChiTiet(spct);
@@ -791,15 +684,12 @@ public class HoaDonApi {
                 hdct.setGiaTien(giaThucTe);
                 hdctRepo.save(hdct);
             }
-
             ThanhToan tt = new ThanhToan();
             tt.setHoaDon(savedHd);
             tt.setSoTien(tongTienCuoi);
             String pttt = req.phuongThucThanhToan != null ? req.phuongThucThanhToan : "TIEN_MAT";
             tt.setPhuongThuc(pttt);
             tt.setLoaiThanhToan("THANH_TOAN");
-
-            // Fix trạng thái thanh toán đối với COD
             if ("COD".equalsIgnoreCase(pttt)) {
                 tt.setTrangThai("CHO_THANH_TOAN");
                 tt.setNgayThanhToan(null);
@@ -812,8 +702,6 @@ public class HoaDonApi {
                 }
             }
             thanhToanRepo.save(tt);
-
-            // SỬA ĐOẠN NÀY LẠI ĐỂ LOG ĐÚNG LỊCH SỬ TẠO ĐƠN THEO LOẠI GIAO HÀNG
             String ghiChuTaoDon = "";
             if (ttBanDau.getMa().equals("CHO_THANH_TOAN")) {
                 ghiChuTaoDon = "Đang chờ thanh toán online";
@@ -824,14 +712,12 @@ public class HoaDonApi {
                     ghiChuTaoDon = "Khách hàng đặt đơn Online (Thanh toán khi nhận hàng - COD)";
                 }
             }
-
             LichSuHoaDon ls = new LichSuHoaDon();
             ls.setHoaDon(savedHd);
             ls.setTrangThaiHoaDon(ttBanDau);
             ls.setGhiChu(ghiChuTaoDon);
             ls.setNgayTao(new Date());
             lsRepo.save(ls);
-
             if ((req.isBuyNow == null || !req.isBuyNow) && savedHd.getKhachHang() != null && savedHd.getKhachHang().getTaiKhoan() != null) {
                 com.example.bee.entities.cart.GioHang gh = gioHangRepository.findByTaiKhoan_Id(savedHd.getKhachHang().getTaiKhoan().getId()).orElse(null);
                 if (gh != null) {
@@ -839,7 +725,6 @@ public class HoaDonApi {
                     gioHangChiTietRepository.deleteAll(ghcts);
                 }
             }
-
             try {
                 if (savedHd.getKhachHang() != null && savedHd.getKhachHang().getTaiKhoan() != null) {
                     ThongBao tb = new ThongBao();
@@ -850,7 +735,6 @@ public class HoaDonApi {
                     tb.setDaDoc(false);
                     thongBaoRepository.save(tb);
                 }
-
                 if (req.email != null && !req.email.isBlank()) {
                     emailService.sendOrderConfirmationEmail(savedHd, req.email);
                 }
@@ -858,14 +742,12 @@ public class HoaDonApi {
                 System.out.println("Lỗi gửi Email: " + e.getMessage());
             }
             try {
-                // Đẩy chuỗi "NEW_ORDER" xuống kênh "/topic/admin/orders"
                 messagingTemplate.convertAndSend("/topic/admin/orders", "NEW_ORDER");
                 messagingTemplate.convertAndSend("/topic/public/stock", "STOCK_CHANGED");
                 messagingTemplate.convertAndSend("/topic/admin/notifications", "NEW_NOTIF");
             } catch (Exception e) {
                 System.out.println("Lỗi gửi WebSocket: " + e.getMessage());
             }
-
             return ResponseEntity.ok(Map.of("message", "Đặt hàng thành công", "maHoaDon", savedHd.getMa(), "id", savedHd.getId(), "tongTienThucTe", tongTienCuoi));
         } catch (Exception e) {
             e.printStackTrace();
@@ -882,11 +764,9 @@ public class HoaDonApi {
         String username = auth.getName();
         KhachHang kh = khRepo.findByTaiKhoan_TenDangNhap(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy khách hàng"));
-
         List<HoaDon> myOrders = hdRepo.findByKhachHangIdOrderByNgayTaoDesc(kh.getId());
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
         List<Map<String, Object>> response = new ArrayList<>();
-
         for (HoaDon hd : myOrders) {
             Map<String, Object> map = new HashMap<>();
             map.put("id", hd.getId());
@@ -895,11 +775,9 @@ public class HoaDonApi {
             map.put("tongTien", hd.getGiaTong());
             map.put("trangThai", hd.getTrangThaiHoaDon().getTen());
             map.put("trangThaiMa", hd.getTrangThaiHoaDon().getMa());
-
             map.put("loaiHoaDon", hd.getLoaiHoaDon());
             map.put("hinhThucGiaoHang", hd.getHinhThucGiaoHang());
             map.put("phiVanChuyen", hd.getPhiVanChuyen());
-
             map.put("giaTamThoi", hd.getGiaTamThoi());
             map.put("giaTriKhuyenMai", hd.getGiaTriKhuyenMai());
             if (hd.getMaGiamGia() != null) {
@@ -907,14 +785,12 @@ public class HoaDonApi {
             } else {
                 map.put("maVoucher", "");
             }
-
             List<ThanhToan> ttList = thanhToanRepo.findByHoaDon_Id(hd.getId());
             String phuongThuc = "COD";
             if (ttList != null && !ttList.isEmpty() && ttList.get(0).getPhuongThuc() != null) {
                 phuongThuc = ttList.get(0).getPhuongThuc();
             }
             map.put("phuongThucThanhToan", phuongThuc);
-
             List<HoaDonChiTiet> chiTiets = hdctRepo.findByHoaDonId(hd.getId());
             if (!chiTiets.isEmpty()) {
                 HoaDonChiTiet firstItem = chiTiets.get(0);
@@ -931,7 +807,6 @@ public class HoaDonApi {
                 ctMap.put("giaBan", firstItem.getGiaTien());
                 map.put("chiTiets", Collections.singletonList(ctMap));
             }
-
             response.add(map);
         }
         return ResponseEntity.ok(response);
@@ -943,28 +818,21 @@ public class HoaDonApi {
         if (hoaDon == null) {
             return ResponseEntity.notFound().build();
         }
-
         SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         SimpleDateFormat sdfDate = new java.text.SimpleDateFormat("dd/MM/yyyy");
-
         Map<String, Object> result = new java.util.HashMap<>();
-
         result.put("id", hoaDon.getId());
         result.put("ma", hoaDon.getMa());
-
         result.put("loaiHoaDon", hoaDon.getLoaiHoaDon());
         result.put("hinhThucGiaoHang", hoaDon.getHinhThucGiaoHang());
-
         result.put("trangThaiMa", hoaDon.getTrangThaiHoaDon() != null ? hoaDon.getTrangThaiHoaDon().getMa() : "");
         result.put("trangThaiTen", hoaDon.getTrangThaiHoaDon() != null ? hoaDon.getTrangThaiHoaDon().getTen() : "");
         result.put("trangThaiHoaDon", hoaDon.getTrangThaiHoaDon());
-
         result.put("ngayTao", hoaDon.getNgayTao() != null ? sdf.format(hoaDon.getNgayTao()) : null);
         result.put("ngayThanhToan", hoaDon.getNgayThanhToan() != null ? sdf.format(hoaDon.getNgayThanhToan()) : null);
         result.put("ngayNhanHangDuKien", hoaDon.getNgayNhanHangDuKien() != null ? sdfDate.format(hoaDon.getNgayNhanHangDuKien()) : null);
         result.put("ngayHenLayHang", hoaDon.getNgayHenLayHang() != null ? sdf.format(hoaDon.getNgayHenLayHang()) : null);
         result.put("ngayHangSanSang", hoaDon.getNgayHangSanSang() != null ? sdf.format(hoaDon.getNgayHangSanSang()) : null);
-
         String tenNhan = "Khách hàng";
         if (hoaDon.getThongTinGiaoHang() != null && hoaDon.getThongTinGiaoHang().getTenNguoiNhan() != null) {
             tenNhan = hoaDon.getThongTinGiaoHang().getTenNguoiNhan();
@@ -973,7 +841,6 @@ public class HoaDonApi {
         }
         result.put("tenNguoiNhan", tenNhan);
         result.put("tenKhachHang", tenNhan);
-
         String sdtNhan = "";
         if (hoaDon.getThongTinGiaoHang() != null && hoaDon.getThongTinGiaoHang().getSdtNhan() != null) {
             sdtNhan = hoaDon.getThongTinGiaoHang().getSdtNhan();
@@ -981,7 +848,6 @@ public class HoaDonApi {
             sdtNhan = hoaDon.getKhachHang().getSoDienThoai();
         }
         result.put("sdtKhachHang", sdtNhan);
-
         String emailNhan = "";
         if (hoaDon.getThongTinGiaoHang() != null && hoaDon.getThongTinGiaoHang().getEmailNhan() != null && !hoaDon.getThongTinGiaoHang().getEmailNhan().isEmpty()) {
             emailNhan = hoaDon.getThongTinGiaoHang().getEmailNhan();
@@ -989,7 +855,6 @@ public class HoaDonApi {
             emailNhan = hoaDon.getKhachHang().getEmail();
         }
         result.put("email", emailNhan);
-
         String diaChiGiaoHang = "";
         Integer maTinh = null;
         Integer maHuyen = null;
@@ -1006,14 +871,12 @@ public class HoaDonApi {
         result.put("maTinh", maTinh);
         result.put("maHuyen", maHuyen);
         result.put("maXa", maXa);
-
         List<ThanhToan> ttListTC = thanhToanRepo.findByHoaDon_Id(hoaDon.getId());
         String ptttTC = "TIEN_MAT";
         if (ttListTC != null && !ttListTC.isEmpty()) {
             ptttTC = ttListTC.get(0).getPhuongThuc();
         }
         result.put("phuongThucThanhToan", ptttTC);
-
         List<Map<String, Object>> resThanhToan = new ArrayList<>();
         if (ttListTC != null) {
             for (ThanhToan tt : ttListTC) {
@@ -1028,29 +891,23 @@ public class HoaDonApi {
             }
         }
         result.put("lichSuThanhToan", resThanhToan);
-
         String rawGhiChu = hoaDon.getGhiChu() != null ? hoaDon.getGhiChu() : "";
         if (rawGhiChu.contains("[BUY_NOW]")) {
             rawGhiChu = rawGhiChu.replace("[BUY_NOW]", "").trim();
         }
         result.put("ghiChu", rawGhiChu);
-
         result.put("giaTong", hoaDon.getGiaTong());
         result.put("tongTien", hoaDon.getGiaTong());
         result.put("phiVanChuyen", hoaDon.getPhiVanChuyen());
-
-        java.util.List<com.example.bee.entities.order.HoaDonChiTiet> danhSachChiTiet = hdctRepo.findByHoaDonId(hoaDon.getId());
+        List<com.example.bee.entities.order.HoaDonChiTiet> danhSachChiTiet = hdctRepo.findByHoaDonId(hoaDon.getId());
         BigDecimal tongGiaGocTraCuu = BigDecimal.ZERO;
         BigDecimal giaTamThoiTraCuu = hoaDon.getGiaTamThoi() != null ? hoaDon.getGiaTamThoi() : BigDecimal.ZERO;
-
-        java.util.List<java.util.Map<String, Object>> listChiTiet = new java.util.ArrayList<>();
+        List<Map<String, Object>> listChiTiet = new ArrayList<>();
         if (danhSachChiTiet != null && !danhSachChiTiet.isEmpty()) {
             for (com.example.bee.entities.order.HoaDonChiTiet hdct : danhSachChiTiet) {
-                java.util.Map<String, Object> item = new java.util.HashMap<>();
-
+                Map<String, Object> item = new HashMap<>();
                 item.put("id", hdct.getId());
                 item.put("soLuong", hdct.getSoLuong());
-
                 BigDecimal giaBan = hdct.getGiaTien() != null ? hdct.getGiaTien() : BigDecimal.ZERO;
                 BigDecimal donGia = giaBan;
                 if (hdct.getSanPhamChiTiet() != null && hdct.getSanPhamChiTiet().getGiaBan() != null) {
@@ -1058,13 +915,10 @@ public class HoaDonApi {
                 }
                 item.put("donGia", donGia);
                 item.put("giaBan", giaBan);
-
                 tongGiaGocTraCuu = tongGiaGocTraCuu.add(donGia.multiply(BigDecimal.valueOf(hdct.getSoLuong())));
-
                 if (hdct.getSanPhamChiTiet() != null) {
                     item.put("sku", hdct.getSanPhamChiTiet().getSku());
                     item.put("idSanPhamChiTiet", hdct.getSanPhamChiTiet().getId());
-
                     item.put("hinhAnh", hdct.getSanPhamChiTiet().getHinhAnh());
                     if (hdct.getSanPhamChiTiet().getSanPham() != null) {
                         item.put("idSanPham", hdct.getSanPhamChiTiet().getSanPham().getId());
@@ -1078,34 +932,28 @@ public class HoaDonApi {
             }
         }
         result.put("chiTiets", listChiTiet);
-
         BigDecimal tienGiamSanPhamTraCuu = tongGiaGocTraCuu.subtract(giaTamThoiTraCuu);
-        if(tienGiamSanPhamTraCuu.compareTo(BigDecimal.ZERO) < 0) tienGiamSanPhamTraCuu = BigDecimal.ZERO;
-
+        if (tienGiamSanPhamTraCuu.compareTo(BigDecimal.ZERO) < 0) tienGiamSanPhamTraCuu = BigDecimal.ZERO;
         BigDecimal chietKhauNV = BigDecimal.ZERO;
         if (rawGhiChu.contains("[Đơn mua nội bộ bởi:")) {
             chietKhauNV = giaTamThoiTraCuu.multiply(new BigDecimal("0.05")).setScale(0, RoundingMode.HALF_UP);
         }
-
         BigDecimal totalDiscount = hoaDon.getGiaTriKhuyenMai() != null ? hoaDon.getGiaTriKhuyenMai() : BigDecimal.ZERO;
         BigDecimal tienGiamVoucher = totalDiscount.subtract(chietKhauNV);
         if (tienGiamVoucher.compareTo(BigDecimal.ZERO) < 0) {
             tienGiamVoucher = BigDecimal.ZERO;
         }
-
         result.put("giaTamThoi", giaTamThoiTraCuu);
         result.put("tongGiaGoc", tongGiaGocTraCuu);
         result.put("tienGiamGiaSanPham", tienGiamSanPhamTraCuu);
         result.put("giaTriKhuyenMai", totalDiscount);
         result.put("tienGiamVoucher", tienGiamVoucher);
         result.put("chietKhauNV", chietKhauNV);
-
         if (hoaDon.getMaGiamGia() != null) {
             result.put("maVoucher", hoaDon.getMaGiamGia().getMaCode());
         } else {
             result.put("maVoucher", "Không áp dụng");
         }
-
         return ResponseEntity.ok(result);
     }
 
@@ -1123,7 +971,6 @@ public class HoaDonApi {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
         orderInfo.put("ngayTao", hd.getNgayTao() != null ? sdf.format(hd.getNgayTao()) : sdf.format(new Date()));
         orderInfo.put("thuNgan", hd.getNhanVien() != null ? hd.getNhanVien().getHoTen() : "Hệ thống");
-
         String tenNhan = "Khách vãng lai";
         String sdtNhan = "";
         if (hd.getThongTinGiaoHang() != null && hd.getThongTinGiaoHang().getTenNguoiNhan() != null) {
@@ -1133,7 +980,6 @@ public class HoaDonApi {
             tenNhan = hd.getKhachHang().getHoTen();
             sdtNhan = hd.getKhachHang().getSoDienThoai();
         }
-
         if (hd.getKhachHang() != null) {
             orderInfo.put("tenKhachHang", tenNhan);
             orderInfo.put("sdtKhachHang", sdtNhan);
@@ -1146,23 +992,19 @@ public class HoaDonApi {
         List<Map<String, Object>> items = new ArrayList<>();
         BigDecimal tongTienHang = BigDecimal.ZERO;
         BigDecimal tongGiaGoc = BigDecimal.ZERO;
-
         for (HoaDonChiTiet ct : listHdct) {
             Map<String, Object> item = new HashMap<>();
             String tenSP = ct.getSanPhamChiTiet().getSanPham().getTen();
             String thuocTinh = ct.getSanPhamChiTiet().getMauSac().getTen() + " - " + ct.getSanPhamChiTiet().getKichThuoc().getTen();
             item.put("ten", tenSP + " (" + thuocTinh + ")");
             item.put("soLuong", ct.getSoLuong());
-
             BigDecimal giaBan = ct.getGiaTien() != null ? ct.getGiaTien() : BigDecimal.ZERO;
             BigDecimal donGia = giaBan;
             if (ct.getSanPhamChiTiet() != null && ct.getSanPhamChiTiet().getGiaBan() != null) {
                 donGia = ct.getSanPhamChiTiet().getGiaBan();
             }
-
             item.put("donGia", giaBan);
             item.put("giaBan", giaBan);
-
             BigDecimal thanhTien = giaBan.multiply(BigDecimal.valueOf(ct.getSoLuong()));
             item.put("thanhTien", thanhTien);
 
@@ -1173,7 +1015,7 @@ public class HoaDonApi {
         Map<String, Object> summary = new HashMap<>();
 
         BigDecimal tienGiamSanPham = tongGiaGoc.subtract(tongTienHang);
-        if(tienGiamSanPham.compareTo(BigDecimal.ZERO) < 0) tienGiamSanPham = BigDecimal.ZERO;
+        if (tienGiamSanPham.compareTo(BigDecimal.ZERO) < 0) tienGiamSanPham = BigDecimal.ZERO;
 
         summary.put("tongTienHang", tongTienHang);
         summary.put("tongGiaGoc", tongGiaGoc);
@@ -1286,9 +1128,6 @@ public class HoaDonApi {
         }
     }
 
-    // ==========================================
-    // API POS TẠO URL THANH TOÁN MOMO TẠI QUẦY
-    // ==========================================
     @PostMapping("/momo-payment-pos/{invoiceId}")
     @Transactional
     public ResponseEntity<?> getMomoUrlPos(@PathVariable Integer invoiceId) {
@@ -1518,9 +1357,6 @@ public class HoaDonApi {
         }
     }
 
-    // ==========================================
-    // API POS TẠO URL THANH TOÁN VNPAY TẠI QUẦY
-    // ==========================================
     @PostMapping("/vnpay-payment-pos/{invoiceId}")
     @Transactional
     public ResponseEntity<?> getVnPayUrlPos(@PathVariable Integer invoiceId, HttpServletRequest request) {
@@ -1604,7 +1440,6 @@ public class HoaDonApi {
         String redirectUrl = "https://beemate.store/customer#home";
 
         try {
-            // VÁ LỖI BẢO MẬT: Xác thực chữ ký điện tử (Checksum)
             Map<String, String> fields = new HashMap<>();
             for (Enumeration<String> params = request.getParameterNames(); params.hasMoreElements(); ) {
                 String fieldName = params.nextElement();
@@ -1630,13 +1465,11 @@ public class HoaDonApi {
 
             String signValue = com.example.bee.utils.VnPayUtil.hmacSHA512(vnp_HashSecret.trim(), hashData.toString());
 
-            // So sánh chữ ký, nếu KHÔNG KHỚP -> Bị giả mạo URL
             if (!signValue.equals(vnp_SecureHash)) {
                 System.err.println("CẢNH BÁO BẢO MẬT: Phát hiện giả mạo URL VNPay!");
                 return ResponseEntity.status(HttpStatus.FOUND).location(java.net.URI.create("https://beemate.store/customer#checkout?error=invalid_signature")).build();
             }
 
-            // ... (Phần logic xử lý đơn hàng bên dưới giữ nguyên y hệt của bạn) ...
             if (vnp_TxnRef != null && vnp_TxnRef.contains("_")) {
                 String maHD = vnp_TxnRef.split("_")[0];
                 HoaDon hd = hdRepo.findByMa(maHD);
@@ -1812,9 +1645,6 @@ public class HoaDonApi {
         return ResponseEntity.ok(usedIds);
     }
 
-    // ==========================================
-    // CALLBACK DÀNH RIÊNG CHO ADMIN / POS
-    // ==========================================
     @GetMapping("/momo-callback-admin")
     @Transactional
     public ResponseEntity<Void> momoCallbackAdmin(HttpServletRequest request) {
@@ -1829,13 +1659,11 @@ public class HoaDonApi {
 
                 if (hd != null) {
                     if ("0".equals(resultCode)) {
-                        // 1. Chuyển hóa đơn sang HOÀN THÀNH
                         TrangThaiHoaDon ttHoanThanh = ttRepo.findByMa("HOAN_THANH");
                         hd.setTrangThaiHoaDon(ttHoanThanh);
                         hd.setNgayThanhToan(new Date());
                         hdRepo.save(hd);
 
-                        // 2. Cập nhật trạng thái Thanh toán & Mã giao dịch
                         List<ThanhToan> tts = thanhToanRepo.findByHoaDon_Id(hd.getId());
                         if (tts != null && !tts.isEmpty()) {
                             ThanhToan tt = tts.get(0);
@@ -1845,13 +1673,11 @@ public class HoaDonApi {
                             thanhToanRepo.save(tt);
                         }
 
-                        // 3. Ghi log lịch sử
                         lsRepo.save(LichSuHoaDon.builder()
                                 .hoaDon(hd).trangThaiHoaDon(ttHoanThanh)
                                 .ghiChu("Khách thanh toán MoMo tại quầy thành công")
                                 .build());
                     } else {
-                        // Thất bại thì chỉ cập nhật trạng thái thanh toán là THAT_BAI, không tự ý hủy đơn của Admin
                         List<ThanhToan> tts = thanhToanRepo.findByHoaDon_Id(hd.getId());
                         if (tts != null && !tts.isEmpty()) {
                             ThanhToan tt = tts.get(0);
@@ -1882,13 +1708,11 @@ public class HoaDonApi {
 
                 if (hd != null) {
                     if ("00".equals(vnp_ResponseCode)) {
-                        // 1. Chuyển hóa đơn sang HOÀN THÀNH
                         TrangThaiHoaDon ttHoanThanh = ttRepo.findByMa("HOAN_THANH");
                         hd.setTrangThaiHoaDon(ttHoanThanh);
                         hd.setNgayThanhToan(new Date());
                         hdRepo.save(hd);
 
-                        // 2. Cập nhật trạng thái Thanh toán & Mã giao dịch
                         List<ThanhToan> tts = thanhToanRepo.findByHoaDon_Id(hd.getId());
                         if (tts != null && !tts.isEmpty()) {
                             ThanhToan tt = tts.get(0);
@@ -1898,13 +1722,11 @@ public class HoaDonApi {
                             thanhToanRepo.save(tt);
                         }
 
-                        // 3. Ghi log lịch sử
                         lsRepo.save(LichSuHoaDon.builder()
                                 .hoaDon(hd).trangThaiHoaDon(ttHoanThanh)
                                 .ghiChu("Khách thanh toán VNPay tại quầy thành công")
                                 .build());
                     } else {
-                        // Thất bại
                         List<ThanhToan> tts = thanhToanRepo.findByHoaDon_Id(hd.getId());
                         if (tts != null && !tts.isEmpty()) {
                             ThanhToan tt = tts.get(0);
@@ -1932,9 +1754,8 @@ public class HoaDonApi {
 
         int currentHold = spct.getSoLuongTamGiu() == null ? 0 : spct.getSoLuongTamGiu();
 
-        // Chặn không cho giữ âm
         if (currentHold + delta < 0) {
-            delta = -currentHold; // Nếu trừ lố thì chỉ trừ về 0
+            delta = -currentHold;
         }
 
         if (delta > 0 && (spct.getSoLuong() - currentHold) < delta) {

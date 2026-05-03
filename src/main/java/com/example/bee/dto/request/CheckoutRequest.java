@@ -10,7 +10,6 @@ public class CheckoutRequest {
     public String email;
     public String diaChiGiaoHang;
 
-    // GHN & Pick up
     public Integer maTinh;
     public Integer maHuyen;
     public String maXa;

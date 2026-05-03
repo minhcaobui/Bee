@@ -1339,19 +1339,13 @@
                     iconHtml = '<i class="bi bi-box-arrow-right" style="font-size: 32px; color: #dc2626;"></i>';
                     actionFunc = async () => {
                         try {
-                            // Gọi API Logout
                             await fetch('/logout', { method: 'POST' });
-
-                            // Xoá mọi bộ nhớ đệm cá nhân liên quan
                             localStorage.removeItem('bee_wishlist');
                             sessionStorage.removeItem('bee_buy_now');
                             sessionStorage.removeItem('reorder_data');
-
-                            // Ép chuyển hướng mạnh về trang chủ hoặc login
                             window.location.href = '/login';
                         } catch (e) {
                             console.error("Lỗi khi đăng xuất:", e);
-                            // Cú chót nếu API nghẽn, vẫn ép văng ra ngoài
                             window.location.href = '/login';
                         }
                     };
@@ -1411,6 +1405,29 @@
                             this.showAccountNotification("Lỗi", "Lỗi kết nối máy chủ", true);
                         }
                     };
+                }
+                // 🌟 PHẦN MỚI THÊM CHO YÊU THÍCH, ĐỊA CHỈ VÀ GUEST
+                else if (actionType === 'remove_wishlist') {
+                    title = "Bỏ yêu thích";
+                    message = "Bạn có chắc chắn muốn loại bỏ sản phẩm này khỏi danh sách yêu thích?";
+                    confirmBtnText = "Đồng ý";
+                    btnColor = "#dc2626";
+                    iconHtml = '<i class="fa-solid fa-heart-crack" style="font-size: 32px; color: #dc2626;"></i>';
+                    actionFunc = () => this.executeRemoveFromWishlist(extraData);
+                } else if (actionType === 'delete_address') {
+                    title = "Xóa địa chỉ";
+                    message = "Bạn có chắc chắn muốn xóa địa chỉ này khỏi sổ địa chỉ của bạn?";
+                    confirmBtnText = "Xóa địa chỉ";
+                    btnColor = "#dc2626";
+                    iconHtml = '<i class="fa-solid fa-trash-can" style="font-size: 32px; color: #dc2626;"></i>';
+                    actionFunc = () => this.executeDeleteAddress(extraData);
+                } else if (actionType === 'guest_cancel_order') {
+                    title = "Xác nhận hủy đơn";
+                    message = "Bạn có chắc chắn muốn hủy đơn hàng này không? Hành động này không thể hoàn tác.";
+                    confirmBtnText = "Hủy đơn hàng";
+                    btnColor = "#dc2626";
+                    iconHtml = '<i class="fa-solid fa-circle-xmark" style="font-size: 32px; color: #dc2626;"></i>';
+                    actionFunc = () => this.executeGuestCancelOrder(extraData);
                 }
 
                 const overlay = document.createElement('div');
@@ -2194,9 +2211,11 @@
                 renderCards();
             },
 
-            removeFromWishlist: async function(id) {
-                if(!confirm("Bạn có muốn bỏ yêu thích sản phẩm này?")) return;
+            removeFromWishlist: function(id) {
+                this.confirmAction('remove_wishlist', id);
+            },
 
+            executeRemoveFromWishlist: async function(id) {
                 try {
                     const numId = parseInt(id, 10);
                     await fetch('/api/khach-hang/wishlist/toggle/' + numId, { method: 'POST' });
@@ -3141,9 +3160,11 @@
                 }
             },
 
-            deleteAddress: async function(id) {
-                if(!confirm("Bạn có chắc chắn muốn xóa địa chỉ này?")) return;
+            deleteAddress: function(id) {
+                this.confirmAction('delete_address', id);
+            },
 
+            executeDeleteAddress: async function(id) {
                 try {
                     const res = await fetch(`/api/khach-hang/addresses/${id}`, { method: 'DELETE' });
                     if(res.ok) {
@@ -3235,10 +3256,11 @@
                 document.getElementById('guestOrderResult').style.display = 'none';
             },
 
-            // 🌟 HÀM BỔ SUNG CHO GUEST VIEW: Hủy đơn trực tiếp
-            guestCancelOrder: async function(orderId) {
-                if (!confirm("Bạn có chắc chắn muốn hủy đơn hàng này không? Hành động này không thể hoàn tác.")) return;
+            guestCancelOrder: function(orderId) {
+                this.confirmAction('guest_cancel_order', orderId);
+            },
 
+            executeGuestCancelOrder: async function(orderId) {
                 try {
                     const res = await fetch(`/api/hoa-don/${orderId}/huy`, {
                         method: 'PATCH',

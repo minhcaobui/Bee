@@ -665,11 +665,11 @@
                 stompClient.debug = null;
 
                 stompClient.connect({}, (frame) => {
-                    console.log('✅ Đã kết nối WebSockets (Giỏ hàng/Kho)');
+                    console.log('Đã kết nối WebSockets');
 
                     stompClient.subscribe('/topic/public/stock', (message) => {
                         if (message.body === "STOCK_CHANGED") {
-                            console.log("🔔 Nhận được thông báo kho thay đổi từ server!");
+                            console.log("Nhận được thông báo kho thay đổi từ server!");
 
                             // Có thể thêm dòng này để hiện toast báo cho người dùng
                             if(typeof window.showToast === 'function') {
@@ -681,7 +681,7 @@
                         }
                     });
                 }, (error) => {
-                    console.warn("Đứt kết nối WebSockets, đang thử lại...", error);
+                    console.warn("Đứt kết nối WebSockets, đang thử lại sau 5s", error);
                     setTimeout(() => this.connectWebSocket(), 5000);
                 });
             },

@@ -57,7 +57,6 @@ public class DanhMucApi {
         String ma = (body.getMa() == null || body.getMa().trim().isEmpty())
                 ? generateMa()
                 : body.getMa().trim().toUpperCase();
-
         if (ma.length() > 20)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã thuộc tính tối đa 20 ký tự!");
         if (!ma.matches("^[A-Z0-9_]*$")) {
@@ -71,7 +70,6 @@ public class DanhMucApi {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên danh mục này đã tồn tại!");
         if (danhMucRepository.existsByMaIgnoreCase(ma))
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã danh mục này đã tồn tại!");
-
         DanhMuc entity = new DanhMuc();
         entity.setMa(ma);
         entity.setTen(ten);
@@ -92,7 +90,6 @@ public class DanhMucApi {
         if (!entity.getTen().equalsIgnoreCase(newTen) && danhMucRepository.existsByTenIgnoreCase(newTen)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên này đã tồn tại ở bản ghi khác!");
         }
-
         Boolean newTrangThai = body.getTrangThai();
         if (newTrangThai != null && !newTrangThai && Boolean.TRUE.equals(entity.getTrangThai())) {
             boolean isUsed = sanPhamRepository.existsByDanhMuc_IdAndTrangThaiTrue(id);

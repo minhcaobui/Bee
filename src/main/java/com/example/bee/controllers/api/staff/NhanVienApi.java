@@ -25,23 +25,16 @@ import org.springframework.web.bind.annotation.*;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Controller
 @RequestMapping("/api/nhan-vien")
 @RequiredArgsConstructor
 public class NhanVienApi {
-
-    private static class OtpData {
-        String otp;
-        long expiryTime;
-
-        OtpData(String otp, long expiryTime) {
-            this.otp = otp;
-            this.expiryTime = expiryTime;
-        }
-    }
 
     private static final Map<String, OtpData> otpStorage = new ConcurrentHashMap<>();
     private final NhanVienRepository nhanVienRepository;
@@ -465,7 +458,6 @@ public class NhanVienApi {
                         java.sql.Date newDob = java.sql.Date.valueOf(payload.get("ngaySinh"));
                         LocalDate hienTai = LocalDate.now();
                         int tuoi = Period.between(newDob.toLocalDate(), hienTai).getYears();
-                        // BẢO MẬT: Bổ sung chặn tuổi < 18 ở Backend khi tự sửa hồ sơ
                         if (tuoi < 18) {
                             return ResponseEntity.badRequest().body(Map.of("message", "Nhân viên phải từ đủ 18 tuổi trở lên!"));
                         }
@@ -553,6 +545,16 @@ public class NhanVienApi {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().body(Map.of("message", "Lỗi hệ thống: " + e.getMessage()));
+        }
+    }
+
+    private static class OtpData {
+        String otp;
+        long expiryTime;
+
+        OtpData(String otp, long expiryTime) {
+            this.otp = otp;
+            this.expiryTime = expiryTime;
         }
     }
 }

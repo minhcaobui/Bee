@@ -157,7 +157,7 @@ const NotifApp = {
 
     connectWebSocket: function() {
         if (typeof SockJS === 'undefined' || typeof Stomp === 'undefined') {
-            console.error("❌ Thư viện SockJS hoặc StompJS chưa được tải!");
+            console.error("Thư viện SockJS hoặc StompJS chưa được tải!");
             return;
         }
 
@@ -166,16 +166,16 @@ const NotifApp = {
         stompClient.debug = null;
 
         stompClient.connect({}, (frame) => {
-            console.log('✅ Đã kết nối WebSockets (Thông báo Admin)');
+            console.log('Đã kết nối WebSockets');
             stompClient.subscribe('/topic/admin/notifications', (message) => {
                 if (message.body === "NEW_NOTIF") {
-                    console.log("🔔 Có thông báo mới cho Admin, đang tự động tải lại...");
+                    console.log("Có thông báo mới cho Admin");
                     this.justReceivedRealtime = true;
                     this.fetchAllData();
                 }
             });
         }, (error) => {
-            console.warn("Mất kết nối WebSockets, đang thử lại sau 5s...", error);
+            console.warn("Mất kết nối WebSockets, đang thử lại sau 5s", error);
             setTimeout(() => this.connectWebSocket(), 5000);
         });
     },

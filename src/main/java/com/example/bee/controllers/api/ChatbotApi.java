@@ -40,13 +40,11 @@ public class ChatbotApi {
             return ResponseEntity.ok(result);
         }
 
-        // BẢO MẬT: Chống Prompt Injection và DDoSing
         if (rawMessage.length() > 500) {
             result.put("reply", "Tin nhắn của cậu hơi dài, hãy tóm tắt lại một xíu để mình dễ hiểu hơn nha!");
             return ResponseEntity.ok(result);
         }
 
-        // Sanitize nhẹ để tránh các câu lệnh điều hướng AI nguy hiểm
         String userMessage = rawMessage.replace("\"", "'").replace("\\", "\\\\");
 
         int randomIndex = new java.util.Random().nextInt(API_KEYS.length);

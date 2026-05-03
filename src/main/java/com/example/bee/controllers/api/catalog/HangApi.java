@@ -56,7 +56,6 @@ public class HangApi {
         String ma = (body.getMa() == null || body.getMa().trim().isEmpty())
                 ? generateMa()
                 : body.getMa().trim().toUpperCase();
-
         if (ma.length() > 20)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã thuộc tính tối đa 20 ký tự!");
         if (!ma.matches("^[A-Z0-9_]*$")) {
@@ -70,7 +69,6 @@ public class HangApi {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên hãng này đã tồn tại!");
         if (hangRepository.existsByMaIgnoreCase(ma))
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã hãng này đã tồn tại!");
-
         Hang entity = new Hang();
         entity.setMa(ma);
         entity.setTen(ten);
@@ -91,7 +89,6 @@ public class HangApi {
         if (!entity.getTen().equalsIgnoreCase(newTen) && hangRepository.existsByTenIgnoreCase(newTen)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Tên này đã tồn tại ở bản ghi khác!");
         }
-
         Boolean newTrangThai = body.getTrangThai();
         if (newTrangThai != null && !newTrangThai && Boolean.TRUE.equals(entity.getTrangThai())) {
             boolean isUsed = sanPhamRepository.existsByHang_IdAndTrangThaiTrue(id);
@@ -99,7 +96,6 @@ public class HangApi {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Không thể ngừng hoạt động! Đang có sản phẩm thuộc hãng này đang được bày bán.");
             }
         }
-
         entity.setTen(newTen);
         if (body.getMoTa() != null) entity.setMoTa(body.getMoTa().trim());
         entity.setTrangThai(newTrangThai != null ? newTrangThai : entity.getTrangThai());

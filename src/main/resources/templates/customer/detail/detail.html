@@ -717,11 +717,11 @@
                 stompClient.debug = null; // Tắt log rác
 
                 stompClient.connect({}, (frame) => {
-                    console.log('Đã kết nối WebSockets (Chi tiết sản phẩm)');
+                    console.log('Đã kết nối WebSockets');
 
                     stompClient.subscribe('/topic/public/stock', async (message) => {
                         if (message.body === "STOCK_CHANGED") {
-                            console.log("Có biến động kho, đang tự động đồng bộ...");
+                            console.log("Có biến động kho, đang tự động đồng bộ");
 
                             try {
                                 const vRes = await fetch(`/api/products/${this.state.productId}/variants`);
@@ -750,7 +750,7 @@
                         }
                     });
                 }, (error) => {
-                    console.warn("Mất kết nối WebSockets, đang thử lại sau 5s...", error);
+                    console.warn("Mất kết nối WebSockets, đang thử lại sau 5s", error);
                     setTimeout(() => this.connectWebSocket(), 5000);
                 });
             },

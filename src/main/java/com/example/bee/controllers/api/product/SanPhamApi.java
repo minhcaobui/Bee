@@ -63,7 +63,7 @@ public class SanPhamApi {
         Map<Integer, Integer> soldMap = new HashMap<>();
         for (Object[] row : totalSoldList) {
             Integer productId = (Integer) row[0];
-            Long total = (Long) row[1]; // SUM() trong JPQL trả về Long
+            Long total = (Long) row[1];
             soldMap.put(productId, total.intValue());
         }
 
