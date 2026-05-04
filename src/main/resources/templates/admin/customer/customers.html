@@ -64,11 +64,11 @@
 
         /* Search Section */
         .search-section { background: var(--gray-100); padding: 16px 20px; border: 1px solid var(--gray-200); border-radius: var(--border-radius); margin-bottom: 20px; }
-        .search-wrapper { display: flex; gap: 12px; align-items: center; width: 100%; }
-        .search-box { position: relative; flex: 1; }
+        .search-wrapper { display: flex; gap: 12px; align-items: center; width: 100%; flex-wrap: wrap; }
+        .search-box { position: relative; flex: 1; min-width: 200px; }
         .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--sub); font-size: 14px; pointer-events: none; }
         .search-input { width: 100%; padding: 8px 12px 8px 36px !important; font-size: 13px; border: 1px solid var(--gray-200); outline: none; background: #ffffff; height: 38px; border-radius: var(--border-radius); transition: all 0.2s ease; color: var(--text-main); font-family: inherit;}
-        .filter-select { padding: 8px 12px; font-size: 13px; border: 1px solid var(--gray-200); outline: none; background: #ffffff; height: 38px; border-radius: var(--border-radius); min-width: 180px; transition: all 0.2s ease; cursor: pointer; color: var(--text-main); font-family: inherit;}
+        .filter-select { padding: 8px 12px; font-size: 13px; border: 1px solid var(--gray-200); outline: none; background: #ffffff; height: 38px; border-radius: var(--border-radius); min-width: 150px; transition: all 0.2s ease; cursor: pointer; color: var(--text-main); font-family: inherit;}
         .btn-reset { height: 38px !important; width: 38px !important; padding: 0 !important; justify-content: center; font-size: 16px; background: #ffffff; border: 1px solid var(--gray-200); color: var(--sub); border-radius: var(--border-radius); transition: 0.2s;}
         .btn-reset:hover { background: var(--gray-100); border-color: var(--gray-300); color: var(--text-main); }
         .search-input:focus, .filter-select:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1); }
@@ -272,11 +272,22 @@
                        placeholder="Tìm tên, SĐT, Mã khách hàng..."
                        oninput="window.CustomerApp.handleSearch(this.value)">
             </div>
+
             <select class="filter-select" id="fStatus" onchange="window.CustomerApp.handleFilter(this.value)">
-                <option value="">-- Trạng thái --</option>
+                <option value="">-- Trạng thái tài khoản --</option>
                 <option value="true">Đang hoạt động</option>
                 <option value="false">Ngưng hoạt động</option>
             </select>
+
+            <!-- Thêm ô lọc theo Tỷ lệ nhận hàng -->
+            <select class="filter-select" id="fRate" onchange="window.CustomerApp.handleFilterRate(this.value)">
+                <option value="">-- Lọc theo Tỷ lệ nhận --</option>
+                <option value="GOOD">Tốt (≥ 80%)</option>
+                <option value="WARNING">Cảnh báo (50 - 79%)</option>
+                <option value="BAD">Xấu (< 50%)</option>
+                <option value="NEW">Khách mới/Chưa có đơn</option>
+            </select>
+
             <button class="btn-reset" onclick="window.CustomerApp.resetFilters()" title="Làm mới bộ lọc">
                 <i class="bi bi-arrow-counterclockwise"></i>
             </button>
@@ -291,7 +302,7 @@
                 <th>MÃ KHÁCH HÀNG</th>
                 <th>TÊN KHÁCH HÀNG</th>
                 <th>LIÊN HỆ</th>
-                <th>GIỚI TÍNH</th>
+                <th style="text-align: center;">TỶ LỆ NHẬN</th>
                 <th style="text-align: center;">TRẠNG THÁI</th>
                 <th style="text-align: right;">THAO TÁC</th>
             </tr>
@@ -520,7 +531,7 @@
                 <label class="form-label">Mật khẩu mới <span style="color:var(--danger-color)">*</span></label>
                 <div class="search-box">
                     <i class="bi bi-key"></i>
-                    <input type="text" id="inpNewPassword" class="form-input" style="padding-left: 36px;" placeholder="Nhập ít nhất 6 ký tự...">
+                    <input type="text" id="inpNewPassword" class="form-input" style="padding-left: 36px;">
                 </div>
             </div>
         </div>
@@ -621,7 +632,7 @@
     window.CustomerApp = {
         initialized: false,
         state: {
-            page: 0, size: 10, totalPages: 0, q: '', status: '', editingId: null, isViewMode: false, activePwdId: null,
+            page: 0, size: 10, totalPages: 0, q: '', status: '', rate: '', editingId: null, isViewMode: false, activePwdId: null,
             subParams: {
                 order: { page: 0, size: 5, q: '', status: '', totalPages: 0, data: [] },
                 product: { page: 0, size: 5, totalPages: 0, data: [] },
@@ -725,7 +736,8 @@
             const tbody = document.getElementById('tbody');
             tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px; color:var(--sub);">Đang tải dữ liệu...</td></tr>`;
             try {
-                const res = await fetch(`/api/khach-hang?page=${this.state.page}&size=${this.state.size}&q=${encodeURIComponent(this.state.q)}&trangThai=${this.state.status}`);
+                // Đã bổ sung param rate vào chuỗi fetch url
+                const res = await fetch(`/api/khach-hang?page=${this.state.page}&size=${this.state.size}&q=${encodeURIComponent(this.state.q)}&trangThai=${this.state.status}&rate=${this.state.rate}`);
                 const data = await res.json();
                 this.state.totalPages = data.totalPages || 0;
                 this.renderTable(data.content);
@@ -754,13 +766,44 @@
                 const badgeText = item.trangThai ? 'Đang hoạt động' : 'Ngừng hoạt động';
                 const statusHtml = `<span class="badge-status ${badgeClass}" onclick="window.CustomerApp.quickToggle(${item.id}, ${item.trangThai})">${badgeText}</span>`;
 
+                // --- LOGIC VẼ GIAO DIỆN TỶ LỆ NHẬN HÀNG ---
+                const tongDon = item.tongDon || 0;
+                const donThanhCong = item.donThanhCong || 0;
+                const donThatBai = item.donThatBai || 0;
+                const tongDaXuLy = donThanhCong + donThatBai;
+
+                let tyLeHtml = '<span style="color:var(--sub); font-size:12px; font-style:italic;">Chưa có đơn</span>';
+                if (tongDon > 0) {
+                    if (tongDaXuLy === 0) {
+                        tyLeHtml = '<span style="color:#3b82f6; font-size:12px; font-weight:600;">Đang giao đơn đầu</span>';
+                    } else {
+                        // Tính % (Lấy số đơn thành công / Tổng số đơn đã có kết quả)
+                        const tyLe = Math.round((donThanhCong / tongDaXuLy) * 100);
+
+                        // Đổ màu: >= 80% Xanh, >= 50% Vàng, < 50% Đỏ chót
+                        let rateColor = tyLe >= 80 ? 'var(--success-color)' : (tyLe >= 50 ? '#f59e0b' : 'var(--danger-color)');
+
+                        tyLeHtml = `
+                            <div style="font-weight: 700; color: ${rateColor}; font-size: 14px;">${tyLe}%</div>
+                            <div style="font-size: 11px; color: var(--sub); white-space: nowrap; margin-top: 2px;">
+                                <span style="color:var(--success-color)" title="Nhận thành công"><i class="bi bi-check-circle-fill"></i> ${donThanhCong}</span>
+                                <span style="margin: 0 4px;">|</span>
+                                <span style="color:var(--danger-color)" title="Bùng/Hủy hàng"><i class="bi bi-x-circle-fill"></i> ${donThatBai}</span>
+                            </div>
+                        `;
+                    }
+                }
+                // --- KẾT THÚC ---
+
                 return `
                     <tr>
                         <td style="text-align:center;">${stt}</td>
                         <td style="font-weight:700; color:var(--text-main);">${safeMa}</td>
                         <td><span style="font-weight: 600; color: var(--text-main); font-size: 13px;">${safeHoTen}</span></td>
                         <td><div style="font-weight:600;">${safeSoDienThoai || '---'}</div><div style="font-size:12px; color:var(--sub);">${safeEmail || ''}</div></td>
-                        <td>${item.gioiTinh ? window.escapeHtml(item.gioiTinh) : '---'}</td>
+
+                        <td style="text-align:center; vertical-align: middle;">${tyLeHtml}</td>
+
                         <td style="text-align:center;">${statusHtml}</td>
                         <td style="text-align:right; white-space: nowrap;">
                             <button class="btn-icon" title="Đổi mật khẩu" data-name="${safeHoTen}" onclick="window.CustomerApp.openChangePassword(${item.id}, this.getAttribute('data-name'))"><i class="bi bi-key"></i></button>
@@ -1048,6 +1091,20 @@
                     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--danger-color);">Lỗi tải dữ liệu</td></tr>`;
                 }
             }
+        },
+
+        handleSearch: function(val) { clearTimeout(this.timeout); this.timeout = setTimeout(() => { this.state.q = val; this.state.page = 0; this.loadData(); }, 500); },
+        handleFilter: function(val) { this.state.status = val; this.state.page = 0; this.loadData(); },
+        handleFilterRate: function(val) { this.state.rate = val; this.state.page = 0; this.loadData(); },
+        resetFilters() {
+            clearTimeout(this.timeout);
+            document.getElementById('search').value = '';
+            document.getElementById('fStatus').value = '';
+            document.getElementById('fRate').value = '';
+            this.state.q = '';
+            this.state.status = '';
+            this.state.rate = '';
+            this.loadData();
         },
 
         handleSubSearch: function(tab, val) { clearTimeout(this.timeout); this.timeout = setTimeout(() => { this.state.subParams[tab].q = val; this.state.subParams[tab].page = 0; if(tab === 'order') this.loadCustomerOrders(); }, 500); },
@@ -1342,9 +1399,7 @@
                 document.getElementById('iconUpload').style.display = 'none';
             }
         },
-        handleSearch(val) { clearTimeout(this.timeout); this.timeout = setTimeout(() => { this.state.q = val; this.state.page = 0; this.loadData(); }, 500); },
-        handleFilter(val) { this.state.status = val; this.state.page = 0; this.loadData(); },
-        resetFilters() { clearTimeout(this.timeout); document.getElementById('search').value = ''; document.getElementById('fStatus').value = ''; this.state.q = ''; this.state.status = ''; this.loadData(); }
+
     };
 
     /* ==========================================================================

@@ -161,11 +161,11 @@
         #vFormDrawer { width: 100%; max-width: 450px; z-index: 999995; }
         #bulkDrawer { width: 100%; max-width: 850px; z-index: 999995; }
         #stockDrawer { width: 100%; max-width: 400px; z-index: 999997; }
-        #priceDrawer { width: 100%; max-width: 400px; z-index: 999997; } /* THÊM CHO ĐỔI GIÁ */
+        #priceDrawer { width: 100%; max-width: 400px; z-index: 999997; }
 
         #vFormOverlay, #bulkOverlay { z-index: 999994; }
         #stockOverlay { z-index: 999996; }
-        #priceOverlay { z-index: 999996; } /* THÊM CHO ĐỔI GIÁ */
+        #priceOverlay { z-index: 999996; }
 
         .product-cell { display: flex; align-items: center; gap: 12px; }
         .product-img { width: 44px; height: 44px; border-radius: var(--border-radius); object-fit: cover; border: 1px solid var(--gray-200); background: var(--gray-100); }
@@ -403,7 +403,7 @@
             <div style="display: flex; gap: 8px;">
                 <button class="btn btn-primary" onclick="ProductApp.openBulkStock()"><i class="bi bi-box-arrow-in-down"></i> NHẬP KHO</button>
                 <button class="btn btn-secondary" onclick="ProductApp.triggerBulkPrice()"><i class="bi bi-tag"></i> ĐỔI GIÁ</button>
-                <button class="btn btn-secondary" onclick="ProductApp.triggerBulkImage()"><i class="bi bi-image"></i> ĐỔI ẢNH</button>
+                <button class="btn btn-secondary" onclick="document.getElementById('bulkVariantImage').click()"><i class="bi bi-image"></i> ĐỔI ẢNH</button>
                 <input type="file" id="bulkVariantImage" accept="image/*" style="display:none" onchange="ProductApp.handleBulkImage(event)">
             </div>
         </div>
@@ -566,7 +566,6 @@
     </div>
 </aside>
 
-<!-- DRAWER ĐỔI GIÁ HÀNG LOẠT MỚI THÊM -->
 <div id="priceOverlay" class="pd-overlay" onclick="ProductApp.closePriceForm()"></div>
 <aside class="drawer" id="priceDrawer">
     <div class="drawer-header">
@@ -601,10 +600,6 @@
             .replace(/'/g, "&#039;");
     };
 
-    /* ========================================================================
-       PROMPT DIALOG SYSTEM (DÀNH RIÊNG CHO SẢN PHẨM: ĐỔI GIÁ HÀNG LOẠT)
-       Đã được thay thế bằng Drawer ở phía dưới, có thể giữ lại hàm này nếu dùng cho việc khác
-       ======================================================================== */
     window.promptDialog = function (title, placeholder, onConfirm) {
         let overlay = document.getElementById('productPromptOverlay');
         if (!overlay) {
@@ -705,8 +700,22 @@
             document.getElementById('fTrangThaiFilter').onchange = (e) => { self.state.trangThai = e.target.value; self.state.page = 0; self.loadData(); };
 
             document.getElementById('fFile').onchange = async (e) => {
-                const files = Array.from(e.target.files);
-                e.target.value = '';
+                const target = e.target;
+                const files = Array.from(target.files);
+                if (files.length === 0) return;
+
+                const MAX_IMAGES = 9;
+                const currentImgCount = self.state.tempImages.length;
+
+                if (currentImgCount + files.length > MAX_IMAGES) {
+                    if(typeof window.toast === 'function') {
+                        window.toast(`Chỉ được phép tải lên tối đa ${MAX_IMAGES} ảnh cho sản phẩm này!`, 'warning');
+                    } else {
+                        alert(`Chỉ được phép tải lên tối đa ${MAX_IMAGES} ảnh cho sản phẩm này!`);
+                    }
+                    target.value = '';
+                    return;
+                }
 
                 for (const file of files) {
                     const blobUrl = URL.createObjectURL(file);
@@ -722,7 +731,6 @@
                         if (res.ok && data.url) {
                             const idx = self.state.tempImages.findIndex(i => typeof i === 'object' && i.preview === blobUrl);
                             if (idx !== -1) self.state.tempImages[idx] = data.url;
-                            URL.revokeObjectURL(blobUrl);
                         } else {
                             if(typeof window.toast === 'function') window.toast('Upload ảnh thất bại: ' + (data.message || ''), 'error');
                             self.state.tempImages = self.state.tempImages.filter(i => !(typeof i === 'object' && i.preview === blobUrl));
@@ -730,15 +738,18 @@
                     } catch (err) {
                         if(typeof window.toast === 'function') window.toast('Lỗi kết nối khi upload ảnh.', 'error');
                         self.state.tempImages = self.state.tempImages.filter(i => !(typeof i === 'object' && i.preview === blobUrl));
+                    } finally {
+                        URL.revokeObjectURL(blobUrl);
                     }
                     self.renderPreview();
                 }
+                target.value = '';
             };
 
             document.getElementById('vFile').onchange = async (e) => {
-                const file = e.target.files[0];
+                const target = e.target;
+                const file = target.files[0];
                 if (!file) return;
-                e.target.value = '';
 
                 const blobUrl = URL.createObjectURL(file);
                 const imgDisplay = document.getElementById('vImgDisplay');
@@ -774,15 +785,16 @@
                     self.state.isUploadingVariantImg = false;
                     imgDisplay.style.opacity = '1';
                     URL.revokeObjectURL(blobUrl);
+                    target.value = '';
                 }
             };
 
             document.getElementById('bulkHiddenFileInput').onchange = async (e) => {
-                const file = e.target.files[0];
+                const target = e.target;
+                const file = target.files[0];
                 if (!file) return;
 
-                const colorId = e.target.dataset.colorId;
-                e.target.value = '';
+                const colorId = target.dataset.colorId;
 
                 const previewBox = document.getElementById(`bulk-preview-${colorId}`);
                 const imgDisplay = previewBox.querySelector('img');
@@ -816,6 +828,7 @@
                 } finally {
                     loading.style.display = 'none';
                     URL.revokeObjectURL(blobUrl);
+                    target.value = '';
                 }
             };
         },
@@ -1051,9 +1064,9 @@
         },
 
         handleBulkImage: async function(e) {
-            const file = e.target.files[0];
+            const target = e.target;
+            const file = target.files[0];
             if(!file) return;
-            e.target.value = '';
 
             if(typeof window.toast === 'function') window.toast("Đang tải ảnh lên...", "warning");
 
@@ -1070,6 +1083,8 @@
                 }
             } catch (err) {
                 if(typeof window.toast === 'function') window.toast('Lỗi kết nối mạng khi tải ảnh.', 'error');
+            } finally {
+                target.value = '';
             }
         },
 
@@ -1103,7 +1118,6 @@
             }
         },
 
-        /* ĐÃ SỬA THÀNH MỞ DRAWER ĐỔI GIÁ */
         triggerBulkPrice: function() {
             const count = this.state.selectedVariants.length;
             if (count === 0) {
@@ -1157,7 +1171,7 @@
                     if(typeof window.toast === 'function') window.toast(`Đổi giá thành công cho ${successCount}/${ids.length} SKU đã chọn.`, "success");
 
                     this.state.selectedVariants = [];
-                    this.closePriceForm(); // Đóng Drawer sau khi xong
+                    this.closePriceForm();
                     this.loadVariants(this.state.currentProductId);
                     this.loadData();
                 });
@@ -1773,10 +1787,7 @@
         }
     };
 
-    // Luôn chạy ngay lập tức khi file vừa được đọc
     window.initProducts();
-
-    // Dự phòng cho trường hợp F5 truyền thống
     document.addEventListener("DOMContentLoaded", window.initProducts);
 
 </script>

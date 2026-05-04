@@ -18,15 +18,22 @@ public interface DanhGiaRepository extends JpaRepository<DanhGia, Long> {
     Optional<DanhGia> findByHoaDonChiTiet_Id(Integer hoaDonChiTietId);
 
     @Query("SELECT d FROM DanhGia d " +
-            "WHERE (:soSao IS NULL OR d.soSao = :soSao) " +
-            "AND (:trangThai IS NULL OR :trangThai = '' " +
-            "     OR (:trangThai = 'CHUA_TRA_LOI' AND d.noiDungTraLoi IS NULL) " +
-            "     OR (:trangThai = 'DA_TRA_LOI' AND d.noiDungTraLoi IS NOT NULL)) " +
-            "AND (:q IS NULL OR :q = '' " +
-            "     OR LOWER(d.noiDung) LIKE LOWER(CONCAT('%', :q, '%')) " +
-            "     OR LOWER(d.sanPham.ten) LIKE LOWER(CONCAT('%', :q, '%')))")
-    Page<DanhGia> findAdminReviews(@Param("q") String q,
-                                   @Param("soSao") Integer soSao,
-                                   @Param("trangThai") String trangThai,
-                                   Pageable pageable);
+            "LEFT JOIN d.taiKhoan tk " +
+            "LEFT JOIN KhachHang kh ON kh.taiKhoan.id = tk.id " + // Join để lấy thông tin KH
+            "LEFT JOIN d.sanPham sp " + // Join để lấy thông tin SP
+            "WHERE (:keyword IS NULL OR " +
+            "       LOWER(kh.hoTen) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "       kh.soDienThoai LIKE CONCAT('%', :keyword, '%') OR " +
+            "       LOWER(sp.ten) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "       LOWER(sp.ma) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "       LOWER(d.noiDung) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "  AND (:soSao IS NULL OR d.soSao = :soSao) " +
+            "  AND (:trangThai IS NULL OR " +
+            "      (:trangThai = 'DA_TRA_LOI' AND d.noiDungTraLoi IS NOT NULL) OR " +
+            "      (:trangThai = 'CHUA_TRA_LOI' AND d.noiDungTraLoi IS NULL))")
+    Page<DanhGia> findAdminReviews(
+            @Param("keyword") String keyword,
+            @Param("soSao") Integer soSao,
+            @Param("trangThai") String trangThai,
+            Pageable pageable);
 }

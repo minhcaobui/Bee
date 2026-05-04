@@ -165,6 +165,14 @@ public class MaGiamGiaApi {
         MaGiamGia entity = voucherRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy thông tin mã giảm giá yêu cầu."));
 
+        if (body.getMaCode() != null && !body.getMaCode().trim().isEmpty()) {
+            String newCode = body.getMaCode().trim().toUpperCase();
+            if (!newCode.equals(entity.getMaCode()) && voucherRepo.existsByMaCodeIgnoreCase(newCode)) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Mã Voucher này đã tồn tại!");
+            }
+            entity.setMaCode(newCode);
+        }
+
         if (entity.getLuotSuDung() > 0) {
             if (entity.getGiaTriGiamGia().compareTo(body.getGiaTriGiamGia()) != 0 ||
                     !entity.getLoaiGiamGia().equals(body.getLoaiGiamGia())) {

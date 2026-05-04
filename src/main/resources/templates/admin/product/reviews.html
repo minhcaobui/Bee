@@ -178,7 +178,8 @@
             <div class="search-wrapper">
                 <div class="search-box">
                     <i class="bi bi-search"></i>
-                    <input type="text" id="rvSearch" class="search-input" placeholder="Tìm tên KH, Tên SP, Nội dung..." oninput="ReviewApp.debounceSearch()">
+                    <!-- Đã cập nhật dòng placeholder -->
+                    <input type="text" id="rvSearch" class="search-input" placeholder="Tìm KH, SĐT, SP, Mã SP, Nội dung..." oninput="ReviewApp.debounceSearch()">
                 </div>
                 <select id="rvStarFilter" class="filter-select" onchange="ReviewApp.filterData()">
                     <option value="">Tất cả (1-5 Sao)</option>
@@ -347,6 +348,9 @@
                     }
 
                     const cusNameSafe = this.escapeHTML(rv.tenKhachHang) || 'Khách hàng ẩn danh';
+                    // Xử lý chuỗi hiển thị SĐT (Nếu có SĐT thì thêm dấu gạch nối)
+                    const sdtSafe = this.escapeHTML(rv.soDienThoai) ? ` - ${this.escapeHTML(rv.soDienThoai)}` : '';
+
                     const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(cusNameSafe)}&background=f8fafc&color=0f172a`;
 
                     const noiDungAnToan = this.escapeHTML(rv.noiDung);
@@ -403,7 +407,8 @@
                                 <div class="rv-customer">
                                     <img src="${avatar}" class="rv-avatar">
                                     <div>
-                                        <div class="rv-cus-name">${cusNameSafe} <span class="rv-badge-buy"><i class="bi bi-check-circle-fill"></i> Đã mua hàng</span></div>
+                                        <!-- In thẳng tên + SĐT ra HTML -->
+                                        <div class="rv-cus-name">${cusNameSafe}${sdtSafe} <span class="rv-badge-buy"><i class="bi bi-check-circle-fill"></i> Đã mua hàng</span></div>
                                         <div class="rv-cus-date">${this.formatDate(rv.ngayTao)}</div>
                                     </div>
                                 </div>

@@ -65,7 +65,7 @@
 
         /* Bảng Data gọn nhẹ */
         .db-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        .db-table th { text-align: left; padding: 10px 12px; font-weight: 600; color: var(--sub); border-bottom: 1px solid var(--gray-200); text-transform: uppercase; background: #fafafa;}
+        .db-table th { text-align: left; padding: 10px 12px; font-weight: 600; color: var(--sub); border-bottom: 1px solid var(--gray-200); text-transform: uppercase; background: #fafafa; position: sticky; top: 0; z-index: 1;}
         .db-table td { padding: 12px; border-bottom: 1px solid var(--gray-100); color: var(--text-main); vertical-align: middle; font-weight: 500;}
         .db-table tr:last-child td { border-bottom: none; }
         .db-table tr:hover { background: var(--gray-100); }
@@ -249,9 +249,10 @@
         <div class="db-grid-half">
             <div class="db-card">
                 <div class="db-card-header">
-                    <div class="db-card-title" style="color: #ea580c;"><i class="bi bi-fire"></i> TOP 5 SẢN PHẨM BÁN CHẠY NHẤT</div>
+                    <div class="db-card-title" style="color: #ea580c;"><i class="bi bi-fire"></i> TOP NHỮNG SẢN PHẨM BÁN CHẠY NHẤT</div>
                 </div>
-                <div class="db-card-body" style="padding: 0; overflow-x: auto;">
+                <!-- Sửa lại ở đây: Thêm max-height và overflow-y: auto -->
+                <div class="db-card-body" style="padding: 0; max-height: 350px; overflow-y: auto; overflow-x: auto;">
                     <div class="loading-overlay" id="loadTopSP"><i class="bi bi-arrow-repeat spinning" style="font-size:24px;"></i> Đang tải...</div>
                     <table class="db-table">
                         <thead>
@@ -273,7 +274,8 @@
                 <div class="db-card-header" style="background: #fef2f2; border-bottom-color: #fecaca;">
                     <div class="db-card-title" style="color: var(--danger);"><i class="bi bi-exclamation-triangle-fill"></i> CẢNH BÁO SẢN PHẨM SẮP HẾT HÀNG</div>
                 </div>
-                <div class="db-card-body" style="padding: 0; overflow-x: auto;">
+                <!-- Sửa lại ở đây: Thêm max-height và overflow-y: auto -->
+                <div class="db-card-body" style="padding: 0; max-height: 350px; overflow-y: auto; overflow-x: auto;">
                     <div class="loading-overlay" id="loadHetHang"><i class="bi bi-arrow-repeat spinning" style="font-size:24px;"></i> Đang tải...</div>
                     <table class="db-table">
                         <thead>

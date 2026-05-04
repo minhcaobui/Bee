@@ -1277,10 +1277,7 @@
                         }
                     }
 
-                    // --- SAU KHI SỬA ---
                     let expectedDiscount = 0;
-
-// Xác định loại giảm giá một cách an toàn
                     const isPercent = loai && loai.toUpperCase().includes('PHAN_TRAM');
 
                     if (!discountLabel) {
@@ -1292,7 +1289,7 @@
                         }
                     }
 
-// Tính toán số tiền thực tế sẽ giảm để hiển thị ở tag "Tiết kiệm..."
+                    // Tính toán số tiền thực tế sẽ giảm để hiển thị ở tag "Tiết kiệm..."
                     if (isEligible) {
                         if (isPercent) {
                             expectedDiscount = (this.state.subTotal * giaTri) / 100;
@@ -1355,15 +1352,30 @@
                     return;
                 }
 
-                const v = this.state.availableVouchers.find(x => (x.maCode || x.ma || x.code) === code);
+                const v = this.state.availableVouchers.find(x => (x.maCode || x.ma || x.code).toUpperCase() === code.toUpperCase());
                 if (!v) {
                     if(window.showToast) window.showToast("Mã không hợp lệ!", "error");
+                    else alert("Mã không hợp lệ!");
                     return;
                 }
 
-                // ... (giữ nguyên đoạn kiểm tra isUsed và dieuKien)
+                // KIỂM TRA MÃ ĐÃ SỬ DỤNG
+                const isUsed = this.state.usedVoucherIds && this.state.usedVoucherIds.includes(v.id);
+                if (isUsed) {
+                    if(window.showToast) window.showToast("Bạn đã sử dụng mã giảm giá này rồi!", "warning");
+                    else alert("Bạn đã sử dụng mã giảm giá này rồi!");
+                    return;
+                }
 
-                this.state.appliedPromoCode = code;
+                // KIỂM TRA ĐIỀU KIỆN ĐƠN HÀNG TỐI THIỂU
+                const dieuKien = v.dieuKien || v.dieuKienApDung || 0;
+                if (this.state.subTotal < dieuKien) {
+                    if(window.showToast) window.showToast(`Đơn hàng chưa đủ điều kiện! Cần tối thiểu ${this.formatMoney(dieuKien)}`, "warning");
+                    else alert(`Đơn hàng chưa đủ điều kiện! Cần tối thiểu ${this.formatMoney(dieuKien)}`);
+                    return;
+                }
+
+                this.state.appliedPromoCode = v.maCode || v.ma || v.code;
                 let baseForVoucher = this.state.subTotal;
                 let loai = v.loaiGiamGia || v.loai || '';
                 let giaTri = v.giaTriGiamGia || v.giaTri || 0;

@@ -332,6 +332,7 @@ public class SanPhamApi {
             Integer newMauId = req.getIdMauSac() != null ? req.getIdMauSac() : currentMauId;
             Integer newSizeId = req.getIdKichThuoc() != null ? req.getIdKichThuoc() : currentSizeId;
 
+            // Xác định xem có sự thay đổi về Màu sắc hoặc Kích thước không
             boolean isChangingAttr = !Objects.equals(currentMauId, newMauId) || !Objects.equals(currentSizeId, newSizeId);
 
             if (isChangingAttr && variantRepo.existsBySanPhamIdAndMauSacIdAndKichThuocId(
@@ -355,6 +356,23 @@ public class SanPhamApi {
             if (req.getHinhAnh() != null) {
                 variant.setHinhAnh(req.getHinhAnh());
             }
+
+            // --- CẬP NHẬT SKU NẾU MÀU SẮC HOẶC KÍCH THƯỚC BỊ THAY ĐỔI ---
+            if (isChangingAttr) {
+                String maSanPham = variant.getSanPham().getMa();
+                String maMau = variant.getMauSac().getMa();
+                String maKichThuoc = variant.getKichThuoc().getMa();
+
+                String skuCode = String.format("%s-%s-%s", maSanPham, maMau, maKichThuoc);
+
+                // Tránh trùng lặp với một SKU đã tồn tại khác (trừ chính nó)
+                if (variantRepo.existsBySku(skuCode) && !skuCode.equals(variant.getSku())) {
+                    skuCode += "-" + UUID.randomUUID().toString().substring(0, 4).toUpperCase();
+                }
+
+                variant.setSku(skuCode);
+            }
+            // -------------------------------------------------------------
 
             variantRepo.save(variant);
             return ResponseEntity.ok(Collections.singletonMap("message", "Cập nhật biến thể thành công!"));

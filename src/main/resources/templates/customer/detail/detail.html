@@ -101,7 +101,15 @@
         .detail-price-sale { color: var(--accent); font-weight: 600; font-size: 22px; }
         .detail-price-old { font-size: 16px; color: var(--muted); text-decoration: line-through; }
         .detail-divider { width: 40px; height: 1px; background: var(--accent); margin-bottom: 24px; }
-        .detail-desc { font-size: 13.5px; color: var(--muted); line-height: 1.9; font-weight: 300; margin-bottom: 32px; white-space: pre-line; }
+
+        /* ===== THÊM ĐOẠN CSS MỚI CHO TRUNCATE MÔ TẢ ===== */
+        .desc-wrapper { position: relative; max-height: 120px; overflow: hidden; transition: max-height 0.5s ease; margin-bottom: 8px; }
+        .desc-wrapper.expanded { max-height: 3000px; } /* Đủ lớn để chứa mọi text */
+        .detail-desc { font-size: 13.5px; color: var(--muted); line-height: 1.9; font-weight: 300; white-space: pre-line; margin-bottom: 0; }
+        .desc-fade { position: absolute; bottom: 0; left: 0; right: 0; height: 50px; background: linear-gradient(to bottom, rgba(255,255,255,0), var(--white)); pointer-events: none; transition: opacity 0.3s; }
+        .desc-wrapper.expanded .desc-fade { opacity: 0; }
+        .btn-read-more { background: none; border: none; color: var(--accent); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; text-decoration: underline; cursor: pointer; padding: 0; margin-bottom: 32px; display: none; }
+        /* ================================================== */
 
         /* ==================== SIZE / COLOR ==================== */
         .size-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; color: var(--text); }
@@ -393,9 +401,6 @@
             border-radius: 24px !important;
         }
 
-
-
-
     </style>
 
     <section class="detail-section">
@@ -425,7 +430,14 @@
                 <div class="detail-name" id="dynName">Đang tải...</div>
                 <div class="detail-price" id="dynPrice">0 ₫</div>
                 <div class="detail-divider"></div>
-                <p class="detail-desc" id="dynDesc">Vui lòng chờ trong giây lát...</p>
+
+                <!-- ===== KHUNG MÔ TẢ CÓ NÚT XEM THÊM ===== -->
+                <div class="desc-wrapper" id="descWrapper">
+                    <p class="detail-desc" id="dynDesc">Vui lòng chờ trong giây lát...</p>
+                    <div class="desc-fade" id="descFade"></div>
+                </div>
+                <button class="btn-read-more" id="btnReadMore" onclick="window.DetailApp.toggleDescription()">Xem thêm</button>
+                <!-- ======================================== -->
 
                 <!-- Màu sắc -->
                 <div style="margin-bottom:24px">
@@ -847,8 +859,6 @@
                 }
             },
 
-            // 1. Tải dữ liệu ban đầu
-            // 1. Tải dữ liệu ban đầu
             loadReviews: async function() {
                 const container = document.getElementById('reviewsContainer');
                 const score = document.getElementById('reviewAvgScore');
@@ -1169,7 +1179,7 @@
                 const cartRect = cartIcon.getBoundingClientRect();
                 clone.className = 'fly-to-cart-img';
                 clone.style.left = rect.left + 'px'; clone.style.top = rect.top + 'px';
-                clone.style.width = rect.width + 'px'; clone.style.height = rect.height + 'px';
+                clone.style.width = rect.width + 'px'; clone.style.height = rect.width + 'px';
                 document.body.appendChild(clone);
                 setTimeout(() => { clone.style.left = (cartRect.left + 5) + 'px'; clone.style.top = (cartRect.top + 5) + 'px'; clone.style.width = '20px'; clone.style.height = '20px'; clone.style.opacity = '0.5'; clone.style.transform = 'scale(0.2)'; }, 50);
                 setTimeout(() => { clone.remove(); }, 850);
@@ -1243,6 +1253,26 @@
                 this.checkCanReview();
                 this.initStickyBar();
             },
+
+            // ===== THÊM HÀM XỬ LÝ NÚT XEM THÊM =====
+            toggleDescription: function() {
+                const wrapper = document.getElementById('descWrapper');
+                const btn = document.getElementById('btnReadMore');
+
+                wrapper.classList.toggle('expanded');
+
+                if (wrapper.classList.contains('expanded')) {
+                    btn.innerText = 'Thu gọn';
+                } else {
+                    btn.innerText = 'Xem thêm';
+                    // Tùy chọn: Cuộn nhẹ màn hình lên nếu đoạn mô tả quá dài khiến nút Thu gọn nằm tuốt dưới
+                    const rect = wrapper.getBoundingClientRect();
+                    if (rect.top < 0) {
+                        window.scrollBy({ top: rect.top - 100, behavior: 'smooth' });
+                    }
+                }
+            },
+            // ========================================
 
             initStickyBar: function() {
                 const p = this.state.product;
@@ -1369,7 +1399,25 @@
                 const catName = p.danhMuc ? p.danhMuc.ten : 'Sản phẩm';
                 document.getElementById('dynBreadcrumb').innerHTML = `<a href="#home">Trang chủ</a><span class="sep">/</span><a href="#shop">${catName}</a><span class="sep">/</span><span style="color:var(--muted)">${p.ten}</span>`;
                 document.getElementById('dynName').innerText = p.ten;
-                document.getElementById('dynDesc').innerText = p.moTa || 'Sản phẩm dệt may thủ công chất lượng cao.';
+
+                const descEl = document.getElementById('dynDesc');
+                descEl.innerText = p.moTa || 'Sản phẩm dệt may thủ công chất lượng cao.';
+
+                // ===== KIỂM TRA ĐỘ DÀI MÔ TẢ ĐỂ HIỂN THỊ NÚT XEM THÊM =====
+                setTimeout(() => {
+                    const btn = document.getElementById('btnReadMore');
+                    const fade = document.getElementById('descFade');
+
+                    // Nếu chiều cao thực tế của thẻ p > 120px thì mới hiện nút "Xem thêm"
+                    if (descEl.scrollHeight > 120) {
+                        btn.style.display = 'inline-block';
+                        fade.style.display = 'block';
+                    } else {
+                        btn.style.display = 'none';
+                        fade.style.display = 'none';
+                    }
+                }, 50); // Delay nhẹ để DOM kịp render chữ
+                // ==========================================================
             },
 
             buildGalleryHTML: function() {

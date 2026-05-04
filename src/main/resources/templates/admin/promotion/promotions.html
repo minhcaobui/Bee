@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản Lý Khuyến Mãi & Voucher</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lưu ý: Các link CSS và script Flatpickr đã chuyển sang admin-layout.html -->
     <style>
         /* ==========================================================================
            CORE STYLES (ĐỒNG BỘ CORPORATE SAAS DESIGN)
@@ -321,11 +319,11 @@
             <div style="display: flex; gap: 15px; margin-top: 15px;">
                 <div class="form-group" style="flex: 1;">
                     <label class="form-label">Ngày bắt đầu <span style="color:#ef4444">*</span></label>
-                    <input id="kmNgayBatDau" type="datetime-local" class="form-input" onchange="window.PromotionApp.handleStartDateChange()">
+                    <input id="kmNgayBatDau" type="text" class="form-input" style="cursor: pointer;" placeholder="Chọn ngày giờ bắt đầu...">
                 </div>
                 <div class="form-group" style="flex: 1;">
                     <label class="form-label">Ngày kết thúc <span style="color:#ef4444">*</span></label>
-                    <input id="kmNgayKetThuc" type="datetime-local" class="form-input" onchange="window.PromotionApp.handleEndDateChange()">
+                    <input id="kmNgayKetThuc" type="text" class="form-input" style="cursor: pointer;" placeholder="Chọn ngày giờ kết thúc...">
                 </div>
             </div>
 
@@ -402,9 +400,29 @@
         init: function () {
             if (this.initialized) return;
             this.bindEvents();
-            this.loadProducts();
+            this.initDatePickers(); // Khởi tạo Datepicker
             this.switchTab('voucher');
             this.initialized = true;
+        },
+
+        // HÀM KHỞI TẠO FLATPICKR (ÉP 24H)
+        initDatePickers: function() {
+            const commonConfig = {
+                enableTime: true,
+                time_24hr: true, // Ép hiển thị giờ 24h
+                dateFormat: "Y-m-d\\TH:i", // Format gốc của datetime-local để API Backend vẫn chạy mượt
+                locale: "vn" // Tiếng Việt
+            };
+
+            this.fpStart = flatpickr("#kmNgayBatDau", {
+                ...commonConfig,
+                onChange: () => this.handleStartDateChange()
+            });
+
+            this.fpEnd = flatpickr("#kmNgayKetThuc", {
+                ...commonConfig,
+                onChange: () => this.handleEndDateChange()
+            });
         },
 
         bindEvents: function () {
@@ -425,6 +443,24 @@
                 });
                 this.renderProductSelectionTable(this.state.filteredProducts);
             };
+        },
+
+        formatMoneyInput: function(el) {
+            let val = el.value.replace(/[^0-9]/g, '');
+            if (val.length > 1 && val.startsWith('0')) val = val.substring(1);
+            el.value = val ? parseInt(val).toLocaleString('en-US') : '';
+        },
+
+        formatDateTimeVN: function(isoString) {
+            if (!isoString) return 'Không giới hạn';
+            const date = new Date(isoString);
+            if (isNaN(date.getTime())) return isoString;
+            const d = String(date.getDate()).padStart(2, '0');
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const y = date.getFullYear();
+            const h = String(date.getHours()).padStart(2, '0');
+            const min = String(date.getMinutes()).padStart(2, '0');
+            return `${d}/${m}/${y} ${h}:${min}`;
         },
 
         switchTab: function(tab) {
@@ -464,6 +500,7 @@
                     <th>LOẠI</th>
                     <th>GIÁ TRỊ</th>
                     <th>ĐIỀU KIỆN</th>
+                    <th>THỜI HẠN SỬ DỤNG</th>
                     <th>SỐ LƯỢNG</th>
                     <th style="text-align:center">TRẠNG THÁI</th>
                     <th style="text-align:right">THAO TÁC</th>
@@ -551,7 +588,7 @@
                     <td style="font-weight:600;">${window.escapeHtml(item.ten)}</td>
                     <td><span class="badge-type">${item.loai === 'PHAN_TRAM' ? 'Phần trăm' : 'Tiền mặt'}</span></td>
                     <td style="font-weight:700; color:#d63384;">${val}</td>
-                    <td style="font-size:12px; color:var(--sub);">${item.ngayBatDau.replace('T',' ')}<br>${item.ngayKetThuc.replace('T',' ')}</td>
+                    <td style="font-size:12px;"><div style="white-space: nowrap; margin-bottom: 4px;"><span style="color: #10b981; font-weight: 600; margin-right: 4px;">Từ:</span> <span style="color: var(--sub);">${this.formatDateTimeVN(item.ngayBatDau)}</span></div><div style="white-space: nowrap;"><span style="color: #ef4444; font-weight: 600; margin-right: 4px;">Đến:</span> <span style="color: var(--sub);">${this.formatDateTimeVN(item.ngayKetThuc)}</span></div></td>
                     <td style="text-align:center;">${statusHtml}</td>
                     <td style="text-align:right; white-space: nowrap;">
                     <button class="btn-icon" title="Chi tiết" onclick="window.PromotionApp.openView(${item.id})"><i class="bi bi-eye"></i></button>
@@ -563,7 +600,7 @@
 
         renderVoucherTable: function (list) {
             const tbody = document.getElementById('tbody');
-            if (list.length === 0) { tbody.innerHTML = '<tr><td colspan="9" class="empty-state">Chưa có voucher nào</td></tr>'; return; }
+            if (list.length === 0) { tbody.innerHTML = '<tr><td colspan="10" class="empty-state">Chưa có voucher nào</td></tr>'; return; }
 
             tbody.innerHTML = list.map((item, index) => {
                 const fm = new Intl.NumberFormat('vi-VN');
@@ -609,6 +646,7 @@
                     <td>${typeLabel}</td>
                     <td style="font-weight:700; color:#d63384;">${val}</td>
                     <td style="font-size:12px; color:var(--sub);">Từ ${cond} ₫</td>
+                    <td style="font-size:12px;"><div style="white-space: nowrap; margin-bottom: 4px;"><span style="color: #10b981; font-weight: 600; margin-right: 4px;">Từ:</span> <span style="color: var(--sub);">${this.formatDateTimeVN(item.ngayBatDau)}</span></div><div style="white-space: nowrap;"><span style="color: #ef4444; font-weight: 600; margin-right: 4px;">Đến:</span> <span style="color: var(--sub);">${this.formatDateTimeVN(item.ngayKetThuc)}</span></div></td>
                     <td style="padding: 0;">${qtyHtml}</td>
                     <td style="text-align:center;">${statusHtml}</td>
                     <td style="text-align:right; white-space: nowrap;">
@@ -637,7 +675,77 @@
             }
         },
 
-        openDrawer: function (mode) {
+        // HÀM TẢI SẢN PHẨM ĐỘNG THEO THỜI GIAN
+        loadProductsDynamic: async function() {
+            if (this.state.activeTab !== 'sale') return;
+
+            const startVal = document.getElementById('kmNgayBatDau').value;
+            const endVal = document.getElementById('kmNgayKetThuc').value;
+
+            let url = '/api/khuyen-mai/san-pham';
+            let params = [];
+
+            if (startVal) {
+                params.push(`start=${startVal.length === 16 ? startVal + ':00' : startVal}`);
+            }
+            if (endVal) {
+                params.push(`end=${endVal.length === 16 ? endVal + ':00' : endVal}`);
+            }
+            if (this.state.editingId) {
+                params.push(`excludeId=${this.state.editingId}`);
+            }
+
+            if (params.length > 0) {
+                url += '?' + params.join('&');
+            }
+
+            try {
+                const res = await fetch(url);
+                this.state.products = await res.json();
+
+                // Tự động gỡ các tick nếu sản phẩm vừa tải về bị dính Khuyến mãi trong thời gian mới
+                let hasConflict = false;
+
+                if (this.state.selectedProductIds.length > 0) {
+                    this.state.selectedProductIds = this.state.selectedProductIds.filter(pId => {
+                        const p = this.state.products.find(x => x.id === pId);
+                        if (p && p.tenKhuyenMai) { hasConflict = true; return false; }
+                        return true;
+                    });
+                }
+
+                if (this.state.selectedSkuIds.length > 0) {
+                    this.state.selectedSkuIds = this.state.selectedSkuIds.filter(sId => {
+                        let isConflict = false;
+                        for (const p of this.state.products) {
+                            if (p.skus) {
+                                const sku = p.skus.find(x => x.id === sId);
+                                if (sku && sku.tenKhuyenMai) { isConflict = true; break; }
+                            }
+                        }
+                        if (isConflict) { hasConflict = true; return false; }
+                        return true;
+                    });
+                }
+
+                if (hasConflict && typeof window.toast === 'function') {
+                    window.toast("Một số sản phẩm/SKU đã tự động gỡ khỏi danh sách chọn do trùng với đợt Sale khác trong khung giờ vừa đổi.", "warning");
+                }
+
+                // Lọc và render lại
+                const searchBox = document.getElementById('productSearchDrawer');
+                if (searchBox && searchBox.value) {
+                    this.filterProducts(searchBox.value);
+                } else {
+                    this.state.filteredProducts = [...this.state.products];
+                    this.renderProductSelectionTable(this.state.filteredProducts);
+                }
+            } catch(e) {
+                console.error("Lỗi tải sản phẩm theo ngày:", e);
+            }
+        },
+
+        openDrawer: async function (mode) {
             this.state.editingId = null;
             this.state.selectedProductIds = [];
             this.state.selectedSkuIds = [];
@@ -648,9 +756,9 @@
 
             const typeSelect = document.getElementById('kmLoai');
             if (isSale) {
-                typeSelect.innerHTML = '<option value="PHAN_TRAM">Phần trăm (%)</option><option value="GIA TIEN">Giảm trực tiếp (VNĐ)</option>';
+                typeSelect.innerHTML = '<option value="PHAN_TRAM">Phần trăm (%)</option><option value="TIEN_MAT">Giảm trực tiếp (VNĐ)</option>';
             } else {
-                typeSelect.innerHTML = '<option value="PHAN_TRAM">Phần trăm (%)</option><option value="GIA TIEN">Tiền mặt (VNĐ)</option><option value="FREESHIP">Hỗ trợ vận chuyển (VNĐ)</option>';
+                typeSelect.innerHTML = '<option value="PHAN_TRAM">Phần trăm (%)</option><option value="TIEN_MAT">Tiền mặt (VNĐ)</option><option value="FREESHIP">Hỗ trợ vận chuyển (VNĐ)</option>';
             }
             this.handleTypeChange(false);
 
@@ -660,25 +768,29 @@
             document.getElementById('checkAll').style.display = isSale ? 'inline-block' : 'none';
             document.getElementById('checkAll').checked = false;
 
-            ['kmMa','kmTen','kmGiaTri','vGiaTriToiDa','vDieuKien','vSoLuong','kmNgayBatDau','kmNgayKetThuc'].forEach(id => {
+            // Xóa dữ liệu các ô text thông thường
+            ['kmMa','kmTen','kmGiaTri','vGiaTriToiDa','vDieuKien','vSoLuong'].forEach(id => {
                 const el = document.getElementById(id);
                 if(el) el.value = '';
             });
+
+            // Xóa giá trị của Datepicker
+            this.fpStart.clear();
+            this.fpEnd.clear();
 
             // Tính toán thời gian hiện tại chuẩn format YYYY-MM-DDThh:mm
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             const minDateTime = now.toISOString().slice(0, 16);
 
-// Set thuộc tính min để khóa quá khứ ở form HTML
-            document.getElementById('kmNgayBatDau').min = minDateTime;
-            document.getElementById('kmNgayKetThuc').min = minDateTime;
+            // Cập nhật minDate cho Flatpickr
+            this.fpStart.set('minDate', minDateTime);
+            this.fpEnd.set('minDate', minDateTime);
 
             document.getElementById('kmCongDon').checked = true;
 
             if (isSale) {
-                this.state.filteredProducts = [...this.state.products];
-                this.renderProductSelectionTable(this.state.filteredProducts);
+                await this.loadProductsDynamic();
             }
 
             document.getElementById('drawer').classList.add('show');
@@ -698,9 +810,9 @@
 
                 const typeSelect = document.getElementById('kmLoai');
                 if (isSale) {
-                    typeSelect.innerHTML = '<option value="PHAN_TRAM">Phần trăm (%)</option><option value="GIA TIEN">Giảm trực tiếp (VNĐ)</option>';
+                    typeSelect.innerHTML = '<option value="PHAN_TRAM">Phần trăm (%)</option><option value="TIEN_MAT">Giảm trực tiếp (VNĐ)</option>';
                 } else {
-                    typeSelect.innerHTML = '<option value="PHAN_TRAM">Phần trăm (%)</option><option value="GIA TIEN">Tiền mặt (VNĐ)</option><option value="FREESHIP">Hỗ trợ vận chuyển (VNĐ)</option>';
+                    typeSelect.innerHTML = '<option value="PHAN_TRAM">Phần trăm (%)</option><option value="TIEN_MAT">Tiền mặt (VNĐ)</option><option value="FREESHIP">Hỗ trợ vận chuyển (VNĐ)</option>';
                 }
 
                 document.getElementById('kmMa').value = isSale ? item.ma : item.maCode;
@@ -711,7 +823,7 @@
                 } else {
                     if (item.loaiGiamGia === 'PHAN_TRAM') document.getElementById('kmLoai').value = 'PHAN_TRAM';
                     else if (item.loaiGiamGia === 'FREESHIP') document.getElementById('kmLoai').value = 'FREESHIP';
-                    else document.getElementById('kmLoai').value = 'GIA TIEN';
+                    else document.getElementById('kmLoai').value = 'TIEN_MAT';
                 }
 
                 const giaTri = isSale ? item.giaTri : item.giaTriGiamGia;
@@ -719,8 +831,11 @@
 
                 this.handleTypeChange(true);
                 const formatTime = (t) => t ? t.substring(0, 16) : '';
-                document.getElementById('kmNgayBatDau').value = formatTime(item.ngayBatDau);
-                document.getElementById('kmNgayKetThuc').value = formatTime(item.ngayKetThuc);
+
+                // Đổ dữ liệu vào Flatpickr
+                this.fpStart.setDate(formatTime(item.ngayBatDau));
+                this.fpEnd.setDate(formatTime(item.ngayKetThuc));
+
                 document.getElementById('kmCongDon').checked = item.choPhepCongDon;
                 document.getElementById('kmTrangThai').checked = item.trangThai;
 
@@ -729,6 +844,9 @@
                     document.getElementById('voucherFields').style.display = 'none';
                     document.getElementById('productSearchDrawer').style.display = 'block';
                     document.getElementById('checkAll').style.display = 'inline-block';
+
+                    // Tải danh sách sản phẩm động theo ngày đang sửa
+                    await this.loadProductsDynamic();
 
                     this.state.selectedProductIds = data.productIds || [];
                     this.state.selectedSkuIds = data.skuIds || [];
@@ -759,17 +877,16 @@
 
                 const now = new Date();
                 if (isSale) {
-                    if (new Date(item.ngayBatDau) <= now) document.getElementById('kmNgayBatDau').disabled = true;
+                    if (new Date(item.ngayBatDau) <= now) {
+                        document.getElementById('kmNgayBatDau').disabled = true;
+                    }
                 } else {
                     if (new Date(item.ngayBatDau) <= now && item.luotSuDung > 0) {
                         document.getElementById('kmNgayBatDau').disabled = true;
                     }
                 }
 
-                document.getElementById('kmMa').disabled = true;
-
                 document.getElementById('drawer').classList.add('show');
-
                 document.getElementById('overlay').classList.add('show');
             } catch(e) { if (typeof window.toast === 'function') window.toast("Truy xuất thông tin thất bại.", "error"); }
         },
@@ -850,7 +967,7 @@
                         payload.maCode = document.getElementById('kmMa').value.trim();
                         if (loaiRaw === 'PHAN_TRAM') payload.loaiGiamGia = 'PHAN_TRAM';
                         else if (loaiRaw === 'FREESHIP') payload.loaiGiamGia = 'FREESHIP';
-                        else payload.loaiGiamGia = 'GIA TIEN';
+                        else payload.loaiGiamGia = 'TIEN_MAT';
                         payload.giaTriGiamGia = giaTriRaw;
                         payload.giaTriGiamGiaToiDa = (loaiRaw === 'PHAN_TRAM') ? cleanMoney('vGiaTriToiDa', null) : null;
                         payload.dieuKien = cleanMoney('vDieuKien', 0);
@@ -951,17 +1068,11 @@
             }
         },
 
-        formatMoneyInput: function(el) {
-            let val = el.value.replace(/[^0-9]/g, '');
-            if (val.length > 1 && val.startsWith('0')) val = val.substring(1);
-            el.value = val ? parseInt(val).toLocaleString('en-US') : '';
-        },
+        handleStartDateChange: async function() {
+            const startVal = document.getElementById('kmNgayBatDau').value;
+            if (!startVal) return;
 
-        handleStartDateChange: function() {
-            const startInputEl = document.getElementById('kmNgayBatDau');
-            if (!startInputEl.value) return;
-
-            const selectedDate = new Date(startInputEl.value);
+            const selectedDate = new Date(startVal);
             const now = new Date();
 
             // KIỂM TRA QUÁ KHỨ: Nếu chọn giờ/phút trong quá khứ, ép nảy về hiện tại ngay lập tức
@@ -969,40 +1080,41 @@
                 if (typeof window.toast === 'function') window.toast('Không thể chọn thời gian trong quá khứ. Đã tự động cập nhật!', 'warning');
                 now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
                 const currentIso = now.toISOString().slice(0, 16);
-                startInputEl.value = currentIso;
 
-                // Cập nhật lại selectedDate để tiếp tục tính toán ngày kết thúc
+                // Set lại vào flatpickr
+                this.fpStart.setDate(currentIso);
                 selectedDate.setTime(now.getTime());
             }
-
-
 
             // TÍNH TOÁN NGÀY KẾT THÚC (+5 phút)
             selectedDate.setMinutes(selectedDate.getMinutes() + 5 - selectedDate.getTimezoneOffset());
             const minEndDate = selectedDate.toISOString().slice(0, 16);
 
-            const endInputEl = document.getElementById('kmNgayKetThuc');
-            endInputEl.min = minEndDate;
+            this.fpEnd.set('minDate', minEndDate);
 
+            const endVal = document.getElementById('kmNgayKetThuc').value;
             // Ép ngày kết thúc nhảy theo nếu đang nhỏ hơn mức cho phép
-            if (endInputEl.value && new Date(endInputEl.value) < new Date(minEndDate)) {
-                endInputEl.value = minEndDate;
+            if (endVal && new Date(endVal) < new Date(minEndDate)) {
+                this.fpEnd.setDate(minEndDate);
             }
+
+            // Tự động tải lại SP khóa theo thời gian mới chọn
+            await this.loadProductsDynamic();
         },
 
-        handleEndDateChange: function() {
-            const startInputEl = document.getElementById('kmNgayBatDau');
-            const endInputEl = document.getElementById('kmNgayKetThuc');
+        handleEndDateChange: async function() {
+            const startVal = document.getElementById('kmNgayBatDau');
+            const endVal = document.getElementById('kmNgayKetThuc');
 
-            if (!endInputEl.value) return;
+            if (!endVal) return;
 
-            const endDate = new Date(endInputEl.value);
+            const endDate = new Date(endVal);
             const now = new Date();
             let minValidEnd = new Date(now.getTime());
 
             // 1. Xác định mốc thời gian làm mốc (hiện tại hoặc ngày bắt đầu)
-            if (startInputEl.value) {
-                const startDate = new Date(startInputEl.value);
+            if (startVal) {
+                const startDate = new Date(startVal);
                 // Nếu ngày bắt đầu ở tương lai, lấy ngày bắt đầu làm mốc.
                 // (Nếu ngày bắt đầu ở quá khứ do đang chạy dở, vẫn lấy hiện tại làm mốc)
                 if (startDate > now) {
@@ -1021,8 +1133,11 @@
 
                 // Bù trừ múi giờ để format ra chuẩn ISO String nhét lại vào input
                 minValidEnd.setMinutes(minValidEnd.getMinutes() - minValidEnd.getTimezoneOffset());
-                endInputEl.value = minValidEnd.toISOString().slice(0, 16);
+                this.fpEnd.setDate(minValidEnd.toISOString().slice(0, 16));
             }
+
+            // Tự động tải lại SP khóa theo thời gian mới chọn
+            await this.loadProductsDynamic();
         },
 
 
@@ -1033,11 +1148,7 @@
         closeDrawer: function () { document.getElementById('drawer').classList.remove('show'); document.getElementById('overlay').classList.remove('show'); },
 
         loadProducts: async function () {
-            try {
-                const res = await fetch('/api/khuyen-mai/san-pham');
-                this.state.products = await res.json();
-                this.state.filteredProducts = [...this.state.products];
-            } catch(e){}
+            // Không load tự động toàn bộ lúc init nữa, dùng loadProductsDynamic
         },
 
         filterProducts: function(key) {
@@ -1062,8 +1173,12 @@
                 const tdStyleProd = isProdDisabled ? 'background: #e2e8f0; opacity: 0.6; pointer-events: none;' : 'background: var(--gray-100); border-bottom: 2px solid var(--gray-200);';
                 const prodBadge = isProdDisabled ? `<span style="font-size: 11px; color: #dc2626; margin-left: 10px; font-style: italic;"><i class="bi bi-info-circle"></i> Đang chạy: ${window.escapeHtml(p.tenKhuyenMai)}</span>` : '';
 
+                // Nếu bị disabled do trùng đợt sale khác thì ép checked
+                const prodCheckedState = (isProdChecked || isProdDisabled) ? 'checked' : '';
+                const prodDisabledState = isProdDisabled ? 'disabled' : '';
+
                 html += `<tr class="prod-row">
-                    <td style="text-align:center; ${tdStyleProd}"><input type="checkbox" class="product-check v-checkbox" style="width:14px; height:14px; cursor:pointer;" value="${p.id}" ${isProdChecked?'checked':''} ${isProdDisabled?'disabled':''} onchange="window.PromotionApp.toggleSelection(${p.id}, this.checked, 'PRODUCT')"></td>
+                    <td style="text-align:center; ${tdStyleProd}"><input type="checkbox" class="product-check v-checkbox" style="width:14px; height:14px; cursor:pointer;" value="${p.id}" ${prodCheckedState} ${prodDisabledState} onchange="window.PromotionApp.toggleSelection(${p.id}, this.checked, 'PRODUCT')"></td>
                     <td style="font-weight:700; color:var(--text-main); ${tdStyleProd}">${window.escapeHtml(p.ma)}</td>
                     <td style="font-weight:600; ${tdStyleProd}">${window.escapeHtml(p.ten)} ${prodBadge}</td>
                 </tr>`;
@@ -1083,13 +1198,15 @@
                             actuallyChecked = 'checked';
                         } else if (isSkuDisabled) {
                             disabledState = 'disabled';
+                            // Nếu bị disabled do trùng đợt sale khác thì ép checked
+                            actuallyChecked = 'checked';
                         }
 
                         const tdStyleSku = isSkuDisabled ? 'background: #f8fafc; opacity: 0.6; pointer-events: none; border-bottom: 1px dashed var(--gray-200);' : 'background: #ffffff; border-bottom: 1px dashed var(--gray-200);';
                         const skuBadge = isSkuDisabled ? `<span style="font-size: 11px; color: #dc2626; margin-left: 10px; font-style: italic;"><i class="bi bi-info-circle"></i> Đang chạy: ${window.escapeHtml(sku.tenKhuyenMai)}</span>` : '';
 
                         html += `<tr class="sku-row">
-                            <td style="text-align:center; ${tdStyleSku}"><input type="checkbox" class="sku-check v-checkbox" style="width:12px; height:12px; cursor:pointer;" value="${sku.id}" ${actuallyChecked} ${disabledState} onchange="window.PromotionApp.toggleSelection(${sku.id}, this.checked, 'SKU')"></td>
+                            <td style="text-align:center; ${tdStyleSku}"><input type="checkbox" class="sku-check v-checkbox" style="width:12px; height:12px; cursor:pointer;" value="${sku.id}" ${actuallyChecked} ${disabledState} onchange="window.PromotionApp.toggleSelection(${sku.id}, this.checked, 'SKU', ${p.id})"></td>
                             <td style="padding-left: 25px; font-size: 12px; color: var(--sub); ${tdStyleSku}">↳ ${window.escapeHtml(sku.sku)}</td>
                             <td style="font-size: 12px; color: var(--sub); ${tdStyleSku}">Phân loại: <span style="font-weight:500; color:var(--text-main);">${window.escapeHtml(sku.ten)}</span> ${skuBadge}</td>
                         </tr>`;
@@ -1155,19 +1272,22 @@
     };
 
     /* ==========================================================================
-       GIẢI PHÁP KHỞI TẠO BÁM ĐUỔI (FIX 100% LỖI KHÔNG TẢI ĐƯỢC JS QUA ROUTER)
+       GIẢI PHÁP KHỞI TẠO BÁM ĐUỔI VÀ ĐỢI CDN (FIX LỖI NOT DEFINED)
        ========================================================================== */
     let initAttempts = 0;
 
     function bootPromotionApp() {
         if (window.PromotionApp && window.PromotionApp.initialized) return;
 
-        if (document.getElementById('btnAdd')) {
+        // KIỂM TRA 2 ĐIỀU KIỆN: Nút btnAdd đã render XONG + Thư viện Flatpickr đã tải XONG
+        if (document.getElementById('btnAdd') && typeof window.flatpickr !== 'undefined') {
             window.PromotionApp.init();
         }
-        else if (initAttempts < 40) {
+        else if (initAttempts < 100) { // Đợi tối đa khoảng 5 giây cho mạng yếu
             initAttempts++;
             setTimeout(bootPromotionApp, 50);
+        } else {
+            console.error("Lỗi: Không thể khởi tạo PromotionApp. Hãy kiểm tra lại kết nối mạng hoặc xem thư viện flatpickr đã được nhúng vào thẻ <head> chưa.");
         }
     }
 

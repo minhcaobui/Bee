@@ -63,14 +63,20 @@ public class DanhGiaSanPhamApi {
 
         Page<ReviewAdminResponse> responsePage = resultPage.map(dg -> {
             String tenKH = "Khách vãng lai";
+            String sdtKH = ""; // Thêm biến lưu SĐT
+
             if (dg.getTaiKhoan() != null) {
                 KhachHang kh = khRepo.findByTaiKhoan_Id(dg.getTaiKhoan().getId()).orElse(null);
-                if (kh != null) tenKH = kh.getHoTen();
+                if (kh != null) {
+                    tenKH = kh.getHoTen();
+                    sdtKH = kh.getSoDienThoai(); // Lấy SĐT từ KhachHang
+                }
             }
 
             return ReviewAdminResponse.builder()
                     .id(dg.getId())
                     .tenKhachHang(tenKH)
+                    .soDienThoai(sdtKH) // Mapping vào DTO
                     .sanPhamId(dg.getSanPham() != null ? dg.getSanPham().getId() : null)
                     .tenSanPham(dg.getSanPham() != null ? dg.getSanPham().getTen() : "Sản phẩm")
                     .soSao(dg.getSoSao())
@@ -129,6 +135,7 @@ public class DanhGiaSanPhamApi {
     public static class ReviewAdminResponse {
         private Long id;
         private String tenKhachHang;
+        private String soDienThoai; // Đã thêm trường này
         private Integer sanPhamId;
         private String tenSanPham;
         private Integer soSao;

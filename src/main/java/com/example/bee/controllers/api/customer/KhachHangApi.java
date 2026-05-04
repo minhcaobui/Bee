@@ -27,6 +27,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -74,23 +75,104 @@ public class KhachHangApi {
     public ResponseEntity<?> list(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) Boolean trangThai,
+            @RequestParam(required = false) String rate,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
+
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-        Page<KhachHang> pageData = khRepo.search(q, trangThai, pageable);
-        Page<java.util.Map<String, Object>> safePage = pageData.map(kh -> {
-            java.util.Map<String, Object> map = new java.util.HashMap<>();
-            map.put("id", kh.getId());
-            map.put("ma", kh.getMa());
-            map.put("hoTen", kh.getHoTen());
-            map.put("soDienThoai", kh.getSoDienThoai());
-            map.put("email", kh.getEmail());
-            map.put("gioiTinh", kh.getGioiTinh());
-            map.put("ngaySinh", kh.getNgaySinh());
-            map.put("trangThai", kh.getTrangThai());
-            return map;
-        });
-        return ResponseEntity.ok(safePage);
+
+        // Nếu CÓ filter rate -> Lấy tất cả và phân trang bằng tay (vì rate không nằm trong DB)
+        if (rate != null && !rate.trim().isEmpty()) {
+            Pageable allPageable = PageRequest.of(0, 1000000, Sort.by("id").descending());
+            Page<KhachHang> allData = khRepo.search(q, trangThai, allPageable);
+
+            List<java.util.Map<String, Object>> filteredList = new java.util.ArrayList<>();
+            for (KhachHang kh : allData.getContent()) {
+                List<HoaDon> orders = hoaDonRepository.findByKhachHangIdOrderByNgayTaoDesc(kh.getId());
+                int tongDon = orders.size();
+                int donThanhCong = 0;
+                int donThatBai = 0;
+
+                for (HoaDon hd : orders) {
+                    if (hd.getTrangThaiHoaDon() != null) {
+                        String maTT = hd.getTrangThaiHoaDon().getMa();
+                        if ("HOAN_THANH".equals(maTT)) donThanhCong++;
+                        else if ("DA_HUY".equals(maTT) || "GIAO_THAT_BAI".equals(maTT)) donThatBai++;
+                    }
+                }
+
+                int tongDaXuLy = donThanhCong + donThatBai;
+                String rateCategory = "NEW";
+
+                if (tongDon > 0) {
+                    if (tongDaXuLy > 0) {
+                        int tyLe = (int) Math.round(((double) donThanhCong / tongDaXuLy) * 100);
+                        if (tyLe >= 80) rateCategory = "GOOD";
+                        else if (tyLe >= 50) rateCategory = "WARNING";
+                        else rateCategory = "BAD";
+                    }
+                }
+
+                if (!rate.equalsIgnoreCase(rateCategory)) {
+                    continue; // Skip nếu không đúng rate
+                }
+
+                java.util.Map<String, Object> map = new java.util.HashMap<>();
+                map.put("id", kh.getId());
+                map.put("ma", kh.getMa());
+                map.put("hoTen", kh.getHoTen());
+                map.put("soDienThoai", kh.getSoDienThoai());
+                map.put("email", kh.getEmail());
+                map.put("gioiTinh", kh.getGioiTinh());
+                map.put("ngaySinh", kh.getNgaySinh());
+                map.put("trangThai", kh.getTrangThai());
+                map.put("tongDon", tongDon);
+                map.put("donThanhCong", donThanhCong);
+                map.put("donThatBai", donThatBai);
+
+                filteredList.add(map);
+            }
+
+            int start = Math.min((int) pageable.getOffset(), filteredList.size());
+            int end = Math.min((start + pageable.getPageSize()), filteredList.size());
+            List<java.util.Map<String, Object>> pageContent = filteredList.subList(start, end);
+
+            Page<java.util.Map<String, Object>> resultPage = new PageImpl<>(pageContent, pageable, filteredList.size());
+            return ResponseEntity.ok(resultPage);
+        } else {
+            // Logic nguyên bản (phân trang trực tiếp từ DB) khi KHÔNG có filter rate
+            Page<KhachHang> pageData = khRepo.search(q, trangThai, pageable);
+            Page<java.util.Map<String, Object>> safePage = pageData.map(kh -> {
+                java.util.Map<String, Object> map = new java.util.HashMap<>();
+                map.put("id", kh.getId());
+                map.put("ma", kh.getMa());
+                map.put("hoTen", kh.getHoTen());
+                map.put("soDienThoai", kh.getSoDienThoai());
+                map.put("email", kh.getEmail());
+                map.put("gioiTinh", kh.getGioiTinh());
+                map.put("ngaySinh", kh.getNgaySinh());
+                map.put("trangThai", kh.getTrangThai());
+
+                List<HoaDon> orders = hoaDonRepository.findByKhachHangIdOrderByNgayTaoDesc(kh.getId());
+                int tongDon = orders.size();
+                int donThanhCong = 0;
+                int donThatBai = 0;
+
+                for (HoaDon hd : orders) {
+                    if (hd.getTrangThaiHoaDon() != null) {
+                        String maTT = hd.getTrangThaiHoaDon().getMa();
+                        if ("HOAN_THANH".equals(maTT)) donThanhCong++;
+                        else if ("DA_HUY".equals(maTT) || "GIAO_THAT_BAI".equals(maTT)) donThatBai++;
+                    }
+                }
+                map.put("tongDon", tongDon);
+                map.put("donThanhCong", donThanhCong);
+                map.put("donThatBai", donThatBai);
+
+                return map;
+            });
+            return ResponseEntity.ok(safePage);
+        }
     }
 
     @GetMapping("/{id}")

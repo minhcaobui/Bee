@@ -201,9 +201,29 @@ public class KhuyenMaiApi {
     }
 
     @GetMapping("/san-pham")
-    public ResponseEntity<?> getAllProducts() {
+    public ResponseEntity<?> getAllProducts(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end,
+            @RequestParam(required = false) Integer excludeId
+    ) {
         List<SanPham> list = sanPhamRepo.getAllActiveProducts();
-        LocalDateTime now = LocalDateTime.now();
+
+        // Xử lý fallback thông minh để không tra cứu sai khoảng thời gian
+        LocalDateTime checkStart = start;
+        LocalDateTime checkEnd = end;
+        if (checkStart == null && checkEnd == null) {
+            checkStart = LocalDateTime.now();
+            checkEnd = LocalDateTime.now();
+        } else if (checkStart != null && checkEnd == null) {
+            checkEnd = checkStart;
+        } else if (checkEnd != null && checkStart == null) {
+            checkStart = checkEnd;
+        }
+
+        int safeExcludeId = (excludeId != null) ? excludeId : -1;
+
+        LocalDateTime finalCheckStart = checkStart;
+        LocalDateTime finalCheckEnd = checkEnd;
 
         List<Map<String, Object>> result = list.stream().map(sp -> {
             Map<String, Object> item = new HashMap<>();
@@ -211,7 +231,7 @@ public class KhuyenMaiApi {
             item.put("ma", sp.getMa());
             item.put("ten", sp.getTen());
 
-            List<KhuyenMai> kmSanPham = khuyenMaiRepository.checkTrungLich(Collections.singletonList(sp.getId()), now, now, -1);
+            List<KhuyenMai> kmSanPham = khuyenMaiRepository.checkTrungLich(Collections.singletonList(sp.getId()), finalCheckStart, finalCheckEnd, safeExcludeId);
             if (!kmSanPham.isEmpty()) {
                 item.put("tenKhuyenMai", kmSanPham.get(0).getTen());
             } else {
@@ -235,7 +255,7 @@ public class KhuyenMaiApi {
                         }
                         s.put("ten", phanLoai);
 
-                        List<KhuyenMai> kmSku = khuyenMaiRepository.checkTrungLichSku(Collections.singletonList(sku.getId()), now, now, -1);
+                        List<KhuyenMai> kmSku = khuyenMaiRepository.checkTrungLichSku(Collections.singletonList(sku.getId()), finalCheckStart, finalCheckEnd, safeExcludeId);
                         if (!kmSku.isEmpty()) {
                             s.put("tenKhuyenMai", kmSku.get(0).getTen());
                         } else {
@@ -276,14 +296,18 @@ public class KhuyenMaiApi {
 
         List<KhuyenMaiSanPham> mappings = khuyenMaiSanPhamRepository.findAllByIdKhuyenMai(id);
 
+        // Lọc danh sách ID Sản Phẩm (CHỈ LẤY dòng đại diện Sản phẩm cha: idSanPhamChiTiet == null)
         List<Integer> productIds = mappings.stream()
-                .filter(m -> m.getIdSanPham() != null)
+                .filter(m -> m.getIdSanPham() != null && m.getIdSanPhamChiTiet() == null)
                 .map(KhuyenMaiSanPham::getIdSanPham)
+                .distinct()
                 .collect(Collectors.toList());
 
+        // Lọc danh sách ID SKU (CHỈ LẤY các dòng được chọn lẻ: idSanPham == null)
         List<Integer> skuIds = mappings.stream()
-                .filter(m -> m.getIdSanPhamChiTiet() != null)
+                .filter(m -> m.getIdSanPhamChiTiet() != null && m.getIdSanPham() == null)
                 .map(KhuyenMaiSanPham::getIdSanPhamChiTiet)
+                .distinct()
                 .collect(Collectors.toList());
 
         Map<String, Object> response = new HashMap<>();
@@ -347,6 +371,14 @@ public class KhuyenMaiApi {
         KhuyenMai entity = khuyenMaiRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
+        if (body.getMa() != null && !body.getMa().trim().isEmpty()) {
+            String newCode = body.getMa().trim().toUpperCase();
+            if (!newCode.equals(entity.getMa()) && khuyenMaiRepository.existsByMa(newCode)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mã khuyến mãi đã tồn tại!");
+            }
+            entity.setMa(newCode);
+        }
+
         List<SanPham> danhSachSanPham = new ArrayList<>();
         if (body.getIdSanPhams() != null && !body.getIdSanPhams().isEmpty()) {
             danhSachSanPham = sanPhamRepo.findAllById(body.getIdSanPhams());
@@ -404,28 +436,48 @@ public class KhuyenMaiApi {
 
     private void saveProductsAndSkus(Integer kmId, List<Integer> productIds, List<Integer> skuIds) {
         List<KhuyenMaiSanPham> listToSave = new ArrayList<>();
+        Set<Integer> processedSkuIds = new HashSet<>();
 
+        // BƯỚC 1: Xử lý Sản Phẩm Cha
         if (productIds != null && !productIds.isEmpty()) {
-            List<Integer> validProductIds = sanPhamRepo.findAllById(productIds).stream()
-                    .map(SanPham::getId).collect(Collectors.toList());
-            for (Integer pId : validProductIds) {
-                KhuyenMaiSanPham kmsp = new KhuyenMaiSanPham();
-                kmsp.setIdKhuyenMai(kmId);
-                kmsp.setIdSanPham(pId);
-                kmsp.setIdSanPhamChiTiet(null);
-                listToSave.add(kmsp);
+            List<SanPham> validProducts = sanPhamRepo.findAllById(productIds);
+            for (SanPham sp : validProducts) {
+                // 1.1 Lưu 1 dòng đại diện cho Sản phẩm cha (để Frontend hiển thị lại Checkbox Sản phẩm)
+                KhuyenMaiSanPham kmspParent = new KhuyenMaiSanPham();
+                kmspParent.setIdKhuyenMai(kmId);
+                kmspParent.setIdSanPham(sp.getId());
+                kmspParent.setIdSanPhamChiTiet(null);
+                listToSave.add(kmspParent);
+
+                // 1.2 TỰ ĐỘNG BUNG RA: Lưu tất cả các biến thể SKU con của nó xuống
+                if (sp.getChiTietSanPhams() != null) {
+                    for (SanPhamChiTiet sku : sp.getChiTietSanPhams()) {
+                        if (!processedSkuIds.contains(sku.getId())) {
+                            KhuyenMaiSanPham kmspChild = new KhuyenMaiSanPham();
+                            kmspChild.setIdKhuyenMai(kmId);
+                            kmspChild.setIdSanPham(sp.getId());
+                            kmspChild.setIdSanPhamChiTiet(sku.getId());
+                            listToSave.add(kmspChild);
+                            processedSkuIds.add(sku.getId());
+                        }
+                    }
+                }
             }
         }
 
+        // BƯỚC 2: Xử lý SKU lẻ
         if (skuIds != null && !skuIds.isEmpty()) {
-            List<Integer> validSkuIds = sanPhamChiTietRepo.findAllById(skuIds).stream()
-                    .map(SanPhamChiTiet::getId).collect(Collectors.toList());
-            for (Integer sId : validSkuIds) {
-                KhuyenMaiSanPham kmsp = new KhuyenMaiSanPham();
-                kmsp.setIdKhuyenMai(kmId);
-                kmsp.setIdSanPham(null);
-                kmsp.setIdSanPhamChiTiet(sId);
-                listToSave.add(kmsp);
+            List<SanPhamChiTiet> validSkus = sanPhamChiTietRepo.findAllById(skuIds);
+            for (SanPhamChiTiet sku : validSkus) {
+                // Chỉ thêm vào danh sách lưu NẾU nó chưa được lưu tự động từ Sản Phẩm Cha ở Bước 1
+                if (!processedSkuIds.contains(sku.getId())) {
+                    KhuyenMaiSanPham kmsp = new KhuyenMaiSanPham();
+                    kmsp.setIdKhuyenMai(kmId);
+                    kmsp.setIdSanPham(null);
+                    kmsp.setIdSanPhamChiTiet(sku.getId());
+                    listToSave.add(kmsp);
+                    processedSkuIds.add(sku.getId());
+                }
             }
         }
 
@@ -449,10 +501,19 @@ public class KhuyenMaiApi {
             }
 
             List<KhuyenMaiSanPham> mappings = khuyenMaiSanPhamRepository.findAllByIdKhuyenMai(id);
+
+            // Cập nhật lại điều kiện lọc chuẩn xác như GetById
             List<Integer> currentProductIds = mappings.stream()
-                    .filter(m -> m.getIdSanPham() != null).map(KhuyenMaiSanPham::getIdSanPham).collect(Collectors.toList());
+                    .filter(m -> m.getIdSanPham() != null && m.getIdSanPhamChiTiet() == null)
+                    .map(KhuyenMaiSanPham::getIdSanPham)
+                    .distinct()
+                    .collect(Collectors.toList());
+
             List<Integer> currentSkuIds = mappings.stream()
-                    .filter(m -> m.getIdSanPhamChiTiet() != null).map(KhuyenMaiSanPham::getIdSanPhamChiTiet).collect(Collectors.toList());
+                    .filter(m -> m.getIdSanPhamChiTiet() != null && m.getIdSanPham() == null)
+                    .map(KhuyenMaiSanPham::getIdSanPhamChiTiet)
+                    .distinct()
+                    .collect(Collectors.toList());
 
             boolean hasProducts = !currentProductIds.isEmpty();
             boolean hasSkus = !currentSkuIds.isEmpty();
